@@ -12,6 +12,13 @@ void main() {
       // TODO
     });
 
+    // The coding tools and models this server offers
+    //
+    //Future<ModelCatalog> listModels() async
+    test('test listModels', () async {
+      // TODO
+    });
+
     //Future<Settings> putSettings(Settings settings) async
     test('test putSettings', () async {
       // TODO

@@ -76,8 +76,11 @@ Class | Method | HTTP request | Description
 [*AccountApi*](doc/AccountApi.md) | [**deleteMyClaude**](doc/AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
 [*AccountApi*](doc/AccountApi.md) | [**disableTotp**](doc/AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
 [*AccountApi*](doc/AccountApi.md) | [**getMyClaude**](doc/AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
+[*AccountApi*](doc/AccountApi.md) | [**getMyFreeCredits**](doc/AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
+[*AccountApi*](doc/AccountApi.md) | [**getMyMuseLogin**](doc/AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
 [*AccountApi*](doc/AccountApi.md) | [**resendVerification**](doc/AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
 [*AccountApi*](doc/AccountApi.md) | [**setMyClaude**](doc/AccountApi.md#setmyclaude) | **PUT** /account/claude | Connect your Claude account
+[*AccountApi*](doc/AccountApi.md) | [**startMyMuseLogin**](doc/AccountApi.md#startmymuselogin) | **POST** /account/muse/login | Connect your Muse account by signing in with Meta (shows a code to confirm on Meta&#39;s page)
 [*AccountApi*](doc/AccountApi.md) | [**updateProfile**](doc/AccountApi.md#updateprofile) | **PUT** /account/profile | Change the display name or email
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalytics**](doc/AnalyticsApi.md#getanalytics) | **GET** /analytics | Throughput, quality, time and plan statistics for a period
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalyticsCi**](doc/AnalyticsApi.md#getanalyticsci) | **GET** /analytics/ci | CI failures, fixes and flaky jobs for a period
@@ -212,6 +215,7 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformRuns**](doc/PlatformApi.md#listplatformruns) | **GET** /platform/runs | Run history across every workspace, newest first, without prompts or transcripts (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformUsers**](doc/PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user, with their workspaces and last sign-in (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformWorkspaces**](doc/PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**setFreeCredits**](doc/PlatformApi.md#setfreecredits) | **PUT** /platform/users/{id}/free-credits | Set how many free credits a person may spend on agnts&#39;s Muse key (Admin); 0 gives none
 [*PlatformApi*](doc/PlatformApi.md) | [**setRunHistorySettings**](doc/PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformFeedback**](doc/PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
@@ -278,6 +282,7 @@ Class | Method | HTTP request | Description
 [*RulesApi*](doc/RulesApi.md) | [**tryEnforce**](doc/RulesApi.md#tryenforce) | **POST** /rules/try | Check an enforcement against agnts&#39;s last changes before turning it on
 [*RulesApi*](doc/RulesApi.md) | [**updateRule**](doc/RulesApi.md#updaterule) | **PUT** /rules/{id} | Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
 [*SettingsApi*](doc/SettingsApi.md) | [**getSettings**](doc/SettingsApi.md#getsettings) | **GET** /settings | 
+[*SettingsApi*](doc/SettingsApi.md) | [**listModels**](doc/SettingsApi.md#listmodels) | **GET** /models | The coding tools and models this server offers
 [*SettingsApi*](doc/SettingsApi.md) | [**putSettings**](doc/SettingsApi.md#putsettings) | **PUT** /settings | 
 [*SwaggerApi*](doc/SwaggerApi.md) | [**createSwaggerSuite**](doc/SwaggerApi.md#createswaggersuite) | **POST** /swagger-suites | Keep a Swagger test ticket&#39;s test as a suite that runs again on a schedule or after each deploy
 [*SwaggerApi*](doc/SwaggerApi.md) | [**createSwaggerTest**](doc/SwaggerApi.md#createswaggertest) | **POST** /swagger-tests | Create a Swagger test ticket; it starts at once (no analysis) unless start is queue
@@ -360,7 +365,9 @@ Class | Method | HTTP request | Description
 [*WorkspacesApi*](doc/WorkspacesApi.md) | [**acceptInvite**](doc/WorkspacesApi.md#acceptinvite) | **POST** /invites/{token}/accept | Join the workspace an invite is for
 [*WorkspacesApi*](doc/WorkspacesApi.md) | [**createWorkspace**](doc/WorkspacesApi.md#createworkspace) | **POST** /workspaces | Create a workspace you own
 [*WorkspacesApi*](doc/WorkspacesApi.md) | [**getInvite**](doc/WorkspacesApi.md#getinvite) | **GET** /invites/{token} | What an invite link is for
+[*WorkspacesApi*](doc/WorkspacesApi.md) | [**getWorkspaceMuseLogin**](doc/WorkspacesApi.md#getworkspacemuselogin) | **GET** /workspace/muse/login/{id} | How the workspace&#39;s Meta sign-in is going
 [*WorkspacesApi*](doc/WorkspacesApi.md) | [**listWorkspaces**](doc/WorkspacesApi.md#listworkspaces) | **GET** /workspaces | The workspaces you are a member of
+[*WorkspacesApi*](doc/WorkspacesApi.md) | [**startWorkspaceMuseLogin**](doc/WorkspacesApi.md#startworkspacemuselogin) | **POST** /workspace/muse/login | Connect the workspace&#39;s Muse account by signing in with Meta
 
 
 ## Documentation For Models
@@ -511,6 +518,7 @@ Class | Method | HTTP request | Description
  - [FollowUpsSetting](doc/FollowUpsSetting.md)
  - [Footprint](doc/Footprint.md)
  - [ForgotPasswordRequest](doc/ForgotPasswordRequest.md)
+ - [FreeCredits](doc/FreeCredits.md)
  - [GetConsent200Response](doc/GetConsent200Response.md)
  - [GetPlatformRunPrompt200Response](doc/GetPlatformRunPrompt200Response.md)
  - [GitSettings](doc/GitSettings.md)
@@ -547,7 +555,10 @@ Class | Method | HTTP request | Description
  - [McpStatus](doc/McpStatus.md)
  - [Member](doc/Member.md)
  - [Meta](doc/Meta.md)
+ - [ModelCatalog](doc/ModelCatalog.md)
+ - [ModelCatalogModelsInner](doc/ModelCatalogModelsInner.md)
  - [ModelOverrides](doc/ModelOverrides.md)
+ - [MuseLogin](doc/MuseLogin.md)
  - [NetworkActivity](doc/NetworkActivity.md)
  - [NetworkActivityDialsInner](doc/NetworkActivityDialsInner.md)
  - [NetworkRoute](doc/NetworkRoute.md)
@@ -672,6 +683,7 @@ Class | Method | HTTP request | Description
  - [SecretFindings](doc/SecretFindings.md)
  - [SecretFindingsFindingsInner](doc/SecretFindingsFindingsInner.md)
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
+ - [SetFreeCreditsRequest](doc/SetFreeCreditsRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [SetSlotsRequest](doc/SetSlotsRequest.md)

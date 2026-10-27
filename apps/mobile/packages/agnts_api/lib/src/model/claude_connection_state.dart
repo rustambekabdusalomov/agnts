@@ -175,7 +175,11 @@ enum ClaudeConnectionStateKindEnum {
 @JsonValue(r'subscription')
 subscription(r'subscription'),
 @JsonValue(r'api_key')
-apiKey(r'api_key');
+apiKey(r'api_key'),
+@JsonValue(r'muse_api_key')
+museApiKey(r'muse_api_key'),
+@JsonValue(r'muse_login')
+museLogin(r'muse_login');
 
 const ClaudeConnectionStateKindEnum(this.value);
 

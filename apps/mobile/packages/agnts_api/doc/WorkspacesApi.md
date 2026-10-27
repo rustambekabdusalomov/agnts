@@ -12,7 +12,9 @@ Method | HTTP request | Description
 [**acceptInvite**](WorkspacesApi.md#acceptinvite) | **POST** /invites/{token}/accept | Join the workspace an invite is for
 [**createWorkspace**](WorkspacesApi.md#createworkspace) | **POST** /workspaces | Create a workspace you own
 [**getInvite**](WorkspacesApi.md#getinvite) | **GET** /invites/{token} | What an invite link is for
+[**getWorkspaceMuseLogin**](WorkspacesApi.md#getworkspacemuselogin) | **GET** /workspace/muse/login/{id} | How the workspace&#39;s Meta sign-in is going
 [**listWorkspaces**](WorkspacesApi.md#listworkspaces) | **GET** /workspaces | The workspaces you are a member of
+[**startWorkspaceMuseLogin**](WorkspacesApi.md#startworkspacemuselogin) | **POST** /workspace/muse/login | Connect the workspace&#39;s Muse account by signing in with Meta
 
 
 # **acceptInvite**
@@ -146,6 +148,51 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getWorkspaceMuseLogin**
+> MuseLogin getWorkspaceMuseLogin(id)
+
+How the workspace's Meta sign-in is going
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getWorkspacesApi();
+final String id = id_example; // String | 
+
+try {
+    final response = api.getWorkspaceMuseLogin(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling WorkspacesApi->getWorkspaceMuseLogin: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+[**MuseLogin**](MuseLogin.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **listWorkspaces**
 > List<WorkspaceSummary> listWorkspaces()
 
@@ -175,6 +222,47 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**List&lt;WorkspaceSummary&gt;**](WorkspaceSummary.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **startWorkspaceMuseLogin**
+> MuseLogin startWorkspaceMuseLogin()
+
+Connect the workspace's Muse account by signing in with Meta
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getWorkspacesApi();
+
+try {
+    final response = api.startWorkspaceMuseLogin();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling WorkspacesApi->startWorkspaceMuseLogin: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**MuseLogin**](MuseLogin.md)
 
 ### Authorization
 

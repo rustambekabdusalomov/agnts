@@ -3151,6 +3151,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/account/muse/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Connect your Muse account by signing in with Meta (shows a code to confirm on Meta's page) */
+        post: operations["startMyMuseLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/muse/login/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** How your Meta sign-in is going */
+        get: operations["getMyMuseLogin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/free-credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Free credits an Admin gave you; runs on agnts's Muse key spend them before your workspace's credits */
+        get: operations["getMyFreeCredits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The coding tools and models this server offers */
+        get: operations["listModels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/feedback": {
         parameters: {
             query?: never;
@@ -3458,6 +3528,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/workspace/muse/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Connect the workspace's Muse account by signing in with Meta */
+        post: operations["startWorkspaceMuseLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/muse/login/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** How the workspace's Meta sign-in is going */
+        get: operations["getWorkspaceMuseLogin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/workspace/billing": {
         parameters: {
             query?: never;
@@ -3646,6 +3752,25 @@ export interface paths {
         get?: never;
         /** Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts */
         put: operations["updatePlatformUser"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/users/{id}/free-credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Set how many free credits a person may spend on agnts's Muse key (Admin); 0 gives none */
+        put: operations["setFreeCredits"];
         post?: never;
         delete?: never;
         options?: never;
@@ -4715,7 +4840,7 @@ export interface components {
             background: boolean;
             modelStage?: string;
             /** @enum {string} */
-            engine: "claude" | "codex";
+            engine: "muse" | "claude" | "codex";
             model: string;
             sessionId?: string;
             /** Format: date-time */
@@ -4859,6 +4984,7 @@ export interface components {
             lastSignInAt?: string;
             /** @description The workspaces they belong to (not deleted), with their role */
             workspaces: components["schemas"]["WorkspaceSummary"][];
+            freeCredits?: components["schemas"]["FreeCredits"];
         };
         WorkspaceSummary: {
             /** Format: int64 */
@@ -4974,16 +5100,16 @@ export interface components {
         };
         ClaudeConnectionInput: {
             /**
-             * @description subscription: a token from `claude setup-token`; api_key: an Anthropic API key
+             * @description subscription: a token from `claude setup-token`; api_key: an Anthropic API key; muse_api_key: a Meta Model API key (LLM_…). A Meta sign-in connects through the muse/login operations.
              * @enum {string}
              */
-            kind: "subscription" | "api_key";
+            kind: "subscription" | "api_key" | "muse_api_key";
             token: string;
         };
         ClaudeConnectionState: {
             connected: boolean;
             /** @enum {string} */
-            kind?: "subscription" | "api_key";
+            kind?: "subscription" | "api_key" | "muse_api_key" | "muse_login";
             /** @description The token's last four characters */
             tokenHint?: string;
             account?: string;
@@ -6073,10 +6199,55 @@ export interface components {
                 attachments?: number[];
             }[];
         };
-        /** @description A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI */
+        /** @description muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers. */
         Model: string;
-        /** @description auto: opus for complex tickets, sonnet otherwise */
+        /** @description auto: the stronger model (muse:wonder, opus) for complex tickets, the lighter one otherwise */
         ReviewModel: string;
+        ModelCatalog: {
+            /** @description The coding tools this server offers */
+            providers: ("muse" | "claude" | "codex")[];
+            /**
+             * @description The default tool
+             * @enum {string}
+             */
+            primary: "muse" | "claude" | "codex";
+            models: {
+                id: components["schemas"]["Model"];
+                label: string;
+                /** @enum {string} */
+                provider: "muse" | "claude" | "codex";
+                /** @description The stronger, dearer tier */
+                strong: boolean;
+                inputPerMillionUSD?: number;
+                outputPerMillionUSD?: number;
+            }[];
+        };
+        /** @description A Meta sign-in in progress (OAuth device flow, like `muse login`) */
+        MuseLogin: {
+            id: string;
+            /** @description The code to confirm on Meta's page */
+            userCode: string;
+            verificationUri: string;
+            /** @description The page with the code filled in */
+            verificationUriComplete?: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** @enum {string} */
+            status: "pending" | "connected" | "denied" | "expired" | "failed";
+            error?: string;
+            account?: string;
+        };
+        /** @description Free credits an Admin gave a person (1 credit = $0.01) */
+        FreeCredits: {
+            /** Format: int64 */
+            limit: number;
+            /** Format: int64 */
+            used: number;
+            /** Format: int64 */
+            remaining: number;
+            /** Format: date-time */
+            setAt?: string;
+        };
         StageModels: {
             analyze: components["schemas"]["Model"];
             coding: components["schemas"]["Model"];
@@ -8845,7 +9016,7 @@ export interface components {
         /** @description A stage (analyze, code, review…), a background call (assistant, brief, detect, reflect, rules, translate), second_opinion, or the groups stages and background */
         RunPurpose: string;
         RunStatus: "running" | "done" | "error" | "timeout" | "cancelled" | "oom";
-        RunEngine: "claude" | "codex";
+        RunEngine: "muse" | "claude" | "codex";
         /** @description Part of a model name */
         RunModel: string;
         /** @description A ticket key, or its start */
@@ -13833,6 +14004,90 @@ export interface operations {
             };
         };
     };
+    startMyMuseLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Started */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuseLogin"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    getMyMuseLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuseLogin"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMyFreeCredits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FreeCredits"];
+                };
+            };
+        };
+    };
+    listModels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelCatalog"];
+                };
+            };
+        };
+    };
     sendFeedback: {
         parameters: {
             query?: never;
@@ -14403,6 +14658,51 @@ export interface operations {
             };
         };
     };
+    startWorkspaceMuseLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Started */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuseLogin"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getWorkspaceMuseLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuseLogin"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
     getBilling: {
         parameters: {
             query?: never;
@@ -14696,6 +14996,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["User"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setFreeCredits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: int64
+                     * @description Credits (1 credit = $0.01 of model cost)
+                     */
+                    limit: number;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FreeCredits"];
                 };
             };
             403: components["responses"]["Forbidden"];

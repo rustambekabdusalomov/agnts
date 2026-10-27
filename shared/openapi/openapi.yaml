@@ -7642,7 +7642,7 @@ components:
               id: { $ref: '#/components/schemas/Model' }
               label: { type: string }
               provider: { type: string, enum: [muse, claude, codex] }
-              strong: { type: boolean, description: The stronger, dearer tier }
+              strong: { type: boolean, description: 'The stronger, dearer tier' }
               inputPerMillionUSD: { type: number }
               outputPerMillionUSD: { type: number }
 

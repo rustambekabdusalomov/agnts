@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **runId** | **int** |  | 
 **revision** | **int** |  | 
-**model** | **String** | A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI | 
+**model** | **String** | muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers. | 
 **compare** | **bool** | Before shots were taken too | 
 **status** | **String** | failed: the app did not start | 
 **summary** | **String** |  | 

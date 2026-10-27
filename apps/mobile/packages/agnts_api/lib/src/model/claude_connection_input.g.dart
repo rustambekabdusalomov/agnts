@@ -96,4 +96,5 @@ Map<String, dynamic> _$ClaudeConnectionInputToJson(
 const _$ClaudeConnectionInputKindEnumEnumMap = {
   ClaudeConnectionInputKindEnum.subscription: 'subscription',
   ClaudeConnectionInputKindEnum.apiKey: 'api_key',
+  ClaudeConnectionInputKindEnum.museApiKey: 'muse_api_key',
 };

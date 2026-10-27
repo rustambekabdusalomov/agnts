@@ -9,7 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **revision** | **int** |  | 
-**model** | **String** | A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI | 
+**model** | **String** | muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers. | 
 **modelReason** | **String** | Why this model reviewed it | 
 **verdict** | **String** |  | 
 **summary** | **String** |  | 

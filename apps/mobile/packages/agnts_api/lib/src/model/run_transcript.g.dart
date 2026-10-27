@@ -512,6 +512,7 @@ Map<String, dynamic> _$RunTranscriptToJson(RunTranscript instance) =>
     };
 
 const _$RunTranscriptEngineEnumEnumMap = {
+  RunTranscriptEngineEnum.muse: 'muse',
   RunTranscriptEngineEnum.claude: 'claude',
   RunTranscriptEngineEnum.codex: 'codex',
 };

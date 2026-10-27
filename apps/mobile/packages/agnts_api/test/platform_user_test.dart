@@ -30,5 +30,10 @@ void main() {
       // TODO
     });
 
+    // FreeCredits freeCredits
+    test('to test the property `freeCredits`', () async {
+      // TODO
+    });
+
   });
 }

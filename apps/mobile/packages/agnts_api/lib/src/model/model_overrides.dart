@@ -31,7 +31,7 @@ class ModelOverrides {
      this.preview,
   });
 
-      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.
   @JsonKey(
     
     name: r'analyze',
@@ -44,7 +44,7 @@ class ModelOverrides {
 
 
 
-      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.
   @JsonKey(
     
     name: r'coding',
@@ -57,7 +57,7 @@ class ModelOverrides {
 
 
 
-      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.
   @JsonKey(
     
     name: r'retry',
@@ -70,7 +70,7 @@ class ModelOverrides {
 
 
 
-      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.
   @JsonKey(
     
     name: r'review',
@@ -83,7 +83,7 @@ class ModelOverrides {
 
 
 
-      /// A Claude model (haiku, sonnet, opus), or codex:<model> for a run on Codex CLI
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.
   @JsonKey(
     
     name: r'preview',

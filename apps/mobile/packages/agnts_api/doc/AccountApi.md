@@ -15,8 +15,11 @@ Method | HTTP request | Description
 [**deleteMyClaude**](AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
 [**disableTotp**](AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
 [**getMyClaude**](AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
+[**getMyFreeCredits**](AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
+[**getMyMuseLogin**](AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
 [**resendVerification**](AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
 [**setMyClaude**](AccountApi.md#setmyclaude) | **PUT** /account/claude | Connect your Claude account
+[**startMyMuseLogin**](AccountApi.md#startmymuselogin) | **POST** /account/muse/login | Connect your Muse account by signing in with Meta (shows a code to confirm on Meta&#39;s page)
 [**updateProfile**](AccountApi.md#updateprofile) | **PUT** /account/profile | Change the display name or email
 
 
@@ -274,6 +277,92 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getMyFreeCredits**
+> FreeCredits getMyFreeCredits()
+
+Free credits an Admin gave you; runs on agnts's Muse key spend them before your workspace's credits
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAccountApi();
+
+try {
+    final response = api.getMyFreeCredits();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AccountApi->getMyFreeCredits: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**FreeCredits**](FreeCredits.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getMyMuseLogin**
+> MuseLogin getMyMuseLogin(id)
+
+How your Meta sign-in is going
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAccountApi();
+final String id = id_example; // String | 
+
+try {
+    final response = api.getMyMuseLogin(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AccountApi->getMyMuseLogin: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+[**MuseLogin**](MuseLogin.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **resendVerification**
 > resendVerification()
 
@@ -355,6 +444,47 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **startMyMuseLogin**
+> MuseLogin startMyMuseLogin()
+
+Connect your Muse account by signing in with Meta (shows a code to confirm on Meta's page)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAccountApi();
+
+try {
+    final response = api.startMyMuseLogin();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AccountApi->startMyMuseLogin: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**MuseLogin**](MuseLogin.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

@@ -25,7 +25,7 @@ class ClaudeConnectionInput {
     required  this.token,
   });
 
-      /// subscription: a token from `claude setup-token`; api_key: an Anthropic API key
+      /// subscription: a token from `claude setup-token`; api_key: an Anthropic API key; muse_api_key: a Meta Model API key (LLM_…). A Meta sign-in connects through the muse/login operations.
   @JsonKey(
     
     name: r'kind',
@@ -73,12 +73,14 @@ class ClaudeConnectionInput {
 
 }
 
-/// subscription: a token from `claude setup-token`; api_key: an Anthropic API key
+/// subscription: a token from `claude setup-token`; api_key: an Anthropic API key; muse_api_key: a Meta Model API key (LLM_…). A Meta sign-in connects through the muse/login operations.
 enum ClaudeConnectionInputKindEnum {
 @JsonValue(r'subscription')
 subscription(r'subscription'),
 @JsonValue(r'api_key')
-apiKey(r'api_key');
+apiKey(r'api_key'),
+@JsonValue(r'muse_api_key')
+museApiKey(r'muse_api_key');
 
 const ClaudeConnectionInputKindEnum(this.value);
 

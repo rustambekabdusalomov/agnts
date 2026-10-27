@@ -28,10 +28,24 @@ void main() {
       // TODO
     });
 
+    // How the workspace's Meta sign-in is going
+    //
+    //Future<MuseLogin> getWorkspaceMuseLogin(String id) async
+    test('test getWorkspaceMuseLogin', () async {
+      // TODO
+    });
+
     // The workspaces you are a member of
     //
     //Future<List<WorkspaceSummary>> listWorkspaces() async
     test('test listWorkspaces', () async {
+      // TODO
+    });
+
+    // Connect the workspace's Muse account by signing in with Meta
+    //
+    //Future<MuseLogin> startWorkspaceMuseLogin() async
+    test('test startWorkspaceMuseLogin', () async {
       // TODO
     });
 

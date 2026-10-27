@@ -137,6 +137,7 @@ import 'package:agnts_api/src/model/follow_ups.dart';
 import 'package:agnts_api/src/model/follow_ups_setting.dart';
 import 'package:agnts_api/src/model/footprint.dart';
 import 'package:agnts_api/src/model/forgot_password_request.dart';
+import 'package:agnts_api/src/model/free_credits.dart';
 import 'package:agnts_api/src/model/get_consent200_response.dart';
 import 'package:agnts_api/src/model/get_platform_run_prompt200_response.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
@@ -169,7 +170,10 @@ import 'package:agnts_api/src/model/login_response.dart';
 import 'package:agnts_api/src/model/mcp_status.dart';
 import 'package:agnts_api/src/model/member.dart';
 import 'package:agnts_api/src/model/meta.dart';
+import 'package:agnts_api/src/model/model_catalog.dart';
+import 'package:agnts_api/src/model/model_catalog_models_inner.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
+import 'package:agnts_api/src/model/muse_login.dart';
 import 'package:agnts_api/src/model/network_activity.dart';
 import 'package:agnts_api/src/model/network_activity_dials_inner.dart';
 import 'package:agnts_api/src/model/network_route.dart';
@@ -291,6 +295,7 @@ import 'package:agnts_api/src/model/second_opinion.dart';
 import 'package:agnts_api/src/model/secret_findings.dart';
 import 'package:agnts_api/src/model/secret_findings_findings_inner.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
+import 'package:agnts_api/src/model/set_free_credits_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/set_slots_request.dart';
@@ -686,6 +691,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Footprint.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ForgotPasswordRequest':
           return ForgotPasswordRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FreeCredits':
+          return FreeCredits.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GetConsent200Response':
           return GetConsent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GetPlatformRunPrompt200Response':
@@ -762,8 +769,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Member.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Meta':
           return Meta.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ModelCatalog':
+          return ModelCatalog.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ModelCatalogModelsInner':
+          return ModelCatalogModelsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ModelOverrides':
           return ModelOverrides.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MuseLogin':
+          return MuseLogin.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'NetworkActivity':
           return NetworkActivity.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'NetworkActivityDialsInner':
@@ -1015,6 +1028,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SecretFindingsFindingsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendFeedbackRequest':
           return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetFreeCreditsRequest':
+          return SetFreeCreditsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMemberRoleRequest':
           return SetMemberRoleRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetPlaneWebhookSecretRequest':

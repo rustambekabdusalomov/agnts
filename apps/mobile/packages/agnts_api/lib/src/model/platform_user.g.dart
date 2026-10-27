@@ -15,6 +15,8 @@ abstract class _$PlatformUserCWProxy {
 
   PlatformUser workspaces(List<WorkspaceSummary> workspaces);
 
+  PlatformUser freeCredits(FreeCredits? freeCredits);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PlatformUser(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -26,6 +28,7 @@ abstract class _$PlatformUserCWProxy {
     bool hasPassword,
     DateTime? lastSignInAt,
     List<WorkspaceSummary> workspaces,
+    FreeCredits? freeCredits,
   });
 }
 
@@ -50,6 +53,10 @@ class _$PlatformUserCWProxyImpl implements _$PlatformUserCWProxy {
       this(workspaces: workspaces);
 
   @override
+  PlatformUser freeCredits(FreeCredits? freeCredits) =>
+      this(freeCredits: freeCredits);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PlatformUser(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -61,6 +68,7 @@ class _$PlatformUserCWProxyImpl implements _$PlatformUserCWProxy {
     Object? hasPassword = const $CopyWithPlaceholder(),
     Object? lastSignInAt = const $CopyWithPlaceholder(),
     Object? workspaces = const $CopyWithPlaceholder(),
+    Object? freeCredits = const $CopyWithPlaceholder(),
   }) {
     return PlatformUser(
       user: user == const $CopyWithPlaceholder()
@@ -79,6 +87,10 @@ class _$PlatformUserCWProxyImpl implements _$PlatformUserCWProxy {
           ? _value.workspaces
           // ignore: cast_nullable_to_non_nullable
           : workspaces as List<WorkspaceSummary>,
+      freeCredits: freeCredits == const $CopyWithPlaceholder()
+          ? _value.freeCredits
+          // ignore: cast_nullable_to_non_nullable
+          : freeCredits as FreeCredits?,
     );
   }
 }
@@ -93,31 +105,33 @@ extension $PlatformUserCopyWith on PlatformUser {
 // JsonSerializableGenerator
 // **************************************************************************
 
-PlatformUser _$PlatformUserFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('PlatformUser', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const ['user', 'hasPassword', 'workspaces'],
-      );
-      final val = PlatformUser(
-        user: $checkedConvert(
-          'user',
-          (v) => User.fromJson(v as Map<String, dynamic>),
-        ),
-        hasPassword: $checkedConvert('hasPassword', (v) => v as bool),
-        lastSignInAt: $checkedConvert(
-          'lastSignInAt',
-          (v) => v == null ? null : DateTime.parse(v as String),
-        ),
-        workspaces: $checkedConvert(
-          'workspaces',
-          (v) => (v as List<dynamic>)
-              .map((e) => WorkspaceSummary.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-      );
-      return val;
-    });
+PlatformUser _$PlatformUserFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('PlatformUser', json, ($checkedConvert) {
+  $checkKeys(json, requiredKeys: const ['user', 'hasPassword', 'workspaces']);
+  final val = PlatformUser(
+    user: $checkedConvert(
+      'user',
+      (v) => User.fromJson(v as Map<String, dynamic>),
+    ),
+    hasPassword: $checkedConvert('hasPassword', (v) => v as bool),
+    lastSignInAt: $checkedConvert(
+      'lastSignInAt',
+      (v) => v == null ? null : DateTime.parse(v as String),
+    ),
+    workspaces: $checkedConvert(
+      'workspaces',
+      (v) => (v as List<dynamic>)
+          .map((e) => WorkspaceSummary.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    freeCredits: $checkedConvert(
+      'freeCredits',
+      (v) => v == null ? null : FreeCredits.fromJson(v as Map<String, dynamic>),
+    ),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$PlatformUserToJson(PlatformUser instance) =>
     <String, dynamic>{
@@ -125,4 +139,5 @@ Map<String, dynamic> _$PlatformUserToJson(PlatformUser instance) =>
       'hasPassword': instance.hasPassword,
       'lastSignInAt': ?instance.lastSignInAt?.toIso8601String(),
       'workspaces': instance.workspaces.map((e) => e.toJson()).toList(),
+      'freeCredits': ?instance.freeCredits?.toJson(),
     };

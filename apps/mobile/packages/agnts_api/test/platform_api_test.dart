@@ -105,6 +105,13 @@ void main() {
       // TODO
     });
 
+    // Set how many free credits a person may spend on agnts's Muse key (Admin); 0 gives none
+    //
+    //Future<FreeCredits> setFreeCredits(int id, SetFreeCreditsRequest setFreeCreditsRequest) async
+    test('test setFreeCredits', () async {
+      // TODO
+    });
+
     // Change how long run history is kept, and its size limits (Admin)
     //
     //Future<RunHistorySettings> setRunHistorySettings(RunHistorySettings runHistorySettings) async

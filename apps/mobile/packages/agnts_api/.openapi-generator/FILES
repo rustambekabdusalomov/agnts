@@ -161,6 +161,7 @@ doc/FollowUpsMode.md
 doc/FollowUpsSetting.md
 doc/Footprint.md
 doc/ForgotPasswordRequest.md
+doc/FreeCredits.md
 doc/GetConsent200Response.md
 doc/GetPlatformRunPrompt200Response.md
 doc/GitSettings.md
@@ -202,7 +203,10 @@ doc/McpStatus.md
 doc/Member.md
 doc/Meta.md
 doc/MetaApi.md
+doc/ModelCatalog.md
+doc/ModelCatalogModelsInner.md
 doc/ModelOverrides.md
+doc/MuseLogin.md
 doc/NetworkActivity.md
 doc/NetworkActivityDialsInner.md
 doc/NetworkApi.md
@@ -333,6 +337,7 @@ doc/SecondOpinion.md
 doc/SecretFindings.md
 doc/SecretFindingsFindingsInner.md
 doc/SendFeedbackRequest.md
+doc/SetFreeCreditsRequest.md
 doc/SetMemberRoleRequest.md
 doc/SetPlaneWebhookSecretRequest.md
 doc/SetSlotsRequest.md
@@ -607,6 +612,7 @@ lib/src/model/follow_ups_mode.dart
 lib/src/model/follow_ups_setting.dart
 lib/src/model/footprint.dart
 lib/src/model/forgot_password_request.dart
+lib/src/model/free_credits.dart
 lib/src/model/get_consent200_response.dart
 lib/src/model/get_platform_run_prompt200_response.dart
 lib/src/model/git_settings.dart
@@ -643,7 +649,10 @@ lib/src/model/login_response.dart
 lib/src/model/mcp_status.dart
 lib/src/model/member.dart
 lib/src/model/meta.dart
+lib/src/model/model_catalog.dart
+lib/src/model/model_catalog_models_inner.dart
 lib/src/model/model_overrides.dart
+lib/src/model/muse_login.dart
 lib/src/model/network_activity.dart
 lib/src/model/network_activity_dials_inner.dart
 lib/src/model/network_route.dart
@@ -768,6 +777,7 @@ lib/src/model/second_opinion.dart
 lib/src/model/secret_findings.dart
 lib/src/model/secret_findings_findings_inner.dart
 lib/src/model/send_feedback_request.dart
+lib/src/model/set_free_credits_request.dart
 lib/src/model/set_member_role_request.dart
 lib/src/model/set_plane_webhook_secret_request.dart
 lib/src/model/set_slots_request.dart
@@ -1010,6 +1020,7 @@ test/follow_ups_setting_test.dart
 test/follow_ups_test.dart
 test/footprint_test.dart
 test/forgot_password_request_test.dart
+test/free_credits_test.dart
 test/get_consent200_response_test.dart
 test/get_platform_run_prompt200_response_test.dart
 test/git_settings_test.dart
@@ -1051,7 +1062,10 @@ test/mcp_status_test.dart
 test/member_test.dart
 test/meta_api_test.dart
 test/meta_test.dart
+test/model_catalog_models_inner_test.dart
+test/model_catalog_test.dart
 test/model_overrides_test.dart
+test/muse_login_test.dart
 test/network_activity_dials_inner_test.dart
 test/network_activity_test.dart
 test/network_api_test.dart
@@ -1182,6 +1196,7 @@ test/second_opinion_test.dart
 test/secret_findings_findings_inner_test.dart
 test/secret_findings_test.dart
 test/send_feedback_request_test.dart
+test/set_free_credits_request_test.dart
 test/set_member_role_request_test.dart
 test/set_plane_webhook_secret_request_test.dart
 test/set_slots_request_test.dart

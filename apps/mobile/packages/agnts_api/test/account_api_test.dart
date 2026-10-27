@@ -49,6 +49,20 @@ void main() {
       // TODO
     });
 
+    // Free credits an Admin gave you; runs on agnts's Muse key spend them before your workspace's credits
+    //
+    //Future<FreeCredits> getMyFreeCredits() async
+    test('test getMyFreeCredits', () async {
+      // TODO
+    });
+
+    // How your Meta sign-in is going
+    //
+    //Future<MuseLogin> getMyMuseLogin(String id) async
+    test('test getMyMuseLogin', () async {
+      // TODO
+    });
+
     // Send the email verification link again
     //
     //Future resendVerification() async
@@ -60,6 +74,13 @@ void main() {
     //
     //Future<ClaudeConnectionState> setMyClaude(ClaudeConnectionInput claudeConnectionInput) async
     test('test setMyClaude', () async {
+      // TODO
+    });
+
+    // Connect your Muse account by signing in with Meta (shows a code to confirm on Meta's page)
+    //
+    //Future<MuseLogin> startMyMuseLogin() async
+    test('test startMyMuseLogin', () async {
       // TODO
     });
 

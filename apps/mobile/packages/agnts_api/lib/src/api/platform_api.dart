@@ -13,6 +13,7 @@ import 'package:agnts_api/src/model/admin_audit_entry.dart';
 import 'package:agnts_api/src/model/create_platform_admin_request.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/feedback.dart';
+import 'package:agnts_api/src/model/free_credits.dart';
 import 'package:agnts_api/src/model/get_platform_run_prompt200_response.dart';
 import 'package:agnts_api/src/model/grant_credits_request.dart';
 import 'package:agnts_api/src/model/platform_overview.dart';
@@ -22,6 +23,7 @@ import 'package:agnts_api/src/model/run_history_page.dart';
 import 'package:agnts_api/src/model/run_history_settings.dart';
 import 'package:agnts_api/src/model/run_history_summary.dart';
 import 'package:agnts_api/src/model/run_transcript_detail.dart';
+import 'package:agnts_api/src/model/set_free_credits_request.dart';
 import 'package:agnts_api/src/model/update_platform_feedback_request.dart';
 import 'package:agnts_api/src/model/update_platform_user_request.dart';
 import 'package:agnts_api/src/model/update_platform_workspace_request.dart';
@@ -1276,6 +1278,110 @@ _responseData = rawData == null ? null : deserialize<List<PlatformWorkspace>, Pl
     }
 
     return Response<List<PlatformWorkspace>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Set how many free credits a person may spend on agnts&#39;s Muse key (Admin); 0 gives none
+  /// 
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [setFreeCreditsRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [FreeCredits] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<FreeCredits>> setFreeCredits({ 
+    required int id,
+    required SetFreeCreditsRequest setFreeCreditsRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/platform/users/{id}/free-credits'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'PUT',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(setFreeCreditsRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    FreeCredits? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<FreeCredits, FreeCredits>(rawData, 'FreeCredits', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<FreeCredits>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

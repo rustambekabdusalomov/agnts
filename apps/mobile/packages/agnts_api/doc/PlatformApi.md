@@ -23,6 +23,7 @@ Method | HTTP request | Description
 [**listPlatformRuns**](PlatformApi.md#listplatformruns) | **GET** /platform/runs | Run history across every workspace, newest first, without prompts or transcripts (Admin)
 [**listPlatformUsers**](PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user, with their workspaces and last sign-in (Admin)
 [**listPlatformWorkspaces**](PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
+[**setFreeCredits**](PlatformApi.md#setfreecredits) | **PUT** /platform/users/{id}/free-credits | Set how many free credits a person may spend on agnts&#39;s Muse key (Admin); 0 gives none
 [**setRunHistorySettings**](PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
 [**updatePlatformFeedback**](PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [**updatePlatformUser**](PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
@@ -684,6 +685,53 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setFreeCredits**
+> FreeCredits setFreeCredits(id, setFreeCreditsRequest)
+
+Set how many free credits a person may spend on agnts's Muse key (Admin); 0 gives none
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int id = 789; // int | 
+final SetFreeCreditsRequest setFreeCreditsRequest = ; // SetFreeCreditsRequest | 
+
+try {
+    final response = api.setFreeCredits(id, setFreeCreditsRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->setFreeCredits: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **setFreeCreditsRequest** | [**SetFreeCreditsRequest**](SetFreeCreditsRequest.md)|  | 
+
+### Return type
+
+[**FreeCredits**](FreeCredits.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

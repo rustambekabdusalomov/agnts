@@ -544,6 +544,8 @@ class RunTranscript {
 }
 
 enum RunTranscriptEngineEnum {
+@JsonValue(r'muse')
+muse(r'muse'),
 @JsonValue(r'claude')
 claude(r'claude'),
 @JsonValue(r'codex')
