@@ -20,6 +20,7 @@ import UsagePill from './UsagePill.vue'
 import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import FeedbackDialog from './account/FeedbackDialog.vue'
+import GlobalSearch, { type SearchPage } from './GlobalSearch.vue'
 import HiIcon from './ui/HiIcon.vue'
 import { SETTINGS_SECTIONS, sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
 
@@ -179,6 +180,17 @@ const narrow = ref(narrowQuery.matches)
 const onNarrow = (e: MediaQueryListEvent) => (narrow.value = e.matches)
 narrowQuery.addEventListener('change', onNarrow)
 const shown = (key: string) => prefs.thin || narrow.value || openMenu.value === key
+// What the top bar's search finds among the pages: every sidebar link and
+// each settings section, named as the sidebar names them.
+const searchPages = computed<SearchPage[]>(() => [
+  ...menus.value.flatMap((m) => m.items.filter((x) => x.to).map((x) => ({ key: x.key, label: t(x.label), icon: x.icon, to: x.to! }))),
+  ...visibleSections(catalog.claudeOff.value).map((s) => ({
+    key: `settings-${s.key}`,
+    label: `${t('nav.settings')} · ${t(sectionLabel(s, catalog.claudeOff.value))}`,
+    icon: sectionIcon(s, catalog.claudeOff.value),
+    to: { name: 'settings', params: { section: s.key } },
+  })),
+])
 
 const langOpen = ref(false)
 const LANG_NAMES: Record<Locale, [string, string]> = { en: ['EN', 'English'], ru: ['RU', 'Русский'], uz: ['UZ', 'Oʻzbekcha'] }
@@ -419,10 +431,7 @@ onBeforeUnmount(() => {
         <RouterLink v-if="queue.data.value" class="queue-pill" :class="{ warn: serverWaiting > 0 }" :to="{ name: 'tickets', query: { f: 'queue' } }">
           {{ t('queue.header', { running: queue.data.value.running, slots: queue.data.value.slots }) }}<template v-if="queued"> · {{ t('queue.queued', { n: queued }) }}</template><template v-if="serverWaiting"> ({{ t('queue.waitingServer', { n: serverWaiting }) }})</template>
         </RouterLink>
-        <label class="search">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-          <input v-model="ui.search" type="search" :placeholder="t('nav.search')" :aria-label="t('nav.search')">
-        </label>
+        <GlobalSearch :pages="searchPages" />
         <div class="top-right">
           <span v-if="!connected" class="hint">{{ t('nav.offline') }}</span>
           <NetworkMenu v-if="workspace.detail" />

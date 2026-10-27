@@ -50,6 +50,9 @@ const missing = computed(() => active.value.filter((r) => r.claudeMd === 'missin
 const drawerOpen = ref(false)
 const editing = ref<Repository | null>(null)
 const preset = ref<Pick<Repository, 'name' | 'cloneUrl' | 'defaultBranch'> | null>(null)
+// A clone URL without its scheme and .git: "gitlab.example.com/team/app".
+const shortUrl = (url: string) => url.replace(/^[a-z+]+:\/\/([^@/]*@)?/i, '').replace(/^[^@/]+@([^:]+):/, '$1/').replace(/\.git$/, '')
+
 function openRepo(r: Repository | null) {
   editing.value = r
   preset.value = null
@@ -103,57 +106,56 @@ function onPick(r: RemoteRepository) {
     <p v-else-if="repos.isError.value" class="ferr">{{ t('common.error') }}</p>
     <p v-else-if="!repos.data.value?.length" class="empty">{{ t('repos.none') }}</p>
     <div v-else class="tw">
-      <table class="tbl">
+      <table class="tbl rp-tbl">
         <thead>
           <tr>
             <th>{{ t('repos.colRepo') }}</th>
             <th>{{ t('repos.colSource') }}</th>
-            <th>{{ t('repos.colBranch') }}</th>
             <th>{{ t('repos.colStack') }}</th>
             <th>{{ t('repos.colTest') }}</th>
             <th>{{ t('repos.colClaude') }}</th>
-            <th>{{ t('repos.colOpen') }}</th>
+            <th class="num">{{ t('repos.colOpen') }}</th>
             <th />
           </tr>
         </thead>
         <tbody>
           <tr v-for="r in rows" :key="r.id" tabindex="0" @click="router.push({ name: 'repo', params: { id: r.id } })" @keydown.enter="router.push({ name: 'repo', params: { id: r.id } })">
-            <td>
-              <div class="ttitle">{{ r.name }}</div>
-              <div class="tkey">{{ r.cloneUrl }}</div>
-              <div v-if="r.groups?.length" class="hint">{{ t('groups.inGroups', { names: r.groups.map((g) => g.name).join(', ') }) }}</div>
+            <td class="rp-repo">
+              <div class="ttitle rp-line" :title="r.name">{{ r.name }}</div>
+              <div class="tkey rp-line" :title="r.cloneUrl">{{ shortUrl(r.cloneUrl) }}</div>
+              <div class="rp-line rp-branch" :title="t('repos.colBranch')"><HiIcon name="commit" /><span class="tkey">{{ r.defaultBranch }}</span></div>
+              <div v-if="r.groups?.length" class="hint rp-line">{{ t('groups.inGroups', { names: r.groups.map((g) => g.name).join(', ') }) }}</div>
             </td>
             <td>
-              <span class="srcs">
+              <span class="srcs rp-chips">
                 <span v-if="r.jiraProject" class="src">{{ t('repos.jira', { project: r.jiraProject }) }}</span>
                 <span v-if="r.planeProject" class="src">{{ t('repos.plane', { project: r.planeProject }) }}</span>
                 <span class="src local">{{ t('repos.side') }}</span>
               </span>
             </td>
-            <td class="tkey">{{ r.defaultBranch }}</td>
             <td>
-              <span v-if="r.toolchains?.length" class="srcs">
+              <span v-if="r.toolchains?.length" class="srcs rp-chips rp-tools-list">
                 <span v-for="tc in r.toolchains" :key="tc.tool" class="src" :title="tc.source">{{ tc.tool }} {{ tc.version }}</span>
               </span>
               <span v-else class="tkey">—</span>
             </td>
-            <td class="tkey">{{ r.testCmd || '—' }}</td>
-            <td>
+            <td class="tkey"><code class="rp-cmd" :title="r.testCmd || undefined">{{ r.testCmd || '—' }}</code></td>
+            <td class="rp-nowrap">
               <span v-if="r.claudeMd === 'found'" class="repo-ok">{{ t('repos.found') }}</span>
               <span v-else-if="r.claudeMd === 'missing'" class="repo-miss">{{ t('repos.missing') }}</span>
               <span v-else class="hint">{{ t('repos.unknown') }}</span>
             </td>
-            <td>{{ r.openTickets }}</td>
-            <td style="text-align: right; white-space: nowrap">
+            <td class="num">{{ r.openTickets }}</td>
+            <td class="rp-acts">
               <template v-if="!r.archivedAt">
                 <button type="button" class="btn btn-s" @click.stop="openRepo(r)">{{ t('repos.edit') }}</button>
-                <button type="button" class="btn btn-s" style="margin-left: 6px" :disabled="archive.pending.value" @click.stop="archive.toggle(r)">{{ t('repos.archive') }}</button>
+                <button type="button" class="btn btn-s" :disabled="archive.pending.value" @click.stop="archive.toggle(r)">{{ t('repos.archive') }}</button>
               </template>
               <button v-else type="button" class="btn btn-s" :disabled="archive.pending.value" @click.stop="archive.toggle(r)">{{ t('repos.restore') }}</button>
             </td>
           </tr>
           <tr v-if="!rows.length">
-            <td colspan="8" class="empty">{{ ui.search.trim() ? t('repos.noMatch') : view === 'archived' ? t('repos.noArchived') : t('repos.none') }}</td>
+            <td colspan="7" class="empty">{{ ui.search.trim() ? t('repos.noMatch') : view === 'archived' ? t('repos.noArchived') : t('repos.none') }}</td>
           </tr>
         </tbody>
       </table>
@@ -169,6 +171,21 @@ function onPick(r: RemoteRepository) {
 .rp-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .rp-tools .mini-search { min-width: 220px; }
 .rp-tools .mini-search input { flex: 1; width: auto; min-width: 0; }
+/* Long URLs and commands stay on one line (full text on hover); chips never
+   wrap inside, so their fixed height holds; the actions never wrap. */
+.rp-tbl td { vertical-align: top; }
+.rp-repo { width: 100%; max-width: 0; min-width: 240px; }
+.rp-line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-chips { flex-wrap: wrap; }
+.rp-chips .src { white-space: nowrap; }
+.rp-tools-list { max-width: 200px; }
+.rp-cmd { display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: inherit; }
+.rp-nowrap { white-space: nowrap; }
+.rp-branch { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+.rp-branch svg { flex: none; width: 14px; height: 14px; stroke: var(--ink-3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rp-branch .tkey { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; }
+.rp-acts { text-align: right; white-space: nowrap; }
+.rp-acts .btn + .btn { margin-left: 6px; }
 @media (max-width: 640px) {
   .rp-tools, .rp-tools .mini-search { width: 100%; }
 }
