@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { PROVIDER_ICON, PROVIDER_TINT, type Provider } from './providers'
+import { PROVIDER_ICON, PROVIDER_TINT, type Tile } from './providers'
 
-defineProps<{ provider: Provider; size?: number }>()
+defineProps<{ provider: Tile; size?: number }>()
 </script>
 
 <template>

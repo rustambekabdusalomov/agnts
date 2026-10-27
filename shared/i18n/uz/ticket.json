@@ -240,6 +240,13 @@
     "srcGit": "Pull request",
     "srcCi": "CI yiqilishi",
     "kvCi": "CI",
-    "ciFixes": "CI pull requestni {n, plural, one {# marta} other {# marta}} qaytardi"
+    "ciFixes": "CI pull requestni {n, plural, one {# marta} other {# marta}} qaytardi",
+    "museMeter": "Ushbu ish uchun Muse sarfi",
+    "museSpentOf": "{limit} dan {spent}",
+    "museCalls": "{n} ta chaqiruv",
+    "museCharged": "{amount} yechildi",
+    "museSteered": "Byudjet kam: yakunlash buyurildi",
+    "museStopped": "Byudjet tugagani uchun to‘xtatildi",
+    "museEscalated": "{model} ga o‘tkazildi"
   }
 }

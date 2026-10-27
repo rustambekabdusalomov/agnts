@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
 import type { components } from '../../api/schema.gen'
+import { useModels } from '../../composables/useModels'
 import { useSession } from '../../stores/session'
 import { useUi } from '../../stores/ui'
 import { useWorkspace } from '../../stores/workspace'
@@ -14,6 +15,7 @@ import ConfirmDialog from '../ui/ConfirmDialog.vue'
 type Member = components['schemas']['Member']
 
 const { t } = useI18n()
+const catalog = useModels()
 const router = useRouter()
 const qc = useQueryClient()
 const ui = useUi()
@@ -145,7 +147,7 @@ const fmt = (s: string) => new Date(s).toLocaleDateString()
                 <span v-else class="badge" :class="roleBadge[m.role]">{{ t(`ws.role_${m.role}`) }}</span>
               </td>
               <td>
-                <span class="badge" :class="m.claudeConnected ? 'b-ok' : 'b-gray'">{{ m.claudeConnected ? t('ws.claudeBadge') : t('ws.noClaudeBadge') }}</span>
+                <span class="badge" :class="m.claudeConnected ? 'b-ok' : 'b-gray'">{{ m.claudeConnected ? t(catalog.isMuse.value ? 'ws.museBadge' : 'ws.claudeBadge') : t(catalog.isMuse.value ? 'ws.noMuseBadge' : 'ws.noClaudeBadge') }}</span>
               </td>
               <td class="hint">{{ fmt(m.joinedAt) }}</td>
               <td>

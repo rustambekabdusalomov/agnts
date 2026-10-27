@@ -146,6 +146,9 @@
       }
     }
   },
+  "accountMyClaudeMuse": "Your Muse account",
+  "accountClaudeSavedMuse": "Muse account connected",
+  "accountClaudeRemovedMuse": "Muse account disconnected",
   "analyticsTitle": "Analytics",
   "analyticsLede": "How well agnts works for you over time: throughput, quality, where time goes, and what it costs your plan.",
   "analyticsPeriod": "Period",
@@ -813,6 +816,30 @@
   "billingReason_refund": "Refunded",
   "billingReason_grant": "Granted",
   "billingReason_document": "Spent on a document",
+  "billingFreeCredits": "Your free credits",
+  "billingFreeCreditsSub": "From agnts. Runs on agnts's Muse key spend them before the workspace's credits.",
+  "billingFreeCreditsLeft": "{n} of {limit} credits left",
+  "@billingFreeCreditsLeft": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "billingFreeCreditsWorth": "{amount} of {total}",
+  "@billingFreeCreditsWorth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "briefTitle": "Repository brief",
   "briefSub": "How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository's tickets reads it, so agnts builds things the way your team does.",
   "briefSurvey": "Survey",
@@ -3205,6 +3232,7 @@
   "integrationsTokenStep4_openai": "In Settings → Preview, add api.openai.com to the hosts runs may reach, so Codex runs can call OpenAI.",
   "integrationsOpenaiKeyHelp": "Stored encrypted on your server. Only runs on Codex receive it.",
   "integrationsOpenaiHelp": "Codex runs have no agnts-guard hooks: agnts's checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts.",
+  "integrationsName_muse": "Muse Code",
   "kindTitle": "Kind",
   "kindAuto": "Auto",
   "kindAutoHint": "agnts picks the kind while reading the ticket",
@@ -3500,6 +3528,7 @@
   "logsTypeLimit": "Limit",
   "logsTypeError": "Error",
   "logsTypeEvent": "Event",
+  "logsTypeBudget": "Spend",
   "maccountPasswordInstead": "Sign in with a password",
   "maccountGoogleInstead": "Continue with Google instead",
   "maccountSetupLede": "Admins sign in with two factors. Add this account to an authenticator app with the secret below (or open the setup link on this phone), then enter the 6-digit code it shows.",
@@ -5012,6 +5041,43 @@
     }
   },
   "platformDeleteAdminBody": "They can no longer sign in. This cannot be undone.",
+  "platformFreeCredits": "Free credits",
+  "platformSetFreeCredits": "Set free credits",
+  "platformFreeCreditsSet": "{name} may spend {n} free credits ({amount})",
+  "@platformFreeCreditsSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFreeCreditsUsed": "{used} of {limit} spent so far.",
+  "@platformFreeCreditsUsed": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFreeCreditsLimit": "Credits (1 credit = $0.01; 0 gives none)",
+  "platformFreeCreditsWorth": "Worth {amount} of model calls on agnts's Muse key.",
+  "@platformFreeCreditsWorth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFreeCreditsInvalid": "Enter a whole number from 0 to 10,000,000.",
   "previewTab": "Preview",
   "previewTitle": "Screenshots of the app",
   "previewSub": "agnts started the app with this change and took screenshots. Advice only: it never blocks approval.",
@@ -6916,6 +6982,14 @@
   "settingsReflect": "Learn from your feedback",
   "settingsReflectHelp": "When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.",
   "settingsCiRed": "When a watched branch goes red",
+  "settingsClaudeMuse": "Muse Code",
+  "settingsClaudeMovedMuse": "Muse is connected per workspace.",
+  "settingsClaudeOpenMuse": "Workspace → Muse",
+  "settingsModelsHelpMuse": "Pick which model runs each step. Muse Spark costs the least; Muse Wonder is stronger and costs more.",
+  "settingsStageCodingHelpMuse": "The main run. Spends the most.",
+  "settingsStageReviewHelpMuse": "Reviews each result while you review it. Auto uses Muse Wonder for complex tickets and Muse Spark for the rest.",
+  "settingsAllowHelpMuse": "Muse Code can run these without asking",
+  "settingsDenyHelpMuse": "Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Muse Code.",
   "spendTitle": "Token spend",
   "spendSub": "{tokens} tokens in and out · about {cost} at API prices",
   "@spendSub": {
@@ -8031,6 +8105,44 @@
       }
     }
   },
+  "ticketMuseMeter": "Muse spend for this run",
+  "ticketMuseSpentOf": "{spent} of {limit}",
+  "@ticketMuseSpentOf": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketMuseCalls": "{n, plural, one {{n} call} other {{n} calls}}",
+  "@ticketMuseCalls": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketMuseCharged": "charged {amount}",
+  "@ticketMuseCharged": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketMuseSteered": "Budget low: told to wrap up",
+  "ticketMuseStopped": "Stopped over budget",
+  "ticketMuseEscalated": "Moved to {model}",
+  "@ticketMuseEscalated": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
   "ticketsRunning": "Running",
@@ -8407,5 +8519,35 @@
         "type": "String"
       }
     }
-  }
+  },
+  "wsTabMuse": "Muse",
+  "wsClaudeMuse": "Muse",
+  "wsClaudeSubMuse": "Which Muse account this workspace's runs use.",
+  "wsClaudeSavedMuse": "Muse settings saved",
+  "wsFallbackHelpMuse": "When the chosen account is missing or out of budget, runs continue on agnts's Muse key and spend your free credits, then the workspace's credits, instead of pausing.",
+  "wsMemberAccountsSubMuse": "Who has connected their own Muse account (Profile → Muse).",
+  "wsMuseBadge": "Muse connected",
+  "wsNoMuseBadge": "No Muse",
+  "wsKindMuseLogin": "Meta account",
+  "wsKindMuseApiKey": "Muse API key",
+  "wsMuseSignIn": "Sign in with Meta",
+  "wsMuseSignInHelp": "Shows a code to confirm on Meta's page; runs then use that Meta account's Muse.",
+  "wsMuseCode": "Enter this code on Meta's page",
+  "wsMuseCopyCode": "Copy code",
+  "wsMuseOpenMeta": "Open Meta",
+  "wsMuseWaiting": "Waiting for you to approve…",
+  "wsMuseExpires": "The code works until {time}.",
+  "@wsMuseExpires": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "wsMuse_denied": "The sign-in was declined on Meta's page.",
+  "wsMuse_expired": "The code expired before it was confirmed.",
+  "wsMuse_failed": "The sign-in failed.",
+  "wsMuseTryAgain": "Try again",
+  "wsMuseUseKey": "Use an API key",
+  "wsMuseKeyHelp": "Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner."
 }

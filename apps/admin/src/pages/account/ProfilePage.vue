@@ -5,14 +5,19 @@ import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
 import PageHeader from '../../components/PageHeader.vue'
 import ClaudeConnect from '../../components/account/ClaudeConnect.vue'
+import MuseConnect from '../../components/account/MuseConnect.vue'
+import { useModels } from '../../composables/useModels'
 import CfgRow from '../../components/form/CfgRow.vue'
 import TotpQr from '../../components/account/TotpQr.vue'
 import { useSession } from '../../stores/session'
 import { useUi } from '../../stores/ui'
 
 // The person's own account: name, email, password, two-factor sign-in and
-// their Claude account (for workspaces in per-member mode).
+// their Claude account, or Muse account where Muse Code is the tool (for
+// workspaces in per-member mode).
 const { t } = useI18n()
+const catalog = useModels()
+const w = (key: string) => (catalog.isMuse.value ? `${key}Muse` : key)
 const session = useSession()
 const ui = useUi()
 const qc = useQueryClient()
@@ -86,11 +91,11 @@ const disable = useMutation({
 const claude = useQuery({ queryKey: ['my-claude'], queryFn: () => unwrap(api.GET('/account/claude')) })
 const claudeError = ref('')
 const connect = useMutation({
-  mutationFn: (v: { kind: 'subscription' | 'api_key'; token: string }) => unwrap(api.PUT('/account/claude', { body: v })),
+  mutationFn: (v: { kind: 'subscription' | 'api_key' | 'muse_api_key'; token: string }) => unwrap(api.PUT('/account/claude', { body: v })),
   onSuccess: (s) => {
     claudeError.value = ''
     qc.setQueryData(['my-claude'], s)
-    ui.notify(t('account.claudeSaved'))
+    ui.notify(t(w('account.claudeSaved')))
   },
   onError: (e) => {
     claudeError.value = errText(e)
@@ -100,9 +105,13 @@ const disconnect = useMutation({
   mutationFn: () => unwrap(api.DELETE('/account/claude')),
   onSuccess: () => {
     void qc.invalidateQueries({ queryKey: ['my-claude'] })
-    ui.notify(t('account.claudeRemoved'))
+    ui.notify(t(w('account.claudeRemoved')))
   },
 })
+function onSignedIn() {
+  void qc.invalidateQueries({ queryKey: ['my-claude'] })
+  ui.notify(t('account.claudeSavedMuse'))
+}
 // Whether subscription tokens are accepted is the server's rule; the
 // workspace's Claude page knows it.
 const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => unwrap(api.GET('/workspace/claude')) })
@@ -129,8 +138,19 @@ const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => 
     </section>
 
     <section v-if="!session.user?.isAdmin || session.user?.workspaces?.length" class="card">
-      <div class="ch"><div><h2>{{ t('account.myClaude') }}</h2><p class="sub">{{ t('account.myClaudeSub') }}</p></div></div>
+      <div class="ch"><div><h2>{{ t(w('account.myClaude')) }}</h2><p class="sub">{{ t('account.myClaudeSub') }}</p></div></div>
+      <MuseConnect
+        v-if="catalog.isMuse.value"
+        scope="personal"
+        :state="claude.data.value"
+        :busy="connect.isPending.value || disconnect.isPending.value"
+        :error="claudeError"
+        @connect="(token) => connect.mutate({ kind: 'muse_api_key', token })"
+        @disconnect="disconnect.mutate()"
+        @signed-in="onSignedIn"
+      />
       <ClaudeConnect
+        v-else
         :state="claude.data.value"
         :subscriptions="subscriptions.data.value?.subscriptionsAllowed ?? true"
         :busy="connect.isPending.value || disconnect.isPending.value"

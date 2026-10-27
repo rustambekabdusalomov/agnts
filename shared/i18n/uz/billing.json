@@ -29,6 +29,10 @@
     "reason_run": "Sarflandi",
     "reason_refund": "Qaytarildi",
     "reason_grant": "Berildi",
-    "reason_document": "Hujjatga sarflandi"
+    "reason_document": "Hujjatga sarflandi",
+    "freeCredits": "Bepul kreditlaringiz",
+    "freeCreditsSub": "agnts’dan. agnts’ning Muse kalitidagi ishlar ularni ish maydoni kreditlaridan oldin sarflaydi.",
+    "freeCreditsLeft": "{limit} kreditdan {n} tasi qoldi",
+    "freeCreditsWorth": "{total} dan {amount}"
   }
 }

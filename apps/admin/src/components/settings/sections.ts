@@ -3,7 +3,7 @@
 export const SETTINGS_SECTIONS = [
   { key: 'appearance', label: 'settings.appearance', icon: 'palette' },
   { key: 'integrations', label: 'settings.integrations', icon: 'plug' },
-  { key: 'claude', label: 'settings.claude', icon: 'assistant' },
+  { key: 'claude', label: 'settings.claude', museLabel: 'settings.claudeMuse', icon: 'assistant' },
   { key: 'commits', label: 'settings.commits', icon: 'commit' },
   { key: 'runs', label: 'settings.runs', icon: 'running' },
   { key: 'guardrails', label: 'harnessSettings.title', icon: 'shield' },
@@ -15,6 +15,11 @@ export const SETTINGS_SECTIONS = [
 ] as const
 
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number]['key']
+
+/** A section's label key; the coding model's reads Muse where Claude Code is not offered. */
+export function sectionLabel(s: (typeof SETTINGS_SECTIONS)[number], claudeOff: boolean): string {
+  return claudeOff && 'museLabel' in s ? s.museLabel : s.label
+}
 
 /** The section a /settings/:section? route shows; the first when it names none. */
 export function settingsSection(param: unknown): SettingsSection {

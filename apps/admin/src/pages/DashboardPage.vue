@@ -15,9 +15,12 @@ import PageHeader from '../components/PageHeader.vue'
 import StateBadge from '../components/StateBadge.vue'
 import { fmtDur, fmtTime, level, pct, since } from '../composables/format'
 import { livePoll } from '../composables/useLive'
+import { useModels } from '../composables/useModels'
 import { useSession } from '../stores/session'
 
 const { t, locale } = useI18n()
+// Claude plan windows do not apply to Muse runs, paid per call.
+const catalog = useModels()
 const router = useRouter()
 const session = useSession()
 
@@ -93,7 +96,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
         <div class="val">{{ d.week.pushed }} <DeltaTag :cur="d.week.pushed" :prev="d.lastWeek.pushed" good-when-up /></div>
         <div class="note">{{ t('dashboard.pushedNote', { n: d.lastWeek.pushed }) }}</div>
       </RouterLink>
-      <RouterLink class="card stat kpi-btn" :to="{ name: 'usage' }">
+      <RouterLink v-if="!catalog.isMuse.value" class="card stat kpi-btn" :to="{ name: 'usage' }">
         <KpiArrow />
         <div class="lbl">{{ t('dashboard.planSession') }}</div>
         <div class="val" :style="{ color: level(session5) === 'warn' ? 'var(--warn-ink)' : level(session5) === 'bad' ? 'var(--bad-ink)' : 'inherit' }">
@@ -126,7 +129,7 @@ const fmtMin = (m: number) => (m < 60 ? `${Math.max(0, m)}m` : `${Math.floor(m /
         <div v-else class="help ok"><p>{{ t('dashboard.nothingWaiting') }}</p></div>
       </section>
 
-      <UsageCard :usage="d.usage" />
+      <UsageCard v-if="!catalog.isMuse.value" :usage="d.usage" />
 
       <section class="card span2">
         <div class="ch"><div><h2>{{ t('dashboard.liveTitle') }}</h2><p class="sub">{{ t('dashboard.liveSub') }}</p></div></div>

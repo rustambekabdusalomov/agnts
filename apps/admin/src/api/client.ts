@@ -51,7 +51,7 @@ export function currentWorkspace(): string {
 }
 
 /** Operations that are the person's, not a workspace's (see x-scope in the spec). */
-const USER_PATHS = ['/auth/', '/meta', '/account/', '/workspaces', '/invites/', '/platform/', '/devices', '/docs/', '/oauth/', '/public/']
+const USER_PATHS = ['/auth/', '/meta', '/models', '/account/', '/workspaces', '/invites/', '/platform/', '/devices', '/docs/', '/oauth/', '/public/']
 
 export function isUserPath(path: string): boolean {
   return USER_PATHS.some((p) => path === p.replace(/\/$/, '') || path.startsWith(p))

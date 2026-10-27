@@ -188,6 +188,7 @@
     "tokenStep3_openai": "Kalitni nusxalang (u sk- bilan boshlanadi) va pastdagi «API kaliti» maydoniga qoʻying.",
     "tokenStep4_openai": "Codex ishga tushirishlari OpenAI ga murojaat qila olishi uchun Sozlamalar → Preview boʻlimida api.openai.com ni ruxsat etilgan hostlarga qoʻshing.",
     "openaiKeyHelp": "Serveringizda shifrlangan holda saqlanadi. Uni faqat Codex dagi ishga tushirishlar oladi.",
-    "openaiHelp": "Codex ishga tushirishlarida agnts-guard hooklari yoʻq: ishga tushirishdan keyingi agnts tekshiruvlari (qizil bayroqlar, build, lint, testlar, review) baribir ishlaydi. Ishga tushirishlarga ruxsat etilgan hostlarda api.openai.com ham kerak."
+    "openaiHelp": "Codex ishga tushirishlarida agnts-guard hooklari yoʻq: ishga tushirishdan keyingi agnts tekshiruvlari (qizil bayroqlar, build, lint, testlar, review) baribir ishlaydi. Ishga tushirishlarga ruxsat etilgan hostlarda api.openai.com ham kerak.",
+    "name_muse": "Muse Code"
   }
 }

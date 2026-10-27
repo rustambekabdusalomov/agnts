@@ -47,6 +47,7 @@
     "typeYou": "Вы",
     "typeLimit": "Лимит",
     "typeError": "Ошибка",
-    "typeEvent": "Событие"
+    "typeEvent": "Событие",
+    "typeBudget": "Расход"
   }
 }

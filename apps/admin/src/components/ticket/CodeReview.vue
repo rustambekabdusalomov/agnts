@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
-import { findingFeedback, MODEL_NAME, SEVERITY_TONE, VERDICT_TONE, type CodeReview, type Finding, type Ticket } from '../../api/types'
+import { findingFeedback, modelLabel, SEVERITY_TONE, VERDICT_TONE, type CodeReview, type Finding, type Ticket } from '../../api/types'
 import { useUi } from '../../stores/ui'
 import HiIcon from '../ui/HiIcon.vue'
 import { useTr } from '../../composables/useTranslation'
@@ -73,7 +73,7 @@ function addAll() {
 
     <template v-if="current && !busy">
       <div class="summary"><p>{{ tr(current.summary) }}</p></div>
-      <p class="hint cr-model">{{ t('review.model', { model: MODEL_NAME[current.model] ?? current.model, reason: current.modelReason }) }}</p>
+      <p class="hint cr-model">{{ t('review.model', { model: modelLabel(current.model), reason: current.modelReason }) }}</p>
       <p v-if="current.dropped" class="hint cr-dropped">{{ t('harnessTicket.dropped', { n: current.dropped }) }}</p>
 
       <p v-if="!current.findings.length" class="cr-none"><HiIcon name="check" />{{ t('review.noFindings') }}</p>

@@ -29,6 +29,10 @@
     "reason_run": "Spent",
     "reason_refund": "Refunded",
     "reason_grant": "Granted",
-    "reason_document": "Spent on a document"
+    "reason_document": "Spent on a document",
+    "freeCredits": "Your free credits",
+    "freeCreditsSub": "From agnts. Runs on agnts's Muse key spend them before the workspace's credits.",
+    "freeCreditsLeft": "{n} of {limit} credits left",
+    "freeCreditsWorth": "{amount} of {total}"
   }
 }

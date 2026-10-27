@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import { api, HttpError, unwrap } from '../../api/client'
 import PageHeader from '../../components/PageHeader.vue'
+import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
 import { initialsOf, nameOf, useAgo, usePlatform, within, type PlatformUser } from '../../composables/usePlatform'
+import { useUi } from '../../stores/ui'
 
 // The platform's Users (Admin accounts are on the Admins page): how they
 // sign in, which workspaces they are in and when they last signed in.
@@ -11,6 +15,8 @@ const { t } = useI18n()
 const route = useRoute()
 const ago = useAgo()
 const { users } = usePlatform()
+const qc = useQueryClient()
+const ui = useUi()
 
 const FILTERS = ['all', 'active', 'new', 'google'] as const
 type Filter = (typeof FILTERS)[number]
@@ -30,6 +36,28 @@ const list = computed(() => {
     .filter((u) => !s || [u.user.username, u.user.displayName ?? '', u.user.email ?? '', ...u.workspaces.map((w) => w.name)].some((x) => x.toLowerCase().includes(s)))
     .sort((a, b) => (b.user.createdAt ?? '').localeCompare(a.user.createdAt ?? ''))
 })
+
+// Free credits: what a person may spend on agnts's Muse key before their
+// workspace's credits (1 credit = $0.01).
+const usd = (credits: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(credits / 100)
+const PRESETS = [0, 500, 2000, 5000]
+const crediting = ref<PlatformUser | null>(null)
+const creditLimit = ref(0)
+function editCredits(u: PlatformUser) {
+  crediting.value = u
+  creditLimit.value = u.freeCredits?.limit ?? 0
+}
+const creditOk = computed(() => Number.isInteger(creditLimit.value) && creditLimit.value >= 0 && creditLimit.value <= 10_000_000)
+const setCredits = useMutation({
+  mutationFn: (u: PlatformUser) => unwrap(api.PUT('/platform/users/{id}/free-credits', { params: { path: { id: u.user.id } }, body: { limit: creditLimit.value } })),
+  onSuccess: (fc, u) => {
+    ui.notify(t('platform.freeCreditsSet', { name: nameOf(u.user), n: fc.limit, amount: usd(fc.limit) }))
+    crediting.value = null
+    void qc.invalidateQueries({ queryKey: ['platform', 'users'] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
+const creditOpen = computed({ get: () => !!crediting.value, set: (v: boolean) => { if (!v) crediting.value = null } })
 </script>
 
 <template>
@@ -54,7 +82,7 @@ const list = computed(() => {
         <thead>
           <tr>
             <th>{{ t('platform.user') }}</th><th>{{ t('platform.signIn') }}</th><th>{{ t('platform.workspaces') }}</th>
-            <th>{{ t('platform.joined') }}</th><th>{{ t('platform.lastSeen') }}</th>
+            <th>{{ t('platform.freeCredits') }}</th><th>{{ t('platform.joined') }}</th><th>{{ t('platform.lastSeen') }}</th><th />
           </tr>
         </thead>
         <tbody>
@@ -76,11 +104,44 @@ const list = computed(() => {
               <span v-if="!u.workspaces.length" class="muted">—</span>
               <span v-for="w in u.workspaces" :key="w.id" class="adm-ws" :title="t(`ws.role_${w.role}`)">{{ w.name }}<small v-if="w.role === 'owner'"> · {{ t('ws.role_owner') }}</small></span>
             </td>
+            <td>
+              <template v-if="u.freeCredits?.limit">
+                <span class="mono">{{ u.freeCredits.remaining }} / {{ u.freeCredits.limit }}</span>
+                <small class="muted"> · {{ usd(u.freeCredits.remaining) }}</small>
+              </template>
+              <span v-else class="muted">—</span>
+            </td>
             <td class="hint">{{ ago(u.user.createdAt) }}</td>
             <td class="hint">{{ ago(u.lastSignInAt) }}</td>
+            <td style="text-align: right"><button class="btn btn-s" @click="editCredits(u)">{{ t('platform.setFreeCredits') }}</button></td>
           </tr>
         </tbody>
       </table>
     </div>
   </section>
+
+  <ConfirmDialog
+    v-model="creditOpen"
+    :title="t('platform.setFreeCredits')"
+    :message="crediting ? nameOf(crediting.user) : ''"
+    :confirm-label="t('platform.setFreeCredits')"
+    :busy="setCredits.isPending.value"
+    @confirm="crediting && creditOk && setCredits.mutate(crediting)"
+  >
+    <div class="stack" style="gap: 10px; width: 100%; margin-top: 12px">
+      <p v-if="crediting?.freeCredits?.limit" class="hint">
+        {{ t('platform.freeCreditsUsed', { used: crediting.freeCredits.used, limit: crediting.freeCredits.limit }) }}
+      </p>
+      <label class="field">
+        <span class="flbl">{{ t('platform.freeCreditsLimit') }}</span>
+        <input v-model.number="creditLimit" class="cfg-in" type="number" min="0" max="10000000" step="100">
+      </label>
+      <p class="hint">{{ creditOk ? t('platform.freeCreditsWorth', { amount: usd(creditLimit) }) : t('platform.freeCreditsInvalid') }}</p>
+      <div class="seg" role="group" :aria-label="t('platform.freeCreditsLimit')">
+        <button v-for="n in PRESETS" :key="n" type="button" class="seg-b" :aria-pressed="creditLimit === n" @click="creditLimit = n">
+          {{ n }} <span class="muted">{{ usd(n) }}</span>
+        </button>
+      </div>
+    </div>
+  </ConfirmDialog>
 </template>

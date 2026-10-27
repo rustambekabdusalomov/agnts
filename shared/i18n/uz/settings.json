@@ -92,6 +92,14 @@
     "autoBriefHelp": "Repozitoriyning birinchi tiketi tahlil qilinganda repozitoriy tavsifini (arxitektura, retseptlar, kelishuvlar) yozish va har 10 ta birlashtirishdan keyin yangilash. Tavsif agentga faqat siz tasdiqlaganingizdan keyin yetadi.",
     "reflect": "Fikr-mulohazalaringizdan o‘rganish",
     "reflectHelp": "O‘zgartirish so‘raganingizda yoki ishni sabab bilan rad etganingizda, agnts uning ortidagi umumiy qoidani qidiradi va «Qoidalar» sahifasida taklif qiladi. Siz qabul qilmaguningizcha hech narsa qo‘llanmaydi.",
-    "ciRed": "Kuzatiladigan branch qizarganda"
+    "ciRed": "Kuzatiladigan branch qizarganda",
+    "claudeMuse": "Muse Code",
+    "claudeMovedMuse": "Muse har bir ish maydoni uchun alohida ulanadi.",
+    "claudeOpenMuse": "Ish maydoni → Muse",
+    "modelsHelpMuse": "Har bir bosqich uchun modelni tanlang. Muse Spark eng arzoni; Muse Wonder kuchliroq va qimmatroq.",
+    "stageCodingHelpMuse": "Asosiy ish. Eng ko‘p sarflaydi.",
+    "stageReviewHelpMuse": "Siz ko‘rib chiqayotganda har bir natijani tekshiradi. «Avto» murakkab tiketlar uchun Muse Wonder, qolganlari uchun Muse Spark’dan foydalanadi.",
+    "allowHelpMuse": "Muse Code bularni so‘ramasdan ishga tushira oladi",
+    "denyHelpMuse": "Tiket so‘rasa ham doim rad etiladi. Push’ni Muse Code emas, agnts bajaradi."
   }
 }

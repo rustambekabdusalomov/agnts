@@ -51,7 +51,8 @@ const get = vi.hoisted(() => vi.fn())
 vi.mock('../api/client', () => ({ api: { GET: get }, unwrap: async (p: Promise<unknown>) => p }))
 
 const BODY: Record<string, unknown> = { '/analytics': main, '/analytics/delivery': delivery, '/analytics/learning': learning, '/analytics/ci': ci,
-  '/eval/replays': { versions: [], replays: [] }, '/eval/benchmark': [] }
+  '/eval/replays': { versions: [], replays: [] }, '/eval/benchmark': [],
+  '/models': { providers: ['muse'], primary: 'muse', models: [{ id: 'muse:spark', label: 'Muse Spark', provider: 'muse', strong: false }] } }
 
 async function setup(path: string, role: 'owner' | 'user' = 'user') {
   get.mockImplementation(async (p: string) => BODY[p])
@@ -138,7 +139,7 @@ describe('AnalyticsPage', () => {
 
   it('asks for CI data on the Quality tab and offers to set it up', async () => {
     const { w } = await setup('/w/acme/analytics/quality')
-    expect(asked()).toEqual(['/analytics', '/analytics/ci', '/eval/benchmark', '/eval/replays']) // the replay cards load their own
+    expect(asked()).toEqual(['/analytics', '/analytics/ci', '/eval/benchmark', '/eval/replays', '/models']) // the replay cards load their own, and the models to pick from
     expect(w.text()).toContain('CI watching is not set up')
     expect(w.text()).not.toContain('Method skills') // no coding run had one
   })

@@ -92,6 +92,14 @@
     "autoBriefHelp": "Write a repository brief (architecture, recipes, conventions) when a repository's first ticket is analysed, and update it after every 10 merges. A brief reaches the agent only after you approve it.",
     "reflect": "Learn from your feedback",
     "reflectHelp": "When you ask for changes or reject work with a reason, agnts looks for a convention behind it and suggests a rule on the Rules page. Nothing applies until you adopt it.",
-    "ciRed": "When a watched branch goes red"
+    "ciRed": "When a watched branch goes red",
+    "claudeMuse": "Muse Code",
+    "claudeMovedMuse": "Muse is connected per workspace.",
+    "claudeOpenMuse": "Workspace → Muse",
+    "modelsHelpMuse": "Pick which model runs each step. Muse Spark costs the least; Muse Wonder is stronger and costs more.",
+    "stageCodingHelpMuse": "The main run. Spends the most.",
+    "stageReviewHelpMuse": "Reviews each result while you review it. Auto uses Muse Wonder for complex tickets and Muse Spark for the rest.",
+    "allowHelpMuse": "Muse Code can run these without asking",
+    "denyHelpMuse": "Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Muse Code."
   }
 }

@@ -4,7 +4,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap, apiPath } from '../../api/client'
 import {
-  ISSUE_TONE, MODEL_NAME, pairShots, PREVIEW_STATUS_TONE, shotFeedback,
+  ISSUE_TONE, modelLabel, pairShots, PREVIEW_STATUS_TONE, shotFeedback,
   type PreviewShot, type ShotPair, type ShotRef, type Ticket, type TicketPreview,
 } from '../../api/types'
 import { useUi } from '../../stores/ui'
@@ -101,7 +101,7 @@ watch(zoomed, async (s) => {
       <div v-if="current.status === 'failed'" class="help bad pv-log"><HiIcon name="info" /><pre class="err-text">{{ current.summary }}</pre><CopyButton v-if="current.summary" :text="current.summary" /></div>
       <div v-else class="summary"><p>{{ tr(current.summary) }}</p></div>
       <p class="hint cr-model">
-        {{ t('preview.model', { model: MODEL_NAME[current.model] ?? current.model, n: current.shots.length }) }}<template v-if="current.compare"> · {{ t('preview.withBase') }}</template>
+        {{ t('preview.model', { model: modelLabel(current.model), n: current.shots.length }) }}<template v-if="current.compare"> · {{ t('preview.withBase') }}</template>
       </p>
 
       <ul v-if="current.issues.length" class="cr-list">

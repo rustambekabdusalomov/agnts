@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
 import { FILTERS, NEEDS, RUNNING } from '../api/types'
 import { livePoll, useLive } from '../composables/useLive'
+import { useModels } from '../composables/useModels'
 import { useTabBadge } from '../composables/tabBadge'
 import { LOCALES, type Locale } from '../i18n'
 import { usePrefs } from '../stores/prefs'
@@ -19,7 +20,7 @@ import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import FeedbackDialog from './account/FeedbackDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
-import { SETTINGS_SECTIONS, settingsSection } from './settings/sections'
+import { SETTINGS_SECTIONS, sectionLabel, settingsSection } from './settings/sections'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
 // top bar with search, language, theme and tracker sync.
@@ -31,6 +32,7 @@ const prefs = usePrefs()
 const ui = useUi()
 const workspace = useWorkspace()
 const { connected } = useLive()
+const catalog = useModels()
 
 // The workspace switcher: every workspace the person is in.
 const wsOpen = ref(false)
@@ -335,7 +337,7 @@ onBeforeUnmount(() => topObserver?.disconnect())
               :to="{ name: 'settings', params: { section: x.key } }"
               :aria-current="settingsAt === x.key ? 'page' : undefined"
             >
-              <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
+              <HiIcon :name="x.icon" /><span class="lbl">{{ t(sectionLabel(x, catalog.claudeOff.value)) }}</span>
             </RouterLink>
           </div>
         </div>
@@ -353,7 +355,8 @@ onBeforeUnmount(() => topObserver?.disconnect())
             <span>{{ t('auth.signOut') }}</span>
           </span>
         </button>
-        <UsagePill />
+        <!-- Claude plan windows; Muse runs are paid per call instead -->
+        <UsagePill v-if="!catalog.isMuse.value" />
       </div>
     </aside>
     <div class="main">
@@ -428,7 +431,7 @@ onBeforeUnmount(() => topObserver?.disconnect())
         :aria-current="settingsAt === x.key ? 'page' : undefined"
         @click="closeFly"
       >
-        <HiIcon :name="x.icon" />{{ t(x.label) }}
+        <HiIcon :name="x.icon" />{{ t(sectionLabel(x, catalog.claudeOff.value)) }}
       </RouterLink>
     </nav>
   </Transition>

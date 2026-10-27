@@ -47,6 +47,10 @@ function stale(e: TicketEvent): string[] {
     case 'credits_changed':
       keys.push('billing', 'workspace-claude')
       break
+    case 'budget':
+      // A Muse run settled: what it was charged is saved (free credits first).
+      if ((e.data as { charged_usd?: number } | undefined)?.charged_usd !== undefined) keys.push('ticket-spend', 'billing', 'free-credits')
+      break
     case 'task_changed':
     case 'ticket_created':
       keys.push('tickets', 'repos')

@@ -96,6 +96,9 @@
     "inviteGoogle": "Continue with Google to join. New here? Your account is created on the spot.",
     "totpRequiredAdmin": "Two-factor sign-in is required for Admin accounts, so it stays on.",
     "goHome": "Back to dashboard",
-    "backToDashboard": "Back to the {name} dashboard"
+    "backToDashboard": "Back to the {name} dashboard",
+    "myClaudeMuse": "Your Muse account",
+    "claudeSavedMuse": "Muse account connected",
+    "claudeRemovedMuse": "Muse account disconnected"
   }
 }

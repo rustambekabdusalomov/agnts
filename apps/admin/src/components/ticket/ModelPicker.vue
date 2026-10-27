@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, unwrap } from '../../api/client'
-import { MODEL_NAME, MODELS, type Model, type Ticket } from '../../api/types'
+import type { Model, Ticket } from '../../api/types'
+import { useModels } from '../../composables/useModels'
 import { useUi } from '../../stores/ui'
 
 // Per-ticket model overrides; "Default" follows Settings.
@@ -11,16 +13,22 @@ const props = defineProps<{ ticket: Ticket; stages: Stage[] }>()
 const { t } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
+const catalog = useModels()
 
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
 const LABEL: Record<Stage, string> = { analyze: 'stageAnalyze', coding: 'stageCoding', retry: 'stageRetry', review: 'stageReview', preview: 'stagePreview' }
 
-// The review model may be auto in Settings: agnts picks by complexity.
+// The review model may be auto in Settings: agnts picks by complexity,
+// between the default tool's lighter and stronger models.
+const autoPair = computed(() => {
+  const own = catalog.models.value.filter((m) => m.provider === catalog.primary.value)
+  return [own.find((m) => !m.strong), own.find((m) => m.strong)].filter((m) => !!m).map((m) => m.label).join(' / ')
+})
 function defaultLabel(s: Stage): string {
   const m = settings.data.value?.models[s]
   if (!m) return t('ticket.modelDefault', { model: '…' })
-  if (m === 'auto') return t('ticket.modelAuto', { model: 'Sonnet / Opus' })
-  return t('ticket.modelDefault', { model: MODEL_NAME[m] })
+  if (m === 'auto') return t('ticket.modelAuto', { model: autoPair.value || '…' })
+  return t('ticket.modelDefault', { model: catalog.label(m) })
 }
 
 const current = (s: Stage): Model | 'default' => props.ticket.models?.[s] ?? 'default'
@@ -50,8 +58,8 @@ function pick(stage: Stage, value: Model | 'default') {
         <button class="seg-b" type="button" :aria-pressed="current(s) === 'default'" :disabled="save.isPending.value" @click="pick(s, 'default')">
           {{ defaultLabel(s) }}
         </button>
-        <button v-for="m in MODELS" :key="m" class="seg-b" type="button" :aria-pressed="current(s) === m" :disabled="save.isPending.value" @click="pick(s, m)">
-          {{ MODEL_NAME[m] }}
+        <button v-for="m in catalog.models.value" :key="m.id" class="seg-b" type="button" :aria-pressed="current(s) === m.id" :disabled="save.isPending.value" @click="pick(s, m.id)">
+          {{ m.label }}
         </button>
       </div>
     </div>

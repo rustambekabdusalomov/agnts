@@ -100,12 +100,21 @@ export const FILTERS: { id: string; icon: string; states: TicketState[] }[] = [
 /** Board columns in workflow order: the sidebar groups, queue first. */
 export const BOARD_GROUPS = ['queue', 'running', 'needs', 'done'].map((id) => FILTERS.find((f) => f.id === id)!)
 
-export const MODELS: Model[] = ['haiku', 'sonnet', 'opus']
-export const MODEL_NAME: Record<Model, string> = { haiku: 'Haiku', sonnet: 'Sonnet', opus: 'Opus' }
-/** "claude-opus-5-5" or "opus" → "Opus"; anything else as given. */
+/** Names of the models agnts has offered; the server's catalog (useModels) names the rest. */
+const MODEL_NAMES: [RegExp, string][] = [
+  [/^muse[:-].*wonder/, 'Muse Wonder'],
+  [/^muse[:-].*spark/, 'Muse Spark'],
+  [/haiku/, 'Haiku'],
+  [/sonnet/, 'Sonnet'],
+  [/opus/, 'Opus'],
+]
+/** "muse:spark" or "muse-spark-1.3" → "Muse Spark", "claude-opus-5-5" or
+ * "opus" → "Opus", "codex:gpt-5-codex" → "Codex · gpt-5-codex"; anything
+ * else as given. */
 export function modelLabel(id: string): string {
-  const m = MODELS.find((x) => id.toLowerCase().includes(x))
-  return m ? MODEL_NAME[m] : id
+  const s = id.toLowerCase()
+  if (s.startsWith('codex:')) return `Codex · ${id.slice('codex:'.length)}`
+  return MODEL_NAMES.find(([re]) => re.test(s))?.[1] ?? id
 }
 
 /** Badge tone per code review verdict and finding severity. */

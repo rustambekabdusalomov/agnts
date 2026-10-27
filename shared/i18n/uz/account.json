@@ -96,6 +96,9 @@
     "inviteGoogle": "Qo'shilish uchun Google orqali davom eting. Yangimisiz? Akkauntingiz darhol yaratiladi.",
     "totpRequiredAdmin": "Administrator akkauntlari uchun ikki bosqichli kirish majburiy, shuning uchun u yoqilgan holda qoladi.",
     "goHome": "Bosh sahifaga qaytish",
-    "backToDashboard": "{name} ish maydoni bosh sahifasiga qaytish"
+    "backToDashboard": "{name} ish maydoni bosh sahifasiga qaytish",
+    "myClaudeMuse": "Sizning Muse hisobingiz",
+    "claudeSavedMuse": "Muse hisobi ulandi",
+    "claudeRemovedMuse": "Muse hisobi uzildi"
   }
 }

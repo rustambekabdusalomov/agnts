@@ -29,6 +29,10 @@
     "reason_run": "Списание",
     "reason_refund": "Возврат",
     "reason_grant": "Начисление",
-    "reason_document": "Потрачено на документ"
+    "reason_document": "Потрачено на документ",
+    "freeCredits": "Ваши бесплатные кредиты",
+    "freeCreditsSub": "От agnts. Запуски на ключе Muse от agnts тратят их раньше кредитов пространства.",
+    "freeCreditsLeft": "Осталось {n} из {limit} кредитов",
+    "freeCreditsWorth": "{amount} из {total}"
   }
 }

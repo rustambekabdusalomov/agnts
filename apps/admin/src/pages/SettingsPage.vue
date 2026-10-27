@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
 import type { components } from '../api/schema.gen'
 import CheckBox from '../components/form/CheckBox.vue'
-import { MODEL_NAME, MODELS, type Model, type ReviewModel, type Settings } from '../api/types'
+import type { Model, ReviewModel, Settings } from '../api/types'
 import PageHeader from '../components/PageHeader.vue'
 import CfgRow from '../components/form/CfgRow.vue'
 import CommandChips from '../components/form/CommandChips.vue'
@@ -17,11 +17,12 @@ import SaveBar from '../components/form/SaveBar.vue'
 import SegButtons from '../components/form/SegButtons.vue'
 import SwitchToggle from '../components/form/SwitchToggle.vue'
 import ProviderTile from '../components/integrations/ProviderTile.vue'
-import { PROVIDERS } from '../components/integrations/providers'
+import { listedProviders } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
 import { settingsSection } from '../components/settings/sections'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { lines } from '../components/ci/ci'
+import { useModels } from '../composables/useModels'
 import { LOCALES, type Locale } from '../i18n'
 import { usePrefs, type Theme } from '../stores/prefs'
 import { useUi } from '../stores/ui'
@@ -32,6 +33,7 @@ const ui = useUi()
 const prefs = usePrefs()
 const integrations = useIntegrations()
 const route = useRoute()
+const catalog = useModels()
 
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
 // Query data is a reactive Proxy, which structuredClone rejects; settings are plain JSON.
@@ -75,7 +77,11 @@ const themes = computed(() => [
 ])
 const LANG_LABEL: Record<Locale, string> = { en: 'English', ru: 'Русский', uz: 'Oʻzbekcha' }
 const langs = LOCALES.map((l) => ({ value: l, label: LANG_LABEL[l] }))
-const models = MODELS.map((m) => ({ value: m, label: MODEL_NAME[m] }))
+// The stage pickers offer the server's models; Codex is set by name below.
+const models = computed(() => catalog.models.value.filter((m) => m.provider !== 'codex').map((m) => ({ value: m.id as Model, label: m.label })))
+// Without Claude Code the section is about Muse: its wording, not Claude's.
+const museWords = computed(() => catalog.claudeOff.value)
+const w = (key: string) => (museWords.value ? `${key}Muse` : key)
 const stages = ['analyze', 'coding', 'retry', 'helper', 'learn'] as const
 const stageKey: Record<(typeof stages)[number], string> = {
   analyze: 'Analyze',
@@ -91,8 +97,8 @@ const percent = (n: number) => `${n}%`
 function setModel(stage: (typeof stages)[number], m: Model) {
   if (draft.value) draft.value.models[stage] = m
 }
-// The code review model can also be auto: Opus for complex tickets.
-const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('settings.modelAuto') }, ...models])
+// The code review model can also be auto: the stronger model for complex tickets.
+const reviewModels = computed(() => [{ value: 'auto' as ReviewModel, label: t('settings.modelAuto') }, ...models.value])
 
 // CI infra patterns, one regular expression per line. The text keeps what
 // is typed (a trailing new line); the draft gets the non-empty lines.
@@ -139,7 +145,8 @@ const codexModel = computed({
   set: (v: string) => {
     if (!draft.value) return
     const m = v.trim().toLowerCase()
-    draft.value.models.coding = m ? `codex:${m}` : 'opus'
+    const strong = catalog.models.value.find((x) => x.provider === catalog.primary.value && x.strong)?.id ?? 'opus'
+    draft.value.models.coding = m ? `codex:${m}` : strong
   },
 })
 
@@ -170,7 +177,7 @@ const section = computed(() => settingsSection(route.params.section))
           <div><h2>{{ t('settings.integrations') }}</h2><p class="sub">{{ t('settings.integrationsSub') }}</p></div>
           <RouterLink class="btn btn-s" :to="{ name: 'integrations' }">{{ t('settings.manageAll') }}</RouterLink>
         </div>
-        <div v-for="p in PROVIDERS.filter((x) => x !== 'claude')" :key="p" class="cfg-row">
+        <div v-for="p in listedProviders(catalog.has('codex'))" :key="p" class="cfg-row">
           <div style="display: flex; gap: 12px; align-items: center">
             <ProviderTile :provider="p" :size="32" />
             <div class="cfg-lbl">{{ t(`integrations.name_${p}`) }}</div>
@@ -188,27 +195,27 @@ const section = computed(() => settingsSection(route.params.section))
 
       <section v-else-if="section === 'claude'" id="s-claude" class="card">
         <div class="ch">
-          <div><h2>{{ t('settings.claude') }}</h2><p class="sub">{{ t('settings.claudeSub') }}</p></div>
-          <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'claude' } }" :title="t('settings.claudeMoved')">{{ t('settings.claudeOpen') }}</RouterLink>
+          <div><h2>{{ t(w('settings.claude')) }}</h2><p class="sub">{{ t('settings.claudeSub') }}</p></div>
+          <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'claude' } }" :title="t(w('settings.claudeMoved'))">{{ t(w('settings.claudeOpen')) }}</RouterLink>
         </div>
         <div class="cfg-row" style="display: block">
           <div class="cfg-lbl">{{ t('settings.models') }}</div>
-          <div class="cfg-help">{{ t('settings.modelsHelp') }}</div>
+          <div class="cfg-help">{{ t(w('settings.modelsHelp')) }}</div>
         </div>
         <CfgRow
           v-for="st in stages"
           :key="st"
           :label="t(`settings.stage${stageKey[st]}`)"
-          :help="t(`settings.stage${stageKey[st]}Help`)"
+          :help="t(st === 'coding' ? w('settings.stageCodingHelp') : `settings.stage${stageKey[st]}Help`)"
         >
           <SegButtons
-            :model-value="draft.models[st] ?? 'sonnet'"
+            :model-value="draft.models[st] ?? models[0]?.value ?? ''"
             :options="models"
             :label="t(`settings.stage${stageKey[st]}`)"
             @update:model-value="setModel(st, $event)"
           />
         </CfgRow>
-        <CfgRow :label="t('harnessSettings.codex')" :help="t('harnessSettings.codexHelp')">
+        <CfgRow v-if="catalog.has('codex')" :label="t('harnessSettings.codex')" :help="t('harnessSettings.codexHelp')">
           <span style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
             <input v-model.lazy="codexModel" class="cfg-in mono" maxlength="64" placeholder="gpt-5-codex" :aria-label="t('harnessSettings.codex')">
             <span class="badge" :class="integ('openai')?.connected ? 'b-ok' : 'b-gray'">
@@ -217,7 +224,7 @@ const section = computed(() => settingsSection(route.params.section))
             <RouterLink class="btn btn-s" :to="{ name: 'integration', params: { provider: 'openai' } }">{{ t('harnessSettings.codexConnect') }}</RouterLink>
           </span>
         </CfgRow>
-        <CfgRow v-if="draft.models.review !== undefined" :label="t('settings.stageReview')" :help="t('settings.stageReviewHelp')">
+        <CfgRow v-if="draft.models.review !== undefined" :label="t('settings.stageReview')" :help="t(w('settings.stageReviewHelp'))">
           <SegButtons v-model="draft.models.review" :options="reviewModels" :label="t('settings.stageReview')" />
         </CfgRow>
         <CfgRow :label="t('settings.maxTurns')" :help="t('settings.maxTurnsHelp')">
@@ -226,10 +233,10 @@ const section = computed(() => settingsSection(route.params.section))
         <CfgRow :label="t('settings.timeout')">
           <NumberStepper v-model="draft.timeoutMin" :min="10" :max="120" :step="5" :label="t('settings.timeout')" :format="minutes" />
         </CfgRow>
-        <CfgRow :label="t('settings.allow')" :help="t('settings.allowHelp')">
+        <CfgRow :label="t('settings.allow')" :help="t(w('settings.allowHelp'))">
           <CommandChips v-model="draft.allow" :label="t('settings.allow')" />
         </CfgRow>
-        <CfgRow :label="t('settings.deny')" :help="t('settings.denyHelp')">
+        <CfgRow :label="t('settings.deny')" :help="t(w('settings.denyHelp'))">
           <CommandChips v-model="draft.deny" :label="t('settings.deny')" />
         </CfgRow>
       </section>

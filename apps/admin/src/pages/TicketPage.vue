@@ -4,11 +4,13 @@ import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
-import { isPullReview, isReport, isSwaggerTest, KIND_EDITABLE, MODEL_NAME, needsRepo, pullHost, stateKey, TERMINAL, type Question, type ShotRef, type TicketKindChoice } from '../api/types'
+import { isPullReview, isReport, isSwaggerTest, KIND_EDITABLE, needsRepo, pullHost, stateKey, TERMINAL, type Question, type ShotRef, type TicketKindChoice } from '../api/types'
 import CheckBox from '../components/form/CheckBox.vue'
 import TicketLessons from '../components/learn/TicketLessons.vue'
 import StateBadge from '../components/StateBadge.vue'
 import LiveLog from '../components/ticket/LiveLog.vue'
+import MuseMeter from '../components/ticket/MuseMeter.vue'
+import { museBudget } from '../components/ticket/museBudget'
 import KindBadge from '../components/ticket/KindBadge.vue'
 import KindPicker from '../components/ticket/KindPicker.vue'
 import ImplementReport from '../components/ticket/ImplementReport.vue'
@@ -48,6 +50,7 @@ import FileList from '../components/files/FileList.vue'
 import { useEventLog } from '../composables/useEventLog'
 import { ago, pct } from '../composables/format'
 import { livePoll } from '../composables/useLive'
+import { useModels } from '../composables/useModels'
 import { useUsage } from '../composables/useUsage'
 import { provideTranslation, TRANSLATION_LANGS, type TranslationLang } from '../composables/useTranslation'
 import InputSelect from '../components/form/InputSelect.vue'
@@ -100,6 +103,7 @@ const host = computed(() => pullHost(tk.value?.pull?.url ?? tk.value?.prUrl))
 const dismissReason = ref('')
 const kindEditable = computed(() => !!tk.value && KIND_EDITABLE.includes(tk.value.state) && !tk.value.prUrl && tk.value.resumeState !== 'pushing' && !isSwaggerTest(tk.value))
 const { events } = useEventLog(key)
+const models = useModels()
 
 // The page can be read in another language; texts show translated where a
 // translation exists. The UI language is offered first.
@@ -739,7 +743,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           <template v-if="pull && ['new', 'analyzing', 'coding'].includes(tk.state)">
             <h2>{{ titleWithRev(tk.state === 'new' ? t('ticket.queuedTitle') : tk.state === 'analyzing' ? t('reviews.fetchingTitle') : t('reviews.reviewingTitle')) }}</h2>
             <p class="sub">{{ tk.state === 'new' ? t('reviews.queuedSub') : t('reviews.reviewingSub') }}</p>
-            <div v-if="tk.state !== 'new'" class="sec"><LiveLog :events="events" /></div>
+            <div v-if="tk.state !== 'new'" class="sec"><MuseMeter :events="events" style="margin-bottom: 10px" /><LiveLog :events="events" /></div>
             <div class="actions">
               <button v-if="tk.state !== 'new'" class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('reviews.dismissBtn', { host }) }}</button>
@@ -806,7 +810,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           <template v-else-if="tk.state === 'analyzing'">
             <h2>{{ tk.repoId ? t('ticket.analyzingTitle') : t('ticket.analyzingTitleNoRepo') }}</h2>
             <p class="sub">{{ tk.repoId ? t('ticket.analyzingSub', { repo: repoNames }) : t('ticket.analyzingSubNoRepo') }}</p>
-            <div class="sec"><LiveLog :events="events" /></div>
+            <div class="sec"><MuseMeter :events="events" style="margin-bottom: 10px" /><LiveLog :events="events" /></div>
             <div class="actions">
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
@@ -879,7 +883,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
             </div>
             <template v-else>
-              <TicketSection id="log" :title="t('ticket.log')"><LiveLog :events="events" /></TicketSection>
+              <TicketSection id="log" :title="t('ticket.log')"><MuseMeter :events="events" style="margin-bottom: 10px" /><LiveLog :events="events" /></TicketSection>
               <div class="actions">
                 <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
                 <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
@@ -891,13 +895,13 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             <p class="sub">{{ report ? t('ticket.writingSub') : t('ticket.codingSub', { branch }) }}</p>
             <div class="sec">
               <dl class="facts">
-                <div><dt>{{ t('ticket.factModel') }}</dt><dd>{{ d.effectiveModels ? MODEL_NAME[tk.revision > 0 ? d.effectiveModels.retry : d.effectiveModels.coding] : '—' }}</dd></div>
+                <div><dt>{{ t('ticket.factModel') }}</dt><dd>{{ d.effectiveModels ? models.label(tk.revision > 0 ? d.effectiveModels.retry : d.effectiveModels.coding) : '—' }}</dd></div>
                 <div><dt>{{ t('ticket.factTurns') }}</dt><dd>{{ tk.turns }}</dd></div>
                 <div><dt>{{ t('ticket.factTurnLimit') }}</dt><dd>{{ d.maxTurns ?? '—' }}</dd></div>
-                <div><dt>{{ t('ticket.factSession') }}</dt><dd>{{ sessionPct }}%</dd></div>
+                <div v-if="!models.isMuse.value"><dt>{{ t('ticket.factSession') }}</dt><dd>{{ sessionPct }}%</dd></div>
               </dl>
             </div>
-            <TicketSection id="log" :title="t('ticket.log')"><LiveLog :events="events" /></TicketSection>
+            <TicketSection id="log" :title="t('ticket.log')"><MuseMeter :events="events" style="margin-bottom: 10px" /><LiveLog :events="events" /></TicketSection>
             <div class="actions">
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="confirmThen(t('ticket.stopConfirm', { key }), 'stop')">{{ t('ticket.stopRun') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>
@@ -1245,8 +1249,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <template v-if="tk.ciFixes && !multi"><dt>{{ t('ticket.kvCi') }}</dt><dd><span class="badge b-warn">{{ t('ticket.ciFixes', { n: tk.ciFixes }) }}</span></dd></template>
               <dt>{{ t('ticket.kvTurns') }}</dt><dd>{{ tk.turns }}</dd>
               <template v-if="d.effectiveModels && !pull">
-                <dt>{{ t('ticket.kvCodingModel') }}</dt><dd>{{ MODEL_NAME[d.effectiveModels.coding] }}</dd>
-                <dt>{{ t('ticket.kvRetryModel') }}</dt><dd>{{ MODEL_NAME[d.effectiveModels.retry] }}</dd>
+                <dt>{{ t('ticket.kvCodingModel') }}</dt><dd>{{ models.label(d.effectiveModels.coding) }}</dd>
+                <dt>{{ t('ticket.kvRetryModel') }}</dt><dd>{{ models.label(d.effectiveModels.retry) }}</dd>
               </template>
             </dl>
           </section>
@@ -1254,6 +1258,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         </template>
 
         <div v-else-if="activeTab === 'spend'" class="tk-panel">
+          <section v-if="museBudget(events)" class="card" style="margin-bottom: 16px"><MuseMeter :events="events" /></section>
           <SpendCard :spend="tk.spend" :stages="d.spendByStage ?? []" :report="report" />
         </div>
 

@@ -4,9 +4,10 @@ import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../api/client'
 import PageHeader from '../components/PageHeader.vue'
 import ProviderTile from '../components/integrations/ProviderTile.vue'
-import { PROVIDERS, type Provider } from '../components/integrations/providers'
+import { listedProviders, type Provider } from '../components/integrations/providers'
 import { useIntegrations } from '../components/integrations/useIntegrations'
 import { ago } from '../composables/format'
+import { useModels } from '../composables/useModels'
 import { useUi } from '../stores/ui'
 import CopyButton from '../components/ui/CopyButton.vue'
 
@@ -14,6 +15,8 @@ const { t, locale } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
 const list = useIntegrations()
+// Only the coding tools this server offers: Codex needs the OpenAI key.
+const catalog = useModels()
 const find = (p: Provider) => list.data.value?.find((i) => i.provider === p)
 
 const test = useMutation({
@@ -31,7 +34,7 @@ const test = useMutation({
   <PageHeader :title="t('integrations.title')" doc="integrations" />
   <p v-if="list.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <div v-else class="integ-grid">
-    <section v-for="p in PROVIDERS.filter((x) => x !== 'claude')" :key="p" class="card integ-card">
+    <section v-for="p in listedProviders(catalog.has('codex'))" :key="p" class="card integ-card">
       <div class="ic-h">
         <ProviderTile :provider="p" />
         <div>
@@ -57,7 +60,17 @@ const test = useMutation({
         </button>
       </div>
     </section>
-    <section class="card integ-card">
+    <section v-if="catalog.isMuse.value" class="card integ-card">
+      <div class="ic-h">
+        <ProviderTile provider="muse" />
+        <div><h2>{{ t('integrations.name_muse') }}</h2></div>
+      </div>
+      <p class="sub" style="margin: 10px 0 8px">{{ t('settings.claudeMovedMuse') }}</p>
+      <div class="actions">
+        <RouterLink class="btn" :to="{ name: 'workspace', query: { tab: 'claude' } }">{{ t('settings.claudeOpenMuse') }}</RouterLink>
+      </div>
+    </section>
+    <section v-if="catalog.has('claude')" class="card integ-card">
       <div class="ic-h">
         <ProviderTile provider="claude" />
         <div><h2>{{ t('integrations.name_claude') }}</h2></div>

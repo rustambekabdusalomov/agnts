@@ -7,6 +7,7 @@ import PageHeader from '../components/PageHeader.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import TicketSpendCard from '../components/usage/TicketSpendCard.vue'
 import { ago, level, pct } from '../composables/format'
+import { useModels } from '../composables/useModels'
 import { useUsage } from '../composables/useUsage'
 import { useUi } from '../stores/ui'
 
@@ -14,6 +15,8 @@ const { t, locale } = useI18n()
 const qc = useQueryClient()
 const ui = useUi()
 const usage = useUsage()
+// Muse runs are paid per call: Claude's plan windows and pausing do not apply.
+const catalog = useModels()
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
 
 const u = computed(() => usage.data.value)
@@ -52,7 +55,7 @@ const refresh = useMutation({
   <PageHeader :title="t('usage.title')" doc="usage" />
   <div class="cfg-grid">
     <div class="col">
-      <section class="card" :aria-label="t('usage.card')">
+      <section v-if="!catalog.isMuse.value" class="card" :aria-label="t('usage.card')">
         <div class="ch">
           <div>
             <h2>{{ t('usage.card') }}</h2>
@@ -88,7 +91,7 @@ const refresh = useMutation({
 
       <TicketSpendCard />
 
-      <section class="card">
+      <section v-if="!catalog.isMuse.value" class="card">
         <div class="ch"><div><h2>{{ t('usage.limitTitle') }}</h2><p class="sub">{{ t('usage.limitSub') }}</p></div></div>
         <dl class="kv">
           <dt>{{ t('usage.above', { pct: u?.pauseAbove ?? settings.data.value?.pauseAbove ?? 90 }) }}</dt>
@@ -102,7 +105,7 @@ const refresh = useMutation({
         </dl>
       </section>
     </div>
-    <aside class="cfg-side">
+    <aside v-if="!catalog.isMuse.value" class="cfg-side">
       <div class="help"><HiIcon name="info" /><p>{{ t('usage.help') }}</p></div>
     </aside>
   </div>

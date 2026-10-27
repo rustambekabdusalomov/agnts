@@ -1,6 +1,6 @@
 import type { TicketEvent } from '../../api/types'
 
-export type EventKind = 'state' | 'tool' | 'command' | 'you' | 'limit' | 'error' | 'event'
+export type EventKind = 'state' | 'tool' | 'command' | 'you' | 'limit' | 'budget' | 'error' | 'event'
 
 const USER_ORIGINS = ['web', 'mobile', 'mcp', 'telegram']
 
@@ -23,6 +23,9 @@ export function eventKind(e: TicketEvent): EventKind {
     case 'rate_limit':
     case 'usage_updated':
       return 'limit'
+    // A Muse run's spend against its budget, and its steering and stops.
+    case 'budget':
+      return 'budget'
     default:
       return 'event'
   }
@@ -34,6 +37,7 @@ export const KIND_CLASS: Record<EventKind, string> = {
   command: 'b-gray',
   you: 'b-warn',
   limit: 'b-ok',
+  budget: 'b-info',
   error: 'b-bad',
   event: 'b-gray',
 }
@@ -44,6 +48,7 @@ export const KIND_LABEL: Record<EventKind, string> = {
   command: 'logs.typeCommand',
   you: 'logs.typeYou',
   limit: 'logs.typeLimit',
+  budget: 'logs.typeBudget',
   error: 'logs.typeError',
   event: 'logs.typeEvent',
 }

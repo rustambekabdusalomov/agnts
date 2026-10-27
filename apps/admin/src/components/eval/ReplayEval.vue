@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, HttpError, unwrap } from '../../api/client'
 import { fmtUsd } from '../../composables/format'
 import { askConfirm } from '../../composables/useConfirm'
+import { useModels } from '../../composables/useModels'
 import { useUi } from '../../stores/ui'
 import StateBadge from '../StateBadge.vue'
 import ReplayVersions from './ReplayVersions.vue'
@@ -22,7 +23,8 @@ const pct = (v: number) => `${Math.round(v * 100)}%`
 const opt = (v?: number) => (v == null ? '—' : pct(v))
 
 const model = ref('')
-const models = ['', 'haiku', 'sonnet', 'opus']
+const catalog = useModels()
+const models = computed(() => ['', ...catalog.models.value.map((m) => m.id)])
 const run = useMutation({
   mutationFn: () => unwrap(api.POST('/eval/benchmark', { body: model.value ? { models: { coding: model.value } } : {} })),
   onSuccess: (runs) => {
@@ -56,7 +58,7 @@ async function start() {
     <div v-if="bench.data.value?.length" class="actions" style="margin-top: 12px; align-items: center">
       <label class="hint" for="bench-model">{{ t('replay.benchmarkModel') }}</label>
       <select id="bench-model" v-model="model" class="cfg-in">
-        <option v-for="m in models" :key="m" :value="m">{{ m || t('replay.benchmarkModelDefault') }}</option>
+        <option v-for="m in models" :key="m" :value="m">{{ m ? catalog.label(m) : t('replay.benchmarkModelDefault') }}</option>
       </select>
       <button class="btn primary" type="button" :disabled="run.isPending.value" @click="start">{{ t('replay.benchmarkRun') }}</button>
     </div>

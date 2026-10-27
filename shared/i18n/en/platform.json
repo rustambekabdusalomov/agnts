@@ -105,6 +105,13 @@
     "createAdmin": "Create Admin",
     "deleteAdmin": "Delete",
     "deleteAdminTitle": "Delete the Admin account {name}?",
-    "deleteAdminBody": "They can no longer sign in. This cannot be undone."
+    "deleteAdminBody": "They can no longer sign in. This cannot be undone.",
+    "freeCredits": "Free credits",
+    "setFreeCredits": "Set free credits",
+    "freeCreditsSet": "{name} may spend {n} free credits ({amount})",
+    "freeCreditsUsed": "{used} of {limit} spent so far.",
+    "freeCreditsLimit": "Credits (1 credit = $0.01; 0 gives none)",
+    "freeCreditsWorth": "Worth {amount} of model calls on agnts's Muse key.",
+    "freeCreditsInvalid": "Enter a whole number from 0 to 10,000,000."
   }
 }

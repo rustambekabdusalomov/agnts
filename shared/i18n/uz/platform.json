@@ -105,6 +105,13 @@
     "createAdmin": "Administrator yaratish",
     "deleteAdmin": "O'chirish",
     "deleteAdminTitle": "{name} administrator akkaunti o'chirilsinmi?",
-    "deleteAdminBody": "U endi kira olmaydi. Buni qaytarib bo'lmaydi."
+    "deleteAdminBody": "U endi kira olmaydi. Buni qaytarib bo'lmaydi.",
+    "freeCredits": "Bepul kreditlar",
+    "setFreeCredits": "Bepul kreditlarni belgilash",
+    "freeCreditsSet": "{name} {n} bepul kredit ({amount}) sarflashi mumkin",
+    "freeCreditsUsed": "Hozircha {limit} dan {used} sarflangan.",
+    "freeCreditsLimit": "Kreditlar (1 kredit = $0.01; 0 — kreditsiz)",
+    "freeCreditsWorth": "Bu agnts’ning Muse kaliti orqali {amount} lik model chaqiruvlari.",
+    "freeCreditsInvalid": "0 dan 10 000 000 gacha butun son kiriting."
   }
 }

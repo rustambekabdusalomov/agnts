@@ -7,7 +7,7 @@ import { eventKind, KIND_CLASS, KIND_LABEL } from './eventKind'
 const props = defineProps<{ event: TicketEvent }>()
 const { t } = useI18n()
 const kind = computed(() => eventKind(props.event))
-const cls = computed(() => (kind.value === 'limit' && props.event.level === 'warn' ? 'b-warn' : KIND_CLASS[kind.value]))
+const cls = computed(() => ((kind.value === 'limit' || kind.value === 'budget') && props.event.level === 'warn' ? 'b-warn' : KIND_CLASS[kind.value]))
 </script>
 
 <template>

@@ -188,6 +188,7 @@
     "tokenStep3_openai": "Copy the key (it starts with sk-) and paste it into API key below.",
     "tokenStep4_openai": "In Settings → Preview, add api.openai.com to the hosts runs may reach, so Codex runs can call OpenAI.",
     "openaiKeyHelp": "Stored encrypted on your server. Only runs on Codex receive it.",
-    "openaiHelp": "Codex runs have no agnts-guard hooks: agnts's checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts."
+    "openaiHelp": "Codex runs have no agnts-guard hooks: agnts's checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts.",
+    "name_muse": "Muse Code"
   }
 }

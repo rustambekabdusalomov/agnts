@@ -47,6 +47,7 @@
     "typeYou": "You",
     "typeLimit": "Limit",
     "typeError": "Error",
-    "typeEvent": "Event"
+    "typeEvent": "Event",
+    "typeBudget": "Spend"
   }
 }

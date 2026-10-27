@@ -105,6 +105,13 @@
     "createAdmin": "Создать администратора",
     "deleteAdmin": "Удалить",
     "deleteAdminTitle": "Удалить аккаунт администратора {name}?",
-    "deleteAdminBody": "Он больше не сможет войти. Это действие нельзя отменить."
+    "deleteAdminBody": "Он больше не сможет войти. Это действие нельзя отменить.",
+    "freeCredits": "Бесплатные кредиты",
+    "setFreeCredits": "Задать бесплатные кредиты",
+    "freeCreditsSet": "{name} может потратить {n} бесплатных кредитов ({amount})",
+    "freeCreditsUsed": "Уже потрачено {used} из {limit}.",
+    "freeCreditsLimit": "Кредиты (1 кредит = $0,01; 0 — без кредитов)",
+    "freeCreditsWorth": "Это {amount} на вызовы моделей через ключ Muse от agnts.",
+    "freeCreditsInvalid": "Введите целое число от 0 до 10 000 000."
   }
 }

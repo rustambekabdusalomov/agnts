@@ -240,6 +240,13 @@
     "srcGit": "Пул-реквест",
     "srcCi": "Падение CI",
     "kvCi": "CI",
-    "ciFixes": "CI {n, plural, one {# раз} few {# раза} many {# раз} other {# раза}} вернул пул-реквест в работу"
+    "ciFixes": "CI {n, plural, one {# раз} few {# раза} many {# раз} other {# раза}} вернул пул-реквест в работу",
+    "museMeter": "Расход Muse за этот запуск",
+    "museSpentOf": "{spent} из {limit}",
+    "museCalls": "{n, plural, one {# вызов} few {# вызова} many {# вызовов} other {# вызова}}",
+    "museCharged": "списано {amount}",
+    "museSteered": "Бюджет на исходе: попросили завершать",
+    "museStopped": "Остановлен: бюджет исчерпан",
+    "museEscalated": "Переведён на {model}"
   }
 }

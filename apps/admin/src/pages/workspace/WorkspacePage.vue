@@ -7,6 +7,7 @@ import BillingTab from '../../components/workspace/BillingTab.vue'
 import ClaudeTab from '../../components/workspace/ClaudeTab.vue'
 import GeneralTab from '../../components/workspace/GeneralTab.vue'
 import MembersTab from '../../components/workspace/MembersTab.vue'
+import { useModels } from '../../composables/useModels'
 import { useWorkspace } from '../../stores/workspace'
 
 // Workspace settings: General, Members, Claude and (for the owner) Billing.
@@ -14,6 +15,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const workspace = useWorkspace()
+const catalog = useModels()
 
 type Tab = 'general' | 'members' | 'claude' | 'billing'
 const tabs = computed<Tab[]>(() => (workspace.isOwner ? ['general', 'members', 'claude', 'billing'] : ['general', 'members', 'claude']))
@@ -21,7 +23,8 @@ const tab = computed<Tab>(() => {
   const q = String(route.query.tab ?? 'general') as Tab
   return tabs.value.includes(q) ? q : 'general'
 })
-const label: Record<Tab, string> = { general: 'ws.tabGeneral', members: 'ws.tabMembers', claude: 'ws.tabClaude', billing: 'ws.tabBilling' }
+// The Claude tab connects Muse where Muse Code is the tool (same tab, same address).
+const label = computed<Record<Tab, string>>(() => ({ general: 'ws.tabGeneral', members: 'ws.tabMembers', claude: catalog.isMuse.value ? 'ws.tabMuse' : 'ws.tabClaude', billing: 'ws.tabBilling' }))
 function open(t: Tab) {
   void router.replace({ query: { ...route.query, tab: t } })
 }
