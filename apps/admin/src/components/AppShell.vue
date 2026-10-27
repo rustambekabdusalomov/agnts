@@ -20,7 +20,7 @@ import { useRules } from './rules/useRules'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import FeedbackDialog from './account/FeedbackDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
-import { SETTINGS_SECTIONS, sectionLabel, settingsSection } from './settings/sections'
+import { SETTINGS_SECTIONS, sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
 // top bar with search, language, theme and tracker sync.
@@ -330,14 +330,14 @@ onBeforeUnmount(() => topObserver?.disconnect())
         <div class="nav-sub" :class="{ open: settingsOpen }" role="group" :aria-label="t('nav.settings')" :inert="!settingsOpen">
           <div class="nav-sub-in">
             <RouterLink
-              v-for="x in SETTINGS_SECTIONS"
+              v-for="x in visibleSections(catalog.claudeOff.value)"
               :key="x.key"
               class="nav-a nav-sub-a"
               :class="{ on: settingsAt === x.key }"
               :to="{ name: 'settings', params: { section: x.key } }"
               :aria-current="settingsAt === x.key ? 'page' : undefined"
             >
-              <HiIcon :name="x.icon" /><span class="lbl">{{ t(sectionLabel(x, catalog.claudeOff.value)) }}</span>
+              <HiIcon :name="sectionIcon(x, catalog.claudeOff.value)" /><span class="lbl">{{ t(sectionLabel(x, catalog.claudeOff.value)) }}</span>
             </RouterLink>
           </div>
         </div>
@@ -423,7 +423,7 @@ onBeforeUnmount(() => topObserver?.disconnect())
     >
       <div class="side-fly-h">{{ t('nav.settings') }}</div>
       <RouterLink
-        v-for="x in SETTINGS_SECTIONS"
+        v-for="x in visibleSections(catalog.claudeOff.value)"
         :key="x.key"
         class="side-fly-a"
         :class="{ on: settingsAt === x.key }"
@@ -431,7 +431,7 @@ onBeforeUnmount(() => topObserver?.disconnect())
         :aria-current="settingsAt === x.key ? 'page' : undefined"
         @click="closeFly"
       >
-        <HiIcon :name="x.icon" />{{ t(sectionLabel(x, catalog.claudeOff.value)) }}
+        <HiIcon :name="sectionIcon(x, catalog.claudeOff.value)" />{{ t(sectionLabel(x, catalog.claudeOff.value)) }}
       </RouterLink>
     </nav>
   </Transition>

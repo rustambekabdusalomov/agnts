@@ -202,7 +202,7 @@ const section = computed(() => settingsSection(route.params.section))
         </div>
       </section>
 
-      <section v-else-if="section === 'claude'" id="s-claude" class="card">
+      <section v-else-if="section === 'muse'" id="s-muse" class="card">
         <div class="ch">
           <div><h2>{{ t(w('settings.claude')) }}</h2><p class="sub">{{ t('settings.claudeSub') }}</p></div>
           <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'claude' } }" :title="t(w('settings.claudeMoved'))">{{ t(w('settings.claudeOpen')) }}</RouterLink>
@@ -446,7 +446,7 @@ const section = computed(() => settingsSection(route.params.section))
           <SwitchToggle v-model="draft.notify.ci" :label="t('settings.ciRed')" />
         </CfgRow>
       </section>
-      <McpCard v-else-if="section === 'mcp'" />
+      <McpCard v-else-if="section === 'mcp' && !catalog.claudeOff.value" />
 
       <div class="help"><HiIcon name="info" /><p>{{ t('settings.secretsHelp') }}</p></div>
 

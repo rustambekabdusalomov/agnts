@@ -103,7 +103,7 @@ const daysAbove = computed(() => usageKnown.value.filter((d) => (d.peakUsage ?? 
     <section class="card span2">
       <div class="ch">
         <div><h2>{{ t('analytics.models') }}</h2><p class="sub">{{ t('analytics.modelsSub') }}</p></div>
-        <RouterLink class="btn btn-s" :to="{ name: 'settings', params: { section: 'claude' } }">{{ t('analytics.changeModels') }}</RouterLink>
+        <RouterLink class="btn btn-s" :to="{ name: 'settings', params: { section: 'muse' } }">{{ t('analytics.changeModels') }}</RouterLink>
       </div>
       <p v-if="!a.models.length" class="hint">{{ t('analytics.noRuns') }}</p>
       <div v-else class="tw">
