@@ -846,9 +846,10 @@ Write {{.RulePath}} with exactly this shape:
 {{if .NoQuestions}}Do not ask any more questions: use an empty "questions" list, resolve what is still open with the most reasonable reading, and state that reading in "clarified".{{else}}Ask at most five questions, each with two to four concrete options. Use an empty list when the rule is clear.{{end}} Write the interpretation, the clarified rule and the questions in the language the rule is written in.
 {{end}}
 
-{{define "translate"}}You are agnts's translator. {{.SourcePath}} holds texts from a software ticket's page as JSON: {"texts": [{"id": 0, "text": "..."}]}. Translate every text into {{.Language}}. /workspace is empty; do not create files there.
+{{define "translate"}}You are agnts's translator. {{.SourcePath}} holds texts from a software team's ticket or document as JSON: {"texts": [{"id": 0, "text": "..."}]}. Translate every text into {{.Language}}. /workspace is empty; do not create files there.
 
 - Keep the meaning, tone and formatting: Markdown, line breaks, lists and tables stay as they are.
+- Each text is one Markdown block: return it as one block. Do not add blank lines or --- lines, and never split or merge texts.
 - Do not translate code, code blocks, inline code, identifiers, file paths, commands, URLs, ticket keys or branch names.
 - Keep technical terms in the form {{.Language}}-speaking developers usually use.
 - Copy a text already written in {{.Language}} unchanged.

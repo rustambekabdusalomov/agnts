@@ -8,7 +8,8 @@ import { downloadFile } from './useDocuments'
 // Download buttons for Markdown and PDF. A PDF made for the first time
 // takes a few seconds: the button says so while it waits.
 // headers go with each request (a guest's token on a public link).
-const props = defineProps<{ mdPath: string; pdfPath: string; name: string; small?: boolean; headers?: Record<string, string> }>()
+// langLabel names the language of a translation being downloaded.
+const props = defineProps<{ mdPath: string; pdfPath: string; name: string; small?: boolean; headers?: Record<string, string>; langLabel?: string }>()
 const { t } = useI18n()
 const busy = ref<'' | 'md' | 'pdf'>('')
 const preparing = ref(false)
@@ -32,10 +33,10 @@ async function get(format: 'md' | 'pdf') {
 <template>
   <span class="dl">
     <button type="button" class="btn" :class="{ 'btn-s': small }" :disabled="!!busy" @click="get('md')">
-      <HiIcon name="import" />{{ t('documents.downloadMd') }}
+      <HiIcon name="import" />{{ t('documents.downloadMd') }}<template v-if="langLabel"> · {{ langLabel }}</template>
     </button>
     <button type="button" class="btn" :class="{ 'btn-s': small }" :disabled="!!busy" @click="get('pdf')">
-      <HiIcon name="import" />{{ busy === 'pdf' && preparing ? t('documents.preparingPdf') : t('documents.downloadPdf') }}
+      <HiIcon name="import" />{{ busy === 'pdf' && preparing ? t('documents.preparingPdf') : t('documents.downloadPdf') }}<template v-if="langLabel && !(busy === 'pdf' && preparing)"> · {{ langLabel }}</template>
     </button>
     <span v-if="error" class="ferr" role="alert">{{ error }}</span>
   </span>

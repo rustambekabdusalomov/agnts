@@ -114,6 +114,7 @@ import 'package:agnts_api/src/model/document_source_input.dart';
 import 'package:agnts_api/src/model/document_source_input_filter.dart';
 import 'package:agnts_api/src/model/document_summary.dart';
 import 'package:agnts_api/src/model/document_ticket.dart';
+import 'package:agnts_api/src/model/document_translation.dart';
 import 'package:agnts_api/src/model/document_version.dart';
 import 'package:agnts_api/src/model/document_viewer.dart';
 import 'package:agnts_api/src/model/edit_check.dart';
@@ -636,6 +637,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DocumentSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentTicket':
           return DocumentTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DocumentTranslation':
+          return DocumentTranslation.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentVersion':
           return DocumentVersion.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentViewer':

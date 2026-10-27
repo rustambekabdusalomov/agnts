@@ -25,6 +25,7 @@ import InputSelect from '../components/form/InputSelect.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { ago } from '../composables/format'
+import { TRANSLATION_LANGS, useDocumentTranslation, type TranslationLang } from '../composables/useTranslation'
 import { useLive } from '../composables/useLive'
 import { useUi } from '../stores/ui'
 
@@ -34,7 +35,8 @@ type Conflict = components['schemas']['DocumentConflict']
 // have agnts write it again, compare and restore versions, download it.
 // A deck reads as slides and can be presented; a page can be made into
 // slides, and lists the decks made from it. Anyone who can open it
-// comments on selected words, and sees who else has it open.
+// comments on selected words, sees who else has it open, and can read it
+// in another language.
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -105,6 +107,25 @@ watch(
 )
 const dirty = computed(() => editing.value && !!d.value && (draft.title !== d.value.title || draft.body !== d.value.body))
 onBeforeRouteLeave(() => (dirty.value ? window.confirm(t('documents.leaveUnsaved')) : true))
+
+// Reading in another language: the page shows the translated title and
+// text once they arrive. A translation is read-only: no highlights, no new
+// comments, and editing shows the original.
+const translation = useDocumentTranslation(id, computed(() => d.value?.version || undefined))
+const tr = computed(() => (editing.value ? undefined : translation.shown.value))
+const shownTitle = computed(() => tr.value?.title ?? d.value?.title ?? '')
+const shownBody = computed(() => tr.value?.body ?? d.value?.body ?? '')
+const langOptions = computed(() => {
+  const ui = TRANSLATION_LANGS.filter((l) => l.value === locale.value)
+  return [{ value: '' as TranslationLang | '', label: t('documents.translateOriginal') }, ...ui, ...TRANSLATION_LANGS.filter((l) => l.value !== locale.value)]
+})
+const translateError = computed(() => {
+  const e = translation.query.error.value
+  return e ? t('documents.translateFailed', { error: e instanceof HttpError ? e.message : t('common.error') }) : ''
+})
+watch(tr, (v) => {
+  if (v) pending.value = null
+})
 
 const save = useMutation({
   mutationFn: async () => {
@@ -204,11 +225,16 @@ const restore = useMutation({
 </script>
 
 <template>
-  <RouterLink class="back-btn" :to="{ name: 'documents' }"><HiIcon name="back" />{{ t('documents.back') }}</RouterLink>
+  <div class="dp-top">
+    <RouterLink class="back-btn" :to="{ name: 'documents' }"><HiIcon name="back" />{{ t('documents.back') }}</RouterLink>
+    <div v-if="d && d.version > 0 && !editing" class="dp-lang">
+      <InputSelect v-model="translation.lang.value" :options="langOptions" :label="t('documents.translate')" :placeholder="t('documents.translate')" />
+    </div>
+  </div>
   <p v-if="doc.isPending.value" class="hint">{{ t('common.loading') }}</p>
   <p v-else-if="doc.isError.value || !d" class="empty">{{ t('documents.notFound') }}</p>
   <template v-else>
-    <PageHeader :title="editing ? t('documents.editing') : d.title">
+    <PageHeader :title="editing ? t('documents.editing') : shownTitle">
       <template #below>
         <div class="dp-meta">
           <span v-if="isSlides" class="badge b-gray">{{ t('documents.docKind_slides') }}</span>
@@ -228,7 +254,13 @@ const restore = useMutation({
         <button v-if="!isSlides && d.version > 0" type="button" class="btn" @click="slidesOpen = true"><HiIcon name="slides" />{{ t('documents.makeSlides') }}</button>
         <button v-if="canEdit && d.source" type="button" class="btn" :disabled="busy" @click="openRegen"><HiIcon name="assistant" />{{ t('documents.regenerate') }}</button>
         <button v-if="isOwner" type="button" class="btn" @click="shareOpen = true"><HiIcon name="users" />{{ t('documents.share') }}</button>
-        <DownloadMenu v-if="d.version > 0" :md-path="downloadPath(d.id, 'md')" :pdf-path="downloadPath(d.id, 'pdf')" :name="`document-${d.id}`" />
+        <DownloadMenu
+          v-if="d.version > 0"
+          :md-path="downloadPath(d.id, 'md', 0, tr?.lang)"
+          :pdf-path="downloadPath(d.id, 'pdf', 0, tr?.lang)"
+          :name="tr ? `document-${d.id}.${tr.lang}` : `document-${d.id}`"
+          :lang-label="tr ? TRANSLATION_LANGS.find((l) => l.value === tr?.lang)?.label : undefined"
+        />
         <button v-if="isOwner" type="button" class="btn btn-d" :disabled="remove.isPending.value" @click="del">{{ t('documents.delete') }}</button>
       </div>
     </PageHeader>
@@ -265,6 +297,11 @@ const restore = useMutation({
       </div>
     </div>
     <span v-if="error && !editing" class="ferr" role="alert">{{ error }}</span>
+    <template v-if="translation.lang.value && !editing">
+      <p v-if="translation.query.isFetching.value" class="hint dp-tr-note" role="status"><span class="spin" aria-hidden="true" />{{ t('documents.translating') }}</p>
+      <p v-else-if="translateError" class="ferr" role="alert">{{ translateError }}</p>
+      <p v-else-if="tr && !tr.complete" class="hint dp-tr-note">{{ t('documents.translatedIncomplete') }}</p>
+    </template>
 
     <div class="cfg-grid">
       <div class="col">
@@ -311,17 +348,17 @@ const restore = useMutation({
           <CommentableText
             v-else
             ref="commentable"
-            :threads="comments.threads.value"
+            :threads="tr ? [] : comments.threads.value"
             :active-id="active"
             :slides="isSlides"
-            :can-comment="true"
-            :content-key="d.body"
+            :can-comment="!tr"
+            :content-key="shownBody"
             @select="(v) => (pending = v)"
             @activate="activate"
             @missing="(ids) => (missing = ids)"
           >
-            <SlideDeck v-if="isSlides" :markdown="d.body" notes @present="present" />
-            <ReportView v-else :markdown="d.body" />
+            <SlideDeck v-if="isSlides" :markdown="shownBody" notes @present="present" />
+            <ReportView v-else :markdown="shownBody" />
           </CommentableText>
         </section>
       </div>
@@ -331,11 +368,13 @@ const restore = useMutation({
           :c="comments"
           :pending="editing ? null : pending"
           :active-id="active"
-          :missing="missing"
-          :can-comment="true"
+          :missing="tr ? [] : missing"
+          :can-comment="!tr"
           :public-notice="d.type === 'public'"
+          :translated="!!tr"
           @activate="activate"
           @cancel="pending = null"
+          @original="translation.lang.value = ''"
         />
         <section v-if="d.type === 'public' && d.publicUrl" class="card">
           <div class="ch"><h2>{{ t('documents.publicLink') }}</h2></div>
@@ -360,7 +399,7 @@ const restore = useMutation({
     </div>
 
     <ShareDrawer v-if="isOwner" v-model="shareOpen" :doc="d" />
-    <PresentMode v-if="isSlides" v-model="presentOpen" :markdown="editing ? draft.body : d.body" :start="presentStart" allow-notes />
+    <PresentMode v-if="isSlides" v-model="presentOpen" :markdown="editing ? draft.body : shownBody" :start="presentStart" allow-notes />
     <NewDocumentDrawer v-if="!isSlides" v-model="slidesOpen" :from-doc="{ id: d.id, title: d.title }" />
     <FormDrawer v-model="regenOpen" :title="t('documents.regenerate')" :subtitle="t('documents.regenerateSub')">
       <div v-if="regenTemplates.length" class="field">
@@ -382,6 +421,9 @@ const restore = useMutation({
 </template>
 
 <style scoped>
+.dp-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.dp-lang { width: 200px; }
+.dp-tr-note { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
 .dp-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .dp-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .dp-editor { display: flex; flex-direction: column; gap: 14px; }

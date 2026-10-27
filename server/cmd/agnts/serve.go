@@ -150,7 +150,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	docDeps := documents.Deps{Store: a.docStore, Workspaces: a.workspaces, Tickets: a.store, Settings: a.settings,
 		Notifier: broker, Log: log.With("component", "documents")}
 	if cfg.AgentEnabled {
-		docDeps.Generator, docDeps.PDF = a.orch, a.orch
+		docDeps.Generator, docDeps.PDF, docDeps.Translator = a.orch, a.orch, a.orch
 	}
 	docSvc := documents.New(docDeps)
 	a.orch.SetDocumentWatcher(docSvc)

@@ -155,6 +155,7 @@ Class | Method | HTTP request | Description
 [*DocumentsApi*](doc/DocumentsApi.md) | [**saveDocument**](doc/DocumentsApi.md#savedocument) | **PUT** /documents/{id} | Save an edit as a new version (edit access)
 [*DocumentsApi*](doc/DocumentsApi.md) | [**setDocumentOwner**](doc/DocumentsApi.md#setdocumentowner) | **PUT** /documents/{id}/owner | Give a document to another member (its owner); the old owner keeps edit access
 [*DocumentsApi*](doc/DocumentsApi.md) | [**shareDocument**](doc/DocumentsApi.md#sharedocument) | **PUT** /documents/{id}/sharing | Set a document&#39;s type, workspace access and grants (its owner)
+[*DocumentsApi*](doc/DocumentsApi.md) | [**translateDocument**](doc/DocumentsApi.md#translatedocument) | **POST** /documents/{id}/translate | The current version translated into a language (view access)
 [*DocumentsApi*](doc/DocumentsApi.md) | [**undeleteDocument**](doc/DocumentsApi.md#undeletedocument) | **POST** /documents/{id}/undelete | Take a document out of the trash (its owner or the workspace owner)
 [*DocumentsApi*](doc/DocumentsApi.md) | [**unlinkDocumentTicket**](doc/DocumentsApi.md#unlinkdocumentticket) | **DELETE** /documents/{id}/tickets/{key} | Remove a link between a ticket and a document
 [*DocumentsApi*](doc/DocumentsApi.md) | [**updateDocumentComment**](doc/DocumentsApi.md#updatedocumentcomment) | **PATCH** /documents/{id}/comments/{commentId} | Edit your comment, or resolve or reopen a thread (its author, or edit access)
@@ -486,6 +487,7 @@ Class | Method | HTTP request | Description
  - [DocumentSourceInputFilter](doc/DocumentSourceInputFilter.md)
  - [DocumentSummary](doc/DocumentSummary.md)
  - [DocumentTicket](doc/DocumentTicket.md)
+ - [DocumentTranslation](doc/DocumentTranslation.md)
  - [DocumentVersion](doc/DocumentVersion.md)
  - [DocumentViewer](doc/DocumentViewer.md)
  - [EditCheck](doc/EditCheck.md)

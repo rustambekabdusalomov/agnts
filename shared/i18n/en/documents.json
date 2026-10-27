@@ -234,6 +234,13 @@
     "yourNamePlaceholder": "Name and company",
     "enter": "Enter",
     "orGoogle": "Or, if you prefer, show who you are with Google:",
-    "viaAccount": "signed in"
+    "viaAccount": "signed in",
+    "translate": "Translate",
+    "translateOriginal": "Original language",
+    "translating": "Translating… the first time takes up to a minute for a long document; after that it is saved.",
+    "translateFailed": "Could not translate: {error}",
+    "translatedNoComments": "You are reading a translation. Switch to the original to comment.",
+    "showOriginal": "Show original",
+    "translatedIncomplete": "Some parts are still in the original language."
   }
 }

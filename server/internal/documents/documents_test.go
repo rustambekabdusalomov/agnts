@@ -116,7 +116,7 @@ func (f fixture) settled(t *testing.T, docID int64, version int) {
 	f.pdf.wait(t)
 	store := postgres.NewDocuments(f.pool)
 	for range 100 {
-		if e, err := store.DocumentExport(f.ctx, docID, version); err == nil && e.Status != domain.ExportPending {
+		if e, err := store.DocumentExport(f.ctx, docID, version, ""); err == nil && e.Status != domain.ExportPending {
 			return
 		}
 		time.Sleep(20 * time.Millisecond)
@@ -316,23 +316,23 @@ func TestDownloads(t *testing.T) {
 	f := setup(t)
 	v := f.create(t, f.alice, "Отчёт по спринту", "Первая версия")
 	v, _ = f.s.Save(f.ctx, f.alice, v.Doc.ID, "Отчёт по спринту", "Вторая версия", 1)
-	if _, err := f.s.Download(f.ctx, f.bob, v.Doc.ID, FormatMarkdown, 0); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := f.s.Download(f.ctx, f.bob, v.Doc.ID, FormatMarkdown, 0, ""); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("no access: %v", err)
 	}
 	_, _ = f.s.Share(f.ctx, f.alice, v.Doc.ID, Sharing{Type: domain.DocPrivate, Grants: []domain.DocumentGrant{{UserID: f.vi.UserID, Level: domain.AccessView}}})
-	old, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, FormatMarkdown, 1)
+	old, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, FormatMarkdown, 1, "")
 	if err != nil || old.Name != "otchyot-po-sprintu-v1.md" || !strings.Contains(string(old.Data), "Первая версия") {
 		t.Fatalf("old version: %+v %v", old, err)
 	}
-	if _, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, "docx", 0); !errors.Is(err, domain.ErrDocInvalid) {
+	if _, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, "docx", 0, ""); !errors.Is(err, domain.ErrDocInvalid) {
 		t.Fatalf("unknown format: %v", err)
 	}
 	// The first PDF download starts a render and asks to come back.
-	if _, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, FormatPDF, 0); !errors.Is(err, ErrPreparing) {
+	if _, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, FormatPDF, 0, ""); !errors.Is(err, ErrPreparing) {
 		t.Fatalf("first pdf: %v", err)
 	}
 	f.settled(t, v.Doc.ID, 2)
-	pdf, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, FormatPDF, 0)
+	pdf, err := f.s.Download(f.ctx, f.vi, v.Doc.ID, FormatPDF, 0, "")
 	if err != nil || pdf.Name != "otchyot-po-sprintu-v2.pdf" || !strings.HasPrefix(string(pdf.Data), "%PDF") {
 		t.Fatalf("pdf: %+v %v", pdf, err)
 	}

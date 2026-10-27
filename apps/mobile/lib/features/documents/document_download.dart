@@ -11,11 +11,11 @@ import '../../l10n/app_localizations.dart';
 import '../../widgets/common.dart';
 import 'documents_logic.dart';
 
-/// Downloads the current version of a document as `md` or `pdf` and opens
-/// the system share sheet with it. The first PDF of a version is made on
+/// Downloads the current version of a document as `md` or `pdf`, in
+/// [lang] when set, and opens the system share sheet with it. The first PDF of a version is made on
 /// the server: it answers 202 until then, and this asks again for up to a
 /// minute.
-Future<void> downloadDocument(BuildContext context, WidgetRef ref, int id, String format) async {
+Future<void> downloadDocument(BuildContext context, WidgetRef ref, int id, String format, {String? lang}) async {
   final l = AppLocalizations.of(context);
   final api = ref.read(apiProvider);
   if (api == null) return;
@@ -27,7 +27,7 @@ Future<void> downloadDocument(BuildContext context, WidgetRef ref, int id, Strin
     while (true) {
       final res = await api.dio.get<List<int>>(
         '/documents/$id/download',
-        queryParameters: {'format': format},
+        queryParameters: {'format': format, 'lang': ?lang},
         options: Options(responseType: ResponseType.bytes, receiveTimeout: const Duration(seconds: 60)),
       );
       if (res.statusCode == 202) {

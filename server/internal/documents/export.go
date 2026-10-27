@@ -33,9 +33,9 @@ type File struct {
 const pdfTimeout = 90 * time.Second
 
 // Download returns a version (0: the current one) of a document as a
-// file. Reading is enough. A PDF not made yet is started and answers
-// ErrPreparing; the caller asks again.
-func (s *Service) Download(ctx context.Context, c Caller, id int64, format string, version int) (File, error) {
+// file, translated into lang unless it is empty. Reading is enough. A PDF
+// not made yet is started and answers ErrPreparing; the caller asks again.
+func (s *Service) Download(ctx context.Context, c Caller, id int64, format string, version int, lang string) (File, error) {
 	v, err := s.open(ctx, c, id)
 	if err != nil {
 		return File{}, err
@@ -51,15 +51,33 @@ func (s *Service) Download(ctx context.Context, c Caller, id int64, format strin
 	if err != nil {
 		return File{}, err
 	}
-	return s.file(ctx, d, ver, format, true)
+	if lang == "" {
+		return s.file(ctx, d, ver, format, "", true)
+	}
+	if format != FormatMarkdown && format != FormatPDF && format != "" {
+		return File{}, invalid("format is md or pdf")
+	}
+	t, err := s.translate(ctx, d, ver, lang)
+	if err != nil {
+		return File{}, err
+	}
+	ver.Title, ver.Body = t.Title, t.Body
+	return s.file(ctx, d, ver, format, lang, true)
 }
 
-// file makes the download of one version. start lets a missing PDF be
-// rendered now; the public page never starts one.
-func (s *Service) file(ctx context.Context, d domain.Document, ver domain.DocumentVersion, format string, start bool) (File, error) {
+// file makes the download of one version, whose text is in lang (empty:
+// as written). start lets a missing PDF be rendered now; the public page
+// never starts one.
+func (s *Service) file(ctx context.Context, d domain.Document, ver domain.DocumentVersion, format, lang string, start bool) (File, error) {
+	ext := func(e string) string {
+		if lang == "" {
+			return e
+		}
+		return lang + "." + e
+	}
 	switch format {
 	case FormatMarkdown, "":
-		return File{Name: domain.DownloadName(ver.Title, d.ID, ver.Version, "md"), ContentType: "text/markdown; charset=utf-8",
+		return File{Name: domain.DownloadName(ver.Title, d.ID, ver.Version, ext("md")), ContentType: "text/markdown; charset=utf-8",
 			Data: []byte(domain.DocumentFile(d.Kind, ver.Title, ver.Body))}, nil
 	case FormatPDF:
 	default:
@@ -68,17 +86,17 @@ func (s *Service) file(ctx context.Context, d domain.Document, ver domain.Docume
 	if s.d.PDF == nil {
 		return File{}, invalid("PDF downloads are not available on this server")
 	}
-	e, err := s.d.Store.DocumentExport(ctx, d.ID, ver.Version)
+	e, err := s.d.Store.DocumentExport(ctx, d.ID, ver.Version, lang)
 	switch {
 	case err == nil && e.Status == domain.ExportDone:
-		return File{Name: domain.DownloadName(ver.Title, d.ID, ver.Version, "pdf"), ContentType: "application/pdf", Data: e.Data}, nil
+		return File{Name: domain.DownloadName(ver.Title, d.ID, ver.Version, ext("pdf")), ContentType: "application/pdf", Data: e.Data}, nil
 	case err == nil && e.Status == domain.ExportFailed && s.now().Sub(e.UpdatedAt) < pdfRetry:
 		return File{}, fmt.Errorf("%w: %s", ErrRenderFailed, e.Error)
 	case err != nil && !errors.Is(err, domain.ErrNotFound):
 		return File{}, err
 	}
 	if start {
-		s.render(ctx, d, ver)
+		s.render(ctx, d, ver, lang)
 	}
 	return File{}, ErrPreparing
 }
@@ -93,13 +111,14 @@ func (s *Service) prepare(ctx context.Context, d domain.Document, version int) {
 		s.d.Log.Warn("prepare PDF", "document", d.ID, "version", version, "err", err)
 		return
 	}
-	s.render(ctx, d, ver)
+	s.render(ctx, d, ver, "")
 }
 
 // render makes a version's PDF in the background, once: the store lets
-// one caller start it.
-func (s *Service) render(ctx context.Context, d domain.Document, ver domain.DocumentVersion) {
-	ok, err := s.d.Store.StartDocumentExport(ctx, d.ID, ver.Version, pdfRetry)
+// one caller start it. lang is the language ver's text is in (empty: the
+// document's own).
+func (s *Service) render(ctx context.Context, d domain.Document, ver domain.DocumentVersion, lang string) {
+	ok, err := s.d.Store.StartDocumentExport(ctx, d.ID, ver.Version, lang, pdfRetry)
 	if err != nil || !ok {
 		if err != nil {
 			s.d.Log.Warn("start PDF", "document", d.ID, "err", err)
@@ -110,9 +129,13 @@ func (s *Service) render(ctx context.Context, d domain.Document, ver domain.Docu
 	go func() {
 		rctx, cancel := context.WithTimeout(bg, pdfTimeout)
 		defer cancel()
-		page := PrintHTML(ver.Title, ver.Body, ver.Version, ver.CreatedAt, d.Language)
+		in := d.Language
+		if lang != "" {
+			in = lang
+		}
+		page := PrintHTML(ver.Title, ver.Body, ver.Version, ver.CreatedAt, in)
 		if d.Kind == domain.DocKindSlides {
-			page = PrintSlidesHTML(ver.Title, ver.Body, d.Language)
+			page = PrintSlidesHTML(ver.Title, ver.Body, in)
 		}
 		data, err := s.d.PDF.RenderPDF(rctx, page)
 		failure := ""
@@ -122,7 +145,7 @@ func (s *Service) render(ctx context.Context, d domain.Document, ver domain.Docu
 		} else if !bytes.HasPrefix(data, []byte("%PDF")) {
 			failure = "the renderer did not return a PDF"
 		}
-		if err := s.d.Store.FinishDocumentExport(bg, d.ID, ver.Version, data, failure); err != nil {
+		if err := s.d.Store.FinishDocumentExport(bg, d.ID, ver.Version, lang, data, failure); err != nil {
 			s.d.Log.Error("save PDF", "document", d.ID, "err", err)
 		}
 	}()
@@ -162,7 +185,7 @@ func (s *Service) PublicDownload(g Guest, format string) (File, error) {
 		return File{}, domain.ErrNotFound
 	}
 	ver := domain.DocumentVersion{DocumentID: d.ID, Version: d.Version, Title: d.Title, Body: publicBody(d)}
-	return s.file(g.ctx, d, ver, format, false)
+	return s.file(g.ctx, d, ver, format, "", false)
 }
 
 var md = goldmark.New(goldmark.WithExtensions(extension.GFM))
@@ -194,7 +217,7 @@ func PrintHTML(title, body string, version int, at time.Time, lang string) []byt
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, `<!doctype html>
-<html lang="%s"><head><meta charset="utf-8"><title>%s</title>
+<html lang="%s"%s><head><meta charset="utf-8"><title>%s</title>
 <style>
 @page { size: A4; margin: 18mm 16mm 20mm; }
 * { box-sizing: border-box; }
@@ -220,7 +243,7 @@ hr { border: none; border-top: 1px solid #ddd; margin: 12pt 0; }
 </style></head><body>
 <h1 class="doc-title">%s</h1>
 <div class="doc-meta">Version %d · %s</div>
-`, html.EscapeString(lang), html.EscapeString(title), html.EscapeString(title), version, at.Format("Jan 2, 2006"))
+`, html.EscapeString(lang), dirOf(lang), html.EscapeString(title), html.EscapeString(title), version, at.Format("Jan 2, 2006"))
 	b.WriteString(RenderMarkdown(body))
 	b.WriteString("\n</body></html>\n")
 	return []byte(b.String())
@@ -235,7 +258,7 @@ func PrintSlidesHTML(title, body, lang string) []byte {
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, `<!doctype html>
-<html lang="%s"><head><meta charset="utf-8"><meta name="agnts-layout" content="slides"><title>%s</title>
+<html lang="%s"%s><head><meta charset="utf-8"><meta name="agnts-layout" content="slides"><title>%s</title>
 <style>
 @page { size: 254mm 142.875mm; margin: 0; }
 * { box-sizing: border-box; }
@@ -267,7 +290,7 @@ html { font-family: "Noto Sans", "DejaVu Sans", "Liberation Sans", "FreeSans", s
 .slide .img { color: #6b6b70; font-style: italic; }
 .slide .no { position: absolute; right: 9mm; bottom: 6mm; font-size: 9pt; color: #8a8a90; }
 </style></head><body>
-`, html.EscapeString(lang), html.EscapeString(title))
+`, html.EscapeString(lang), dirOf(lang), html.EscapeString(title))
 	slides := domain.SplitSlides(body)
 	if len(slides) == 0 {
 		slides = []domain.Slide{{Body: "# " + title, Layout: domain.SlideLead}}
@@ -277,4 +300,12 @@ html { font-family: "Noto Sans", "DejaVu Sans", "Liberation Sans", "FreeSans", s
 	}
 	b.WriteString("</body></html>\n")
 	return []byte(b.String())
+}
+
+// dirOf is the dir attribute of a page in lang: right to left for Arabic.
+func dirOf(lang string) string {
+	if lang == "ar" {
+		return ` dir="rtl"`
+	}
+	return ""
 }

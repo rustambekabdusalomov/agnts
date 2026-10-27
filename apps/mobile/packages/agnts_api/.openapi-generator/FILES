@@ -135,6 +135,7 @@ doc/DocumentSourceInput.md
 doc/DocumentSourceInputFilter.md
 doc/DocumentSummary.md
 doc/DocumentTicket.md
+doc/DocumentTranslation.md
 doc/DocumentVersion.md
 doc/DocumentViewer.md
 doc/DocumentsApi.md
@@ -582,6 +583,7 @@ lib/src/model/document_source_input.dart
 lib/src/model/document_source_input_filter.dart
 lib/src/model/document_summary.dart
 lib/src/model/document_ticket.dart
+lib/src/model/document_translation.dart
 lib/src/model/document_version.dart
 lib/src/model/document_viewer.dart
 lib/src/model/edit_check.dart
@@ -982,6 +984,7 @@ test/document_source_input_test.dart
 test/document_summary_test.dart
 test/document_test.dart
 test/document_ticket_test.dart
+test/document_translation_test.dart
 test/document_version_test.dart
 test/document_viewer_test.dart
 test/documents_api_test.dart

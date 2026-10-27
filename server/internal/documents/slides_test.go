@@ -110,7 +110,7 @@ func TestSlidesFromAPage(t *testing.T) {
 	finish(2)
 
 	// Downloads: the deck's text as is for people inside, without notes outside.
-	file, err := f.s.Download(f.ctx, f.alice, d.ID, FormatMarkdown, 0)
+	file, err := f.s.Download(f.ctx, f.alice, d.ID, FormatMarkdown, 0, "")
 	if err != nil || !strings.HasPrefix(string(file.Data), "# Sprint\n") || !strings.Contains(string(file.Data), "say the long part") {
 		t.Fatalf("md: %q %v", file.Data, err)
 	}
@@ -128,7 +128,7 @@ func TestSlidesFromAPage(t *testing.T) {
 	if err != nil || strings.Contains(string(pf.Data), "long part") {
 		t.Fatalf("public md: %q %v", pf.Data, err)
 	}
-	if e, err := store.DocumentExport(f.ctx, d.ID, 2); err != nil || e.Status != domain.ExportDone {
+	if e, err := store.DocumentExport(f.ctx, d.ID, 2, ""); err != nil || e.Status != domain.ExportDone {
 		t.Fatalf("deck PDF: %+v %v", e.Status, err)
 	}
 

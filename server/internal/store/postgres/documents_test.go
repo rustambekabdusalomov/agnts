@@ -382,32 +382,43 @@ func TestDocumentsTicketsRunsAndExports(t *testing.T) {
 	}
 
 	// Exports: one renderer at a time, a failure waits before a retry.
-	if _, err := f.s.DocumentExport(f.ctx, d.ID, 1); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := f.s.DocumentExport(f.ctx, d.ID, 1, ""); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("no export yet: %v", err)
 	}
-	if ok, err := f.s.StartDocumentExport(f.ctx, d.ID, 1, time.Minute); !ok || err != nil {
+	if ok, err := f.s.StartDocumentExport(f.ctx, d.ID, 1, "", time.Minute); !ok || err != nil {
 		t.Fatalf("start: %v %v", ok, err)
 	}
-	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, time.Minute); ok {
+	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, "", time.Minute); ok {
 		t.Fatal("started twice")
 	}
-	if err := f.s.FinishDocumentExport(f.ctx, d.ID, 1, nil, "chromium crashed"); err != nil {
+	if err := f.s.FinishDocumentExport(f.ctx, d.ID, 1, "", nil, "chromium crashed"); err != nil {
 		t.Fatal(err)
 	}
-	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, time.Minute); ok {
+	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, "", time.Minute); ok {
 		t.Fatal("retried right after a failure")
 	}
-	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, 0); !ok {
+	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, "", 0); !ok {
 		t.Fatal("no retry after the wait")
 	}
-	if err := f.s.FinishDocumentExport(f.ctx, d.ID, 1, []byte("%PDF-1.7"), ""); err != nil {
+	if err := f.s.FinishDocumentExport(f.ctx, d.ID, 1, "", []byte("%PDF-1.7"), ""); err != nil {
 		t.Fatal(err)
 	}
-	e, err := f.s.DocumentExport(f.ctx, d.ID, 1)
+	e, err := f.s.DocumentExport(f.ctx, d.ID, 1, "")
 	if err != nil || e.Status != domain.ExportDone || string(e.Data) != "%PDF-1.7" {
 		t.Fatalf("export: %+v %v", e, err)
 	}
-	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, 0); ok {
+	if ok, _ := f.s.StartDocumentExport(f.ctx, d.ID, 1, "", 0); ok {
 		t.Fatal("a done export started again")
+	}
+
+	// A translation's PDF is kept apart from the original's.
+	if ok, err := f.s.StartDocumentExport(f.ctx, d.ID, 1, "ru", 0); !ok || err != nil {
+		t.Fatalf("start the Russian PDF: %v %v", ok, err)
+	}
+	if e, err := f.s.DocumentExport(f.ctx, d.ID, 1, "ru"); err != nil || e.Status != domain.ExportPending {
+		t.Fatalf("Russian export: %+v %v", e, err)
+	}
+	if e, _ := f.s.DocumentExport(f.ctx, d.ID, 1, ""); e.Status != domain.ExportDone {
+		t.Fatalf("the original's PDF changed: %+v", e)
 	}
 }

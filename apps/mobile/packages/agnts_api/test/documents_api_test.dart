@@ -69,7 +69,7 @@ void main() {
     //
     // version 0 (the default) is the current one. The first PDF download of a version starts making it and answers 202 with Retry-After; ask again then. A made PDF is kept: later downloads are instant. 
     //
-    //Future<Uint8List> downloadDocument(int id, { String format, int version }) async
+    //Future<Uint8List> downloadDocument(int id, { String format, int version, TranslationLanguage lang }) async
     test('test downloadDocument', () async {
       // TODO
     });
@@ -234,6 +234,15 @@ void main() {
     //
     //Future<DocumentSharing> shareDocument(int id, DocumentShareInput documentShareInput) async
     test('test shareDocument', () async {
+      // TODO
+    });
+
+    // The current version translated into a language (view access)
+    //
+    // The title and each Markdown block are translated and stored on their own, so a later version only sends the blocks that changed. Blocks not yet translated are translated in this request, which can take a minute for a long document.
+    //
+    //Future<DocumentTranslation> translateDocument(int id, TranslateInput translateInput) async
+    test('test translateDocument', () async {
       // TODO
     });
 

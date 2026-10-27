@@ -5471,6 +5471,10 @@ paths:
         - name: version
           in: query
           schema: { type: integer, minimum: 0, default: 0 }
+        - name: lang
+          in: query
+          description: The version translated into this language (translated first if needed); absent is as written
+          schema: { $ref: '#/components/schemas/TranslationLanguage' }
       responses:
         '200':
           description: The file, as an attachment
@@ -5484,6 +5488,35 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
         '503': { $ref: '#/components/responses/RenderFailed' }
+
+  /documents/{id}/translate:
+    parameters:
+      - $ref: '#/components/parameters/DocumentID'
+    post:
+      operationId: translateDocument
+      x-viewer: true
+      summary: The current version translated into a language (view access)
+      description: >-
+        The title and each Markdown block are translated and stored on their
+        own, so a later version only sends the blocks that changed. Blocks
+        not yet translated are translated in this request, which can take a
+        minute for a long document.
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TranslateInput' }
+      responses:
+        '200':
+          description: The translated version
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentTranslation' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
 
   /documents/{id}/comments:
     parameters:
@@ -6908,6 +6941,16 @@ components:
             properties:
               source: { type: string }
               text: { type: string }
+
+    DocumentTranslation:
+      type: object
+      required: [lang, version, title, body, complete]
+      properties:
+        lang: { $ref: '#/components/schemas/TranslationLanguage' }
+        version: { type: integer, description: The version translated }
+        title: { type: string }
+        body: { type: string, description: 'The Markdown, rendered like the original' }
+        complete: { type: boolean, description: 'False when some blocks are still as written' }
 
     TicketKindInput:
       type: object

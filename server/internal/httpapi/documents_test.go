@@ -50,7 +50,7 @@ func (s *publicStore) PublicDocument(_ context.Context, token string) (domain.Do
 		UpdatedAt: time.Date(2026, 10, 22, 0, 0, 0, 0, time.UTC)}, nil
 }
 
-func (s *publicStore) DocumentExport(_ context.Context, _ int64, version int) (domain.DocumentExport, error) {
+func (s *publicStore) DocumentExport(_ context.Context, _ int64, version int, _ string) (domain.DocumentExport, error) {
 	if s.pdf == nil {
 		return domain.DocumentExport{}, domain.ErrNotFound
 	}

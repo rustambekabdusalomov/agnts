@@ -111,10 +111,11 @@ export async function downloadFile(path: string, fallback: string, onWait?: () =
   }
 }
 
-/** The download URL of a version (0: the current one) of a document. */
-export function downloadPath(id: number, format: 'md' | 'pdf', version = 0): string {
+/** The download URL of a version (0: the current one) of a document, translated into lang when set. */
+export function downloadPath(id: number, format: 'md' | 'pdf', version = 0, lang = ''): string {
   const q = new URLSearchParams({ format })
   if (version) q.set('version', String(version))
+  if (lang) q.set('lang', lang)
   return `${apiPath(`/documents/${id}/download`)}?${q}`
 }
 

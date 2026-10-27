@@ -3150,6 +3150,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String get documentsViaAccount => 'вошёл в аккаунт';
 
   @override
+  String get documentsTranslate => 'Перевести';
+
+  @override
+  String get documentsTranslateOriginal => 'Язык оригинала';
+
+  @override
+  String get documentsTranslating => 'Перевод… в первый раз длинный документ переводится до минуты, потом перевод сохранён.';
+
+  @override
+  String documentsTranslateFailed(String error) {
+    return 'Не удалось перевести: $error';
+  }
+
+  @override
+  String get documentsTranslatedNoComments => 'Вы читаете перевод. Чтобы комментировать, переключитесь на оригинал.';
+
+  @override
+  String get documentsShowOriginal => 'Показать оригинал';
+
+  @override
+  String get documentsTranslatedIncomplete => 'Некоторые части остались на языке оригинала.';
+
+  @override
   String get draftsTitle => 'Комментарии ревью';
 
   @override

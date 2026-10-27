@@ -3072,6 +3072,29 @@ class AppLocalizationsUz extends AppLocalizations {
   String get documentsViaAccount => 'akkaunt orqali';
 
   @override
+  String get documentsTranslate => 'Tarjima qilish';
+
+  @override
+  String get documentsTranslateOriginal => 'Asl til';
+
+  @override
+  String get documentsTranslating => 'Tarjima qilinmoqda… uzun hujjat birinchi marta bir daqiqagacha tarjima qilinadi, keyin saqlanadi.';
+
+  @override
+  String documentsTranslateFailed(String error) {
+    return 'Tarjima qilib boʻlmadi: $error';
+  }
+
+  @override
+  String get documentsTranslatedNoComments => 'Siz tarjimani oʻqiyapsiz. Izoh qoldirish uchun asl matnga oʻting.';
+
+  @override
+  String get documentsShowOriginal => 'Asl matnni koʻrsatish';
+
+  @override
+  String get documentsTranslatedIncomplete => 'Baʼzi qismlar hali asl tilda.';
+
+  @override
   String get draftsTitle => 'Ko\'rib chiqish izohlari';
 
   @override

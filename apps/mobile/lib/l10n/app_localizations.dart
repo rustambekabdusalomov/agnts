@@ -5709,6 +5709,48 @@ abstract class AppLocalizations {
   /// **'signed in'**
   String get documentsViaAccount;
 
+  /// No description provided for @documentsTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get documentsTranslate;
+
+  /// No description provided for @documentsTranslateOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original language'**
+  String get documentsTranslateOriginal;
+
+  /// No description provided for @documentsTranslating.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating… the first time takes up to a minute for a long document; after that it is saved.'**
+  String get documentsTranslating;
+
+  /// No description provided for @documentsTranslateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not translate: {error}'**
+  String documentsTranslateFailed(String error);
+
+  /// No description provided for @documentsTranslatedNoComments.
+  ///
+  /// In en, this message translates to:
+  /// **'You are reading a translation. Switch to the original to comment.'**
+  String get documentsTranslatedNoComments;
+
+  /// No description provided for @documentsShowOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original'**
+  String get documentsShowOriginal;
+
+  /// No description provided for @documentsTranslatedIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Some parts are still in the original language.'**
+  String get documentsTranslatedIncomplete;
+
   /// No description provided for @draftsTitle.
   ///
   /// In en, this message translates to:

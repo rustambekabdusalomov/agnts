@@ -12,6 +12,7 @@ import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../tickets/kinds.dart' show ReportMarkdown;
+import '../tickets/translation.dart';
 import 'document_download.dart';
 import 'document_share_sheet.dart';
 import 'slide_deck.dart';
@@ -21,7 +22,8 @@ import 'documents_logic.dart';
 /// A document, read-only: its text, version, what it was made from, its
 /// linked tickets, and a menu to copy its public link, change who can
 /// open it (its owner) and download it; a deck reads as slides and can be
-/// presented. Editing is on the web.
+/// presented. It can be read in another language, as a ticket can.
+/// Editing and comments are on the web.
 class DocumentScreen extends ConsumerStatefulWidget {
   const DocumentScreen({super.key, required this.id});
   final int id;
@@ -49,7 +51,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
     super.dispose();
   }
 
-  Future<void> _menu(String action, Document d) async {
+  Future<void> _menu(String action, Document d, DocumentTranslation? tr) async {
     final l = AppLocalizations.of(context);
     switch (action) {
       case 'copy':
@@ -59,10 +61,10 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
         await showDocumentShareSheet(context, d.id);
         ref.invalidate(documentProvider(widget.id));
       case 'present':
-        await presentSlides(context, d.body);
+        await presentSlides(context, tr?.body ?? d.body);
       case 'md':
       case 'pdf':
-        await downloadDocument(context, ref, d.id, action);
+        await downloadDocument(context, ref, d.id, action, lang: tr?.lang.value);
     }
   }
 
@@ -72,16 +74,23 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
     final c = Agnts.of(context);
     final doc = ref.watch(documentProvider(widget.id));
     final d = doc.value;
+    // The language it is read in, and the translation once it arrives.
+    final lang = ref.watch(ticketLangProvider('doc:${widget.id}'));
+    final trState = lang == null || d == null || d.version == 0
+        ? null
+        : ref.watch(documentTranslationProvider((id: d.id, lang: lang, version: d.version)));
+    final tr = trState?.value?.lang == lang ? trState?.value : null;
     return Scaffold(
       backgroundColor: c.bg,
       appBar: DetailBar(
         backLabel: l.navBack,
         onBack: () => context.canPop() ? context.pop() : context.go('/documents'),
         actions: [
+          if (d != null && d.version > 0) TranslateButton('doc:${d.id}'),
           if (d != null)
             PopupMenuButton<String>(
               icon: Icon(Icons.more_horiz_rounded, color: c.primary),
-              onSelected: (a) => _menu(a, d),
+              onSelected: (a) => _menu(a, d, tr),
               itemBuilder: (_) => [
                 if (d.kind == DocumentKind.slides && d.version > 0) PopupMenuItem(value: 'present', child: Text(l.mdocumentsPresent)),
                 if (d.publicUrl != null) PopupMenuItem(value: 'copy', child: Text(l.mdocumentsCopyLink)),
@@ -102,7 +111,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: screenPad,
           children: [
-            Text(d.title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, height: 1.2, color: c.ink)),
+            Text(tr?.title ?? d.title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, height: 1.2, color: c.ink)),
             const SizedBox(height: 6),
             Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
               if (d.kind == DocumentKind.slides) ToneBadge(l.mdocumentsSlides, Tone.gray, small: true),
@@ -136,13 +145,20 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
               const SizedBox(height: 12),
               HelpBox(l.mdocumentsFailedText(d.generation!.error), tone: Tone.bad, copyable: true),
             ],
+            if (trState != null && (trState.isLoading || trState.hasError))
+              TranslationStatus(trState)
+            else if (tr != null && !tr.complete)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(l.documentsTranslatedIncomplete, style: TextStyle(fontSize: 13, color: c.ink3)),
+              ),
             const SizedBox(height: 14),
             if (d.body.trim().isEmpty)
               HCard(child: Text(l.mdocumentsNoBody, style: TextStyle(color: c.ink3)))
             else if (d.kind == DocumentKind.slides)
-              SlideDeck(d.body)
+              SlideDeck(tr?.body ?? d.body)
             else
-              HCard(child: ReportMarkdown(d.body)),
+              HCard(child: ReportMarkdown(tr?.body ?? d.body)),
             const SizedBox(height: 14),
             _LinkedTickets(id: d.id),
           ],

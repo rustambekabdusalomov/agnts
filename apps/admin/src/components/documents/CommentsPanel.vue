@@ -19,8 +19,10 @@ const props = defineProps<{
   canComment: boolean
   // A member on a public document: guests read comments too.
   publicNotice?: boolean
+  // The text is shown translated: comments are read only, on the original.
+  translated?: boolean
 }>()
-const emit = defineEmits<{ activate: [id: number]; cancel: [] }>()
+const emit = defineEmits<{ activate: [id: number]; cancel: []; original: [] }>()
 const { t, locale } = useI18n()
 
 const open = computed(() => props.c.threads.value.filter((th) => !th.root.resolvedAt))
@@ -130,6 +132,10 @@ const short = (s: string) => ([...s].length > 140 ? [...s].slice(0, 140).join(''
     </div>
 
     <span v-if="error" class="ferr" role="alert">{{ error }}</span>
+    <div v-if="translated" class="cp-tr">
+      <p class="hint">{{ t('documents.translatedNoComments') }}</p>
+      <button type="button" class="btn btn-s" @click="emit('original')">{{ t('documents.showOriginal') }}</button>
+    </div>
     <p v-if="!open.length && !pending" class="hint">{{ canComment ? t('documents.noCommentsHint') : t('documents.noComments') }}</p>
 
     <ol class="cp-list">
@@ -195,6 +201,7 @@ const short = (s: string) => ([...s].length > 140 ? [...s].slice(0, 140).join(''
 </template>
 
 <style scoped>
+.cp-tr { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 10px; }
 .cp { display: flex; flex-direction: column; gap: 10px; }
 .cp-n { margin-left: 8px; font-size: 12px; font-weight: 700; background: var(--line-2); border-radius: 10px; padding: 1px 8px; vertical-align: middle; }
 .cp-new { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--primary, #1a5fb4); border-radius: 10px; }

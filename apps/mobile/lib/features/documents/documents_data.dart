@@ -18,6 +18,13 @@ final documentProvider = FutureProvider.autoDispose.family<Document, int>((ref, 
   return res.data!;
 });
 
+/// A document's version [version] translated into [lang].
+final documentTranslationProvider =
+    FutureProvider.family<DocumentTranslation, ({int id, TranslationLanguage lang, int version})>((ref, a) async {
+  final res = await requireApi(ref).getDocumentsApi().translateDocument(id: a.id, translateInput: TranslateInput(lang: a.lang));
+  return res.data!;
+});
+
 /// The tickets linked to a document.
 final documentTicketsProvider = FutureProvider.autoDispose.family<List<DocumentTicket>, int>((ref, id) async {
   return (await requireApi(ref).getDocumentsApi().listDocumentTickets(id: id)).data ?? const [];

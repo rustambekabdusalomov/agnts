@@ -234,6 +234,13 @@
     "yourNamePlaceholder": "Ism va kompaniya",
     "enter": "Davom etish",
     "orGoogle": "Yoki xohlasangiz, Google orqali kim ekaningizni koʻrsating:",
-    "viaAccount": "akkaunt orqali"
+    "viaAccount": "akkaunt orqali",
+    "translate": "Tarjima qilish",
+    "translateOriginal": "Asl til",
+    "translating": "Tarjima qilinmoqda… uzun hujjat birinchi marta bir daqiqagacha tarjima qilinadi, keyin saqlanadi.",
+    "translateFailed": "Tarjima qilib boʻlmadi: {error}",
+    "translatedNoComments": "Siz tarjimani oʻqiyapsiz. Izoh qoldirish uchun asl matnga oʻting.",
+    "showOriginal": "Asl matnni koʻrsatish",
+    "translatedIncomplete": "Baʼzi qismlar hali asl tilda."
   }
 }

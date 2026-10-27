@@ -1750,6 +1750,20 @@
   "documentsEnter": "Enter",
   "documentsOrGoogle": "Or, if you prefer, show who you are with Google:",
   "documentsViaAccount": "signed in",
+  "documentsTranslate": "Translate",
+  "documentsTranslateOriginal": "Original language",
+  "documentsTranslating": "Translating… the first time takes up to a minute for a long document; after that it is saved.",
+  "documentsTranslateFailed": "Could not translate: {error}",
+  "@documentsTranslateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsTranslatedNoComments": "You are reading a translation. Switch to the original to comment.",
+  "documentsShowOriginal": "Show original",
+  "documentsTranslatedIncomplete": "Some parts are still in the original language.",
   "draftsTitle": "Review comments",
   "draftsSub": "agnts's comments stay here until you accept them. Only accepted ones are published on {host}, together as one review; the rest never leave agnts.",
   "@draftsSub": {

@@ -4369,6 +4369,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/documents/{id}/translate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The current version translated into a language (view access)
+         * @description The title and each Markdown block are translated and stored on their own, so a later version only sends the blocks that changed. Blocks not yet translated are translated in this request, which can take a minute for a long document.
+         */
+        post: operations["translateDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/documents/{id}/comments": {
         parameters: {
             query?: never;
@@ -5545,6 +5567,16 @@ export interface components {
                 source: string;
                 text: string;
             }[];
+        };
+        DocumentTranslation: {
+            lang: components["schemas"]["TranslationLanguage"];
+            /** @description The version translated */
+            version: number;
+            title: string;
+            /** @description The Markdown, rendered like the original */
+            body: string;
+            /** @description False when some blocks are still as written */
+            complete: boolean;
         };
         TicketKindInput: {
             kind: components["schemas"]["TicketKindChoice"];
@@ -15853,6 +15885,8 @@ export interface operations {
             query?: {
                 format?: components["parameters"]["DocumentFormat"];
                 version?: number;
+                /** @description The version translated into this language (translated first if needed); absent is as written */
+                lang?: components["schemas"]["TranslationLanguage"];
             };
             header?: never;
             path: {
@@ -15877,6 +15911,36 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             503: components["responses"]["RenderFailed"];
+        };
+    };
+    translateDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["DocumentID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranslateInput"];
+            };
+        };
+        responses: {
+            /** @description The translated version */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentTranslation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
         };
     };
     listDocumentComments: {

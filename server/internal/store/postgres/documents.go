@@ -691,13 +691,13 @@ func (s *Documents) PublicDocument(ctx context.Context, token string) (domain.Do
 	return d, notFound(err)
 }
 
-// DocumentExport returns the PDF of a version, or domain.ErrNotFound when
-// none was asked for.
-func (s *Documents) DocumentExport(ctx context.Context, docID int64, version int) (domain.DocumentExport, error) {
+// DocumentExport returns the PDF of a version in lang ("": as written), or
+// domain.ErrNotFound when none was asked for.
+func (s *Documents) DocumentExport(ctx context.Context, docID int64, version int, lang string) (domain.DocumentExport, error) {
 	var e domain.DocumentExport
 	var status string
 	err := s.db.QueryRow(ctx, `SELECT document_id, version, status, COALESCE(data, ''::bytea), error, updated_at FROM document_exports
-		WHERE document_id = $1 AND version = $2 AND format = 'pdf'`, docID, version).Scan(&e.DocumentID, &e.Version, &status, &e.Data, &e.Error, &e.UpdatedAt)
+		WHERE document_id = $1 AND version = $2 AND format = 'pdf' AND lang = $3`, docID, version, lang).Scan(&e.DocumentID, &e.Version, &status, &e.Data, &e.Error, &e.UpdatedAt)
 	e.Status = domain.ExportStatus(status)
 	return e, notFound(err)
 }
@@ -705,22 +705,22 @@ func (s *Documents) DocumentExport(ctx context.Context, docID int64, version int
 // StartDocumentExport marks the PDF of a version pending. It reports
 // false when it is pending or done already (someone else renders it), or
 // failed less than retryAfter ago.
-func (s *Documents) StartDocumentExport(ctx context.Context, docID int64, version int, retryAfter time.Duration) (bool, error) {
-	tag, err := s.db.Exec(ctx, `INSERT INTO document_exports (document_id, version, format) VALUES ($1, $2, 'pdf')
-		ON CONFLICT (document_id, version, format) DO UPDATE SET status = 'pending', error = '', updated_at = now()
+func (s *Documents) StartDocumentExport(ctx context.Context, docID int64, version int, lang string, retryAfter time.Duration) (bool, error) {
+	tag, err := s.db.Exec(ctx, `INSERT INTO document_exports (document_id, version, format, lang) VALUES ($1, $2, 'pdf', $4)
+		ON CONFLICT (document_id, version, format, lang) DO UPDATE SET status = 'pending', error = '', updated_at = now()
 		WHERE document_exports.status = 'failed' AND document_exports.updated_at < now() - $3::interval
 		   OR document_exports.status = 'pending' AND document_exports.updated_at < now() - interval '5 minutes'`,
-		docID, version, fmt.Sprintf("%d seconds", int(retryAfter.Seconds())))
+		docID, version, fmt.Sprintf("%d seconds", int(retryAfter.Seconds())), lang)
 	return tag.RowsAffected() > 0, err
 }
 
 // FinishDocumentExport stores a rendered PDF, or why it failed.
-func (s *Documents) FinishDocumentExport(ctx context.Context, docID int64, version int, data []byte, failure string) error {
+func (s *Documents) FinishDocumentExport(ctx context.Context, docID int64, version int, lang string, data []byte, failure string) error {
 	status := domain.ExportDone
 	if failure != "" {
 		status, data = domain.ExportFailed, nil
 	}
 	_, err := s.db.Exec(ctx, `UPDATE document_exports SET status = $3, data = $4, size = $5, error = $6, updated_at = now()
-		WHERE document_id = $1 AND version = $2 AND format = 'pdf'`, docID, version, string(status), data, len(data), failure)
+		WHERE document_id = $1 AND version = $2 AND format = 'pdf' AND lang = $7`, docID, version, string(status), data, len(data), failure, lang)
 	return err
 }

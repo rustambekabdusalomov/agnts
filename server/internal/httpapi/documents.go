@@ -10,6 +10,7 @@ import (
 	"agnts/internal/documents"
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
+	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
 )
 
@@ -47,6 +48,10 @@ func (s *Server) documentError(w http.ResponseWriter, r *http.Request, err error
 	case errors.Is(err, documents.ErrTooMany):
 		w.Header().Set("Retry-After", "60")
 		writeError(w, http.StatusTooManyRequests, "rate_limited", err.Error())
+	case errors.Is(err, orchestrator.ErrPlanLimit):
+		writeError(w, http.StatusTooManyRequests, "plan_limit", err.Error())
+	case errors.Is(err, orchestrator.ErrInvalid):
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 	case errors.Is(err, documents.ErrPreparing):
 		w.Header().Set("Retry-After", "3")
 		writeError(w, http.StatusAccepted, "preparing", err.Error())
@@ -567,12 +572,42 @@ func (s *Server) DownloadDocument(w http.ResponseWriter, r *http.Request, id gen
 	if params.Version != nil {
 		version = *params.Version
 	}
-	f, err := s.opt.Documents.Download(r.Context(), caller(r), id, format, version)
+	lang := ""
+	if params.Lang != nil {
+		if !params.Lang.Valid() {
+			writeError(w, http.StatusBadRequest, "bad_request", "unknown language "+string(*params.Lang))
+			return
+		}
+		lang = string(*params.Lang)
+	}
+	f, err := s.opt.Documents.Download(r.Context(), caller(r), id, format, version, lang)
 	if err != nil {
 		s.documentError(w, r, err)
 		return
 	}
 	writeFile(w, f)
+}
+
+// TranslateDocument implements gen.ServerInterface.
+func (s *Server) TranslateDocument(w http.ResponseWriter, r *http.Request, id gen.DocumentID) {
+	if !s.documentsReady(w) {
+		return
+	}
+	var req gen.TranslateInput
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	if !req.Lang.Valid() {
+		writeError(w, http.StatusBadRequest, "bad_request", "unknown language "+string(req.Lang))
+		return
+	}
+	t, err := s.opt.Documents.Translate(r.Context(), caller(r), id, string(req.Lang))
+	if err != nil {
+		s.documentError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, gen.DocumentTranslation{Lang: req.Lang, Version: t.Version, Title: t.Title, Body: t.Body, Complete: t.Complete})
 }
 
 // ListTicketDocuments implements gen.ServerInterface.

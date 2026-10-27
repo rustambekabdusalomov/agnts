@@ -47,14 +47,43 @@ func (o *Orchestrator) Translate(ctx context.Context, key, lang string) ([]Trans
 	if _, ok := domain.Languages[lang]; !ok {
 		return nil, invalid("unknown language %q", lang)
 	}
-	if o.trans == nil {
-		return nil, invalid("translation is not available")
-	}
 	v, err := o.View(ctx, key)
 	if err != nil {
 		return nil, err
 	}
 	texts := ticketTexts(v)
+	got, err := o.translateTexts(ctx, translateSubject{ticket: key, name: key}, lang, texts)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]TranslatedText, 0, len(texts))
+	for _, s := range texts {
+		if t, ok := got[s]; ok {
+			out = append(out, TranslatedText{Source: s, Text: t})
+		}
+	}
+	return out, nil
+}
+
+// TranslateTexts returns texts that are not a ticket's (a document's)
+// translated into lang, by source text, the same way: the store answers
+// what is translated already, Claude the rest. subject names what they
+// are of, as "document-12"; one run per subject and language at a time.
+func (o *Orchestrator) TranslateTexts(ctx context.Context, subject, lang string, texts []string) (map[string]string, error) {
+	if _, ok := domain.Languages[lang]; !ok {
+		return nil, invalid("unknown language %q", lang)
+	}
+	return o.translateTexts(ctx, translateSubject{name: subject}, lang, texts)
+}
+
+// translateSubject is what texts are of: a ticket (its key in both), or
+// another subject by name.
+type translateSubject struct{ ticket, name string }
+
+func (o *Orchestrator) translateTexts(ctx context.Context, sub translateSubject, lang string, texts []string) (map[string]string, error) {
+	if o.trans == nil {
+		return nil, invalid("translation is not available")
+	}
 	got, err := o.translated(ctx, lang, texts)
 	if err != nil {
 		return nil, err
@@ -65,27 +94,19 @@ func (o *Orchestrator) Translate(ctx context.Context, key, lang string) ([]Trans
 			missing = append(missing, s)
 		}
 	}
-	if len(missing) > 0 {
-		// One run per ticket and language at a time: a second request waits
-		// for the first. The run outlives a client that gives up, so its
-		// work is stored all the same.
-		_, err, _ := o.translating.Do(runKey(domain.WorkspaceOf(ctx), key)+"\x00"+lang, func() (any, error) {
-			return nil, o.translateMissing(context.WithoutCancel(ctx), key, lang, missing)
-		})
-		if err != nil {
-			return nil, err
-		}
-		if got, err = o.translated(ctx, lang, texts); err != nil {
-			return nil, err
-		}
+	if len(missing) == 0 {
+		return got, nil
 	}
-	out := make([]TranslatedText, 0, len(texts))
-	for _, s := range texts {
-		if t, ok := got[s]; ok {
-			out = append(out, TranslatedText{Source: s, Text: t})
-		}
+	// One run per subject and language at a time: a second request waits
+	// for the first. The run outlives a client that gives up, so its work
+	// is stored all the same.
+	_, err, _ = o.translating.Do(runKey(domain.WorkspaceOf(ctx), sub.name)+"\x00"+lang, func() (any, error) {
+		return nil, o.translateMissing(context.WithoutCancel(ctx), sub, lang, missing)
+	})
+	if err != nil {
+		return nil, err
 	}
-	return out, nil
+	return o.translated(ctx, lang, texts)
 }
 
 // translated returns the stored translations of texts, by source text.
@@ -171,9 +192,29 @@ func ticketTexts(v TicketView) []string {
 	return out
 }
 
+// translateBatch bounds the text one Claude call translates; more is
+// translated in several calls, one after another.
+const translateBatch = 40 << 10
+
+// translateBatches cuts texts into runs of at most translateBatch bytes
+// (a longer text goes alone).
+func translateBatches(texts []string) [][]string {
+	var out [][]string
+	size := 0
+	for _, t := range texts {
+		if n := len(out); n == 0 || size+len(t) > translateBatch && len(out[n-1]) > 0 {
+			out, size = append(out, nil), 0
+		}
+		out[len(out)-1] = append(out[len(out)-1], t)
+		size += len(t)
+	}
+	return out
+}
+
 // translateMissing has Claude translate texts into lang in an empty
-// workspace and stores the translations.
-func (o *Orchestrator) translateMissing(ctx context.Context, key, lang string, texts []string) error {
+// workspace, in batches, and stores the translations of each batch as it
+// is done.
+func (o *Orchestrator) translateMissing(ctx context.Context, sub translateSubject, lang string, texts []string) error {
 	s, err := o.settings.Get(ctx)
 	if err != nil {
 		return err
@@ -181,6 +222,40 @@ func (o *Orchestrator) translateMissing(ctx context.Context, key, lang string, t
 	if paused, _ := o.usage.Paused(ctx, s); paused {
 		return ErrPlanLimit
 	}
+	prompt, err := render("translate", promptData{Language: domain.Languages[lang]})
+	if err != nil {
+		return err
+	}
+
+	var empty bytes.Buffer
+	_ = tar.NewWriter(&empty).Close()
+	ws, err := o.runner.Open(ctx, WorkspaceSpec{TicketKey: sub.name + "-translate", Image: o.cfg.Image, Repo: &empty})
+	if err != nil {
+		return fmt.Errorf("start container: %w", err)
+	}
+	defer func() {
+		if err := ws.Close(context.WithoutCancel(ctx)); err != nil {
+			o.log.Warn("remove container", "subject", sub.name, "err", err)
+		}
+	}()
+	done := 0
+	for _, batch := range translateBatches(texts) {
+		n, err := o.translateBatch(ctx, ws, s, sub, lang, prompt, batch)
+		if err != nil {
+			return err
+		}
+		done += n
+	}
+	if done == 0 {
+		return errors.New("claude translated nothing")
+	}
+	o.log.Info("texts translated", "subject", sub.name, "lang", lang, "texts", done, "of", len(texts))
+	return nil
+}
+
+// translateBatch has Claude translate one batch in ws and stores it,
+// returning how many texts it translated.
+func (o *Orchestrator) translateBatch(ctx context.Context, ws Workspace, s domain.Settings, sub translateSubject, lang, prompt string, texts []string) (int, error) {
 	type item struct {
 		ID   int    `json:"id"`
 		Text string `json:"text"`
@@ -193,28 +268,16 @@ func (o *Orchestrator) translateMissing(ctx context.Context, key, lang string, t
 	}
 	src, err := json.Marshal(in)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	prompt, err := render("translate", promptData{Language: domain.Languages[lang]})
-	if err != nil {
-		return err
-	}
-
-	var empty bytes.Buffer
-	_ = tar.NewWriter(&empty).Close()
-	ws, err := o.runner.Open(ctx, WorkspaceSpec{TicketKey: key + "-translate", Image: o.cfg.Image, Repo: &empty})
-	if err != nil {
-		return fmt.Errorf("start container: %w", err)
-	}
-	defer func() {
-		if err := ws.Close(context.WithoutCancel(ctx)); err != nil {
-			o.log.Warn("remove container", "ticket", key, "err", err)
-		}
-	}()
 	if err := ws.WriteFile(ctx, SourcePath, src); err != nil {
-		return fmt.Errorf("write texts: %w", err)
+		return 0, fmt.Errorf("write texts: %w", err)
 	}
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeTranslate, TicketKey: key, Subject: lang}, ClaudeRequest{
+	// An earlier batch's answer must not pass for this one's.
+	if err := ws.WriteFile(ctx, TranslationPath, nil); err != nil {
+		return 0, fmt.Errorf("clear translation: %w", err)
+	}
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeTranslate, TicketKey: sub.ticket, Subject: subjectOf(sub, lang)}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
 		MaxTurns: min(s.MaxTurns, translateMaxTurns),
@@ -226,22 +289,25 @@ func (o *Orchestrator) translateMissing(ctx context.Context, key, lang string, t
 		}
 	})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if res.RateLimited {
 		o.usage.RecordLimited(ctx)
-		return ErrPlanLimit
+		return 0, ErrPlanLimit
 	}
 	if res.IsError {
-		return fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return 0, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, TranslationPath)
+	if err == nil && len(bytes.TrimSpace(raw)) == 0 {
+		err = errors.New("empty")
+	}
 	if err != nil {
-		return fmt.Errorf("claude did not write %s: %w", TranslationPath, err)
+		return 0, fmt.Errorf("claude did not write %s: %w", TranslationPath, err)
 	}
 	var tf translationFile
 	if err := json.Unmarshal(raw, &tf); err != nil {
-		return fmt.Errorf("translation.json is not valid JSON: %w", err)
+		return 0, fmt.Errorf("translation.json is not valid JSON: %w", err)
 	}
 	byHash := map[string]string{}
 	for _, x := range tf.Texts {
@@ -250,8 +316,16 @@ func (o *Orchestrator) translateMissing(ctx context.Context, key, lang string, t
 		}
 	}
 	if len(byHash) == 0 {
-		return errors.New("claude translated nothing")
+		return 0, nil
 	}
-	o.log.Info("ticket translated", "ticket", key, "lang", lang, "texts", len(byHash), "of", len(texts))
-	return o.trans.SaveTranslations(ctx, lang, byHash)
+	return len(byHash), o.trans.SaveTranslations(ctx, lang, byHash)
+}
+
+// subjectOf is a translation call's subject in the run history: the
+// language for a ticket (its key is on the call), else what it is of too.
+func subjectOf(sub translateSubject, lang string) string {
+	if sub.ticket != "" {
+		return lang
+	}
+	return sub.name + " " + lang
 }

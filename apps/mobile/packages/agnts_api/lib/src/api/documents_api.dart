@@ -25,6 +25,7 @@ import 'package:agnts_api/src/model/document_share_input.dart';
 import 'package:agnts_api/src/model/document_sharing.dart';
 import 'package:agnts_api/src/model/document_summary.dart';
 import 'package:agnts_api/src/model/document_ticket.dart';
+import 'package:agnts_api/src/model/document_translation.dart';
 import 'package:agnts_api/src/model/document_version.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/guest_join.dart';
@@ -34,6 +35,8 @@ import 'package:agnts_api/src/model/public_document.dart';
 import 'package:agnts_api/src/model/public_document_info.dart';
 import 'package:agnts_api/src/model/secret_findings.dart';
 import 'package:agnts_api/src/model/transfer_workspace_request.dart';
+import 'package:agnts_api/src/model/translate_input.dart';
+import 'package:agnts_api/src/model/translation_language.dart';
 
 class DocumentsApi {
 
@@ -728,6 +731,7 @@ _responseData = rawData == null ? null : deserialize<DocumentPresence, DocumentP
   /// * [id] 
   /// * [format] 
   /// * [version] 
+  /// * [lang] - The version translated into this language (translated first if needed); absent is as written
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -741,6 +745,7 @@ _responseData = rawData == null ? null : deserialize<DocumentPresence, DocumentP
     required int id,
     String? format = 'md',
     int? version = 0,
+    TranslationLanguage? lang,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -776,6 +781,7 @@ _responseData = rawData == null ? null : deserialize<DocumentPresence, DocumentP
     final _queryParameters = <String, dynamic>{
       if (format != null) r'format': format,
       if (version != null) r'version': version,
+      if (lang != null) r'lang': lang,
     };
 
     final _response = await _dio.request<Object>(
@@ -2625,6 +2631,110 @@ _responseData = rawData == null ? null : deserialize<DocumentSharing, DocumentSh
     }
 
     return Response<DocumentSharing>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// The current version translated into a language (view access)
+  /// The title and each Markdown block are translated and stored on their own, so a later version only sends the blocks that changed. Blocks not yet translated are translated in this request, which can take a minute for a long document.
+  ///
+  /// Parameters:
+  /// * [id] 
+  /// * [translateInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentTranslation] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentTranslation>> translateDocument({ 
+    required int id,
+    required TranslateInput translateInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/{id}/translate'.replaceAll('{' r'id' '}', id.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(translateInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentTranslation? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DocumentTranslation, DocumentTranslation>(rawData, 'DocumentTranslation', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentTranslation>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

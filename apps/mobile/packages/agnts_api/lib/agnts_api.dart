@@ -162,6 +162,7 @@ export 'package:agnts_api/src/model/document_source_input.dart';
 export 'package:agnts_api/src/model/document_source_input_filter.dart';
 export 'package:agnts_api/src/model/document_summary.dart';
 export 'package:agnts_api/src/model/document_ticket.dart';
+export 'package:agnts_api/src/model/document_translation.dart';
 export 'package:agnts_api/src/model/document_version.dart';
 export 'package:agnts_api/src/model/document_viewer.dart';
 export 'package:agnts_api/src/model/edit_check.dart';

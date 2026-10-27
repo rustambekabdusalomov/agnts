@@ -39,6 +39,7 @@ Method | HTTP request | Description
 [**saveDocument**](DocumentsApi.md#savedocument) | **PUT** /documents/{id} | Save an edit as a new version (edit access)
 [**setDocumentOwner**](DocumentsApi.md#setdocumentowner) | **PUT** /documents/{id}/owner | Give a document to another member (its owner); the old owner keeps edit access
 [**shareDocument**](DocumentsApi.md#sharedocument) | **PUT** /documents/{id}/sharing | Set a document&#39;s type, workspace access and grants (its owner)
+[**translateDocument**](DocumentsApi.md#translatedocument) | **POST** /documents/{id}/translate | The current version translated into a language (view access)
 [**undeleteDocument**](DocumentsApi.md#undeletedocument) | **POST** /documents/{id}/undelete | Take a document out of the trash (its owner or the workspace owner)
 [**unlinkDocumentTicket**](DocumentsApi.md#unlinkdocumentticket) | **DELETE** /documents/{id}/tickets/{key} | Remove a link between a ticket and a document
 [**updateDocumentComment**](DocumentsApi.md#updatedocumentcomment) | **PATCH** /documents/{id}/comments/{commentId} | Edit your comment, or resolve or reopen a thread (its author, or edit access)
@@ -413,7 +414,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **downloadDocument**
-> Uint8List downloadDocument(id, format, version)
+> Uint8List downloadDocument(id, format, version, lang)
 
 Download a version as Markdown or PDF (view access)
 
@@ -431,9 +432,10 @@ final api = AgntsApi().getDocumentsApi();
 final int id = 789; // int | 
 final String format = format_example; // String | 
 final int version = 56; // int | 
+final TranslationLanguage lang = ; // TranslationLanguage | The version translated into this language (translated first if needed); absent is as written
 
 try {
-    final response = api.downloadDocument(id, format, version);
+    final response = api.downloadDocument(id, format, version, lang);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling DocumentsApi->downloadDocument: $e\n');
@@ -447,6 +449,7 @@ Name | Type | Description  | Notes
  **id** | **int**|  | 
  **format** | **String**|  | [optional] [default to 'md']
  **version** | **int**|  | [optional] [default to 0]
+ **lang** | [**TranslationLanguage**](.md)| The version translated into this language (translated first if needed); absent is as written | [optional] 
 
 ### Return type
 
@@ -1423,6 +1426,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**DocumentSharing**](DocumentSharing.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **translateDocument**
+> DocumentTranslation translateDocument(id, translateInput)
+
+The current version translated into a language (view access)
+
+The title and each Markdown block are translated and stored on their own, so a later version only sends the blocks that changed. Blocks not yet translated are translated in this request, which can take a minute for a long document.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getDocumentsApi();
+final int id = 789; // int | 
+final TranslateInput translateInput = ; // TranslateInput | 
+
+try {
+    final response = api.translateDocument(id, translateInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling DocumentsApi->translateDocument: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **translateInput** | [**TranslateInput**](TranslateInput.md)|  | 
+
+### Return type
+
+[**DocumentTranslation**](DocumentTranslation.md)
 
 ### Authorization
 

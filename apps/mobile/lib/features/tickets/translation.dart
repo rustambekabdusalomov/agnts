@@ -33,6 +33,7 @@ const translationLanguages = <(TranslationLanguage, String)>[
 ];
 
 /// The language a ticket is read in (null: as written), remembered per ticket on this phone.
+/// A document uses it too, keyed `doc:<id>`.
 class TicketLangNotifier extends Notifier<TranslationLanguage?> {
   TicketLangNotifier(this.ticketKey);
   final String ticketKey;
@@ -87,6 +88,7 @@ final ticketTranslationProvider =
 }
 
 /// The detail bar's translate button: the language picked, or "Translate".
+/// ticketKey is a ticket's key, or `doc:<id>` for a document.
 class TranslateButton extends ConsumerWidget {
   const TranslateButton(this.ticketKey, {super.key});
   final String ticketKey;
@@ -141,7 +143,7 @@ class TranslateButton extends ConsumerWidget {
 /// While a translation loads or after it failed, a line saying so.
 class TranslationStatus extends StatelessWidget {
   const TranslationStatus(this.state, {super.key});
-  final AsyncValue<Map<String, String>>? state;
+  final AsyncValue<Object?>? state;
 
   @override
   Widget build(BuildContext context) {

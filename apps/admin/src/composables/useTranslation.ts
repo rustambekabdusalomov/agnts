@@ -6,7 +6,7 @@ import { usePrefs } from '../stores/prefs'
 
 export type TranslationLang = components['schemas']['TranslationLanguage']
 
-/** Languages a ticket can be read in, each named in itself. */
+/** Languages a ticket or a document can be read in, each named in itself. */
 export const TRANSLATION_LANGS: { value: TranslationLang; label: string }[] = [
   { value: 'en', label: 'English' },
   { value: 'ru', label: 'Русский' },
@@ -35,16 +35,7 @@ const TR: InjectionKey<Ref<Tr>> = Symbol('tr')
  * Components below the page read the translation with useTr().
  */
 export function provideTranslation(key: Ref<string>, version: Ref<string | undefined>) {
-  const prefs = usePrefs()
-  const lang = computed<TranslationLang | ''>({
-    get: () => (prefs.translations[key.value] as TranslationLang | undefined) ?? '',
-    set: (v) => {
-      const next = { ...prefs.translations }
-      if (v) next[key.value] = v
-      else delete next[key.value]
-      prefs.translations = next
-    },
-  })
+  const lang = rememberedLang(key)
   const query = useQuery({
     queryKey: computed(() => ['translation', key.value, lang.value, version.value]),
     queryFn: () => unwrap(api.POST('/tickets/{key}/translate', { params: { path: { key: key.value } }, body: { lang: lang.value as TranslationLang } })),
@@ -62,6 +53,41 @@ export function provideTranslation(key: Ref<string>, version: Ref<string | undef
   })
   provide(TR, tr)
   return { lang, query, tr }
+}
+
+/** The language a page is read in, remembered under key; '' is as written. */
+function rememberedLang(key: Ref<string>) {
+  const prefs = usePrefs()
+  return computed<TranslationLang | ''>({
+    get: () => (prefs.translations[key.value] as TranslationLang | undefined) ?? '',
+    set: (v) => {
+      const next = { ...prefs.translations }
+      if (v) next[key.value] = v
+      else delete next[key.value]
+      prefs.translations = next
+    },
+  })
+}
+
+/**
+ * The language a document is read in, remembered per document, and its
+ * current version in it. The server answers the whole translated text, so
+ * the page renders it like the original. version (the document's) asks
+ * again after a save; the last translation shows meanwhile.
+ */
+export function useDocumentTranslation(id: Ref<number>, version: Ref<number | undefined>) {
+  const lang = rememberedLang(computed(() => `doc:${id.value}`))
+  const query = useQuery({
+    queryKey: computed(() => ['documentTranslation', id.value, lang.value, version.value]),
+    queryFn: () => unwrap(api.POST('/documents/{id}/translate', { params: { path: { id: id.value } }, body: { lang: lang.value as TranslationLang } })),
+    enabled: computed(() => !!lang.value && !!version.value),
+    staleTime: Infinity,
+    retry: false,
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === id.value && prevQuery?.queryKey[2] === lang.value ? prev : undefined),
+  })
+  // The translation shown: only once it is in the chosen language.
+  const shown = computed(() => (lang.value && query.data.value?.lang === lang.value ? query.data.value : undefined))
+  return { lang, query, shown }
 }
 
 /** The translation the ticket page provides, or the texts as written. */

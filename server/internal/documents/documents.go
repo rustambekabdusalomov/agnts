@@ -38,9 +38,11 @@ type Store interface {
 	DocumentTickets(ctx context.Context, docID int64) ([]domain.DocumentTicket, error)
 	CreateDocumentRun(ctx context.Context, docID int64, src domain.DocumentSource, by *int64, promptVersion string) (domain.DocumentRun, error)
 	PublicDocument(ctx context.Context, token string) (domain.Document, error)
-	DocumentExport(ctx context.Context, docID int64, version int) (domain.DocumentExport, error)
-	StartDocumentExport(ctx context.Context, docID int64, version int, retryAfter time.Duration) (bool, error)
-	FinishDocumentExport(ctx context.Context, docID int64, version int, data []byte, failure string) error
+	// The PDF of a version is kept per language; "" is the version as
+	// written.
+	DocumentExport(ctx context.Context, docID int64, version int, lang string) (domain.DocumentExport, error)
+	StartDocumentExport(ctx context.Context, docID int64, version int, lang string, retryAfter time.Duration) (bool, error)
+	FinishDocumentExport(ctx context.Context, docID int64, version int, lang string, data []byte, failure string) error
 }
 
 // Workspaces gives members and their roles.
@@ -109,6 +111,7 @@ type Deps struct {
 	Settings   Settings
 	Generator  Generator   // nil: generations are refused
 	PDF        PDFRenderer // nil: PDFs are refused
+	Translator Translator  // nil: translations are refused
 	Notifier   Notifier    // nil: nobody hears about changes
 	Log        *slog.Logger
 }

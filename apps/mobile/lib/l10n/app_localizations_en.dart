@@ -3072,6 +3072,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentsViaAccount => 'signed in';
 
   @override
+  String get documentsTranslate => 'Translate';
+
+  @override
+  String get documentsTranslateOriginal => 'Original language';
+
+  @override
+  String get documentsTranslating => 'Translating… the first time takes up to a minute for a long document; after that it is saved.';
+
+  @override
+  String documentsTranslateFailed(String error) {
+    return 'Could not translate: $error';
+  }
+
+  @override
+  String get documentsTranslatedNoComments => 'You are reading a translation. Switch to the original to comment.';
+
+  @override
+  String get documentsShowOriginal => 'Show original';
+
+  @override
+  String get documentsTranslatedIncomplete => 'Some parts are still in the original language.';
+
+  @override
   String get draftsTitle => 'Review comments';
 
   @override
