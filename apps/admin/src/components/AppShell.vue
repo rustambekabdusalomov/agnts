@@ -119,30 +119,37 @@ const activeFilter = computed(() => (isTicketList.value ? String(route.query.f ?
 // The sidebar's menus, each opening into its pages; Settings, under Setup,
 // opens once more into its sections. One menu is open at a time, and only a
 // click opens one: a page reached another way marks its closed menu instead.
-type NavItem = { key: string; icon: string; label: string; to?: RouteLocationRaw; on: boolean; cnt?: number; dim?: boolean; kind?: 'settings' | 'feedback' }
+type NavItem = {
+  key: string; icon: string; label: string; to?: RouteLocationRaw; on: boolean; cnt?: number; dim?: boolean
+  kind?: 'settings' | 'feedback' | 'group'; children?: NavItem[]
+}
 type NavMenu = { key: string; icon: string; items: NavItem[] }
 const page = (name: string, icon: string, more: Partial<NavItem> = {}): NavItem => ({
   key: name, icon, label: `nav.${name}`, to: { name }, on: route.name === name, ...more,
+})
+// A submenu inside a menu: on while one of its pages is, and showing what
+// needs you among them.
+const group = (key: string, icon: string, children: NavItem[]): NavItem => ({
+  key, icon, label: `nav.${key}`, kind: 'group', children, on: children.some((x) => x.on),
+  cnt: children.reduce((n, x) => n + (x.dim ? 0 : (x.cnt ?? 0)), 0),
 })
 const menus = computed<NavMenu[]>(() => [
   { key: 'overview', icon: 'dashboard', items: [page('dashboard', 'dashboard'), page('analytics', 'analytics')] },
   { key: 'aiAssistant', icon: 'assistant', items: [page('assistant', 'assistant', { label: 'nav.assistantChat' }), page('assistantConversations', 'logs')] },
   {
-    key: 'tickets',
-    icon: 'all',
-    items: FILTERS.map((f) => ({
-      key: f.id, icon: f.icon, label: `nav.${f.id}`, to: { name: 'tickets', query: { f: f.id } }, on: activeFilter.value === f.id,
-      cnt: ['needs', 'running', 'queue'].includes(f.id) ? count(f.states) : 0, dim: f.id !== 'needs',
-    })),
-  },
-  {
-    key: 'sideProjects',
-    icon: 'folder',
+    key: 'workflow',
+    icon: 'running',
     items: [
-      page('tasks', 'tasks', { cnt: openTasks.value, dim: true }),
-      page('documents', 'rules'),
-      page('reviews', 'pull', { cnt: readyReviews.value }),
-      page('ci', 'ci', { cnt: redPipelines.value }),
+      group('tickets', 'all', FILTERS.map((f) => ({
+        key: f.id, icon: f.icon, label: `nav.${f.id}`, to: { name: 'tickets', query: { f: f.id } }, on: activeFilter.value === f.id,
+        cnt: ['needs', 'running', 'queue'].includes(f.id) ? count(f.states) : 0, dim: f.id !== 'needs',
+      }))),
+      group('sideProjects', 'folder', [
+        page('tasks', 'tasks', { cnt: openTasks.value, dim: true }),
+        page('documents', 'rules'),
+        page('reviews', 'pull', { cnt: readyReviews.value }),
+        page('ci', 'ci', { cnt: redPipelines.value }),
+      ]),
     ],
   },
   { key: 'knowledge', icon: 'learn', items: [page('learn', 'learn', { cnt: unlearned.value }), page('learnQueue', 'learnQueue', { cnt: learning.value, dim: true })] },
@@ -172,6 +179,11 @@ const openMenu = ref(menus.value.find((m) => m.items.some((x) => x.on))?.key ?? 
 function toggleMenu(key: string) {
   openMenu.value = openMenu.value === key ? '' : key
 }
+// Submenus open on click, one at a time; the one holding this page starts open.
+const openSub = ref(menus.value.flatMap((m) => m.items).find((x) => x.kind === 'group' && x.on)?.key ?? '')
+function toggleSub(key: string) {
+  openSub.value = openSub.value === key ? '' : key
+}
 // What needs you in a closed menu shows on it, so closing one hides nothing.
 const urgent = (m: NavMenu) => m.items.reduce((n, x) => n + (x.dim ? 0 : (x.cnt ?? 0)), 0)
 // The thin sidebar and narrow screens list every page without the menus.
@@ -180,10 +192,12 @@ const narrow = ref(narrowQuery.matches)
 const onNarrow = (e: MediaQueryListEvent) => (narrow.value = e.matches)
 narrowQuery.addEventListener('change', onNarrow)
 const shown = (key: string) => prefs.thin || narrow.value || openMenu.value === key
+// The thin sidebar and narrow screens list a submenu's pages in its place.
+const itemsOf = (m: NavMenu) => (prefs.thin || narrow.value ? m.items.flatMap((x) => x.children ?? [x]) : m.items)
 // What the top bar's search finds among the pages: every sidebar link and
 // each settings section, named as the sidebar names them.
 const searchPages = computed<SearchPage[]>(() => [
-  ...menus.value.flatMap((m) => m.items.filter((x) => x.to).map((x) => ({ key: x.key, label: t(x.label), icon: x.icon, to: x.to! }))),
+  ...menus.value.flatMap((m) => m.items.flatMap((x) => x.children ?? [x]).filter((x) => x.to).map((x) => ({ key: x.key, label: t(x.label), icon: x.icon, to: x.to! }))),
   ...visibleSections(catalog.claudeOff.value).map((s) => ({
     key: `settings-${s.key}`,
     label: `${t('nav.settings')} · ${t(sectionLabel(s, catalog.claudeOff.value))}`,
@@ -355,8 +369,37 @@ onBeforeUnmount(() => {
           <!-- Always rendered, so opening and closing can animate; closed, it is inert (out of the tab order). -->
           <div :id="`nav-${m.key}`" class="nav-grp" :class="{ open: shown(m.key) }" role="group" :aria-label="t(`nav.${m.key}`)" :inert="!shown(m.key)">
             <div class="nav-grp-in">
-              <template v-for="x in m.items" :key="x.key">
-                <template v-if="x.kind === 'settings'">
+              <template v-for="x in itemsOf(m)" :key="x.key">
+                <template v-if="x.kind === 'group'">
+                  <button
+                    type="button"
+                    class="nav-a"
+                    :class="{ here: openSub !== x.key && x.on }"
+                    :aria-expanded="openSub === x.key"
+                    :aria-controls="`nav-sub-${x.key}`"
+                    @click="toggleSub(x.key)"
+                  >
+                    <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
+                    <span v-if="openSub !== x.key && x.cnt" class="cnt">{{ x.cnt }}</span>
+                    <svg class="nav-chev" :class="{ open: openSub === x.key }" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
+                  </button>
+                  <div :id="`nav-sub-${x.key}`" class="nav-sub" :class="{ open: openSub === x.key }" role="group" :aria-label="t(x.label)" :inert="openSub !== x.key">
+                    <div class="nav-sub-in">
+                      <RouterLink
+                        v-for="c in x.children"
+                        :key="c.key"
+                        class="nav-a nav-sub-a"
+                        :class="{ on: c.on }"
+                        :to="c.to!"
+                        :aria-current="c.on ? 'page' : undefined"
+                      >
+                        <HiIcon :name="c.icon" /><span class="lbl">{{ t(c.label) }}</span>
+                        <span v-if="c.cnt" class="cnt" :class="{ dim: c.dim }">{{ c.cnt }}</span>
+                      </RouterLink>
+                    </div>
+                  </div>
+                </template>
+                <template v-else-if="x.kind === 'settings'">
                   <button
                     type="button"
                     class="nav-a"

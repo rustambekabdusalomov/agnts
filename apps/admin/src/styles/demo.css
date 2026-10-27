@@ -32,8 +32,8 @@
 .nav-sub .nav-sub-a.on{background:var(--hover); color:var(--ink); font-weight:700}
 .thin .side .nav-sub,.thin .side .nav-chev{display:none}
 /* The sidebar's menus (AppShell): a header opening into its pages, animated like .nav-sub. */
-.nav-menu.here{color:var(--ink); font-weight:700}
-.nav-menu.here svg{color:var(--primary)}
+.nav-a.here{color:var(--ink); font-weight:700}
+.nav-a.here svg{color:var(--primary)}
 .nav-menu .cnt + .nav-chev{margin-left:6px}
 .nav-grp{display:grid; grid-template-rows:0fr; opacity:0; margin:0 0 0 20px; transition:grid-template-rows .28s ease, opacity .2s ease, margin .28s ease}
 .nav-grp.open{grid-template-rows:1fr; opacity:1; margin:2px 0 6px 20px}
