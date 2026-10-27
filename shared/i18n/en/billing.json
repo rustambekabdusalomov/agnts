@@ -33,6 +33,7 @@
     "freeCredits": "Your free credits",
     "freeCreditsSub": "From agnts. Runs on agnts's Muse key spend them before the workspace's credits.",
     "freeCreditsLeft": "{n} of {limit} credits left",
-    "freeCreditsWorth": "{amount} of {total}"
+    "freeCreditsWorth": "{amount} of {total}",
+    "freeCreditsNone": "None yet. An Admin can give you free credits for runs on agnts's Muse key."
   }
 }

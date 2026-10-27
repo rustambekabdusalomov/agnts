@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FreeCreditsCard from '../account/FreeCreditsCard.vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -46,9 +47,6 @@ const checkout = useMutation({
   },
   onError: (e) => ui.notify(errText(e)),
 })
-// The person's own free credits from an Admin: runs on agnts's Muse key
-// spend them before the workspace's credits (1 credit = $0.01).
-const free = useQuery({ queryKey: ['free-credits'], queryFn: () => unwrap(api.GET('/account/free-credits')) })
 const reasonBadge: Record<string, string> = { purchase: 'b-ok', grant: 'b-info', refund: 'b-warn', run: 'b-gray' }
 </script>
 
@@ -96,19 +94,7 @@ const reasonBadge: Record<string, string> = { purchase: 'b-ok', grant: 'b-info',
       <p v-else class="hint">{{ t('billing.paymentsOff') }}</p>
     </section>
 
-    <section v-if="free.data.value?.limit" class="card">
-      <div class="ch">
-        <div><h2>{{ t('billing.freeCredits') }}</h2><p class="sub">{{ t('billing.freeCreditsSub') }}</p></div>
-        <span class="badge" :class="free.data.value.remaining > 0 ? 'b-ok' : 'b-gray'">{{ usd(free.data.value.remaining / 100) }}</span>
-      </div>
-      <div class="lim">
-        <div class="lim-h">
-          <span>{{ t('billing.freeCreditsLeft', { n: free.data.value.remaining, limit: free.data.value.limit }) }}</span>
-          <b>{{ t('billing.freeCreditsWorth', { amount: usd(free.data.value.remaining / 100), total: usd(free.data.value.limit / 100) }) }}</b>
-        </div>
-        <div class="bar"><span :style="{ width: Math.round((free.data.value.remaining / free.data.value.limit) * 100) + '%' }" /></div>
-      </div>
-    </section>
+    <FreeCreditsCard />
 
     <section class="card">
       <div class="ch"><div><h2>{{ t('billing.history') }}</h2></div></div>

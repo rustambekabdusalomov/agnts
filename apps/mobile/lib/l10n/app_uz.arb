@@ -428,6 +428,7 @@
   "billingFreeCreditsSub": "agnts’dan. agnts’ning Muse kalitidagi ishlar ularni ish maydoni kreditlaridan oldin sarflaydi.",
   "billingFreeCreditsLeft": "{limit} kreditdan {n} tasi qoldi",
   "billingFreeCreditsWorth": "{total} dan {amount}",
+  "billingFreeCreditsNone": "Hozircha yo‘q. Administrator sizga agnts’ning Muse kalitidagi ishlar uchun bepul kredit berishi mumkin.",
   "briefTitle": "Repozitoriy tavsifi",
   "briefSub": "Bu kod bazasi qanday ishlaydi: arxitektura, odatiy o‘zgarishlar uchun retseptlar, namuna fayllar, kelishuvlar va tuzoqlar. Bu repozitoriy tiketlarining har bir ishga tushirilishi uni o‘qiydi, shunda agnts jamoangiz qanday qilsa, shunday quradi.",
   "briefSurvey": "O‘rganish",

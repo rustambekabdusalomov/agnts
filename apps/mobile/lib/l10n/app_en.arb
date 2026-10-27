@@ -840,6 +840,7 @@
       }
     }
   },
+  "billingFreeCreditsNone": "None yet. An Admin can give you free credits for runs on agnts's Muse key.",
   "briefTitle": "Repository brief",
   "briefSub": "How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository's tickets reads it, so agnts builds things the way your team does.",
   "briefSurvey": "Survey",

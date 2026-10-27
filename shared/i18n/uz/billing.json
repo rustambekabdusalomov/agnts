@@ -33,6 +33,7 @@
     "freeCredits": "Bepul kreditlaringiz",
     "freeCreditsSub": "agnts’dan. agnts’ning Muse kalitidagi ishlar ularni ish maydoni kreditlaridan oldin sarflaydi.",
     "freeCreditsLeft": "{limit} kreditdan {n} tasi qoldi",
-    "freeCreditsWorth": "{total} dan {amount}"
+    "freeCreditsWorth": "{total} dan {amount}",
+    "freeCreditsNone": "Hozircha yo‘q. Administrator sizga agnts’ning Muse kalitidagi ishlar uchun bepul kredit berishi mumkin."
   }
 }

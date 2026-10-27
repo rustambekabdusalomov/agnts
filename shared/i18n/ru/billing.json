@@ -33,6 +33,7 @@
     "freeCredits": "Ваши бесплатные кредиты",
     "freeCreditsSub": "От agnts. Запуски на ключе Muse от agnts тратят их раньше кредитов пространства.",
     "freeCreditsLeft": "Осталось {n} из {limit} кредитов",
-    "freeCreditsWorth": "{amount} из {total}"
+    "freeCreditsWorth": "{amount} из {total}",
+    "freeCreditsNone": "Пока нет. Администратор может выдать вам бесплатные кредиты для запусков на ключе Muse от agnts."
   }
 }

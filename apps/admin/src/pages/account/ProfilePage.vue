@@ -6,6 +6,7 @@ import { api, HttpError, unwrap } from '../../api/client'
 import PageHeader from '../../components/PageHeader.vue'
 import ClaudeConnect from '../../components/account/ClaudeConnect.vue'
 import MuseConnect from '../../components/account/MuseConnect.vue'
+import FreeCreditsCard from '../../components/account/FreeCreditsCard.vue'
 import { useModels } from '../../composables/useModels'
 import CfgRow from '../../components/form/CfgRow.vue'
 import TotpQr from '../../components/account/TotpQr.vue'
@@ -159,6 +160,8 @@ const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => 
         @disconnect="disconnect.mutate()"
       />
     </section>
+
+    <FreeCreditsCard v-if="catalog.isMuse.value" always />
 
     <section class="card">
       <div class="ch"><div><h2>{{ t('account.passwordTitle') }}</h2><p class="sub">{{ t('account.passwordSub') }}</p></div></div>
