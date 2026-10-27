@@ -81,6 +81,15 @@ const langs = LOCALES.map((l) => ({ value: l, label: LANG_LABEL[l] }))
 const models = computed(() => catalog.models.value.filter((m) => m.provider !== 'codex').map((m) => ({ value: m.id as Model, label: m.label })))
 // Without Claude Code the section is about Muse: its wording, not Claude's.
 const museWords = computed(() => catalog.claudeOff.value)
+// The budget per run is kept in credits (1 credit = $0.01) and set in
+// whole dollars; 0 leaves the server's cap.
+const runBudgetUsd = computed({
+  get: () => Math.round((draft.value?.runBudget ?? 0) / 100),
+  set: (v: number) => {
+    if (draft.value) draft.value.runBudget = Math.max(0, Math.round(v)) * 100
+  },
+})
+const budgetLabel = (n: number) => (n === 0 ? t('settings.runBudgetServer') : '$' + n)
 const w = (key: string) => (museWords.value ? `${key}Muse` : key)
 const stages = ['analyze', 'coding', 'retry', 'helper', 'learn'] as const
 const stageKey: Record<(typeof stages)[number], string> = {
@@ -229,6 +238,9 @@ const section = computed(() => settingsSection(route.params.section))
         </CfgRow>
         <CfgRow :label="t('settings.maxTurns')" :help="t('settings.maxTurnsHelp')">
           <NumberStepper v-model="draft.maxTurns" :min="20" :max="200" :step="10" :label="t('settings.maxTurns')" />
+        </CfgRow>
+        <CfgRow v-if="catalog.isMuse.value" :label="t('settings.runBudget')" :help="t('settings.runBudgetHelp')">
+          <NumberStepper v-model="runBudgetUsd" :min="0" :max="500" :step="1" :label="t('settings.runBudget')" :format="budgetLabel" />
         </CfgRow>
         <CfgRow :label="t('settings.timeout')">
           <NumberStepper v-model="draft.timeoutMin" :min="10" :max="120" :step="5" :label="t('settings.timeout')" :format="minutes" />

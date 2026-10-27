@@ -32,6 +32,8 @@ class Settings {
 
     required  this.maxTurns,
 
+     this.runBudget,
+
     required  this.timeoutMin,
 
     required  this.allow,
@@ -122,6 +124,21 @@ class Settings {
 
 
   final int maxTurns;
+
+
+
+      /// The most one run on credits may spend, in credits (1 credit = $0.01); 0 leaves the server cap
+          // minimum: 0
+          // maximum: 1000000
+  @JsonKey(
+    
+    name: r'runBudget',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? runBudget;
 
 
 
@@ -554,6 +571,7 @@ class Settings {
     bool operator ==(Object other) => identical(this, other) || other is Settings &&
       other.models == models &&
       other.maxTurns == maxTurns &&
+      other.runBudget == runBudget &&
       other.timeoutMin == timeoutMin &&
       other.allow == allow &&
       other.deny == deny &&
@@ -592,6 +610,7 @@ class Settings {
     int get hashCode =>
         models.hashCode +
         maxTurns.hashCode +
+        runBudget.hashCode +
         timeoutMin.hashCode +
         allow.hashCode +
         deny.hashCode +

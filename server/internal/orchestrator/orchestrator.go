@@ -746,6 +746,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: turns,
+		Budget:   s.RunBudget,
 		Resume:   resume,
 		Timeout:  time.Duration(s.TimeoutMin) * time.Minute,
 		Settings: permissionSettings(s, readOnly, extraDeny...),

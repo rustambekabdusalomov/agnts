@@ -145,16 +145,35 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 		}
 		b.Caps = []budget.AccountID{capAcct}
 	}
-	if s.cfg.RunCap > 0 {
+	// The run's limit: the workspace's budget per run (Settings), else the
+	// server's cap, less what the run spent already, and never more than
+	// its payers have, so the ticket shows the limit that really applies.
+	capCredits := s.cfg.RunCap
+	if req.Budget > 0 && (capCredits <= 0 || req.Budget < capCredits) {
+		capCredits = req.Budget
+	}
+	if capCredits > 0 {
 		spent := 0.0
 		if s.spend != nil {
 			spent, _ = s.spend.RunCostUSD(sys, req.RunID)
 		}
-		left := money.USD(s.cfg.RunCap)*CreditUSD - money.Dollars(spent)
+		left := money.USD(capCredits)*CreditUSD - money.Dollars(spent)
 		if left <= 0 {
-			return nil, fmt.Errorf("%w: this run reached the cap of %d credits", muse.ErrRunLimit, s.cfg.RunCap)
+			return nil, fmt.Errorf("%w: this run reached its budget of %d credits", muse.ErrRunLimit, capCredits)
 		}
 		b.Limit = left
+	}
+	var funds money.USD
+	for _, p := range b.Payers {
+		if bal, err := s.ledger.Balance(sys, p); err == nil {
+			funds += money.Max(bal.Available, 0)
+		}
+	}
+	if funds <= 0 {
+		return nil, fmt.Errorf("%w: no credits left (free credits and the workspace's)", muse.ErrBudget)
+	}
+	if b.Limit == 0 || funds < b.Limit {
+		b.Limit = funds
 	}
 	return b, nil
 }

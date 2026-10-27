@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **models** | [**StageModels**](StageModels.md) |  | 
 **maxTurns** | **int** |  | 
+**runBudget** | **int** | The most one run on credits may spend, in credits (1 credit = $0.01); 0 leaves the server cap | [optional] 
 **timeoutMin** | **int** |  | 
 **allow** | **List&lt;String&gt;** |  | 
 **deny** | **List&lt;String&gt;** |  | 

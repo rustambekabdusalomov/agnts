@@ -11,6 +11,8 @@ abstract class _$SettingsCWProxy {
 
   Settings maxTurns(int maxTurns);
 
+  Settings runBudget(int? runBudget);
+
   Settings timeoutMin(int timeoutMin);
 
   Settings allow(List<String> allow);
@@ -86,6 +88,7 @@ abstract class _$SettingsCWProxy {
   Settings call({
     StageModels models,
     int maxTurns,
+    int? runBudget,
     int timeoutMin,
     List<String> allow,
     List<String> deny,
@@ -133,6 +136,9 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
 
   @override
   Settings maxTurns(int maxTurns) => this(maxTurns: maxTurns);
+
+  @override
+  Settings runBudget(int? runBudget) => this(runBudget: runBudget);
 
   @override
   Settings timeoutMin(int timeoutMin) => this(timeoutMin: timeoutMin);
@@ -253,6 +259,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
   Settings call({
     Object? models = const $CopyWithPlaceholder(),
     Object? maxTurns = const $CopyWithPlaceholder(),
+    Object? runBudget = const $CopyWithPlaceholder(),
     Object? timeoutMin = const $CopyWithPlaceholder(),
     Object? allow = const $CopyWithPlaceholder(),
     Object? deny = const $CopyWithPlaceholder(),
@@ -296,6 +303,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.maxTurns
           // ignore: cast_nullable_to_non_nullable
           : maxTurns as int,
+      runBudget: runBudget == const $CopyWithPlaceholder()
+          ? _value.runBudget
+          // ignore: cast_nullable_to_non_nullable
+          : runBudget as int?,
       timeoutMin: timeoutMin == const $CopyWithPlaceholder()
           ? _value.timeoutMin
           // ignore: cast_nullable_to_non_nullable
@@ -466,6 +477,7 @@ Settings _$SettingsFromJson(
       (v) => StageModels.fromJson(v as Map<String, dynamic>),
     ),
     maxTurns: $checkedConvert('maxTurns', (v) => (v as num).toInt()),
+    runBudget: $checkedConvert('runBudget', (v) => (v as num?)?.toInt()),
     timeoutMin: $checkedConvert('timeoutMin', (v) => (v as num).toInt()),
     allow: $checkedConvert(
       'allow',
@@ -546,6 +558,7 @@ Settings _$SettingsFromJson(
 Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'models': instance.models.toJson(),
   'maxTurns': instance.maxTurns,
+  'runBudget': ?instance.runBudget,
   'timeoutMin': instance.timeoutMin,
   'allow': instance.allow,
   'deny': instance.deny,

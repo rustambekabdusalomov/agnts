@@ -6902,6 +6902,9 @@
   "settingsModelAuto": "Auto",
   "settingsMaxTurns": "Turn limit per run",
   "settingsMaxTurnsHelp": "The run stops and reports when it reaches this",
+  "settingsRunBudget": "Budget per run",
+  "settingsRunBudgetHelp": "The most one run on credits may spend; Muse is told to wrap up at 80% and stopped before going over",
+  "settingsRunBudgetServer": "Server cap",
   "settingsTimeout": "Run timeout",
   "settingsMinutes": "{n} min",
   "@settingsMinutes": {

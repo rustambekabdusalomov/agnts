@@ -166,6 +166,9 @@ type NotifySettings struct {
 type Settings struct {
 	Models     StageModels `json:"models"`
 	MaxTurns   int         `json:"maxTurns"`
+	// RunBudget is the most one run on credits may spend, in credits
+	// (1 credit = $0.01); 0 leaves the server's cap per run.
+	RunBudget int64 `json:"runBudget"`
 	TimeoutMin int         `json:"timeoutMin"`
 	Allow      []string    `json:"allow"`
 	Deny       []string    `json:"deny"`
@@ -332,6 +335,9 @@ func (s *Settings) Validate() error {
 		}
 	}
 	check("maxTurns", s.MaxTurns, 20, 200)
+	if s.RunBudget < 0 || s.RunBudget > 1_000_000 {
+		errs = append(errs, fmt.Errorf("budget per run must be between 0 and 1000000 credits"))
+	}
 	check("timeoutMin", s.TimeoutMin, 10, 120)
 	check("pauseAbove", s.PauseAbove, 50, 100)
 	check("parallel", s.Parallel, 1, 3)

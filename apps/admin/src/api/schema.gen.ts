@@ -6701,6 +6701,11 @@ export interface components {
         Settings: {
             models: components["schemas"]["StageModels"];
             maxTurns: number;
+            /**
+             * Format: int64
+             * @description The most one run on credits may spend, in credits (1 credit = $0.01); 0 leaves the server cap
+             */
+            runBudget?: number;
             timeoutMin: number;
             allow: string[];
             deny: string[];

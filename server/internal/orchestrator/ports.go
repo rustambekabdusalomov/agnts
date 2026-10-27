@@ -448,6 +448,9 @@ type ClaudeRequest struct {
 	// ticket run); Muse runs on credits budget by them.
 	RunID       int64
 	WorkspaceID int64
+	// Budget is the workspace's most a run on credits may spend, in
+	// credits (0: the server's cap).
+	Budget int64
 }
 
 // CodexPrefix marks a model as one Codex CLI runs ("codex:<model>"),

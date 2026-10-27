@@ -17,6 +17,12 @@ void main() {
       // TODO
     });
 
+    // The most one run on credits may spend, in credits (1 credit = $0.01); 0 leaves the server cap
+    // int runBudget
+    test('to test the property `runBudget`', () async {
+      // TODO
+    });
+
     // int timeoutMin
     test('to test the property `timeoutMin`', () async {
       // TODO

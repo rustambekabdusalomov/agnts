@@ -58,13 +58,14 @@ func TestRunPaysFreeCreditsFirst(t *testing.T) {
 	}
 
 	// The run's budget: the judge's free credits, then the wallet, under
-	// the platform's monthly cap and the run cap.
+	// the platform's monthly cap and the run cap; its limit is what the
+	// payers have ($0.20 + $5.00), below the $25 cap.
 	rctx := domain.WithClaude(ctx, domain.ClaudeAccount{Credits: true, UserID: judge})
 	b, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: run.ID, WorkspaceID: ws})
 	if err != nil || b == nil {
 		t.Fatalf("budget = %+v, %v", b, err)
 	}
-	if len(b.Payers) != 2 || b.Payers[0] != budget.AccountID("user:"+itoa(judge)+":free") || len(b.Caps) != 1 || b.Limit != 2500*money.Cent {
+	if len(b.Payers) != 2 || b.Payers[0] != budget.AccountID("user:"+itoa(judge)+":free") || len(b.Caps) != 1 || b.Limit != 520*money.Cent {
 		t.Fatalf("budget = %+v", b)
 	}
 	// What agnts-muse does during the run: hold, extend, commit.
@@ -161,3 +162,29 @@ func TestLoweringFreeCreditsKeepsWhatWasSpent(t *testing.T) {
 }
 
 func itoa(n int64) string { return strconv.FormatInt(n, 10) }
+
+func TestWorkspaceBudgetPerRun(t *testing.T) {
+	pool := pgtest.Open(t)
+	pgtest.Reset(t, pool)
+	ctx, ws := pgtest.Workspace(t, pool, "muse-budget")
+	pgtest.Exec(t, pool, `UPDATE workspaces SET credits_balance = 0 WHERE id = $1`, ws)
+	credits := postgres.NewCredits(pool)
+	svc := musecredits.New(musecredits.Config{RunCap: 2500}, pool, credits)
+	if err := svc.Migrate(ctx); err != nil {
+		t.Fatal(err)
+	}
+	rctx := domain.WithClaude(ctx, domain.ClaudeAccount{Credits: true})
+	if _, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9001, WorkspaceID: ws}); err == nil {
+		t.Fatal("a run without any credits must not start")
+	}
+	if _, err := credits.Add(domain.System(ctx), postgres.LedgerEntry{WorkspaceID: ws, Amount: 1000, Reason: postgres.CreditGrant}); err != nil {
+		t.Fatal(err)
+	}
+	b, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9001, WorkspaceID: ws, Budget: 50})
+	if err != nil || b.Limit != 50*money.Cent {
+		t.Fatalf("budget 50 credits: %+v, %v", b, err)
+	}
+	if b, _ = svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9001, WorkspaceID: ws}); b.Limit != 10*money.Dollar {
+		t.Fatalf("no setting: limit %v, want the $10 the wallet has", b.Limit)
+	}
+}

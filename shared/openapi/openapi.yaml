@@ -8170,6 +8170,7 @@ components:
       properties:
         models: { $ref: '#/components/schemas/StageModels' }
         maxTurns: { type: integer, minimum: 20, maximum: 200 }
+        runBudget: { type: integer, format: int64, minimum: 0, maximum: 1000000, description: 'The most one run on credits may spend, in credits (1 credit = $0.01); 0 leaves the server cap' }
         timeoutMin: { type: integer, minimum: 10, maximum: 120 }
         allow:
           type: array

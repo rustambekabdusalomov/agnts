@@ -458,7 +458,7 @@ func toSettings(v domain.Settings) gen.Settings {
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
 			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect, PublicDocuments: &publicDocs,
-		MaxTurns: v.MaxTurns, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
+		MaxTurns: v.MaxTurns, RunBudget: &v.RunBudget, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
 		AutoReview: &autoReview, SuggestFollowUps: &followUps,
 		Git: gen.GitSettings{AuthorName: v.Git.AuthorName, AuthorEmail: v.Git.AuthorEmail, CoAuthor: v.Git.CoAuthor,
@@ -520,7 +520,10 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos, Effort: cur.Effort, RecheckComplex: cur.RecheckComplex, BaselineChecks: cur.BaselineChecks,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
-		Notify: cur.Notify,
+		Notify: cur.Notify, RunBudget: cur.RunBudget,
+	}
+	if req.RunBudget != nil {
+		v.RunBudget = *req.RunBudget
 	}
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
