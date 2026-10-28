@@ -5,6 +5,8 @@ import 'package:agnts_api/src/model/accept_follow_ups.dart';
 import 'package:agnts_api/src/model/accept_follow_ups_result.dart';
 import 'package:agnts_api/src/model/acceptance.dart';
 import 'package:agnts_api/src/model/acceptance_criteria_inner.dart';
+import 'package:agnts_api/src/model/act_on_meeting_person_request.dart';
+import 'package:agnts_api/src/model/action_item_ticket_input.dart';
 import 'package:agnts_api/src/model/add_review_draft_request.dart';
 import 'package:agnts_api/src/model/address_pull_comments_request.dart';
 import 'package:agnts_api/src/model/admin_audit_entry.dart';
@@ -25,6 +27,7 @@ import 'package:agnts_api/src/model/analytics_repos_inner.dart';
 import 'package:agnts_api/src/model/answer_draft.dart';
 import 'package:agnts_api/src/model/answer_draft_request.dart';
 import 'package:agnts_api/src/model/answer_draft_request_answers_inner.dart';
+import 'package:agnts_api/src/model/answer_meeting_request.dart';
 import 'package:agnts_api/src/model/answers_request.dart';
 import 'package:agnts_api/src/model/answers_request_answers_inner.dart';
 import 'package:agnts_api/src/model/api_case.dart';
@@ -179,6 +182,37 @@ import 'package:agnts_api/src/model/local_branch.dart';
 import 'package:agnts_api/src/model/login_request.dart';
 import 'package:agnts_api/src/model/login_response.dart';
 import 'package:agnts_api/src/model/mcp_status.dart';
+import 'package:agnts_api/src/model/meeting.dart';
+import 'package:agnts_api/src/model/meeting_action_item.dart';
+import 'package:agnts_api/src/model/meeting_attendee.dart';
+import 'package:agnts_api/src/model/meeting_call.dart';
+import 'package:agnts_api/src/model/meeting_call_settings.dart';
+import 'package:agnts_api/src/model/meeting_detail.dart';
+import 'package:agnts_api/src/model/meeting_grant.dart';
+import 'package:agnts_api/src/model/meeting_input.dart';
+import 'package:agnts_api/src/model/meeting_invitee.dart';
+import 'package:agnts_api/src/model/meeting_invitees_input.dart';
+import 'package:agnts_api/src/model/meeting_invites.dart';
+import 'package:agnts_api/src/model/meeting_join.dart';
+import 'package:agnts_api/src/model/meeting_join_input.dart';
+import 'package:agnts_api/src/model/meeting_knock.dart';
+import 'package:agnts_api/src/model/meeting_live.dart';
+import 'package:agnts_api/src/model/meeting_message.dart';
+import 'package:agnts_api/src/model/meeting_person.dart';
+import 'package:agnts_api/src/model/meeting_prefs.dart';
+import 'package:agnts_api/src/model/meeting_recording.dart';
+import 'package:agnts_api/src/model/meeting_rights.dart';
+import 'package:agnts_api/src/model/meeting_segment.dart';
+import 'package:agnts_api/src/model/meeting_session_brief.dart';
+import 'package:agnts_api/src/model/meeting_session_detail.dart';
+import 'package:agnts_api/src/model/meeting_session_summary.dart';
+import 'package:agnts_api/src/model/meeting_settings.dart';
+import 'package:agnts_api/src/model/meeting_settings_available.dart';
+import 'package:agnts_api/src/model/meeting_settings_input.dart';
+import 'package:agnts_api/src/model/meeting_ticket_link.dart';
+import 'package:agnts_api/src/model/meeting_transcript.dart';
+import 'package:agnts_api/src/model/meeting_transcript_hit.dart';
+import 'package:agnts_api/src/model/meeting_usage_day.dart';
 import 'package:agnts_api/src/model/member.dart';
 import 'package:agnts_api/src/model/meta.dart';
 import 'package:agnts_api/src/model/model_catalog.dart';
@@ -219,6 +253,7 @@ import 'package:agnts_api/src/model/proof_run.dart';
 import 'package:agnts_api/src/model/proof_test.dart';
 import 'package:agnts_api/src/model/public_document.dart';
 import 'package:agnts_api/src/model/public_document_info.dart';
+import 'package:agnts_api/src/model/public_meeting.dart';
 import 'package:agnts_api/src/model/publish_review_drafts_request.dart';
 import 'package:agnts_api/src/model/published_review.dart';
 import 'package:agnts_api/src/model/pull_comment.dart';
@@ -288,6 +323,7 @@ import 'package:agnts_api/src/model/reviewer_note_input.dart';
 import 'package:agnts_api/src/model/reviewer_profile_input.dart';
 import 'package:agnts_api/src/model/reviewer_stat.dart';
 import 'package:agnts_api/src/model/reviewers.dart';
+import 'package:agnts_api/src/model/ring_meeting_request.dart';
 import 'package:agnts_api/src/model/rotate_mcp_token200_response.dart';
 import 'package:agnts_api/src/model/rotate_swagger_suite_hook200_response.dart';
 import 'package:agnts_api/src/model/rule.dart';
@@ -307,7 +343,9 @@ import 'package:agnts_api/src/model/second_opinion.dart';
 import 'package:agnts_api/src/model/secret_findings.dart';
 import 'package:agnts_api/src/model/secret_findings_findings_inner.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
+import 'package:agnts_api/src/model/send_meeting_message_request.dart';
 import 'package:agnts_api/src/model/set_free_credits_request.dart';
+import 'package:agnts_api/src/model/set_meeting_cohosts_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/set_slots_request.dart';
@@ -419,6 +457,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Acceptance.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AcceptanceCriteriaInner':
           return AcceptanceCriteriaInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ActOnMeetingPersonRequest':
+          return ActOnMeetingPersonRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ActionItemTicketInput':
+          return ActionItemTicketInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AddReviewDraftRequest':
           return AddReviewDraftRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AddressPullCommentsRequest':
@@ -459,6 +501,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AnswerDraftRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnswerDraftRequestAnswersInner':
           return AnswerDraftRequestAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AnswerMeetingRequest':
+          return AnswerMeetingRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnswersRequest':
           return AnswersRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AnswersRequestAnswersInner':
@@ -806,6 +850,71 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return LoginResponse.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'McpStatus':
           return McpStatus.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Meeting':
+          return Meeting.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingActionItem':
+          return MeetingActionItem.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingAttendee':
+          return MeetingAttendee.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingCall':
+          return MeetingCall.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingCallSettings':
+          return MeetingCallSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingDetail':
+          return MeetingDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingGrant':
+          return MeetingGrant.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingInput':
+          return MeetingInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingInvitee':
+          return MeetingInvitee.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingInviteesInput':
+          return MeetingInviteesInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingInvites':
+          return MeetingInvites.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingJoin':
+          return MeetingJoin.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingJoinInput':
+          return MeetingJoinInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingKnock':
+          return MeetingKnock.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingLive':
+          return MeetingLive.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingMessage':
+          return MeetingMessage.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingNotesStatus':
+          
+          
+        case 'MeetingPerson':
+          return MeetingPerson.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingPrefs':
+          return MeetingPrefs.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingRecording':
+          return MeetingRecording.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingRights':
+          return MeetingRights.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingSegment':
+          return MeetingSegment.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingSessionBrief':
+          return MeetingSessionBrief.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingSessionDetail':
+          return MeetingSessionDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingSessionSummary':
+          return MeetingSessionSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingSettings':
+          return MeetingSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingSettingsAvailable':
+          return MeetingSettingsAvailable.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingSettingsInput':
+          return MeetingSettingsInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingTicketLink':
+          return MeetingTicketLink.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingTranscript':
+          return MeetingTranscript.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingTranscriptHit':
+          return MeetingTranscriptHit.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MeetingUsageDay':
+          return MeetingUsageDay.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Member':
           return Member.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Meta':
@@ -886,6 +995,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PublicDocument.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublicDocumentInfo':
           return PublicDocumentInfo.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PublicMeeting':
+          return PublicMeeting.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublishReviewDraftsRequest':
           return PublishReviewDraftsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublishedReview':
@@ -1027,6 +1138,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ReviewerStat.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Reviewers':
           return Reviewers.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RingMeetingRequest':
+          return RingMeetingRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RotateMcpToken200Response':
           return RotateMcpToken200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RotateSwaggerSuiteHook200Response':
@@ -1071,8 +1184,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SecretFindingsFindingsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendFeedbackRequest':
           return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SendMeetingMessageRequest':
+          return SendMeetingMessageRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetFreeCreditsRequest':
           return SetFreeCreditsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetMeetingCohostsRequest':
+          return SetMeetingCohostsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMemberRoleRequest':
           return SetMemberRoleRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetPlaneWebhookSecretRequest':

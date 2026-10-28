@@ -164,18 +164,18 @@ type NotifySettings struct {
 
 // Settings are the runtime settings edited on the Settings page.
 type Settings struct {
-	Models     StageModels `json:"models"`
-	MaxTurns   int         `json:"maxTurns"`
+	Models   StageModels `json:"models"`
+	MaxTurns int         `json:"maxTurns"`
 	// RunBudget is the most one run on credits may spend, in credits
 	// (1 credit = $0.01); 0 leaves the server's cap per run.
-	RunBudget int64 `json:"runBudget"`
-	TimeoutMin int         `json:"timeoutMin"`
-	Allow      []string    `json:"allow"`
-	Deny       []string    `json:"deny"`
-	AskFirst   bool        `json:"askFirst"`
-	AutoResume bool        `json:"autoResume"`
-	AutoLearn  bool        `json:"autoLearn"`  // learn run after every push
-	AutoReview bool        `json:"autoReview"` // code review of every result
+	RunBudget  int64    `json:"runBudget"`
+	TimeoutMin int      `json:"timeoutMin"`
+	Allow      []string `json:"allow"`
+	Deny       []string `json:"deny"`
+	AskFirst   bool     `json:"askFirst"`
+	AutoResume bool     `json:"autoResume"`
+	AutoLearn  bool     `json:"autoLearn"`  // learn run after every push
+	AutoReview bool     `json:"autoReview"` // code review of every result
 	// AutoPreview takes screenshots of every UI change in a repository
 	// with a preview command.
 	AutoPreview bool `json:"autoPreview"`
@@ -244,6 +244,37 @@ type Settings struct {
 	Parallel       int            `json:"parallel"`
 	Git            GitSettings    `json:"git"`
 	Notify         NotifySettings `json:"notify"`
+	// Meetings: recording, retention and limits of the workspace's calls.
+	Meetings MeetingSettings `json:"meetings"`
+}
+
+// MeetingSettings are a workspace's rules for meetings.
+type MeetingSettings struct {
+	// AllowRecording lets hosts record calls as video.
+	AllowRecording bool `json:"allowRecording"`
+	// RetentionDays is how long recordings, notes audio and transcripts
+	// are kept, 0 for ever.
+	RetentionDays int `json:"retentionDays"`
+	// KeepAudio keeps the audio of notes after it is transcribed.
+	KeepAudio bool `json:"keepAudio"`
+	// MaxParticipants caps the people in one call.
+	MaxParticipants int `json:"maxParticipants"`
+}
+
+// DefaultMeetingSettings are the settings before any are saved.
+func DefaultMeetingSettings() MeetingSettings {
+	return MeetingSettings{AllowRecording: true, RetentionDays: 90, MaxParticipants: 50}
+}
+
+// Validate checks the ranges.
+func (m MeetingSettings) Validate() error {
+	switch {
+	case m.RetentionDays < 0 || m.RetentionDays > 3650:
+		return errors.New("meeting retention must be between 0 and 3650 days")
+	case m.MaxParticipants < 2 || m.MaxParticipants > 100:
+		return errors.New("people in one call must be between 2 and 100")
+	}
+	return nil
 }
 
 // defaultModels are the primary provider's models per stage. On Muse,
@@ -292,6 +323,7 @@ func DefaultSettings() Settings {
 		MaxTicketRepos: DefaultMaxTicketRepos,
 		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
 		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
+		Meetings:       DefaultMeetingSettings(),
 	}
 }
 
@@ -396,6 +428,9 @@ func (s *Settings) Validate() error {
 	}
 	if s.Git.AuthorEmail != "" && !strings.Contains(s.Git.AuthorEmail, "@") {
 		errs = append(errs, errors.New("git author email is not an email address"))
+	}
+	if err := s.Meetings.Validate(); err != nil {
+		errs = append(errs, err)
 	}
 	return errors.Join(errs...)
 }

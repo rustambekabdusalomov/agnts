@@ -11,6 +11,8 @@ abstract class _$DocumentSourceInputCWProxy {
 
   DocumentSourceInput template(DocumentSourceInputTemplateEnum? template);
 
+  DocumentSourceInput sessionId(int? sessionId);
+
   DocumentSourceInput documentId(int? documentId);
 
   DocumentSourceInput documentVersion(int? documentVersion);
@@ -44,6 +46,7 @@ abstract class _$DocumentSourceInputCWProxy {
   DocumentSourceInput call({
     DocumentSourceInputKindEnum kind,
     DocumentSourceInputTemplateEnum? template,
+    int? sessionId,
     int? documentId,
     int? documentVersion,
     String? instruction,
@@ -72,6 +75,9 @@ class _$DocumentSourceInputCWProxyImpl implements _$DocumentSourceInputCWProxy {
   @override
   DocumentSourceInput template(DocumentSourceInputTemplateEnum? template) =>
       this(template: template);
+
+  @override
+  DocumentSourceInput sessionId(int? sessionId) => this(sessionId: sessionId);
 
   @override
   DocumentSourceInput documentId(int? documentId) =>
@@ -125,6 +131,7 @@ class _$DocumentSourceInputCWProxyImpl implements _$DocumentSourceInputCWProxy {
   DocumentSourceInput call({
     Object? kind = const $CopyWithPlaceholder(),
     Object? template = const $CopyWithPlaceholder(),
+    Object? sessionId = const $CopyWithPlaceholder(),
     Object? documentId = const $CopyWithPlaceholder(),
     Object? documentVersion = const $CopyWithPlaceholder(),
     Object? instruction = const $CopyWithPlaceholder(),
@@ -147,6 +154,10 @@ class _$DocumentSourceInputCWProxyImpl implements _$DocumentSourceInputCWProxy {
           ? _value.template
           // ignore: cast_nullable_to_non_nullable
           : template as DocumentSourceInputTemplateEnum?,
+      sessionId: sessionId == const $CopyWithPlaceholder()
+          ? _value.sessionId
+          // ignore: cast_nullable_to_non_nullable
+          : sessionId as int?,
       documentId: documentId == const $CopyWithPlaceholder()
           ? _value.documentId
           // ignore: cast_nullable_to_non_nullable
@@ -223,6 +234,7 @@ DocumentSourceInput _$DocumentSourceInputFromJson(Map<String, dynamic> json) =>
           (v) =>
               $enumDecodeNullable(_$DocumentSourceInputTemplateEnumEnumMap, v),
         ),
+        sessionId: $checkedConvert('sessionId', (v) => (v as num?)?.toInt()),
         documentId: $checkedConvert('documentId', (v) => (v as num?)?.toInt()),
         documentVersion: $checkedConvert(
           'documentVersion',
@@ -271,6 +283,7 @@ Map<String, dynamic> _$DocumentSourceInputToJson(
 ) => <String, dynamic>{
   'kind': _$DocumentSourceInputKindEnumEnumMap[instance.kind]!,
   'template': ?_$DocumentSourceInputTemplateEnumEnumMap[instance.template],
+  'sessionId': ?instance.sessionId,
   'documentId': ?instance.documentId,
   'documentVersion': ?instance.documentVersion,
   'instruction': ?instance.instruction,
@@ -292,6 +305,7 @@ const _$DocumentSourceInputKindEnumEnumMap = {
   DocumentSourceInputKindEnum.pulls: 'pulls',
   DocumentSourceInputKindEnum.repo: 'repo',
   DocumentSourceInputKindEnum.document: 'document',
+  DocumentSourceInputKindEnum.meeting: 'meeting',
 };
 
 const _$DocumentSourceInputTemplateEnumEnumMap = {
@@ -302,6 +316,7 @@ const _$DocumentSourceInputTemplateEnumEnumMap = {
   DocumentSourceInputTemplateEnum.ticketSummary: 'ticket_summary',
   DocumentSourceInputTemplateEnum.presentation: 'presentation',
   DocumentSourceInputTemplateEnum.blank: 'blank',
+  DocumentSourceInputTemplateEnum.meetingNotes: 'meeting_notes',
 };
 
 const _$DocumentSourceInputPrStateEnumEnumMap = {

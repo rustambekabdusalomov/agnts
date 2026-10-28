@@ -14,6 +14,7 @@ import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../../widgets/workspace.dart';
+import '../meetings/meetings_data.dart';
 
 /// Profile, usage, appearance, default models, push settings, integrations and repositories.
 class MoreScreen extends ConsumerWidget {
@@ -141,7 +142,8 @@ class MoreScreen extends ConsumerWidget {
                 onTap: () => context.push('/ci'),
               ),
             ]),
-            // Documents: reports and pages of the workspace.
+            // Documents: reports and pages of the workspace; meetings: calls
+            // and their notes.
             const SizedBox(height: 10),
             group([
               ListRow(
@@ -149,6 +151,12 @@ class MoreScreen extends ConsumerWidget {
                 title: l.mdocumentsTitle,
                 subtitle: l.mdocumentsMoreRowSub,
                 onTap: () => context.push('/documents'),
+              ),
+              ListRow(
+                leading: HIcon('video', size: 22, color: c.primary),
+                title: l.meetingsPageTitle,
+                value: '${ref.watch(upcomingMeetingsProvider).value?.where((m) => m.live != null).length ?? ''}'.replaceAll(RegExp(r'^0$'), ''),
+                onTap: () => context.push('/meetings'),
               ),
             ]),
             // Workspace setup and the pages that manage it.

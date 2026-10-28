@@ -71,6 +71,25 @@ func (s *Agent) TicketOwner(ctx context.Context, ws int64, key string) (int64, e
 	return *owner, nil
 }
 
+// UserDevices returns the devices of some members of a workspace.
+func (s *Agent) UserDevices(ctx context.Context, ws int64, users []int64) ([]Device, error) {
+	rows, err := s.db.Query(ctx, `SELECT d.id, d.user_id, d.platform, d.fcm_token, d.app_version, d.last_seen FROM devices d
+		JOIN memberships m ON m.user_id = d.user_id AND m.workspace_id = $1 WHERE d.user_id = ANY($2) ORDER BY d.id`, ws, users)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []Device
+	for rows.Next() {
+		var d Device
+		if err := rows.Scan(&d.ID, &d.UserID, &d.Platform, &d.FCMToken, &d.AppVersion, &d.LastSeen); err != nil {
+			return nil, err
+		}
+		out = append(out, d)
+	}
+	return out, rows.Err()
+}
+
 // OwnerDevices returns the owner of ticket key (TicketOwner) and their
 // devices. Someone who has left the workspace has no devices here.
 func (s *Agent) OwnerDevices(ctx context.Context, ws int64, key string) (int64, []Device, error) {

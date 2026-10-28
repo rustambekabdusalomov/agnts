@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **kind** | **String** |  | 
 **template** | **String** | Defaults by kind | [optional] 
+**sessionId** | **int** | meeting: the session | [optional] 
 **documentId** | **int** |  | [optional] 
 **documentVersion** | **int** |  | [optional] 
 **instruction** | **String** |  | [optional] 

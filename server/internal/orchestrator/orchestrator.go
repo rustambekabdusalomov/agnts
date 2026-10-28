@@ -155,6 +155,8 @@ type Orchestrator struct {
 	docs     DocumentRuns
 	docHost  DocumentHost
 	docWatch DocumentWatcher
+	meetings MeetingNotesSource // nil: no meeting notes
+	meetHear MeetingTranscriber // nil: meeting audio is not heard
 
 	swagger SwaggerTests
 	suites  SwaggerSuites

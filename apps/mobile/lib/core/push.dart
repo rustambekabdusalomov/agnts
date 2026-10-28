@@ -110,12 +110,13 @@ class Push {
     if (route != null) open(route, int.tryParse('${data['workspace'] ?? ''}') ?? 0);
   }
 
-  /// The app route a push opens: its own (a ticket, lessons, or a CI
-  /// failure), else its ticket's.
+  /// The app route a push opens: its own (a ticket, lessons, a CI
+  /// failure, or a meeting's call), else its ticket's.
   static String? _route(Map<String, dynamic> data) {
     final route = data['route'];
     final key = data['ticket'];
-    if (route is String && (route.startsWith('/tickets/') || route.startsWith('/learn') || route.startsWith('/ci/'))) {
+    if (route is String &&
+        (route.startsWith('/tickets/') || route.startsWith('/learn') || route.startsWith('/ci/') || route.startsWith('/m/'))) {
       return route;
     }
     if (key is String && key.isNotEmpty) return '/tickets/$key';

@@ -121,6 +121,14 @@ type Service struct {
 	d       Deps
 	now     func() time.Time
 	viewers *presence
+	// meetingNotes hears when a meeting's notes generation ends.
+	meetingNotes func(ctx context.Context, d domain.Document)
+}
+
+// SetMeetingWatcher has fn hear when a meeting's notes document changes
+// (its generation ended); call before generations run.
+func (s *Service) SetMeetingWatcher(fn func(ctx context.Context, d domain.Document)) {
+	s.meetingNotes = fn
 }
 
 // New returns the service.
@@ -316,9 +324,92 @@ func (s *Service) Create(ctx context.Context, c Caller, in NewDocument) (View, e
 	return s.open(ctx, c, d.ID)
 }
 
+// MeetingNotes is a meeting session's notes document to make: a private
+// page owned by the host, which the attendees and invitees can view.
+type MeetingNotes struct {
+	OwnerID   int64
+	Title     string
+	Language  string // en, ru or uz
+	SessionID int64
+	Viewers   []int64
+	// RequestedBy is who the generation runs for (whose account pays).
+	RequestedBy int64
+}
+
+// CreateMeetingNotes makes a session's notes document and queues its
+// generation; it returns the document's id.
+func (s *Service) CreateMeetingNotes(ctx context.Context, n MeetingNotes) (int64, error) {
+	if s.d.Generator == nil {
+		return 0, invalid("generating documents is not available on this server")
+	}
+	title, err := domain.CleanDocumentTitle(n.Title)
+	if err != nil {
+		return 0, err
+	}
+	lang := n.Language
+	if lang != "ru" && lang != "uz" {
+		lang = "en"
+	}
+	src := domain.DocumentSource{Kind: domain.SourceMeeting, SessionID: n.SessionID}
+	if err := src.Validate(); err != nil {
+		return 0, err
+	}
+	d, err := s.d.Store.CreateDocument(ctx, domain.Document{Kind: domain.DocKindPage, Title: title, OwnerID: n.OwnerID, Language: lang, Source: &src}, nil)
+	if err != nil {
+		return 0, err
+	}
+	var grants []domain.DocumentGrant
+	for _, u := range n.Viewers {
+		if u != n.OwnerID {
+			grants = append(grants, domain.DocumentGrant{UserID: u, Level: domain.AccessView})
+		}
+	}
+	if len(grants) > 0 {
+		if _, err := s.d.Store.SetDocumentSharing(ctx, d.ID, postgres.Sharing{Type: domain.DocPrivate, WorkspaceAccess: domain.AccessNone, Grants: grants},
+			n.OwnerID); err != nil {
+			return 0, err
+		}
+	}
+	by := n.RequestedBy
+	if by == 0 {
+		by = n.OwnerID
+	}
+	if _, err := s.d.Store.CreateDocumentRun(ctx, d.ID, src, &by, DocumentPromptVersion); err != nil {
+		return 0, err
+	}
+	s.d.Generator.Wake()
+	return d.ID, nil
+}
+
+// RegenerateMeetingNotes writes a session's notes document again from
+// its transcript, for by.
+func (s *Service) RegenerateMeetingNotes(ctx context.Context, docID, sessionID, by int64) error {
+	if s.d.Generator == nil {
+		return invalid("generating documents is not available on this server")
+	}
+	d, err := s.d.Store.Document(ctx, docID)
+	if err != nil {
+		return err
+	}
+	if d.DeletedAt != nil || d.Source == nil || d.Source.Kind != domain.SourceMeeting || d.Source.SessionID != sessionID {
+		return domain.ErrNotFound
+	}
+	if _, err := s.d.Store.CreateDocumentRun(ctx, docID, *d.Source, &by, DocumentPromptVersion); err != nil {
+		if errors.Is(err, domain.ErrConflict) {
+			return ErrBusy
+		}
+		return err
+	}
+	s.d.Generator.Wake()
+	if d, err := s.d.Store.Document(ctx, docID); err == nil {
+		s.changed(ctx, d)
+	}
+	return nil
+}
+
 // DocumentPromptVersion is recorded with each generation (the
 // orchestrator's prompt version for documents).
-var DocumentPromptVersion = "doc-2"
+var DocumentPromptVersion = "doc-3"
 
 // ticket finds the ticket a person named by its number (AMANAT-12) or
 // its key: an open ticket with that number first, then the key (see
@@ -351,6 +442,9 @@ func invalidTicket(key string, err error) error {
 func (s *Service) checkSource(ctx context.Context, c Caller, kind domain.DocumentKind, src *domain.DocumentSource) error {
 	if err := src.Validate(); err != nil {
 		return err
+	}
+	if src.Kind == domain.SourceMeeting {
+		return invalid("meeting notes are made by the meeting: turn on notes in the call")
 	}
 	if src.Kind == domain.SourceDoc {
 		return s.checkPageSource(ctx, c, kind, src)
@@ -482,7 +576,16 @@ func (s *Service) Regenerate(ctx context.Context, c Caller, id int64, src *domai
 		cp.DocumentVersion = 0 // read the page again as it is now
 		src = &cp
 	}
-	if err := s.checkSource(ctx, c, v.Doc.Kind, src); err != nil {
+	if cur := v.Doc.Source; cur != nil && cur.Kind == domain.SourceMeeting && src.Kind == domain.SourceMeeting {
+		// Notes are written again from the same session; an instruction
+		// may change how.
+		cp := *cur
+		cp.Instruction = src.Instruction
+		if err := cp.Validate(); err != nil {
+			return v, err
+		}
+		src = &cp
+	} else if err := s.checkSource(ctx, c, v.Doc.Kind, src); err != nil {
 		return v, err
 	}
 	if _, err := s.d.Store.CreateDocumentRun(ctx, id, *src, &c.UserID, DocumentPromptVersion); err != nil {
@@ -806,4 +909,9 @@ func (s *Service) notify(ctx context.Context, d domain.Document, typ string) {
 }
 
 // DocumentChanged implements orchestrator.DocumentWatcher.
-func (s *Service) DocumentChanged(ctx context.Context, d domain.Document) { s.changed(ctx, d) }
+func (s *Service) DocumentChanged(ctx context.Context, d domain.Document) {
+	s.changed(ctx, d)
+	if s.meetingNotes != nil && d.Source != nil && d.Source.Kind == domain.SourceMeeting {
+		s.meetingNotes(ctx, d)
+	}
+}

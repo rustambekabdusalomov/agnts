@@ -201,6 +201,53 @@ OpenVPN sidecar `agnts-ovpn-<workspace>` with `agnts-ovpn-net-<network>`.
 Deploy agnts, egress and gateway together: an egress or gateway from before
 does not send or check the network.
 
+## Meetings (once)
+
+Video calls run on LiveKit (`livekit`, `redis`, `livekit-egress`, the
+`meetings` profile). Until `AGNTS_LIVEKIT_URL` is set the Meetings page says
+they are off. The server needs about 1 CPU per 25 people in calls, and 2–4
+CPUs for each recording while it runs (`AGNTS_MEET_MAX_RECORDINGS`, default 2).
+
+1. Open the media ports (signaling goes through Caddy), in ufw or the provider's firewall:
+
+   ```sh
+   ssh root@45.138.158.39 'ufw allow 7881/tcp && ufw allow 7882/udp && ufw allow 3478/udp'
+   ```
+
+2. Add to `/opt/agnts/.env` (the URL is the domain whose Caddy block has `/rtc`):
+
+   ```sh
+   AGNTS_LIVEKIT_URL=wss://app.agnts.uz
+   AGNTS_LIVEKIT_API_KEY=agnts
+   AGNTS_LIVEKIT_API_SECRET=<openssl rand -hex 32>
+   AGNTS_LIVEKIT_EGRESS=true
+   ```
+
+3. Merge from `deploy/docker-compose.yml` into the server's copy by hand: the
+   `livekit`, `redis` and `livekit-egress` services, the `meetingmedia` volume,
+   and the `agnts` service's new environment lines and `meetingmedia` mount.
+4. In `/opt/agnts/Caddyfile.cloud`, add the `handle /rtc* { reverse_proxy livekit:7880 }`
+   block to the admin panel's domain, and the CSP (`wss://`, `media-src`) and
+   `Permissions-Policy` changes (see `deploy/Caddyfile.cloud`).
+5. Rebuild the runner image (it now carries ffmpeg, which notes need), see
+   [Runner image](#runner-image-when-deploy-runner-changes).
+6. Deploy as usual (steps 1–3), then start it:
+
+   ```sh
+   ssh root@45.138.158.39 'cd /opt/agnts && docker compose --profile meetings up -d livekit redis livekit-egress agnts && docker compose restart caddy'
+   ```
+
+Check: open `/m/<code>` from two devices on different networks (one on mobile
+data). If they see each other only on the same Wi-Fi, a port is closed.
+Notes need Muse connected in the workspace and `AGNTS_AGENT_ENABLED=true`.
+Networks that block UDP and 7881 need TURN over TLS on 443, which this setup
+doesn't have yet.
+
+This server has it set up (28 October 2026). The server's compose file, `.env`
+and `Caddyfile.cloud` from before are kept beside them as `*.pre-meetings`.
+Step 3 leaves `livekit`, `redis` and `livekit-egress` running; recreate them
+with `--profile meetings up -d` only when their settings change.
+
 ## Rollback
 
 ```sh

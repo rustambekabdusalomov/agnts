@@ -47,6 +47,10 @@ services:
       AGNTS_RUN_NETWORK: agnts-runs
       AGNTS_RUN_PROXY: http://egress:3128
       AGNTS_RUNNER_IMAGE: ${AGNTS_RUNNER_IMAGE:-agnts-runner:latest}
+      # Meetings (empty AGNTS_LIVEKIT_URL: off): agnts calls LiveKit's API
+      # on the internal network; browsers use AGNTS_LIVEKIT_URL.
+      AGNTS_LIVEKIT_INTERNAL_URL: http://livekit:7880
+      AGNTS_MEETINGS_DIR: /var/lib/agnts-meetings
     # agnts starts one container per run through the Docker socket. That makes
     # the agnts container root-equivalent on the host; run containers never get
     # the socket. DOCKER_GID is the host's docker group (getent group docker).
@@ -55,6 +59,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - agntsdata:/var/lib/agnts
+      # Meetings: recordings and the audio of notes, written by Egress.
+      - meetingmedia:/var/lib/agnts-meetings
     # Not published: only Caddy reaches agnts, which is why agnts trusts the
     # X-Forwarded-For entry Caddy writes.
     expose:
@@ -151,6 +157,91 @@ services:
         condition: service_healthy
     logging: *logging
 
+  # Meetings (video calls). LiveKit carries the media; agnts decides who
+  # joins and keeps what happened. Turn on with, in .env,
+  #   AGNTS_LIVEKIT_URL=wss://<AGNTS_DOMAIN>, AGNTS_LIVEKIT_API_KEY, AGNTS_LIVEKIT_API_SECRET
+  #   (and AGNTS_LIVEKIT_EGRESS=true for recordings and notes), then
+  #   docker compose --profile meetings up -d
+  # Open 7881/tcp, 7882/udp and 3478/udp in the server's firewall.
+  livekit:
+    image: livekit/livekit-server:v1.13.9
+    restart: unless-stopped
+    profiles: ["meetings"]
+    environment:
+      LIVEKIT_CONFIG: |
+        port: 7880
+        log_level: info
+        rtc:
+          tcp_port: 7881
+          udp_port: 7882
+          use_external_ip: true
+          # Egress shares this network namespace and reaches the media on
+          # the loopback interface.
+          enable_loopback_candidate: true
+        redis:
+          address: redis:6379
+        keys:
+          ${AGNTS_LIVEKIT_API_KEY:-unset}: ${AGNTS_LIVEKIT_API_SECRET:-unset}
+        room:
+          empty_timeout: 120
+          departure_timeout: 120
+        turn:
+          enabled: true
+          domain: ${AGNTS_DOMAIN}
+          udp_port: 3478
+        webhook:
+          api_key: ${AGNTS_LIVEKIT_API_KEY:-unset}
+          urls: ["http://agnts:8080/webhooks/livekit"]
+    # Signaling and the API stay on the internal network (Caddy routes
+    # /rtc to 7880); media comes in directly.
+    expose:
+      - "7880"
+    ports:
+      - "7881:7881"
+      - "7882:7882/udp"
+      - "3478:3478/udp"
+    depends_on:
+      - redis
+    logging: *logging
+
+  # Only for LiveKit and Egress, on the internal network.
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    profiles: ["meetings"]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    logging: *logging
+
+  # Records calls (MP4) and the audio of notes (Ogg) into the meetings
+  # volume. A video recording takes 2-4 CPUs (headless Chrome); agnts
+  # limits how many run at once (AGNTS_MEET_MAX_RECORDINGS). It shares
+  # LiveKit's network so its Chrome reaches the media server directly.
+  livekit-egress:
+    image: livekit/egress:v1.14.1
+    restart: unless-stopped
+    profiles: ["meetings"]
+    network_mode: "service:livekit"
+    cap_add: [SYS_ADMIN]
+    cpus: ${AGNTS_EGRESS_CPUS:-3}
+    mem_limit: ${AGNTS_EGRESS_MEMORY:-3g}
+    environment:
+      EGRESS_CONFIG_BODY: |
+        api_key: ${AGNTS_LIVEKIT_API_KEY:-unset}
+        api_secret: ${AGNTS_LIVEKIT_API_SECRET:-unset}
+        ws_url: ws://localhost:7880
+        redis:
+          address: redis:6379
+        log_level: info
+        # A 720p recording takes about 2-3 CPUs; Egress's default cost (4)
+        # would refuse every recording under the CPU limit above.
+        cpu_cost:
+          room_composite_cpu_cost: 2
+    volumes:
+      - meetingmedia:/var/lib/agnts-meetings
+    depends_on:
+      - livekit
+    logging: *logging
+
   # Build-only: the image run containers start from.
   #   docker compose --profile build build runner
   runner:
@@ -188,3 +279,5 @@ volumes:
     name: hiro_caddy_data
   caddy_config:
     name: hiro_caddy_config
+  meetingmedia:
+    name: agnts_meetingmedia

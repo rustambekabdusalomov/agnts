@@ -94,7 +94,7 @@ void main() {
 
   test('wait badges name the reason', () async {
     final l = await AppLocalizations.delegate.load(const Locale('en'));
-    expect(waitBadge(l, WaitReason.claude).$1, 'Paused · Claude');
+    expect(waitBadge(l, WaitReason.claude).$1, 'Paused · Muse');
     expect(waitBadge(l, WaitReason.slots).$1, 'Queued · slots');
   });
 

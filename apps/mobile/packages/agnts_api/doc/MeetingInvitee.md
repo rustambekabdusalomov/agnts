@@ -1,0 +1,19 @@
+# agnts_api.model.MeetingInvitee
+
+## Load the model package
+```dart
+import 'package:agnts_api/api.dart';
+```
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**id** | **int** |  | 
+**userId** | **int** | A member; absent for an email address | [optional] 
+**email** | **String** |  | 
+**name** | **String** |  | 
+**rsvp** | **String** |  | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

@@ -333,6 +333,15 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get accountMyClaudeMuse => 'Ваш аккаунт Muse';
+
+  @override
+  String get accountClaudeSavedMuse => 'Аккаунт Muse подключён';
+
+  @override
+  String get accountClaudeRemovedMuse => 'Аккаунт Muse отключён';
+
+  @override
   String get analyticsTitle => 'Аналитика';
 
   @override
@@ -545,7 +554,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsSpend => 'Расход токенов';
 
   @override
-  String get analyticsSpendSub => 'Токены, которые Claude потратил за день, на вход и выход';
+  String get analyticsSpendSub => 'Токены, которые Muse потратил за день, на вход и выход';
 
   @override
   String get analyticsSpendTokens => 'Токены на вход и выход';
@@ -560,7 +569,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsSpendStagesSub => 'Куда ушли токены, самые дорогие сверху';
 
   @override
-  String get analyticsNoSpend => 'За этот период запусков Claude нет.';
+  String get analyticsNoSpend => 'За этот период запусков Muse нет.';
 
   @override
   String get analyticsRepos => 'По репозиториям';
@@ -701,7 +710,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsColFixes => 'Исправлений проверок';
 
   @override
-  String get analyticsColFixesHint => 'Сколько раз в среднем упавшие проверки возвращались Claude';
+  String get analyticsColFixesHint => 'Сколько раз в среднем упавшие проверки возвращались Muse';
 
   @override
   String get analyticsColSerious => 'Серьёзные замечания';
@@ -1146,7 +1155,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsColRepos => 'Репозитории';
 
   @override
-  String get analyticsKpiCostNote => 'Все вызовы Claude за период';
+  String get analyticsKpiCostNote => 'Все вызовы Muse за период';
 
   @override
   String analyticsKpiDaysAboveNote(String n) {
@@ -1431,6 +1440,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get billingReason_document => 'Потрачено на документ';
 
   @override
+  String get billingFreeCredits => 'Ваши бесплатные кредиты';
+
+  @override
+  String get billingFreeCreditsSub => 'От agnts. Запуски на ключе Muse от agnts тратят их раньше кредитов пространства.';
+
+  @override
+  String billingFreeCreditsLeft(String n, String limit) {
+    return 'Осталось $n из $limit кредитов';
+  }
+
+  @override
+  String billingFreeCreditsWorth(String amount, String total) {
+    return '$amount из $total';
+  }
+
+  @override
+  String get billingFreeCreditsNone => 'Пока нет. Администратор может выдать вам бесплатные кредиты для запусков на ключе Muse от agnts.';
+
+  @override
   String get briefTitle => 'Описание репозитория';
 
   @override
@@ -1460,10 +1488,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Markdown. Сохранённый текст сразу начнут читать запуски; оставьте пустым, чтобы запуски не получали описание.';
 
   @override
-  String get briefNone => 'Описания пока нет. Запустите изучение, чтобы Claude написал черновик, или напишите его сами.';
+  String get briefNone => 'Описания пока нет. Запустите изучение, чтобы Muse написал черновик, или напишите его сами.';
 
   @override
-  String get briefSurveying => 'Claude изучает репозиторий. Черновик появится здесь для вашего одобрения.';
+  String get briefSurveying => 'Muse изучает репозиторий. Черновик появится здесь для вашего одобрения.';
 
   @override
   String briefFailed(String error) {
@@ -1970,6 +1998,362 @@ class AppLocalizationsRu extends AppLocalizations {
       'Регулярные выражения, по одному на строку. Совпавший лог считается падением инфраструктуры: показывается и учитывается, но тикет не открывается. Добавляются к встроенным.';
 
   @override
+  String get codechatTitle => 'Код';
+
+  @override
+  String get codechatModeLabel => 'Режим чата';
+
+  @override
+  String get codechatModeChat => 'Чат';
+
+  @override
+  String get codechatModeCode => 'Код';
+
+  @override
+  String get codechatNewConversation => 'Новый разговор о коде';
+
+  @override
+  String get codechatEmptyTitle => 'Меняйте код прямо из чата';
+
+  @override
+  String get codechatEmptyText =>
+      'Выберите репозитории и опишите, что нужно сделать. agnts выполнит это как тикет: следите за работой здесь, отвечайте на вопросы, просите изменения и одобряйте pull request.';
+
+  @override
+  String get codechatViewersOnly => 'Режим «Код» доступен тем, кто может менять рабочее пространство.';
+
+  @override
+  String get codechatRepos => 'Репозитории';
+
+  @override
+  String get codechatReposNone => 'Выберите репозитории для работы или назовите их в сообщении через @';
+
+  @override
+  String get codechatReposChange => 'Изменить';
+
+  @override
+  String get codechatReposSave => 'Сохранить репозитории';
+
+  @override
+  String get codechatReposSaved => 'Репозитории изменены: следующий тикет будет работать в них';
+
+  @override
+  String get codechatKind => 'Тип';
+
+  @override
+  String get codechatQuick => 'Быстро: без проверок';
+
+  @override
+  String get codechatQuickHint => 'Сборка, линтер и тесты не запускаются, поэтому ревью наступает раньше.';
+
+  @override
+  String get codechatTicketPick => 'Или продолжить существующий тикет';
+
+  @override
+  String get codechatTicketPlaceholder => 'Ключ тикета, например PAY-214';
+
+  @override
+  String get codechatTicketAttach => 'Подключить';
+
+  @override
+  String codechatTicketAttached(String key) {
+    return 'Теперь работаем над $key';
+  }
+
+  @override
+  String get codechatPlaceholderNew => 'Опишите изменение…';
+
+  @override
+  String get codechatPlaceholderReview => 'Попросите изменения или одобрите выше…';
+
+  @override
+  String get codechatPlaceholderAnswers => 'Ответьте на вопрос…';
+
+  @override
+  String get codechatPlaceholderRunning => 'Дополните запрос: он уйдёт, когда закончится этот запуск…';
+
+  @override
+  String get codechatPlaceholderStopped => 'Подскажите, как это обойти, и запуск повторится…';
+
+  @override
+  String get codechatPlaceholderPushing => 'Идёт отправка…';
+
+  @override
+  String get codechatPlaceholderDone => 'Опишите следующее изменение…';
+
+  @override
+  String get codechatSend => 'Отправить';
+
+  @override
+  String get codechatSendHint => 'Enter отправляет, Shift+Enter переносит строку, @ указывает репозиторий';
+
+  @override
+  String codechatCount(String n) {
+    return '$n / 4000';
+  }
+
+  @override
+  String codechatRoutedCreated(String key) {
+    return 'Создан $key';
+  }
+
+  @override
+  String codechatRoutedAnswered(String key) {
+    return 'Ответ отправлен в $key';
+  }
+
+  @override
+  String codechatRoutedChanges(String key) {
+    return 'Запрошены изменения в $key';
+  }
+
+  @override
+  String codechatRoutedContinued(String key) {
+    return '$key продолжен';
+  }
+
+  @override
+  String codechatRoutedRetried(String key) {
+    return '$key запущен повторно';
+  }
+
+  @override
+  String codechatRoutedQueued(String key) {
+    return 'Ждёт окончания запуска $key';
+  }
+
+  @override
+  String codechatRoutedSent(String key) {
+    return 'Отправлено в $key';
+  }
+
+  @override
+  String codechatRoutedFailed(String reason) {
+    return 'Не отправлено: $reason';
+  }
+
+  @override
+  String get codechatRoutedSteered => 'Передано работающему агенту';
+
+  @override
+  String codechatQueuedTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n сообщения ждут',
+      many: '$n сообщений ждут',
+      few: '$n сообщения ждут',
+      one: '$n сообщение ждёт',
+    );
+    return '$_temp0 окончания запуска';
+  }
+
+  @override
+  String get codechatSendNow => 'Остановить и отправить';
+
+  @override
+  String codechatSendNowTitle(String key) {
+    return 'Остановить $key сейчас?';
+  }
+
+  @override
+  String get codechatSendNowText => 'Текущий этап остановится, и ваши сообщения сразу уйдут в тикет.';
+
+  @override
+  String codechatSteps(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n шага', many: '$n шагов', few: '$n шага', one: '$n шаг');
+    return '$_temp0';
+  }
+
+  @override
+  String codechatStateLine(String key, String state) {
+    return '$key: $state';
+  }
+
+  @override
+  String codechatCheckPassed(String name) {
+    return '$name: пройдено';
+  }
+
+  @override
+  String codechatCheckFailed(String name) {
+    return '$name: ошибка';
+  }
+
+  @override
+  String get codechatPrOpened => 'Pull request открыт';
+
+  @override
+  String get codechatPushed => 'Отправлено';
+
+  @override
+  String get codechatMerged => 'Влито';
+
+  @override
+  String get codechatWorking => 'Работаю…';
+
+  @override
+  String codechatResultTitle(String key) {
+    return '$key готов к вашему ревью';
+  }
+
+  @override
+  String codechatReportTitle(String key) {
+    return '$key написал отчёт';
+  }
+
+  @override
+  String codechatFilesChanged(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'изменено $n файла',
+      many: 'изменено $n файлов',
+      few: 'изменено $n файла',
+      one: 'изменён $n файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get codechatChecksPassed => 'Проверки пройдены';
+
+  @override
+  String codechatChecksFailed(String failed, String n) {
+    return 'Не прошли $failed из $n проверок';
+  }
+
+  @override
+  String get codechatChecksSkipped => 'Проверки пропущены';
+
+  @override
+  String get codechatViewDiff => 'Показать diff';
+
+  @override
+  String get codechatHideDiff => 'Скрыть diff';
+
+  @override
+  String get codechatApprove => 'Одобрить';
+
+  @override
+  String codechatApproveTitle(String key) {
+    return 'Одобрить $key?';
+  }
+
+  @override
+  String codechatApprovePr(String branch) {
+    return 'agnts отправит $branch и откроет pull request.';
+  }
+
+  @override
+  String get codechatApproveMain => 'agnts отправит изменения прямо в основную ветку.';
+
+  @override
+  String get codechatApproveReport => 'Тикет закроется с этим отчётом.';
+
+  @override
+  String get codechatReject => 'Отклонить';
+
+  @override
+  String codechatRejectTitle(String key) {
+    return 'Отклонить $key?';
+  }
+
+  @override
+  String get codechatRejectText => 'Вся работа над ним остановится. Позже его можно продолжить из этого чата.';
+
+  @override
+  String get codechatOpenTicket => 'Открыть тикет';
+
+  @override
+  String codechatQuestionsTitle(String key) {
+    return '$key спрашивает, прежде чем продолжить';
+  }
+
+  @override
+  String get codechatAnswersSend => 'Отправить ответы';
+
+  @override
+  String codechatStoppedTitle(String key) {
+    return '$key остановлен';
+  }
+
+  @override
+  String get codechatStoppedHint => 'Напишите, как это обойти: запуск повторится с вашей подсказкой.';
+
+  @override
+  String codechatDoneTitle(String key) {
+    return '$key готов';
+  }
+
+  @override
+  String get codechatDoneHint => 'Следующее сообщение создаст новый тикет в тех же репозиториях.';
+
+  @override
+  String codechatRejectedTitle(String key) {
+    return '$key отклонён';
+  }
+
+  @override
+  String get codechatRejectedHint => 'Напишите, что сделать иначе, и работа продолжится.';
+
+  @override
+  String codechatMovedHint(String key) {
+    return '$key перенесён в другой ваш разговор.';
+  }
+
+  @override
+  String get codechatApprovalTitle => 'Агент просит разрешения';
+
+  @override
+  String codechatApprovalReason(String reason) {
+    return 'Правило требует спросить: $reason';
+  }
+
+  @override
+  String get codechatApprovalAllow => 'Разрешить';
+
+  @override
+  String get codechatApprovalDeny => 'Запретить';
+
+  @override
+  String get codechatApprovalAllowed => 'Разрешено';
+
+  @override
+  String get codechatApprovalDenied => 'Запрещено';
+
+  @override
+  String get codechatApprovalExpired => 'Нет ответа: запрещено';
+
+  @override
+  String codechatApprovalLeft(String seconds) {
+    return 'осталось $seconds с';
+  }
+
+  @override
+  String get codechatHandoffTitle => 'Сделать в режиме «Код»';
+
+  @override
+  String get codechatHandoffOpen => 'Открыть в «Коде»';
+
+  @override
+  String get codechatTicketChat => 'Обсуждается в чате';
+
+  @override
+  String get codechatContinueInChat => 'Продолжить в чате';
+
+  @override
+  String get codechatCodeBadge => 'Код';
+
+  @override
+  String codechatMentioned(String names) {
+    return 'Работа в $names';
+  }
+
+  @override
+  String get codechatMentionLabel => 'Репозитории';
+
+  @override
   String get commitBack => 'Назад к коммитам';
 
   @override
@@ -2047,6 +2431,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String commitFilesCapped(String n) {
     return 'Коммит меняет больше файлов, чем можно показать здесь. Показаны первые $n; остальные — на git-хостинге.';
   }
+
+  @override
+  String get commonPagePrev => 'Предыдущая страница';
+
+  @override
+  String get commonPageNext => 'Следующая страница';
+
+  @override
+  String commonPageRange(String from, String to, String n) {
+    return '$from–$to из $n';
+  }
+
+  @override
+  String get commonPerPage => 'На странице';
+
+  @override
+  String get commonPager => 'Страницы';
 
   @override
   String get commonLoading => 'Загрузка…';
@@ -3546,7 +3947,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get filesAddFile => 'Файл';
 
   @override
-  String get filesHint => 'Картинки, PDF, логи или текст, до 10 МБ каждый. Claude прочитает их все.';
+  String get filesHint => 'Картинки, PDF, логи или текст, до 10 МБ каждый. Muse прочитает их все.';
 
   @override
   String filesUploading(String name) {
@@ -4133,7 +4534,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessRepoTitle => 'Защита';
 
   @override
-  String get harnessRepoSub => 'Насколько строго agnts-guard проверяет работу Claude в этом репозитории — во время работы и после.';
+  String get harnessRepoSub => 'Насколько строго agnts-guard проверяет работу Muse в этом репозитории — во время работы и после.';
 
   @override
   String get harnessRepoSave => 'Сохранить защиту';
@@ -4188,7 +4589,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessRepoKind_encoded_blob => 'Закодированный текст';
 
   @override
-  String get harnessRepoKind_hooks => 'Хуки Claude Code';
+  String get harnessRepoKind_hooks => 'Хуки Muse';
 
   @override
   String get harnessRepoKind_mcp_server => 'MCP-серверы';
@@ -4215,15 +4616,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessRepoProfileHelp_ => 'Как в настройках рабочего пространства.';
 
   @override
-  String get harnessRepoProfileHelp_minimal => 'Блокируются только секреты и обязательные правила; перед завершением проверяется сборка.';
+  String get harnessRepoProfileHelp_minimal =>
+      'Блокируются только секреты и обязательные правила; сборка проверяется до того, как Muse закончит.';
 
   @override
   String get harnessRepoProfileHelp_standard =>
-      'Также блокируются пропущенные тесты, отключённые линтеры и правки конфигурации проверок; перед завершением должны пройти сборка и линтер.';
+      'Также блокируются пропущенные тесты, отключённые линтеры и правки конфигурации проверок; сборка и линтер должны пройти до того, как Muse закончит.';
 
   @override
   String get harnessRepoProfileHelp_strict =>
-      'Также блокируются проглоченные ошибки и удалённые проверки в тестах, перед завершением запускаются тесты, и агент может спросить факты перед правкой файла.';
+      'Также блокируются проглоченные ошибки и удалённые проверки в тестах, тесты запускаются до того, как Muse закончит, и Muse может спросить факты перед правкой файла.';
 
   @override
   String get harnessRepoSecretAllow => 'Где разрешены примеры ключей';
@@ -4236,13 +4638,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get harnessRepoChecksSub =>
-      'Быстрые форматтеры и линтеры, которые agnts-guard запускает на каждом изменённом Claude файле, чтобы проблемы исправлялись сразу.';
+      'Быстрые форматтеры и линтеры, которые agnts-guard запускает на каждом изменённом Muse файле, чтобы проблемы исправлялись сразу.';
 
   @override
   String get harnessRepoChecksOff => 'Отключить проверки файлов';
 
   @override
-  String get harnessRepoChecksOffHelp => 'Claude не проверяется после каждой правки; проверки после запуска остаются.';
+  String get harnessRepoChecksOffHelp => 'Muse не проверяется после каждой правки; проверки после запуска остаются.';
 
   @override
   String get harnessRepoOwnChecks => 'Свои проверки';
@@ -4402,13 +4804,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get harnessRulesDeliveryHelp_skill =>
-      'Навык, который Claude загружает, когда его описание подходит к работе: промпты остаются короткими, когда правил много. Важные правила держите в каждом промпте.';
+      'Навык, который Muse загружает, когда его описание подходит к работе: промпты остаются короткими, когда правил много. Важные правила держите в каждом промпте.';
 
   @override
   String get harnessRulesEnforce => 'Обязательное';
 
   @override
-  String get harnessRulesEnforceHelp => 'agnts-guard проверяет правило во время работы Claude, а не только просит его соблюдать.';
+  String get harnessRulesEnforceHelp => 'agnts-guard проверяет правило во время работы Muse, а не только просит его соблюдать.';
 
   @override
   String get harnessRulesOn => 'Проверять';
@@ -4426,7 +4828,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessRulesOnHelp_file => 'Правки файлов ниже; с шаблоном — только добавленные строки, которые ему соответствуют.';
 
   @override
-  String get harnessRulesOnHelp_bash => 'Команды оболочки, которые запускает Claude и которые подходят под шаблон.';
+  String get harnessRulesOnHelp_bash => 'Команды оболочки, которые запускает Muse и которые подходят под шаблон.';
 
   @override
   String get harnessRulesOnHelp_diff => 'Готовое изменение, проверяется на сервере после запуска.';
@@ -4450,7 +4852,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessRulesAction_warn => 'Предупреждать';
 
   @override
-  String get harnessRulesMessage => 'Сообщение для Claude';
+  String get harnessRulesMessage => 'Сообщение для Muse';
 
   @override
   String get harnessRulesMessagePlaceholder => 'Добавьте новую миграцию.';
@@ -4548,7 +4950,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get harnessSettingsSub =>
-      'agnts-guard проверяет работу Claude внутри каждого запуска, по ходу дела; проверки agnts после запуска по-прежнему действуют.';
+      'agnts-guard проверяет работу Muse внутри каждого запуска, по ходу дела; проверки agnts после запуска по-прежнему действуют.';
 
   @override
   String get harnessSettingsProfile => 'Профиль ограничителей';
@@ -4564,7 +4966,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get harnessSettingsProfileHelp_minimal =>
-      'Блокирует секреты и файлы .env, применяет правила команды с шаблоном и требует успешной сборки, прежде чем Claude закончит.';
+      'Блокирует секреты и файлы .env, применяет правила команды с шаблоном и требует успешной сборки, прежде чем Muse закончит.';
 
   @override
   String get harnessSettingsProfileHelp_standard =>
@@ -4632,7 +5034,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get harnessSettingsMethodSkillsHelp =>
-      'Запуски кодинга получают навыки-методики agnts: добавлять ещё один элемент так, как это уже сделано в репозитории, следовать окружающему стилю, переиспользовать перед тем как писать, безопасно менять схему базы данных. Claude загружает навык, только когда он подходит; сравнивайте в Аналитике.';
+      'Запуски кодинга получают навыки-методики agnts: добавлять ещё один элемент так, как это уже сделано в репозитории, следовать окружающему стилю, переиспользовать перед тем как писать, безопасно менять схему базы данных. Muse загружает навык, только когда он подходит; сравнивайте в Аналитике.';
 
   @override
   String get harnessSettingsSecondOpinion => 'Второе мнение';
@@ -4669,7 +5071,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessSettingsHook_post_edit_check => 'проверять каждый изменённый файл (форматтер, линтер)';
 
   @override
-  String get harnessSettingsHook_stop_gate => 'сборка и линтер должны пройти, прежде чем Claude закончит';
+  String get harnessSettingsHook_stop_gate => 'сборка и линтер должны пройти, прежде чем Muse закончит';
 
   @override
   String get harnessSettingsHook_session_progress => 'возвращать план после сжатия контекста';
@@ -4679,7 +5081,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get harnessSettingsCodexHelp =>
-      'Имя модели Codex запускает написание кода в Codex CLI вместо Claude; пусто — Claude. Нужны интеграция OpenAI и api.openai.com в разрешённых хостах (Настройки → Превью).';
+      'Имя модели Codex запускает написание кода в Codex CLI вместо Muse; пусто — Muse. Нужны интеграция OpenAI и api.openai.com в разрешённых хостах (Настройки → Превью).';
 
   @override
   String get harnessSettingsCodexConnect => 'Интеграция OpenAI';
@@ -4758,7 +5160,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessSettingsColLoaded => 'Загружен';
 
   @override
-  String get harnessSettingsColLoadedHint => 'Доля этих тикетов, где Claude загрузил навык';
+  String get harnessSettingsColLoadedHint => 'Доля этих тикетов, где Muse загрузил навык';
 
   @override
   String get harnessSettingsColSkillFirstTry => 'С первого раза';
@@ -4770,7 +5172,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get harnessSettingsColLoadedFirstTry => 'С первого раза, загружен';
 
   @override
-  String get harnessSettingsColLoadedFirstTryHint => 'Доля готовых с первого раза среди тикетов, где Claude загрузил навык';
+  String get harnessSettingsColLoadedFirstTryHint => 'Доля готовых с первого раза среди тикетов, где Muse загрузил навык';
 
   @override
   String get harnessSettingsColTargeted => 'Целевые замечания';
@@ -4794,7 +5196,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get harnessSettingsEffortHelp =>
-      'Насколько глубоко Claude думает на каждом этапе (--effort в Claude Code). Выше — медленнее и дороже для вашего плана. Для сложных тикетов кодинг и ревью используют свой уровень.';
+      'Насколько глубоко Muse думает на каждом этапе (--effort в Muse). Выше — медленнее и дороже для вашего плана. Для сложных тикетов кодинг и ревью используют свой уровень.';
 
   @override
   String get harnessSettingsEffortAnalyze => 'Анализ';
@@ -5725,6 +6127,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'В запусках Codex нет хуков agnts-guard: проверки agnts после запуска (красные флаги, сборка, линтер, тесты, ревью) работают как обычно. Запускам также нужен api.openai.com в разрешённых хостах.';
 
   @override
+  String get integrationsName_muse => 'Muse Code';
+
+  @override
   String get kindTitle => 'Тип';
 
   @override
@@ -5900,7 +6305,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get learnReadingTitle => 'Что почитать';
 
   @override
-  String get learnReadingNote => 'Ссылки предложил Claude. Проверьте их, прежде чем на них полагаться.';
+  String get learnReadingNote => 'Ссылки предложил Muse. Проверьте их, прежде чем на них полагаться.';
 
   @override
   String get learnCategory_pattern => 'Паттерн';
@@ -6257,6 +6662,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get logsTypeEvent => 'Событие';
 
   @override
+  String get logsTypeBudget => 'Расход';
+
+  @override
   String get maccountPasswordInstead => 'Войти с паролем';
 
   @override
@@ -6553,7 +6961,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String massistantStatsParts(String start, String snapshot, String claude) {
-    return 'Контейнер $start · данные $snapshot · Claude $claude';
+    return 'Контейнер $start · данные $snapshot · Muse $claude';
   }
 
   @override
@@ -6640,6 +7048,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String massistantStatsVersionActions(String proposed, String done) {
     return '$proposed действий предложено · $done выполнено';
   }
+
+  @override
+  String get massistantVoiceStart => 'Спросить голосом';
+
+  @override
+  String get massistantVoiceSend => 'Остановить и спросить';
+
+  @override
+  String get massistantVoiceRecording => 'Запись';
+
+  @override
+  String get massistantVoiceHearing => 'Muse слушает ваш вопрос…';
+
+  @override
+  String massistantVoiceLimit(String n) {
+    return 'до $n мин';
+  }
+
+  @override
+  String get massistantVoiceDenied => 'Разрешите этому сайту доступ к микрофону, чтобы спрашивать голосом.';
+
+  @override
+  String get massistantVoiceNoMic => 'Не удалось открыть микрофон.';
 
   @override
   String get mciTitle => 'Сбои CI';
@@ -7070,6 +7501,1053 @@ class AppLocalizationsRu extends AppLocalizations {
   String mdocumentsMadeFrom(String title) {
     return 'Сделано из «$title»';
   }
+
+  @override
+  String get meetingsPageTitle => 'Встречи';
+
+  @override
+  String get meetingsLede =>
+      'Видеозвонки для команды и гостей, которых вы впустите. Muse может вести заметки и превращать договорённости в задачи.';
+
+  @override
+  String get meetingsStartNow => 'Начать сейчас';
+
+  @override
+  String get meetingsSchedule => 'Запланировать';
+
+  @override
+  String get meetingsGetLink => 'Получить ссылку';
+
+  @override
+  String meetingsLinkCopied(String link) {
+    return 'Ссылка скопирована: $link';
+  }
+
+  @override
+  String get meetingsLinkCopiedShort => 'Ссылка скопирована';
+
+  @override
+  String get meetingsCopyLink => 'Скопировать ссылку';
+
+  @override
+  String get meetingsJoinWithCode => 'Войти по коду или ссылке';
+
+  @override
+  String get meetingsCodePlaceholder => 'abc-defg-hij';
+
+  @override
+  String get meetingsBadCode => 'Это не код встречи: он выглядит как abc-defg-hij.';
+
+  @override
+  String get meetingsJoin => 'Войти';
+
+  @override
+  String get meetingsOpen => 'Открыть';
+
+  @override
+  String get meetingsTab_upcoming => 'Предстоящие';
+
+  @override
+  String get meetingsTab_past => 'Прошедшие звонки';
+
+  @override
+  String get meetingsTab_mine => 'Я веду';
+
+  @override
+  String get meetingsNoneUpcoming => 'Нет идущих или предстоящих встреч. Начните сейчас или запланируйте.';
+
+  @override
+  String get meetingsNoneMine => 'Вы пока не ведёте встреч.';
+
+  @override
+  String get meetingsNonePast => 'Звонков пока не было.';
+
+  @override
+  String get meetingsLive => 'Идёт';
+
+  @override
+  String meetingsInCallNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n человека в звонке',
+      many: '$n человек в звонке',
+      few: '$n человека в звонке',
+      one: '$n человек в звонке',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsLiveEmpty => 'Звонок открыт';
+
+  @override
+  String get meetingsNobodyYet => 'В звонке пока никого';
+
+  @override
+  String meetingsHostedBy(String name) {
+    return 'Ведущий: $name';
+  }
+
+  @override
+  String get meetingsUntitled => 'Встреча';
+
+  @override
+  String get meetingsKind_instant => 'Сейчас';
+
+  @override
+  String get meetingsKind_scheduled => 'Позже';
+
+  @override
+  String get meetingsColMeeting => 'Встреча';
+
+  @override
+  String get meetingsColWhen => 'Когда';
+
+  @override
+  String get meetingsColPeople => 'Участники';
+
+  @override
+  String get meetingsColNotes => 'Заметки';
+
+  @override
+  String meetingsRecordings(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n записи',
+      many: '$n записей',
+      few: '$n записи',
+      one: '$n запись',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsActionItemsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n задачи', many: '$n задач', few: '$n задачи', one: '$n задача');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsOpenNotes => 'Открыть заметки';
+
+  @override
+  String get meetingsNotes_none => 'Без заметок';
+
+  @override
+  String get meetingsNotes_recording => 'Ведутся заметки';
+
+  @override
+  String get meetingsNotes_queued => 'Заметки в очереди';
+
+  @override
+  String get meetingsNotes_transcribing => 'Muse слушает';
+
+  @override
+  String get meetingsNotes_writing => 'Muse пишет';
+
+  @override
+  String get meetingsNotes_done => 'Заметки готовы';
+
+  @override
+  String get meetingsNotes_failed => 'Заметки не получились';
+
+  @override
+  String get meetingsOffTitle => 'Встречи на этом сервере выключены';
+
+  @override
+  String get meetingsOffBody => 'Администратор сервера включает их вместе с сервером LiveKit (AGNTS_LIVEKIT_URL).';
+
+  @override
+  String get meetingsYourReminders => 'Ваши напоминания';
+
+  @override
+  String get meetingsRemindersSub => 'Перед началом встречи, на которую вас пригласили, — на телефоне и здесь.';
+
+  @override
+  String meetingsMinutesBefore(String n) {
+    return 'За $n мин';
+  }
+
+  @override
+  String get meetingsNoReminders => 'Без напоминаний';
+
+  @override
+  String get meetingsSettingsTitle => 'Встречи в этом рабочем пространстве';
+
+  @override
+  String get meetingsSettingsSub => 'Записи, что хранится и сколько, и сколько человек вмещает один звонок.';
+
+  @override
+  String get meetingsAllowRecording => 'Ведущие могут записывать звонки на видео';
+
+  @override
+  String get meetingsKeepAudio => 'Хранить звук заметок после того, как Muse его прослушал';
+
+  @override
+  String get meetingsRetention => 'Хранить записи и расшифровки (дней)';
+
+  @override
+  String get meetingsRetentionHelp => '0 — хранить всегда.';
+
+  @override
+  String get meetingsMaxPeople => 'Людей в одном звонке';
+
+  @override
+  String get meetingsServerCan => 'Этот сервер умеет:';
+
+  @override
+  String get meetingsRecordingWord => 'Запись';
+
+  @override
+  String get meetingsNotesWord => 'Заметки';
+
+  @override
+  String get meetingsSave => 'Сохранить';
+
+  @override
+  String get meetingsSettingsSaved => 'Сохранено';
+
+  @override
+  String get meetingsNewTitle => 'Новая встреча';
+
+  @override
+  String get meetingsNewSub => 'Звонок сейчас или встреча в календаре с приглашениями.';
+
+  @override
+  String get meetingsEditTitle => 'Изменить встречу';
+
+  @override
+  String get meetingsWhen => 'Когда';
+
+  @override
+  String get meetingsTitle => 'Название';
+
+  @override
+  String get meetingsTitlePlaceholder => 'Планирование спринта';
+
+  @override
+  String get meetingsDate => 'Дата';
+
+  @override
+  String get meetingsTime => 'Время';
+
+  @override
+  String get meetingsDuration => 'Длительность';
+
+  @override
+  String meetingsMinutes(String n) {
+    return '$n мин';
+  }
+
+  @override
+  String meetingsTimeZoneIs(String zone) {
+    return 'Время указано в $zone.';
+  }
+
+  @override
+  String get meetingsDescription => 'Повестка';
+
+  @override
+  String get meetingsDescriptionPlaceholder => 'Зачем встреча. Muse прочитает это, когда будет писать заметки.';
+
+  @override
+  String get meetingsAccess => 'Кто входит без стука';
+
+  @override
+  String get meetingsAccess_workspace => 'Все в рабочем пространстве';
+
+  @override
+  String get meetingsAccess_invited => 'Только приглашённые';
+
+  @override
+  String get meetingsAccessHelp_workspace => 'Участники входят; гости стучатся.';
+
+  @override
+  String get meetingsAccessHelp_invited => 'Приглашённые входят; остальные участники и гости стучатся.';
+
+  @override
+  String get meetingsGuestsMode => 'Гости';
+
+  @override
+  String get meetingsGuests_knock => 'Стучатся';
+
+  @override
+  String get meetingsGuests_open => 'Свободно';
+
+  @override
+  String get meetingsGuests_off => 'Нельзя';
+
+  @override
+  String get meetingsGuestsHelp_knock => 'Люди без участия ждут, пока ведущий их впустит.';
+
+  @override
+  String get meetingsGuestsHelp_open => 'Любой со ссылкой входит без ожидания, пока звонок не закончится.';
+
+  @override
+  String get meetingsGuestsHelp_off => 'Только участники рабочего пространства.';
+
+  @override
+  String meetingsGuestsAre(String mode) {
+    return 'гости: $mode';
+  }
+
+  @override
+  String get meetingsInvite => 'Пригласить';
+
+  @override
+  String get meetingsEmailsPlaceholder => 'Адреса почты через запятую';
+
+  @override
+  String get meetingsInviteHelp => 'Каждый получит письмо с событием для календаря; люди вне рабочего пространства — личную ссылку.';
+
+  @override
+  String get meetingsInviteHelpNow => 'Участникам придёт уведомление в agnts; на адреса — ссылка письмом.';
+
+  @override
+  String get meetingsAi => 'Заметки и запись';
+
+  @override
+  String get meetingsAutoNotes => 'Вести заметки: Muse слушает звонок и записывает решения и задачи';
+
+  @override
+  String get meetingsAutoRecord => 'Записывать звонок на видео';
+
+  @override
+  String get meetingsAutoNotesOn => 'Заметки включены';
+
+  @override
+  String get meetingsAutoRecordOn => 'Записывается';
+
+  @override
+  String get meetingsNotesUnavailable => 'Заметки на этом сервере не настроены.';
+
+  @override
+  String get meetingsLanguage => 'Язык заметок';
+
+  @override
+  String get meetingsLang_auto => 'Как говорили';
+
+  @override
+  String get meetingsCancel => 'Отмена';
+
+  @override
+  String get meetingsEdit => 'Изменить';
+
+  @override
+  String get meetingsDelete => 'Удалить';
+
+  @override
+  String get meetingsCancelMeeting => 'Отменить встречу';
+
+  @override
+  String get meetingsCancelTitle => 'Отменить эту встречу?';
+
+  @override
+  String get meetingsCancelBody => 'Приглашённые получат отмену в календаре. Идущий звонок завершится.';
+
+  @override
+  String get meetingsCancelled => 'Эта встреча отменена.';
+
+  @override
+  String get meetingsCancelledShort => 'Отменена';
+
+  @override
+  String get meetingsDeleteTitle => 'Удалить эту встречу?';
+
+  @override
+  String get meetingsDeleteBody => 'Её звонки, записи, расшифровки и чат удалятся. Документы с заметками останутся.';
+
+  @override
+  String get meetingsLink => 'Ссылка';
+
+  @override
+  String get meetingsRing => 'Позвонить';
+
+  @override
+  String get meetingsRingWho => 'Кому позвонить сейчас';
+
+  @override
+  String get meetingsRingNow => 'Позвонить';
+
+  @override
+  String get meetingsRinging => 'Звоним…';
+
+  @override
+  String get meetingsAreYouComing => 'Вы придёте?';
+
+  @override
+  String get meetingsRsvp_yes => 'Да';
+
+  @override
+  String get meetingsRsvp_no => 'Нет';
+
+  @override
+  String get meetingsRsvp_maybe => 'Может быть';
+
+  @override
+  String get meetingsRsvp_none => 'Нет ответа';
+
+  @override
+  String meetingsInvitees(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n приглашены',
+      many: '$n приглашены',
+      few: '$n приглашены',
+      one: '$n приглашён',
+      zero: 'Приглашённые',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsInviteMore => 'Пригласить';
+
+  @override
+  String get meetingsNoInvitees => 'Никто не приглашён.';
+
+  @override
+  String get meetingsByEmail => 'по почте';
+
+  @override
+  String get meetingsUninvite => 'Отозвать приглашение';
+
+  @override
+  String get meetingsCalls => 'Звонки';
+
+  @override
+  String get meetingsNoCalls => 'Встреча ещё не проходила.';
+
+  @override
+  String get meetingsTheMeeting => 'встреча';
+
+  @override
+  String get meetingsNotesTitle => 'Заметки';
+
+  @override
+  String get meetingsNoNotes => 'В этом звонке заметки не велись.';
+
+  @override
+  String get meetingsNotesBusy_recording => 'Ведутся заметки; Muse напишет их, когда звонок закончится.';
+
+  @override
+  String get meetingsNotesBusy_queued => 'Ждём, пока Muse прослушает звонок…';
+
+  @override
+  String get meetingsNotesBusy_transcribing => 'Muse слушает звонок…';
+
+  @override
+  String get meetingsNotesBusy_writing => 'Muse пишет заметки…';
+
+  @override
+  String meetingsNotesFailed(String reason) {
+    return 'Не удалось написать заметки: $reason';
+  }
+
+  @override
+  String get meetingsWriteAgain => 'Написать заново';
+
+  @override
+  String get meetingsNotesAgain => 'Muse пишет заметки заново';
+
+  @override
+  String get meetingsActionItems => 'Задачи';
+
+  @override
+  String get meetingsAnyRepo => 'Любой репозиторий';
+
+  @override
+  String get meetingsRepository => 'Репозиторий';
+
+  @override
+  String get meetingsCreateTicket => 'Создать тикет';
+
+  @override
+  String meetingsTicketMade(String key) {
+    return '$key создан';
+  }
+
+  @override
+  String get meetingsRecordingsTitle => 'Запись';
+
+  @override
+  String get meetingsRecordingNow => 'Идёт запись…';
+
+  @override
+  String get meetingsDownload => 'Скачать';
+
+  @override
+  String get meetingsDeleteRecordingTitle => 'Удалить эту запись?';
+
+  @override
+  String get meetingsDeleteRecordingBody => 'Видео удалится для всех. Расшифровка и заметки останутся.';
+
+  @override
+  String meetingsAttendance(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n участника',
+      many: '$n участников',
+      few: '$n участника',
+      one: '$n участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsStillIn => 'ещё в звонке';
+
+  @override
+  String get meetingsGuest => 'Гость';
+
+  @override
+  String get meetingsMember => 'Участник';
+
+  @override
+  String get meetingsTranscript => 'Расшифровка';
+
+  @override
+  String get meetingsNoTranscript => 'Расшифровки нет.';
+
+  @override
+  String get meetingsSearchTranscript => 'Искать в сказанном';
+
+  @override
+  String get meetingsMixedNote => 'Звук всех слушался вместе, поэтому расшифровка не говорит, кто это сказал.';
+
+  @override
+  String meetingsChatLog(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Чат · $n сообщения',
+      many: 'Чат · $n сообщений',
+      few: 'Чат · $n сообщения',
+      one: 'Чат · $n сообщение',
+      zero: 'Чат',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsShow => 'Показать';
+
+  @override
+  String get meetingsHide => 'Скрыть';
+
+  @override
+  String get meetingsTicketTitle => 'Обсуждали на встречах';
+
+  @override
+  String get meetingsNotFound => 'Такой встречи нет';
+
+  @override
+  String get meetingsSomethingWrong => 'Что-то пошло не так';
+
+  @override
+  String get meetingsTryAgain => 'Попробовать снова';
+
+  @override
+  String get meetingsCameraStarting => 'Включаем камеру…';
+
+  @override
+  String get meetingsCameraOff => 'Камера выключена';
+
+  @override
+  String get meetingsMicOn => 'Микрофон включён';
+
+  @override
+  String get meetingsMicOff => 'Микрофон выключен';
+
+  @override
+  String get meetingsCamOn => 'Камера включена';
+
+  @override
+  String get meetingsCamOff => 'Камера выключена';
+
+  @override
+  String get meetingsMicLevel => 'Уровень микрофона';
+
+  @override
+  String get meetingsDevicesBlocked => 'Браузер запретил камеру и микрофон. Разрешите их в адресной строке и попробуйте снова.';
+
+  @override
+  String get meetingsDevicesFailed => 'Камера или микрофон не запустились. Возможно, их занимает другое приложение.';
+
+  @override
+  String get meetingsMicrophone => 'Микрофон';
+
+  @override
+  String get meetingsCamera => 'Камера';
+
+  @override
+  String get meetingsSpeakers => 'Динамики';
+
+  @override
+  String get meetingsDefaultDevice => 'По умолчанию';
+
+  @override
+  String get meetingsLobbyRecording => 'Этот звонок записывается.';
+
+  @override
+  String get meetingsLobbyNotes => 'agnts ведёт заметки этого звонка.';
+
+  @override
+  String get meetingsNotStartedYet => 'Войти можно за 15 минут до начала.';
+
+  @override
+  String get meetingsYourName => 'Ваше имя';
+
+  @override
+  String get meetingsYourNamePlaceholder => 'Как вас увидят другие';
+
+  @override
+  String meetingsJoiningAs(String name) {
+    return 'Вы войдёте как $name.';
+  }
+
+  @override
+  String get meetingsJoinNow => 'Войти';
+
+  @override
+  String get meetingsAskToJoin => 'Попросить войти';
+
+  @override
+  String get meetingsJoining => 'Входим…';
+
+  @override
+  String get meetingsOrGoogle => 'Или покажите, кто вы, через Google';
+
+  @override
+  String get meetingsWaitingTitle => 'Просим впустить…';
+
+  @override
+  String get meetingsWaitingBody => 'Кто-то из звонка скоро вас впустит.';
+
+  @override
+  String get meetingsConnecting => 'Подключаемся…';
+
+  @override
+  String get meetingsYouLeft => 'Вы вышли из звонка';
+
+  @override
+  String get meetingsJoinedElsewhere => 'Вы вошли из другой вкладки';
+
+  @override
+  String get meetingsRejoin => 'Вернуться';
+
+  @override
+  String get meetingsBackToMeetings => 'К встречам';
+
+  @override
+  String get meetingsEnded => 'Звонок завершён';
+
+  @override
+  String get meetingsEndedBody => 'Заметки и записи появятся в прошедших звонках, когда будут готовы.';
+
+  @override
+  String get meetingsRemovedTitle => 'Вас удалили из звонка';
+
+  @override
+  String get meetingsRemovedBody => 'Ведущий удалил вас. Вернуться в этот звонок нельзя.';
+
+  @override
+  String get meetingsRefused_locked => 'Встреча закрыта';
+
+  @override
+  String get meetingsRefused_full => 'Встреча заполнена';
+
+  @override
+  String get meetingsRefused_removed => 'Вас удалили из этого звонка';
+
+  @override
+  String get meetingsRefused_guests_off => 'Эта встреча только для участников рабочего пространства';
+
+  @override
+  String get meetingsRefused_not_started => 'Встреча ещё не началась';
+
+  @override
+  String get meetingsRefused_cancelled => 'Эта встреча отменена';
+
+  @override
+  String get meetingsRefused_denied => 'Вас не впустили';
+
+  @override
+  String get meetingsRefused_expired => 'Никто не ответил';
+
+  @override
+  String get meetingsRole_host => 'Ведущий';
+
+  @override
+  String get meetingsRole_cohost => 'Соведущий';
+
+  @override
+  String get meetingsRole_member => 'Участник';
+
+  @override
+  String get meetingsRole_guest => 'Гость';
+
+  @override
+  String meetingsYou(String name) {
+    return '$name (вы)';
+  }
+
+  @override
+  String get meetingsYouShort => 'вы';
+
+  @override
+  String meetingsScreenOf(String name) {
+    return 'Экран: $name';
+  }
+
+  @override
+  String get meetingsPoorConnection => 'Плохое соединение';
+
+  @override
+  String get meetingsHandRaised => 'Рука поднята';
+
+  @override
+  String get meetingsPin => 'Закрепить';
+
+  @override
+  String get meetingsUnpin => 'Открепить';
+
+  @override
+  String get meetingsRecording => 'Запись';
+
+  @override
+  String get meetingsTakingNotes => 'Заметки';
+
+  @override
+  String get meetingsLocked => 'Закрыто';
+
+  @override
+  String get meetingsReconnecting => 'Переподключаемся…';
+
+  @override
+  String get meetingsEnableAudio => 'Включить звук';
+
+  @override
+  String get meetingsWantsToJoin => 'хочет войти';
+
+  @override
+  String meetingsAndMore(String n) {
+    return 'и ещё $n';
+  }
+
+  @override
+  String get meetingsAdmit => 'Впустить';
+
+  @override
+  String get meetingsDeny => 'Отклонить';
+
+  @override
+  String get meetingsSeeAll => 'Все';
+
+  @override
+  String meetingsAskedToUnmute(String name) {
+    return '$name просит вас включить микрофон.';
+  }
+
+  @override
+  String get meetingsUnmute => 'Включить микрофон';
+
+  @override
+  String get meetingsNotNow => 'Не сейчас';
+
+  @override
+  String get meetingsChat => 'Чат';
+
+  @override
+  String get meetingsPeople => 'Участники';
+
+  @override
+  String get meetingsMicToggle => 'Микрофон (Ctrl+D)';
+
+  @override
+  String get meetingsCamToggle => 'Камера (Ctrl+E)';
+
+  @override
+  String get meetingsShareScreen => 'Показать экран';
+
+  @override
+  String get meetingsStopSharing => 'Остановить показ';
+
+  @override
+  String get meetingsRaiseHand => 'Поднять руку';
+
+  @override
+  String get meetingsLowerHand => 'Опустить руку';
+
+  @override
+  String get meetingsReact => 'Реакция';
+
+  @override
+  String get meetingsSpeakerView => 'Докладчик крупно';
+
+  @override
+  String get meetingsGridView => 'Сетка';
+
+  @override
+  String get meetingsHostControls => 'Управление';
+
+  @override
+  String get meetingsStartRecording => 'Начать запись';
+
+  @override
+  String get meetingsStopRecording => 'Остановить запись';
+
+  @override
+  String get meetingsRecordTitle => 'Записать этот звонок?';
+
+  @override
+  String get meetingsRecordBody => 'Все в звонке увидят, что идёт запись, а входящих предупредят заранее.';
+
+  @override
+  String get meetingsStartNotes => 'Вести заметки';
+
+  @override
+  String get meetingsStopNotes => 'Остановить заметки';
+
+  @override
+  String get meetingsLock => 'Закрыть встречу';
+
+  @override
+  String get meetingsUnlock => 'Открыть встречу';
+
+  @override
+  String get meetingsMuteAll => 'Выключить всем микрофоны';
+
+  @override
+  String get meetingsQuietGuests => 'Выключить гостям чат и показ экрана';
+
+  @override
+  String get meetingsGuestsSpeakAgain => 'Вернуть гостям чат и показ экрана';
+
+  @override
+  String get meetingsOpenTitle => 'Впускать всех со ссылкой?';
+
+  @override
+  String get meetingsOpenBody => 'Пока звонок не закончится, гости входят без ожидания.';
+
+  @override
+  String get meetingsLetAnyoneIn => 'Впускать';
+
+  @override
+  String get meetingsEndForAll => 'Завершить звонок для всех';
+
+  @override
+  String get meetingsEndTitle => 'Завершить звонок для всех?';
+
+  @override
+  String get meetingsEndBody => 'Все отключатся. Заметки напишутся по тому, что было записано.';
+
+  @override
+  String get meetingsLeave => 'Выйти';
+
+  @override
+  String meetingsWaiting(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ждут', many: '$n ждут', few: '$n ждут', one: '$n ждёт');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsAdmitAll => 'Впустить всех';
+
+  @override
+  String meetingsHands(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n поднятые руки',
+      many: '$n поднятых рук',
+      few: '$n поднятые руки',
+      one: '$n поднятая рука',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsInCall(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n в звонке',
+      many: '$n в звонке',
+      few: '$n в звонке',
+      one: '$n в звонке',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsDevices(String n) {
+    return 'устройств: $n';
+  }
+
+  @override
+  String meetingsActionsFor(String name) {
+    return 'Действия для $name';
+  }
+
+  @override
+  String get meetingsMuteMic => 'Выключить микрофон';
+
+  @override
+  String get meetingsStopCamera => 'Выключить камеру';
+
+  @override
+  String get meetingsStopScreen => 'Остановить показ экрана';
+
+  @override
+  String get meetingsAskUnmute => 'Попросить включить микрофон';
+
+  @override
+  String get meetingsMakeCohost => 'Сделать соведущим';
+
+  @override
+  String get meetingsUncohost => 'Убрать из соведущих';
+
+  @override
+  String get meetingsRemove => 'Удалить из звонка';
+
+  @override
+  String meetingsRemoveTitle(String name) {
+    return 'Удалить $name?';
+  }
+
+  @override
+  String get meetingsRemoveBody => 'Человек отключится на всех устройствах и не сможет вернуться в этот звонок.';
+
+  @override
+  String get meetingsChatEmpty => 'Сообщений пока нет. Они сохраняются вместе со звонком.';
+
+  @override
+  String get meetingsChatPlaceholder => 'Сообщение для всех';
+
+  @override
+  String get meetingsChatOff => 'Ведущие выключили чат для гостей.';
+
+  @override
+  String get meetingsSend => 'Отправить';
+
+  @override
+  String meetingsCallingYou(String name) {
+    return '$name звонит вам';
+  }
+
+  @override
+  String get meetingsStartsSoon => 'Скоро начнётся встреча';
+
+  @override
+  String get meetingsHasStarted => 'Началась встреча, на которую вас пригласили';
+
+  @override
+  String meetingsKnockAway(String name) {
+    return '$name хочет войти на вашу встречу';
+  }
+
+  @override
+  String get meetingsDecline => 'Отклонить';
+
+  @override
+  String get meetingsDismiss => 'Закрыть';
+
+  @override
+  String get meetingsColHost => 'Организатор';
+
+  @override
+  String get meetingsFullscreen => 'Во весь экран';
+
+  @override
+  String get meetingsExitFullscreen => 'Выйти из полноэкранного режима';
+
+  @override
+  String get meetingsColPerson => 'Участник';
+
+  @override
+  String get meetingsColInCall => 'В звонке';
+
+  @override
+  String get meetingsColDuration => 'Время';
+
+  @override
+  String get meetingsLeaveTitle => 'Выйти из звонка?';
+
+  @override
+  String get meetingsLeaveBody => 'Вы сможете вернуться по той же ссылке, пока звонок идёт.';
+
+  @override
+  String get meetingsLeaveBodyHost =>
+      'Звонок продолжится без вас. Чтобы завершить его для всех, выберите «Завершить звонок для всех» в меню «Управление».';
+
+  @override
+  String get meetingsStopRecordingTitle => 'Остановить запись?';
+
+  @override
+  String get meetingsStopRecordingBody => 'Записанное сохранится и появится на странице звонка.';
+
+  @override
+  String get meetingsStopNotesTitle => 'Перестать вести заметки?';
+
+  @override
+  String get meetingsStopNotesBody => 'Muse напишет заметки по тому, что услышал до этого момента.';
+
+  @override
+  String get meetingsMuteAllTitle => 'Выключить микрофоны всем?';
+
+  @override
+  String get meetingsMuteAllBody => 'Микрофоны выключатся у всех, кроме вас. Каждый сможет включить свой снова.';
+
+  @override
+  String get meetingsLockTitle => 'Закрыть встречу?';
+
+  @override
+  String get meetingsLockBody =>
+      'Новые участники не смогут войти или постучаться, пока вы не откроете её. Уже допущенные и организаторы смогут вернуться.';
+
+  @override
+  String meetingsAdmitAllTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Впустить $n человека?',
+      many: 'Впустить $n человек?',
+      few: 'Впустить $n человека?',
+      one: 'Впустить $n человека?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsAdmitAllBody => 'Все ожидающие сразу войдут в звонок.';
+
+  @override
+  String meetingsCohostTitle(String name) {
+    return 'Сделать $name соорганизатором?';
+  }
+
+  @override
+  String get meetingsCohostBody =>
+      'Соорганизаторы могут впускать людей, выключать им микрофон и удалять их, записывать звонок и вести заметки.';
+
+  @override
+  String get meetingsWriteAgainTitle => 'Написать заметки заново?';
+
+  @override
+  String get meetingsWriteAgainBody => 'Muse напишет их заново по звонку и заменит текущие заметки вместе со всеми правками в них.';
+
+  @override
+  String meetingsUninviteTitle(String name) {
+    return 'Убрать $name из приглашённых?';
+  }
+
+  @override
+  String get meetingsUninviteBody => 'Человек больше не приглашён и не получит напоминаний.';
 
   @override
   String get mgroupsGroups => 'Группы';
@@ -7794,6 +9272,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navOverview => 'Обзор';
 
   @override
+  String get navWorkflow => 'Работа';
+
+  @override
   String get navDashboard => 'Дашборд';
 
   @override
@@ -7845,7 +9326,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navSettings => 'Настройки';
 
   @override
-  String get navSearch => 'Поиск тикетов и задач';
+  String get navSearch => 'Поиск страниц, репозиториев, тикетов, чатов, уроков';
+
+  @override
+  String get navSearchPages => 'Страницы';
+
+  @override
+  String get navSearchNone => 'Ничего не найдено';
+
+  @override
+  String get navSearchResults => 'Результаты поиска';
 
   @override
   String get navSyncJira => 'Синхронизировать Jira';
@@ -7860,6 +9350,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navWeek => 'Эта неделя';
+
+  @override
+  String navCreditsLeft(String amount, String total) {
+    return 'Осталось $amount из $total';
+  }
 
   @override
   String get navDayMode => 'Включить дневной режим';
@@ -7968,10 +9463,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navAssistantChat => 'Чат';
 
   @override
+  String get navAssistantCode => 'Код';
+
+  @override
   String get navAssistantConversations => 'Разговоры';
 
   @override
   String get navDocuments => 'Документы';
+
+  @override
+  String get navMeetings => 'Встречи';
 
   @override
   String get networkTitle => 'Частные сети';
@@ -8678,6 +10179,33 @@ class AppLocalizationsRu extends AppLocalizations {
   String get platformDeleteAdminBody => 'Он больше не сможет войти. Это действие нельзя отменить.';
 
   @override
+  String get platformFreeCredits => 'Бесплатные кредиты';
+
+  @override
+  String get platformSetFreeCredits => 'Задать бесплатные кредиты';
+
+  @override
+  String platformFreeCreditsSet(String name, String n, String amount) {
+    return '$name может потратить $n бесплатных кредитов ($amount)';
+  }
+
+  @override
+  String platformFreeCreditsUsed(String used, String limit) {
+    return 'Уже потрачено $used из $limit.';
+  }
+
+  @override
+  String get platformFreeCreditsLimit => 'Кредиты (1 кредит = \$0,01; 0 — без кредитов)';
+
+  @override
+  String platformFreeCreditsWorth(String amount) {
+    return 'Это $amount на вызовы моделей через ключ Muse от agnts.';
+  }
+
+  @override
+  String get platformFreeCreditsInvalid => 'Введите целое число от 0 до 10 000 000.';
+
+  @override
   String get previewTab => 'Превью';
 
   @override
@@ -8896,7 +10424,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get previewVisualCheckHelp =>
-      'Claude может запустить приложение, посмотреть на изменённые страницы перед завершением и исправить то, что выглядит сломанным. Это стоит нескольких ходов.';
+      'Muse может запустить приложение, посмотреть на изменённые страницы перед завершением и исправить то, что выглядит сломанным. Это стоит нескольких ходов.';
 
   @override
   String get previewModel_ => 'Модель превью';
@@ -8909,7 +10437,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get previewEgressHelp =>
-      'Хосты, доступные контейнерам запуска помимо встроенного списка (Claude, git-хостинги, реестры пакетов), например staging API, к которому приложение обращается в превью. .example.com разрешает поддомены.';
+      'Хосты, доступные контейнерам запуска помимо встроенного списка (Muse, git-хостинги, реестры пакетов), например staging API, к которому приложение обращается в превью. .example.com разрешает поддомены.';
 
   @override
   String get previewNotify => 'Когда скриншоты превью готовы';
@@ -9270,7 +10798,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get queueBadge_server => 'В очереди · сервер';
 
   @override
-  String get queueBadge_claude => 'Пауза · Claude';
+  String get queueBadge_claude => 'Пауза · Muse';
 
   @override
   String get queueTitle_blocked => 'Ждёт связанные тикеты';
@@ -9282,7 +10810,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get queueTitle_server => 'В очереди сервера';
 
   @override
-  String get queueTitle_claude => 'Ждёт Claude';
+  String get queueTitle_claude => 'Ждёт Muse';
 
   @override
   String queuePosition(String position) {
@@ -9330,7 +10858,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get queueAddSlot => 'Добавить слот';
 
   @override
-  String get queueClaudeHint => 'Подключите аккаунт или включите кредиты в настройках пространства → Claude.';
+  String get queueClaudeHint => 'Подключите аккаунт или включите кредиты в настройках пространства → Muse.';
 
   @override
   String get queueMember => 'Участник';
@@ -9339,7 +10867,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get queueTakeOver => 'Взять себе';
 
   @override
-  String get queueTakenOver => 'Тикет ваш: в режиме «у каждого свой» он выполняется на вашем аккаунте Claude.';
+  String get queueTakenOver => 'Тикет ваш: в режиме «у каждого свой» он выполняется на вашем аккаунте Muse.';
 
   @override
   String queueCreatedBy(String name) {
@@ -9566,7 +11094,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String replayConfirm(String key) {
-    return 'agnts создаст новую задачу, которая заново выполнит $key с того места, где он начинался. Она расходует ваш план Claude, как любой тикет.';
+    return 'agnts создаст новую задачу, которая заново выполнит $key с того места, где он начинался. Она расходует ваш план Muse, как любой тикет.';
   }
 
   @override
@@ -9674,7 +11202,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String replayBenchmarkConfirm(String n) {
-    return 'agnts повторит $n тикетов бенчмарка с того места, где каждый начинался. Они расходуют ваш план Claude, как обычные тикеты.';
+    return 'agnts повторит $n тикетов бенчмарка с того места, где каждый начинался. Они расходуют ваш план Muse, как обычные тикеты.';
   }
 
   @override
@@ -9961,7 +11489,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get repoDeployHelp =>
-      'agnts ждёт проверок, прежде чем тикет попадёт к вам на ревью. Деплой всегда решаете вы, и из чата Claude он недоступен.';
+      'agnts ждёт проверок, прежде чем тикет попадёт к вам на ревью. Деплой всегда решаете вы, и из чата Muse он недоступен.';
 
   @override
   String repoDeployBranch(String branch) {
@@ -10378,11 +11906,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reposDetect => 'Определить';
 
   @override
-  String get reposDetectDeep => 'Спросить Claude';
+  String get reposDetectDeep => 'Спросить Muse';
 
   @override
   String get reposDetectDeepHelp =>
-      'Claude прочитает README и файлы CI, если сканирование не нашло команд. Занимает около минуты и расходует ваш план Claude.';
+      'Muse прочитает README и файлы CI, если сканирование не нашло команд. Занимает около минуты и расходует ваш план Muse.';
 
   @override
   String get reposDetecting => 'Читаю репозиторий…';
@@ -10393,13 +11921,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get reposDetectNothing => 'Известных файлов сборки не найдено. Добавьте тулчейны и команды вручную или спросите Claude.';
+  String get reposDetectNothing => 'Известных файлов сборки не найдено. Добавьте тулчейны и команды вручную или спросите Muse.';
 
   @override
   String get reposDetectFilled => 'Пустые команды проверок заполнены — проверьте их перед сохранением.';
 
   @override
-  String get reposDetectByClaude => 'Claude дополнил то, что не нашло сканирование.';
+  String get reposDetectByClaude => 'Muse дополнил то, что не нашло сканирование.';
 
   @override
   String get reposDetectNeedsUrl => 'Сначала укажите URL для клонирования.';
@@ -10435,7 +11963,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reposBuildEnvHelp =>
-      'Строки KEY=value для каждого запуска, например токены приватных реестров пакетов (NPM_TOKEN, PIP_INDEX_URL). Хранятся зашифрованными и больше не показываются. Claude может прочитать их во время работы, поэтому используйте токены только для чтения.';
+      'Строки KEY=value для каждого запуска, например токены приватных реестров пакетов (NPM_TOKEN, PIP_INDEX_URL). Хранятся зашифрованными и больше не показываются. Muse может прочитать их во время работы, поэтому используйте токены только для чтения.';
 
   @override
   String reposBuildEnvSet(String names) {
@@ -10878,7 +12406,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rulesLede =>
-      'Инструкции, которым agnts следует в каждом тикете: глобальные правила для всех репозиториев и правила для одного репозитория. Claude проверяет каждое правило и задаёт вопросы обо всём неясном, прежде чем оно начнёт действовать.';
+      'Инструкции, которым agnts следует в каждом тикете: глобальные правила для всех репозиториев и правила для одного репозитория. Muse проверяет каждое правило и задаёт вопросы обо всём неясном, прежде чем оно начнёт действовать.';
 
   @override
   String get rulesAdd => 'Добавить правило';
@@ -10888,7 +12416,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rulesDrawerSub =>
-      'Пишите так, как объясняли бы новому коллеге. Claude проверит правило, прежде чем ему будет следовать какой-либо тикет.';
+      'Пишите так, как объясняли бы новому коллеге. Muse проверит правило, прежде чем ему будет следовать какой-либо тикет.';
 
   @override
   String get rulesRuleTitle => 'Название';
@@ -10927,13 +12455,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rulesRereviewHelp =>
-      'Вы изменили текст правила, поэтому Claude проверит его снова. Пока проверка не закончится, тикеты его не получают.';
+      'Вы изменили текст правила, поэтому Muse проверит его снова. Пока проверка не закончится, тикеты его не получают.';
 
   @override
   String get rulesSaved => 'Правило сохранено';
 
   @override
-  String get rulesSavedReview => 'Правило сохранено; Claude проверяет его';
+  String get rulesSavedReview => 'Правило сохранено; Muse проверяет его';
 
   @override
   String get rulesScopeLabel => 'Показать правила для';
@@ -10998,10 +12526,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get rulesPending => 'Ждёт свободного исполнителя. Claude проверяет правила до начала следующего тикета.';
+  String get rulesPending => 'Ждёт свободного исполнителя. Muse проверяет правила до начала следующего тикета.';
 
   @override
-  String get rulesAnalyzing => 'Claude читает правило и ищет в нём неясности и противоречия.';
+  String get rulesAnalyzing => 'Muse читает правило и ищет в нём неясности и противоречия.';
 
   @override
   String rulesQuestionsTitle(num n) {
@@ -11017,7 +12545,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get rulesQuestionsSub => 'Claude нашёл неясность. Ваши ответы станут частью правила.';
+  String get rulesQuestionsSub => 'Muse нашёл неясность. Ваши ответы станут частью правила.';
 
   @override
   String get rulesYourAnswer => 'Ваш ответ';
@@ -11066,7 +12594,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String rulesFailed(String error) {
-    return 'Claude не смог проверить правило: $error';
+    return 'Muse не смог проверить правило: $error';
   }
 
   @override
@@ -11105,7 +12633,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get rulesAnswered => 'Ответы отправлены; Claude снова проверяет правило';
+  String get rulesAnswered => 'Ответы отправлены; Muse снова проверяет правило';
 
   @override
   String get rulesAccepted => 'Правило действует как написано';
@@ -11203,7 +12731,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get runsLede =>
-      'Каждый вызов Claude Code и Codex во всех рабочих пространствах: сколько он стоил, сколько длился и чем закончился. Открытый запуск показывает данные клиента, и каждый просмотр записывается в журнал.';
+      'Каждый вызов Muse и Codex во всех рабочих пространствах: сколько он стоил, сколько длился и чем закончился. Открытый запуск показывает данные клиента, и каждый просмотр записывается в журнал.';
 
   @override
   String get runsRunTitle => 'Вызов';
@@ -11339,7 +12867,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get runsAnyEngine => 'Любой движок';
 
   @override
-  String get runsE_claude => 'Claude';
+  String get runsE_claude => 'Muse';
 
   @override
   String get runsE_codex => 'Codex';
@@ -11481,7 +13009,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get runsTruncated => 'Достигнут лимит размера; дальнейшее содержимое не сохранено.';
 
   @override
-  String get runsAccount => 'Аккаунт Claude';
+  String get runsAccount => 'Аккаунт Muse';
 
   @override
   String get runsSession => 'Сессия';
@@ -11780,6 +13308,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsMaxTurnsHelp => 'Запуск останавливается и сообщает, когда достигает лимита';
 
   @override
+  String get settingsRunBudget => 'Бюджет на запуск';
+
+  @override
+  String get settingsRunBudgetHelp =>
+      'Максимум, который один запуск на кредитах может потратить; на 80% Muse просят завершать, и он останавливается до превышения';
+
+  @override
+  String get settingsRunBudgetServer => 'Лимит сервера';
+
+  @override
   String get settingsTimeout => 'Тайм-аут запуска';
 
   @override
@@ -11919,7 +13457,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsSecretsHelp =>
-      'Токены Jira, GitHub и Claude хранятся на вашем сервере в зашифрованном виде. Эта страница их никогда не показывает.';
+      'Токены Jira, GitHub и Muse хранятся на вашем сервере в зашифрованном виде. Эта страница их никогда не показывает.';
 
   @override
   String get settingsSaved => 'Настройки сохранены';
@@ -11971,6 +13509,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsCiRed => 'Когда отслеживаемая ветка краснеет';
 
   @override
+  String get settingsClaudeMuse => 'Muse Code';
+
+  @override
+  String get settingsClaudeMovedMuse => 'Muse подключается для каждого пространства.';
+
+  @override
+  String get settingsClaudeOpenMuse => 'Пространство → Muse';
+
+  @override
+  String get settingsModelsHelpMuse => 'Выберите модель для каждого шага. Muse Spark дешевле всего; Muse Wonder сильнее и дороже.';
+
+  @override
+  String get settingsStageCodingHelpMuse => 'Основной запуск. Тратит больше всего.';
+
+  @override
+  String get settingsStageReviewHelpMuse =>
+      'Проверяет каждый результат, пока вы его смотрите. «Авто» берёт Muse Wonder для сложных задач и Muse Spark для остальных.';
+
+  @override
+  String get settingsAllowHelpMuse => 'Muse Code может запускать это без вопросов';
+
+  @override
+  String get settingsDenyHelpMuse => 'Всегда запрещено, даже если задача просит. Push делает agnts, а не Muse Code.';
+
+  @override
   String get spendTitle => 'Расход токенов';
 
   @override
@@ -11979,7 +13542,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get spendEmpty => 'Пока ничего не записано. Расход появится после первого запуска Claude по этому тикету.';
+  String get spendEmpty => 'Пока ничего не записано. Расход появится после первого запуска Muse по этому тикету.';
 
   @override
   String get spendInput => 'Вход';
@@ -12010,7 +13573,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get spendCostNote =>
-      'Стоимость — оценка Claude Code для той же работы по ценам API. На подписке Claude её не списывают; она показывает относительный вес каждого этапа.';
+      'Стоимость — оценка Muse для той же работы по ценам API. На подписке Muse её не списывают; она показывает относительный вес каждого этапа.';
 
   @override
   String spendTokens(String n) {
@@ -12056,11 +13619,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get spendTopSubEmpty => 'Какие тикеты расходуют подписку больше всего';
 
   @override
-  String get spendTopEmpty => 'За этот период запусков Claude не записано.';
+  String get spendTopEmpty => 'За этот период запусков Muse не записано.';
 
   @override
   String get spendTopNote =>
-      'Порядок — по оценке стоимости от Claude Code, которая правильно учитывает кэш. Доля — от оценки стоимости за период. Учитывается только расход внутри периода.';
+      'Порядок — по оценке стоимости от Muse, которая правильно учитывает кэш. Доля — от оценки стоимости за период. Учитывается только расход внутри периода.';
 
   @override
   String get spendColStage => 'Самый дорогой этап';
@@ -12324,7 +13887,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get swaggerClaudeOnly =>
-      'Тесты Swagger всегда выполняются на Claude (Sonnet), какой бы моделью ни программировало рабочее пространство.';
+      'Тесты Swagger всегда выполняются на лёгкой модели Muse, какой бы моделью ни программировало рабочее пространство.';
 
   @override
   String get swaggerTab => 'Результаты API';
@@ -13151,7 +14714,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ticketSkipChecksHint =>
-      'Для проверок, которые нельзя запустить в контейнере, например если он не может скачать приватную зависимость. Claude тоже не будет запускать сборку, линтер и тесты, поэтому код проверяете вы. Настройка действует для задачи, пока вы не снимете галочку.';
+      'Для проверок, которые нельзя запустить в контейнере, например если он не может скачать приватную зависимость. Muse тоже не будет запускать сборку, линтер и тесты, поэтому код проверяете вы. Настройка действует для задачи, пока вы не снимете галочку.';
 
   @override
   String get ticketStopRun => 'Остановить запуск';
@@ -13645,6 +15208,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ticketTabsLabel => 'Детали тикета';
 
   @override
+  String get ticketFactsTicket => 'Тикет';
+
+  @override
+  String get ticketFactsCode => 'Код';
+
+  @override
+  String get ticketFactsPeople => 'Люди';
+
+  @override
+  String get ticketFactsLinks => 'Связанные тикеты';
+
+  @override
+  String get ticketFactsRuns => 'Запуски';
+
+  @override
   String get ticketTabReview => 'Код-ревью';
 
   @override
@@ -13726,6 +15304,39 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n раза', many: '$n раз', few: '$n раза', one: '$n раз');
     return 'CI $_temp0 вернул пул-реквест в работу';
   }
+
+  @override
+  String get ticketMuseMeter => 'Расход Muse за этот запуск';
+
+  @override
+  String ticketMuseSpentOf(String spent, String limit) {
+    return '$spent из $limit';
+  }
+
+  @override
+  String ticketMuseCalls(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n вызова', many: '$n вызовов', few: '$n вызова', one: '$n вызов');
+    return '$_temp0';
+  }
+
+  @override
+  String ticketMuseCharged(String amount) {
+    return 'списано $amount';
+  }
+
+  @override
+  String get ticketMuseSteered => 'Бюджет на исходе: попросили завершать';
+
+  @override
+  String get ticketMuseStopped => 'Остановлен: бюджет исчерпан';
+
+  @override
+  String ticketMuseEscalated(String model) {
+    return 'Переведён на $model';
+  }
+
+  @override
+  String get ticketsTabsLabel => 'Списки тикетов';
 
   @override
   String get ticketsTitle => 'Тикеты';
@@ -13854,8 +15465,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get usageTitle => 'Лимиты тарифа';
 
   @override
-  String get usageLede =>
-      'agnts работает на вашей подписке Claude. Эти лимиты общие с вашим собственным использованием Claude и Claude Code.';
+  String get usageLede => 'agnts работает на вашем плане Muse. Эти лимиты общие с вашим собственным использованием Muse.';
 
   @override
   String get usageCard => 'Лимиты тарифа';
@@ -13929,7 +15539,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get usageStatus_unknown => 'Неизвестно';
 
   @override
-  String get usageSource => 'Берётся из событий лимитов Claude Code. Включает ваше собственное использование Claude на этом аккаунте.';
+  String get usageSource => 'Берётся из событий лимитов Muse. Включает ваше собственное использование Muse на этом аккаунте.';
 
   @override
   String get usageLimitTitle => 'Когда достигнут лимит';
@@ -13968,7 +15578,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get usageHelp =>
-      'Данные берутся из событий лимитов, которые Claude Code отправляет во время каждого запуска. Когда agnts простаивает, небольшой запуск обновляет их.';
+      'Данные берутся из событий лимитов, которые Muse отправляет во время каждого запуска. Когда agnts простаивает, небольшой запуск обновляет их.';
 
   @override
   String get wsTitle => 'Рабочее пространство';
@@ -14071,7 +15681,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get wsMembersSub =>
-      'Все участники видят тикеты пространства, могут создавать их, отвечать, проверять и перезапускать. Владелец также управляет настройками, интеграциями, Claude, участниками и оплатой.';
+      'Все участники видят тикеты пространства, могут создавать их, отвечать, проверять и перезапускать. Владелец также управляет настройками, интеграциями, Muse, участниками и оплатой.';
 
   @override
   String get wsYou => 'вы';
@@ -14345,361 +15955,75 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get codechatTitle => 'Код';
+  String get wsTabMuse => 'Muse';
 
   @override
-  String get codechatModeLabel => 'Режим чата';
+  String get wsClaudeMuse => 'Muse';
 
   @override
-  String get codechatModeChat => 'Чат';
+  String get wsClaudeSubMuse => 'Какой аккаунт Muse используют запуски этого пространства.';
 
   @override
-  String get codechatModeCode => 'Код';
+  String get wsClaudeSavedMuse => 'Настройки Muse сохранены';
 
   @override
-  String get codechatNewConversation => 'Новый разговор о коде';
+  String get wsFallbackHelpMuse =>
+      'Когда выбранный аккаунт не подключён или исчерпал бюджет, запуски продолжаются на ключе Muse от agnts и тратят сначала ваши бесплатные кредиты, затем кредиты пространства, вместо паузы.';
 
   @override
-  String get codechatEmptyTitle => 'Меняйте код прямо из чата';
+  String get wsMemberAccountsSubMuse => 'Кто подключил свой аккаунт Muse (Профиль → Muse).';
 
   @override
-  String get codechatEmptyText =>
-      'Выберите репозитории и опишите, что нужно сделать. agnts выполнит это как тикет: следите за работой здесь, отвечайте на вопросы, просите изменения и одобряйте pull request.';
+  String get wsMuseBadge => 'Muse подключён';
 
   @override
-  String get codechatViewersOnly => 'Режим «Код» доступен тем, кто может менять рабочее пространство.';
+  String get wsNoMuseBadge => 'Без Muse';
 
   @override
-  String get codechatRepos => 'Репозитории';
+  String get wsKindMuseLogin => 'Аккаунт Meta';
 
   @override
-  String get codechatReposNone => 'Выберите репозитории для работы или назовите их в сообщении через @';
+  String get wsKindMuseApiKey => 'API-ключ Muse';
 
   @override
-  String get codechatReposChange => 'Изменить';
+  String get wsMuseSignIn => 'Войти через Meta';
 
   @override
-  String get codechatReposSave => 'Сохранить репозитории';
+  String get wsMuseSignInHelp =>
+      'Покажет код, который нужно подтвердить на странице Meta; после этого запуски используют Muse этого аккаунта Meta.';
 
   @override
-  String get codechatReposSaved => 'Репозитории изменены: следующий тикет будет работать в них';
+  String get wsMuseCode => 'Введите этот код на странице Meta';
 
   @override
-  String get codechatKind => 'Тип';
+  String get wsMuseCopyCode => 'Копировать код';
 
   @override
-  String get codechatQuick => 'Быстро: без проверок';
+  String get wsMuseOpenMeta => 'Открыть Meta';
 
   @override
-  String get codechatQuickHint => 'Сборка, линтер и тесты не запускаются, поэтому ревью наступает раньше.';
+  String get wsMuseWaiting => 'Ждём вашего подтверждения…';
 
   @override
-  String get codechatTicketPick => 'Или продолжить существующий тикет';
-
-  @override
-  String get codechatTicketPlaceholder => 'Ключ тикета, например PAY-214';
-
-  @override
-  String get codechatTicketAttach => 'Подключить';
-
-  @override
-  String codechatTicketAttached(String key) {
-    return 'Теперь работаем над $key';
+  String wsMuseExpires(String time) {
+    return 'Код действует до $time.';
   }
 
   @override
-  String get codechatPlaceholderNew => 'Опишите изменение…';
+  String get wsMuse_denied => 'Вход отклонён на странице Meta.';
 
   @override
-  String get codechatPlaceholderReview => 'Попросите изменения или одобрите выше…';
+  String get wsMuse_expired => 'Срок действия кода истёк до подтверждения.';
 
   @override
-  String get codechatPlaceholderAnswers => 'Ответьте на вопрос…';
+  String get wsMuse_failed => 'Не удалось войти.';
 
   @override
-  String get codechatPlaceholderRunning => 'Дополните запрос: он уйдёт, когда закончится этот запуск…';
+  String get wsMuseTryAgain => 'Попробовать снова';
 
   @override
-  String get codechatPlaceholderStopped => 'Подскажите, как это обойти, и запуск повторится…';
+  String get wsMuseUseKey => 'Использовать API-ключ';
 
   @override
-  String get codechatPlaceholderPushing => 'Идёт отправка…';
-
-  @override
-  String get codechatPlaceholderDone => 'Опишите следующее изменение…';
-
-  @override
-  String get codechatSend => 'Отправить';
-
-  @override
-  String get codechatSendHint => 'Enter отправляет, Shift+Enter переносит строку, @ указывает репозиторий';
-
-  @override
-  String codechatCount(String n) {
-    return '$n / 4000';
-  }
-
-  @override
-  String codechatMentioned(String names) {
-    return 'Работа в $names';
-  }
-
-  @override
-  String get codechatMentionLabel => 'Репозитории';
-
-  @override
-  String codechatRoutedCreated(String key) {
-    return 'Создан $key';
-  }
-
-  @override
-  String codechatRoutedAnswered(String key) {
-    return 'Ответ отправлен в $key';
-  }
-
-  @override
-  String codechatRoutedChanges(String key) {
-    return 'Запрошены изменения в $key';
-  }
-
-  @override
-  String codechatRoutedContinued(String key) {
-    return '$key продолжен';
-  }
-
-  @override
-  String codechatRoutedRetried(String key) {
-    return '$key запущен повторно';
-  }
-
-  @override
-  String codechatRoutedQueued(String key) {
-    return 'Ждёт окончания запуска $key';
-  }
-
-  @override
-  String codechatRoutedSent(String key) {
-    return 'Отправлено в $key';
-  }
-
-  @override
-  String codechatRoutedFailed(String reason) {
-    return 'Не отправлено: $reason';
-  }
-
-  @override
-  String get codechatRoutedSteered => 'Передано работающему агенту';
-
-  @override
-  String codechatQueuedTitle(num n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n сообщения ждут',
-      many: '$n сообщений ждут',
-      few: '$n сообщения ждут',
-      one: '$n сообщение ждёт',
-    );
-    return '$_temp0 окончания запуска';
-  }
-
-  @override
-  String get codechatSendNow => 'Остановить и отправить';
-
-  @override
-  String codechatSendNowTitle(String key) {
-    return 'Остановить $key сейчас?';
-  }
-
-  @override
-  String get codechatSendNowText => 'Текущий этап остановится, и ваши сообщения сразу уйдут в тикет.';
-
-  @override
-  String codechatSteps(num n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n шага', many: '$n шагов', few: '$n шага', one: '$n шаг');
-    return '$_temp0';
-  }
-
-  @override
-  String codechatStateLine(String key, String state) {
-    return '$key: $state';
-  }
-
-  @override
-  String codechatCheckPassed(String name) {
-    return '$name: пройдено';
-  }
-
-  @override
-  String codechatCheckFailed(String name) {
-    return '$name: ошибка';
-  }
-
-  @override
-  String get codechatPrOpened => 'Pull request открыт';
-
-  @override
-  String get codechatPushed => 'Отправлено';
-
-  @override
-  String get codechatMerged => 'Влито';
-
-  @override
-  String get codechatWorking => 'Работаю…';
-
-  @override
-  String codechatResultTitle(String key) {
-    return '$key готов к вашему ревью';
-  }
-
-  @override
-  String codechatReportTitle(String key) {
-    return '$key написал отчёт';
-  }
-
-  @override
-  String codechatFilesChanged(num n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: 'изменено $n файла',
-      many: 'изменено $n файлов',
-      few: 'изменено $n файла',
-      one: 'изменён $n файл',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get codechatChecksPassed => 'Проверки пройдены';
-
-  @override
-  String codechatChecksFailed(String failed, String n) {
-    return 'Не прошли $failed из $n проверок';
-  }
-
-  @override
-  String get codechatChecksSkipped => 'Проверки пропущены';
-
-  @override
-  String get codechatViewDiff => 'Показать diff';
-
-  @override
-  String get codechatHideDiff => 'Скрыть diff';
-
-  @override
-  String get codechatApprove => 'Одобрить';
-
-  @override
-  String codechatApproveTitle(String key) {
-    return 'Одобрить $key?';
-  }
-
-  @override
-  String codechatApprovePr(String branch) {
-    return 'agnts отправит $branch и откроет pull request.';
-  }
-
-  @override
-  String get codechatApproveMain => 'agnts отправит изменения прямо в основную ветку.';
-
-  @override
-  String get codechatApproveReport => 'Тикет закроется с этим отчётом.';
-
-  @override
-  String get codechatReject => 'Отклонить';
-
-  @override
-  String codechatRejectTitle(String key) {
-    return 'Отклонить $key?';
-  }
-
-  @override
-  String get codechatRejectText => 'Вся работа над ним остановится. Позже его можно продолжить из этого чата.';
-
-  @override
-  String get codechatOpenTicket => 'Открыть тикет';
-
-  @override
-  String codechatQuestionsTitle(String key) {
-    return '$key спрашивает, прежде чем продолжить';
-  }
-
-  @override
-  String get codechatAnswersSend => 'Отправить ответы';
-
-  @override
-  String codechatStoppedTitle(String key) {
-    return '$key остановлен';
-  }
-
-  @override
-  String get codechatStoppedHint => 'Напишите, как это обойти: запуск повторится с вашей подсказкой.';
-
-  @override
-  String codechatDoneTitle(String key) {
-    return '$key готов';
-  }
-
-  @override
-  String get codechatDoneHint => 'Следующее сообщение создаст новый тикет в тех же репозиториях.';
-
-  @override
-  String codechatRejectedTitle(String key) {
-    return '$key отклонён';
-  }
-
-  @override
-  String get codechatRejectedHint => 'Напишите, что сделать иначе, и работа продолжится.';
-
-  @override
-  String codechatMovedHint(String key) {
-    return '$key перенесён в другой ваш разговор.';
-  }
-
-  @override
-  String get codechatApprovalTitle => 'Агент просит разрешения';
-
-  @override
-  String codechatApprovalReason(String reason) {
-    return 'Правило требует спросить: $reason';
-  }
-
-  @override
-  String get codechatApprovalAllow => 'Разрешить';
-
-  @override
-  String get codechatApprovalDeny => 'Запретить';
-
-  @override
-  String get codechatApprovalAllowed => 'Разрешено';
-
-  @override
-  String get codechatApprovalDenied => 'Запрещено';
-
-  @override
-  String get codechatApprovalExpired => 'Нет ответа: запрещено';
-
-  @override
-  String codechatApprovalLeft(String seconds) {
-    return 'осталось $seconds с';
-  }
-
-  @override
-  String get codechatHandoffTitle => 'Сделать в режиме «Код»';
-
-  @override
-  String get codechatHandoffOpen => 'Открыть в «Коде»';
-
-  @override
-  String get codechatTicketChat => 'Обсуждается в чате';
-
-  @override
-  String get codechatContinueInChat => 'Продолжить в чате';
-
-  @override
-  String get codechatCodeBadge => 'Код';
-
-  @override
-  String get navAssistantCode => 'Код';
+  String get wsMuseKeyHelp => 'Вставьте API-ключ Muse (начинается с LLM_). Расход оплачивает владелец ключа в Meta.';
 }

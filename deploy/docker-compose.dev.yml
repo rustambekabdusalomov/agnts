@@ -1,4 +1,6 @@
 # Local development database. `make dev-db` starts it.
+# Meetings (video calls) also need LiveKit: `make dev-meetings` starts it,
+# with Redis and Egress (recordings and notes).
 name: agnts-dev
 
 services:
@@ -13,6 +15,67 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql
       - ./dev-init.sql:/docker-entrypoint-initdb.d/dev-init.sql:ro
+
+  # LiveKit for local calls: browsers on this machine connect to
+  # ws://localhost:7880 and send media to 127.0.0.1:7882/udp (7881/tcp).
+  # Webhooks go to the dev server on the host. The keys match .env.dev.
+  livekit:
+    image: livekit/livekit-server:v1.13.9
+    profiles: ["meetings"]
+    environment:
+      LIVEKIT_CONFIG: |
+        port: 7880
+        log_level: info
+        rtc:
+          tcp_port: 7881
+          udp_port: 7882
+          node_ip: 127.0.0.1
+          use_external_ip: false
+          # Egress shares this network namespace and reaches the media on
+          # the loopback interface.
+          enable_loopback_candidate: true
+        redis:
+          address: redis:6379
+        keys:
+          devkey: devsecret-for-local-meetings-only-0123456789
+        room:
+          empty_timeout: 120
+          departure_timeout: 120
+        webhook:
+          api_key: devkey
+          urls: ["http://host.docker.internal:8080/webhooks/livekit"]
+    ports:
+      - "127.0.0.1:7880:7880"
+      - "127.0.0.1:7881:7881"
+      - "127.0.0.1:7882:7882/udp"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on: [redis]
+
+  redis:
+    image: redis:7.4-alpine
+    profiles: ["meetings"]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  # Records calls (video, and the audio of notes) into ../.dev-data-agnts/meetings,
+  # which the dev server reads (AGNTS_MEETINGS_DIR / AGNTS_MEETINGS_EGRESS_DIR).
+  # It shares LiveKit's network, so its Chrome reaches the media on 127.0.0.1.
+  livekit-egress:
+    image: livekit/egress:v1.14.1
+    profiles: ["meetings"]
+    network_mode: "service:livekit"
+    cap_add: [SYS_ADMIN]
+    environment:
+      EGRESS_CONFIG_BODY: |
+        api_key: devkey
+        api_secret: devsecret-for-local-meetings-only-0123456789
+        ws_url: ws://localhost:7880
+        redis:
+          address: redis:6379
+        log_level: info
+    volumes:
+      - ../.dev-data-agnts/meetings:/out
+    depends_on: [livekit]
 
 # Pinned to the volume created before the rename from hiro, so local data stays.
 volumes:

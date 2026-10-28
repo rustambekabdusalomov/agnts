@@ -37,6 +37,8 @@ import 'features/home/home_screen.dart';
 import 'features/integrations/integration_screen.dart';
 import 'features/integrations/integrations_screen.dart';
 import 'features/learn/learn_queue.dart';
+import 'features/meetings/call_screen.dart';
+import 'features/meetings/meetings_screen.dart';
 import 'features/learn/learn_screen.dart';
 import 'features/learn/lesson_screen.dart';
 import 'features/more/more_screen.dart';
@@ -141,6 +143,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         screenRoute('/repos', (_, _) => const ReposScreen()),
         screenRoute('/rules', (_, _) => const RulesScreen()),
         screenRoute('/documents', (_, _) => const DocumentsScreen()),
+        screenRoute('/meetings', (_, _) => const MeetingsScreen()),
+        // A meeting's call: from the list, a push, or a meeting link.
+        screenRoute('/m/:code', (_, s) => CallScreen(code: s.pathParameters['code']!)),
         screenRoute('/documents/:id', (_, s) => DocumentScreen(id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0)),
         screenRoute('/reviews', (_, _) => const ReviewsScreen()),
         screenRoute('/swagger-suites', (_, _) => const SwaggerSuitesScreen()),

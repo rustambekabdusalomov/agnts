@@ -64,6 +64,7 @@
     "assistantChat": "Chat",
     "assistantCode": "Code",
     "assistantConversations": "Conversations",
-    "documents": "Documents"
+    "documents": "Documents",
+    "meetings": "Meetings"
   }
 }

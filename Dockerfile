@@ -25,7 +25,7 @@ RUN CGO_ENABLED=0 go build -trimpath \
       -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
       -o /out/agnts ./cmd/agnts \
  && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /out/agnts-guard ./cmd/agnts-guard \
- && mkdir -p /out/data
+ && mkdir -p /out/data /out/meetings && chmod 777 /out/meetings
 
 # Runtime: no shell, no package manager, non-root.
 FROM gcr.io/distroless/static-debian12:nonroot
@@ -34,6 +34,9 @@ COPY --from=server /out/agnts /usr/local/bin/agnts
 COPY --from=server /out/agnts-guard /usr/local/bin/agnts-guard
 COPY --from=admin /src/apps/admin/dist /srv/web
 COPY --from=server --chown=nonroot:nonroot /out/data /var/lib/agnts
+# Meetings' recordings: a new volume takes this owner and mode (Egress
+# writes as its own user).
+COPY --from=server --chown=nonroot:nonroot /out/meetings /var/lib/agnts-meetings
 ENV AGNTS_WEB_DIR=/srv/web \
     AGNTS_ADDR=:8080
 EXPOSE 8080

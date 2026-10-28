@@ -169,6 +169,28 @@ type Config struct {
 	// disables that provider.
 	PaymeMerchantID, PaymeKey                       string
 	ClickServiceID, ClickMerchantID, ClickSecretKey string
+
+	// Meetings (video calls on a LiveKit server).
+	// LiveKitURL is the address browsers and the app connect to
+	// (AGNTS_LIVEKIT_URL, wss://...); empty turns meetings off.
+	// LiveKitInternalURL is where agnts calls LiveKit's API
+	// (AGNTS_LIVEKIT_INTERNAL_URL; default the public one). The key and
+	// secret are LiveKit's API key (AGNTS_LIVEKIT_API_KEY,
+	// AGNTS_LIVEKIT_API_SECRET), which also sign its webhooks.
+	LiveKitURL, LiveKitInternalURL, LiveKitKey, LiveKitSecret string
+	// LiveKitEgress says LiveKit Egress runs (AGNTS_LIVEKIT_EGRESS):
+	// recordings and notes need it.
+	LiveKitEgress bool
+	// MeetingsDir is where Egress's files are read (AGNTS_MEETINGS_DIR) and
+	// MeetingsEgressDir the same directory as the Egress container sees it
+	// (AGNTS_MEETINGS_EGRESS_DIR; default the same path).
+	MeetingsDir, MeetingsEgressDir string
+	// MeetMaxRecordings caps the video recordings running on the server at
+	// once (AGNTS_MEET_MAX_RECORDINGS); each takes 2-4 CPUs.
+	MeetMaxRecordings int
+	// MeetNotesAudio is how notes are recorded (AGNTS_MEET_NOTES_AUDIO):
+	// "mixed" (everyone in one file) or "per-speaker" (each microphone).
+	MeetNotesAudio string
 }
 
 // Load reads the configuration from the environment.
@@ -310,6 +332,29 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	if c.Cloud, err = strconv.ParseBool(get("AGNTS_CLOUD", "false")); err != nil {
 		errs = append(errs, errors.New("AGNTS_CLOUD must be true or false"))
+	}
+	c.LiveKitURL = get("AGNTS_LIVEKIT_URL", "")
+	c.LiveKitInternalURL = get("AGNTS_LIVEKIT_INTERNAL_URL", c.LiveKitURL)
+	c.LiveKitKey, c.LiveKitSecret = get("AGNTS_LIVEKIT_API_KEY", ""), get("AGNTS_LIVEKIT_API_SECRET", "")
+	if c.LiveKitURL != "" {
+		if u, err := url.Parse(c.LiveKitURL); err != nil || (u.Scheme != "wss" && u.Scheme != "ws") || u.Host == "" {
+			errs = append(errs, errors.New("AGNTS_LIVEKIT_URL must look like wss://meet.example.com (ws:// for local development)"))
+		}
+		if c.LiveKitKey == "" || len(c.LiveKitSecret) < 32 {
+			errs = append(errs, errors.New("meetings need AGNTS_LIVEKIT_API_KEY and AGNTS_LIVEKIT_API_SECRET (at least 32 characters)"))
+		}
+	}
+	if c.LiveKitEgress, err = strconv.ParseBool(get("AGNTS_LIVEKIT_EGRESS", "false")); err != nil {
+		errs = append(errs, errors.New("AGNTS_LIVEKIT_EGRESS must be true or false"))
+	}
+	c.MeetingsDir = get("AGNTS_MEETINGS_DIR", "/var/lib/agnts-meetings")
+	c.MeetingsEgressDir = get("AGNTS_MEETINGS_EGRESS_DIR", c.MeetingsDir)
+	if c.MeetMaxRecordings, err = strconv.Atoi(get("AGNTS_MEET_MAX_RECORDINGS", "2")); err != nil || c.MeetMaxRecordings < 0 {
+		errs = append(errs, errors.New("AGNTS_MEET_MAX_RECORDINGS must be a number"))
+	}
+	c.MeetNotesAudio = strings.ToLower(get("AGNTS_MEET_NOTES_AUDIO", "mixed"))
+	if c.MeetNotesAudio != "mixed" && c.MeetNotesAudio != "per-speaker" {
+		errs = append(errs, errors.New("AGNTS_MEET_NOTES_AUDIO must be mixed or per-speaker"))
 	}
 	c.GoogleClientID = get("AGNTS_GOOGLE_CLIENT_ID", "")
 	for _, id := range strings.Split(get("AGNTS_GOOGLE_APP_CLIENT_IDS", ""), ",") {

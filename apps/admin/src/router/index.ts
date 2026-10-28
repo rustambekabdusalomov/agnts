@@ -17,6 +17,8 @@ export const router = createRouter({
     { path: '/verify', name: 'verify', component: () => import('../pages/account/VerifyPage.vue'), meta: { public: true, bare: true, any: true } },
     // A public document: anyone with the link, signed in or not.
     { path: '/d/:token', name: 'publicDocument', component: () => import('../pages/PublicDocumentPage.vue'), meta: { public: true, bare: true, any: true } },
+    // A meeting's link: the lobby and the call, for members and guests alike.
+    { path: '/m/:code', name: 'meetingRoom', component: () => import('../pages/MeetingRoomPage.vue'), meta: { public: true, bare: true, any: true } },
     { path: '/invite/:token', name: 'invite', component: () => import('../pages/account/InvitePage.vue'), meta: { public: true, bare: true, any: true } },
     { path: '/workspaces', name: 'workspaces', component: () => import('../pages/account/WorkspacesPage.vue'), meta: { bare: true, global: true } },
     { path: '/oauth/consent', name: 'consent', component: () => import('../pages/ConsentPage.vue'), meta: { bare: true, global: true } },
@@ -47,6 +49,9 @@ export const router = createRouter({
         { path: 'tasks', name: 'tasks', component: () => import('../pages/TasksPage.vue') },
         { path: 'documents', name: 'documents', component: () => import('../pages/DocumentsPage.vue') },
         { path: 'documents/:id(\\d+)', name: 'document', component: () => import('../pages/DocumentPage.vue') },
+        { path: 'meetings', name: 'meetings', component: () => import('../pages/MeetingsPage.vue') },
+        { path: 'meetings/:id(\\d+)', name: 'meeting', component: () => import('../pages/MeetingPage.vue') },
+        { path: 'meetings/:id(\\d+)/sessions/:sid(\\d+)', name: 'meetingSession', component: () => import('../pages/MeetingSessionPage.vue') },
         { path: 'swagger-suites', name: 'swagger-suites', component: () => import('../pages/SwaggerSuitesPage.vue') },
         { path: 'reviews', name: 'reviews', component: () => import('../pages/ReviewsPage.vue') },
         { path: 'ci', name: 'ci', component: () => import('../pages/CiPage.vue') },

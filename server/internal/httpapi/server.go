@@ -24,6 +24,7 @@ import (
 	"agnts/internal/documents"
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
+	"agnts/internal/meetings"
 	"agnts/internal/network"
 )
 
@@ -120,6 +121,9 @@ type Options struct {
 	Suites SwaggerSuites
 	// Documents runs the Documents module; nil answers 501.
 	Documents *documents.Service
+	// Meetings runs video calls; nil (or no LiveKit) answers 501. Its
+	// LiveKit server's webhooks come to /webhooks/livekit.
+	Meetings *meetings.Service
 }
 
 // Server implements gen.ServerInterface.
@@ -175,6 +179,9 @@ func NewHandler(opt Options) (http.Handler, error) {
 	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)
 	}
+	if opt.Meetings != nil && opt.Meetings.Ready() {
+		r.With(middleware.RequestSize(maxBodyBytes)).Post("/webhooks/livekit", s.livekitWebhook)
+	}
 	if opt.SiteURL != nil && opt.Feedback != nil {
 		// Called by the website from another origin, without an account:
 		// outside /api, with its own CORS answer.
@@ -217,6 +224,11 @@ func NewHandler(opt Options) (http.Handler, error) {
 		// A public document's page: the admin app, kept out of search
 		// engines and without a Referer that carries its token.
 		r.Get("/d/{token}", func(w http.ResponseWriter, r *http.Request) {
+			publicHeaders(w)
+			spa.ServeHTTP(w, r)
+		})
+		// A meeting's link: the admin app's lobby and call page.
+		r.Get("/m/{code}", func(w http.ResponseWriter, r *http.Request) {
 			publicHeaders(w)
 			spa.ServeHTTP(w, r)
 		})

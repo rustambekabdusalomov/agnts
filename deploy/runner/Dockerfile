@@ -27,12 +27,14 @@ ARG CLAUDE_CODE_VERSION=2.1.299
 # Custom runner images are built FROM this one; agnts checks the label.
 LABEL agnts.runner="1"
 
-# Tools, the native libraries that pip, gem, cargo, mix and friends link
+# Tools (ffmpeg cuts meeting audio into the clips Muse hears), the native
+# libraries that pip, gem, cargo, mix and friends link
 # against (they cannot be installed at run time: the root is read-only),
 # ICU for .NET, and PHP with Composer (PHP has no prebuilt mise backend).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       bash bzip2 ca-certificates coreutils curl file git jq less make procps ripgrep tar unzip xz-utils zstd \
+      ffmpeg \
       build-essential pkg-config autoconf automake libtool cmake \
       libssl-dev libffi-dev zlib1g-dev libbz2-dev liblzma-dev libreadline-dev libncurses-dev libsqlite3-dev \
       libgdbm-dev libgmp-dev libyaml-dev libxml2-dev libxslt1-dev libcurl4-openssl-dev libpq-dev \

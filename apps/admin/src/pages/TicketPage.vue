@@ -41,6 +41,7 @@ import ReviewDraftsPanel from '../components/pulls/ReviewDraftsPanel.vue'
 import TicketPullComments from '../components/ticket/TicketPullComments.vue'
 import TicketCommits from '../components/ticket/TicketCommits.vue'
 import TicketDocuments from '../components/documents/TicketDocuments.vue'
+import TicketMeetings from '../components/meetings/TicketMeetings.vue'
 import CiCard from '../components/ticket/CiCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
@@ -1211,7 +1212,10 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
           <TicketLessons :ticket="tk" />
         </fieldset>
 
-        <TicketDocuments v-else-if="activeTab === 'documents'" class="tk-panel" :ticket="tk" :has-report="report && !!result?.report" />
+        <div v-else-if="activeTab === 'documents'" class="tk-panel tk-docs">
+          <TicketDocuments :ticket="tk" :has-report="report && !!result?.report" />
+          <TicketMeetings :ticket-key="tk.key" />
+        </div>
 
         <RunLog v-else-if="activeTab === 'log'" :events="events" :ticket-key="key" />
 
@@ -1356,4 +1360,5 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-shots { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
 .tk-shot { display: inline-flex; align-items: center; gap: 6px; }
 .tk-shot button { border: 0; background: none; padding: 0 2px; font: inherit; font-weight: 700; color: inherit; cursor: pointer; }
+.tk-docs { display: flex; flex-direction: column; gap: 16px; }
 </style>

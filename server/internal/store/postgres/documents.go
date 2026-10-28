@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -611,6 +612,9 @@ func (s *Documents) FinishDocumentRun(ctx context.Context, runID int64, res doma
 			runID, string(res.Status), res.Error); err != nil {
 			return err
 		}
+		if err := finishMeetingNotes(ctx, tx, runID, docID, res); err != nil {
+			return err
+		}
 		if res.Version == nil {
 			return nil
 		}
@@ -647,6 +651,57 @@ func (s *Documents) FinishDocumentRun(ctx context.Context, runID int64, res doma
 		return domain.Document{}, err
 	}
 	return s.Document(ctx, docID)
+}
+
+// finishMeetingNotes moves a meeting session's notes on when a
+// generation of its notes ends: done with the action items it wrote
+// (keeping the ones that have tickets), or failed with the reason.
+func finishMeetingNotes(ctx context.Context, tx pgx.Tx, runID, docID int64, res domain.DocRunResult) error {
+	var kind string
+	var sessionID int64
+	err := tx.QueryRow(ctx, `SELECT COALESCE(source->>'kind', ''), COALESCE((source->>'sessionId')::bigint, 0) FROM document_runs WHERE id = $1`, runID).
+		Scan(&kind, &sessionID)
+	if err != nil || kind != string(domain.SourceMeeting) || sessionID == 0 {
+		return err
+	}
+	switch res.Status {
+	case domain.DocRunFailed:
+		_, err = tx.Exec(ctx, `UPDATE meeting_sessions SET notes_status = 'failed', notes_error = $2 WHERE id = $1`, sessionID, res.Error)
+		return err
+	case domain.DocRunDone:
+	default:
+		return nil
+	}
+	if _, err := tx.Exec(ctx, `UPDATE meeting_sessions SET notes_status = 'done', notes_error = '', document_id = $2 WHERE id = $1`, sessionID, docID); err != nil {
+		return err
+	}
+	if res.ActionItems == nil {
+		return nil
+	}
+	rows, err := tx.Query(ctx, `SELECT lower(text) FROM meeting_action_items WHERE session_id = $1 AND ticket_id IS NOT NULL`, sessionID)
+	if err != nil {
+		return err
+	}
+	kept, err := pgx.CollectRows(rows, pgx.RowTo[string])
+	if err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `DELETE FROM meeting_action_items WHERE session_id = $1 AND ticket_id IS NULL`, sessionID); err != nil {
+		return err
+	}
+	pos := len(kept)
+	for _, it := range res.ActionItems {
+		if slices.Contains(kept, strings.ToLower(it.Text)) {
+			continue
+		}
+		if _, err := tx.Exec(ctx, `INSERT INTO meeting_action_items (workspace_id, session_id, position, text, who, due, at_ms, quote)
+			SELECT workspace_id, id, $2, $3, $4, $5, $6, $7 FROM meeting_sessions WHERE id = $1`,
+			sessionID, pos, it.Text, it.Who, it.Due, it.AtMS, it.Quote); err != nil {
+			return err
+		}
+		pos++
+	}
+	return nil
 }
 
 // DocumentRunCostUSD is the API cost of a generation's calls.

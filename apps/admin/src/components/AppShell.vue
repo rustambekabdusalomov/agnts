@@ -20,6 +20,7 @@ import UsagePill from './UsagePill.vue'
 import { useRules } from './rules/useRules'
 import GlobalSearch, { type SearchPage } from './GlobalSearch.vue'
 import HiIcon from './ui/HiIcon.vue'
+import IncomingCall from './meetings/IncomingCall.vue'
 import { sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
@@ -131,6 +132,7 @@ const menus = computed<NavMenu[]>(() => [
       page('tickets', 'all', { label: 'nav.all', on: isTicketList.value, cnt: count(NEEDS) }),
       page('tasks', 'tasks', { cnt: openTasks.value, dim: true }),
       page('documents', 'rules'),
+      page('meetings', 'video', { on: route.name === 'meetings' || route.name === 'meeting' || route.name === 'meetingSession' }),
       page('reviews', 'pull', { cnt: readyReviews.value }),
       page('ci', 'ci', { cnt: redPipelines.value }),
     ],
@@ -515,4 +517,5 @@ onBeforeUnmount(() => {
   </Transition>
   <div v-if="tipBox" class="side-tip" role="tooltip" :style="{ top: tipBox.top + 'px', left: tipBox.left + 'px' }">{{ tipBox.text }}</div>
   <div class="toast" :class="{ show: ui.toast }" role="status">{{ ui.toast }}</div>
+  <IncomingCall />
 </template>

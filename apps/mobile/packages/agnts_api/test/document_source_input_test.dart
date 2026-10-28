@@ -18,6 +18,12 @@ void main() {
       // TODO
     });
 
+    // meeting: the session
+    // int sessionId
+    test('to test the property `sessionId`', () async {
+      // TODO
+    });
+
     // int documentId
     test('to test the property `documentId`', () async {
       // TODO
