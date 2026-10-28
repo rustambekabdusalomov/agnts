@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/assistant/assistant_data.dart';
+import '../features/assistant/code_data.dart';
 import '../features/documents/documents_data.dart';
 import '../features/tickets/linked_commits.dart';
 import '../features/tickets/pull_comments.dart';
@@ -96,6 +97,11 @@ class LiveStream {
     // The asker's own answers being made: nothing else changed.
     if ((e['type'] as String? ?? '').startsWith('assistant_')) {
       onAssistantEvent(ref, e);
+      return;
+    }
+    // A Code conversation's own messages and questions.
+    if ((e['type'] as String? ?? '').startsWith('code_')) {
+      onCodeEvent(ref, e);
       return;
     }
     final key = e['ticketKey'] as String? ?? '';

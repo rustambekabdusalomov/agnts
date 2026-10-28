@@ -93,6 +93,9 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   Future<void> _history() async {
     final picked = await showConversationsSheet(context, current: _id);
     if (!mounted || picked == null) return;
+    // A Code conversation opens in Code mode.
+    final mode = ref.read(assistantConversationsProvider).value?.where((c) => c.id == picked).firstOrNull?.mode;
+    if (mode == ChatMode.code) return context.pushReplacement('/assistant/code/$picked');
     setState(() => _id = picked == 0 ? null : picked);
   }
 
@@ -138,6 +141,13 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
         title: l.massistantTitle,
         onBack: () => context.canPop() ? context.pop() : context.go('/home'),
         actions: [
+          // Code mode changes repositories: people who can edit only.
+          if (ref.watch(canEditProvider))
+            IconButton(
+              tooltip: l.codechatModeCode,
+              onPressed: () => context.pushReplacement('/assistant/code'),
+              icon: HIcon('code', size: 22, color: c.primary),
+            ),
           IconButton(tooltip: l.massistantHistory, onPressed: _history, icon: HIcon('logs', size: 22, color: c.primary)),
           if (_id != null)
             IconButton(
@@ -264,6 +274,7 @@ class _Answer extends ConsumerWidget {
       child = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         ReportMarkdown(m.text),
         for (final a in m.actions ?? const <AssistantAction>[]) _ActionCard(a, key: ValueKey(a.id)),
+        if (m.handoff != null) _HandoffCard(m.handoff!),
         for (final e in m.actionErrors ?? const <String>[])
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -624,6 +635,43 @@ class _InputBarState extends State<_InputBar> {
             padding: const EdgeInsets.only(top: 4, right: 8),
             child: Text(l.massistantCount('$n'), style: TextStyle(fontSize: 12, color: n > _maxQuestion ? c.badInk : c.ink3)),
           ),
+      ]),
+    );
+  }
+}
+
+/// An answer's offer to do a code change in Code mode: the request and its
+/// repositories, opened there for the person to send.
+class _HandoffCard extends StatelessWidget {
+  const _HandoffCard(this.h);
+  final CodeHandoff h;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = Agnts.of(context);
+    final q = Uri(queryParameters: {'text': h.request, if (h.repoIds.isNotEmpty) 'repos': h.repoIds.join(',')}).query;
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      decoration: BoxDecoration(color: c.bg, borderRadius: BorderRadius.circular(14), border: Border.all(color: c.primary)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(l.codechatHandoffTitle, style: TextStyle(fontWeight: FontWeight.w700, color: c.ink)),
+        const SizedBox(height: 4),
+        SelectableText(h.request, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink)),
+        if (h.repos.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text('${l.codechatRepos}: ${h.repos.join(', ')}', style: TextStyle(fontSize: 13, color: c.ink3)),
+          ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: FilledButton.icon(
+            onPressed: () => context.push('/assistant/code?$q'),
+            icon: HIcon('code', size: 18, color: c.onPrimary),
+            label: Text(l.codechatHandoffOpen),
+          ),
+        ),
       ]),
     );
   }

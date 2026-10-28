@@ -44,5 +44,6 @@ export const ICON: Record<string, string> = {
   "play": "<path d=\"M8 5l11 7-11 7z\"/>",
   "prev": "<path d=\"M15 6l-6 6 6 6\"/>",
   "next": "<path d=\"M9 6l6 6-6 6\"/>",
+  "code": "<path d=\"M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14\"/>",
   "mic": "<rect x=\"9\" y=\"3\" width=\"6\" height=\"11\" rx=\"3\"/><path d=\"M5 11a7 7 0 0 0 14 0M12 18v3\"/>",
 }

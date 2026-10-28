@@ -16,6 +16,8 @@ let timer: ReturnType<typeof setTimeout> | undefined
 function stale(e: TicketEvent): string[] {
   // The asker's own answers being made: only the assistant's queries.
   if (e.type.startsWith('assistant_')) return e.type === 'assistant_progress' || e.type === 'assistant_partial' ? [] : ['assistant']
+  // A Code conversation's own messages and questions: its queries only.
+  if (e.type.startsWith('code_')) return ['assistant']
   const keys = ['dashboard', 'nav']
   if (e.ticketKey) keys.push(`ticket:${e.ticketKey}`, 'tickets')
   switch (e.type) {

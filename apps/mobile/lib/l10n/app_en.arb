@@ -1147,6 +1147,312 @@
   "ciFeedbackRoundsHelp": "How many times a red check sends agnts's own pull request back to coding. 0 turns it off.",
   "ciInfraPatterns": "Infra patterns",
   "ciInfraPatternsHelp": "Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.",
+  "codechatTitle": "Code",
+  "codechatModeLabel": "Chat mode",
+  "codechatModeChat": "Chat",
+  "codechatModeCode": "Code",
+  "codechatNewConversation": "New Code conversation",
+  "codechatEmptyTitle": "Change code from the chat",
+  "codechatEmptyText": "Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.",
+  "codechatViewersOnly": "Code mode is for people who can change the workspace.",
+  "codechatRepos": "Repositories",
+  "codechatReposNone": "Pick the repositories to work in",
+  "codechatReposChange": "Change",
+  "codechatReposSave": "Save repositories",
+  "codechatReposSaved": "Repositories changed: the next ticket works in them",
+  "codechatKind": "Kind",
+  "codechatQuick": "Quick: skip checks",
+  "codechatQuickHint": "Build, lint and tests don't run, so review comes sooner.",
+  "codechatTicketPick": "Or work on an existing ticket",
+  "codechatTicketPlaceholder": "Ticket key, e.g. PAY-214",
+  "codechatTicketAttach": "Attach",
+  "codechatTicketAttached": "Now working on {key}",
+  "@codechatTicketAttached": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatPlaceholderNew": "Describe the change…",
+  "codechatPlaceholderReview": "Ask for changes, or approve above…",
+  "codechatPlaceholderAnswers": "Answer the question…",
+  "codechatPlaceholderRunning": "Add to the request: it is sent when this run ends…",
+  "codechatPlaceholderStopped": "Say how to get past this, and it retries…",
+  "codechatPlaceholderPushing": "Pushing now…",
+  "codechatPlaceholderDone": "Ask for the next change…",
+  "codechatSend": "Send",
+  "codechatSendHint": "Enter sends, Shift+Enter makes a new line",
+  "codechatCount": "{n} / 4000",
+  "@codechatCount": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedCreated": "Started {key}",
+  "@codechatRoutedCreated": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedAnswered": "Answered {key}",
+  "@codechatRoutedAnswered": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedChanges": "Asked {key} for changes",
+  "@codechatRoutedChanges": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedContinued": "Continued {key}",
+  "@codechatRoutedContinued": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedRetried": "Retried {key}",
+  "@codechatRoutedRetried": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedQueued": "Waits for {key}'s run to end",
+  "@codechatRoutedQueued": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedSent": "Sent to {key}",
+  "@codechatRoutedSent": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedFailed": "Not sent: {reason}",
+  "@codechatRoutedFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRoutedSteered": "Delivered to the running agent",
+  "codechatQueuedTitle": "{n, plural, one {{n} message waits} other {{n} messages wait}} for this run to end",
+  "@codechatQueuedTitle": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "codechatSendNow": "Stop and send now",
+  "codechatSendNowTitle": "Stop {key} now?",
+  "@codechatSendNowTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatSendNowText": "The running stage stops, and your messages go to it at once.",
+  "codechatSteps": "{n, plural, one {{n} step} other {{n} steps}}",
+  "@codechatSteps": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "codechatStateLine": "{key}: {state}",
+  "@codechatStateLine": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatCheckPassed": "{name} passed",
+  "@codechatCheckPassed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatCheckFailed": "{name} failed",
+  "@codechatCheckFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatPrOpened": "Pull request opened",
+  "codechatPushed": "Pushed",
+  "codechatMerged": "Merged",
+  "codechatWorking": "Working…",
+  "codechatResultTitle": "{key} is ready for your review",
+  "@codechatResultTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatReportTitle": "{key} wrote its report",
+  "@codechatReportTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatFilesChanged": "{n, plural, one {{n} file changed} other {{n} files changed}}",
+  "@codechatFilesChanged": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "codechatChecksPassed": "Checks passed",
+  "codechatChecksFailed": "{failed} of {n} checks failed",
+  "@codechatChecksFailed": {
+    "placeholders": {
+      "failed": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatChecksSkipped": "Checks skipped",
+  "codechatViewDiff": "View diff",
+  "codechatHideDiff": "Hide diff",
+  "codechatApprove": "Approve",
+  "codechatApproveTitle": "Approve {key}?",
+  "@codechatApproveTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatApprovePr": "agnts pushes {branch} and opens a pull request.",
+  "@codechatApprovePr": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatApproveMain": "agnts pushes the change straight to the default branch.",
+  "codechatApproveReport": "The ticket closes with this report.",
+  "codechatReject": "Reject",
+  "codechatRejectTitle": "Reject {key}?",
+  "@codechatRejectTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRejectText": "All work on it stops. You can continue it from this chat later.",
+  "codechatOpenTicket": "Open ticket",
+  "codechatQuestionsTitle": "{key} asks before it goes on",
+  "@codechatQuestionsTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatAnswersSend": "Send answers",
+  "codechatStoppedTitle": "{key} stopped",
+  "@codechatStoppedTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatStoppedHint": "Write how to get past it: it retries with your note.",
+  "codechatDoneTitle": "{key} is done",
+  "@codechatDoneTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatDoneHint": "Your next message starts a new ticket in the same repositories.",
+  "codechatRejectedTitle": "{key} was rejected",
+  "@codechatRejectedTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatRejectedHint": "Write what to do differently and it continues.",
+  "codechatMovedHint": "{key} moved to another of your conversations.",
+  "@codechatMovedHint": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatApprovalTitle": "The agent asks to run this",
+  "codechatApprovalReason": "A rule asks about it: {reason}",
+  "@codechatApprovalReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatApprovalAllow": "Allow",
+  "codechatApprovalDeny": "Deny",
+  "codechatApprovalAllowed": "Allowed",
+  "codechatApprovalDenied": "Denied",
+  "codechatApprovalExpired": "Nobody answered: denied",
+  "codechatApprovalLeft": "{seconds}s left",
+  "@codechatApprovalLeft": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatHandoffTitle": "Do this in Code",
+  "codechatHandoffOpen": "Open in Code",
+  "codechatTicketChat": "Discussed in chat",
+  "codechatContinueInChat": "Continue in chat",
+  "codechatCodeBadge": "Code",
   "commitBack": "Back to commits",
   "commitBackTo": "Back to {repo}",
   "@commitBackTo": {
@@ -4848,6 +5154,7 @@
   "navCi": "CI",
   "navAiAssistant": "AI assistant",
   "navAssistantChat": "Chat",
+  "navAssistantCode": "Code",
   "navAssistantConversations": "Conversations",
   "navDocuments": "Documents",
   "networkTitle": "Private networks",

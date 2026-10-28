@@ -21,6 +21,7 @@ import DesignRecord from '../components/ticket/DesignRecord.vue'
 import RedFlags from '../components/ticket/RedFlags.vue'
 import HarnessChecks from '../components/ticket/HarnessChecks.vue'
 import ReplayButton from '../components/ticket/ReplayButton.vue'
+import TicketChatLink from '../components/codechat/TicketChatLink.vue'
 import PreviewShots from '../components/ticket/PreviewShots.vue'
 import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
@@ -653,6 +654,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
   <div class="tk-top">
     <RouterLink class="back-btn" :to="backTo"><HiIcon name="back" />{{ isTask ? t('nav.tasks') : t('ticket.back') }}</RouterLink>
     <div v-if="d && tk" class="tk-lang">
+      <TicketChatLink v-if="!tk.replayOf" :ticket="tk" />
       <InputSelect v-model="translation.lang.value" :options="langOptions" :label="t('ticket.translate')" :placeholder="t('ticket.translate')" />
     </div>
   </div>

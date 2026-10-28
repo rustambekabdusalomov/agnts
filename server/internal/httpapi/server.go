@@ -111,6 +111,8 @@ type Options struct {
 	Network *network.Service
 	// Assistant answers questions about the workspace; nil answers 501.
 	Assistant Assistant
+	// Code runs the chat's Code mode; nil answers 501.
+	Code CodeChat
 	// Swagger runs Swagger tests; nil answers 501.
 	Swagger Swagger
 	// Suites runs saved Swagger test suites; nil answers 501 and turns

@@ -13738,4 +13738,341 @@ class AppLocalizationsUz extends AppLocalizations {
   String wsRoleLabel(String name) {
     return '$name roli';
   }
+
+  @override
+  String get codechatTitle => 'Kod';
+
+  @override
+  String get codechatModeLabel => 'Chat rejimi';
+
+  @override
+  String get codechatModeChat => 'Chat';
+
+  @override
+  String get codechatModeCode => 'Kod';
+
+  @override
+  String get codechatNewConversation => 'Yangi kod suhbati';
+
+  @override
+  String get codechatEmptyTitle => 'Kodni chatdan oʻzgartiring';
+
+  @override
+  String get codechatEmptyText =>
+      'Repozitoriylarni tanlang va nima qilish kerakligini yozing. agnts buni tiket sifatida bajaradi: ishni shu yerda kuzating, savollarga javob bering, oʻzgarish soʻrang va pull requestni tasdiqlang.';
+
+  @override
+  String get codechatViewersOnly => 'Kod rejimi ish maydonini oʻzgartira oladiganlar uchun.';
+
+  @override
+  String get codechatRepos => 'Repozitoriylar';
+
+  @override
+  String get codechatReposNone => 'Ishlash uchun repozitoriylarni tanlang';
+
+  @override
+  String get codechatReposChange => 'Oʻzgartirish';
+
+  @override
+  String get codechatReposSave => 'Repozitoriylarni saqlash';
+
+  @override
+  String get codechatReposSaved => 'Repozitoriylar oʻzgardi: keyingi tiket ularda ishlaydi';
+
+  @override
+  String get codechatKind => 'Turi';
+
+  @override
+  String get codechatQuick => 'Tez: tekshiruvlarsiz';
+
+  @override
+  String get codechatQuickHint => 'Build, lint va testlar ishlamaydi, shuning uchun koʻrib chiqish tezroq keladi.';
+
+  @override
+  String get codechatTicketPick => 'Yoki mavjud tiket ustida ishlang';
+
+  @override
+  String get codechatTicketPlaceholder => 'Tiket kaliti, masalan PAY-214';
+
+  @override
+  String get codechatTicketAttach => 'Ulash';
+
+  @override
+  String codechatTicketAttached(String key) {
+    return 'Endi $key ustida ishlaymiz';
+  }
+
+  @override
+  String get codechatPlaceholderNew => 'Oʻzgarishni tasvirlang…';
+
+  @override
+  String get codechatPlaceholderReview => 'Oʻzgarish soʻrang yoki yuqorida tasdiqlang…';
+
+  @override
+  String get codechatPlaceholderAnswers => 'Savolga javob bering…';
+
+  @override
+  String get codechatPlaceholderRunning => 'Soʻrovga qoʻshing: bu ishga tushirish tugaganda yuboriladi…';
+
+  @override
+  String get codechatPlaceholderStopped => 'Buni qanday chetlab oʻtishni yozing, u qayta urinadi…';
+
+  @override
+  String get codechatPlaceholderPushing => 'Yuborilmoqda…';
+
+  @override
+  String get codechatPlaceholderDone => 'Keyingi oʻzgarishni yozing…';
+
+  @override
+  String get codechatSend => 'Yuborish';
+
+  @override
+  String get codechatSendHint => 'Enter yuboradi, Shift+Enter yangi qator';
+
+  @override
+  String codechatCount(String n) {
+    return '$n / 4000';
+  }
+
+  @override
+  String codechatRoutedCreated(String key) {
+    return '$key boshlandi';
+  }
+
+  @override
+  String codechatRoutedAnswered(String key) {
+    return '$key savollariga javob berildi';
+  }
+
+  @override
+  String codechatRoutedChanges(String key) {
+    return '$key dan oʻzgarish soʻraldi';
+  }
+
+  @override
+  String codechatRoutedContinued(String key) {
+    return '$key davom ettirildi';
+  }
+
+  @override
+  String codechatRoutedRetried(String key) {
+    return '$key qayta ishga tushirildi';
+  }
+
+  @override
+  String codechatRoutedQueued(String key) {
+    return '$key ishga tushirishi tugashini kutmoqda';
+  }
+
+  @override
+  String codechatRoutedSent(String key) {
+    return '$key ga yuborildi';
+  }
+
+  @override
+  String codechatRoutedFailed(String reason) {
+    return 'Yuborilmadi: $reason';
+  }
+
+  @override
+  String get codechatRoutedSteered => 'Ishlayotgan agentga yetkazildi';
+
+  @override
+  String codechatQueuedTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta xabar');
+    return '$_temp0 bu ishga tushirish tugashini kutmoqda';
+  }
+
+  @override
+  String get codechatSendNow => 'Toʻxtatib, hozir yuborish';
+
+  @override
+  String codechatSendNowTitle(String key) {
+    return '$key hozir toʻxtatilsinmi?';
+  }
+
+  @override
+  String get codechatSendNowText => 'Joriy bosqich toʻxtaydi va xabarlaringiz darhol tiketga ketadi.';
+
+  @override
+  String codechatSteps(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n qadam');
+    return '$_temp0';
+  }
+
+  @override
+  String codechatStateLine(String key, String state) {
+    return '$key: $state';
+  }
+
+  @override
+  String codechatCheckPassed(String name) {
+    return '$name: oʻtdi';
+  }
+
+  @override
+  String codechatCheckFailed(String name) {
+    return '$name: xato';
+  }
+
+  @override
+  String get codechatPrOpened => 'Pull request ochildi';
+
+  @override
+  String get codechatPushed => 'Yuborildi';
+
+  @override
+  String get codechatMerged => 'Birlashtirildi';
+
+  @override
+  String get codechatWorking => 'Ishlayapman…';
+
+  @override
+  String codechatResultTitle(String key) {
+    return '$key koʻrib chiqishingizga tayyor';
+  }
+
+  @override
+  String codechatReportTitle(String key) {
+    return '$key hisobotini yozdi';
+  }
+
+  @override
+  String codechatFilesChanged(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta fayl oʻzgardi');
+    return '$_temp0';
+  }
+
+  @override
+  String get codechatChecksPassed => 'Tekshiruvlar oʻtdi';
+
+  @override
+  String codechatChecksFailed(String failed, String n) {
+    return '$n tadan $failed ta tekshiruv oʻtmadi';
+  }
+
+  @override
+  String get codechatChecksSkipped => 'Tekshiruvlar oʻtkazib yuborildi';
+
+  @override
+  String get codechatViewDiff => 'Diffni koʻrsatish';
+
+  @override
+  String get codechatHideDiff => 'Diffni yashirish';
+
+  @override
+  String get codechatApprove => 'Tasdiqlash';
+
+  @override
+  String codechatApproveTitle(String key) {
+    return '$key tasdiqlansinmi?';
+  }
+
+  @override
+  String codechatApprovePr(String branch) {
+    return 'agnts $branch ni yuboradi va pull request ochadi.';
+  }
+
+  @override
+  String get codechatApproveMain => 'agnts oʻzgarishni toʻgʻridan-toʻgʻri asosiy branchga yuboradi.';
+
+  @override
+  String get codechatApproveReport => 'Tiket shu hisobot bilan yopiladi.';
+
+  @override
+  String get codechatReject => 'Rad etish';
+
+  @override
+  String codechatRejectTitle(String key) {
+    return '$key rad etilsinmi?';
+  }
+
+  @override
+  String get codechatRejectText => 'Undagi barcha ish toʻxtaydi. Keyinroq uni shu chatdan davom ettirish mumkin.';
+
+  @override
+  String get codechatOpenTicket => 'Tiketni ochish';
+
+  @override
+  String codechatQuestionsTitle(String key) {
+    return '$key davom etishdan oldin soʻrayapti';
+  }
+
+  @override
+  String get codechatAnswersSend => 'Javoblarni yuborish';
+
+  @override
+  String codechatStoppedTitle(String key) {
+    return '$key toʻxtadi';
+  }
+
+  @override
+  String get codechatStoppedHint => 'Buni qanday chetlab oʻtishni yozing: u maslahatingiz bilan qayta urinadi.';
+
+  @override
+  String codechatDoneTitle(String key) {
+    return '$key tayyor';
+  }
+
+  @override
+  String get codechatDoneHint => 'Keyingi xabaringiz oʻsha repozitoriylarda yangi tiket boshlaydi.';
+
+  @override
+  String codechatRejectedTitle(String key) {
+    return '$key rad etildi';
+  }
+
+  @override
+  String get codechatRejectedHint => 'Nimani boshqacha qilishni yozing va u davom etadi.';
+
+  @override
+  String codechatMovedHint(String key) {
+    return '$key boshqa suhbatingizga oʻtkazildi.';
+  }
+
+  @override
+  String get codechatApprovalTitle => 'Agent buni ishga tushirishga ruxsat soʻrayapti';
+
+  @override
+  String codechatApprovalReason(String reason) {
+    return 'Qoida soʻrashni talab qiladi: $reason';
+  }
+
+  @override
+  String get codechatApprovalAllow => 'Ruxsat berish';
+
+  @override
+  String get codechatApprovalDeny => 'Taqiqlash';
+
+  @override
+  String get codechatApprovalAllowed => 'Ruxsat berildi';
+
+  @override
+  String get codechatApprovalDenied => 'Taqiqlandi';
+
+  @override
+  String get codechatApprovalExpired => 'Javob boʻlmadi: taqiqlandi';
+
+  @override
+  String codechatApprovalLeft(String seconds) {
+    return '$seconds s qoldi';
+  }
+
+  @override
+  String get codechatHandoffTitle => 'Buni Kod rejimida qilish';
+
+  @override
+  String get codechatHandoffOpen => 'Kodda ochish';
+
+  @override
+  String get codechatTicketChat => 'Chatda muhokama qilinmoqda';
+
+  @override
+  String get codechatContinueInChat => 'Chatda davom ettirish';
+
+  @override
+  String get codechatCodeBadge => 'Kod';
+
+  @override
+  String get navAssistantCode => 'Kod';
 }

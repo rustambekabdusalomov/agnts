@@ -24530,6 +24530,552 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Role of {name}'**
   String wsRoleLabel(String name);
+
+  /// No description provided for @codechatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get codechatTitle;
+
+  /// No description provided for @codechatModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat mode'**
+  String get codechatModeLabel;
+
+  /// No description provided for @codechatModeChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get codechatModeChat;
+
+  /// No description provided for @codechatModeCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get codechatModeCode;
+
+  /// No description provided for @codechatNewConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'New Code conversation'**
+  String get codechatNewConversation;
+
+  /// No description provided for @codechatEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change code from the chat'**
+  String get codechatEmptyTitle;
+
+  /// No description provided for @codechatEmptyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.'**
+  String get codechatEmptyText;
+
+  /// No description provided for @codechatViewersOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Code mode is for people who can change the workspace.'**
+  String get codechatViewersOnly;
+
+  /// No description provided for @codechatRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get codechatRepos;
+
+  /// No description provided for @codechatReposNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the repositories to work in'**
+  String get codechatReposNone;
+
+  /// No description provided for @codechatReposChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get codechatReposChange;
+
+  /// No description provided for @codechatReposSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save repositories'**
+  String get codechatReposSave;
+
+  /// No description provided for @codechatReposSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories changed: the next ticket works in them'**
+  String get codechatReposSaved;
+
+  /// No description provided for @codechatKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get codechatKind;
+
+  /// No description provided for @codechatQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick: skip checks'**
+  String get codechatQuick;
+
+  /// No description provided for @codechatQuickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Build, lint and tests don\'t run, so review comes sooner.'**
+  String get codechatQuickHint;
+
+  /// No description provided for @codechatTicketPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Or work on an existing ticket'**
+  String get codechatTicketPick;
+
+  /// No description provided for @codechatTicketPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket key, e.g. PAY-214'**
+  String get codechatTicketPlaceholder;
+
+  /// No description provided for @codechatTicketAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get codechatTicketAttach;
+
+  /// No description provided for @codechatTicketAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Now working on {key}'**
+  String codechatTicketAttached(String key);
+
+  /// No description provided for @codechatPlaceholderNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the change…'**
+  String get codechatPlaceholderNew;
+
+  /// No description provided for @codechatPlaceholderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for changes, or approve above…'**
+  String get codechatPlaceholderReview;
+
+  /// No description provided for @codechatPlaceholderAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer the question…'**
+  String get codechatPlaceholderAnswers;
+
+  /// No description provided for @codechatPlaceholderRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to the request: it is sent when this run ends…'**
+  String get codechatPlaceholderRunning;
+
+  /// No description provided for @codechatPlaceholderStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Say how to get past this, and it retries…'**
+  String get codechatPlaceholderStopped;
+
+  /// No description provided for @codechatPlaceholderPushing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushing now…'**
+  String get codechatPlaceholderPushing;
+
+  /// No description provided for @codechatPlaceholderDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for the next change…'**
+  String get codechatPlaceholderDone;
+
+  /// No description provided for @codechatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get codechatSend;
+
+  /// No description provided for @codechatSendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter sends, Shift+Enter makes a new line'**
+  String get codechatSendHint;
+
+  /// No description provided for @codechatCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} / 4000'**
+  String codechatCount(String n);
+
+  /// No description provided for @codechatRoutedCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Started {key}'**
+  String codechatRoutedCreated(String key);
+
+  /// No description provided for @codechatRoutedAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered {key}'**
+  String codechatRoutedAnswered(String key);
+
+  /// No description provided for @codechatRoutedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked {key} for changes'**
+  String codechatRoutedChanges(String key);
+
+  /// No description provided for @codechatRoutedContinued.
+  ///
+  /// In en, this message translates to:
+  /// **'Continued {key}'**
+  String codechatRoutedContinued(String key);
+
+  /// No description provided for @codechatRoutedRetried.
+  ///
+  /// In en, this message translates to:
+  /// **'Retried {key}'**
+  String codechatRoutedRetried(String key);
+
+  /// No description provided for @codechatRoutedQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Waits for {key}\'s run to end'**
+  String codechatRoutedQueued(String key);
+
+  /// No description provided for @codechatRoutedSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {key}'**
+  String codechatRoutedSent(String key);
+
+  /// No description provided for @codechatRoutedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: {reason}'**
+  String codechatRoutedFailed(String reason);
+
+  /// No description provided for @codechatRoutedSteered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered to the running agent'**
+  String get codechatRoutedSteered;
+
+  /// No description provided for @codechatQueuedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} message waits} other {{n} messages wait}} for this run to end'**
+  String codechatQueuedTitle(num n);
+
+  /// No description provided for @codechatSendNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and send now'**
+  String get codechatSendNow;
+
+  /// No description provided for @codechatSendNowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {key} now?'**
+  String codechatSendNowTitle(String key);
+
+  /// No description provided for @codechatSendNowText.
+  ///
+  /// In en, this message translates to:
+  /// **'The running stage stops, and your messages go to it at once.'**
+  String get codechatSendNowText;
+
+  /// No description provided for @codechatSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} step} other {{n} steps}}'**
+  String codechatSteps(num n);
+
+  /// No description provided for @codechatStateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{key}: {state}'**
+  String codechatStateLine(String key, String state);
+
+  /// No description provided for @codechatCheckPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} passed'**
+  String codechatCheckPassed(String name);
+
+  /// No description provided for @codechatCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} failed'**
+  String codechatCheckFailed(String name);
+
+  /// No description provided for @codechatPrOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request opened'**
+  String get codechatPrOpened;
+
+  /// No description provided for @codechatPushed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushed'**
+  String get codechatPushed;
+
+  /// No description provided for @codechatMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get codechatMerged;
+
+  /// No description provided for @codechatWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get codechatWorking;
+
+  /// No description provided for @codechatResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} is ready for your review'**
+  String codechatResultTitle(String key);
+
+  /// No description provided for @codechatReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} wrote its report'**
+  String codechatReportTitle(String key);
+
+  /// No description provided for @codechatFilesChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} file changed} other {{n} files changed}}'**
+  String codechatFilesChanged(num n);
+
+  /// No description provided for @codechatChecksPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks passed'**
+  String get codechatChecksPassed;
+
+  /// No description provided for @codechatChecksFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{failed} of {n} checks failed'**
+  String codechatChecksFailed(String failed, String n);
+
+  /// No description provided for @codechatChecksSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks skipped'**
+  String get codechatChecksSkipped;
+
+  /// No description provided for @codechatViewDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'View diff'**
+  String get codechatViewDiff;
+
+  /// No description provided for @codechatHideDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide diff'**
+  String get codechatHideDiff;
+
+  /// No description provided for @codechatApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get codechatApprove;
+
+  /// No description provided for @codechatApproveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {key}?'**
+  String codechatApproveTitle(String key);
+
+  /// No description provided for @codechatApprovePr.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts pushes {branch} and opens a pull request.'**
+  String codechatApprovePr(String branch);
+
+  /// No description provided for @codechatApproveMain.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts pushes the change straight to the default branch.'**
+  String get codechatApproveMain;
+
+  /// No description provided for @codechatApproveReport.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket closes with this report.'**
+  String get codechatApproveReport;
+
+  /// No description provided for @codechatReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get codechatReject;
+
+  /// No description provided for @codechatRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject {key}?'**
+  String codechatRejectTitle(String key);
+
+  /// No description provided for @codechatRejectText.
+  ///
+  /// In en, this message translates to:
+  /// **'All work on it stops. You can continue it from this chat later.'**
+  String get codechatRejectText;
+
+  /// No description provided for @codechatOpenTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ticket'**
+  String get codechatOpenTicket;
+
+  /// No description provided for @codechatQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} asks before it goes on'**
+  String codechatQuestionsTitle(String key);
+
+  /// No description provided for @codechatAnswersSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send answers'**
+  String get codechatAnswersSend;
+
+  /// No description provided for @codechatStoppedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} stopped'**
+  String codechatStoppedTitle(String key);
+
+  /// No description provided for @codechatStoppedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write how to get past it: it retries with your note.'**
+  String get codechatStoppedHint;
+
+  /// No description provided for @codechatDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} is done'**
+  String codechatDoneTitle(String key);
+
+  /// No description provided for @codechatDoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next message starts a new ticket in the same repositories.'**
+  String get codechatDoneHint;
+
+  /// No description provided for @codechatRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} was rejected'**
+  String codechatRejectedTitle(String key);
+
+  /// No description provided for @codechatRejectedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write what to do differently and it continues.'**
+  String get codechatRejectedHint;
+
+  /// No description provided for @codechatMovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} moved to another of your conversations.'**
+  String codechatMovedHint(String key);
+
+  /// No description provided for @codechatApprovalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The agent asks to run this'**
+  String get codechatApprovalTitle;
+
+  /// No description provided for @codechatApprovalReason.
+  ///
+  /// In en, this message translates to:
+  /// **'A rule asks about it: {reason}'**
+  String codechatApprovalReason(String reason);
+
+  /// No description provided for @codechatApprovalAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get codechatApprovalAllow;
+
+  /// No description provided for @codechatApprovalDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny'**
+  String get codechatApprovalDeny;
+
+  /// No description provided for @codechatApprovalAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get codechatApprovalAllowed;
+
+  /// No description provided for @codechatApprovalDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Denied'**
+  String get codechatApprovalDenied;
+
+  /// No description provided for @codechatApprovalExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody answered: denied'**
+  String get codechatApprovalExpired;
+
+  /// No description provided for @codechatApprovalLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s left'**
+  String codechatApprovalLeft(String seconds);
+
+  /// No description provided for @codechatHandoffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Do this in Code'**
+  String get codechatHandoffTitle;
+
+  /// No description provided for @codechatHandoffOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Code'**
+  String get codechatHandoffOpen;
+
+  /// No description provided for @codechatTicketChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Discussed in chat'**
+  String get codechatTicketChat;
+
+  /// No description provided for @codechatContinueInChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue in chat'**
+  String get codechatContinueInChat;
+
+  /// No description provided for @codechatCodeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get codechatCodeBadge;
+
+  /// No description provided for @navAssistantCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get navAssistantCode;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

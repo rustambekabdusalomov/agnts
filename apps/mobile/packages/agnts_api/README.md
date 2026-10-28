@@ -90,15 +90,23 @@ Class | Method | HTTP request | Description
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getReplayReport**](doc/AnalyticsApi.md#getreplayreport) | **GET** /eval/replays | How the newest replays compare with the tickets they re-ran, by prompt version
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**runBenchmark**](doc/AnalyticsApi.md#runbenchmark) | **POST** /eval/benchmark | Replay every ticket in the benchmark with today&#39;s prompts, and the given models
 [*AssistantApi*](doc/AssistantApi.md) | [**askAssistant**](doc/AssistantApi.md#askassistant) | **POST** /assistant/conversations/{conversationId}/messages | Ask a follow-up question in one of your conversations
+[*AssistantApi*](doc/AssistantApi.md) | [**attachCodeTicket**](doc/AssistantApi.md#attachcodeticket) | **PUT** /assistant/conversations/{conversationId}/ticket | Make an existing ticket the one a Code conversation works on
 [*AssistantApi*](doc/AssistantApi.md) | [**cancelAssistantAction**](doc/AssistantApi.md#cancelassistantaction) | **POST** /assistant/actions/{actionId}/cancel | Decline an action the assistant proposed
 [*AssistantApi*](doc/AssistantApi.md) | [**confirmAssistantAction**](doc/AssistantApi.md#confirmassistantaction) | **POST** /assistant/actions/{actionId}/confirm | Do an action the assistant proposed on one of your answers
+[*AssistantApi*](doc/AssistantApi.md) | [**decideCodeApproval**](doc/AssistantApi.md#decidecodeapproval) | **POST** /assistant/approvals/{approvalId} | Allow or deny a tool call the agent asked you about
 [*AssistantApi*](doc/AssistantApi.md) | [**deleteAssistantConversation**](doc/AssistantApi.md#deleteassistantconversation) | **DELETE** /assistant/conversations/{conversationId} | Delete one of your conversations
 [*AssistantApi*](doc/AssistantApi.md) | [**getAssistantConversation**](doc/AssistantApi.md#getassistantconversation) | **GET** /assistant/conversations/{conversationId} | One of your conversations with all its messages
 [*AssistantApi*](doc/AssistantApi.md) | [**getAssistantStats**](doc/AssistantApi.md#getassistantstats) | **GET** /assistant/stats | How the workspace&#39;s assistant did (questions, answer rate, time, ratings, tokens, per prompt version)
+[*AssistantApi*](doc/AssistantApi.md) | [**getCodeTimeline**](doc/AssistantApi.md#getcodetimeline) | **GET** /assistant/conversations/{conversationId}/timeline | A Code conversation with its timeline
+[*AssistantApi*](doc/AssistantApi.md) | [**getTicketChat**](doc/AssistantApi.md#getticketchat) | **GET** /tickets/{key}/chat | Your Code conversation that works on this ticket
 [*AssistantApi*](doc/AssistantApi.md) | [**listAssistantConversations**](doc/AssistantApi.md#listassistantconversations) | **GET** /assistant/conversations | Your assistant conversations, newest first, each with its last message
 [*AssistantApi*](doc/AssistantApi.md) | [**listAssistantRated**](doc/AssistantApi.md#listassistantrated) | **GET** /assistant/rated | Rated answers with their questions, newest rating first
 [*AssistantApi*](doc/AssistantApi.md) | [**rateAssistantAnswer**](doc/AssistantApi.md#rateassistantanswer) | **PUT** /assistant/messages/{messageId}/rating | Rate one of your answers (helpful or not), or take the rating back
+[*AssistantApi*](doc/AssistantApi.md) | [**sendCodeMessage**](doc/AssistantApi.md#sendcodemessage) | **POST** /assistant/conversations/{conversationId}/code | Send a message in a Code conversation
+[*AssistantApi*](doc/AssistantApi.md) | [**sendCodeQueuedNow**](doc/AssistantApi.md#sendcodequeuednow) | **POST** /assistant/conversations/{conversationId}/send-now | Stop the running stage and send the queued messages now
+[*AssistantApi*](doc/AssistantApi.md) | [**setCodeRepos**](doc/AssistantApi.md#setcoderepos) | **PUT** /assistant/conversations/{conversationId}/repos | Change the repositories of a Code conversation
 [*AssistantApi*](doc/AssistantApi.md) | [**startAssistantConversation**](doc/AssistantApi.md#startassistantconversation) | **POST** /assistant/conversations | Ask the assistant a question in a new conversation
+[*AssistantApi*](doc/AssistantApi.md) | [**startCodeConversation**](doc/AssistantApi.md#startcodeconversation) | **POST** /assistant/code | Start a Code conversation
 [*AssistantApi*](doc/AssistantApi.md) | [**transcribeAssistantQuestion**](doc/AssistantApi.md#transcribeassistantquestion) | **POST** /assistant/transcribe | Turn a spoken question into text
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
@@ -421,6 +429,7 @@ Class | Method | HTTP request | Description
  - [AssistantStatsActions](doc/AssistantStatsActions.md)
  - [AssistantStatsVersionsInner](doc/AssistantStatsVersionsInner.md)
  - [AssistantTranscript](doc/AssistantTranscript.md)
+ - [AttachCodeTicketRequest](doc/AttachCodeTicketRequest.md)
  - [Attachment](doc/Attachment.md)
  - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)
  - [BeginLoginTotpRequest](doc/BeginLoginTotpRequest.md)
@@ -441,12 +450,21 @@ Class | Method | HTTP request | Description
  - [CIWatch](doc/CIWatch.md)
  - [Capacity](doc/Capacity.md)
  - [ChangePasswordRequest](doc/ChangePasswordRequest.md)
+ - [ChatMode](doc/ChatMode.md)
  - [CheckStep](doc/CheckStep.md)
  - [CheckoutCredits200Response](doc/CheckoutCredits200Response.md)
  - [CheckoutCreditsRequest](doc/CheckoutCreditsRequest.md)
  - [ClaudeConnectionInput](doc/ClaudeConnectionInput.md)
  - [ClaudeConnectionState](doc/ClaudeConnectionState.md)
+ - [CodeApproval](doc/CodeApproval.md)
+ - [CodeHandoff](doc/CodeHandoff.md)
  - [CodeReview](doc/CodeReview.md)
+ - [CodeRouted](doc/CodeRouted.md)
+ - [CodeSend](doc/CodeSend.md)
+ - [CodeSendAnswersInner](doc/CodeSendAnswersInner.md)
+ - [CodeStart](doc/CodeStart.md)
+ - [CodeTicket](doc/CodeTicket.md)
+ - [CodeTimeline](doc/CodeTimeline.md)
  - [Commit](doc/Commit.md)
  - [CommitDetail](doc/CommitDetail.md)
  - [CommitPull](doc/CommitPull.md)
@@ -467,6 +485,7 @@ Class | Method | HTTP request | Description
  - [Dashboard](doc/Dashboard.md)
  - [DashboardCounts](doc/DashboardCounts.md)
  - [DayStat](doc/DayStat.md)
+ - [DecideCodeApprovalRequest](doc/DecideCodeApprovalRequest.md)
  - [DecideConsent200Response](doc/DecideConsent200Response.md)
  - [DecideConsentRequest](doc/DecideConsentRequest.md)
  - [DeleteWorkspaceRequest](doc/DeleteWorkspaceRequest.md)
@@ -523,6 +542,7 @@ Class | Method | HTTP request | Description
  - [FreeCredits](doc/FreeCredits.md)
  - [GetConsent200Response](doc/GetConsent200Response.md)
  - [GetPlatformRunPrompt200Response](doc/GetPlatformRunPrompt200Response.md)
+ - [GetTicketChat200Response](doc/GetTicketChat200Response.md)
  - [GitSettings](doc/GitSettings.md)
  - [GoogleSignInRequest](doc/GoogleSignInRequest.md)
  - [GrantCreditsRequest](doc/GrantCreditsRequest.md)
@@ -630,6 +650,7 @@ Class | Method | HTTP request | Description
  - [RepoActivity](doc/RepoActivity.md)
  - [RepoBrief](doc/RepoBrief.md)
  - [RepoBriefInput](doc/RepoBriefInput.md)
+ - [RepoChoice](doc/RepoChoice.md)
  - [RepoDetectInput](doc/RepoDetectInput.md)
  - [RepoDetection](doc/RepoDetection.md)
  - [RepoFile](doc/RepoFile.md)
@@ -737,6 +758,7 @@ Class | Method | HTTP request | Description
  - [TicketSpendList](doc/TicketSpendList.md)
  - [TicketSpendRow](doc/TicketSpendRow.md)
  - [TicketState](doc/TicketState.md)
+ - [TimelineItem](doc/TimelineItem.md)
  - [TokenRequest](doc/TokenRequest.md)
  - [TokenSpend](doc/TokenSpend.md)
  - [Toolchain](doc/Toolchain.md)

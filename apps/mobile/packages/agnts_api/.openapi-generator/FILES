@@ -54,6 +54,7 @@ doc/AssistantStats.md
 doc/AssistantStatsActions.md
 doc/AssistantStatsVersionsInner.md
 doc/AssistantTranscript.md
+doc/AttachCodeTicketRequest.md
 doc/Attachment.md
 doc/AttachmentsApi.md
 doc/AuthApi.md
@@ -77,13 +78,22 @@ doc/CIStatus.md
 doc/CIWatch.md
 doc/Capacity.md
 doc/ChangePasswordRequest.md
+doc/ChatMode.md
 doc/CheckStep.md
 doc/CheckoutCredits200Response.md
 doc/CheckoutCreditsRequest.md
 doc/CiApi.md
 doc/ClaudeConnectionInput.md
 doc/ClaudeConnectionState.md
+doc/CodeApproval.md
+doc/CodeHandoff.md
 doc/CodeReview.md
+doc/CodeRouted.md
+doc/CodeSend.md
+doc/CodeSendAnswersInner.md
+doc/CodeStart.md
+doc/CodeTicket.md
+doc/CodeTimeline.md
 doc/Commit.md
 doc/CommitDetail.md
 doc/CommitPull.md
@@ -105,6 +115,7 @@ doc/Dashboard.md
 doc/DashboardApi.md
 doc/DashboardCounts.md
 doc/DayStat.md
+doc/DecideCodeApprovalRequest.md
 doc/DecideConsent200Response.md
 doc/DecideConsentRequest.md
 doc/DeleteWorkspaceRequest.md
@@ -165,6 +176,7 @@ doc/ForgotPasswordRequest.md
 doc/FreeCredits.md
 doc/GetConsent200Response.md
 doc/GetPlatformRunPrompt200Response.md
+doc/GetTicketChat200Response.md
 doc/GitSettings.md
 doc/GoogleSignInRequest.md
 doc/GrantCreditsRequest.md
@@ -280,6 +292,7 @@ doc/ReplyPullThreadRequest.md
 doc/RepoActivity.md
 doc/RepoBrief.md
 doc/RepoBriefInput.md
+doc/RepoChoice.md
 doc/RepoDetectInput.md
 doc/RepoDetection.md
 doc/RepoFile.md
@@ -394,6 +407,7 @@ doc/TicketSpendList.md
 doc/TicketSpendRow.md
 doc/TicketState.md
 doc/TicketsApi.md
+doc/TimelineItem.md
 doc/TokenRequest.md
 doc/TokenSpend.md
 doc/Toolchain.md
@@ -515,6 +529,7 @@ lib/src/model/assistant_stats.dart
 lib/src/model/assistant_stats_actions.dart
 lib/src/model/assistant_stats_versions_inner.dart
 lib/src/model/assistant_transcript.dart
+lib/src/model/attach_code_ticket_request.dart
 lib/src/model/attachment.dart
 lib/src/model/begin_login_totp200_response.dart
 lib/src/model/begin_login_totp_request.dart
@@ -527,6 +542,7 @@ lib/src/model/branch.dart
 lib/src/model/branch_commit.dart
 lib/src/model/capacity.dart
 lib/src/model/change_password_request.dart
+lib/src/model/chat_mode.dart
 lib/src/model/check_step.dart
 lib/src/model/checkout_credits200_response.dart
 lib/src/model/checkout_credits_request.dart
@@ -540,7 +556,15 @@ lib/src/model/ci_status.dart
 lib/src/model/ci_watch.dart
 lib/src/model/claude_connection_input.dart
 lib/src/model/claude_connection_state.dart
+lib/src/model/code_approval.dart
+lib/src/model/code_handoff.dart
 lib/src/model/code_review.dart
+lib/src/model/code_routed.dart
+lib/src/model/code_send.dart
+lib/src/model/code_send_answers_inner.dart
+lib/src/model/code_start.dart
+lib/src/model/code_ticket.dart
+lib/src/model/code_timeline.dart
 lib/src/model/commit.dart
 lib/src/model/commit_detail.dart
 lib/src/model/commit_pull.dart
@@ -561,6 +585,7 @@ lib/src/model/create_workspace_request.dart
 lib/src/model/dashboard.dart
 lib/src/model/dashboard_counts.dart
 lib/src/model/day_stat.dart
+lib/src/model/decide_code_approval_request.dart
 lib/src/model/decide_consent200_response.dart
 lib/src/model/decide_consent_request.dart
 lib/src/model/delete_workspace_request.dart
@@ -617,6 +642,7 @@ lib/src/model/forgot_password_request.dart
 lib/src/model/free_credits.dart
 lib/src/model/get_consent200_response.dart
 lib/src/model/get_platform_run_prompt200_response.dart
+lib/src/model/get_ticket_chat200_response.dart
 lib/src/model/git_settings.dart
 lib/src/model/google_sign_in_request.dart
 lib/src/model/grant_credits_request.dart
@@ -724,6 +750,7 @@ lib/src/model/reply_pull_thread_request.dart
 lib/src/model/repo_activity.dart
 lib/src/model/repo_brief.dart
 lib/src/model/repo_brief_input.dart
+lib/src/model/repo_choice.dart
 lib/src/model/repo_detect_input.dart
 lib/src/model/repo_detection.dart
 lib/src/model/repo_file.dart
@@ -831,6 +858,7 @@ lib/src/model/ticket_repos_input.dart
 lib/src/model/ticket_spend_list.dart
 lib/src/model/ticket_spend_row.dart
 lib/src/model/ticket_state.dart
+lib/src/model/timeline_item.dart
 lib/src/model/token_request.dart
 lib/src/model/token_spend.dart
 lib/src/model/toolchain.dart
@@ -915,6 +943,7 @@ test/assistant_stats_actions_test.dart
 test/assistant_stats_test.dart
 test/assistant_stats_versions_inner_test.dart
 test/assistant_transcript_test.dart
+test/attach_code_ticket_request_test.dart
 test/attachment_test.dart
 test/attachments_api_test.dart
 test/auth_api_test.dart
@@ -930,6 +959,7 @@ test/branch_commit_test.dart
 test/branch_test.dart
 test/capacity_test.dart
 test/change_password_request_test.dart
+test/chat_mode_test.dart
 test/check_step_test.dart
 test/checkout_credits200_response_test.dart
 test/checkout_credits_request_test.dart
@@ -944,7 +974,15 @@ test/ci_test.dart
 test/ci_watch_test.dart
 test/claude_connection_input_test.dart
 test/claude_connection_state_test.dart
+test/code_approval_test.dart
+test/code_handoff_test.dart
 test/code_review_test.dart
+test/code_routed_test.dart
+test/code_send_answers_inner_test.dart
+test/code_send_test.dart
+test/code_start_test.dart
+test/code_ticket_test.dart
+test/code_timeline_test.dart
 test/commit_detail_test.dart
 test/commit_pull_test.dart
 test/commit_test.dart
@@ -966,6 +1004,7 @@ test/dashboard_api_test.dart
 test/dashboard_counts_test.dart
 test/dashboard_test.dart
 test/day_stat_test.dart
+test/decide_code_approval_request_test.dart
 test/decide_consent200_response_test.dart
 test/decide_consent_request_test.dart
 test/delete_workspace_request_test.dart
@@ -1026,6 +1065,7 @@ test/forgot_password_request_test.dart
 test/free_credits_test.dart
 test/get_consent200_response_test.dart
 test/get_platform_run_prompt200_response_test.dart
+test/get_ticket_chat200_response_test.dart
 test/git_settings_test.dart
 test/google_sign_in_request_test.dart
 test/grant_credits_request_test.dart
@@ -1141,6 +1181,7 @@ test/reply_pull_thread_request_test.dart
 test/repo_activity_test.dart
 test/repo_brief_input_test.dart
 test/repo_brief_test.dart
+test/repo_choice_test.dart
 test/repo_detect_input_test.dart
 test/repo_detection_test.dart
 test/repo_file_test.dart
@@ -1255,6 +1296,7 @@ test/ticket_spend_row_test.dart
 test/ticket_state_test.dart
 test/ticket_test.dart
 test/tickets_api_test.dart
+test/timeline_item_test.dart
 test/token_request_test.dart
 test/token_spend_test.dart
 test/toolchain_test.dart

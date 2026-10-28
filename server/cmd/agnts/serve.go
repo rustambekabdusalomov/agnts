@@ -176,6 +176,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		CI:           a.ci,
 		CommitLinks:  a.store,
 		Assistant:    a.orch,
+		Code:         a.orch,
 		Swagger:      a.orch,
 		Suites:       a.orch,
 		Documents:    docSvc,
@@ -586,6 +587,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.assistant = postgres.NewAssistant(pool, box)
 	a.orch.SetAssistant(a.assistant, mcpserver.NewSnapshotter(a.mcpDeps()))
 	a.orch.SetAssistantActions(&actions.Assistant{Deps: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Role: a.workspaces.Role})
+	a.orch.SetCodeChat(a.assistant, a.workspaces.Role)
 	a.orch.SetTranscriber(a.runner)
 	return a, nil
 }
@@ -1172,8 +1174,9 @@ func evalAssistant(ctx context.Context, cfg config.Config, pool postgresPool, lo
 }
 
 // evalAssistantCases answers the built-in cases with the current prompt
-// and checks the actions each proposes: acting when asked, not when the
-// files only talk about acting. It fails when a case does.
+// and checks the actions each proposes (acting when asked, not when the
+// files only talk about acting) and its offers of Code mode. It fails
+// when a case does.
 func evalAssistantCases(ctx context.Context, cfg config.Config, pool postgresPool, log *slog.Logger, out io.Writer) error {
 	cases, err := orchestrator.AssistantCases()
 	if err != nil {
@@ -1190,7 +1193,7 @@ func evalAssistantCases(ctx context.Context, cfg config.Config, pool postgresPoo
 	for _, c := range cases {
 		ans, res, err := a.orch.ReplayAnswer(ctx, c.Snapshot(), c.Lang, 0)
 		tokens += res.Usage.Total()
-		problems := orchestrator.CheckProposals(ans.Actions, c.Want)
+		problems := append(orchestrator.CheckProposals(ans.Actions, c.Want), orchestrator.CheckCode(ans.Code, c.Code)...)
 		if err != nil {
 			problems = []string{"no answer: " + err.Error()}
 		}

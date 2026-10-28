@@ -88,3 +88,34 @@ func TestReadLoginPrompt(t *testing.T) {
 		t.Fatal("no page printed must fail")
 	}
 }
+
+// A run someone follows in a chat: their messages and answers go into it,
+// and what it waits on is in the ticket's log.
+func TestMuseLiveEvents(t *testing.T) {
+	var got []orchestrator.ClaudeEvent
+	on := func(e orchestrator.ClaudeEvent) { got = append(got, e) }
+	for _, e := range []muse.Event{
+		{Kind: muse.EventSteer, Reason: "person", Text: "[Message from the person following this task] in seconds"},
+		{Kind: muse.EventSteer, Reason: "steps"},
+		{Kind: muse.EventApproval, Approval: &muse.Approval{Tool: "bash", Command: "npm install left-pad", Ask: true, Pending: true,
+			Rule: "ask-new-dependency", Reason: "it adds a dependency to the project"}},
+		{Kind: muse.EventApproval, Approval: &muse.Approval{Tool: "bash", Command: "npm install left-pad", Ask: true, Allow: true, Rule: "ask-new-dependency"}},
+		{Kind: muse.EventApproval, Approval: &muse.Approval{Tool: "bash", Command: "pip install x", Ask: true, Rule: "ask-new-dependency"}},
+	} {
+		museEvent(e, 0, on)
+	}
+	var lines []string
+	for _, e := range got {
+		lines = append(lines, e.Data["kind"].(string)+"/"+e.Data["level"].(string)+": "+e.Text)
+	}
+	want := []string{
+		"message/info: a message from the chat went to the running agent",
+		"steer/warn: model calls running low: told Muse to wrap up",
+		"ask/warn: waiting for the chat to allow npm install left-pad (it adds a dependency to the project)",
+		"ask/info: the chat allowed npm install left-pad",
+		"ask/warn: the chat did not allow pip install x",
+	}
+	if strings.Join(lines, "\n") != strings.Join(want, "\n") {
+		t.Fatalf("events:\n%s", strings.Join(lines, "\n"))
+	}
+}

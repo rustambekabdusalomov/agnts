@@ -7,6 +7,7 @@ import { api, transcribeQuestion, unwrap } from '../api/client'
 import type { AssistantConversation, AssistantLink, AssistantMessage } from '../api/types'
 import { applyLive, assistantLang, fileLabel, isOpen, live, MAX_QUESTION, secs } from '../components/assistant/assistant'
 import AssistantActionCard from '../components/assistant/AssistantActionCard.vue'
+import ChatModeSwitch from '../components/codechat/ChatModeSwitch.vue'
 import PageHeader from '../components/PageHeader.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
@@ -161,6 +162,7 @@ const suggestions = computed(() => [
 <template>
   <PageHeader :title="id && conv.data.value ? conv.data.value.title : t('nav.assistantChat')">
     <div class="actions" style="margin: 0">
+      <ChatModeSwitch mode="chat" />
       <RouterLink class="btn" :to="{ name: 'assistantConversations' }"><HiIcon name="logs" />{{ t('nav.assistantConversations') }}</RouterLink>
       <RouterLink v-if="id" class="btn btn-p" :to="{ name: 'assistant' }"><HiIcon name="plus" />{{ t('massistant.newConversation') }}</RouterLink>
     </div>
@@ -195,6 +197,17 @@ const suggestions = computed(() => [
           <template v-else>
             <ReportView :markdown="m.text" />
             <AssistantActionCard v-for="a in m.actions ?? []" :key="a.id" :action="a" />
+            <div v-if="m.handoff" class="as-handoff">
+              <b>{{ t('codechat.handoffTitle') }}</b>
+              <p>{{ m.handoff.request }}</p>
+              <p v-if="m.handoff.repos.length" class="hint">{{ t('codechat.repos') }}: {{ m.handoff.repos.join(', ') }}</p>
+              <RouterLink
+                class="btn btn-p btn-s"
+                :to="{ name: 'assistantCode', query: { text: m.handoff.request, repos: m.handoff.repoIds.join(',') || undefined } }"
+              >
+                <HiIcon name="code" />{{ t('codechat.handoffOpen') }}
+              </RouterLink>
+            </div>
             <p v-for="(e, i) in m.actionErrors ?? []" :key="i" class="hint as-noact">{{ t('massistant.actionNotOffered', { reason: e }) }}</p>
             <div v-if="m.links.length" class="as-links">
               <RouterLink v-for="(l, i) in m.links" :key="i" class="as-link" :class="{ mono: l.kind === 'ticket' }" :to="linkTo(l)">{{ linkLabel(l) }}</RouterLink>
@@ -280,6 +293,8 @@ const suggestions = computed(() => [
 @keyframes as-spin { to { transform: rotate(360deg); } }
 .as-partial { opacity: 0.6; }
 .as-noact { margin: 8px 0 0; }
+.as-handoff { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 10px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--primary); }
+.as-handoff p { margin: 0; white-space: pre-wrap; }
 .as-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .as-link { padding: 3px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary-ink); font-size: 13.5px; font-weight: 700; text-decoration: none; }
 .as-link.mono { font-family: var(--mono); }

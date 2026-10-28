@@ -28,6 +28,19 @@ type AssistantCase struct {
 	Files map[string]json.RawMessage `json:"files"`
 	// Want are the actions a good answer proposes; empty for none.
 	Want []WantAction `json:"want"`
+	// Code says a good answer offers the change in Code mode.
+	Code bool `json:"code"`
+}
+
+// CheckCode compares an answer's Code mode offer with what a case wants.
+func CheckCode(got *AssistantCodeOffer, want bool) []string {
+	switch {
+	case want && got == nil:
+		return []string{"missing the offer to do it in Code mode"}
+	case !want && got != nil:
+		return []string{"offered Code mode unasked: " + got.Request}
+	}
+	return nil
 }
 
 // WantAction is an action a case expects: its tool, and the arguments it

@@ -287,6 +287,8 @@ func TestViewerReadsOnly(t *testing.T) {
 		{"PUT", "/api/w/acme/tickets/PAY-1/answers", `{"answers":[]}`},
 		{"PUT", "/api/w/acme/tickets/PAY-1/member", `{"userId":0}`},
 		{"POST", "/api/w/acme/integrations/jira/sync", ``},
+		{"POST", "/api/w/acme/assistant/code", `{"text":"x","repos":{"repoId":1}}`},
+		{"POST", "/api/w/acme/assistant/conversations/7/code", `{"text":"x"}`},
 	} {
 		rec := h.do(c.method, c.path, c.body, cookie)
 		if rec.Code != http.StatusForbidden || !strings.Contains(rec.Body.String(), "viewers") {

@@ -19,7 +19,7 @@ import (
 type Assistant interface {
 	AssistantReady() bool
 	Ask(ctx context.Context, conversationID int64, question, lang string) (domain.AssistantConversation, error)
-	AssistantConversations(ctx context.Context) ([]domain.AssistantConversation, error)
+	AssistantConversations(ctx context.Context, mode domain.ChatMode) ([]domain.AssistantConversation, error)
 	AssistantConversation(ctx context.Context, id int64) (domain.AssistantConversation, error)
 	DeleteAssistantConversation(ctx context.Context, id int64) error
 	RateAnswer(ctx context.Context, messageID int64, rating int, comment string, share bool) (domain.AssistantMessage, error)
@@ -62,11 +62,18 @@ func askLang(l *gen.AssistantLanguage) string {
 }
 
 // ListAssistantConversations implements gen.ServerInterface.
-func (s *Server) ListAssistantConversations(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ListAssistantConversations(w http.ResponseWriter, r *http.Request, p gen.ListAssistantConversationsParams) {
 	if !s.assistantReady(w) {
 		return
 	}
-	cs, err := s.opt.Assistant.AssistantConversations(r.Context())
+	var mode domain.ChatMode
+	if p.Mode != nil {
+		if mode = domain.ChatMode(*p.Mode); !mode.Valid() {
+			writeError(w, http.StatusBadRequest, "bad_request", "mode is chat or code")
+			return
+		}
+	}
+	cs, err := s.opt.Assistant.AssistantConversations(r.Context(), mode)
 	if err != nil {
 		s.writeAssistantError(w, r, err)
 		return
@@ -316,10 +323,22 @@ func (s *Server) ListAssistantRated(w http.ResponseWriter, r *http.Request, p ge
 func makeLike[S ~[]E, E any](_ S, n int) S { return make(S, n) }
 
 func toConversation(c domain.AssistantConversation) gen.AssistantConversation {
-	out := gen.AssistantConversation{Id: c.ID, Title: c.Title, CreatedAt: c.CreatedAt, UpdatedAt: c.UpdatedAt,
+	mode := c.Mode
+	if mode == "" {
+		mode = domain.ChatModeChat
+	}
+	out := gen.AssistantConversation{Id: c.ID, Title: c.Title, Mode: gen.ChatMode(mode), CreatedAt: c.CreatedAt, UpdatedAt: c.UpdatedAt,
 		Messages: make([]gen.AssistantMessage, len(c.Messages))}
 	for i, m := range c.Messages {
 		out.Messages[i] = toAssistantMessage(m)
+	}
+	if mode == domain.ChatModeCode {
+		kind := gen.TicketKindChoice("auto")
+		if c.Kind != "" {
+			kind = gen.TicketKindChoice(c.Kind)
+		}
+		quick, tickets := c.Quick, toCodeTickets(c.Tickets)
+		out.Repos, out.Kind, out.Quick, out.Tickets = toRepoChoice(c.Repos), &kind, &quick, &tickets
 	}
 	return out
 }
@@ -358,6 +377,23 @@ func toAssistantMessage(m domain.AssistantMessage) gen.AssistantMessage {
 	if len(m.ActionErrors) > 0 {
 		errs := m.ActionErrors
 		out.ActionErrors = &errs
+	}
+	if h := m.Handoff; h != nil {
+		out.Handoff = &gen.CodeHandoff{Request: h.Request, RepoIds: h.RepoIDs, Repos: h.Repos}
+		if out.Handoff.RepoIds == nil {
+			out.Handoff.RepoIds = []int64{}
+		}
+		if out.Handoff.Repos == nil {
+			out.Handoff.Repos = []string{}
+		}
+	}
+	if m.Routed != "" {
+		routed, key := gen.CodeRouted(m.Routed), m.TicketKey
+		out.Routed, out.TicketKey = &routed, &key
+	}
+	if len(m.Attachments) > 0 {
+		a := m.Attachments
+		out.Attachments = &a
 	}
 	if m.Role == domain.AssistantReply && m.Status == domain.AssistantDone {
 		d := m.DurationMS
