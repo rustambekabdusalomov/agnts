@@ -587,11 +587,11 @@ func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (strin
 		if res.Subtype == "error_max_turns" {
 			return "", "", nil, fmt.Errorf("stopped at the turn limit (%d) before writing the brief", min(s.MaxTurns, surveyMaxTurns))
 		}
-		return "", "", nil, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return "", "", nil, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, BriefOutPath)
 	if err != nil {
-		return "", "", nil, fmt.Errorf("claude did not write %s: %w", BriefOutPath, err)
+		return "", "", nil, fmt.Errorf("%s did not write %s: %w", domain.AgentName(res.Model), BriefOutPath, err)
 	}
 	draft, err := domain.CleanBriefText(string(raw))
 	if err != nil {

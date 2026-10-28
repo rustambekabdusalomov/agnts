@@ -244,7 +244,7 @@ func (o *Orchestrator) finishSwaggerRun(ctx context.Context, ws Workspace, t dom
 	raw, err := ws.ReadFile(ctx, apiclient.ResultsPath)
 	if err != nil {
 		run.ExitReason = "no_results"
-		return fmt.Errorf("claude did not write %s: %w", apiclient.ResultsPath, err)
+		return fmt.Errorf("%s did not write %s: %w", domain.AgentName(run.Model), apiclient.ResultsPath, err)
 	}
 	var results domain.SwaggerResults
 	if err := json.Unmarshal(redact.Bytes(raw), &results); err != nil {

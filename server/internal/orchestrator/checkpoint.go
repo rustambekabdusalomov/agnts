@@ -24,7 +24,10 @@ func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings
 	// repositories get more turns.
 	total := int(float64(s.MaxTurns) * domain.TurnScale(len(t.Repos)))
 	at := 0
-	if design != nil && (design.Chosen() != nil || design.Footprint != nil) && total >= checkpointMinTurns {
+	// Muse is told to wrap up before its call cap (agnts-muse's SteerAt), so
+	// a checkpoint cap would end its run instead of pausing it.
+	if design != nil && (design.Chosen() != nil || design.Footprint != nil) && total >= checkpointMinTurns &&
+		!domain.IsMuse(s.ModelFor(*t, modelStage)) {
 		at = total / 3
 	}
 	res, err := o.claudeTurns(ctx, s, ws, t, run, modelStage, prompt, session, at)

@@ -221,11 +221,11 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 		if res.Subtype == "error_max_turns" {
 			return "", fmt.Errorf("stopped at the turn limit (%d) before writing the document", turns)
 		}
-		return "", fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return "", fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, DocOutPath)
 	if err != nil {
-		return "", fmt.Errorf("claude did not write %s: %w", DocOutPath, err)
+		return "", fmt.Errorf("%s did not write %s: %w", domain.AgentName(res.Model), DocOutPath, err)
 	}
 	body, err := domain.CleanDocumentBody(strings.TrimSpace(string(raw)) + "\n")
 	if err != nil {

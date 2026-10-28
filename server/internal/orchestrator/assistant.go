@@ -523,9 +523,9 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 	raw, err := box.ReadFile(ctx, AssistantAnswerPath(a.ID))
 	if err != nil {
 		if res.IsError {
-			return out, nil, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+			return out, nil, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 		}
-		return out, nil, fmt.Errorf("claude did not write its answer: %w", err)
+		return out, nil, fmt.Errorf("%s did not write its answer: %w", domain.AgentName(res.Model), err)
 	}
 	ans, err := ParseAssistantAnswer(raw)
 	if err != nil {
@@ -609,7 +609,7 @@ func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang s
 	}
 	raw, err := box.ReadFile(ctx, AssistantAnswerPath(0))
 	if err != nil {
-		return AssistantAnswer{}, res, fmt.Errorf("claude did not write its answer: %w", err)
+		return AssistantAnswer{}, res, fmt.Errorf("%s did not write its answer: %w", domain.AgentName(res.Model), err)
 	}
 	a, err := ParseAssistantAnswer(raw)
 	return a, res, err

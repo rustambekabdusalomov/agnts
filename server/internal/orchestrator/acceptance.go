@@ -57,7 +57,7 @@ func (o *Orchestrator) checkAcceptance(ctx context.Context, s domain.Settings, w
 	}
 	raw, err := ws.ReadFile(ctx, AcceptancePath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("claude did not write %s: %w", AcceptancePath, err)
+		return nil, nil, fmt.Errorf("%s did not write %s: %w", domain.AgentName(run.Model), AcceptancePath, err)
 	}
 	var got struct {
 		domain.Acceptance

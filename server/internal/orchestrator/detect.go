@@ -79,11 +79,11 @@ func (o *Orchestrator) DetectDeep(ctx context.Context, repo domain.Repository, b
 		return base, ErrPlanLimit
 	}
 	if res.IsError {
-		return base, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return base, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, DetectPath)
 	if err != nil {
-		return base, fmt.Errorf("claude did not write %s: %w", DetectPath, err)
+		return base, fmt.Errorf("%s did not write %s: %w", domain.AgentName(res.Model), DetectPath, err)
 	}
 	var f detectFile
 	if err := json.Unmarshal(raw, &f); err != nil {

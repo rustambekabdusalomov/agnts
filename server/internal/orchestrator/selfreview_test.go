@@ -203,3 +203,31 @@ func TestDriftCheckpoint(t *testing.T) {
 		t.Fatalf("turns: %d", tk.Turns)
 	}
 }
+
+// Muse is told to wrap up before its call cap, so a checkpoint cap would
+// end its coding instead of pausing it: Muse runs get the whole budget.
+func TestNoDriftCheckpointForMuse(t *testing.T) {
+	h := newHarness(t)
+	h.settings.s.Models.Coding = "muse:spark"
+	var a map[string]any
+	_ = json.Unmarshal([]byte(analysis(0)), &a)
+	a["footprint"] = map[string]any{"files": []string{"refund.go"}}
+	a["approaches"] = []any{map[string]any{"title": "Round in refund.go", "sketch": "Use math.Round."}}
+	b, _ := json.Marshal(a)
+	var budgets []int
+	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { budgets = append(budgets, r.MaxTurns) }
+	h.ingest("PAY-1")
+	h.runner.scripts = []script{
+		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: string(b)}},
+		{result: ok("s1"), edit: "all"},
+	}
+	h.step() // analyze
+	h.step() // code, in one go
+	h.expect("PAY-1", domain.StateWaitingForReview)
+	if len(budgets) != 2 || budgets[1] != 150 {
+		t.Fatalf("turn budgets: %v", budgets)
+	}
+	if cp := h.events("PAY-1", domain.EventCheckpoint); len(cp) != 0 {
+		t.Fatalf("checkpoint event: %+v", cp)
+	}
+}
