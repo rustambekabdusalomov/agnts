@@ -18,8 +18,6 @@ import BrandLogo from './BrandLogo.vue'
 import NetworkMenu from './network/NetworkMenu.vue'
 import UsagePill from './UsagePill.vue'
 import { useRules } from './rules/useRules'
-import ConfirmDialog from './ui/ConfirmDialog.vue'
-import FeedbackDialog from './account/FeedbackDialog.vue'
 import GlobalSearch, { type SearchPage } from './GlobalSearch.vue'
 import HiIcon from './ui/HiIcon.vue'
 import { sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
@@ -108,7 +106,7 @@ function toggleSettings() {
 // The sidebar's menus, each opening into its pages; Settings, under Setup,
 // opens once more into its sections. One menu is open at a time, and only a
 // click opens one: a page reached another way marks its closed menu instead.
-type NavItem = { key: string; icon: string; label: string; to?: RouteLocationRaw; on: boolean; cnt?: number; dim?: boolean; kind?: 'settings' | 'feedback' }
+type NavItem = { key: string; icon: string; label: string; to?: RouteLocationRaw; on: boolean; cnt?: number; dim?: boolean; kind?: 'settings' }
 type NavMenu = { key: string; icon: string; items: NavItem[] }
 const page = (name: string, icon: string, more: Partial<NavItem> = {}): NavItem => ({
   key: name, icon, label: `nav.${name}`, to: { name }, on: route.name === name, ...more,
@@ -137,16 +135,8 @@ const menus = computed<NavMenu[]>(() => [
       page('integrations', 'plug'),
       page('repos', 'repos'),
       page('rules', 'rules', { cnt: ruleQuestions.value }),
+      page('workspace', 'users'),
       { key: 'settings', icon: 'settings', label: 'nav.settings', on: inSettings.value, kind: 'settings' },
-    ],
-  },
-  {
-    key: 'people',
-    icon: 'users',
-    items: [
-      page('workspace', 'repos'),
-      page('profile', 'settings'),
-      { key: 'feedback', icon: 'feedback', label: 'feedback.title', on: false, kind: 'feedback' },
       ...(session.user?.isAdmin ? [page('adminDashboard', 'shield', { label: 'nav.platform' })] : []),
     ],
   },
@@ -299,19 +289,6 @@ const creditsPct = computed(() => {
   return f && f.limit > 0 ? Math.max(0, Math.min(100, Math.round((f.remaining / f.limit) * 100))) : 0
 })
 const creditsLevel = computed(() => (creditsPct.value <= 5 ? 'bad' : creditsPct.value <= 20 ? 'warn' : ''))
-const confirmOut = ref(false)
-const feedbackOpen = ref(false)
-const signingOut = ref(false)
-async function signOut() {
-  signingOut.value = true
-  try {
-    await session.logout()
-    confirmOut.value = false
-    await router.replace({ name: 'login' })
-  } finally {
-    signingOut.value = false
-  }
-}
 
 // The top bar's height as --top-h, for what sticks under it (a ticket
 // page's section titles); it wraps on narrow screens.
@@ -407,9 +384,6 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
                 </template>
-                <button v-else-if="x.kind === 'feedback'" type="button" class="nav-a" v-bind="tip(t(x.label))" @click="feedbackOpen = true">
-                  <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
-                </button>
                 <RouterLink v-else-if="x.to" class="nav-a" :class="{ on: x.on }" :to="x.to" v-bind="tip(t(x.label))">
                   <HiIcon :name="x.icon" /><span class="lbl">{{ t(x.label) }}</span>
                   <span v-if="x.cnt" class="cnt" :class="{ dim: x.dim }">{{ x.cnt }}</span>
@@ -420,15 +394,20 @@ onBeforeUnmount(() => {
         </template>
       </nav>
       <div class="me">
-        <button class="nav-a me-btn" v-bind="tip([t('common.signedInAs', { username: session.user?.username }), creditsLeft, t('auth.signOut')].filter(Boolean).join(' · '))" @click="confirmOut = true">
-          <span class="av"><span class="av-ini">{{ initials }}</span><svg class="av-out" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg></span>
+        <!-- The person's own page: profile, feedback and signing out -->
+        <RouterLink
+          class="nav-a me-btn"
+          :class="{ on: route.name === 'profile' }"
+          :to="{ name: 'profile' }"
+          v-bind="tip([t('common.signedInAs', { username: session.user?.username }), creditsLeft, t('nav.profile')].filter(Boolean).join(' · '))"
+        >
+          <span class="av"><span class="av-ini">{{ initials }}</span></span>
           <span class="lbl me-txt">
             <span class="me-name">{{ session.user?.username }}</span>
             <span v-if="creditsLeft" class="me-credits">{{ creditsLeft }}</span>
             <span v-if="creditsLeft" class="bar me-bar" :class="creditsLevel" aria-hidden="true"><span :style="{ width: creditsPct + '%' }" /></span>
-            <span>{{ t('auth.signOut') }}</span>
           </span>
-        </button>
+        </RouterLink>
         <!-- Claude plan windows; Muse runs are paid per call instead -->
         <UsagePill v-if="!catalog.isMuse.value" />
       </div>
@@ -492,9 +471,6 @@ onBeforeUnmount(() => {
           <HiIcon :name="x.icon" />{{ t(x.label) }}
           <svg class="side-fly-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5" /></svg>
         </button>
-        <button v-else-if="x.kind === 'feedback'" type="button" class="side-fly-a" @mouseenter="fly2 = null" @click="closeFly(); feedbackOpen = true">
-          <HiIcon :name="x.icon" />{{ t(x.label) }}
-        </button>
         <RouterLink v-else-if="x.to" class="side-fly-a" :class="{ on: x.on }" :to="x.to" :aria-current="x.on ? 'page' : undefined" @mouseenter="fly2 = null" @click="closeFly">
           <HiIcon :name="x.icon" />{{ t(x.label) }}
           <span v-if="x.cnt" class="cnt" :class="{ dim: x.dim }">{{ x.cnt }}</span>
@@ -529,9 +505,5 @@ onBeforeUnmount(() => {
     </nav>
   </Transition>
   <div v-if="tipBox" class="side-tip" role="tooltip" :style="{ top: tipBox.top + 'px', left: tipBox.left + 'px' }">{{ tipBox.text }}</div>
-  <ConfirmDialog v-model="confirmOut" :title="t('auth.signOutTitle')" :message="session.user?.isAdmin ? t('auth.signOutBody') : t('auth.signOutBodyGoogle')" :confirm-label="t('auth.signOut')" danger :busy="signingOut" @confirm="signOut">
-    <template #icon><svg viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg></template>
-  </ConfirmDialog>
-  <FeedbackDialog v-model="feedbackOpen" :workspace="workspace.slug" />
   <div class="toast" :class="{ show: ui.toast }" role="status">{{ ui.toast }}</div>
 </template>

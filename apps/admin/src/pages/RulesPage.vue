@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import type { Rule } from '../api/types'
@@ -10,11 +10,13 @@ import RuleCard from '../components/rules/RuleCard.vue'
 import RuleDrawer from '../components/rules/RuleDrawer.vue'
 import { useRules } from '../components/rules/useRules'
 import HiIcon from '../components/ui/HiIcon.vue'
+import PageNav from '../components/ui/PageNav.vue'
 import { useLive } from '../composables/useLive'
 import { useUi } from '../stores/ui'
 
-// Global and per-repository rules. The scope filter lives in the URL
-// (?scope=global or ?scope=<repo id>) so a repository's rules can be linked.
+// Global and per-repository rules. The scope filter and the page live in the
+// URL (?scope=global or ?scope=<repo id>, ?page=) so a repository's rules
+// can be linked.
 const { t } = useI18n()
 const ui = useUi()
 const route = useRoute()
@@ -29,7 +31,8 @@ const scope = computed<Scope>({
     const s = String(route.query.scope ?? '')
     return s === 'global' ? 'global' : /^\d+$/.test(s) ? Number(s) : 'all'
   },
-  set: (v) => void router.replace({ query: { ...route.query, scope: v === 'all' ? undefined : String(v) } }),
+  // Another scope starts on its first page.
+  set: (v) => void router.replace({ query: { ...route.query, scope: v === 'all' ? undefined : String(v), page: undefined } }),
 })
 const all = computed(() => rules.data.value ?? [])
 const scopeOptions = computed(() => [
@@ -53,6 +56,17 @@ const rows = computed(() => {
     .map((r, i) => ({ r, i }))
     .sort((a, b) => rank(a.r) - rank(b.r) || a.i - b.i)
     .map(({ r }) => r)
+})
+// A page of rows; a new search goes back to the first page.
+const pageSize = ref(25)
+const pageCount = computed(() => Math.max(1, Math.ceil(rows.value.length / pageSize.value)))
+const page = computed<number>({
+  get: () => Math.min(pageCount.value, Math.max(1, Number(route.query.page) || 1)),
+  set: (v) => void router.replace({ query: { ...route.query, page: v > 1 ? String(v) : undefined } }),
+})
+const pageRows = computed(() => rows.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value))
+watch(() => ui.search, () => {
+  if (route.query.page) page.value = 1
 })
 const waiting = computed(() => all.value.filter((r) => r.status === 'questions').length)
 const suggested = computed(() => all.value.filter((r) => r.status === 'suggested' && !r.watching).length)
@@ -88,7 +102,10 @@ const presetRepo = computed(() => (typeof scope.value === 'number' ? scope.value
   <section v-else-if="!rows.length && !watching.length" class="card">
     <p class="empty">{{ t('rules.noMatch') }}</p>
   </section>
-  <RuleCard v-for="r in rows" v-else :key="r.id" :rule="r" @edit="openRule" />
+  <template v-else>
+    <RuleCard v-for="r in pageRows" :key="r.id" :rule="r" @edit="openRule" />
+    <PageNav v-model="page" v-model:size="pageSize" :total="rows.length" />
+  </template>
 
   <details v-if="watching.length" class="card rules-watching">
     <summary>{{ t('harnessRules.watching', { n: watching.length }) }}</summary>
