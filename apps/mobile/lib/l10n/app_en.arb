@@ -1156,7 +1156,7 @@
   "codechatEmptyText": "Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.",
   "codechatViewersOnly": "Code mode is for people who can change the workspace.",
   "codechatRepos": "Repositories",
-  "codechatReposNone": "Pick the repositories to work in",
+  "codechatReposNone": "Pick the repositories to work in, or name them in the message with @",
   "codechatReposChange": "Change",
   "codechatReposSave": "Save repositories",
   "codechatReposSaved": "Repositories changed: the next ticket works in them",
@@ -1182,7 +1182,7 @@
   "codechatPlaceholderPushing": "Pushing now…",
   "codechatPlaceholderDone": "Ask for the next change…",
   "codechatSend": "Send",
-  "codechatSendHint": "Enter sends, Shift+Enter makes a new line",
+  "codechatSendHint": "Enter sends, Shift+Enter makes a new line, @ names a repository",
   "codechatCount": "{n} / 4000",
   "@codechatCount": {
     "placeholders": {
@@ -1453,6 +1453,15 @@
   "codechatTicketChat": "Discussed in chat",
   "codechatContinueInChat": "Continue in chat",
   "codechatCodeBadge": "Code",
+  "codechatMentioned": "Works in {names}",
+  "@codechatMentioned": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "codechatMentionLabel": "Repositories",
   "commitBack": "Back to commits",
   "commitBackTo": "Back to {repo}",
   "@commitBackTo": {

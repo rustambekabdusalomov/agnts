@@ -13768,7 +13768,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get codechatRepos => 'Repozitoriylar';
 
   @override
-  String get codechatReposNone => 'Ishlash uchun repozitoriylarni tanlang';
+  String get codechatReposNone => 'Ishlash uchun repozitoriylarni tanlang yoki xabarda @ bilan ayting';
 
   @override
   String get codechatReposChange => 'Oʻzgartirish';
@@ -13827,7 +13827,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get codechatSend => 'Yuborish';
 
   @override
-  String get codechatSendHint => 'Enter yuboradi, Shift+Enter yangi qator';
+  String get codechatSendHint => 'Enter yuboradi, Shift+Enter yangi qator, @ repozitoriyni ko‘rsatadi';
 
   @override
   String codechatCount(String n) {

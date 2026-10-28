@@ -44,7 +44,7 @@ function send() {
           {{ o }}
         </button>
       </div>
-      <textarea :id="`cq-${q.id}`" v-model="answers[q.id]" rows="2" maxlength="5000" />
+      <textarea :id="`cq-${q.id}`" v-model="answers[q.id]" class="cfg-in" rows="2" maxlength="5000" />
     </div>
     <div><button type="submit" class="btn btn-p" :disabled="!ready || busy">{{ t('codechat.answersSend') }}</button></div>
   </form>

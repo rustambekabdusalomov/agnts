@@ -10,9 +10,11 @@ import CodeApprovalCard from '../components/codechat/CodeApprovalCard.vue'
 import CodeQuestions from '../components/codechat/CodeQuestions.vue'
 import CodeResult from '../components/codechat/CodeResult.vue'
 import CodeTimelineView from '../components/codechat/CodeTimelineView.vue'
-import { blocks, currentTicket, liveItems, MAX_CODE_MESSAGE, placeholder, queued, running, TIMELINE_TYPES } from '../components/codechat/codechat'
+import { blocks, currentTicket, liveItems, MAX_CODE_MESSAGE, mentionedRepos, placeholder, queued, running, TIMELINE_TYPES } from '../components/codechat/codechat'
+import MentionInput from '../components/codechat/MentionInput.vue'
 import FileAttach from '../components/files/FileAttach.vue'
 import CheckBox from '../components/form/CheckBox.vue'
+import InputSelect from '../components/form/InputSelect.vue'
 import PageHeader from '../components/PageHeader.vue'
 import RepoSetPicker from '../components/repos/RepoSetPicker.vue'
 import { emptySelection, selectionBody, type RepoSelection } from '../components/repos/repoSet'
@@ -116,7 +118,13 @@ watch(() => [id.value, route.query] as const, ([i, q]) => {
 const uploading = ref(false)
 const error = ref('')
 const length = computed(() => text.value.trim().length)
-const canStart = computed(() => sel.value.repoIds.length > 0 || ticketKey.value.trim() !== '')
+// The repositories the message names. A message that starts a ticket works
+// in its @mentions; a first one with none picked, in the names it uses.
+const pickedNone = computed(() => !id.value && !sel.value.repoIds.length && !ticketKey.value.trim())
+const startsTicket = computed(() => !id.value ? !ticketKey.value.trim() : !cur.value || state.value === 'done')
+const named = computed(() => (startsTicket.value ? mentionedRepos(text.value, repos.data.value ?? [], pickedNone.value) : []))
+const namedNames = computed(() => named.value.map((x) => repos.data.value?.find((p) => p.id === x)?.name ?? `#${x}`).join(', '))
+const canStart = computed(() => sel.value.repoIds.length > 0 || ticketKey.value.trim() !== '' || named.value.length > 0)
 
 const send = useMutation({
   mutationFn: (answers?: { questionId: number; answer: string }[]) => {
@@ -147,12 +155,6 @@ function submit() {
   if (!length.value && !files.value.length) return
   if (!id.value && !canStart.value) return void (error.value = t('codechat.reposNone'))
   send.mutate(undefined)
-}
-function onKey(e: KeyboardEvent) {
-  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-    e.preventDefault()
-    submit()
-  }
 }
 
 // The conversation's repositories, changed in place.
@@ -233,7 +235,7 @@ async function stopAndSend() {
       <span v-if="conv.quick" class="badge b-gray">{{ t('codechat.quick') }}</span>
       <span class="sp" />
       <form class="cc-attach" @submit.prevent="attachKey.trim() && attach.mutate()">
-        <input v-model="attachKey" :placeholder="t('codechat.ticketPlaceholder')" :aria-label="t('codechat.ticketPick')" maxlength="64">
+        <input v-model="attachKey" class="cfg-in" :placeholder="t('codechat.ticketPlaceholder')" :aria-label="t('codechat.ticketPick')" maxlength="64">
         <button type="submit" class="btn btn-s" :disabled="!attachKey.trim() || attach.isPending.value">{{ t('codechat.ticketAttach') }}</button>
       </form>
     </div>
@@ -258,9 +260,7 @@ async function stopAndSend() {
         <div class="cc-row">
           <label class="cc-field">
             <b>{{ t('codechat.kind') }}</b>
-            <select v-model="kind" :disabled="!!ticketKey.trim()">
-              <option v-for="k in kinds" :key="k.value" :value="k.value">{{ k.label }}</option>
-            </select>
+            <InputSelect v-model="kind" :options="kinds" :label="t('codechat.kind')" :disabled="!!ticketKey.trim()" />
           </label>
           <div class="cc-field">
             <CheckBox v-model="quick">{{ t('codechat.quick') }}</CheckBox>
@@ -269,7 +269,7 @@ async function stopAndSend() {
         </div>
         <label class="cc-field">
           <b>{{ t('codechat.ticketPick') }}</b>
-          <input v-model="ticketKey" :placeholder="t('codechat.ticketPlaceholder')" maxlength="64">
+          <input v-model="ticketKey" class="cfg-in" :placeholder="t('codechat.ticketPlaceholder')" maxlength="64">
         </label>
       </div>
       <p v-else-if="timeline.isPending.value" class="hint">{{ t('common.loading') }}</p>
@@ -313,15 +313,15 @@ async function stopAndSend() {
     </div>
 
     <form class="cc-compose" @submit.prevent="submit">
-      <textarea
+      <MentionInput
         v-model="text"
-        rows="2"
+        :repos="repos.data.value ?? []"
         :maxlength="MAX_CODE_MESSAGE"
         :placeholder="placeholder(t, conv ? state : undefined)"
-        :aria-label="placeholder(t, conv ? state : undefined)"
         :disabled="state === 'pushing'"
-        @keydown="onKey"
+        @submit="submit"
       />
+      <p v-if="named.length" class="cc-named"><HiIcon name="code" />{{ t('codechat.mentioned', { names: namedNames }) }}</p>
       <FileAttach v-model="files" v-model:busy="uploading" />
       <div class="cc-send">
         <span class="hint">{{ length > MAX_CODE_MESSAGE - 200 ? t('codechat.count', { n: length }) : t('codechat.sendHint') }}</span>
@@ -362,7 +362,9 @@ async function stopAndSend() {
 .cc-note p { margin: 0; }
 .cc-center { align-self: center; }
 .cc-compose { border-top: 1px solid var(--line); padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
-.cc-compose textarea { min-height: 48px; resize: none; }
+.cc-named { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.cc-named svg { width: 14px; height: 14px; color: var(--primary); }
+.cc-row .isel { min-width: 200px; }
 .cc-send { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 @media (max-width: 900px) {
   .cc-chat { height: calc(100vh - 160px); }

@@ -87,6 +87,28 @@ describe('CodePage', () => {
     w.unmount()
   })
 
+  it('starts in the repository the message names, picked from the @ list', async () => {
+    const { w } = await setup('/w/acme/assistant/code')
+    const box = w.find('.cc-compose textarea')
+    const el = box.element as HTMLTextAreaElement
+    expect(w.find('.cc-compose button[type="submit"]').attributes('disabled')).toBeDefined()
+    el.value = 'Add a timer to @vi'
+    el.setSelectionRange(el.value.length, el.value.length)
+    await box.trigger('input')
+    await flushPromises()
+    expect(w.find('.mi-pop').text()).toContain('@visper')
+    await box.trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+    expect(el.value).toBe('Add a timer to @visper ')
+    expect(w.find('.cc-named').text()).toContain('visper')
+    expect(w.find('.cc-compose button[type="submit"]').attributes('disabled')).toBeUndefined()
+    call.POST.mockResolvedValue({ id: 9 })
+    await w.find('.cc-compose').trigger('submit')
+    await flushPromises()
+    expect(call.POST).toHaveBeenCalledWith('/assistant/code', { body: expect.objectContaining({ text: 'Add a timer to @visper' }) })
+    w.unmount()
+  })
+
   it('opens prefilled from a Chat answer or a ticket', async () => {
     const { w } = await setup('/w/acme/assistant/code?text=Round%20half%20up&repos=3')
     expect((w.find('.cc-compose textarea').element as HTMLTextAreaElement).value).toBe('Round half up')

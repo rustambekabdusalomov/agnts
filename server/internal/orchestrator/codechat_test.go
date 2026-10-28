@@ -470,3 +470,39 @@ func TestCodeLiveMuseRun(t *testing.T) {
 	}
 	c.step()
 }
+
+func TestCodeMessageNamesRepos(t *testing.T) {
+	c := newCodeHarness(t)
+	gym, err := c.store.SaveRepository(c.ctx, domain.Repository{
+		Name: "gymlog", Kind: "side", Provider: "github", CloneURL: "https://github.com/me/gymlog.git",
+		DefaultBranch: "main", TaskPrefix: "GYM",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// None picked: the repository the message names, even without an @.
+	conv, err := c.o.StartCode(c.ask, orchestrator.CodeStart{Text: "Add a rest timer to Visper."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cur := conv.CurrentTicket(); cur == nil || cur.Key != "VIS-1" || conv.Repos.RepoID != c.repo {
+		t.Fatalf("named without @: %+v %+v", cur, conv.Repos)
+	}
+	if _, err := c.o.StartCode(c.ask, orchestrator.CodeStart{Text: "Add a rest timer"}); !errors.Is(err, orchestrator.ErrInvalid) {
+		t.Fatalf("nothing named: %v", err)
+	}
+
+	// Picked ones, but the message says @gymlog: its ticket works there,
+	// and the conversation's next tickets too.
+	conv = c.start("@gymlog log the weight of each set")
+	if cur := conv.CurrentTicket(); cur == nil || cur.Key != "GYM-1" || conv.Repos.RepoID != gym.ID {
+		t.Fatalf("named with @: %+v %+v", cur, conv.Repos)
+	}
+
+	// Both, by @: one ticket in the two.
+	conv = c.start("rename the app in @visper and @GymLog, please")
+	if cur := conv.CurrentTicket(); cur == nil || len(cur.Repos) != 2 || len(conv.Repos.RepoIDs) != 2 {
+		t.Fatalf("named both: %+v %+v", cur, conv.Repos)
+	}
+}
