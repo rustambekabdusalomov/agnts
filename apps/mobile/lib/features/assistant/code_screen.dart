@@ -58,7 +58,9 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     super.initState();
     _id = widget.conversationId;
     _text.text = (widget.initialText ?? '').characters.take(_maxMessage).toString();
+    // The composer reads the key: with one, the message picks that ticket up.
     _ticketKey.text = widget.initialTicket ?? '';
+    _ticketKey.addListener(_changed);
     if (widget.initialRepos.isNotEmpty) _pick = RepoPick(ids: widget.initialRepos);
     _sub = ref.read(liveProvider).events.listen(_onEvent);
   }
@@ -274,6 +276,11 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
               enabled: state != TicketState.pushing,
               hint: codePlaceholder(l, conv == null ? null : state),
               onSend: () => _send(),
+              repos: ref.watch(reposProvider).value ?? const <Repository>[],
+              // A message that starts a ticket works in its @mentions; a
+              // first one with none picked, in the names it uses.
+              startsTicket: _id == null ? _ticketKey.text.trim().isEmpty : cur == null || state == TicketState.done,
+              plain: _id == null && _pick.isEmpty && _ticketKey.text.trim().isEmpty,
             ),
         ]),
       ),
@@ -802,6 +809,9 @@ class _InputBar extends StatefulWidget {
     required this.enabled,
     required this.hint,
     required this.onSend,
+    required this.repos,
+    required this.startsTicket,
+    required this.plain,
   });
   final TextEditingController controller;
   final AttachmentsController files;
@@ -811,6 +821,9 @@ class _InputBar extends StatefulWidget {
   final bool enabled;
   final String hint;
   final VoidCallback onSend;
+  final List<Repository> repos;
+  final bool startsTicket;
+  final bool plain;
 
   @override
   State<_InputBar> createState() => _InputBarState();
@@ -831,17 +844,45 @@ class _InputBarState extends State<_InputBar> {
 
   void _changed() => setState(() {});
 
+  /// Writes @name for the mention being typed, as the person picked it.
+  void _pickMention(({int start, String query}) m, Repository r) {
+    final t = widget.controller;
+    final out = insertMention(t.text, m.start, t.selection.baseOffset, r.name);
+    t.value = TextEditingValue(text: out.text, selection: TextSelection.collapsed(offset: out.caret));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    final n = widget.controller.text.trim().length;
+    final text = widget.controller.text;
+    final n = text.trim().length;
+    final sel = widget.controller.selection;
+    final mention = sel.isValid && sel.isCollapsed ? mentionAt(text, sel.baseOffset) : null;
+    final options = mention == null ? const <Repository>[] : mentionOptions(mention.query, widget.repos);
+    final named = widget.startsTicket ? mentionedRepos(text, widget.repos, plain: widget.plain) : const <int>[];
+    final names = [for (final id in named) widget.repos.firstWhere((r) => r.id == id).name].join(', ');
     final can = widget.enabled && (n > 0 || widget.files.ids.isNotEmpty) && n <= _maxMessage && !widget.sending && !widget.files.uploading;
     return Container(
       decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
       padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         if (widget.attach) Padding(padding: const EdgeInsets.fromLTRB(8, 0, 0, 8), child: AttachmentPicker(controller: widget.files)),
+        if (options.isNotEmpty && widget.enabled)
+          Semantics(
+            label: l.codechatMentionLabel,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
+              child: Row(children: [
+                for (final r in options)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: FilterChipH(label: '@${r.name}', selected: false, onTap: () => _pickMention(mention!, r)),
+                  ),
+              ]),
+            ),
+          ),
         Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           IconButton(
             tooltip: l.filesTitle,
@@ -875,6 +916,15 @@ class _InputBarState extends State<_InputBar> {
                 : const Icon(Icons.arrow_upward_rounded),
           ),
         ]),
+        if (names.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 6, 8, 0),
+            child: Row(children: [
+              HIcon('code', size: 14, color: c.primary),
+              const SizedBox(width: 6),
+              Expanded(child: Text(l.codechatMentioned(names), style: TextStyle(fontSize: 12.5, color: c.ink2))),
+            ]),
+          ),
         if (n > _maxMessage - 200)
           Padding(
             padding: const EdgeInsets.only(top: 4, right: 8),

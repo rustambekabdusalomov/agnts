@@ -14440,6 +14440,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String codechatMentioned(String names) {
+    return 'Работа в $names';
+  }
+
+  @override
+  String get codechatMentionLabel => 'Репозитории';
+
+  @override
   String codechatRoutedCreated(String key) {
     return 'Создан $key';
   }

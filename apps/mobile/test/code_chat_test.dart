@@ -15,6 +15,12 @@ import 'package:agnts_mobile/theme.dart';
 
 final _at = DateTime.utc(2026, 10, 28, 9);
 
+Repository _repo(int id, String name) => Repository(
+      id: id, name: name, kind: RepositoryKindEnum.side, provider: RepositoryProviderEnum.github,
+      cloneUrl: 'https://github.com/acme/$name.git', defaultBranch: 'main', buildCmd: '', lintCmd: '', testCmd: '',
+      branchPrefix: 'agnts/', taskPrefix: 'VIS', instructions: '', jiraProject: '', claudeMd: RepositoryClaudeMdEnum.found, openTickets: 0,
+    );
+
 Event _e(int id, String type, String message, {String key = 'VIS-1', EventOriginEnum origin = EventOriginEnum.system, Map<String, Object>? data}) =>
     Event(
       id: id,
@@ -168,6 +174,53 @@ void main() {
     expect(find.text('Repositories: api'), findsOneWidget);
     expect(find.text('Open in Code'), findsOneWidget);
     expect(find.byTooltip('Code'), findsOneWidget); // the switch to Code mode
+    await tester.pumpWidget(const SizedBox());
+  });
+  group('mentions', () {
+    final repos = [_repo(1, 'api'), _repo(2, 'web-admin'), _repo(3, 'acme/mobile')];
+    test('reads the repositories a message names, as the server does', () {
+      expect(mentionedRepos('fix login in @api', repos, plain: false), [1]);
+      expect(mentionedRepos('fix login in the api', repos, plain: false), isEmpty);
+      expect(mentionedRepos('fix login in the api', repos, plain: true), [1]);
+      expect(mentionedRepos('@WEB-ADMIN and @api: rename it', repos, plain: false), [1, 2]);
+      expect(mentionedRepos('update @mobile.', repos, plain: false), [3]);
+      expect(mentionedRepos('see src/api/handler.go', repos, plain: true), isEmpty);
+      expect(mentionedRepos('mail me at x@api.dev', repos, plain: false), isEmpty);
+    });
+    test('finds the mention being typed and inserts the pick', () {
+      expect(mentionAt('fix @we', 7), (start: 4, query: 'we'));
+      expect(mentionAt('me@ap', 5), isNull);
+      expect(mentionAt('', 12), isNull);
+      expect(mentionOptions('a', repos).map((r) => r.id), [1, 3, 2]);
+      expect(insertMention('fix @we in it', 4, 7, 'web-admin'), (text: 'fix @web-admin in it', caret: 15));
+    });
+  });
+
+  testWidgets('typing @ offers the repositories, and the pick shows where it works', (tester) async {
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        reposProvider.overrideWith((ref) async => [_repo(3, 'visper'), _repo(4, 'gymlog')]),
+        repoGroupsProvider.overrideWith((ref) async => const <RepoGroup>[]),
+        canEditProvider.overrideWithValue(true),
+      ],
+      child: MaterialApp(
+        theme: agntsTheme(Brightness.light),
+        locale: const Locale('en'),
+        localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const CodeScreen(),
+      ),
+    ));
+    await tester.pump();
+    final field = find.byWidgetPredicate((w) => w is TextField && w.minLines == 1 && w.maxLines == 6);
+    await tester.enterText(field, 'Add a timer to @vi');
+    await tester.pump();
+    expect(find.text('@visper'), findsOneWidget);
+    expect(find.text('@gymlog'), findsNothing);
+    await tester.tap(find.text('@visper'));
+    await tester.pump();
+    expect(tester.widget<TextField>(field).controller!.text, 'Add a timer to @visper ');
+    expect(find.text('Works in visper'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }
