@@ -1,0 +1,90 @@
+//
+// AUTO-GENERATED FILE, DO NOT MODIFY!
+//
+
+// ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'meeting_settings_available.g.dart';
+
+
+@CopyWith()
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
+class MeetingSettingsAvailable {
+  /// Returns a new [MeetingSettingsAvailable] instance.
+  MeetingSettingsAvailable({
+
+    required  this.meetings,
+
+    required  this.recording,
+
+    required  this.notes,
+  });
+
+  @JsonKey(
+    
+    name: r'meetings',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool meetings;
+
+
+
+  @JsonKey(
+    
+    name: r'recording',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool recording;
+
+
+
+  @JsonKey(
+    
+    name: r'notes',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool notes;
+
+
+
+
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is MeetingSettingsAvailable &&
+      other.meetings == meetings &&
+      other.recording == recording &&
+      other.notes == notes;
+
+    @override
+    int get hashCode =>
+        meetings.hashCode +
+        recording.hashCode +
+        notes.hashCode;
+
+  factory MeetingSettingsAvailable.fromJson(Map<String, dynamic> json) => _$MeetingSettingsAvailableFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MeetingSettingsAvailableToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+}
+

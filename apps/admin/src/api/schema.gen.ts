@@ -4944,6 +4944,676 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/meetings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The meetings you see
+         * @description upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host.
+         */
+        get: operations["listMeetings"];
+        put?: never;
+        /**
+         * Make a meeting you host (instant or scheduled) and invite people
+         * @description Scheduled meetings' invitees get an email with the calendar event; members are told in agnts too.
+         */
+        post: operations["createMeeting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/past": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Calls that happened, newest first, of the meetings you see */
+        get: operations["listPastMeetingSessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find what was said in the meetings you see */
+        get: operations["searchMeetingTranscripts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace's rules for meetings, and what this server can do */
+        get: operations["getMeetingSettings"];
+        /** Change the workspace's rules for meetings (the owner) */
+        put: operations["putMeetingSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace's use of meetings per day (people-minutes, recordings, transcribed audio) */
+        get: operations["getMeetingUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        /** A meeting with its invitees */
+        get: operations["getMeeting"];
+        put?: never;
+        post?: never;
+        /** Delete a meeting with its calls, recordings and transcripts (the host or the owner); notes documents stay */
+        delete: operations["deleteMeeting"];
+        options?: never;
+        head?: never;
+        /** Change a meeting (its hosts and the owner); a new time sends the invitees an update */
+        patch: operations["updateMeeting"];
+        trace?: never;
+    };
+    "/meetings/{meetingId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a meeting; invitees get the cancellation in their calendar */
+        post: operations["cancelMeeting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/rsvp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Answer an invitation */
+        put: operations["answerMeeting"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/invitees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invite more people, or uninvite (the meeting's hosts) */
+        post: operations["changeMeetingInvitees"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/host": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Hand a meeting to another member (the host or the owner) */
+        put: operations["setMeetingHost"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/cohosts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Choose a meeting's co-hosts (the host) */
+        put: operations["setMeetingCohosts"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/ring": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ring members into the meeting now (their phone and open agnts pages, for 30 seconds) */
+        post: operations["ringMeeting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        /** The times a meeting was live, newest first */
+        get: operations["listMeetingSessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        /**
+         * A call's attendance, recordings, notes and action items
+         * @description For the people who were in it, the meeting's invitees, its hosts and the owner.
+         */
+        get: operations["getMeetingSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions/{sessionId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        /** A call's chat */
+        get: operations["listMeetingSessionMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions/{sessionId}/transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        /** What was said, as Muse heard it */
+        get: operations["getMeetingTranscript"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions/{sessionId}/recordings/{mediaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                mediaId: number;
+            };
+            cookie?: never;
+        };
+        /** Watch or download a call's recording (MP4; ranges for seeking) */
+        get: operations["getMeetingRecording"];
+        put?: never;
+        post?: never;
+        /** Delete a recording now (the host or the owner) */
+        delete: operations["deleteMeetingRecording"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions/{sessionId}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Have Muse write a call's notes again (the meeting's hosts) */
+        post: operations["regenerateMeetingNotes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make a ticket of an action item, with the words of the meeting that show it */
+        post: operations["createActionItemTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/meetings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** The meetings a ticket was discussed in or made from */
+        get: operations["listTicketMeetings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/meetings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your meeting reminders */
+        get: operations["getMeetingPrefs"];
+        /** Change your meeting reminders */
+        put: operations["putMeetingPrefs"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        /**
+         * What anyone with the link sees before joining
+         * @description Title, host, times and whether it is live. Says whether the signed-in person is a member of its workspace.
+         */
+        get: operations["getPublicMeeting"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Join a meeting, or knock to be let in
+         * @description Members of the meeting's workspace are recognised by their session; everyone else is a guest: by the name they
+         *     type, Google, their agnts account, or an invitation link's token. A returning guest sends their guest token
+         *     (X-Guest-Token) to stay the same guest. joined hands out the LiveKit grant and the seat for in-call requests;
+         *     waiting hands out a knock to poll. Refusals are 403 with the reason as the code (locked, full, removed,
+         *     guests_off, not_started, cancelled, denied).
+         */
+        post: operations["joinMeeting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/knocks/{knockId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+                knockId: number;
+            };
+            cookie?: never;
+        };
+        /**
+         * Wait (up to 25 seconds) for a knock to be answered
+         * @description joined with the grant once let in, waiting while nobody answered, 403 denied or expired.
+         */
+        get: operations["waitMeetingKnock"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        /** The call as you see it in it - people, waiting room, what you may do */
+        get: operations["getMeetingCall"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A new LiveKit token for your seat (to reconnect) */
+        post: operations["refreshMeetingToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        /** The call's chat after a message */
+        get: operations["listMeetingCallMessages"];
+        put?: never;
+        /** Send a chat message to the call (no secrets; at most 30 a minute) */
+        post: operations["sendMeetingMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/knocks/{knockId}/{decision}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+                knockId: number;
+                decision: "admit" | "deny";
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Let someone in, or turn them away */
+        post: operations["decideMeetingKnock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/admit-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Let everyone waiting in */
+        post: operations["admitAllMeetingKnocks"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/people/{person}/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+                /** @description u<user id> or g<guest id> */
+                person: string;
+                action: "mute" | "ask-unmute" | "remove" | "lower-hand" | "cohost" | "uncohost";
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hosts: mute someone (source: microphone, camera or screen_share), ask them to unmute, remove them, lower their hand, make them co-host */
+        post: operations["actOnMeetingPerson"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/mute-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mute everyone's microphone but yours (hosts) */
+        post: operations["muteAllInMeeting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Hosts: lock the meeting, change who may come in, quiet guests, record, take notes */
+        put: operations["setMeetingCallSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/meetings/{code}/call/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End the call for everyone (the host) */
+        post: operations["endMeetingCall"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -8889,16 +9559,22 @@ export interface components {
          *     required), on branch (the default branch when empty), optionally by one author. pulls: repositories' pull
          *     requests by state and period, or chosen numbers in one repository. repo: one repository read in the sandbox.
          *     document: a page you can open (documentId), made into slides; only for slide decks. documentVersion is the
-         *     version read: 0 or absent reads the current one, and the server records which.
+         *     version read: 0 or absent reads the current one, and the server records which. meeting: a meeting session's
+         *     transcript and chat (sessionId), made into notes; only the meeting makes these, never a person.
          */
         DocumentSourceInput: {
             /** @enum {string} */
-            kind: "report" | "tickets" | "commits" | "pulls" | "repo" | "document";
+            kind: "report" | "tickets" | "commits" | "pulls" | "repo" | "document" | "meeting";
             /**
              * @description Defaults by kind
              * @enum {string}
              */
-            template?: "status" | "release_notes" | "pr_review" | "repo_review" | "ticket_summary" | "presentation" | "blank";
+            template?: "status" | "release_notes" | "pr_review" | "repo_review" | "ticket_summary" | "presentation" | "blank" | "meeting_notes";
+            /**
+             * Format: int64
+             * @description meeting: the session
+             */
+            sessionId?: number;
             /** Format: int64 */
             documentId?: number;
             documentVersion?: number;
@@ -9188,6 +9864,439 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        /** @description A meeting link and its settings. live is set while a call is going on. */
+        Meeting: {
+            /** Format: int64 */
+            id: number;
+            /** @description abc-defg-hij */
+            code: string;
+            /** @description The meeting's public link */
+            link: string;
+            title: string;
+            description: string;
+            /** Format: int64 */
+            hostId?: number;
+            hostName: string;
+            /** @enum {string} */
+            kind: "instant" | "scheduled";
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            endsAt?: string;
+            durationMin: number;
+            timeZone: string;
+            /**
+             * @description workspace: every member joins; invited: only invitees, other members knock
+             * @enum {string}
+             */
+            access: "workspace" | "invited";
+            /**
+             * @description What people without a membership may do
+             * @enum {string}
+             */
+            guests: "off" | "knock" | "open";
+            locked: boolean;
+            autoRecord: boolean;
+            autoNotes: boolean;
+            /** @enum {string} */
+            language: "auto" | "en" | "ru" | "uz";
+            cohostIds: number[];
+            /** Format: date-time */
+            cancelledAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+            live?: components["schemas"]["MeetingLive"];
+        };
+        MeetingLive: {
+            /** Format: int64 */
+            sessionId: number;
+            /** Format: date-time */
+            startedAt: string;
+            /** @description People in the call now */
+            inCall: number;
+            recording: boolean;
+            notes: boolean;
+        };
+        MeetingDetail: components["schemas"]["Meeting"] & {
+            invitees: components["schemas"]["MeetingInvitee"][];
+            /**
+             * @description Set when you are invited
+             * @enum {string}
+             */
+            myRsvp?: "none" | "yes" | "no" | "maybe";
+            /** @description You may change, invite, cancel */
+            canManage: boolean;
+        };
+        MeetingInvitee: {
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: int64
+             * @description A member; absent for an email address
+             */
+            userId?: number;
+            email: string;
+            name: string;
+            /** @enum {string} */
+            rsvp: "none" | "yes" | "no" | "maybe";
+        };
+        MeetingInput: {
+            title?: string;
+            description?: string;
+            /**
+             * @description instant when absent
+             * @enum {string}
+             */
+            kind?: "instant" | "scheduled";
+            /** Format: date-time */
+            startsAt?: string;
+            durationMin?: number;
+            /** @description IANA, e.g. Asia/Tashkent */
+            timeZone?: string;
+            /** @enum {string} */
+            access?: "workspace" | "invited";
+            /** @enum {string} */
+            guests?: "off" | "knock" | "open";
+            autoRecord?: boolean;
+            autoNotes?: boolean;
+            /** @enum {string} */
+            language?: "auto" | "en" | "ru" | "uz";
+            invite?: components["schemas"]["MeetingInvites"];
+        };
+        MeetingInvites: {
+            users?: number[];
+            emails?: string[];
+        };
+        MeetingInviteesInput: {
+            add?: components["schemas"]["MeetingInvites"];
+            /** @description Invitee ids to uninvite */
+            remove?: number[];
+        };
+        MeetingSessionBrief: {
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            connectedAt?: string;
+            /** Format: date-time */
+            endedAt?: string;
+            notesStatus: components["schemas"]["MeetingNotesStatus"];
+            notesError: string;
+            /** Format: int64 */
+            documentId?: number;
+        };
+        /**
+         * @description none; recording (notes are on); queued, transcribing (Muse hears the audio), writing (Muse writes the notes); done; failed
+         * @enum {string}
+         */
+        MeetingNotesStatus: "none" | "recording" | "queued" | "transcribing" | "writing" | "done" | "failed";
+        MeetingSessionSummary: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            meetingId: number;
+            meetingCode: string;
+            meetingTitle: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            people: number;
+            recordings: number;
+            actionItems: number;
+            notesStatus: components["schemas"]["MeetingNotesStatus"];
+            notesError: string;
+            /** Format: int64 */
+            documentId?: number;
+            documentTitle: string;
+        };
+        MeetingSessionDetail: {
+            /** Format: int64 */
+            id: number;
+            meeting: components["schemas"]["Meeting"];
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            notesStatus: components["schemas"]["MeetingNotesStatus"];
+            notesError: string;
+            /** Format: int64 */
+            documentId?: number;
+            attendees: components["schemas"]["MeetingAttendee"][];
+            recordings: components["schemas"]["MeetingRecording"][];
+            actionItems: components["schemas"]["MeetingActionItem"][];
+            /** @description Chat messages */
+            messages: number;
+            canManage: boolean;
+        };
+        MeetingAttendee: {
+            /** @description u<id> or g<id> */
+            person: string;
+            name: string;
+            guest: boolean;
+            /** @description A guest's, when Google or an invitation gave it */
+            email?: string;
+            /** Format: date-time */
+            firstIn: string;
+            /**
+             * Format: date-time
+             * @description Absent while still in the call
+             */
+            lastOut?: string;
+            /** Format: int64 */
+            seconds: number;
+        };
+        MeetingRecording: {
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            /** Format: int64 */
+            seconds: number;
+            /** Format: int64 */
+            bytes: number;
+            /** @enum {string} */
+            status: "active" | "ready";
+        };
+        MeetingActionItem: {
+            /** Format: int64 */
+            id: number;
+            position: number;
+            text: string;
+            /** @description As named in the meeting */
+            who: string;
+            /** @description As said */
+            due: string;
+            /** @description When it was said, from the start of the call */
+            atMs?: number;
+            quote: string;
+            /** @description The ticket made from it */
+            ticketKey?: string;
+        };
+        ActionItemTicketInput: {
+            /**
+             * Format: int64
+             * @description The repository; absent lets agnts pick, or none
+             */
+            repoId?: number;
+            /**
+             * @description ask when absent
+             * @enum {string}
+             */
+            start?: "ask" | "code" | "queue";
+        };
+        MeetingMessage: {
+            /** Format: int64 */
+            id: number;
+            /** @description u<id> or g<id> */
+            person: string;
+            name: string;
+            body: string;
+            /** Format: date-time */
+            at: string;
+        };
+        MeetingSegment: {
+            startMs: number;
+            endMs: number;
+            /** @description Who spoke; empty when the audio did not say */
+            name: string;
+            text: string;
+        };
+        MeetingTranscript: {
+            segments: components["schemas"]["MeetingSegment"][];
+            /** @description The segments name who spoke */
+            speakers: boolean;
+        };
+        MeetingTranscriptHit: {
+            /** Format: int64 */
+            meetingId: number;
+            meetingTitle: string;
+            /** Format: int64 */
+            sessionId: number;
+            /** Format: date-time */
+            startedAt: string;
+            segment: components["schemas"]["MeetingSegment"];
+        };
+        MeetingTicketLink: {
+            /** Format: int64 */
+            meetingId: number;
+            meetingTitle: string;
+            meetingCode: string;
+            /** Format: int64 */
+            sessionId?: number;
+            ticketKey: string;
+            quote: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MeetingSettings: {
+            allowRecording: boolean;
+            /** @description Recordings, notes audio and transcripts are deleted after; 0 keeps them */
+            retentionDays: number;
+            /** @description Keep the audio of notes after it is heard */
+            keepAudio: boolean;
+            maxParticipants: number;
+            /** @description What this server can do */
+            available: {
+                meetings: boolean;
+                recording: boolean;
+                notes: boolean;
+            };
+        };
+        MeetingSettingsInput: {
+            allowRecording: boolean;
+            retentionDays: number;
+            keepAudio: boolean;
+            maxParticipants: number;
+        };
+        MeetingPrefs: {
+            /**
+             * @description 0 turns reminders off
+             * @enum {integer}
+             */
+            reminderMinutes: 0 | 5 | 10 | 15;
+        };
+        MeetingUsageDay: {
+            /** Format: date */
+            day: string;
+            sessions: number;
+            /** Format: int64 */
+            participantMinutes: number;
+            /** Format: int64 */
+            recordingMinutes: number;
+            /** Format: int64 */
+            recordingBytes: number;
+            /** Format: int64 */
+            transcribedMinutes: number;
+        };
+        PublicMeeting: {
+            code: string;
+            title: string;
+            hostName: string;
+            /** @description The workspace's name */
+            workspace: string;
+            /** @enum {string} */
+            kind: "instant" | "scheduled";
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            endsAt?: string;
+            timeZone?: string;
+            cancelled: boolean;
+            /** @enum {string} */
+            guests: "off" | "knock" | "open";
+            live?: boolean;
+            inCall: number;
+            /** @description The call is being recorded */
+            recording: boolean;
+            /** @description agnts is taking notes of the call */
+            notes: boolean;
+            /** @description You are signed in as a member of its workspace */
+            member: boolean;
+            /** @description Your name, when signed in */
+            name?: string;
+            /** @description For "Continue with Google" */
+            googleClientId?: string;
+        };
+        MeetingJoinInput: {
+            /** @description A guest's name */
+            name?: string;
+            /** @description A Google ID token: the guest is who Google says */
+            googleCredential?: string;
+            /** @description The token of an invitation link (?i=) */
+            invite?: string;
+            /** @description The browser or phone: 4-16 letters and digits it keeps */
+            device?: string;
+        };
+        MeetingJoin: {
+            /** @enum {string} */
+            status: "joined" | "waiting";
+            grant?: components["schemas"]["MeetingGrant"];
+            /** Format: int64 */
+            knockId?: number;
+            /** @description Send as X-Knock-Token when polling */
+            knockToken?: string;
+            /** @description A new guest's token: keep it and send it as X-Guest-Token next time */
+            guestToken?: string;
+            guestName?: string;
+        };
+        MeetingGrant: {
+            /** @description The LiveKit server (wss://) */
+            url: string;
+            /** @description The LiveKit access token */
+            token: string;
+            identity: string;
+            /** @description Send as X-Meeting-Seat with in-call requests */
+            seat?: string;
+            /** @enum {string} */
+            role: "host" | "cohost" | "member" | "guest";
+            rights: components["schemas"]["MeetingRights"];
+            /** Format: int64 */
+            sessionId: number;
+            name: string;
+        };
+        MeetingRights: {
+            publish: boolean;
+            screenShare: boolean;
+            chat: boolean;
+            admit: boolean;
+            moderate: boolean;
+            record: boolean;
+            manageCohosts: boolean;
+        };
+        MeetingCall: {
+            meeting: components["schemas"]["Meeting"];
+            /** Format: int64 */
+            sessionId: number;
+            me: components["schemas"]["MeetingPerson"];
+            rights: components["schemas"]["MeetingRights"];
+            canAdmit: boolean;
+            people: components["schemas"]["MeetingPerson"][];
+            knocks: components["schemas"]["MeetingKnock"][];
+            recording: boolean;
+            notes: boolean;
+            notesStatus?: components["schemas"]["MeetingNotesStatus"];
+            recordingAvailable: boolean;
+            notesAvailable: boolean;
+            guestsQuiet: boolean;
+            /** @description The workspace's slug, for members */
+            workspace?: string;
+        };
+        MeetingPerson: {
+            /** @description u<id> or g<id> */
+            key: string;
+            name: string;
+            /** @enum {string} */
+            role: "host" | "cohost" | "member" | "guest";
+            /** @description Their connections (one per device) */
+            identities: string[];
+            /** @description A guest's, for hosts */
+            email?: string;
+            knocked: boolean;
+        };
+        MeetingKnock: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            email?: string;
+            guest: boolean;
+            /** Format: date-time */
+            at: string;
+        };
+        MeetingCallSettings: {
+            locked?: boolean;
+            /** @enum {string} */
+            guests?: "off" | "knock" | "open";
+            /** @description Guests can't chat or share their screen */
+            guestsQuiet?: boolean;
+            /** @description Start or stop the video recording */
+            recording?: boolean;
+            /** @description Start or stop taking notes */
+            notes?: boolean;
+        };
     };
     responses: {
         /** @description The PDF is being made; ask again after Retry-After seconds */
@@ -9303,6 +10412,14 @@ export interface components {
         };
     };
     parameters: {
+        MeetingID: number;
+        SessionID: number;
+        /** @description The meeting code, abc-defg-hij (dashes optional) */
+        MeetingCode: string;
+        /** @description The seat a join handed out */
+        SeatToken: string;
+        /** @description The knock's secret a join handed out */
+        KnockToken: string;
         CommentID: number;
         /** @description The guest's secret token from joinPublicDocument */
         GuestToken: string;
@@ -17315,6 +18432,1081 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
+        };
+    };
+    listMeetings: {
+        parameters: {
+            query?: {
+                view?: "upcoming" | "live" | "mine";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Meeting"][];
+                };
+            };
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    createMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeetingInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    listPastMeetingSessions: {
+        parameters: {
+            query?: {
+                /** @description Page back from this start time */
+                before?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingSessionSummary"][];
+                };
+            };
+        };
+    };
+    searchMeetingTranscripts: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingTranscriptHit"][];
+                };
+            };
+        };
+    };
+    getMeetingSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingSettings"];
+                };
+            };
+        };
+    };
+    putMeetingSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeetingSettingsInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingSettings"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    getMeetingUsage: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingUsageDay"][];
+                };
+            };
+        };
+    };
+    getMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingDetail"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeetingInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    cancelMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancelled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    answerMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    answer: "yes" | "no" | "maybe";
+                };
+            };
+        };
+        responses: {
+            /** @description Answered */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    changeMeetingInvitees: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeetingInviteesInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    setMeetingHost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: int64 */
+                    userId: number;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    setMeetingCohosts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    userIds: number[];
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    ringMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    userIds: number[];
+                };
+            };
+        };
+        responses: {
+            /** @description Ringing */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listMeetingSessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingSessionBrief"][];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMeetingSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingSessionDetail"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listMeetingSessionMessages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingMessage"][];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMeetingTranscript: {
+        parameters: {
+            query?: {
+                format?: "json" | "txt" | "vtt";
+            };
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The transcript; txt and vtt as attachments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingTranscript"];
+                    "text/plain": string;
+                    "text/vtt": string;
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMeetingRecording: {
+        parameters: {
+            query?: {
+                download?: boolean;
+            };
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                mediaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The video */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "video/mp4": string;
+                };
+            };
+            /** @description Part of the video */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                mediaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    regenerateMeetingNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Being written */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    createActionItemTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ActionItemTicketInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ticket"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listTicketMeetings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingTicketLink"][];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMeetingPrefs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingPrefs"];
+                };
+            };
+        };
+    };
+    putMeetingPrefs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeetingPrefs"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingPrefs"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    getPublicMeeting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicMeeting"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    joinMeeting: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The guest's secret token from joinPublicDocument */
+                "X-Guest-Token"?: components["parameters"]["GuestToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeetingJoinInput"];
+            };
+        };
+        responses: {
+            /** @description Joined or waiting */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingJoin"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    waitMeetingKnock: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The knock's secret a join handed out */
+                "X-Knock-Token"?: components["parameters"]["KnockToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+                knockId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Joined or still waiting */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingJoin"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMeetingCall: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingCall"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    refreshMeetingToken: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingGrant"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listMeetingCallMessages: {
+        parameters: {
+            query?: {
+                after?: number;
+            };
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingMessage"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    sendMeetingMessage: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingMessage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    decideMeetingKnock: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+                knockId: number;
+                decision: "admit" | "deny";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Done */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    admitAllMeetingKnocks: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Done */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    actOnMeetingPerson: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+                /** @description u<user id> or g<guest id> */
+                person: string;
+                action: "mute" | "ask-unmute" | "remove" | "lower-hand" | "cohost" | "uncohost";
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    source?: "microphone" | "camera" | "screen_share";
+                };
+            };
+        };
+        responses: {
+            /** @description Done */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    muteAllInMeeting: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Done */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    setMeetingCallSettings: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeetingCallSettings"];
+            };
+        };
+        responses: {
+            /** @description Done */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            429: components["responses"]["TooManyRequests"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    endMeetingCall: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The seat a join handed out */
+                "X-Meeting-Seat"?: components["parameters"]["SeatToken"];
+            };
+            path: {
+                /** @description The meeting code, abc-defg-hij (dashes optional) */
+                code: components["parameters"]["MeetingCode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ended */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
 }

@@ -25,6 +25,8 @@ class DocumentSourceInput {
 
      this.template,
 
+     this.sessionId,
+
      this.documentId,
 
      this.documentVersion,
@@ -72,6 +74,19 @@ class DocumentSourceInput {
 
 
   final DocumentSourceInputTemplateEnum? template;
+
+
+
+      /// meeting: the session
+  @JsonKey(
+    
+    name: r'sessionId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? sessionId;
 
 
 
@@ -226,6 +241,7 @@ class DocumentSourceInput {
     bool operator ==(Object other) => identical(this, other) || other is DocumentSourceInput &&
       other.kind == kind &&
       other.template == template &&
+      other.sessionId == sessionId &&
       other.documentId == documentId &&
       other.documentVersion == documentVersion &&
       other.instruction == instruction &&
@@ -243,6 +259,7 @@ class DocumentSourceInput {
     int get hashCode =>
         kind.hashCode +
         template.hashCode +
+        sessionId.hashCode +
         documentId.hashCode +
         documentVersion.hashCode +
         instruction.hashCode +
@@ -279,7 +296,9 @@ pulls(r'pulls'),
 @JsonValue(r'repo')
 repo(r'repo'),
 @JsonValue(r'document')
-document(r'document');
+document(r'document'),
+@JsonValue(r'meeting')
+meeting(r'meeting');
 
 const DocumentSourceInputKindEnum(this.value);
 
@@ -305,7 +324,9 @@ ticketSummary(r'ticket_summary'),
 @JsonValue(r'presentation')
 presentation(r'presentation'),
 @JsonValue(r'blank')
-blank(r'blank');
+blank(r'blank'),
+@JsonValue(r'meeting_notes')
+meetingNotes(r'meeting_notes');
 
 const DocumentSourceInputTemplateEnum(this.value);
 

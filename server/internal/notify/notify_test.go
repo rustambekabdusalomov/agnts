@@ -69,6 +69,15 @@ func (m *memStore) SetCursor(_ context.Context, _ string, id int64) error {
 	return nil
 }
 func (m *memStore) Devices(context.Context, int64) ([]postgres.Device, error) { return m.devices, nil }
+func (m *memStore) UserDevices(_ context.Context, _ int64, users []int64) ([]postgres.Device, error) {
+	var out []postgres.Device
+	for _, d := range m.devices {
+		if slices.Contains(users, d.UserID) {
+			out = append(out, d)
+		}
+	}
+	return out, nil
+}
 func (m *memStore) OwnerDevices(context.Context, int64, string) (int64, []postgres.Device, error) {
 	var out []postgres.Device
 	for _, d := range m.devices {

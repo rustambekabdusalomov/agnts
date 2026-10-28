@@ -289,6 +289,7 @@ const (
 	SourcePulls   SourceKind = "pulls"    // pull requests of repositories
 	SourceRepo    SourceKind = "repo"     // one repository, read in the sandbox
 	SourceDoc     SourceKind = "document" // a page of the workspace, made into slides
+	SourceMeeting SourceKind = "meeting"  // a meeting session's transcript and chat, made into notes
 )
 
 // DocTemplate shapes what a generation writes.
@@ -302,12 +303,13 @@ const (
 	TemplateRepoReview    DocTemplate = "repo_review"
 	TemplateTicketSummary DocTemplate = "ticket_summary"
 	TemplatePresentation  DocTemplate = "presentation"
+	TemplateMeetingNotes  DocTemplate = "meeting_notes"
 	TemplateBlank         DocTemplate = "blank"
 )
 
 // DocTemplates lists the templates, in the order clients show them.
 var DocTemplates = []DocTemplate{TemplateStatus, TemplateReleaseNotes, TemplatePullReview, TemplateRepoReview, TemplateTicketSummary,
-	TemplatePresentation, TemplateBlank}
+	TemplatePresentation, TemplateBlank, TemplateMeetingNotes}
 
 // DefaultTemplate is the template a source kind starts with.
 func DefaultTemplate(k SourceKind) DocTemplate {
@@ -322,6 +324,8 @@ func DefaultTemplate(k SourceKind) DocTemplate {
 		return TemplateRepoReview
 	case SourceDoc:
 		return TemplatePresentation
+	case SourceMeeting:
+		return TemplateMeetingNotes
 	}
 	return TemplateStatus
 }
@@ -352,6 +356,8 @@ type DocumentSource struct {
 	// which pins the current one).
 	DocumentID      int64 `json:"documentId,omitempty"`
 	DocumentVersion int   `json:"documentVersion,omitempty"`
+	// meeting: the session whose transcript and chat the notes are made from.
+	SessionID int64 `json:"sessionId,omitempty"`
 }
 
 // Validate checks a source and fills its defaults.
@@ -432,6 +438,13 @@ func (s *DocumentSource) Validate() error {
 	case SourceRepo:
 		if len(s.RepoIDs) != 1 {
 			return docInvalid("a repository source names exactly one repository")
+		}
+	case SourceMeeting:
+		if s.SessionID <= 0 {
+			return docInvalid("a meeting source names the session")
+		}
+		if s.Template != TemplateMeetingNotes {
+			return docInvalid("meeting notes use the meeting_notes template")
 		}
 	case SourceDoc:
 		if s.DocumentID <= 0 {
@@ -622,4 +635,7 @@ type DocRunResult struct {
 	DataAsOf time.Time
 	// FromVersion is the version of the source page a document source read.
 	FromVersion int
+	// ActionItems are what a meeting's notes say people are to do (done
+	// meeting generations only).
+	ActionItems []ActionItem
 }

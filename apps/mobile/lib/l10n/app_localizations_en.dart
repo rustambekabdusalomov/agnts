@@ -318,6 +318,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get accountMyClaudeMuse => 'Your Muse account';
+
+  @override
+  String get accountClaudeSavedMuse => 'Muse account connected';
+
+  @override
+  String get accountClaudeRemovedMuse => 'Muse account disconnected';
+
+  @override
   String get analyticsTitle => 'Analytics';
 
   @override
@@ -524,7 +533,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsSpend => 'Token spend';
 
   @override
-  String get analyticsSpendSub => 'Tokens Claude used per day, input and output';
+  String get analyticsSpendSub => 'Tokens Muse used per day, input and output';
 
   @override
   String get analyticsSpendTokens => 'Tokens in and out';
@@ -539,7 +548,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsSpendStagesSub => 'Where the tokens went, costliest first';
 
   @override
-  String get analyticsNoSpend => 'No Claude runs recorded in this period.';
+  String get analyticsNoSpend => 'No Muse runs recorded in this period.';
 
   @override
   String get analyticsRepos => 'By repository';
@@ -680,7 +689,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsColFixes => 'Check fixes';
 
   @override
-  String get analyticsColFixesHint => 'Average times failing checks were sent back to Claude';
+  String get analyticsColFixesHint => 'Average times failing checks were sent back to Muse';
 
   @override
   String get analyticsColSerious => 'Serious findings';
@@ -1118,7 +1127,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyticsColRepos => 'Repositories';
 
   @override
-  String get analyticsKpiCostNote => 'All Claude calls in the period';
+  String get analyticsKpiCostNote => 'All Muse calls in the period';
 
   @override
   String analyticsKpiDaysAboveNote(String n) {
@@ -1393,6 +1402,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingReason_document => 'Spent on a document';
 
   @override
+  String get billingFreeCredits => 'Your free credits';
+
+  @override
+  String get billingFreeCreditsSub => 'From agnts. Runs on agnts\'s Muse key spend them before the workspace\'s credits.';
+
+  @override
+  String billingFreeCreditsLeft(String n, String limit) {
+    return '$n of $limit credits left';
+  }
+
+  @override
+  String billingFreeCreditsWorth(String amount, String total) {
+    return '$amount of $total';
+  }
+
+  @override
+  String get billingFreeCreditsNone => 'None yet. An Admin can give you free credits for runs on agnts\'s Muse key.';
+
+  @override
   String get briefTitle => 'Repository brief';
 
   @override
@@ -1421,10 +1449,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get briefEditHint => 'Markdown. What you save is what runs read from now on; leave it empty to give runs no brief.';
 
   @override
-  String get briefNone => 'No brief yet. Survey the repository to have Claude write a draft, or write one yourself.';
+  String get briefNone => 'No brief yet. Survey the repository to have Muse write a draft, or write one yourself.';
 
   @override
-  String get briefSurveying => 'Claude is surveying the repository. The draft appears here for your approval.';
+  String get briefSurveying => 'Muse is surveying the repository. The draft appears here for your approval.';
 
   @override
   String briefFailed(String error) {
@@ -1921,6 +1949,348 @@ class AppLocalizationsEn extends AppLocalizations {
       'Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.';
 
   @override
+  String get codechatTitle => 'Code';
+
+  @override
+  String get codechatModeLabel => 'Chat mode';
+
+  @override
+  String get codechatModeChat => 'Chat';
+
+  @override
+  String get codechatModeCode => 'Code';
+
+  @override
+  String get codechatNewConversation => 'New Code conversation';
+
+  @override
+  String get codechatEmptyTitle => 'Change code from the chat';
+
+  @override
+  String get codechatEmptyText =>
+      'Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.';
+
+  @override
+  String get codechatViewersOnly => 'Code mode is for people who can change the workspace.';
+
+  @override
+  String get codechatRepos => 'Repositories';
+
+  @override
+  String get codechatReposNone => 'Pick the repositories to work in, or name them in the message with @';
+
+  @override
+  String get codechatReposChange => 'Change';
+
+  @override
+  String get codechatReposSave => 'Save repositories';
+
+  @override
+  String get codechatReposSaved => 'Repositories changed: the next ticket works in them';
+
+  @override
+  String get codechatKind => 'Kind';
+
+  @override
+  String get codechatQuick => 'Quick: skip checks';
+
+  @override
+  String get codechatQuickHint => 'Build, lint and tests don\'t run, so review comes sooner.';
+
+  @override
+  String get codechatTicketPick => 'Or work on an existing ticket';
+
+  @override
+  String get codechatTicketPlaceholder => 'Ticket key, e.g. PAY-214';
+
+  @override
+  String get codechatTicketAttach => 'Attach';
+
+  @override
+  String codechatTicketAttached(String key) {
+    return 'Now working on $key';
+  }
+
+  @override
+  String get codechatPlaceholderNew => 'Describe the change…';
+
+  @override
+  String get codechatPlaceholderReview => 'Ask for changes, or approve above…';
+
+  @override
+  String get codechatPlaceholderAnswers => 'Answer the question…';
+
+  @override
+  String get codechatPlaceholderRunning => 'Add to the request: it is sent when this run ends…';
+
+  @override
+  String get codechatPlaceholderStopped => 'Say how to get past this, and it retries…';
+
+  @override
+  String get codechatPlaceholderPushing => 'Pushing now…';
+
+  @override
+  String get codechatPlaceholderDone => 'Ask for the next change…';
+
+  @override
+  String get codechatSend => 'Send';
+
+  @override
+  String get codechatSendHint => 'Enter sends, Shift+Enter makes a new line, @ names a repository';
+
+  @override
+  String codechatCount(String n) {
+    return '$n / 4000';
+  }
+
+  @override
+  String codechatRoutedCreated(String key) {
+    return 'Started $key';
+  }
+
+  @override
+  String codechatRoutedAnswered(String key) {
+    return 'Answered $key';
+  }
+
+  @override
+  String codechatRoutedChanges(String key) {
+    return 'Asked $key for changes';
+  }
+
+  @override
+  String codechatRoutedContinued(String key) {
+    return 'Continued $key';
+  }
+
+  @override
+  String codechatRoutedRetried(String key) {
+    return 'Retried $key';
+  }
+
+  @override
+  String codechatRoutedQueued(String key) {
+    return 'Waits for $key\'s run to end';
+  }
+
+  @override
+  String codechatRoutedSent(String key) {
+    return 'Sent to $key';
+  }
+
+  @override
+  String codechatRoutedFailed(String reason) {
+    return 'Not sent: $reason';
+  }
+
+  @override
+  String get codechatRoutedSteered => 'Delivered to the running agent';
+
+  @override
+  String codechatQueuedTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n messages wait', one: '$n message waits');
+    return '$_temp0 for this run to end';
+  }
+
+  @override
+  String get codechatSendNow => 'Stop and send now';
+
+  @override
+  String codechatSendNowTitle(String key) {
+    return 'Stop $key now?';
+  }
+
+  @override
+  String get codechatSendNowText => 'The running stage stops, and your messages go to it at once.';
+
+  @override
+  String codechatSteps(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n steps', one: '$n step');
+    return '$_temp0';
+  }
+
+  @override
+  String codechatStateLine(String key, String state) {
+    return '$key: $state';
+  }
+
+  @override
+  String codechatCheckPassed(String name) {
+    return '$name passed';
+  }
+
+  @override
+  String codechatCheckFailed(String name) {
+    return '$name failed';
+  }
+
+  @override
+  String get codechatPrOpened => 'Pull request opened';
+
+  @override
+  String get codechatPushed => 'Pushed';
+
+  @override
+  String get codechatMerged => 'Merged';
+
+  @override
+  String get codechatWorking => 'Working…';
+
+  @override
+  String codechatResultTitle(String key) {
+    return '$key is ready for your review';
+  }
+
+  @override
+  String codechatReportTitle(String key) {
+    return '$key wrote its report';
+  }
+
+  @override
+  String codechatFilesChanged(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n files changed', one: '$n file changed');
+    return '$_temp0';
+  }
+
+  @override
+  String get codechatChecksPassed => 'Checks passed';
+
+  @override
+  String codechatChecksFailed(String failed, String n) {
+    return '$failed of $n checks failed';
+  }
+
+  @override
+  String get codechatChecksSkipped => 'Checks skipped';
+
+  @override
+  String get codechatViewDiff => 'View diff';
+
+  @override
+  String get codechatHideDiff => 'Hide diff';
+
+  @override
+  String get codechatApprove => 'Approve';
+
+  @override
+  String codechatApproveTitle(String key) {
+    return 'Approve $key?';
+  }
+
+  @override
+  String codechatApprovePr(String branch) {
+    return 'agnts pushes $branch and opens a pull request.';
+  }
+
+  @override
+  String get codechatApproveMain => 'agnts pushes the change straight to the default branch.';
+
+  @override
+  String get codechatApproveReport => 'The ticket closes with this report.';
+
+  @override
+  String get codechatReject => 'Reject';
+
+  @override
+  String codechatRejectTitle(String key) {
+    return 'Reject $key?';
+  }
+
+  @override
+  String get codechatRejectText => 'All work on it stops. You can continue it from this chat later.';
+
+  @override
+  String get codechatOpenTicket => 'Open ticket';
+
+  @override
+  String codechatQuestionsTitle(String key) {
+    return '$key asks before it goes on';
+  }
+
+  @override
+  String get codechatAnswersSend => 'Send answers';
+
+  @override
+  String codechatStoppedTitle(String key) {
+    return '$key stopped';
+  }
+
+  @override
+  String get codechatStoppedHint => 'Write how to get past it: it retries with your note.';
+
+  @override
+  String codechatDoneTitle(String key) {
+    return '$key is done';
+  }
+
+  @override
+  String get codechatDoneHint => 'Your next message starts a new ticket in the same repositories.';
+
+  @override
+  String codechatRejectedTitle(String key) {
+    return '$key was rejected';
+  }
+
+  @override
+  String get codechatRejectedHint => 'Write what to do differently and it continues.';
+
+  @override
+  String codechatMovedHint(String key) {
+    return '$key moved to another of your conversations.';
+  }
+
+  @override
+  String get codechatApprovalTitle => 'The agent asks to run this';
+
+  @override
+  String codechatApprovalReason(String reason) {
+    return 'A rule asks about it: $reason';
+  }
+
+  @override
+  String get codechatApprovalAllow => 'Allow';
+
+  @override
+  String get codechatApprovalDeny => 'Deny';
+
+  @override
+  String get codechatApprovalAllowed => 'Allowed';
+
+  @override
+  String get codechatApprovalDenied => 'Denied';
+
+  @override
+  String get codechatApprovalExpired => 'Nobody answered: denied';
+
+  @override
+  String codechatApprovalLeft(String seconds) {
+    return '${seconds}s left';
+  }
+
+  @override
+  String get codechatHandoffTitle => 'Do this in Code';
+
+  @override
+  String get codechatHandoffOpen => 'Open in Code';
+
+  @override
+  String get codechatTicketChat => 'Discussed in chat';
+
+  @override
+  String get codechatContinueInChat => 'Continue in chat';
+
+  @override
+  String get codechatCodeBadge => 'Code';
+
+  @override
+  String codechatMentioned(String names) {
+    return 'Works in $names';
+  }
+
+  @override
+  String get codechatMentionLabel => 'Repositories';
+
+  @override
   String get commitBack => 'Back to commits';
 
   @override
@@ -1991,6 +2361,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String commitFilesCapped(String n) {
     return 'This commit changes more files than can be shown here. The first $n are listed; open it on the git host to see all of them.';
   }
+
+  @override
+  String get commonPagePrev => 'Previous page';
+
+  @override
+  String get commonPageNext => 'Next page';
+
+  @override
+  String commonPageRange(String from, String to, String n) {
+    return '$from–$to of $n';
+  }
+
+  @override
+  String get commonPerPage => 'Per page';
+
+  @override
+  String get commonPager => 'Pages';
 
   @override
   String get commonLoading => 'Loading…';
@@ -3440,7 +3827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filesAddFile => 'File';
 
   @override
-  String get filesHint => 'Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.';
+  String get filesHint => 'Pictures, PDFs, logs or text, up to 10 MB each. Muse reads them all.';
 
   @override
   String filesUploading(String name) {
@@ -3967,7 +4354,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessRepoTitle => 'Guardrails';
 
   @override
-  String get harnessRepoSub => 'How strictly agnts-guard checks Claude\'s work in this repository, while it works and after.';
+  String get harnessRepoSub => 'How strictly agnts-guard checks Muse\'s work in this repository, while it works and after.';
 
   @override
   String get harnessRepoSave => 'Save guardrails';
@@ -4015,7 +4402,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessRepoKind_encoded_blob => 'Encoded text';
 
   @override
-  String get harnessRepoKind_hooks => 'Claude Code hooks';
+  String get harnessRepoKind_hooks => 'Muse hooks';
 
   @override
   String get harnessRepoKind_mcp_server => 'MCP servers';
@@ -4042,15 +4429,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessRepoProfileHelp_ => 'Follows the workspace setting.';
 
   @override
-  String get harnessRepoProfileHelp_minimal => 'Only secrets and enforced rules are blocked; build checked before Claude finishes.';
+  String get harnessRepoProfileHelp_minimal => 'Only secrets and enforced rules are blocked; build checked before Muse finishes.';
 
   @override
   String get harnessRepoProfileHelp_standard =>
-      'Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Claude finishes.';
+      'Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Muse finishes.';
 
   @override
   String get harnessRepoProfileHelp_strict =>
-      'Also blocks swallowed errors and removed assertions, runs the tests before Claude finishes, and may ask for facts before editing a file.';
+      'Also blocks swallowed errors and removed assertions, runs the tests before Muse finishes, and may ask for facts before editing a file.';
 
   @override
   String get harnessRepoSecretAllow => 'Example credentials allowed in';
@@ -4063,13 +4450,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessRepoChecksSub =>
-      'Quick formatters and linters agnts-guard runs on each file Claude edits, so problems are fixed while the change is fresh.';
+      'Quick formatters and linters agnts-guard runs on each file Muse edits, so problems are fixed while the change is fresh.';
 
   @override
   String get harnessRepoChecksOff => 'Turn per-file checks off';
 
   @override
-  String get harnessRepoChecksOffHelp => 'Claude is not checked after each edit; the checks after the run still apply.';
+  String get harnessRepoChecksOffHelp => 'Muse is not checked after each edit; the checks after the run still apply.';
 
   @override
   String get harnessRepoOwnChecks => 'Use my own checks';
@@ -4213,13 +4600,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessRulesDeliveryHelp_skill =>
-      'A skill Claude loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.';
+      'A skill Muse loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.';
 
   @override
   String get harnessRulesEnforce => 'Enforce';
 
   @override
-  String get harnessRulesEnforceHelp => 'agnts-guard checks the rule while Claude works, not only asks for it.';
+  String get harnessRulesEnforceHelp => 'agnts-guard checks the rule while Muse works, not only asks for it.';
 
   @override
   String get harnessRulesOn => 'Check';
@@ -4237,7 +4624,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessRulesOnHelp_file => 'Edits of the files below; with a pattern, only added lines that match it.';
 
   @override
-  String get harnessRulesOnHelp_bash => 'Shell commands Claude runs that match the pattern.';
+  String get harnessRulesOnHelp_bash => 'Shell commands Muse runs that match the pattern.';
 
   @override
   String get harnessRulesOnHelp_diff => 'The finished change, checked on the server after the run.';
@@ -4261,7 +4648,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessRulesAction_warn => 'Warn';
 
   @override
-  String get harnessRulesMessage => 'Message to Claude';
+  String get harnessRulesMessage => 'Message to Muse';
 
   @override
   String get harnessRulesMessagePlaceholder => 'Add a new migration instead.';
@@ -4338,7 +4725,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessSettingsSub =>
-      'agnts-guard checks Claude\'s work inside every run, while it happens; agnts\'s checks after the run still apply.';
+      'agnts-guard checks Muse\'s work inside every run, while it happens; agnts\'s checks after the run still apply.';
 
   @override
   String get harnessSettingsProfile => 'Guard profile';
@@ -4354,7 +4741,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessSettingsProfileHelp_minimal =>
-      'Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Claude finishes.';
+      'Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Muse finishes.';
 
   @override
   String get harnessSettingsProfileHelp_standard =>
@@ -4422,7 +4809,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessSettingsMethodSkillsHelp =>
-      'Coding runs get agnts\'s method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Claude loads one only when it fits; compare on Analytics.';
+      'Coding runs get agnts\'s method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Muse loads one only when it fits; compare on Analytics.';
 
   @override
   String get harnessSettingsSecondOpinion => 'Second opinion';
@@ -4459,7 +4846,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessSettingsHook_post_edit_check => 'check each edited file (formatter, linter)';
 
   @override
-  String get harnessSettingsHook_stop_gate => 'build and lint must pass before Claude finishes';
+  String get harnessSettingsHook_stop_gate => 'build and lint must pass before Muse finishes';
 
   @override
   String get harnessSettingsHook_session_progress => 'give the plan back after the context is compacted';
@@ -4469,7 +4856,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessSettingsCodexHelp =>
-      'A Codex model name runs coding on Codex CLI instead of Claude; empty uses Claude. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).';
+      'A Codex model name runs coding on Codex CLI instead of Muse; empty uses Muse. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).';
 
   @override
   String get harnessSettingsCodexConnect => 'OpenAI integration';
@@ -4546,7 +4933,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessSettingsColLoaded => 'Loaded';
 
   @override
-  String get harnessSettingsColLoadedHint => 'Share of those tickets where Claude loaded the skill';
+  String get harnessSettingsColLoadedHint => 'Share of those tickets where Muse loaded the skill';
 
   @override
   String get harnessSettingsColSkillFirstTry => 'First try';
@@ -4558,7 +4945,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get harnessSettingsColLoadedFirstTry => 'First try, loaded';
 
   @override
-  String get harnessSettingsColLoadedFirstTryHint => 'First-try rate of the done tickets where Claude loaded the skill';
+  String get harnessSettingsColLoadedFirstTryHint => 'First-try rate of the done tickets where Muse loaded the skill';
 
   @override
   String get harnessSettingsColTargeted => 'Targeted findings';
@@ -4582,7 +4969,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get harnessSettingsEffortHelp =>
-      'How hard Claude thinks in each stage (Claude Code\'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.';
+      'How hard Muse thinks in each stage (Muse\'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.';
 
   @override
   String get harnessSettingsEffortAnalyze => 'Analysis';
@@ -5504,6 +5891,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Codex runs have no agnts-guard hooks: agnts\'s checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts.';
 
   @override
+  String get integrationsName_muse => 'Muse Code';
+
+  @override
   String get kindTitle => 'Kind';
 
   @override
@@ -5671,7 +6061,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get learnReadingTitle => 'Further reading';
 
   @override
-  String get learnReadingNote => 'Claude suggested these links. Check them before relying on them.';
+  String get learnReadingNote => 'Muse suggested these links. Check them before relying on them.';
 
   @override
   String get learnCategory_pattern => 'Pattern';
@@ -5991,6 +6381,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logsTypeEvent => 'Event';
 
   @override
+  String get logsTypeBudget => 'Spend';
+
+  @override
   String get maccountPasswordInstead => 'Sign in with a password';
 
   @override
@@ -6276,7 +6669,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String massistantStatsParts(String start, String snapshot, String claude) {
-    return 'Container $start · workspace $snapshot · Claude $claude';
+    return 'Container $start · workspace $snapshot · Muse $claude';
   }
 
   @override
@@ -6363,6 +6756,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String massistantStatsVersionActions(String proposed, String done) {
     return '$proposed actions offered · $done done';
   }
+
+  @override
+  String get massistantVoiceStart => 'Ask by voice';
+
+  @override
+  String get massistantVoiceSend => 'Stop and ask';
+
+  @override
+  String get massistantVoiceRecording => 'Recording';
+
+  @override
+  String get massistantVoiceHearing => 'Muse is listening to your question…';
+
+  @override
+  String massistantVoiceLimit(String n) {
+    return 'up to $n min';
+  }
+
+  @override
+  String get massistantVoiceDenied => 'Allow the microphone for this site to ask by voice.';
+
+  @override
+  String get massistantVoiceNoMic => 'No microphone could be opened.';
 
   @override
   String get mciTitle => 'CI failures';
@@ -6783,6 +7199,995 @@ class AppLocalizationsEn extends AppLocalizations {
   String mdocumentsMadeFrom(String title) {
     return 'Made from “$title”';
   }
+
+  @override
+  String get meetingsPageTitle => 'Meetings';
+
+  @override
+  String get meetingsLede =>
+      'Video calls for the team and the guests you let in. Muse can take the notes and turn what was agreed into tickets.';
+
+  @override
+  String get meetingsStartNow => 'Start now';
+
+  @override
+  String get meetingsSchedule => 'Schedule';
+
+  @override
+  String get meetingsGetLink => 'Get a link';
+
+  @override
+  String meetingsLinkCopied(String link) {
+    return 'Link copied: $link';
+  }
+
+  @override
+  String get meetingsLinkCopiedShort => 'Link copied';
+
+  @override
+  String get meetingsCopyLink => 'Copy link';
+
+  @override
+  String get meetingsJoinWithCode => 'Join with a code or link';
+
+  @override
+  String get meetingsCodePlaceholder => 'abc-defg-hij';
+
+  @override
+  String get meetingsBadCode => 'That is not a meeting code: it looks like abc-defg-hij.';
+
+  @override
+  String get meetingsJoin => 'Join';
+
+  @override
+  String get meetingsOpen => 'Open';
+
+  @override
+  String get meetingsTab_upcoming => 'Upcoming';
+
+  @override
+  String get meetingsTab_past => 'Past calls';
+
+  @override
+  String get meetingsTab_mine => 'I host';
+
+  @override
+  String get meetingsNoneUpcoming => 'No live or upcoming meetings. Start one now, or schedule one.';
+
+  @override
+  String get meetingsNoneMine => 'You host no meetings yet.';
+
+  @override
+  String get meetingsNonePast => 'No calls yet.';
+
+  @override
+  String get meetingsLive => 'Live';
+
+  @override
+  String meetingsInCallNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n people in the call', one: '$n person in the call');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsLiveEmpty => 'The call is open';
+
+  @override
+  String get meetingsNobodyYet => 'Nobody is in the call yet';
+
+  @override
+  String meetingsHostedBy(String name) {
+    return 'Hosted by $name';
+  }
+
+  @override
+  String get meetingsUntitled => 'Meeting';
+
+  @override
+  String get meetingsKind_instant => 'Now';
+
+  @override
+  String get meetingsKind_scheduled => 'Later';
+
+  @override
+  String get meetingsColMeeting => 'Meeting';
+
+  @override
+  String get meetingsColWhen => 'When';
+
+  @override
+  String get meetingsColPeople => 'People';
+
+  @override
+  String get meetingsColNotes => 'Notes';
+
+  @override
+  String meetingsRecordings(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n recordings', one: '$n recording');
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsActionItemsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n action items', one: '$n action item');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsOpenNotes => 'Open the notes';
+
+  @override
+  String get meetingsNotes_none => 'No notes';
+
+  @override
+  String get meetingsNotes_recording => 'Taking notes';
+
+  @override
+  String get meetingsNotes_queued => 'Notes queued';
+
+  @override
+  String get meetingsNotes_transcribing => 'Muse is listening';
+
+  @override
+  String get meetingsNotes_writing => 'Muse is writing';
+
+  @override
+  String get meetingsNotes_done => 'Notes ready';
+
+  @override
+  String get meetingsNotes_failed => 'Notes failed';
+
+  @override
+  String get meetingsOffTitle => 'Meetings are off on this server';
+
+  @override
+  String get meetingsOffBody => 'The server’s administrator turns them on with a LiveKit server (AGNTS_LIVEKIT_URL).';
+
+  @override
+  String get meetingsYourReminders => 'Your reminders';
+
+  @override
+  String get meetingsRemindersSub => 'Before a meeting you are invited to starts, on your phone and here.';
+
+  @override
+  String meetingsMinutesBefore(String n) {
+    return '$n min before';
+  }
+
+  @override
+  String get meetingsNoReminders => 'No reminders';
+
+  @override
+  String get meetingsSettingsTitle => 'Meetings in this workspace';
+
+  @override
+  String get meetingsSettingsSub => 'Recordings, what is kept and for how long, and how many people one call takes.';
+
+  @override
+  String get meetingsAllowRecording => 'Hosts may record calls as video';
+
+  @override
+  String get meetingsKeepAudio => 'Keep the audio of notes after Muse has heard it';
+
+  @override
+  String get meetingsRetention => 'Keep recordings and transcripts for (days)';
+
+  @override
+  String get meetingsRetentionHelp => '0 keeps them for ever.';
+
+  @override
+  String get meetingsMaxPeople => 'People in one call';
+
+  @override
+  String get meetingsServerCan => 'This server can do:';
+
+  @override
+  String get meetingsRecordingWord => 'Recording';
+
+  @override
+  String get meetingsNotesWord => 'Notes';
+
+  @override
+  String get meetingsSave => 'Save';
+
+  @override
+  String get meetingsSettingsSaved => 'Saved';
+
+  @override
+  String get meetingsNewTitle => 'New meeting';
+
+  @override
+  String get meetingsNewSub => 'A call now, or one in the calendar with invitations.';
+
+  @override
+  String get meetingsEditTitle => 'Change the meeting';
+
+  @override
+  String get meetingsWhen => 'When';
+
+  @override
+  String get meetingsTitle => 'Title';
+
+  @override
+  String get meetingsTitlePlaceholder => 'Sprint planning';
+
+  @override
+  String get meetingsDate => 'Date';
+
+  @override
+  String get meetingsTime => 'Time';
+
+  @override
+  String get meetingsDuration => 'Length';
+
+  @override
+  String meetingsMinutes(String n) {
+    return '$n min';
+  }
+
+  @override
+  String meetingsTimeZoneIs(String zone) {
+    return 'Times are in $zone.';
+  }
+
+  @override
+  String get meetingsDescription => 'Agenda';
+
+  @override
+  String get meetingsDescriptionPlaceholder => 'What the meeting is for. Muse reads it when it writes the notes.';
+
+  @override
+  String get meetingsAccess => 'Who joins without knocking';
+
+  @override
+  String get meetingsAccess_workspace => 'Everyone in the workspace';
+
+  @override
+  String get meetingsAccess_invited => 'Only the invited';
+
+  @override
+  String get meetingsAccessHelp_workspace => 'Members join; guests knock.';
+
+  @override
+  String get meetingsAccessHelp_invited => 'Invitees join; other members and guests knock.';
+
+  @override
+  String get meetingsGuestsMode => 'Guests';
+
+  @override
+  String get meetingsGuests_knock => 'Knock';
+
+  @override
+  String get meetingsGuests_open => 'Open';
+
+  @override
+  String get meetingsGuests_off => 'Off';
+
+  @override
+  String get meetingsGuestsHelp_knock => 'People without a membership wait until a host lets them in.';
+
+  @override
+  String get meetingsGuestsHelp_open => 'Anyone with the link joins without waiting, until the call ends.';
+
+  @override
+  String get meetingsGuestsHelp_off => 'Only members of the workspace.';
+
+  @override
+  String meetingsGuestsAre(String mode) {
+    return 'guests: $mode';
+  }
+
+  @override
+  String get meetingsInvite => 'Invite';
+
+  @override
+  String get meetingsEmailsPlaceholder => 'Email addresses, separated by commas';
+
+  @override
+  String get meetingsInviteHelp => 'Everyone gets an email with the calendar event; people outside the workspace get a personal link.';
+
+  @override
+  String get meetingsInviteHelpNow => 'Members are told in agnts; addresses get the link by email.';
+
+  @override
+  String get meetingsAi => 'Notes and recording';
+
+  @override
+  String get meetingsAutoNotes => 'Take notes: Muse hears the call and writes the decisions and action items';
+
+  @override
+  String get meetingsAutoRecord => 'Record the call as video';
+
+  @override
+  String get meetingsAutoNotesOn => 'Notes on';
+
+  @override
+  String get meetingsAutoRecordOn => 'Recorded';
+
+  @override
+  String get meetingsNotesUnavailable => 'Notes are not set up on this server.';
+
+  @override
+  String get meetingsLanguage => 'Language of the notes';
+
+  @override
+  String get meetingsLang_auto => 'As spoken';
+
+  @override
+  String get meetingsCancel => 'Cancel';
+
+  @override
+  String get meetingsEdit => 'Change';
+
+  @override
+  String get meetingsDelete => 'Delete';
+
+  @override
+  String get meetingsCancelMeeting => 'Cancel the meeting';
+
+  @override
+  String get meetingsCancelTitle => 'Cancel this meeting?';
+
+  @override
+  String get meetingsCancelBody => 'Invitees get the cancellation in their calendar. A call in progress ends.';
+
+  @override
+  String get meetingsCancelled => 'This meeting was cancelled.';
+
+  @override
+  String get meetingsCancelledShort => 'Cancelled';
+
+  @override
+  String get meetingsDeleteTitle => 'Delete this meeting?';
+
+  @override
+  String get meetingsDeleteBody => 'Its calls, recordings, transcripts and chat are deleted. Notes documents stay.';
+
+  @override
+  String get meetingsLink => 'Link';
+
+  @override
+  String get meetingsRing => 'Ring people';
+
+  @override
+  String get meetingsRingWho => 'Who to ring now';
+
+  @override
+  String get meetingsRingNow => 'Ring';
+
+  @override
+  String get meetingsRinging => 'Ringing…';
+
+  @override
+  String get meetingsAreYouComing => 'Are you coming?';
+
+  @override
+  String get meetingsRsvp_yes => 'Yes';
+
+  @override
+  String get meetingsRsvp_no => 'No';
+
+  @override
+  String get meetingsRsvp_maybe => 'Maybe';
+
+  @override
+  String get meetingsRsvp_none => 'No answer';
+
+  @override
+  String meetingsInvitees(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n invited', one: '$n invited', zero: 'Invited');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsInviteMore => 'Invite';
+
+  @override
+  String get meetingsNoInvitees => 'Nobody is invited.';
+
+  @override
+  String get meetingsByEmail => 'by email';
+
+  @override
+  String get meetingsUninvite => 'Uninvite';
+
+  @override
+  String get meetingsCalls => 'Calls';
+
+  @override
+  String get meetingsNoCalls => 'The meeting has not been live yet.';
+
+  @override
+  String get meetingsTheMeeting => 'the meeting';
+
+  @override
+  String get meetingsNotesTitle => 'Notes';
+
+  @override
+  String get meetingsNoNotes => 'Notes were not taken in this call.';
+
+  @override
+  String get meetingsNotesBusy_recording => 'Notes are being taken; Muse writes them when the call ends.';
+
+  @override
+  String get meetingsNotesBusy_queued => 'Waiting for Muse to hear the call…';
+
+  @override
+  String get meetingsNotesBusy_transcribing => 'Muse is listening to the call…';
+
+  @override
+  String get meetingsNotesBusy_writing => 'Muse is writing the notes…';
+
+  @override
+  String meetingsNotesFailed(String reason) {
+    return 'The notes could not be written: $reason';
+  }
+
+  @override
+  String get meetingsWriteAgain => 'Write again';
+
+  @override
+  String get meetingsNotesAgain => 'Muse is writing the notes again';
+
+  @override
+  String get meetingsActionItems => 'Action items';
+
+  @override
+  String get meetingsAnyRepo => 'Any repository';
+
+  @override
+  String get meetingsRepository => 'Repository';
+
+  @override
+  String get meetingsCreateTicket => 'Create ticket';
+
+  @override
+  String meetingsTicketMade(String key) {
+    return '$key created';
+  }
+
+  @override
+  String get meetingsRecordingsTitle => 'Recording';
+
+  @override
+  String get meetingsRecordingNow => 'Recording…';
+
+  @override
+  String get meetingsDownload => 'Download';
+
+  @override
+  String get meetingsDeleteRecordingTitle => 'Delete this recording?';
+
+  @override
+  String get meetingsDeleteRecordingBody => 'The video is deleted for everyone. The transcript and notes stay.';
+
+  @override
+  String meetingsAttendance(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n people', one: '$n person');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsStillIn => 'still in';
+
+  @override
+  String get meetingsGuest => 'Guest';
+
+  @override
+  String get meetingsMember => 'Member';
+
+  @override
+  String get meetingsTranscript => 'Transcript';
+
+  @override
+  String get meetingsNoTranscript => 'No transcript.';
+
+  @override
+  String get meetingsSearchTranscript => 'Search what was said';
+
+  @override
+  String get meetingsMixedNote => 'Everyone’s audio was heard together, so the transcript does not say who spoke.';
+
+  @override
+  String meetingsChatLog(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Chat · $n messages', one: 'Chat · $n message', zero: 'Chat');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsShow => 'Show';
+
+  @override
+  String get meetingsHide => 'Hide';
+
+  @override
+  String get meetingsTicketTitle => 'Discussed in meetings';
+
+  @override
+  String get meetingsNotFound => 'No such meeting';
+
+  @override
+  String get meetingsSomethingWrong => 'Something went wrong';
+
+  @override
+  String get meetingsTryAgain => 'Try again';
+
+  @override
+  String get meetingsCameraStarting => 'Starting the camera…';
+
+  @override
+  String get meetingsCameraOff => 'Camera is off';
+
+  @override
+  String get meetingsMicOn => 'Microphone on';
+
+  @override
+  String get meetingsMicOff => 'Microphone off';
+
+  @override
+  String get meetingsCamOn => 'Camera on';
+
+  @override
+  String get meetingsCamOff => 'Camera off';
+
+  @override
+  String get meetingsMicLevel => 'Microphone level';
+
+  @override
+  String get meetingsDevicesBlocked => 'The browser blocked the camera and microphone. Allow them in the address bar, then try again.';
+
+  @override
+  String get meetingsDevicesFailed => 'The camera or microphone could not start. Another app may be using it.';
+
+  @override
+  String get meetingsMicrophone => 'Microphone';
+
+  @override
+  String get meetingsCamera => 'Camera';
+
+  @override
+  String get meetingsSpeakers => 'Speakers';
+
+  @override
+  String get meetingsDefaultDevice => 'Default';
+
+  @override
+  String get meetingsLobbyRecording => 'This call is being recorded.';
+
+  @override
+  String get meetingsLobbyNotes => 'agnts is taking notes of this call.';
+
+  @override
+  String get meetingsNotStartedYet => 'You can join 15 minutes before it starts.';
+
+  @override
+  String get meetingsYourName => 'Your name';
+
+  @override
+  String get meetingsYourNamePlaceholder => 'How others will see you';
+
+  @override
+  String meetingsJoiningAs(String name) {
+    return 'You join as $name.';
+  }
+
+  @override
+  String get meetingsJoinNow => 'Join now';
+
+  @override
+  String get meetingsAskToJoin => 'Ask to join';
+
+  @override
+  String get meetingsJoining => 'Joining…';
+
+  @override
+  String get meetingsOrGoogle => 'Or show who you are with Google';
+
+  @override
+  String get meetingsWaitingTitle => 'Asking to join…';
+
+  @override
+  String get meetingsWaitingBody => 'Someone in the call will let you in soon.';
+
+  @override
+  String get meetingsConnecting => 'Connecting…';
+
+  @override
+  String get meetingsYouLeft => 'You left the call';
+
+  @override
+  String get meetingsJoinedElsewhere => 'You joined from another tab';
+
+  @override
+  String get meetingsRejoin => 'Rejoin';
+
+  @override
+  String get meetingsBackToMeetings => 'Back to meetings';
+
+  @override
+  String get meetingsEnded => 'The call has ended';
+
+  @override
+  String get meetingsEndedBody => 'Notes and recordings appear under Past calls when they are ready.';
+
+  @override
+  String get meetingsRemovedTitle => 'You were removed from the call';
+
+  @override
+  String get meetingsRemovedBody => 'A host removed you. You can’t rejoin this call.';
+
+  @override
+  String get meetingsRefused_locked => 'The meeting is locked';
+
+  @override
+  String get meetingsRefused_full => 'The meeting is full';
+
+  @override
+  String get meetingsRefused_removed => 'You were removed from this call';
+
+  @override
+  String get meetingsRefused_guests_off => 'This meeting is for the workspace’s members';
+
+  @override
+  String get meetingsRefused_not_started => 'The meeting hasn’t started yet';
+
+  @override
+  String get meetingsRefused_cancelled => 'This meeting was cancelled';
+
+  @override
+  String get meetingsRefused_denied => 'You were not let in';
+
+  @override
+  String get meetingsRefused_expired => 'Nobody answered';
+
+  @override
+  String get meetingsRole_host => 'Host';
+
+  @override
+  String get meetingsRole_cohost => 'Co-host';
+
+  @override
+  String get meetingsRole_member => 'Member';
+
+  @override
+  String get meetingsRole_guest => 'Guest';
+
+  @override
+  String meetingsYou(String name) {
+    return '$name (you)';
+  }
+
+  @override
+  String get meetingsYouShort => 'you';
+
+  @override
+  String meetingsScreenOf(String name) {
+    return '$name’s screen';
+  }
+
+  @override
+  String get meetingsPoorConnection => 'Poor connection';
+
+  @override
+  String get meetingsHandRaised => 'Hand raised';
+
+  @override
+  String get meetingsPin => 'Pin';
+
+  @override
+  String get meetingsUnpin => 'Unpin';
+
+  @override
+  String get meetingsRecording => 'Recording';
+
+  @override
+  String get meetingsTakingNotes => 'Taking notes';
+
+  @override
+  String get meetingsLocked => 'Locked';
+
+  @override
+  String get meetingsReconnecting => 'Reconnecting…';
+
+  @override
+  String get meetingsEnableAudio => 'Turn the sound on';
+
+  @override
+  String get meetingsWantsToJoin => 'wants to join';
+
+  @override
+  String meetingsAndMore(String n) {
+    return 'and $n more';
+  }
+
+  @override
+  String get meetingsAdmit => 'Admit';
+
+  @override
+  String get meetingsDeny => 'Deny';
+
+  @override
+  String get meetingsSeeAll => 'See all';
+
+  @override
+  String meetingsAskedToUnmute(String name) {
+    return '$name asks you to unmute.';
+  }
+
+  @override
+  String get meetingsUnmute => 'Unmute';
+
+  @override
+  String get meetingsNotNow => 'Not now';
+
+  @override
+  String get meetingsChat => 'Chat';
+
+  @override
+  String get meetingsPeople => 'People';
+
+  @override
+  String get meetingsMicToggle => 'Microphone (Ctrl+D)';
+
+  @override
+  String get meetingsCamToggle => 'Camera (Ctrl+E)';
+
+  @override
+  String get meetingsShareScreen => 'Share your screen';
+
+  @override
+  String get meetingsStopSharing => 'Stop sharing';
+
+  @override
+  String get meetingsRaiseHand => 'Raise your hand';
+
+  @override
+  String get meetingsLowerHand => 'Lower hand';
+
+  @override
+  String get meetingsReact => 'React';
+
+  @override
+  String get meetingsSpeakerView => 'Speaker view';
+
+  @override
+  String get meetingsGridView => 'Grid view';
+
+  @override
+  String get meetingsHostControls => 'Host controls';
+
+  @override
+  String get meetingsStartRecording => 'Start recording';
+
+  @override
+  String get meetingsStopRecording => 'Stop recording';
+
+  @override
+  String get meetingsRecordTitle => 'Record this call?';
+
+  @override
+  String get meetingsRecordBody => 'Everyone in the call sees that it is recorded, and people who join are told before they do.';
+
+  @override
+  String get meetingsStartNotes => 'Take notes';
+
+  @override
+  String get meetingsStopNotes => 'Stop taking notes';
+
+  @override
+  String get meetingsLock => 'Lock the meeting';
+
+  @override
+  String get meetingsUnlock => 'Unlock the meeting';
+
+  @override
+  String get meetingsMuteAll => 'Mute everyone';
+
+  @override
+  String get meetingsQuietGuests => 'Turn off guests’ chat and screen sharing';
+
+  @override
+  String get meetingsGuestsSpeakAgain => 'Let guests chat and share again';
+
+  @override
+  String get meetingsOpenTitle => 'Let anyone with the link in?';
+
+  @override
+  String get meetingsOpenBody => 'Until this call ends, guests join without waiting.';
+
+  @override
+  String get meetingsLetAnyoneIn => 'Let them in';
+
+  @override
+  String get meetingsEndForAll => 'End the call for everyone';
+
+  @override
+  String get meetingsEndTitle => 'End the call for everyone?';
+
+  @override
+  String get meetingsEndBody => 'Everyone is disconnected. Notes are written from what was recorded.';
+
+  @override
+  String get meetingsLeave => 'Leave';
+
+  @override
+  String meetingsWaiting(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n waiting', one: '$n waiting');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsAdmitAll => 'Admit all';
+
+  @override
+  String meetingsHands(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n raised hands', one: '$n raised hand');
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsInCall(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n in the call', one: '$n in the call');
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsDevices(String n) {
+    return '$n devices';
+  }
+
+  @override
+  String meetingsActionsFor(String name) {
+    return 'Actions for $name';
+  }
+
+  @override
+  String get meetingsMuteMic => 'Mute microphone';
+
+  @override
+  String get meetingsStopCamera => 'Stop camera';
+
+  @override
+  String get meetingsStopScreen => 'Stop screen sharing';
+
+  @override
+  String get meetingsAskUnmute => 'Ask to unmute';
+
+  @override
+  String get meetingsMakeCohost => 'Make co-host';
+
+  @override
+  String get meetingsUncohost => 'Remove as co-host';
+
+  @override
+  String get meetingsRemove => 'Remove from the call';
+
+  @override
+  String meetingsRemoveTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get meetingsRemoveBody => 'They are disconnected on every device and can’t come back to this call.';
+
+  @override
+  String get meetingsChatEmpty => 'No messages yet. Messages are kept with the call.';
+
+  @override
+  String get meetingsChatPlaceholder => 'Send a message to everyone';
+
+  @override
+  String get meetingsChatOff => 'The hosts turned guests’ chat off.';
+
+  @override
+  String get meetingsSend => 'Send';
+
+  @override
+  String meetingsCallingYou(String name) {
+    return '$name is calling you';
+  }
+
+  @override
+  String get meetingsStartsSoon => 'A meeting starts soon';
+
+  @override
+  String get meetingsHasStarted => 'A meeting you’re invited to has started';
+
+  @override
+  String meetingsKnockAway(String name) {
+    return '$name wants to join your meeting';
+  }
+
+  @override
+  String get meetingsDecline => 'Decline';
+
+  @override
+  String get meetingsDismiss => 'Dismiss';
+
+  @override
+  String get meetingsColHost => 'Host';
+
+  @override
+  String get meetingsFullscreen => 'Full screen';
+
+  @override
+  String get meetingsExitFullscreen => 'Exit full screen';
+
+  @override
+  String get meetingsColPerson => 'Person';
+
+  @override
+  String get meetingsColInCall => 'In the call';
+
+  @override
+  String get meetingsColDuration => 'Time';
+
+  @override
+  String get meetingsLeaveTitle => 'Leave the call?';
+
+  @override
+  String get meetingsLeaveBody => 'You can join again with the same link while the call is on.';
+
+  @override
+  String get meetingsLeaveBodyHost =>
+      'The call goes on without you. To close it for everyone, choose “End the call for everyone” in Host controls.';
+
+  @override
+  String get meetingsStopRecordingTitle => 'Stop recording?';
+
+  @override
+  String get meetingsStopRecordingBody => 'What was recorded so far is saved and appears on the call’s page.';
+
+  @override
+  String get meetingsStopNotesTitle => 'Stop taking notes?';
+
+  @override
+  String get meetingsStopNotesBody => 'Muse writes the notes from what it heard until now.';
+
+  @override
+  String get meetingsMuteAllTitle => 'Mute everyone?';
+
+  @override
+  String get meetingsMuteAllBody => 'Everyone except you is muted. They can unmute themselves.';
+
+  @override
+  String get meetingsLockTitle => 'Lock the meeting?';
+
+  @override
+  String get meetingsLockBody =>
+      'Nobody new can join or knock until you unlock it. People already admitted, and the hosts, can still come back.';
+
+  @override
+  String meetingsAdmitAllTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Let $n people in?', one: 'Let $n person in?');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsAdmitAllBody => 'Everyone waiting joins the call now.';
+
+  @override
+  String meetingsCohostTitle(String name) {
+    return 'Make $name a co-host?';
+  }
+
+  @override
+  String get meetingsCohostBody => 'Co-hosts can let people in, mute and remove them, record the call and take notes.';
+
+  @override
+  String get meetingsWriteAgainTitle => 'Write the notes again?';
+
+  @override
+  String get meetingsWriteAgainBody =>
+      'Muse writes them again from the call and replaces the current notes, with any changes made to them.';
+
+  @override
+  String meetingsUninviteTitle(String name) {
+    return 'Remove $name from the invitations?';
+  }
+
+  @override
+  String get meetingsUninviteBody => 'They are no longer invited and get no more reminders.';
 
   @override
   String get mgroupsGroups => 'Groups';
@@ -7477,6 +8882,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navOverview => 'Overview';
 
   @override
+  String get navWorkflow => 'Workflow';
+
+  @override
   String get navDashboard => 'Dashboard';
 
   @override
@@ -7528,7 +8936,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
-  String get navSearch => 'Search tickets and tasks';
+  String get navSearch => 'Search pages, repositories, tickets, chats, lessons';
+
+  @override
+  String get navSearchPages => 'Pages';
+
+  @override
+  String get navSearchNone => 'Nothing found';
+
+  @override
+  String get navSearchResults => 'Search results';
 
   @override
   String get navSyncJira => 'Sync Jira';
@@ -7543,6 +8960,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navWeek => 'This week';
+
+  @override
+  String navCreditsLeft(String amount, String total) {
+    return '$amount of $total credits left';
+  }
 
   @override
   String get navDayMode => 'Switch to day mode';
@@ -7651,10 +9073,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navAssistantChat => 'Chat';
 
   @override
+  String get navAssistantCode => 'Code';
+
+  @override
   String get navAssistantConversations => 'Conversations';
 
   @override
   String get navDocuments => 'Documents';
+
+  @override
+  String get navMeetings => 'Meetings';
 
   @override
   String get networkTitle => 'Private networks';
@@ -8336,6 +9764,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get platformDeleteAdminBody => 'They can no longer sign in. This cannot be undone.';
 
   @override
+  String get platformFreeCredits => 'Free credits';
+
+  @override
+  String get platformSetFreeCredits => 'Set free credits';
+
+  @override
+  String platformFreeCreditsSet(String name, String n, String amount) {
+    return '$name may spend $n free credits ($amount)';
+  }
+
+  @override
+  String platformFreeCreditsUsed(String used, String limit) {
+    return '$used of $limit spent so far.';
+  }
+
+  @override
+  String get platformFreeCreditsLimit => 'Credits (1 credit = \$0.01; 0 gives none)';
+
+  @override
+  String platformFreeCreditsWorth(String amount) {
+    return 'Worth $amount of model calls on agnts\'s Muse key.';
+  }
+
+  @override
+  String get platformFreeCreditsInvalid => 'Enter a whole number from 0 to 10,000,000.';
+
+  @override
   String get previewTab => 'Preview';
 
   @override
@@ -8539,7 +9994,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previewVisualCheckHelp =>
-      'Claude may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.';
+      'Muse may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.';
 
   @override
   String get previewModel_ => 'Preview model';
@@ -8552,7 +10007,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previewEgressHelp =>
-      'Hosts run containers may reach besides the built-in list (Claude, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.';
+      'Hosts run containers may reach besides the built-in list (Muse, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.';
 
   @override
   String get previewNotify => 'When preview screenshots are ready';
@@ -8876,7 +10331,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueBadge_server => 'Queued · server';
 
   @override
-  String get queueBadge_claude => 'Paused · Claude';
+  String get queueBadge_claude => 'Paused · Muse';
 
   @override
   String get queueTitle_blocked => 'Waiting for related tickets';
@@ -8888,7 +10343,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueTitle_server => 'In the server queue';
 
   @override
-  String get queueTitle_claude => 'Waiting for Claude';
+  String get queueTitle_claude => 'Waiting for Muse';
 
   @override
   String queuePosition(String position) {
@@ -8927,7 +10382,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueAddSlot => 'Add a slot';
 
   @override
-  String get queueClaudeHint => 'Connect an account or turn on credits in Workspace settings → Claude.';
+  String get queueClaudeHint => 'Connect an account or turn on credits in Workspace settings → Muse.';
 
   @override
   String get queueMember => 'Member';
@@ -8936,7 +10391,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueTakeOver => 'Take over';
 
   @override
-  String get queueTakenOver => 'The ticket is yours: it runs on your Claude account in per-member mode.';
+  String get queueTakenOver => 'The ticket is yours: it runs on your Muse account in per-member mode.';
 
   @override
   String queueCreatedBy(String name) {
@@ -9150,7 +10605,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String replayConfirm(String key) {
-    return 'agnts creates a new task that re-does $key from where it started. It uses your Claude plan like any ticket.';
+    return 'agnts creates a new task that re-does $key from where it started. It uses your Muse plan like any ticket.';
   }
 
   @override
@@ -9258,7 +10713,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String replayBenchmarkConfirm(String n) {
-    return 'agnts replays the $n benchmark tickets from where each started. They use your Claude plan like any ticket.';
+    return 'agnts replays the $n benchmark tickets from where each started. They use your Muse plan like any ticket.';
   }
 
   @override
@@ -9524,7 +10979,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repoDeployHelp =>
-      'agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.';
+      'agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Muse chat.';
 
   @override
   String repoDeployBranch(String branch) {
@@ -9934,11 +11389,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reposDetect => 'Detect';
 
   @override
-  String get reposDetectDeep => 'Ask Claude';
+  String get reposDetectDeep => 'Ask Muse';
 
   @override
   String get reposDetectDeepHelp =>
-      'Claude reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Claude plan.';
+      'Muse reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Muse plan.';
 
   @override
   String get reposDetecting => 'Reading the repository…';
@@ -9949,13 +11404,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get reposDetectNothing => 'No known build files found. Add the toolchains and commands by hand, or ask Claude.';
+  String get reposDetectNothing => 'No known build files found. Add the toolchains and commands by hand, or ask Muse.';
 
   @override
   String get reposDetectFilled => 'Empty check commands were filled in; review them before saving.';
 
   @override
-  String get reposDetectByClaude => 'Claude filled in what the scan could not find.';
+  String get reposDetectByClaude => 'Muse filled in what the scan could not find.';
 
   @override
   String get reposDetectNeedsUrl => 'Enter the clone URL first.';
@@ -9991,7 +11446,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reposBuildEnvHelp =>
-      'KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Claude can read them while it works, so use read-only tokens.';
+      'KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Muse can read them while it works, so use read-only tokens.';
 
   @override
   String reposBuildEnvSet(String names) {
@@ -10419,7 +11874,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulesLede =>
-      'Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.';
+      'Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Muse reviews each rule and asks about anything unclear before it applies.';
 
   @override
   String get rulesAdd => 'Add rule';
@@ -10428,7 +11883,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rulesAddSubmit => 'Add and review';
 
   @override
-  String get rulesDrawerSub => 'Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.';
+  String get rulesDrawerSub => 'Write it the way you would brief a new teammate. Muse checks it before any ticket follows it.';
 
   @override
   String get rulesRuleTitle => 'Title';
@@ -10467,13 +11922,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulesRereviewHelp =>
-      'You changed what the rule says, so Claude reviews it again. Tickets stop getting it until the review is done.';
+      'You changed what the rule says, so Muse reviews it again. Tickets stop getting it until the review is done.';
 
   @override
   String get rulesSaved => 'Rule saved';
 
   @override
-  String get rulesSavedReview => 'Rule saved; Claude is reviewing it';
+  String get rulesSavedReview => 'Rule saved; Muse is reviewing it';
 
   @override
   String get rulesScopeLabel => 'Show rules for';
@@ -10535,10 +11990,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rulesPending => 'Waiting for a free worker. Claude reviews rules before the next ticket starts.';
+  String get rulesPending => 'Waiting for a free worker. Muse reviews rules before the next ticket starts.';
 
   @override
-  String get rulesAnalyzing => 'Claude is reading the rule and checking it for anything unclear or conflicting.';
+  String get rulesAnalyzing => 'Muse is reading the rule and checking it for anything unclear or conflicting.';
 
   @override
   String rulesQuestionsTitle(num n) {
@@ -10552,7 +12007,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rulesQuestionsSub => 'Claude found something unclear. Your answers become part of the rule.';
+  String get rulesQuestionsSub => 'Muse found something unclear. Your answers become part of the rule.';
 
   @override
   String get rulesYourAnswer => 'Your answer';
@@ -10593,7 +12048,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rulesFailed(String error) {
-    return 'Claude could not review this rule: $error';
+    return 'Muse could not review this rule: $error';
   }
 
   @override
@@ -10625,7 +12080,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rulesAnswered => 'Answers sent; Claude is reviewing the rule again';
+  String get rulesAnswered => 'Answers sent; Muse is reviewing the rule again';
 
   @override
   String get rulesAccepted => 'The rule applies as written';
@@ -10721,7 +12176,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get runsLede =>
-      'Every Claude Code and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.';
+      'Every Muse and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.';
 
   @override
   String get runsRunTitle => 'Invocation';
@@ -10857,7 +12312,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get runsAnyEngine => 'Any engine';
 
   @override
-  String get runsE_claude => 'Claude';
+  String get runsE_claude => 'Muse';
 
   @override
   String get runsE_codex => 'Codex';
@@ -10992,7 +12447,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get runsTruncated => 'The size limit was reached; later content was left out.';
 
   @override
-  String get runsAccount => 'Claude account';
+  String get runsAccount => 'Muse account';
 
   @override
   String get runsSession => 'Session';
@@ -11284,6 +12739,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsMaxTurnsHelp => 'The run stops and reports when it reaches this';
 
   @override
+  String get settingsRunBudget => 'Budget per run';
+
+  @override
+  String get settingsRunBudgetHelp => 'The most one run on credits may spend; Muse is told to wrap up at 80% and stopped before going over';
+
+  @override
+  String get settingsRunBudgetServer => 'Server cap';
+
+  @override
   String get settingsTimeout => 'Run timeout';
 
   @override
@@ -11422,7 +12886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsReviewDone => 'When agnts\'s code review finishes';
 
   @override
-  String get settingsSecretsHelp => 'Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.';
+  String get settingsSecretsHelp => 'Tokens for Jira, GitHub and Muse are stored encrypted on your server. This page never shows them.';
 
   @override
   String get settingsSaved => 'Settings saved';
@@ -11467,6 +12931,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCiRed => 'When a watched branch goes red';
 
   @override
+  String get settingsClaudeMuse => 'Muse Code';
+
+  @override
+  String get settingsClaudeMovedMuse => 'Muse is connected per workspace.';
+
+  @override
+  String get settingsClaudeOpenMuse => 'Workspace → Muse';
+
+  @override
+  String get settingsModelsHelpMuse =>
+      'Pick which model runs each step. Muse Spark costs the least; Muse Wonder is stronger and costs more.';
+
+  @override
+  String get settingsStageCodingHelpMuse => 'The main run. Spends the most.';
+
+  @override
+  String get settingsStageReviewHelpMuse =>
+      'Reviews each result while you review it. Auto uses Muse Wonder for complex tickets and Muse Spark for the rest.';
+
+  @override
+  String get settingsAllowHelpMuse => 'Muse Code can run these without asking';
+
+  @override
+  String get settingsDenyHelpMuse => 'Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Muse Code.';
+
+  @override
   String get spendTitle => 'Token spend';
 
   @override
@@ -11475,7 +12965,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get spendEmpty => 'Nothing recorded yet. Spend appears after agnts\'s first Claude run on this ticket.';
+  String get spendEmpty => 'Nothing recorded yet. Spend appears after agnts\'s first Muse run on this ticket.';
 
   @override
   String get spendInput => 'Input';
@@ -11499,7 +12989,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spendCostNote =>
-      'Cost is Claude Code\'s estimate of the same work at API prices. On a Claude plan you are not charged it; it shows the relative weight of each stage.';
+      'Cost is Muse\'s estimate of the same work at API prices. On a Muse plan you are not charged it; it shows the relative weight of each stage.';
 
   @override
   String spendTokens(String n) {
@@ -11545,11 +13035,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spendTopSubEmpty => 'Which tickets used the most of your plan';
 
   @override
-  String get spendTopEmpty => 'No Claude runs recorded in this period.';
+  String get spendTopEmpty => 'No Muse runs recorded in this period.';
 
   @override
   String get spendTopNote =>
-      'Ranked by Claude Code\'s cost estimate, which weighs cache traffic properly. Share is of the period\'s estimated cost. Only spend inside the period counts.';
+      'Ranked by Muse\'s cost estimate, which weighs cache traffic properly. Share is of the period\'s estimated cost. Only spend inside the period counts.';
 
   @override
   String get spendColStage => 'Costliest stage';
@@ -11806,7 +13296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swaggerNeedToken => 'Enter the token.';
 
   @override
-  String get swaggerClaudeOnly => 'Swagger tests always run on Claude (Sonnet), whatever model the workspace codes with.';
+  String get swaggerClaudeOnly => 'Swagger tests always run on Muse\'s light model, whatever model the workspace codes with.';
 
   @override
   String get swaggerTab => 'API results';
@@ -12598,7 +14088,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketSkipChecksHint =>
-      'For checks the run container can\'t run, such as a private dependency it can\'t fetch. Claude won\'t run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.';
+      'For checks the run container can\'t run, such as a private dependency it can\'t fetch. Muse won\'t run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.';
 
   @override
   String get ticketStopRun => 'Stop run';
@@ -13069,6 +14559,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketTabsLabel => 'Ticket details';
 
   @override
+  String get ticketFactsTicket => 'Ticket';
+
+  @override
+  String get ticketFactsCode => 'Code';
+
+  @override
+  String get ticketFactsPeople => 'People';
+
+  @override
+  String get ticketFactsLinks => 'Linked tickets';
+
+  @override
+  String get ticketFactsRuns => 'Runs';
+
+  @override
   String get ticketTabReview => 'Code review';
 
   @override
@@ -13150,6 +14655,39 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', one: '$n time');
     return 'CI sent the pull request back $_temp0';
   }
+
+  @override
+  String get ticketMuseMeter => 'Muse spend for this run';
+
+  @override
+  String ticketMuseSpentOf(String spent, String limit) {
+    return '$spent of $limit';
+  }
+
+  @override
+  String ticketMuseCalls(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n calls', one: '$n call');
+    return '$_temp0';
+  }
+
+  @override
+  String ticketMuseCharged(String amount) {
+    return 'charged $amount';
+  }
+
+  @override
+  String get ticketMuseSteered => 'Budget low: told to wrap up';
+
+  @override
+  String get ticketMuseStopped => 'Stopped over budget';
+
+  @override
+  String ticketMuseEscalated(String model) {
+    return 'Moved to $model';
+  }
+
+  @override
+  String get ticketsTabsLabel => 'Ticket lists';
 
   @override
   String get ticketsTitle => 'Tickets';
@@ -13278,7 +14816,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usageTitle => 'Plan usage';
 
   @override
-  String get usageLede => 'agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.';
+  String get usageLede => 'agnts runs on your Muse plan. These limits are shared with your own Muse use.';
 
   @override
   String get usageCard => 'Plan usage';
@@ -13352,7 +14890,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usageStatus_unknown => 'Unknown';
 
   @override
-  String get usageSource => 'Read from Claude Code\'s rate limit events. Includes your own Claude use on this account.';
+  String get usageSource => 'Read from Muse\'s rate limit events. Includes your own Muse use on this account.';
 
   @override
   String get usageLimitTitle => 'When a limit is reached';
@@ -13391,7 +14929,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usageHelp =>
-      'Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.';
+      'Numbers come from the rate limit events Muse emits during each run. When agnts is idle, a tiny refresh run keeps them current.';
 
   @override
   String get wsTitle => 'Workspace';
@@ -13494,7 +15032,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wsMembersSub =>
-      'Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Claude, members and billing.';
+      'Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Muse, members and billing.';
 
   @override
   String get wsYou => 'you';
@@ -13750,347 +15288,74 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get codechatTitle => 'Code';
+  String get wsTabMuse => 'Muse';
 
   @override
-  String get codechatModeLabel => 'Chat mode';
+  String get wsClaudeMuse => 'Muse';
 
   @override
-  String get codechatModeChat => 'Chat';
+  String get wsClaudeSubMuse => 'Which Muse account this workspace\'s runs use.';
 
   @override
-  String get codechatModeCode => 'Code';
+  String get wsClaudeSavedMuse => 'Muse settings saved';
 
   @override
-  String get codechatNewConversation => 'New Code conversation';
+  String get wsFallbackHelpMuse =>
+      'When the chosen account is missing or out of budget, runs continue on agnts\'s Muse key and spend your free credits, then the workspace\'s credits, instead of pausing.';
 
   @override
-  String get codechatEmptyTitle => 'Change code from the chat';
+  String get wsMemberAccountsSubMuse => 'Who has connected their own Muse account (Profile → Muse).';
 
   @override
-  String get codechatEmptyText =>
-      'Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.';
+  String get wsMuseBadge => 'Muse connected';
 
   @override
-  String get codechatViewersOnly => 'Code mode is for people who can change the workspace.';
+  String get wsNoMuseBadge => 'No Muse';
 
   @override
-  String get codechatRepos => 'Repositories';
+  String get wsKindMuseLogin => 'Meta account';
 
   @override
-  String get codechatReposNone => 'Pick the repositories to work in, or name them in the message with @';
+  String get wsKindMuseApiKey => 'Muse API key';
 
   @override
-  String get codechatReposChange => 'Change';
+  String get wsMuseSignIn => 'Sign in with Meta';
 
   @override
-  String get codechatReposSave => 'Save repositories';
+  String get wsMuseSignInHelp => 'Shows a code to confirm on Meta\'s page; runs then use that Meta account\'s Muse.';
 
   @override
-  String get codechatReposSaved => 'Repositories changed: the next ticket works in them';
+  String get wsMuseCode => 'Enter this code on Meta\'s page';
 
   @override
-  String get codechatKind => 'Kind';
+  String get wsMuseCopyCode => 'Copy code';
 
   @override
-  String get codechatQuick => 'Quick: skip checks';
+  String get wsMuseOpenMeta => 'Open Meta';
 
   @override
-  String get codechatQuickHint => 'Build, lint and tests don\'t run, so review comes sooner.';
+  String get wsMuseWaiting => 'Waiting for you to approve…';
 
   @override
-  String get codechatTicketPick => 'Or work on an existing ticket';
-
-  @override
-  String get codechatTicketPlaceholder => 'Ticket key, e.g. PAY-214';
-
-  @override
-  String get codechatTicketAttach => 'Attach';
-
-  @override
-  String codechatTicketAttached(String key) {
-    return 'Now working on $key';
+  String wsMuseExpires(String time) {
+    return 'The code works until $time.';
   }
 
   @override
-  String get codechatPlaceholderNew => 'Describe the change…';
+  String get wsMuse_denied => 'The sign-in was declined on Meta\'s page.';
 
   @override
-  String get codechatPlaceholderReview => 'Ask for changes, or approve above…';
+  String get wsMuse_expired => 'The code expired before it was confirmed.';
 
   @override
-  String get codechatPlaceholderAnswers => 'Answer the question…';
+  String get wsMuse_failed => 'The sign-in failed.';
 
   @override
-  String get codechatPlaceholderRunning => 'Add to the request: it is sent when this run ends…';
+  String get wsMuseTryAgain => 'Try again';
 
   @override
-  String get codechatPlaceholderStopped => 'Say how to get past this, and it retries…';
+  String get wsMuseUseKey => 'Use an API key';
 
   @override
-  String get codechatPlaceholderPushing => 'Pushing now…';
-
-  @override
-  String get codechatPlaceholderDone => 'Ask for the next change…';
-
-  @override
-  String get codechatSend => 'Send';
-
-  @override
-  String get codechatSendHint => 'Enter sends, Shift+Enter makes a new line, @ names a repository';
-
-  @override
-  String codechatCount(String n) {
-    return '$n / 4000';
-  }
-
-  @override
-  String codechatMentioned(String names) {
-    return 'Works in $names';
-  }
-
-  @override
-  String get codechatMentionLabel => 'Repositories';
-
-  @override
-  String codechatRoutedCreated(String key) {
-    return 'Started $key';
-  }
-
-  @override
-  String codechatRoutedAnswered(String key) {
-    return 'Answered $key';
-  }
-
-  @override
-  String codechatRoutedChanges(String key) {
-    return 'Asked $key for changes';
-  }
-
-  @override
-  String codechatRoutedContinued(String key) {
-    return 'Continued $key';
-  }
-
-  @override
-  String codechatRoutedRetried(String key) {
-    return 'Retried $key';
-  }
-
-  @override
-  String codechatRoutedQueued(String key) {
-    return 'Waits for $key\'s run to end';
-  }
-
-  @override
-  String codechatRoutedSent(String key) {
-    return 'Sent to $key';
-  }
-
-  @override
-  String codechatRoutedFailed(String reason) {
-    return 'Not sent: $reason';
-  }
-
-  @override
-  String get codechatRoutedSteered => 'Delivered to the running agent';
-
-  @override
-  String codechatQueuedTitle(num n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n messages wait', one: '$n message waits');
-    return '$_temp0 for this run to end';
-  }
-
-  @override
-  String get codechatSendNow => 'Stop and send now';
-
-  @override
-  String codechatSendNowTitle(String key) {
-    return 'Stop $key now?';
-  }
-
-  @override
-  String get codechatSendNowText => 'The running stage stops, and your messages go to it at once.';
-
-  @override
-  String codechatSteps(num n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n steps', one: '$n step');
-    return '$_temp0';
-  }
-
-  @override
-  String codechatStateLine(String key, String state) {
-    return '$key: $state';
-  }
-
-  @override
-  String codechatCheckPassed(String name) {
-    return '$name passed';
-  }
-
-  @override
-  String codechatCheckFailed(String name) {
-    return '$name failed';
-  }
-
-  @override
-  String get codechatPrOpened => 'Pull request opened';
-
-  @override
-  String get codechatPushed => 'Pushed';
-
-  @override
-  String get codechatMerged => 'Merged';
-
-  @override
-  String get codechatWorking => 'Working…';
-
-  @override
-  String codechatResultTitle(String key) {
-    return '$key is ready for your review';
-  }
-
-  @override
-  String codechatReportTitle(String key) {
-    return '$key wrote its report';
-  }
-
-  @override
-  String codechatFilesChanged(num n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n files changed', one: '$n file changed');
-    return '$_temp0';
-  }
-
-  @override
-  String get codechatChecksPassed => 'Checks passed';
-
-  @override
-  String codechatChecksFailed(String failed, String n) {
-    return '$failed of $n checks failed';
-  }
-
-  @override
-  String get codechatChecksSkipped => 'Checks skipped';
-
-  @override
-  String get codechatViewDiff => 'View diff';
-
-  @override
-  String get codechatHideDiff => 'Hide diff';
-
-  @override
-  String get codechatApprove => 'Approve';
-
-  @override
-  String codechatApproveTitle(String key) {
-    return 'Approve $key?';
-  }
-
-  @override
-  String codechatApprovePr(String branch) {
-    return 'agnts pushes $branch and opens a pull request.';
-  }
-
-  @override
-  String get codechatApproveMain => 'agnts pushes the change straight to the default branch.';
-
-  @override
-  String get codechatApproveReport => 'The ticket closes with this report.';
-
-  @override
-  String get codechatReject => 'Reject';
-
-  @override
-  String codechatRejectTitle(String key) {
-    return 'Reject $key?';
-  }
-
-  @override
-  String get codechatRejectText => 'All work on it stops. You can continue it from this chat later.';
-
-  @override
-  String get codechatOpenTicket => 'Open ticket';
-
-  @override
-  String codechatQuestionsTitle(String key) {
-    return '$key asks before it goes on';
-  }
-
-  @override
-  String get codechatAnswersSend => 'Send answers';
-
-  @override
-  String codechatStoppedTitle(String key) {
-    return '$key stopped';
-  }
-
-  @override
-  String get codechatStoppedHint => 'Write how to get past it: it retries with your note.';
-
-  @override
-  String codechatDoneTitle(String key) {
-    return '$key is done';
-  }
-
-  @override
-  String get codechatDoneHint => 'Your next message starts a new ticket in the same repositories.';
-
-  @override
-  String codechatRejectedTitle(String key) {
-    return '$key was rejected';
-  }
-
-  @override
-  String get codechatRejectedHint => 'Write what to do differently and it continues.';
-
-  @override
-  String codechatMovedHint(String key) {
-    return '$key moved to another of your conversations.';
-  }
-
-  @override
-  String get codechatApprovalTitle => 'The agent asks to run this';
-
-  @override
-  String codechatApprovalReason(String reason) {
-    return 'A rule asks about it: $reason';
-  }
-
-  @override
-  String get codechatApprovalAllow => 'Allow';
-
-  @override
-  String get codechatApprovalDeny => 'Deny';
-
-  @override
-  String get codechatApprovalAllowed => 'Allowed';
-
-  @override
-  String get codechatApprovalDenied => 'Denied';
-
-  @override
-  String get codechatApprovalExpired => 'Nobody answered: denied';
-
-  @override
-  String codechatApprovalLeft(String seconds) {
-    return '${seconds}s left';
-  }
-
-  @override
-  String get codechatHandoffTitle => 'Do this in Code';
-
-  @override
-  String get codechatHandoffOpen => 'Open in Code';
-
-  @override
-  String get codechatTicketChat => 'Discussed in chat';
-
-  @override
-  String get codechatContinueInChat => 'Continue in chat';
-
-  @override
-  String get codechatCodeBadge => 'Code';
-
-  @override
-  String get navAssistantCode => 'Code';
+  String get wsMuseKeyHelp => 'Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner.';
 }

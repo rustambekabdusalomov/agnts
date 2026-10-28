@@ -23,6 +23,7 @@ import 'package:agnts_api/src/api/integrations_api.dart';
 import 'package:agnts_api/src/api/learn_api.dart';
 import 'package:agnts_api/src/api/logs_api.dart';
 import 'package:agnts_api/src/api/mcp_api.dart';
+import 'package:agnts_api/src/api/meetings_api.dart';
 import 'package:agnts_api/src/api/meta_api.dart';
 import 'package:agnts_api/src/api/network_api.dart';
 import 'package:agnts_api/src/api/platform_api.dart';
@@ -223,6 +224,12 @@ class AgntsApi {
   /// by doing that all interceptors will not be executed
   McpApi getMcpApi() {
     return McpApi(dio);
+  }
+
+  /// Get MeetingsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  MeetingsApi getMeetingsApi() {
+    return MeetingsApi(dio);
   }
 
   /// Get MetaApi instance, base route and serializer can be overridden by a given but be careful,

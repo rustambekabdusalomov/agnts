@@ -105,19 +105,29 @@ export function hashToArg(msg) {
   return out
 }
 
+// The coding tool's name ({agent} in a message). The admin panel fills it
+// in at run time; the app's messages name agnts's primary tool, Muse.
+const APP_AGENT = 'Muse'
+
+/** A message with {agent} written out, as the app's dictionaries carry it. */
+export function withAgent(msg) {
+  return msg.replace(/\{\s*agent\s*\}/g, APP_AGENT)
+}
+
 function arb(outDir) {
   const flat = check()
   mkdirSync(outDir, { recursive: true })
   for (const l of LOCALES) {
     const out = { '@@locale': l }
-    for (const [k, v] of Object.entries(flat[l])) {
+    for (const [k, raw] of Object.entries(flat[l])) {
+      const v = withAgent(raw)
       out[arbKey(k)] = hashToArg(v)
       if (l === 'en') {
         // A placeholder that any locale pluralizes must be a number in the
         // shared metadata, or Flutter rejects that locale's plural.
         const ph = placeholders(v)
         for (const other of LOCALES) {
-          for (const [n, type] of placeholders(flat[other][k])) if (type === 'num' && ph.has(n)) ph.set(n, 'num')
+          for (const [n, type] of placeholders(withAgent(flat[other][k]))) if (type === 'num' && ph.has(n)) ph.set(n, 'num')
         }
         if (ph.size) {
           out[`@${arbKey(k)}`] = { placeholders: Object.fromEntries([...ph].map(([n, type]) => [n, { type }])) }

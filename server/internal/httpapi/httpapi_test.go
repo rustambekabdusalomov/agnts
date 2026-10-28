@@ -180,7 +180,17 @@ func TestPublicRoutesComeFromSpec(t *testing.T) {
 		"GET /api/public/documents/{token}/info": true, "POST /api/public/documents/{token}/guest": true,
 		"GET /api/public/documents/{token}/comments": true, "POST /api/public/documents/{token}/comments": true,
 		"PATCH /api/public/documents/{token}/comments/{commentId}": true, "DELETE /api/public/documents/{token}/comments/{commentId}": true,
-		"POST /api/public/documents/{token}/presence": true}
+		"POST /api/public/documents/{token}/presence": true,
+		// Meetings: anyone with the link sees the lobby and joins or knocks
+		// (members by their session); in the call, the handlers check the
+		// seat the join handed out.
+		"GET /api/public/meetings/{code}": true, "POST /api/public/meetings/{code}/join": true,
+		"GET /api/public/meetings/{code}/knocks/{knockId}": true, "GET /api/public/meetings/{code}/call": true,
+		"POST /api/public/meetings/{code}/call/token": true, "GET /api/public/meetings/{code}/call/messages": true,
+		"POST /api/public/meetings/{code}/call/messages": true, "POST /api/public/meetings/{code}/call/knocks/{knockId}/{decision}": true,
+		"POST /api/public/meetings/{code}/call/admit-all": true, "POST /api/public/meetings/{code}/call/people/{person}/{action}": true,
+		"POST /api/public/meetings/{code}/call/mute-all": true, "PUT /api/public/meetings/{code}/call/settings": true,
+		"POST /api/public/meetings/{code}/call/end": true}
 	if len(got) != len(want) {
 		t.Fatalf("public routes = %v, want %v", got, want)
 	}

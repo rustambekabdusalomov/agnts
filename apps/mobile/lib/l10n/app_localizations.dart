@@ -675,6 +675,24 @@ abstract class AppLocalizations {
   /// **'Back to the {name} dashboard'**
   String accountBackToDashboard(String name);
 
+  /// No description provided for @accountMyClaudeMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Muse account'**
+  String get accountMyClaudeMuse;
+
+  /// No description provided for @accountClaudeSavedMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse account connected'**
+  String get accountClaudeSavedMuse;
+
+  /// No description provided for @accountClaudeRemovedMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse account disconnected'**
+  String get accountClaudeRemovedMuse;
+
   /// No description provided for @analyticsTitle.
   ///
   /// In en, this message translates to:
@@ -1062,7 +1080,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsSpendSub.
   ///
   /// In en, this message translates to:
-  /// **'Tokens Claude used per day, input and output'**
+  /// **'Tokens Muse used per day, input and output'**
   String get analyticsSpendSub;
 
   /// No description provided for @analyticsSpendTokens.
@@ -1092,7 +1110,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsNoSpend.
   ///
   /// In en, this message translates to:
-  /// **'No Claude runs recorded in this period.'**
+  /// **'No Muse runs recorded in this period.'**
   String get analyticsNoSpend;
 
   /// No description provided for @analyticsRepos.
@@ -1338,7 +1356,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsColFixesHint.
   ///
   /// In en, this message translates to:
-  /// **'Average times failing checks were sent back to Claude'**
+  /// **'Average times failing checks were sent back to Muse'**
   String get analyticsColFixesHint;
 
   /// No description provided for @analyticsColSerious.
@@ -2136,7 +2154,7 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsKpiCostNote.
   ///
   /// In en, this message translates to:
-  /// **'All Claude calls in the period'**
+  /// **'All Muse calls in the period'**
   String get analyticsKpiCostNote;
 
   /// No description provided for @analyticsKpiDaysAboveNote.
@@ -2619,6 +2637,36 @@ abstract class AppLocalizations {
   /// **'Spent on a document'**
   String get billingReason_document;
 
+  /// No description provided for @billingFreeCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free credits'**
+  String get billingFreeCredits;
+
+  /// No description provided for @billingFreeCreditsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'From agnts. Runs on agnts\'s Muse key spend them before the workspace\'s credits.'**
+  String get billingFreeCreditsSub;
+
+  /// No description provided for @billingFreeCreditsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {limit} credits left'**
+  String billingFreeCreditsLeft(String n, String limit);
+
+  /// No description provided for @billingFreeCreditsWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} of {total}'**
+  String billingFreeCreditsWorth(String amount, String total);
+
+  /// No description provided for @billingFreeCreditsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet. An Admin can give you free credits for runs on agnts\'s Muse key.'**
+  String get billingFreeCreditsNone;
+
   /// No description provided for @briefTitle.
   ///
   /// In en, this message translates to:
@@ -2676,13 +2724,13 @@ abstract class AppLocalizations {
   /// No description provided for @briefNone.
   ///
   /// In en, this message translates to:
-  /// **'No brief yet. Survey the repository to have Claude write a draft, or write one yourself.'**
+  /// **'No brief yet. Survey the repository to have Muse write a draft, or write one yourself.'**
   String get briefNone;
 
   /// No description provided for @briefSurveying.
   ///
   /// In en, this message translates to:
-  /// **'Claude is surveying the repository. The draft appears here for your approval.'**
+  /// **'Muse is surveying the repository. The draft appears here for your approval.'**
   String get briefSurveying;
 
   /// No description provided for @briefFailed.
@@ -3603,6 +3651,558 @@ abstract class AppLocalizations {
   /// **'Regular expressions, one per line. A matching log is an infra failure: shown and counted, never a ticket. Added to the built-in ones.'**
   String get ciInfraPatternsHelp;
 
+  /// No description provided for @codechatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get codechatTitle;
+
+  /// No description provided for @codechatModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat mode'**
+  String get codechatModeLabel;
+
+  /// No description provided for @codechatModeChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get codechatModeChat;
+
+  /// No description provided for @codechatModeCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get codechatModeCode;
+
+  /// No description provided for @codechatNewConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'New Code conversation'**
+  String get codechatNewConversation;
+
+  /// No description provided for @codechatEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change code from the chat'**
+  String get codechatEmptyTitle;
+
+  /// No description provided for @codechatEmptyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.'**
+  String get codechatEmptyText;
+
+  /// No description provided for @codechatViewersOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Code mode is for people who can change the workspace.'**
+  String get codechatViewersOnly;
+
+  /// No description provided for @codechatRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get codechatRepos;
+
+  /// No description provided for @codechatReposNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the repositories to work in, or name them in the message with @'**
+  String get codechatReposNone;
+
+  /// No description provided for @codechatReposChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get codechatReposChange;
+
+  /// No description provided for @codechatReposSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save repositories'**
+  String get codechatReposSave;
+
+  /// No description provided for @codechatReposSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories changed: the next ticket works in them'**
+  String get codechatReposSaved;
+
+  /// No description provided for @codechatKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get codechatKind;
+
+  /// No description provided for @codechatQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick: skip checks'**
+  String get codechatQuick;
+
+  /// No description provided for @codechatQuickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Build, lint and tests don\'t run, so review comes sooner.'**
+  String get codechatQuickHint;
+
+  /// No description provided for @codechatTicketPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Or work on an existing ticket'**
+  String get codechatTicketPick;
+
+  /// No description provided for @codechatTicketPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket key, e.g. PAY-214'**
+  String get codechatTicketPlaceholder;
+
+  /// No description provided for @codechatTicketAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get codechatTicketAttach;
+
+  /// No description provided for @codechatTicketAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Now working on {key}'**
+  String codechatTicketAttached(String key);
+
+  /// No description provided for @codechatPlaceholderNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the change…'**
+  String get codechatPlaceholderNew;
+
+  /// No description provided for @codechatPlaceholderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for changes, or approve above…'**
+  String get codechatPlaceholderReview;
+
+  /// No description provided for @codechatPlaceholderAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer the question…'**
+  String get codechatPlaceholderAnswers;
+
+  /// No description provided for @codechatPlaceholderRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to the request: it is sent when this run ends…'**
+  String get codechatPlaceholderRunning;
+
+  /// No description provided for @codechatPlaceholderStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Say how to get past this, and it retries…'**
+  String get codechatPlaceholderStopped;
+
+  /// No description provided for @codechatPlaceholderPushing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushing now…'**
+  String get codechatPlaceholderPushing;
+
+  /// No description provided for @codechatPlaceholderDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for the next change…'**
+  String get codechatPlaceholderDone;
+
+  /// No description provided for @codechatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get codechatSend;
+
+  /// No description provided for @codechatSendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter sends, Shift+Enter makes a new line, @ names a repository'**
+  String get codechatSendHint;
+
+  /// No description provided for @codechatCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} / 4000'**
+  String codechatCount(String n);
+
+  /// No description provided for @codechatRoutedCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Started {key}'**
+  String codechatRoutedCreated(String key);
+
+  /// No description provided for @codechatRoutedAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered {key}'**
+  String codechatRoutedAnswered(String key);
+
+  /// No description provided for @codechatRoutedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked {key} for changes'**
+  String codechatRoutedChanges(String key);
+
+  /// No description provided for @codechatRoutedContinued.
+  ///
+  /// In en, this message translates to:
+  /// **'Continued {key}'**
+  String codechatRoutedContinued(String key);
+
+  /// No description provided for @codechatRoutedRetried.
+  ///
+  /// In en, this message translates to:
+  /// **'Retried {key}'**
+  String codechatRoutedRetried(String key);
+
+  /// No description provided for @codechatRoutedQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Waits for {key}\'s run to end'**
+  String codechatRoutedQueued(String key);
+
+  /// No description provided for @codechatRoutedSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {key}'**
+  String codechatRoutedSent(String key);
+
+  /// No description provided for @codechatRoutedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: {reason}'**
+  String codechatRoutedFailed(String reason);
+
+  /// No description provided for @codechatRoutedSteered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered to the running agent'**
+  String get codechatRoutedSteered;
+
+  /// No description provided for @codechatQueuedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} message waits} other {{n} messages wait}} for this run to end'**
+  String codechatQueuedTitle(num n);
+
+  /// No description provided for @codechatSendNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and send now'**
+  String get codechatSendNow;
+
+  /// No description provided for @codechatSendNowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {key} now?'**
+  String codechatSendNowTitle(String key);
+
+  /// No description provided for @codechatSendNowText.
+  ///
+  /// In en, this message translates to:
+  /// **'The running stage stops, and your messages go to it at once.'**
+  String get codechatSendNowText;
+
+  /// No description provided for @codechatSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} step} other {{n} steps}}'**
+  String codechatSteps(num n);
+
+  /// No description provided for @codechatStateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{key}: {state}'**
+  String codechatStateLine(String key, String state);
+
+  /// No description provided for @codechatCheckPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} passed'**
+  String codechatCheckPassed(String name);
+
+  /// No description provided for @codechatCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} failed'**
+  String codechatCheckFailed(String name);
+
+  /// No description provided for @codechatPrOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request opened'**
+  String get codechatPrOpened;
+
+  /// No description provided for @codechatPushed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushed'**
+  String get codechatPushed;
+
+  /// No description provided for @codechatMerged.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged'**
+  String get codechatMerged;
+
+  /// No description provided for @codechatWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get codechatWorking;
+
+  /// No description provided for @codechatResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} is ready for your review'**
+  String codechatResultTitle(String key);
+
+  /// No description provided for @codechatReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} wrote its report'**
+  String codechatReportTitle(String key);
+
+  /// No description provided for @codechatFilesChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} file changed} other {{n} files changed}}'**
+  String codechatFilesChanged(num n);
+
+  /// No description provided for @codechatChecksPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks passed'**
+  String get codechatChecksPassed;
+
+  /// No description provided for @codechatChecksFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{failed} of {n} checks failed'**
+  String codechatChecksFailed(String failed, String n);
+
+  /// No description provided for @codechatChecksSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks skipped'**
+  String get codechatChecksSkipped;
+
+  /// No description provided for @codechatViewDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'View diff'**
+  String get codechatViewDiff;
+
+  /// No description provided for @codechatHideDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide diff'**
+  String get codechatHideDiff;
+
+  /// No description provided for @codechatApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get codechatApprove;
+
+  /// No description provided for @codechatApproveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {key}?'**
+  String codechatApproveTitle(String key);
+
+  /// No description provided for @codechatApprovePr.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts pushes {branch} and opens a pull request.'**
+  String codechatApprovePr(String branch);
+
+  /// No description provided for @codechatApproveMain.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts pushes the change straight to the default branch.'**
+  String get codechatApproveMain;
+
+  /// No description provided for @codechatApproveReport.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket closes with this report.'**
+  String get codechatApproveReport;
+
+  /// No description provided for @codechatReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get codechatReject;
+
+  /// No description provided for @codechatRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject {key}?'**
+  String codechatRejectTitle(String key);
+
+  /// No description provided for @codechatRejectText.
+  ///
+  /// In en, this message translates to:
+  /// **'All work on it stops. You can continue it from this chat later.'**
+  String get codechatRejectText;
+
+  /// No description provided for @codechatOpenTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ticket'**
+  String get codechatOpenTicket;
+
+  /// No description provided for @codechatQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} asks before it goes on'**
+  String codechatQuestionsTitle(String key);
+
+  /// No description provided for @codechatAnswersSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send answers'**
+  String get codechatAnswersSend;
+
+  /// No description provided for @codechatStoppedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} stopped'**
+  String codechatStoppedTitle(String key);
+
+  /// No description provided for @codechatStoppedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write how to get past it: it retries with your note.'**
+  String get codechatStoppedHint;
+
+  /// No description provided for @codechatDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} is done'**
+  String codechatDoneTitle(String key);
+
+  /// No description provided for @codechatDoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next message starts a new ticket in the same repositories.'**
+  String get codechatDoneHint;
+
+  /// No description provided for @codechatRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} was rejected'**
+  String codechatRejectedTitle(String key);
+
+  /// No description provided for @codechatRejectedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write what to do differently and it continues.'**
+  String get codechatRejectedHint;
+
+  /// No description provided for @codechatMovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} moved to another of your conversations.'**
+  String codechatMovedHint(String key);
+
+  /// No description provided for @codechatApprovalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The agent asks to run this'**
+  String get codechatApprovalTitle;
+
+  /// No description provided for @codechatApprovalReason.
+  ///
+  /// In en, this message translates to:
+  /// **'A rule asks about it: {reason}'**
+  String codechatApprovalReason(String reason);
+
+  /// No description provided for @codechatApprovalAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get codechatApprovalAllow;
+
+  /// No description provided for @codechatApprovalDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny'**
+  String get codechatApprovalDeny;
+
+  /// No description provided for @codechatApprovalAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get codechatApprovalAllowed;
+
+  /// No description provided for @codechatApprovalDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Denied'**
+  String get codechatApprovalDenied;
+
+  /// No description provided for @codechatApprovalExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody answered: denied'**
+  String get codechatApprovalExpired;
+
+  /// No description provided for @codechatApprovalLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s left'**
+  String codechatApprovalLeft(String seconds);
+
+  /// No description provided for @codechatHandoffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Do this in Code'**
+  String get codechatHandoffTitle;
+
+  /// No description provided for @codechatHandoffOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Code'**
+  String get codechatHandoffOpen;
+
+  /// No description provided for @codechatTicketChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Discussed in chat'**
+  String get codechatTicketChat;
+
+  /// No description provided for @codechatContinueInChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue in chat'**
+  String get codechatContinueInChat;
+
+  /// No description provided for @codechatCodeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get codechatCodeBadge;
+
+  /// No description provided for @codechatMentioned.
+  ///
+  /// In en, this message translates to:
+  /// **'Works in {names}'**
+  String codechatMentioned(String names);
+
+  /// No description provided for @codechatMentionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get codechatMentionLabel;
+
   /// No description provided for @commitBack.
   ///
   /// In en, this message translates to:
@@ -3716,6 +4316,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This commit changes more files than can be shown here. The first {n} are listed; open it on the git host to see all of them.'**
   String commitFilesCapped(String n);
+
+  /// No description provided for @commonPagePrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get commonPagePrev;
+
+  /// No description provided for @commonPageNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get commonPageNext;
+
+  /// No description provided for @commonPageRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{from}–{to} of {n}'**
+  String commonPageRange(String from, String to, String n);
+
+  /// No description provided for @commonPerPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Per page'**
+  String get commonPerPage;
+
+  /// No description provided for @commonPager.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get commonPager;
 
   /// No description provided for @commonLoading.
   ///
@@ -6342,7 +6972,7 @@ abstract class AppLocalizations {
   /// No description provided for @filesHint.
   ///
   /// In en, this message translates to:
-  /// **'Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.'**
+  /// **'Pictures, PDFs, logs or text, up to 10 MB each. Muse reads them all.'**
   String get filesHint;
 
   /// No description provided for @filesUploading.
@@ -7176,7 +7806,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRepoSub.
   ///
   /// In en, this message translates to:
-  /// **'How strictly agnts-guard checks Claude\'s work in this repository, while it works and after.'**
+  /// **'How strictly agnts-guard checks Muse\'s work in this repository, while it works and after.'**
   String get harnessRepoSub;
 
   /// No description provided for @harnessRepoSave.
@@ -7260,7 +7890,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRepoKind_hooks.
   ///
   /// In en, this message translates to:
-  /// **'Claude Code hooks'**
+  /// **'Muse hooks'**
   String get harnessRepoKind_hooks;
 
   /// No description provided for @harnessRepoKind_mcp_server.
@@ -7314,19 +7944,19 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRepoProfileHelp_minimal.
   ///
   /// In en, this message translates to:
-  /// **'Only secrets and enforced rules are blocked; build checked before Claude finishes.'**
+  /// **'Only secrets and enforced rules are blocked; build checked before Muse finishes.'**
   String get harnessRepoProfileHelp_minimal;
 
   /// No description provided for @harnessRepoProfileHelp_standard.
   ///
   /// In en, this message translates to:
-  /// **'Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Claude finishes.'**
+  /// **'Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Muse finishes.'**
   String get harnessRepoProfileHelp_standard;
 
   /// No description provided for @harnessRepoProfileHelp_strict.
   ///
   /// In en, this message translates to:
-  /// **'Also blocks swallowed errors and removed assertions, runs the tests before Claude finishes, and may ask for facts before editing a file.'**
+  /// **'Also blocks swallowed errors and removed assertions, runs the tests before Muse finishes, and may ask for facts before editing a file.'**
   String get harnessRepoProfileHelp_strict;
 
   /// No description provided for @harnessRepoSecretAllow.
@@ -7350,7 +7980,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRepoChecksSub.
   ///
   /// In en, this message translates to:
-  /// **'Quick formatters and linters agnts-guard runs on each file Claude edits, so problems are fixed while the change is fresh.'**
+  /// **'Quick formatters and linters agnts-guard runs on each file Muse edits, so problems are fixed while the change is fresh.'**
   String get harnessRepoChecksSub;
 
   /// No description provided for @harnessRepoChecksOff.
@@ -7362,7 +7992,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRepoChecksOffHelp.
   ///
   /// In en, this message translates to:
-  /// **'Claude is not checked after each edit; the checks after the run still apply.'**
+  /// **'Muse is not checked after each edit; the checks after the run still apply.'**
   String get harnessRepoChecksOffHelp;
 
   /// No description provided for @harnessRepoOwnChecks.
@@ -7602,7 +8232,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRulesDeliveryHelp_skill.
   ///
   /// In en, this message translates to:
-  /// **'A skill Claude loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.'**
+  /// **'A skill Muse loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.'**
   String get harnessRulesDeliveryHelp_skill;
 
   /// No description provided for @harnessRulesEnforce.
@@ -7614,7 +8244,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRulesEnforceHelp.
   ///
   /// In en, this message translates to:
-  /// **'agnts-guard checks the rule while Claude works, not only asks for it.'**
+  /// **'agnts-guard checks the rule while Muse works, not only asks for it.'**
   String get harnessRulesEnforceHelp;
 
   /// No description provided for @harnessRulesOn.
@@ -7650,7 +8280,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRulesOnHelp_bash.
   ///
   /// In en, this message translates to:
-  /// **'Shell commands Claude runs that match the pattern.'**
+  /// **'Shell commands Muse runs that match the pattern.'**
   String get harnessRulesOnHelp_bash;
 
   /// No description provided for @harnessRulesOnHelp_diff.
@@ -7698,7 +8328,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessRulesMessage.
   ///
   /// In en, this message translates to:
-  /// **'Message to Claude'**
+  /// **'Message to Muse'**
   String get harnessRulesMessage;
 
   /// No description provided for @harnessRulesMessagePlaceholder.
@@ -7818,7 +8448,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsSub.
   ///
   /// In en, this message translates to:
-  /// **'agnts-guard checks Claude\'s work inside every run, while it happens; agnts\'s checks after the run still apply.'**
+  /// **'agnts-guard checks Muse\'s work inside every run, while it happens; agnts\'s checks after the run still apply.'**
   String get harnessSettingsSub;
 
   /// No description provided for @harnessSettingsProfile.
@@ -7848,7 +8478,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsProfileHelp_minimal.
   ///
   /// In en, this message translates to:
-  /// **'Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Claude finishes.'**
+  /// **'Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Muse finishes.'**
   String get harnessSettingsProfileHelp_minimal;
 
   /// No description provided for @harnessSettingsProfileHelp_standard.
@@ -7968,7 +8598,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsMethodSkillsHelp.
   ///
   /// In en, this message translates to:
-  /// **'Coding runs get agnts\'s method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Claude loads one only when it fits; compare on Analytics.'**
+  /// **'Coding runs get agnts\'s method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Muse loads one only when it fits; compare on Analytics.'**
   String get harnessSettingsMethodSkillsHelp;
 
   /// No description provided for @harnessSettingsSecondOpinion.
@@ -8040,7 +8670,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsHook_stop_gate.
   ///
   /// In en, this message translates to:
-  /// **'build and lint must pass before Claude finishes'**
+  /// **'build and lint must pass before Muse finishes'**
   String get harnessSettingsHook_stop_gate;
 
   /// No description provided for @harnessSettingsHook_session_progress.
@@ -8058,7 +8688,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsCodexHelp.
   ///
   /// In en, this message translates to:
-  /// **'A Codex model name runs coding on Codex CLI instead of Claude; empty uses Claude. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).'**
+  /// **'A Codex model name runs coding on Codex CLI instead of Muse; empty uses Muse. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).'**
   String get harnessSettingsCodexHelp;
 
   /// No description provided for @harnessSettingsCodexConnect.
@@ -8208,7 +8838,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsColLoadedHint.
   ///
   /// In en, this message translates to:
-  /// **'Share of those tickets where Claude loaded the skill'**
+  /// **'Share of those tickets where Muse loaded the skill'**
   String get harnessSettingsColLoadedHint;
 
   /// No description provided for @harnessSettingsColSkillFirstTry.
@@ -8232,7 +8862,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsColLoadedFirstTryHint.
   ///
   /// In en, this message translates to:
-  /// **'First-try rate of the done tickets where Claude loaded the skill'**
+  /// **'First-try rate of the done tickets where Muse loaded the skill'**
   String get harnessSettingsColLoadedFirstTryHint;
 
   /// No description provided for @harnessSettingsColTargeted.
@@ -8268,7 +8898,7 @@ abstract class AppLocalizations {
   /// No description provided for @harnessSettingsEffortHelp.
   ///
   /// In en, this message translates to:
-  /// **'How hard Claude thinks in each stage (Claude Code\'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.'**
+  /// **'How hard Muse thinks in each stage (Muse\'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.'**
   String get harnessSettingsEffortHelp;
 
   /// No description provided for @harnessSettingsEffortAnalyze.
@@ -9897,6 +10527,12 @@ abstract class AppLocalizations {
   /// **'Codex runs have no agnts-guard hooks: agnts\'s checks after the run (red flags, build, lint, tests, review) still apply. Runs also need api.openai.com in the allowed hosts.'**
   String get integrationsOpenaiHelp;
 
+  /// No description provided for @integrationsName_muse.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse Code'**
+  String get integrationsName_muse;
+
   /// No description provided for @kindTitle.
   ///
   /// In en, this message translates to:
@@ -10200,7 +10836,7 @@ abstract class AppLocalizations {
   /// No description provided for @learnReadingNote.
   ///
   /// In en, this message translates to:
-  /// **'Claude suggested these links. Check them before relying on them.'**
+  /// **'Muse suggested these links. Check them before relying on them.'**
   String get learnReadingNote;
 
   /// No description provided for @learnCategory_pattern.
@@ -10779,6 +11415,12 @@ abstract class AppLocalizations {
   /// **'Event'**
   String get logsTypeEvent;
 
+  /// No description provided for @logsTypeBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend'**
+  String get logsTypeBudget;
+
   /// No description provided for @maccountPasswordInstead.
   ///
   /// In en, this message translates to:
@@ -11256,7 +11898,7 @@ abstract class AppLocalizations {
   /// No description provided for @massistantStatsParts.
   ///
   /// In en, this message translates to:
-  /// **'Container {start} · workspace {snapshot} · Claude {claude}'**
+  /// **'Container {start} · workspace {snapshot} · Muse {claude}'**
   String massistantStatsParts(String start, String snapshot, String claude);
 
   /// No description provided for @massistantStatsWarm.
@@ -11408,6 +12050,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{proposed} actions offered · {done} done'**
   String massistantStatsVersionActions(String proposed, String done);
+
+  /// No description provided for @massistantVoiceStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask by voice'**
+  String get massistantVoiceStart;
+
+  /// No description provided for @massistantVoiceSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and ask'**
+  String get massistantVoiceSend;
+
+  /// No description provided for @massistantVoiceRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get massistantVoiceRecording;
+
+  /// No description provided for @massistantVoiceHearing.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is listening to your question…'**
+  String get massistantVoiceHearing;
+
+  /// No description provided for @massistantVoiceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {n} min'**
+  String massistantVoiceLimit(String n);
+
+  /// No description provided for @massistantVoiceDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the microphone for this site to ask by voice.'**
+  String get massistantVoiceDenied;
+
+  /// No description provided for @massistantVoiceNoMic.
+  ///
+  /// In en, this message translates to:
+  /// **'No microphone could be opened.'**
+  String get massistantVoiceNoMic;
 
   /// No description provided for @mciTitle.
   ///
@@ -12176,6 +12860,1836 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Made from “{title}”'**
   String mdocumentsMadeFrom(String title);
+
+  /// No description provided for @meetingsPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meetings'**
+  String get meetingsPageTitle;
+
+  /// No description provided for @meetingsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Video calls for the team and the guests you let in. Muse can take the notes and turn what was agreed into tickets.'**
+  String get meetingsLede;
+
+  /// No description provided for @meetingsStartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start now'**
+  String get meetingsStartNow;
+
+  /// No description provided for @meetingsSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get meetingsSchedule;
+
+  /// No description provided for @meetingsGetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a link'**
+  String get meetingsGetLink;
+
+  /// No description provided for @meetingsLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied: {link}'**
+  String meetingsLinkCopied(String link);
+
+  /// No description provided for @meetingsLinkCopiedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get meetingsLinkCopiedShort;
+
+  /// No description provided for @meetingsCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get meetingsCopyLink;
+
+  /// No description provided for @meetingsJoinWithCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with a code or link'**
+  String get meetingsJoinWithCode;
+
+  /// No description provided for @meetingsCodePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'abc-defg-hij'**
+  String get meetingsCodePlaceholder;
+
+  /// No description provided for @meetingsBadCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a meeting code: it looks like abc-defg-hij.'**
+  String get meetingsBadCode;
+
+  /// No description provided for @meetingsJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get meetingsJoin;
+
+  /// No description provided for @meetingsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get meetingsOpen;
+
+  /// No description provided for @meetingsTab_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get meetingsTab_upcoming;
+
+  /// No description provided for @meetingsTab_past.
+  ///
+  /// In en, this message translates to:
+  /// **'Past calls'**
+  String get meetingsTab_past;
+
+  /// No description provided for @meetingsTab_mine.
+  ///
+  /// In en, this message translates to:
+  /// **'I host'**
+  String get meetingsTab_mine;
+
+  /// No description provided for @meetingsNoneUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'No live or upcoming meetings. Start one now, or schedule one.'**
+  String get meetingsNoneUpcoming;
+
+  /// No description provided for @meetingsNoneMine.
+  ///
+  /// In en, this message translates to:
+  /// **'You host no meetings yet.'**
+  String get meetingsNoneMine;
+
+  /// No description provided for @meetingsNonePast.
+  ///
+  /// In en, this message translates to:
+  /// **'No calls yet.'**
+  String get meetingsNonePast;
+
+  /// No description provided for @meetingsLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get meetingsLive;
+
+  /// No description provided for @meetingsInCallNow.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} person in the call} other {{n} people in the call}}'**
+  String meetingsInCallNow(num n);
+
+  /// No description provided for @meetingsLiveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The call is open'**
+  String get meetingsLiveEmpty;
+
+  /// No description provided for @meetingsNobodyYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody is in the call yet'**
+  String get meetingsNobodyYet;
+
+  /// No description provided for @meetingsHostedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted by {name}'**
+  String meetingsHostedBy(String name);
+
+  /// No description provided for @meetingsUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting'**
+  String get meetingsUntitled;
+
+  /// No description provided for @meetingsKind_instant.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get meetingsKind_instant;
+
+  /// No description provided for @meetingsKind_scheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get meetingsKind_scheduled;
+
+  /// No description provided for @meetingsColMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting'**
+  String get meetingsColMeeting;
+
+  /// No description provided for @meetingsColWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get meetingsColWhen;
+
+  /// No description provided for @meetingsColPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get meetingsColPeople;
+
+  /// No description provided for @meetingsColNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get meetingsColNotes;
+
+  /// No description provided for @meetingsRecordings.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} recording} other {{n} recordings}}'**
+  String meetingsRecordings(num n);
+
+  /// No description provided for @meetingsActionItemsN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} action item} other {{n} action items}}'**
+  String meetingsActionItemsN(num n);
+
+  /// No description provided for @meetingsOpenNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the notes'**
+  String get meetingsOpenNotes;
+
+  /// No description provided for @meetingsNotes_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes'**
+  String get meetingsNotes_none;
+
+  /// No description provided for @meetingsNotes_recording.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking notes'**
+  String get meetingsNotes_recording;
+
+  /// No description provided for @meetingsNotes_queued.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes queued'**
+  String get meetingsNotes_queued;
+
+  /// No description provided for @meetingsNotes_transcribing.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is listening'**
+  String get meetingsNotes_transcribing;
+
+  /// No description provided for @meetingsNotes_writing.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is writing'**
+  String get meetingsNotes_writing;
+
+  /// No description provided for @meetingsNotes_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes ready'**
+  String get meetingsNotes_done;
+
+  /// No description provided for @meetingsNotes_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes failed'**
+  String get meetingsNotes_failed;
+
+  /// No description provided for @meetingsOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meetings are off on this server'**
+  String get meetingsOffTitle;
+
+  /// No description provided for @meetingsOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The server’s administrator turns them on with a LiveKit server (AGNTS_LIVEKIT_URL).'**
+  String get meetingsOffBody;
+
+  /// No description provided for @meetingsYourReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reminders'**
+  String get meetingsYourReminders;
+
+  /// No description provided for @meetingsRemindersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Before a meeting you are invited to starts, on your phone and here.'**
+  String get meetingsRemindersSub;
+
+  /// No description provided for @meetingsMinutesBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min before'**
+  String meetingsMinutesBefore(String n);
+
+  /// No description provided for @meetingsNoReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders'**
+  String get meetingsNoReminders;
+
+  /// No description provided for @meetingsSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meetings in this workspace'**
+  String get meetingsSettingsTitle;
+
+  /// No description provided for @meetingsSettingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings, what is kept and for how long, and how many people one call takes.'**
+  String get meetingsSettingsSub;
+
+  /// No description provided for @meetingsAllowRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts may record calls as video'**
+  String get meetingsAllowRecording;
+
+  /// No description provided for @meetingsKeepAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the audio of notes after Muse has heard it'**
+  String get meetingsKeepAudio;
+
+  /// No description provided for @meetingsRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep recordings and transcripts for (days)'**
+  String get meetingsRetention;
+
+  /// No description provided for @meetingsRetentionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'0 keeps them for ever.'**
+  String get meetingsRetentionHelp;
+
+  /// No description provided for @meetingsMaxPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People in one call'**
+  String get meetingsMaxPeople;
+
+  /// No description provided for @meetingsServerCan.
+  ///
+  /// In en, this message translates to:
+  /// **'This server can do:'**
+  String get meetingsServerCan;
+
+  /// No description provided for @meetingsRecordingWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get meetingsRecordingWord;
+
+  /// No description provided for @meetingsNotesWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get meetingsNotesWord;
+
+  /// No description provided for @meetingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get meetingsSave;
+
+  /// No description provided for @meetingsSettingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get meetingsSettingsSaved;
+
+  /// No description provided for @meetingsNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New meeting'**
+  String get meetingsNewTitle;
+
+  /// No description provided for @meetingsNewSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A call now, or one in the calendar with invitations.'**
+  String get meetingsNewSub;
+
+  /// No description provided for @meetingsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the meeting'**
+  String get meetingsEditTitle;
+
+  /// No description provided for @meetingsWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get meetingsWhen;
+
+  /// No description provided for @meetingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get meetingsTitle;
+
+  /// No description provided for @meetingsTitlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Sprint planning'**
+  String get meetingsTitlePlaceholder;
+
+  /// No description provided for @meetingsDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get meetingsDate;
+
+  /// No description provided for @meetingsTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get meetingsTime;
+
+  /// No description provided for @meetingsDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get meetingsDuration;
+
+  /// No description provided for @meetingsMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String meetingsMinutes(String n);
+
+  /// No description provided for @meetingsTimeZoneIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Times are in {zone}.'**
+  String meetingsTimeZoneIs(String zone);
+
+  /// No description provided for @meetingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Agenda'**
+  String get meetingsDescription;
+
+  /// No description provided for @meetingsDescriptionPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'What the meeting is for. Muse reads it when it writes the notes.'**
+  String get meetingsDescriptionPlaceholder;
+
+  /// No description provided for @meetingsAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Who joins without knocking'**
+  String get meetingsAccess;
+
+  /// No description provided for @meetingsAccess_workspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the workspace'**
+  String get meetingsAccess_workspace;
+
+  /// No description provided for @meetingsAccess_invited.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the invited'**
+  String get meetingsAccess_invited;
+
+  /// No description provided for @meetingsAccessHelp_workspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Members join; guests knock.'**
+  String get meetingsAccessHelp_workspace;
+
+  /// No description provided for @meetingsAccessHelp_invited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitees join; other members and guests knock.'**
+  String get meetingsAccessHelp_invited;
+
+  /// No description provided for @meetingsGuestsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests'**
+  String get meetingsGuestsMode;
+
+  /// No description provided for @meetingsGuests_knock.
+  ///
+  /// In en, this message translates to:
+  /// **'Knock'**
+  String get meetingsGuests_knock;
+
+  /// No description provided for @meetingsGuests_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get meetingsGuests_open;
+
+  /// No description provided for @meetingsGuests_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get meetingsGuests_off;
+
+  /// No description provided for @meetingsGuestsHelp_knock.
+  ///
+  /// In en, this message translates to:
+  /// **'People without a membership wait until a host lets them in.'**
+  String get meetingsGuestsHelp_knock;
+
+  /// No description provided for @meetingsGuestsHelp_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link joins without waiting, until the call ends.'**
+  String get meetingsGuestsHelp_open;
+
+  /// No description provided for @meetingsGuestsHelp_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Only members of the workspace.'**
+  String get meetingsGuestsHelp_off;
+
+  /// No description provided for @meetingsGuestsAre.
+  ///
+  /// In en, this message translates to:
+  /// **'guests: {mode}'**
+  String meetingsGuestsAre(String mode);
+
+  /// No description provided for @meetingsInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get meetingsInvite;
+
+  /// No description provided for @meetingsEmailsPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Email addresses, separated by commas'**
+  String get meetingsEmailsPlaceholder;
+
+  /// No description provided for @meetingsInviteHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone gets an email with the calendar event; people outside the workspace get a personal link.'**
+  String get meetingsInviteHelp;
+
+  /// No description provided for @meetingsInviteHelpNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Members are told in agnts; addresses get the link by email.'**
+  String get meetingsInviteHelpNow;
+
+  /// No description provided for @meetingsAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes and recording'**
+  String get meetingsAi;
+
+  /// No description provided for @meetingsAutoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Take notes: Muse hears the call and writes the decisions and action items'**
+  String get meetingsAutoNotes;
+
+  /// No description provided for @meetingsAutoRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the call as video'**
+  String get meetingsAutoRecord;
+
+  /// No description provided for @meetingsAutoNotesOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes on'**
+  String get meetingsAutoNotesOn;
+
+  /// No description provided for @meetingsAutoRecordOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded'**
+  String get meetingsAutoRecordOn;
+
+  /// No description provided for @meetingsNotesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes are not set up on this server.'**
+  String get meetingsNotesUnavailable;
+
+  /// No description provided for @meetingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language of the notes'**
+  String get meetingsLanguage;
+
+  /// No description provided for @meetingsLang_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'As spoken'**
+  String get meetingsLang_auto;
+
+  /// No description provided for @meetingsCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get meetingsCancel;
+
+  /// No description provided for @meetingsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get meetingsEdit;
+
+  /// No description provided for @meetingsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get meetingsDelete;
+
+  /// No description provided for @meetingsCancelMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the meeting'**
+  String get meetingsCancelMeeting;
+
+  /// No description provided for @meetingsCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this meeting?'**
+  String get meetingsCancelTitle;
+
+  /// No description provided for @meetingsCancelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitees get the cancellation in their calendar. A call in progress ends.'**
+  String get meetingsCancelBody;
+
+  /// No description provided for @meetingsCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This meeting was cancelled.'**
+  String get meetingsCancelled;
+
+  /// No description provided for @meetingsCancelledShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get meetingsCancelledShort;
+
+  /// No description provided for @meetingsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this meeting?'**
+  String get meetingsDeleteTitle;
+
+  /// No description provided for @meetingsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its calls, recordings, transcripts and chat are deleted. Notes documents stay.'**
+  String get meetingsDeleteBody;
+
+  /// No description provided for @meetingsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get meetingsLink;
+
+  /// No description provided for @meetingsRing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ring people'**
+  String get meetingsRing;
+
+  /// No description provided for @meetingsRingWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Who to ring now'**
+  String get meetingsRingWho;
+
+  /// No description provided for @meetingsRingNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Ring'**
+  String get meetingsRingNow;
+
+  /// No description provided for @meetingsRinging.
+  ///
+  /// In en, this message translates to:
+  /// **'Ringing…'**
+  String get meetingsRinging;
+
+  /// No description provided for @meetingsAreYouComing.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you coming?'**
+  String get meetingsAreYouComing;
+
+  /// No description provided for @meetingsRsvp_yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get meetingsRsvp_yes;
+
+  /// No description provided for @meetingsRsvp_no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get meetingsRsvp_no;
+
+  /// No description provided for @meetingsRsvp_maybe.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe'**
+  String get meetingsRsvp_maybe;
+
+  /// No description provided for @meetingsRsvp_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No answer'**
+  String get meetingsRsvp_none;
+
+  /// No description provided for @meetingsInvitees.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {Invited} one {{n} invited} other {{n} invited}}'**
+  String meetingsInvitees(num n);
+
+  /// No description provided for @meetingsInviteMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get meetingsInviteMore;
+
+  /// No description provided for @meetingsNoInvitees.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody is invited.'**
+  String get meetingsNoInvitees;
+
+  /// No description provided for @meetingsByEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'by email'**
+  String get meetingsByEmail;
+
+  /// No description provided for @meetingsUninvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Uninvite'**
+  String get meetingsUninvite;
+
+  /// No description provided for @meetingsCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls'**
+  String get meetingsCalls;
+
+  /// No description provided for @meetingsNoCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'The meeting has not been live yet.'**
+  String get meetingsNoCalls;
+
+  /// No description provided for @meetingsTheMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'the meeting'**
+  String get meetingsTheMeeting;
+
+  /// No description provided for @meetingsNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get meetingsNotesTitle;
+
+  /// No description provided for @meetingsNoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes were not taken in this call.'**
+  String get meetingsNoNotes;
+
+  /// No description provided for @meetingsNotesBusy_recording.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes are being taken; Muse writes them when the call ends.'**
+  String get meetingsNotesBusy_recording;
+
+  /// No description provided for @meetingsNotesBusy_queued.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Muse to hear the call…'**
+  String get meetingsNotesBusy_queued;
+
+  /// No description provided for @meetingsNotesBusy_transcribing.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is listening to the call…'**
+  String get meetingsNotesBusy_transcribing;
+
+  /// No description provided for @meetingsNotesBusy_writing.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is writing the notes…'**
+  String get meetingsNotesBusy_writing;
+
+  /// No description provided for @meetingsNotesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The notes could not be written: {reason}'**
+  String meetingsNotesFailed(String reason);
+
+  /// No description provided for @meetingsWriteAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Write again'**
+  String get meetingsWriteAgain;
+
+  /// No description provided for @meetingsNotesAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is writing the notes again'**
+  String get meetingsNotesAgain;
+
+  /// No description provided for @meetingsActionItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Action items'**
+  String get meetingsActionItems;
+
+  /// No description provided for @meetingsAnyRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Any repository'**
+  String get meetingsAnyRepo;
+
+  /// No description provided for @meetingsRepository.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get meetingsRepository;
+
+  /// No description provided for @meetingsCreateTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Create ticket'**
+  String get meetingsCreateTicket;
+
+  /// No description provided for @meetingsTicketMade.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} created'**
+  String meetingsTicketMade(String key);
+
+  /// No description provided for @meetingsRecordingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get meetingsRecordingsTitle;
+
+  /// No description provided for @meetingsRecordingNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get meetingsRecordingNow;
+
+  /// No description provided for @meetingsDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get meetingsDownload;
+
+  /// No description provided for @meetingsDeleteRecordingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this recording?'**
+  String get meetingsDeleteRecordingTitle;
+
+  /// No description provided for @meetingsDeleteRecordingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The video is deleted for everyone. The transcript and notes stay.'**
+  String get meetingsDeleteRecordingBody;
+
+  /// No description provided for @meetingsAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} person} other {{n} people}}'**
+  String meetingsAttendance(num n);
+
+  /// No description provided for @meetingsStillIn.
+  ///
+  /// In en, this message translates to:
+  /// **'still in'**
+  String get meetingsStillIn;
+
+  /// No description provided for @meetingsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get meetingsGuest;
+
+  /// No description provided for @meetingsMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get meetingsMember;
+
+  /// No description provided for @meetingsTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript'**
+  String get meetingsTranscript;
+
+  /// No description provided for @meetingsNoTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'No transcript.'**
+  String get meetingsNoTranscript;
+
+  /// No description provided for @meetingsSearchTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Search what was said'**
+  String get meetingsSearchTranscript;
+
+  /// No description provided for @meetingsMixedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone’s audio was heard together, so the transcript does not say who spoke.'**
+  String get meetingsMixedNote;
+
+  /// No description provided for @meetingsChatLog.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {Chat} one {Chat · {n} message} other {Chat · {n} messages}}'**
+  String meetingsChatLog(num n);
+
+  /// No description provided for @meetingsShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get meetingsShow;
+
+  /// No description provided for @meetingsHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get meetingsHide;
+
+  /// No description provided for @meetingsTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discussed in meetings'**
+  String get meetingsTicketTitle;
+
+  /// No description provided for @meetingsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No such meeting'**
+  String get meetingsNotFound;
+
+  /// No description provided for @meetingsSomethingWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get meetingsSomethingWrong;
+
+  /// No description provided for @meetingsTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get meetingsTryAgain;
+
+  /// No description provided for @meetingsCameraStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting the camera…'**
+  String get meetingsCameraStarting;
+
+  /// No description provided for @meetingsCameraOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera is off'**
+  String get meetingsCameraOff;
+
+  /// No description provided for @meetingsMicOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone on'**
+  String get meetingsMicOn;
+
+  /// No description provided for @meetingsMicOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone off'**
+  String get meetingsMicOff;
+
+  /// No description provided for @meetingsCamOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera on'**
+  String get meetingsCamOn;
+
+  /// No description provided for @meetingsCamOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera off'**
+  String get meetingsCamOff;
+
+  /// No description provided for @meetingsMicLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone level'**
+  String get meetingsMicLevel;
+
+  /// No description provided for @meetingsDevicesBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser blocked the camera and microphone. Allow them in the address bar, then try again.'**
+  String get meetingsDevicesBlocked;
+
+  /// No description provided for @meetingsDevicesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera or microphone could not start. Another app may be using it.'**
+  String get meetingsDevicesFailed;
+
+  /// No description provided for @meetingsMicrophone.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get meetingsMicrophone;
+
+  /// No description provided for @meetingsCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get meetingsCamera;
+
+  /// No description provided for @meetingsSpeakers.
+  ///
+  /// In en, this message translates to:
+  /// **'Speakers'**
+  String get meetingsSpeakers;
+
+  /// No description provided for @meetingsDefaultDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get meetingsDefaultDevice;
+
+  /// No description provided for @meetingsLobbyRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'This call is being recorded.'**
+  String get meetingsLobbyRecording;
+
+  /// No description provided for @meetingsLobbyNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is taking notes of this call.'**
+  String get meetingsLobbyNotes;
+
+  /// No description provided for @meetingsNotStartedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You can join 15 minutes before it starts.'**
+  String get meetingsNotStartedYet;
+
+  /// No description provided for @meetingsYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get meetingsYourName;
+
+  /// No description provided for @meetingsYourNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'How others will see you'**
+  String get meetingsYourNamePlaceholder;
+
+  /// No description provided for @meetingsJoiningAs.
+  ///
+  /// In en, this message translates to:
+  /// **'You join as {name}.'**
+  String meetingsJoiningAs(String name);
+
+  /// No description provided for @meetingsJoinNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Join now'**
+  String get meetingsJoinNow;
+
+  /// No description provided for @meetingsAskToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to join'**
+  String get meetingsAskToJoin;
+
+  /// No description provided for @meetingsJoining.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining…'**
+  String get meetingsJoining;
+
+  /// No description provided for @meetingsOrGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Or show who you are with Google'**
+  String get meetingsOrGoogle;
+
+  /// No description provided for @meetingsWaitingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asking to join…'**
+  String get meetingsWaitingTitle;
+
+  /// No description provided for @meetingsWaitingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone in the call will let you in soon.'**
+  String get meetingsWaitingBody;
+
+  /// No description provided for @meetingsConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get meetingsConnecting;
+
+  /// No description provided for @meetingsYouLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the call'**
+  String get meetingsYouLeft;
+
+  /// No description provided for @meetingsJoinedElsewhere.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined from another tab'**
+  String get meetingsJoinedElsewhere;
+
+  /// No description provided for @meetingsRejoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejoin'**
+  String get meetingsRejoin;
+
+  /// No description provided for @meetingsBackToMeetings.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to meetings'**
+  String get meetingsBackToMeetings;
+
+  /// No description provided for @meetingsEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'The call has ended'**
+  String get meetingsEnded;
+
+  /// No description provided for @meetingsEndedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes and recordings appear under Past calls when they are ready.'**
+  String get meetingsEndedBody;
+
+  /// No description provided for @meetingsRemovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You were removed from the call'**
+  String get meetingsRemovedTitle;
+
+  /// No description provided for @meetingsRemovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A host removed you. You can’t rejoin this call.'**
+  String get meetingsRemovedBody;
+
+  /// No description provided for @meetingsRefused_locked.
+  ///
+  /// In en, this message translates to:
+  /// **'The meeting is locked'**
+  String get meetingsRefused_locked;
+
+  /// No description provided for @meetingsRefused_full.
+  ///
+  /// In en, this message translates to:
+  /// **'The meeting is full'**
+  String get meetingsRefused_full;
+
+  /// No description provided for @meetingsRefused_removed.
+  ///
+  /// In en, this message translates to:
+  /// **'You were removed from this call'**
+  String get meetingsRefused_removed;
+
+  /// No description provided for @meetingsRefused_guests_off.
+  ///
+  /// In en, this message translates to:
+  /// **'This meeting is for the workspace’s members'**
+  String get meetingsRefused_guests_off;
+
+  /// No description provided for @meetingsRefused_not_started.
+  ///
+  /// In en, this message translates to:
+  /// **'The meeting hasn’t started yet'**
+  String get meetingsRefused_not_started;
+
+  /// No description provided for @meetingsRefused_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This meeting was cancelled'**
+  String get meetingsRefused_cancelled;
+
+  /// No description provided for @meetingsRefused_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'You were not let in'**
+  String get meetingsRefused_denied;
+
+  /// No description provided for @meetingsRefused_expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody answered'**
+  String get meetingsRefused_expired;
+
+  /// No description provided for @meetingsRole_host.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get meetingsRole_host;
+
+  /// No description provided for @meetingsRole_cohost.
+  ///
+  /// In en, this message translates to:
+  /// **'Co-host'**
+  String get meetingsRole_cohost;
+
+  /// No description provided for @meetingsRole_member.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get meetingsRole_member;
+
+  /// No description provided for @meetingsRole_guest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get meetingsRole_guest;
+
+  /// No description provided for @meetingsYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (you)'**
+  String meetingsYou(String name);
+
+  /// No description provided for @meetingsYouShort.
+  ///
+  /// In en, this message translates to:
+  /// **'you'**
+  String get meetingsYouShort;
+
+  /// No description provided for @meetingsScreenOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}’s screen'**
+  String meetingsScreenOf(String name);
+
+  /// No description provided for @meetingsPoorConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor connection'**
+  String get meetingsPoorConnection;
+
+  /// No description provided for @meetingsHandRaised.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand raised'**
+  String get meetingsHandRaised;
+
+  /// No description provided for @meetingsPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin'**
+  String get meetingsPin;
+
+  /// No description provided for @meetingsUnpin.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get meetingsUnpin;
+
+  /// No description provided for @meetingsRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get meetingsRecording;
+
+  /// No description provided for @meetingsTakingNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking notes'**
+  String get meetingsTakingNotes;
+
+  /// No description provided for @meetingsLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get meetingsLocked;
+
+  /// No description provided for @meetingsReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get meetingsReconnecting;
+
+  /// No description provided for @meetingsEnableAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the sound on'**
+  String get meetingsEnableAudio;
+
+  /// No description provided for @meetingsWantsToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'wants to join'**
+  String get meetingsWantsToJoin;
+
+  /// No description provided for @meetingsAndMore.
+  ///
+  /// In en, this message translates to:
+  /// **'and {n} more'**
+  String meetingsAndMore(String n);
+
+  /// No description provided for @meetingsAdmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Admit'**
+  String get meetingsAdmit;
+
+  /// No description provided for @meetingsDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny'**
+  String get meetingsDeny;
+
+  /// No description provided for @meetingsSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get meetingsSeeAll;
+
+  /// No description provided for @meetingsAskedToUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} asks you to unmute.'**
+  String meetingsAskedToUnmute(String name);
+
+  /// No description provided for @meetingsUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get meetingsUnmute;
+
+  /// No description provided for @meetingsNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get meetingsNotNow;
+
+  /// No description provided for @meetingsChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get meetingsChat;
+
+  /// No description provided for @meetingsPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get meetingsPeople;
+
+  /// No description provided for @meetingsMicToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone (Ctrl+D)'**
+  String get meetingsMicToggle;
+
+  /// No description provided for @meetingsCamToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera (Ctrl+E)'**
+  String get meetingsCamToggle;
+
+  /// No description provided for @meetingsShareScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your screen'**
+  String get meetingsShareScreen;
+
+  /// No description provided for @meetingsStopSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop sharing'**
+  String get meetingsStopSharing;
+
+  /// No description provided for @meetingsRaiseHand.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise your hand'**
+  String get meetingsRaiseHand;
+
+  /// No description provided for @meetingsLowerHand.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower hand'**
+  String get meetingsLowerHand;
+
+  /// No description provided for @meetingsReact.
+  ///
+  /// In en, this message translates to:
+  /// **'React'**
+  String get meetingsReact;
+
+  /// No description provided for @meetingsSpeakerView.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker view'**
+  String get meetingsSpeakerView;
+
+  /// No description provided for @meetingsGridView.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get meetingsGridView;
+
+  /// No description provided for @meetingsHostControls.
+  ///
+  /// In en, this message translates to:
+  /// **'Host controls'**
+  String get meetingsHostControls;
+
+  /// No description provided for @meetingsStartRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Start recording'**
+  String get meetingsStartRecording;
+
+  /// No description provided for @meetingsStopRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop recording'**
+  String get meetingsStopRecording;
+
+  /// No description provided for @meetingsRecordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record this call?'**
+  String get meetingsRecordTitle;
+
+  /// No description provided for @meetingsRecordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the call sees that it is recorded, and people who join are told before they do.'**
+  String get meetingsRecordBody;
+
+  /// No description provided for @meetingsStartNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Take notes'**
+  String get meetingsStartNotes;
+
+  /// No description provided for @meetingsStopNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop taking notes'**
+  String get meetingsStopNotes;
+
+  /// No description provided for @meetingsLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the meeting'**
+  String get meetingsLock;
+
+  /// No description provided for @meetingsUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the meeting'**
+  String get meetingsUnlock;
+
+  /// No description provided for @meetingsMuteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute everyone'**
+  String get meetingsMuteAll;
+
+  /// No description provided for @meetingsQuietGuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off guests’ chat and screen sharing'**
+  String get meetingsQuietGuests;
+
+  /// No description provided for @meetingsGuestsSpeakAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Let guests chat and share again'**
+  String get meetingsGuestsSpeakAgain;
+
+  /// No description provided for @meetingsOpenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let anyone with the link in?'**
+  String get meetingsOpenTitle;
+
+  /// No description provided for @meetingsOpenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Until this call ends, guests join without waiting.'**
+  String get meetingsOpenBody;
+
+  /// No description provided for @meetingsLetAnyoneIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Let them in'**
+  String get meetingsLetAnyoneIn;
+
+  /// No description provided for @meetingsEndForAll.
+  ///
+  /// In en, this message translates to:
+  /// **'End the call for everyone'**
+  String get meetingsEndForAll;
+
+  /// No description provided for @meetingsEndTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'End the call for everyone?'**
+  String get meetingsEndTitle;
+
+  /// No description provided for @meetingsEndBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone is disconnected. Notes are written from what was recorded.'**
+  String get meetingsEndBody;
+
+  /// No description provided for @meetingsLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get meetingsLeave;
+
+  /// No description provided for @meetingsWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} waiting} other {{n} waiting}}'**
+  String meetingsWaiting(num n);
+
+  /// No description provided for @meetingsAdmitAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Admit all'**
+  String get meetingsAdmitAll;
+
+  /// No description provided for @meetingsHands.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} raised hand} other {{n} raised hands}}'**
+  String meetingsHands(num n);
+
+  /// No description provided for @meetingsInCall.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} in the call} other {{n} in the call}}'**
+  String meetingsInCall(num n);
+
+  /// No description provided for @meetingsDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} devices'**
+  String meetingsDevices(String n);
+
+  /// No description provided for @meetingsActionsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions for {name}'**
+  String meetingsActionsFor(String name);
+
+  /// No description provided for @meetingsMuteMic.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute microphone'**
+  String get meetingsMuteMic;
+
+  /// No description provided for @meetingsStopCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop camera'**
+  String get meetingsStopCamera;
+
+  /// No description provided for @meetingsStopScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop screen sharing'**
+  String get meetingsStopScreen;
+
+  /// No description provided for @meetingsAskUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to unmute'**
+  String get meetingsAskUnmute;
+
+  /// No description provided for @meetingsMakeCohost.
+  ///
+  /// In en, this message translates to:
+  /// **'Make co-host'**
+  String get meetingsMakeCohost;
+
+  /// No description provided for @meetingsUncohost.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove as co-host'**
+  String get meetingsUncohost;
+
+  /// No description provided for @meetingsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from the call'**
+  String get meetingsRemove;
+
+  /// No description provided for @meetingsRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String meetingsRemoveTitle(String name);
+
+  /// No description provided for @meetingsRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They are disconnected on every device and can’t come back to this call.'**
+  String get meetingsRemoveBody;
+
+  /// No description provided for @meetingsChatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet. Messages are kept with the call.'**
+  String get meetingsChatEmpty;
+
+  /// No description provided for @meetingsChatPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a message to everyone'**
+  String get meetingsChatPlaceholder;
+
+  /// No description provided for @meetingsChatOff.
+  ///
+  /// In en, this message translates to:
+  /// **'The hosts turned guests’ chat off.'**
+  String get meetingsChatOff;
+
+  /// No description provided for @meetingsSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get meetingsSend;
+
+  /// No description provided for @meetingsCallingYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is calling you'**
+  String meetingsCallingYou(String name);
+
+  /// No description provided for @meetingsStartsSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'A meeting starts soon'**
+  String get meetingsStartsSoon;
+
+  /// No description provided for @meetingsHasStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'A meeting you’re invited to has started'**
+  String get meetingsHasStarted;
+
+  /// No description provided for @meetingsKnockAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wants to join your meeting'**
+  String meetingsKnockAway(String name);
+
+  /// No description provided for @meetingsDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get meetingsDecline;
+
+  /// No description provided for @meetingsDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get meetingsDismiss;
+
+  /// No description provided for @meetingsColHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get meetingsColHost;
+
+  /// No description provided for @meetingsFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get meetingsFullscreen;
+
+  /// No description provided for @meetingsExitFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get meetingsExitFullscreen;
+
+  /// No description provided for @meetingsColPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Person'**
+  String get meetingsColPerson;
+
+  /// No description provided for @meetingsColInCall.
+  ///
+  /// In en, this message translates to:
+  /// **'In the call'**
+  String get meetingsColInCall;
+
+  /// No description provided for @meetingsColDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get meetingsColDuration;
+
+  /// No description provided for @meetingsLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the call?'**
+  String get meetingsLeaveTitle;
+
+  /// No description provided for @meetingsLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can join again with the same link while the call is on.'**
+  String get meetingsLeaveBody;
+
+  /// No description provided for @meetingsLeaveBodyHost.
+  ///
+  /// In en, this message translates to:
+  /// **'The call goes on without you. To close it for everyone, choose “End the call for everyone” in Host controls.'**
+  String get meetingsLeaveBodyHost;
+
+  /// No description provided for @meetingsStopRecordingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop recording?'**
+  String get meetingsStopRecordingTitle;
+
+  /// No description provided for @meetingsStopRecordingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What was recorded so far is saved and appears on the call’s page.'**
+  String get meetingsStopRecordingBody;
+
+  /// No description provided for @meetingsStopNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop taking notes?'**
+  String get meetingsStopNotesTitle;
+
+  /// No description provided for @meetingsStopNotesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse writes the notes from what it heard until now.'**
+  String get meetingsStopNotesBody;
+
+  /// No description provided for @meetingsMuteAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute everyone?'**
+  String get meetingsMuteAllTitle;
+
+  /// No description provided for @meetingsMuteAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone except you is muted. They can unmute themselves.'**
+  String get meetingsMuteAllBody;
+
+  /// No description provided for @meetingsLockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the meeting?'**
+  String get meetingsLockTitle;
+
+  /// No description provided for @meetingsLockBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody new can join or knock until you unlock it. People already admitted, and the hosts, can still come back.'**
+  String get meetingsLockBody;
+
+  /// No description provided for @meetingsAdmitAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {Let {n} person in?} other {Let {n} people in?}}'**
+  String meetingsAdmitAllTitle(num n);
+
+  /// No description provided for @meetingsAdmitAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone waiting joins the call now.'**
+  String get meetingsAdmitAllBody;
+
+  /// No description provided for @meetingsCohostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make {name} a co-host?'**
+  String meetingsCohostTitle(String name);
+
+  /// No description provided for @meetingsCohostBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Co-hosts can let people in, mute and remove them, record the call and take notes.'**
+  String get meetingsCohostBody;
+
+  /// No description provided for @meetingsWriteAgainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the notes again?'**
+  String get meetingsWriteAgainTitle;
+
+  /// No description provided for @meetingsWriteAgainBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse writes them again from the call and replaces the current notes, with any changes made to them.'**
+  String get meetingsWriteAgainBody;
+
+  /// No description provided for @meetingsUninviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from the invitations?'**
+  String meetingsUninviteTitle(String name);
+
+  /// No description provided for @meetingsUninviteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They are no longer invited and get no more reminders.'**
+  String get meetingsUninviteBody;
 
   /// No description provided for @mgroupsGroups.
   ///
@@ -13419,6 +15933,12 @@ abstract class AppLocalizations {
   /// **'Overview'**
   String get navOverview;
 
+  /// No description provided for @navWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Workflow'**
+  String get navWorkflow;
+
   /// No description provided for @navDashboard.
   ///
   /// In en, this message translates to:
@@ -13524,8 +16044,26 @@ abstract class AppLocalizations {
   /// No description provided for @navSearch.
   ///
   /// In en, this message translates to:
-  /// **'Search tickets and tasks'**
+  /// **'Search pages, repositories, tickets, chats, lessons'**
   String get navSearch;
+
+  /// No description provided for @navSearchPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get navSearchPages;
+
+  /// No description provided for @navSearchNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found'**
+  String get navSearchNone;
+
+  /// No description provided for @navSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get navSearchResults;
 
   /// No description provided for @navSyncJira.
   ///
@@ -13550,6 +16088,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This week'**
   String get navWeek;
+
+  /// No description provided for @navCreditsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} of {total} credits left'**
+  String navCreditsLeft(String amount, String total);
 
   /// No description provided for @navDayMode.
   ///
@@ -13755,6 +16299,12 @@ abstract class AppLocalizations {
   /// **'Chat'**
   String get navAssistantChat;
 
+  /// No description provided for @navAssistantCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get navAssistantCode;
+
   /// No description provided for @navAssistantConversations.
   ///
   /// In en, this message translates to:
@@ -13766,6 +16316,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Documents'**
   String get navDocuments;
+
+  /// No description provided for @navMeetings.
+  ///
+  /// In en, this message translates to:
+  /// **'Meetings'**
+  String get navMeetings;
 
   /// No description provided for @networkTitle.
   ///
@@ -14967,6 +17523,48 @@ abstract class AppLocalizations {
   /// **'They can no longer sign in. This cannot be undone.'**
   String get platformDeleteAdminBody;
 
+  /// No description provided for @platformFreeCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Free credits'**
+  String get platformFreeCredits;
+
+  /// No description provided for @platformSetFreeCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Set free credits'**
+  String get platformSetFreeCredits;
+
+  /// No description provided for @platformFreeCreditsSet.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} may spend {n} free credits ({amount})'**
+  String platformFreeCreditsSet(String name, String n, String amount);
+
+  /// No description provided for @platformFreeCreditsUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {limit} spent so far.'**
+  String platformFreeCreditsUsed(String used, String limit);
+
+  /// No description provided for @platformFreeCreditsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits (1 credit = \$0.01; 0 gives none)'**
+  String get platformFreeCreditsLimit;
+
+  /// No description provided for @platformFreeCreditsWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Worth {amount} of model calls on agnts\'s Muse key.'**
+  String platformFreeCreditsWorth(String amount);
+
+  /// No description provided for @platformFreeCreditsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number from 0 to 10,000,000.'**
+  String get platformFreeCreditsInvalid;
+
   /// No description provided for @previewTab.
   ///
   /// In en, this message translates to:
@@ -15336,7 +17934,7 @@ abstract class AppLocalizations {
   /// No description provided for @previewVisualCheckHelp.
   ///
   /// In en, this message translates to:
-  /// **'Claude may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.'**
+  /// **'Muse may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.'**
   String get previewVisualCheckHelp;
 
   /// No description provided for @previewModel_.
@@ -15360,7 +17958,7 @@ abstract class AppLocalizations {
   /// No description provided for @previewEgressHelp.
   ///
   /// In en, this message translates to:
-  /// **'Hosts run containers may reach besides the built-in list (Claude, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.'**
+  /// **'Hosts run containers may reach besides the built-in list (Muse, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.'**
   String get previewEgressHelp;
 
   /// No description provided for @previewNotify.
@@ -15888,7 +18486,7 @@ abstract class AppLocalizations {
   /// No description provided for @queueBadge_claude.
   ///
   /// In en, this message translates to:
-  /// **'Paused · Claude'**
+  /// **'Paused · Muse'**
   String get queueBadge_claude;
 
   /// No description provided for @queueTitle_blocked.
@@ -15912,7 +18510,7 @@ abstract class AppLocalizations {
   /// No description provided for @queueTitle_claude.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for Claude'**
+  /// **'Waiting for Muse'**
   String get queueTitle_claude;
 
   /// No description provided for @queuePosition.
@@ -15954,7 +18552,7 @@ abstract class AppLocalizations {
   /// No description provided for @queueClaudeHint.
   ///
   /// In en, this message translates to:
-  /// **'Connect an account or turn on credits in Workspace settings → Claude.'**
+  /// **'Connect an account or turn on credits in Workspace settings → Muse.'**
   String get queueClaudeHint;
 
   /// No description provided for @queueMember.
@@ -15972,7 +18570,7 @@ abstract class AppLocalizations {
   /// No description provided for @queueTakenOver.
   ///
   /// In en, this message translates to:
-  /// **'The ticket is yours: it runs on your Claude account in per-member mode.'**
+  /// **'The ticket is yours: it runs on your Muse account in per-member mode.'**
   String get queueTakenOver;
 
   /// No description provided for @queueCreatedBy.
@@ -16350,7 +18948,7 @@ abstract class AppLocalizations {
   /// No description provided for @replayConfirm.
   ///
   /// In en, this message translates to:
-  /// **'agnts creates a new task that re-does {key} from where it started. It uses your Claude plan like any ticket.'**
+  /// **'agnts creates a new task that re-does {key} from where it started. It uses your Muse plan like any ticket.'**
   String replayConfirm(String key);
 
   /// No description provided for @replayCreated.
@@ -16554,7 +19152,7 @@ abstract class AppLocalizations {
   /// No description provided for @replayBenchmarkConfirm.
   ///
   /// In en, this message translates to:
-  /// **'agnts replays the {n} benchmark tickets from where each started. They use your Claude plan like any ticket.'**
+  /// **'agnts replays the {n} benchmark tickets from where each started. They use your Muse plan like any ticket.'**
   String replayBenchmarkConfirm(String n);
 
   /// No description provided for @replayBenchmarkStarted.
@@ -17016,7 +19614,7 @@ abstract class AppLocalizations {
   /// No description provided for @repoDeployHelp.
   ///
   /// In en, this message translates to:
-  /// **'agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.'**
+  /// **'agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Muse chat.'**
   String get repoDeployHelp;
 
   /// No description provided for @repoDeployBranch.
@@ -17742,13 +20340,13 @@ abstract class AppLocalizations {
   /// No description provided for @reposDetectDeep.
   ///
   /// In en, this message translates to:
-  /// **'Ask Claude'**
+  /// **'Ask Muse'**
   String get reposDetectDeep;
 
   /// No description provided for @reposDetectDeepHelp.
   ///
   /// In en, this message translates to:
-  /// **'Claude reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Claude plan.'**
+  /// **'Muse reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Muse plan.'**
   String get reposDetectDeepHelp;
 
   /// No description provided for @reposDetecting.
@@ -17766,7 +20364,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposDetectNothing.
   ///
   /// In en, this message translates to:
-  /// **'No known build files found. Add the toolchains and commands by hand, or ask Claude.'**
+  /// **'No known build files found. Add the toolchains and commands by hand, or ask Muse.'**
   String get reposDetectNothing;
 
   /// No description provided for @reposDetectFilled.
@@ -17778,7 +20376,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposDetectByClaude.
   ///
   /// In en, this message translates to:
-  /// **'Claude filled in what the scan could not find.'**
+  /// **'Muse filled in what the scan could not find.'**
   String get reposDetectByClaude;
 
   /// No description provided for @reposDetectNeedsUrl.
@@ -17844,7 +20442,7 @@ abstract class AppLocalizations {
   /// No description provided for @reposBuildEnvHelp.
   ///
   /// In en, this message translates to:
-  /// **'KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Claude can read them while it works, so use read-only tokens.'**
+  /// **'KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Muse can read them while it works, so use read-only tokens.'**
   String get reposBuildEnvHelp;
 
   /// No description provided for @reposBuildEnvSet.
@@ -18600,7 +21198,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesLede.
   ///
   /// In en, this message translates to:
-  /// **'Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.'**
+  /// **'Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Muse reviews each rule and asks about anything unclear before it applies.'**
   String get rulesLede;
 
   /// No description provided for @rulesAdd.
@@ -18618,7 +21216,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesDrawerSub.
   ///
   /// In en, this message translates to:
-  /// **'Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.'**
+  /// **'Write it the way you would brief a new teammate. Muse checks it before any ticket follows it.'**
   String get rulesDrawerSub;
 
   /// No description provided for @rulesRuleTitle.
@@ -18690,7 +21288,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesRereviewHelp.
   ///
   /// In en, this message translates to:
-  /// **'You changed what the rule says, so Claude reviews it again. Tickets stop getting it until the review is done.'**
+  /// **'You changed what the rule says, so Muse reviews it again. Tickets stop getting it until the review is done.'**
   String get rulesRereviewHelp;
 
   /// No description provided for @rulesSaved.
@@ -18702,7 +21300,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesSavedReview.
   ///
   /// In en, this message translates to:
-  /// **'Rule saved; Claude is reviewing it'**
+  /// **'Rule saved; Muse is reviewing it'**
   String get rulesSavedReview;
 
   /// No description provided for @rulesScopeLabel.
@@ -18798,13 +21396,13 @@ abstract class AppLocalizations {
   /// No description provided for @rulesPending.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for a free worker. Claude reviews rules before the next ticket starts.'**
+  /// **'Waiting for a free worker. Muse reviews rules before the next ticket starts.'**
   String get rulesPending;
 
   /// No description provided for @rulesAnalyzing.
   ///
   /// In en, this message translates to:
-  /// **'Claude is reading the rule and checking it for anything unclear or conflicting.'**
+  /// **'Muse is reading the rule and checking it for anything unclear or conflicting.'**
   String get rulesAnalyzing;
 
   /// No description provided for @rulesQuestionsTitle.
@@ -18816,7 +21414,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesQuestionsSub.
   ///
   /// In en, this message translates to:
-  /// **'Claude found something unclear. Your answers become part of the rule.'**
+  /// **'Muse found something unclear. Your answers become part of the rule.'**
   String get rulesQuestionsSub;
 
   /// No description provided for @rulesYourAnswer.
@@ -18882,7 +21480,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesFailed.
   ///
   /// In en, this message translates to:
-  /// **'Claude could not review this rule: {error}'**
+  /// **'Muse could not review this rule: {error}'**
   String rulesFailed(String error);
 
   /// No description provided for @rulesReviewAgain.
@@ -18930,7 +21528,7 @@ abstract class AppLocalizations {
   /// No description provided for @rulesAnswered.
   ///
   /// In en, this message translates to:
-  /// **'Answers sent; Claude is reviewing the rule again'**
+  /// **'Answers sent; Muse is reviewing the rule again'**
   String get rulesAnswered;
 
   /// No description provided for @rulesAccepted.
@@ -19098,7 +21696,7 @@ abstract class AppLocalizations {
   /// No description provided for @runsLede.
   ///
   /// In en, this message translates to:
-  /// **'Every Claude Code and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.'**
+  /// **'Every Muse and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.'**
   String get runsLede;
 
   /// No description provided for @runsRunTitle.
@@ -19362,7 +21960,7 @@ abstract class AppLocalizations {
   /// No description provided for @runsE_claude.
   ///
   /// In en, this message translates to:
-  /// **'Claude'**
+  /// **'Muse'**
   String get runsE_claude;
 
   /// No description provided for @runsE_codex.
@@ -19620,7 +22218,7 @@ abstract class AppLocalizations {
   /// No description provided for @runsAccount.
   ///
   /// In en, this message translates to:
-  /// **'Claude account'**
+  /// **'Muse account'**
   String get runsAccount;
 
   /// No description provided for @runsSession.
@@ -20157,6 +22755,24 @@ abstract class AppLocalizations {
   /// **'The run stops and reports when it reaches this'**
   String get settingsMaxTurnsHelp;
 
+  /// No description provided for @settingsRunBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget per run'**
+  String get settingsRunBudget;
+
+  /// No description provided for @settingsRunBudgetHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The most one run on credits may spend; Muse is told to wrap up at 80% and stopped before going over'**
+  String get settingsRunBudgetHelp;
+
+  /// No description provided for @settingsRunBudgetServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server cap'**
+  String get settingsRunBudgetServer;
+
   /// No description provided for @settingsTimeout.
   ///
   /// In en, this message translates to:
@@ -20424,7 +23040,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSecretsHelp.
   ///
   /// In en, this message translates to:
-  /// **'Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.'**
+  /// **'Tokens for Jira, GitHub and Muse are stored encrypted on your server. This page never shows them.'**
   String get settingsSecretsHelp;
 
   /// No description provided for @settingsSaved.
@@ -20499,6 +23115,54 @@ abstract class AppLocalizations {
   /// **'When a watched branch goes red'**
   String get settingsCiRed;
 
+  /// No description provided for @settingsClaudeMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse Code'**
+  String get settingsClaudeMuse;
+
+  /// No description provided for @settingsClaudeMovedMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is connected per workspace.'**
+  String get settingsClaudeMovedMuse;
+
+  /// No description provided for @settingsClaudeOpenMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace → Muse'**
+  String get settingsClaudeOpenMuse;
+
+  /// No description provided for @settingsModelsHelpMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick which model runs each step. Muse Spark costs the least; Muse Wonder is stronger and costs more.'**
+  String get settingsModelsHelpMuse;
+
+  /// No description provided for @settingsStageCodingHelpMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'The main run. Spends the most.'**
+  String get settingsStageCodingHelpMuse;
+
+  /// No description provided for @settingsStageReviewHelpMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews each result while you review it. Auto uses Muse Wonder for complex tickets and Muse Spark for the rest.'**
+  String get settingsStageReviewHelpMuse;
+
+  /// No description provided for @settingsAllowHelpMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse Code can run these without asking'**
+  String get settingsAllowHelpMuse;
+
+  /// No description provided for @settingsDenyHelpMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Always refused, even if a ticket asks for them. Pushing is done by agnts, never by Muse Code.'**
+  String get settingsDenyHelpMuse;
+
   /// No description provided for @spendTitle.
   ///
   /// In en, this message translates to:
@@ -20514,7 +23178,7 @@ abstract class AppLocalizations {
   /// No description provided for @spendEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Nothing recorded yet. Spend appears after agnts\'s first Claude run on this ticket.'**
+  /// **'Nothing recorded yet. Spend appears after agnts\'s first Muse run on this ticket.'**
   String get spendEmpty;
 
   /// No description provided for @spendInput.
@@ -20550,7 +23214,7 @@ abstract class AppLocalizations {
   /// No description provided for @spendCostNote.
   ///
   /// In en, this message translates to:
-  /// **'Cost is Claude Code\'s estimate of the same work at API prices. On a Claude plan you are not charged it; it shows the relative weight of each stage.'**
+  /// **'Cost is Muse\'s estimate of the same work at API prices. On a Muse plan you are not charged it; it shows the relative weight of each stage.'**
   String get spendCostNote;
 
   /// No description provided for @spendTokens.
@@ -20634,13 +23298,13 @@ abstract class AppLocalizations {
   /// No description provided for @spendTopEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No Claude runs recorded in this period.'**
+  /// **'No Muse runs recorded in this period.'**
   String get spendTopEmpty;
 
   /// No description provided for @spendTopNote.
   ///
   /// In en, this message translates to:
-  /// **'Ranked by Claude Code\'s cost estimate, which weighs cache traffic properly. Share is of the period\'s estimated cost. Only spend inside the period counts.'**
+  /// **'Ranked by Muse\'s cost estimate, which weighs cache traffic properly. Share is of the period\'s estimated cost. Only spend inside the period counts.'**
   String get spendTopNote;
 
   /// No description provided for @spendColStage.
@@ -21114,7 +23778,7 @@ abstract class AppLocalizations {
   /// No description provided for @swaggerClaudeOnly.
   ///
   /// In en, this message translates to:
-  /// **'Swagger tests always run on Claude (Sonnet), whatever model the workspace codes with.'**
+  /// **'Swagger tests always run on Muse\'s light model, whatever model the workspace codes with.'**
   String get swaggerClaudeOnly;
 
   /// No description provided for @swaggerTab.
@@ -22494,7 +25158,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketSkipChecksHint.
   ///
   /// In en, this message translates to:
-  /// **'For checks the run container can\'t run, such as a private dependency it can\'t fetch. Claude won\'t run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.'**
+  /// **'For checks the run container can\'t run, such as a private dependency it can\'t fetch. Muse won\'t run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.'**
   String get ticketSkipChecksHint;
 
   /// No description provided for @ticketStopRun.
@@ -23319,6 +25983,36 @@ abstract class AppLocalizations {
   /// **'Ticket details'**
   String get ticketTabsLabel;
 
+  /// No description provided for @ticketFactsTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get ticketFactsTicket;
+
+  /// No description provided for @ticketFactsCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get ticketFactsCode;
+
+  /// No description provided for @ticketFactsPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get ticketFactsPeople;
+
+  /// No description provided for @ticketFactsLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked tickets'**
+  String get ticketFactsLinks;
+
+  /// No description provided for @ticketFactsRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs'**
+  String get ticketFactsRuns;
+
   /// No description provided for @ticketTabReview.
   ///
   /// In en, this message translates to:
@@ -23456,6 +26150,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CI sent the pull request back {n, plural, one {{n} time} other {{n} times}}'**
   String ticketCiFixes(num n);
+
+  /// No description provided for @ticketMuseMeter.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse spend for this run'**
+  String get ticketMuseMeter;
+
+  /// No description provided for @ticketMuseSpentOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{spent} of {limit}'**
+  String ticketMuseSpentOf(String spent, String limit);
+
+  /// No description provided for @ticketMuseCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} call} other {{n} calls}}'**
+  String ticketMuseCalls(num n);
+
+  /// No description provided for @ticketMuseCharged.
+  ///
+  /// In en, this message translates to:
+  /// **'charged {amount}'**
+  String ticketMuseCharged(String amount);
+
+  /// No description provided for @ticketMuseSteered.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget low: told to wrap up'**
+  String get ticketMuseSteered;
+
+  /// No description provided for @ticketMuseStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped over budget'**
+  String get ticketMuseStopped;
+
+  /// No description provided for @ticketMuseEscalated.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {model}'**
+  String ticketMuseEscalated(String model);
+
+  /// No description provided for @ticketsTabsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket lists'**
+  String get ticketsTabsLabel;
 
   /// No description provided for @ticketsTitle.
   ///
@@ -23694,7 +26436,7 @@ abstract class AppLocalizations {
   /// No description provided for @usageLede.
   ///
   /// In en, this message translates to:
-  /// **'agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.'**
+  /// **'agnts runs on your Muse plan. These limits are shared with your own Muse use.'**
   String get usageLede;
 
   /// No description provided for @usageCard.
@@ -23826,7 +26568,7 @@ abstract class AppLocalizations {
   /// No description provided for @usageSource.
   ///
   /// In en, this message translates to:
-  /// **'Read from Claude Code\'s rate limit events. Includes your own Claude use on this account.'**
+  /// **'Read from Muse\'s rate limit events. Includes your own Muse use on this account.'**
   String get usageSource;
 
   /// No description provided for @usageLimitTitle.
@@ -23898,7 +26640,7 @@ abstract class AppLocalizations {
   /// No description provided for @usageHelp.
   ///
   /// In en, this message translates to:
-  /// **'Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.'**
+  /// **'Numbers come from the rate limit events Muse emits during each run. When agnts is idle, a tiny refresh run keeps them current.'**
   String get usageHelp;
 
   /// No description provided for @wsTitle.
@@ -24084,7 +26826,7 @@ abstract class AppLocalizations {
   /// No description provided for @wsMembersSub.
   ///
   /// In en, this message translates to:
-  /// **'Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Claude, members and billing.'**
+  /// **'Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Muse, members and billing.'**
   String get wsMembersSub;
 
   /// No description provided for @wsYou.
@@ -24531,563 +27273,143 @@ abstract class AppLocalizations {
   /// **'Role of {name}'**
   String wsRoleLabel(String name);
 
-  /// No description provided for @codechatTitle.
+  /// No description provided for @wsTabMuse.
   ///
   /// In en, this message translates to:
-  /// **'Code'**
-  String get codechatTitle;
+  /// **'Muse'**
+  String get wsTabMuse;
 
-  /// No description provided for @codechatModeLabel.
+  /// No description provided for @wsClaudeMuse.
   ///
   /// In en, this message translates to:
-  /// **'Chat mode'**
-  String get codechatModeLabel;
+  /// **'Muse'**
+  String get wsClaudeMuse;
 
-  /// No description provided for @codechatModeChat.
+  /// No description provided for @wsClaudeSubMuse.
   ///
   /// In en, this message translates to:
-  /// **'Chat'**
-  String get codechatModeChat;
+  /// **'Which Muse account this workspace\'s runs use.'**
+  String get wsClaudeSubMuse;
 
-  /// No description provided for @codechatModeCode.
+  /// No description provided for @wsClaudeSavedMuse.
   ///
   /// In en, this message translates to:
-  /// **'Code'**
-  String get codechatModeCode;
+  /// **'Muse settings saved'**
+  String get wsClaudeSavedMuse;
 
-  /// No description provided for @codechatNewConversation.
+  /// No description provided for @wsFallbackHelpMuse.
   ///
   /// In en, this message translates to:
-  /// **'New Code conversation'**
-  String get codechatNewConversation;
+  /// **'When the chosen account is missing or out of budget, runs continue on agnts\'s Muse key and spend your free credits, then the workspace\'s credits, instead of pausing.'**
+  String get wsFallbackHelpMuse;
 
-  /// No description provided for @codechatEmptyTitle.
+  /// No description provided for @wsMemberAccountsSubMuse.
   ///
   /// In en, this message translates to:
-  /// **'Change code from the chat'**
-  String get codechatEmptyTitle;
+  /// **'Who has connected their own Muse account (Profile → Muse).'**
+  String get wsMemberAccountsSubMuse;
 
-  /// No description provided for @codechatEmptyText.
+  /// No description provided for @wsMuseBadge.
   ///
   /// In en, this message translates to:
-  /// **'Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.'**
-  String get codechatEmptyText;
+  /// **'Muse connected'**
+  String get wsMuseBadge;
 
-  /// No description provided for @codechatViewersOnly.
+  /// No description provided for @wsNoMuseBadge.
   ///
   /// In en, this message translates to:
-  /// **'Code mode is for people who can change the workspace.'**
-  String get codechatViewersOnly;
+  /// **'No Muse'**
+  String get wsNoMuseBadge;
 
-  /// No description provided for @codechatRepos.
+  /// No description provided for @wsKindMuseLogin.
   ///
   /// In en, this message translates to:
-  /// **'Repositories'**
-  String get codechatRepos;
+  /// **'Meta account'**
+  String get wsKindMuseLogin;
 
-  /// No description provided for @codechatReposNone.
+  /// No description provided for @wsKindMuseApiKey.
   ///
   /// In en, this message translates to:
-  /// **'Pick the repositories to work in, or name them in the message with @'**
-  String get codechatReposNone;
+  /// **'Muse API key'**
+  String get wsKindMuseApiKey;
 
-  /// No description provided for @codechatReposChange.
+  /// No description provided for @wsMuseSignIn.
   ///
   /// In en, this message translates to:
-  /// **'Change'**
-  String get codechatReposChange;
+  /// **'Sign in with Meta'**
+  String get wsMuseSignIn;
 
-  /// No description provided for @codechatReposSave.
+  /// No description provided for @wsMuseSignInHelp.
   ///
   /// In en, this message translates to:
-  /// **'Save repositories'**
-  String get codechatReposSave;
+  /// **'Shows a code to confirm on Meta\'s page; runs then use that Meta account\'s Muse.'**
+  String get wsMuseSignInHelp;
 
-  /// No description provided for @codechatReposSaved.
+  /// No description provided for @wsMuseCode.
   ///
   /// In en, this message translates to:
-  /// **'Repositories changed: the next ticket works in them'**
-  String get codechatReposSaved;
+  /// **'Enter this code on Meta\'s page'**
+  String get wsMuseCode;
 
-  /// No description provided for @codechatKind.
+  /// No description provided for @wsMuseCopyCode.
   ///
   /// In en, this message translates to:
-  /// **'Kind'**
-  String get codechatKind;
+  /// **'Copy code'**
+  String get wsMuseCopyCode;
 
-  /// No description provided for @codechatQuick.
+  /// No description provided for @wsMuseOpenMeta.
   ///
   /// In en, this message translates to:
-  /// **'Quick: skip checks'**
-  String get codechatQuick;
+  /// **'Open Meta'**
+  String get wsMuseOpenMeta;
 
-  /// No description provided for @codechatQuickHint.
+  /// No description provided for @wsMuseWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Build, lint and tests don\'t run, so review comes sooner.'**
-  String get codechatQuickHint;
+  /// **'Waiting for you to approve…'**
+  String get wsMuseWaiting;
 
-  /// No description provided for @codechatTicketPick.
+  /// No description provided for @wsMuseExpires.
   ///
   /// In en, this message translates to:
-  /// **'Or work on an existing ticket'**
-  String get codechatTicketPick;
+  /// **'The code works until {time}.'**
+  String wsMuseExpires(String time);
 
-  /// No description provided for @codechatTicketPlaceholder.
+  /// No description provided for @wsMuse_denied.
   ///
   /// In en, this message translates to:
-  /// **'Ticket key, e.g. PAY-214'**
-  String get codechatTicketPlaceholder;
+  /// **'The sign-in was declined on Meta\'s page.'**
+  String get wsMuse_denied;
 
-  /// No description provided for @codechatTicketAttach.
+  /// No description provided for @wsMuse_expired.
   ///
   /// In en, this message translates to:
-  /// **'Attach'**
-  String get codechatTicketAttach;
+  /// **'The code expired before it was confirmed.'**
+  String get wsMuse_expired;
 
-  /// No description provided for @codechatTicketAttached.
+  /// No description provided for @wsMuse_failed.
   ///
   /// In en, this message translates to:
-  /// **'Now working on {key}'**
-  String codechatTicketAttached(String key);
+  /// **'The sign-in failed.'**
+  String get wsMuse_failed;
 
-  /// No description provided for @codechatPlaceholderNew.
+  /// No description provided for @wsMuseTryAgain.
   ///
   /// In en, this message translates to:
-  /// **'Describe the change…'**
-  String get codechatPlaceholderNew;
+  /// **'Try again'**
+  String get wsMuseTryAgain;
 
-  /// No description provided for @codechatPlaceholderReview.
+  /// No description provided for @wsMuseUseKey.
   ///
   /// In en, this message translates to:
-  /// **'Ask for changes, or approve above…'**
-  String get codechatPlaceholderReview;
+  /// **'Use an API key'**
+  String get wsMuseUseKey;
 
-  /// No description provided for @codechatPlaceholderAnswers.
+  /// No description provided for @wsMuseKeyHelp.
   ///
   /// In en, this message translates to:
-  /// **'Answer the question…'**
-  String get codechatPlaceholderAnswers;
-
-  /// No description provided for @codechatPlaceholderRunning.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to the request: it is sent when this run ends…'**
-  String get codechatPlaceholderRunning;
-
-  /// No description provided for @codechatPlaceholderStopped.
-  ///
-  /// In en, this message translates to:
-  /// **'Say how to get past this, and it retries…'**
-  String get codechatPlaceholderStopped;
-
-  /// No description provided for @codechatPlaceholderPushing.
-  ///
-  /// In en, this message translates to:
-  /// **'Pushing now…'**
-  String get codechatPlaceholderPushing;
-
-  /// No description provided for @codechatPlaceholderDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask for the next change…'**
-  String get codechatPlaceholderDone;
-
-  /// No description provided for @codechatSend.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get codechatSend;
-
-  /// No description provided for @codechatSendHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter sends, Shift+Enter makes a new line'**
-  String get codechatSendHint;
-
-  /// No description provided for @codechatCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} / 4000'**
-  String codechatCount(String n);
-
-  /// No description provided for @codechatMentioned.
-  ///
-  /// In en, this message translates to:
-  /// **'Works in {names}'**
-  String codechatMentioned(String names);
-
-  /// No description provided for @codechatMentionLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Repositories'**
-  String get codechatMentionLabel;
-
-  /// No description provided for @codechatRoutedCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'Started {key}'**
-  String codechatRoutedCreated(String key);
-
-  /// No description provided for @codechatRoutedAnswered.
-  ///
-  /// In en, this message translates to:
-  /// **'Answered {key}'**
-  String codechatRoutedAnswered(String key);
-
-  /// No description provided for @codechatRoutedChanges.
-  ///
-  /// In en, this message translates to:
-  /// **'Asked {key} for changes'**
-  String codechatRoutedChanges(String key);
-
-  /// No description provided for @codechatRoutedContinued.
-  ///
-  /// In en, this message translates to:
-  /// **'Continued {key}'**
-  String codechatRoutedContinued(String key);
-
-  /// No description provided for @codechatRoutedRetried.
-  ///
-  /// In en, this message translates to:
-  /// **'Retried {key}'**
-  String codechatRoutedRetried(String key);
-
-  /// No description provided for @codechatRoutedQueued.
-  ///
-  /// In en, this message translates to:
-  /// **'Waits for {key}\'s run to end'**
-  String codechatRoutedQueued(String key);
-
-  /// No description provided for @codechatRoutedSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Sent to {key}'**
-  String codechatRoutedSent(String key);
-
-  /// No description provided for @codechatRoutedFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Not sent: {reason}'**
-  String codechatRoutedFailed(String reason);
-
-  /// No description provided for @codechatRoutedSteered.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivered to the running agent'**
-  String get codechatRoutedSteered;
-
-  /// No description provided for @codechatQueuedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{n, plural, one {{n} message waits} other {{n} messages wait}} for this run to end'**
-  String codechatQueuedTitle(num n);
-
-  /// No description provided for @codechatSendNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop and send now'**
-  String get codechatSendNow;
-
-  /// No description provided for @codechatSendNowTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop {key} now?'**
-  String codechatSendNowTitle(String key);
-
-  /// No description provided for @codechatSendNowText.
-  ///
-  /// In en, this message translates to:
-  /// **'The running stage stops, and your messages go to it at once.'**
-  String get codechatSendNowText;
-
-  /// No description provided for @codechatSteps.
-  ///
-  /// In en, this message translates to:
-  /// **'{n, plural, one {{n} step} other {{n} steps}}'**
-  String codechatSteps(num n);
-
-  /// No description provided for @codechatStateLine.
-  ///
-  /// In en, this message translates to:
-  /// **'{key}: {state}'**
-  String codechatStateLine(String key, String state);
-
-  /// No description provided for @codechatCheckPassed.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} passed'**
-  String codechatCheckPassed(String name);
-
-  /// No description provided for @codechatCheckFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} failed'**
-  String codechatCheckFailed(String name);
-
-  /// No description provided for @codechatPrOpened.
-  ///
-  /// In en, this message translates to:
-  /// **'Pull request opened'**
-  String get codechatPrOpened;
-
-  /// No description provided for @codechatPushed.
-  ///
-  /// In en, this message translates to:
-  /// **'Pushed'**
-  String get codechatPushed;
-
-  /// No description provided for @codechatMerged.
-  ///
-  /// In en, this message translates to:
-  /// **'Merged'**
-  String get codechatMerged;
-
-  /// No description provided for @codechatWorking.
-  ///
-  /// In en, this message translates to:
-  /// **'Working…'**
-  String get codechatWorking;
-
-  /// No description provided for @codechatResultTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{key} is ready for your review'**
-  String codechatResultTitle(String key);
-
-  /// No description provided for @codechatReportTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{key} wrote its report'**
-  String codechatReportTitle(String key);
-
-  /// No description provided for @codechatFilesChanged.
-  ///
-  /// In en, this message translates to:
-  /// **'{n, plural, one {{n} file changed} other {{n} files changed}}'**
-  String codechatFilesChanged(num n);
-
-  /// No description provided for @codechatChecksPassed.
-  ///
-  /// In en, this message translates to:
-  /// **'Checks passed'**
-  String get codechatChecksPassed;
-
-  /// No description provided for @codechatChecksFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'{failed} of {n} checks failed'**
-  String codechatChecksFailed(String failed, String n);
-
-  /// No description provided for @codechatChecksSkipped.
-  ///
-  /// In en, this message translates to:
-  /// **'Checks skipped'**
-  String get codechatChecksSkipped;
-
-  /// No description provided for @codechatViewDiff.
-  ///
-  /// In en, this message translates to:
-  /// **'View diff'**
-  String get codechatViewDiff;
-
-  /// No description provided for @codechatHideDiff.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide diff'**
-  String get codechatHideDiff;
-
-  /// No description provided for @codechatApprove.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve'**
-  String get codechatApprove;
-
-  /// No description provided for @codechatApproveTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve {key}?'**
-  String codechatApproveTitle(String key);
-
-  /// No description provided for @codechatApprovePr.
-  ///
-  /// In en, this message translates to:
-  /// **'agnts pushes {branch} and opens a pull request.'**
-  String codechatApprovePr(String branch);
-
-  /// No description provided for @codechatApproveMain.
-  ///
-  /// In en, this message translates to:
-  /// **'agnts pushes the change straight to the default branch.'**
-  String get codechatApproveMain;
-
-  /// No description provided for @codechatApproveReport.
-  ///
-  /// In en, this message translates to:
-  /// **'The ticket closes with this report.'**
-  String get codechatApproveReport;
-
-  /// No description provided for @codechatReject.
-  ///
-  /// In en, this message translates to:
-  /// **'Reject'**
-  String get codechatReject;
-
-  /// No description provided for @codechatRejectTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Reject {key}?'**
-  String codechatRejectTitle(String key);
-
-  /// No description provided for @codechatRejectText.
-  ///
-  /// In en, this message translates to:
-  /// **'All work on it stops. You can continue it from this chat later.'**
-  String get codechatRejectText;
-
-  /// No description provided for @codechatOpenTicket.
-  ///
-  /// In en, this message translates to:
-  /// **'Open ticket'**
-  String get codechatOpenTicket;
-
-  /// No description provided for @codechatQuestionsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{key} asks before it goes on'**
-  String codechatQuestionsTitle(String key);
-
-  /// No description provided for @codechatAnswersSend.
-  ///
-  /// In en, this message translates to:
-  /// **'Send answers'**
-  String get codechatAnswersSend;
-
-  /// No description provided for @codechatStoppedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{key} stopped'**
-  String codechatStoppedTitle(String key);
-
-  /// No description provided for @codechatStoppedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Write how to get past it: it retries with your note.'**
-  String get codechatStoppedHint;
-
-  /// No description provided for @codechatDoneTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{key} is done'**
-  String codechatDoneTitle(String key);
-
-  /// No description provided for @codechatDoneHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Your next message starts a new ticket in the same repositories.'**
-  String get codechatDoneHint;
-
-  /// No description provided for @codechatRejectedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{key} was rejected'**
-  String codechatRejectedTitle(String key);
-
-  /// No description provided for @codechatRejectedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Write what to do differently and it continues.'**
-  String get codechatRejectedHint;
-
-  /// No description provided for @codechatMovedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'{key} moved to another of your conversations.'**
-  String codechatMovedHint(String key);
-
-  /// No description provided for @codechatApprovalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'The agent asks to run this'**
-  String get codechatApprovalTitle;
-
-  /// No description provided for @codechatApprovalReason.
-  ///
-  /// In en, this message translates to:
-  /// **'A rule asks about it: {reason}'**
-  String codechatApprovalReason(String reason);
-
-  /// No description provided for @codechatApprovalAllow.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow'**
-  String get codechatApprovalAllow;
-
-  /// No description provided for @codechatApprovalDeny.
-  ///
-  /// In en, this message translates to:
-  /// **'Deny'**
-  String get codechatApprovalDeny;
-
-  /// No description provided for @codechatApprovalAllowed.
-  ///
-  /// In en, this message translates to:
-  /// **'Allowed'**
-  String get codechatApprovalAllowed;
-
-  /// No description provided for @codechatApprovalDenied.
-  ///
-  /// In en, this message translates to:
-  /// **'Denied'**
-  String get codechatApprovalDenied;
-
-  /// No description provided for @codechatApprovalExpired.
-  ///
-  /// In en, this message translates to:
-  /// **'Nobody answered: denied'**
-  String get codechatApprovalExpired;
-
-  /// No description provided for @codechatApprovalLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'{seconds}s left'**
-  String codechatApprovalLeft(String seconds);
-
-  /// No description provided for @codechatHandoffTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Do this in Code'**
-  String get codechatHandoffTitle;
-
-  /// No description provided for @codechatHandoffOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Open in Code'**
-  String get codechatHandoffOpen;
-
-  /// No description provided for @codechatTicketChat.
-  ///
-  /// In en, this message translates to:
-  /// **'Discussed in chat'**
-  String get codechatTicketChat;
-
-  /// No description provided for @codechatContinueInChat.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue in chat'**
-  String get codechatContinueInChat;
-
-  /// No description provided for @codechatCodeBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Code'**
-  String get codechatCodeBadge;
-
-  /// No description provided for @navAssistantCode.
-  ///
-  /// In en, this message translates to:
-  /// **'Code'**
-  String get navAssistantCode;
+  /// **'Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner.'**
+  String get wsMuseKeyHelp;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

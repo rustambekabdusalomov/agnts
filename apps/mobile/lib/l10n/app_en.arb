@@ -241,26 +241,12 @@
   "analyticsDaysAbove": "Days above 80%",
   "analyticsNoUsage": "No usage readings in this period.",
   "analyticsSpend": "Token spend",
-  "analyticsSpendSub": "Tokens {agent} used per day, input and output",
-  "@analyticsSpendSub": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "analyticsSpendSub": "Tokens Muse used per day, input and output",
   "analyticsSpendTokens": "Tokens in and out",
   "analyticsSpendCost": "At API prices",
   "analyticsSpendStages": "Spend by stage",
   "analyticsSpendStagesSub": "Where the tokens went, costliest first",
-  "analyticsNoSpend": "No {agent} runs recorded in this period.",
-  "@analyticsNoSpend": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "analyticsNoSpend": "No Muse runs recorded in this period.",
   "analyticsRepos": "By repository",
   "analyticsReposSub": "Where agnts works best, and where it struggles",
   "analyticsColRepo": "Repository",
@@ -366,14 +352,7 @@
   "analyticsColCIRounds": "CI rounds",
   "analyticsColCIRoundsHint": "Average times red CI on the pull request sent the work back, per ticket that reached review (not counted in change rounds)",
   "analyticsColFixes": "Check fixes",
-  "analyticsColFixesHint": "Average times failing checks were sent back to {agent}",
-  "@analyticsColFixesHint": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "analyticsColFixesHint": "Average times failing checks were sent back to Muse",
   "analyticsColSerious": "Serious findings",
   "analyticsColSeriousHint": "Share of reviewed tickets where agnts's review found a blocker or major problem",
   "analyticsColFootprint": "Plan accuracy",
@@ -662,14 +641,7 @@
   "analyticsColManual": "Notes",
   "analyticsColManualHint": "Notes the reviewer wrote by hand",
   "analyticsColRepos": "Repositories",
-  "analyticsKpiCostNote": "All {agent} calls in the period",
-  "@analyticsKpiCostNote": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "analyticsKpiCostNote": "All Muse calls in the period",
   "analyticsKpiDaysAboveNote": "{n} days above 80% of the session limit",
   "@analyticsKpiDaysAboveNote": {
     "placeholders": {
@@ -878,22 +850,8 @@
   "briefSave": "Save brief",
   "briefCancel": "Cancel",
   "briefEditHint": "Markdown. What you save is what runs read from now on; leave it empty to give runs no brief.",
-  "briefNone": "No brief yet. Survey the repository to have {agent} write a draft, or write one yourself.",
-  "@briefNone": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
-  "briefSurveying": "{agent} is surveying the repository. The draft appears here for your approval.",
-  "@briefSurveying": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "briefNone": "No brief yet. Survey the repository to have Muse write a draft, or write one yourself.",
+  "briefSurveying": "Muse is surveying the repository. The draft appears here for your approval.",
   "briefFailed": "The last survey failed: {error}",
   "@briefFailed": {
     "placeholders": {
@@ -2434,14 +2392,7 @@
   "filesAddPhoto": "Photo",
   "filesCamera": "Camera",
   "filesAddFile": "File",
-  "filesHint": "Pictures, PDFs, logs or text, up to 10 MB each. {agent} reads them all.",
-  "@filesHint": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "filesHint": "Pictures, PDFs, logs or text, up to 10 MB each. Muse reads them all.",
   "filesUploading": "Uploading {name}…",
   "@filesUploading": {
     "placeholders": {
@@ -2837,14 +2788,7 @@
   "groupsMaxTicketReposHelp": "How many repositories one ticket, and one repository group, may have.",
   "harnessRepoTab": "Guardrails",
   "harnessRepoTitle": "Guardrails",
-  "harnessRepoSub": "How strictly agnts-guard checks {agent}'s work in this repository, while it works and after.",
-  "@harnessRepoSub": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRepoSub": "How strictly agnts-guard checks Muse's work in this repository, while it works and after.",
   "harnessRepoSave": "Save guardrails",
   "harnessRepoSaved": "Guardrails saved",
   "harnessRepoAgentTitle": "Agent instruction files",
@@ -2872,14 +2816,7 @@
   "harnessRepoKind_agent_instruction": "Instruction to an agent",
   "harnessRepoKind_exfiltration": "Sends data out",
   "harnessRepoKind_encoded_blob": "Encoded text",
-  "harnessRepoKind_hooks": "{agent} hooks",
-  "@harnessRepoKind_hooks": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRepoKind_hooks": "Muse hooks",
   "harnessRepoKind_mcp_server": "MCP servers",
   "harnessRepoProfile": "Guard profile",
   "harnessRepoProfileHelp": "How strict the in-run checks are for this repository.",
@@ -2888,50 +2825,15 @@
   "harnessRepoProfile_standard": "Standard",
   "harnessRepoProfile_strict": "Strict",
   "harnessRepoProfileHelp_": "Follows the workspace setting.",
-  "harnessRepoProfileHelp_minimal": "Only secrets and enforced rules are blocked; build checked before {agent} finishes.",
-  "@harnessRepoProfileHelp_minimal": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
-  "harnessRepoProfileHelp_standard": "Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before {agent} finishes.",
-  "@harnessRepoProfileHelp_standard": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
-  "harnessRepoProfileHelp_strict": "Also blocks swallowed errors and removed assertions, runs the tests before {agent} finishes, and may ask for facts before editing a file.",
-  "@harnessRepoProfileHelp_strict": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRepoProfileHelp_minimal": "Only secrets and enforced rules are blocked; build checked before Muse finishes.",
+  "harnessRepoProfileHelp_standard": "Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Muse finishes.",
+  "harnessRepoProfileHelp_strict": "Also blocks swallowed errors and removed assertions, runs the tests before Muse finishes, and may ask for facts before editing a file.",
   "harnessRepoSecretAllow": "Example credentials allowed in",
   "harnessRepoSecretAllowHelp": "Path globs where fake keys are expected, besides testdata/, fixtures/ and *.example.",
   "harnessRepoChecksTitle": "Per-file checks",
-  "harnessRepoChecksSub": "Quick formatters and linters agnts-guard runs on each file {agent} edits, so problems are fixed while the change is fresh.",
-  "@harnessRepoChecksSub": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRepoChecksSub": "Quick formatters and linters agnts-guard runs on each file Muse edits, so problems are fixed while the change is fresh.",
   "harnessRepoChecksOff": "Turn per-file checks off",
-  "harnessRepoChecksOffHelp": "{agent} is not checked after each edit; the checks after the run still apply.",
-  "@harnessRepoChecksOffHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRepoChecksOffHelp": "Muse is not checked after each edit; the checks after the run still apply.",
   "harnessRepoOwnChecks": "Use my own checks",
   "harnessRepoOwnChecksHelp": "Replace the checks agnts derives from the toolchains with your list.",
   "harnessRepoDerivedTitle": "Derived from the toolchains",
@@ -3009,36 +2911,15 @@
   "harnessRulesDelivery_prompt": "Every prompt",
   "harnessRulesDelivery_skill": "Skill",
   "harnessRulesDeliveryHelp_prompt": "In every prompt, always in view.",
-  "harnessRulesDeliveryHelp_skill": "A skill {agent} loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.",
-  "@harnessRulesDeliveryHelp_skill": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRulesDeliveryHelp_skill": "A skill Muse loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.",
   "harnessRulesEnforce": "Enforce",
-  "harnessRulesEnforceHelp": "agnts-guard checks the rule while {agent} works, not only asks for it.",
-  "@harnessRulesEnforceHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRulesEnforceHelp": "agnts-guard checks the rule while Muse works, not only asks for it.",
   "harnessRulesOn": "Check",
   "harnessRulesOn_file": "File edits",
   "harnessRulesOn_bash": "Commands",
   "harnessRulesOn_diff": "Finished change",
   "harnessRulesOnHelp_file": "Edits of the files below; with a pattern, only added lines that match it.",
-  "harnessRulesOnHelp_bash": "Shell commands {agent} runs that match the pattern.",
-  "@harnessRulesOnHelp_bash": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRulesOnHelp_bash": "Shell commands Muse runs that match the pattern.",
   "harnessRulesOnHelp_diff": "The finished change, checked on the server after the run.",
   "harnessRulesPaths": "Files (globs)",
   "harnessRulesPathsPlaceholder": "server/migrations/*.sql",
@@ -3046,14 +2927,7 @@
   "harnessRulesAction": "When it matches",
   "harnessRulesAction_block": "Block",
   "harnessRulesAction_warn": "Warn",
-  "harnessRulesMessage": "Message to {agent}",
-  "@harnessRulesMessage": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessRulesMessage": "Message to Muse",
   "harnessRulesMessagePlaceholder": "Add a new migration instead.",
   "harnessRulesTry": "Try on history",
   "harnessRulesTrying": "Checking…",
@@ -3115,26 +2989,12 @@
   },
   "harnessRulesWatchingHelp": "Lessons agnts noticed once or twice. They become suggestions when it sees them again; until then they reach no ticket.",
   "harnessSettingsTitle": "Guardrails",
-  "harnessSettingsSub": "agnts-guard checks {agent}'s work inside every run, while it happens; agnts's checks after the run still apply.",
-  "@harnessSettingsSub": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsSub": "agnts-guard checks Muse's work inside every run, while it happens; agnts's checks after the run still apply.",
   "harnessSettingsProfile": "Guard profile",
   "harnessSettingsProfile_minimal": "Minimal",
   "harnessSettingsProfile_standard": "Standard",
   "harnessSettingsProfile_strict": "Strict",
-  "harnessSettingsProfileHelp_minimal": "Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before {agent} finishes.",
-  "@harnessSettingsProfileHelp_minimal": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsProfileHelp_minimal": "Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Muse finishes.",
   "harnessSettingsProfileHelp_standard": "Minimal, plus: blocks skipped tests, silenced linters, deleted tests and check config changes; lint in the stop gate; quick checks of each edited file.",
   "harnessSettingsProfileHelp_strict": "Standard, plus: tests in the stop gate, blocks swallowed errors and removed assertions, and the fact check before first edits.",
   "harnessSettingsFactCheck": "Fact check share",
@@ -3154,14 +3014,7 @@
   "harnessSettingsLearnFromRuns": "Learn from runs",
   "harnessSettingsLearnFromRunsHelp": "After a run with failed checks or a stall, agnts may suggest a tip for the repository. Tips stay watched until seen again.",
   "harnessSettingsMethodSkills": "Method skills",
-  "harnessSettingsMethodSkillsHelp": "Coding runs get agnts's method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. {agent} loads one only when it fits; compare on Analytics.",
-  "@harnessSettingsMethodSkillsHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsMethodSkillsHelp": "Coding runs get agnts's method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Muse loads one only when it fits; compare on Analytics.",
   "harnessSettingsSecondOpinion": "Second opinion",
   "harnessSettingsSecondOpinionHelp": "Another model reads the chosen approach of complex tickets and says whether it agrees. Empty turns it off.",
   "harnessSettingsSecondOpinionHint": "e.g. opus or codex:gpt-5-codex",
@@ -3173,24 +3026,10 @@
   "harnessSettingsHook_pre_fact_check": "ask for facts before the first edit of a file",
   "harnessSettingsHook_pre_destructive": "ask for a rollback plan before destructive commands",
   "harnessSettingsHook_post_edit_check": "check each edited file (formatter, linter)",
-  "harnessSettingsHook_stop_gate": "build and lint must pass before {agent} finishes",
-  "@harnessSettingsHook_stop_gate": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsHook_stop_gate": "build and lint must pass before Muse finishes",
   "harnessSettingsHook_session_progress": "give the plan back after the context is compacted",
   "harnessSettingsCodex": "Coding on Codex",
-  "harnessSettingsCodexHelp": "A Codex model name runs coding on Codex CLI instead of {agent}; empty uses {agent}. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).",
-  "@harnessSettingsCodexHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsCodexHelp": "A Codex model name runs coding on Codex CLI instead of Muse; empty uses Muse. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).",
   "harnessSettingsCodexConnect": "OpenAI integration",
   "harnessSettingsQualityTitle": "Guardrails by prompt version",
   "harnessSettingsQualitySub": "What agnts-guard and the harness checks did for the tickets of each prompt version.",
@@ -3215,25 +3054,11 @@
   "harnessSettingsColSkillTickets": "Tickets",
   "harnessSettingsColSkillTicketsHint": "Tickets with a coding run that had the skill",
   "harnessSettingsColLoaded": "Loaded",
-  "harnessSettingsColLoadedHint": "Share of those tickets where {agent} loaded the skill",
-  "@harnessSettingsColLoadedHint": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsColLoadedHint": "Share of those tickets where Muse loaded the skill",
   "harnessSettingsColSkillFirstTry": "First try",
   "harnessSettingsColSkillFirstTryHint": "Done without a person asking for changes, of the done tickets",
   "harnessSettingsColLoadedFirstTry": "First try, loaded",
-  "harnessSettingsColLoadedFirstTryHint": "First-try rate of the done tickets where {agent} loaded the skill",
-  "@harnessSettingsColLoadedFirstTryHint": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsColLoadedFirstTryHint": "First-try rate of the done tickets where Muse loaded the skill",
   "harnessSettingsColTargeted": "Targeted findings",
   "harnessSettingsColTargetedHint": "Review findings per ticket of the kinds the skills target: architecture, maintainability, and any on a migration file",
   "harnessSettingsXOfY": "{x} of {y}",
@@ -3256,14 +3081,7 @@
     }
   },
   "harnessSettingsEffort": "Thinking effort",
-  "harnessSettingsEffortHelp": "How hard {agent} thinks in each stage ({agent}'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.",
-  "@harnessSettingsEffortHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "harnessSettingsEffortHelp": "How hard Muse thinks in each stage (Muse's --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.",
   "harnessSettingsEffortAnalyze": "Analysis",
   "harnessSettingsEffortCoding": "Coding",
   "harnessSettingsEffortReview": "Review",
@@ -3854,14 +3672,7 @@
   },
   "learnRetry": "Try again",
   "learnReadingTitle": "Further reading",
-  "learnReadingNote": "{agent} suggested these links. Check them before relying on them.",
-  "@learnReadingNote": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "learnReadingNote": "Muse suggested these links. Check them before relying on them.",
   "learnCategory_pattern": "Pattern",
   "learnCategory_architecture": "Architecture",
   "learnCategory_algorithm": "Algorithm",
@@ -4272,16 +4083,13 @@
   "massistantStatsRated": "Rated answers",
   "massistantRatedEmpty": "No rated answers yet.",
   "massistantRatedShared": "Kept for prompt tests",
-  "massistantStatsParts": "Container {start} · workspace {snapshot} · {agent} {claude}",
+  "massistantStatsParts": "Container {start} · workspace {snapshot} · Muse {claude}",
   "@massistantStatsParts": {
     "placeholders": {
       "start": {
         "type": "String"
       },
       "snapshot": {
-        "type": "String"
-      },
-      "agent": {
         "type": "String"
       },
       "claude": {
@@ -4612,6 +4420,521 @@
       }
     }
   },
+  "meetingsPageTitle": "Meetings",
+  "meetingsLede": "Video calls for the team and the guests you let in. Muse can take the notes and turn what was agreed into tickets.",
+  "meetingsStartNow": "Start now",
+  "meetingsSchedule": "Schedule",
+  "meetingsGetLink": "Get a link",
+  "meetingsLinkCopied": "Link copied: {link}",
+  "@meetingsLinkCopied": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsLinkCopiedShort": "Link copied",
+  "meetingsCopyLink": "Copy link",
+  "meetingsJoinWithCode": "Join with a code or link",
+  "meetingsCodePlaceholder": "abc-defg-hij",
+  "meetingsBadCode": "That is not a meeting code: it looks like abc-defg-hij.",
+  "meetingsJoin": "Join",
+  "meetingsOpen": "Open",
+  "meetingsTab_upcoming": "Upcoming",
+  "meetingsTab_past": "Past calls",
+  "meetingsTab_mine": "I host",
+  "meetingsNoneUpcoming": "No live or upcoming meetings. Start one now, or schedule one.",
+  "meetingsNoneMine": "You host no meetings yet.",
+  "meetingsNonePast": "No calls yet.",
+  "meetingsLive": "Live",
+  "meetingsInCallNow": "{n, plural, one {{n} person in the call} other {{n} people in the call}}",
+  "@meetingsInCallNow": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsLiveEmpty": "The call is open",
+  "meetingsNobodyYet": "Nobody is in the call yet",
+  "meetingsHostedBy": "Hosted by {name}",
+  "@meetingsHostedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsUntitled": "Meeting",
+  "meetingsKind_instant": "Now",
+  "meetingsKind_scheduled": "Later",
+  "meetingsColMeeting": "Meeting",
+  "meetingsColWhen": "When",
+  "meetingsColPeople": "People",
+  "meetingsColNotes": "Notes",
+  "meetingsRecordings": "{n, plural, one {{n} recording} other {{n} recordings}}",
+  "@meetingsRecordings": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsActionItemsN": "{n, plural, one {{n} action item} other {{n} action items}}",
+  "@meetingsActionItemsN": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsOpenNotes": "Open the notes",
+  "meetingsNotes_none": "No notes",
+  "meetingsNotes_recording": "Taking notes",
+  "meetingsNotes_queued": "Notes queued",
+  "meetingsNotes_transcribing": "Muse is listening",
+  "meetingsNotes_writing": "Muse is writing",
+  "meetingsNotes_done": "Notes ready",
+  "meetingsNotes_failed": "Notes failed",
+  "meetingsOffTitle": "Meetings are off on this server",
+  "meetingsOffBody": "The server’s administrator turns them on with a LiveKit server (AGNTS_LIVEKIT_URL).",
+  "meetingsYourReminders": "Your reminders",
+  "meetingsRemindersSub": "Before a meeting you are invited to starts, on your phone and here.",
+  "meetingsMinutesBefore": "{n} min before",
+  "@meetingsMinutesBefore": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsNoReminders": "No reminders",
+  "meetingsSettingsTitle": "Meetings in this workspace",
+  "meetingsSettingsSub": "Recordings, what is kept and for how long, and how many people one call takes.",
+  "meetingsAllowRecording": "Hosts may record calls as video",
+  "meetingsKeepAudio": "Keep the audio of notes after Muse has heard it",
+  "meetingsRetention": "Keep recordings and transcripts for (days)",
+  "meetingsRetentionHelp": "0 keeps them for ever.",
+  "meetingsMaxPeople": "People in one call",
+  "meetingsServerCan": "This server can do:",
+  "meetingsRecordingWord": "Recording",
+  "meetingsNotesWord": "Notes",
+  "meetingsSave": "Save",
+  "meetingsSettingsSaved": "Saved",
+  "meetingsNewTitle": "New meeting",
+  "meetingsNewSub": "A call now, or one in the calendar with invitations.",
+  "meetingsEditTitle": "Change the meeting",
+  "meetingsWhen": "When",
+  "meetingsTitle": "Title",
+  "meetingsTitlePlaceholder": "Sprint planning",
+  "meetingsDate": "Date",
+  "meetingsTime": "Time",
+  "meetingsDuration": "Length",
+  "meetingsMinutes": "{n} min",
+  "@meetingsMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTimeZoneIs": "Times are in {zone}.",
+  "@meetingsTimeZoneIs": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsDescription": "Agenda",
+  "meetingsDescriptionPlaceholder": "What the meeting is for. Muse reads it when it writes the notes.",
+  "meetingsAccess": "Who joins without knocking",
+  "meetingsAccess_workspace": "Everyone in the workspace",
+  "meetingsAccess_invited": "Only the invited",
+  "meetingsAccessHelp_workspace": "Members join; guests knock.",
+  "meetingsAccessHelp_invited": "Invitees join; other members and guests knock.",
+  "meetingsGuestsMode": "Guests",
+  "meetingsGuests_knock": "Knock",
+  "meetingsGuests_open": "Open",
+  "meetingsGuests_off": "Off",
+  "meetingsGuestsHelp_knock": "People without a membership wait until a host lets them in.",
+  "meetingsGuestsHelp_open": "Anyone with the link joins without waiting, until the call ends.",
+  "meetingsGuestsHelp_off": "Only members of the workspace.",
+  "meetingsGuestsAre": "guests: {mode}",
+  "@meetingsGuestsAre": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsInvite": "Invite",
+  "meetingsEmailsPlaceholder": "Email addresses, separated by commas",
+  "meetingsInviteHelp": "Everyone gets an email with the calendar event; people outside the workspace get a personal link.",
+  "meetingsInviteHelpNow": "Members are told in agnts; addresses get the link by email.",
+  "meetingsAi": "Notes and recording",
+  "meetingsAutoNotes": "Take notes: Muse hears the call and writes the decisions and action items",
+  "meetingsAutoRecord": "Record the call as video",
+  "meetingsAutoNotesOn": "Notes on",
+  "meetingsAutoRecordOn": "Recorded",
+  "meetingsNotesUnavailable": "Notes are not set up on this server.",
+  "meetingsLanguage": "Language of the notes",
+  "meetingsLang_auto": "As spoken",
+  "meetingsCancel": "Cancel",
+  "meetingsEdit": "Change",
+  "meetingsDelete": "Delete",
+  "meetingsCancelMeeting": "Cancel the meeting",
+  "meetingsCancelTitle": "Cancel this meeting?",
+  "meetingsCancelBody": "Invitees get the cancellation in their calendar. A call in progress ends.",
+  "meetingsCancelled": "This meeting was cancelled.",
+  "meetingsCancelledShort": "Cancelled",
+  "meetingsDeleteTitle": "Delete this meeting?",
+  "meetingsDeleteBody": "Its calls, recordings, transcripts and chat are deleted. Notes documents stay.",
+  "meetingsLink": "Link",
+  "meetingsRing": "Ring people",
+  "meetingsRingWho": "Who to ring now",
+  "meetingsRingNow": "Ring",
+  "meetingsRinging": "Ringing…",
+  "meetingsAreYouComing": "Are you coming?",
+  "meetingsRsvp_yes": "Yes",
+  "meetingsRsvp_no": "No",
+  "meetingsRsvp_maybe": "Maybe",
+  "meetingsRsvp_none": "No answer",
+  "meetingsInvitees": "{n, plural, =0 {Invited} one {{n} invited} other {{n} invited}}",
+  "@meetingsInvitees": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsInviteMore": "Invite",
+  "meetingsNoInvitees": "Nobody is invited.",
+  "meetingsByEmail": "by email",
+  "meetingsUninvite": "Uninvite",
+  "meetingsCalls": "Calls",
+  "meetingsNoCalls": "The meeting has not been live yet.",
+  "meetingsTheMeeting": "the meeting",
+  "meetingsNotesTitle": "Notes",
+  "meetingsNoNotes": "Notes were not taken in this call.",
+  "meetingsNotesBusy_recording": "Notes are being taken; Muse writes them when the call ends.",
+  "meetingsNotesBusy_queued": "Waiting for Muse to hear the call…",
+  "meetingsNotesBusy_transcribing": "Muse is listening to the call…",
+  "meetingsNotesBusy_writing": "Muse is writing the notes…",
+  "meetingsNotesFailed": "The notes could not be written: {reason}",
+  "@meetingsNotesFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsWriteAgain": "Write again",
+  "meetingsNotesAgain": "Muse is writing the notes again",
+  "meetingsActionItems": "Action items",
+  "meetingsAnyRepo": "Any repository",
+  "meetingsRepository": "Repository",
+  "meetingsCreateTicket": "Create ticket",
+  "meetingsTicketMade": "{key} created",
+  "@meetingsTicketMade": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsRecordingsTitle": "Recording",
+  "meetingsRecordingNow": "Recording…",
+  "meetingsDownload": "Download",
+  "meetingsDeleteRecordingTitle": "Delete this recording?",
+  "meetingsDeleteRecordingBody": "The video is deleted for everyone. The transcript and notes stay.",
+  "meetingsAttendance": "{n, plural, one {{n} person} other {{n} people}}",
+  "@meetingsAttendance": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsStillIn": "still in",
+  "meetingsGuest": "Guest",
+  "meetingsMember": "Member",
+  "meetingsTranscript": "Transcript",
+  "meetingsNoTranscript": "No transcript.",
+  "meetingsSearchTranscript": "Search what was said",
+  "meetingsMixedNote": "Everyone’s audio was heard together, so the transcript does not say who spoke.",
+  "meetingsChatLog": "{n, plural, =0 {Chat} one {Chat · {n} message} other {Chat · {n} messages}}",
+  "@meetingsChatLog": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsShow": "Show",
+  "meetingsHide": "Hide",
+  "meetingsTicketTitle": "Discussed in meetings",
+  "meetingsNotFound": "No such meeting",
+  "meetingsSomethingWrong": "Something went wrong",
+  "meetingsTryAgain": "Try again",
+  "meetingsCameraStarting": "Starting the camera…",
+  "meetingsCameraOff": "Camera is off",
+  "meetingsMicOn": "Microphone on",
+  "meetingsMicOff": "Microphone off",
+  "meetingsCamOn": "Camera on",
+  "meetingsCamOff": "Camera off",
+  "meetingsMicLevel": "Microphone level",
+  "meetingsDevicesBlocked": "The browser blocked the camera and microphone. Allow them in the address bar, then try again.",
+  "meetingsDevicesFailed": "The camera or microphone could not start. Another app may be using it.",
+  "meetingsMicrophone": "Microphone",
+  "meetingsCamera": "Camera",
+  "meetingsSpeakers": "Speakers",
+  "meetingsDefaultDevice": "Default",
+  "meetingsLobbyRecording": "This call is being recorded.",
+  "meetingsLobbyNotes": "agnts is taking notes of this call.",
+  "meetingsNotStartedYet": "You can join 15 minutes before it starts.",
+  "meetingsYourName": "Your name",
+  "meetingsYourNamePlaceholder": "How others will see you",
+  "meetingsJoiningAs": "You join as {name}.",
+  "@meetingsJoiningAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsJoinNow": "Join now",
+  "meetingsAskToJoin": "Ask to join",
+  "meetingsJoining": "Joining…",
+  "meetingsOrGoogle": "Or show who you are with Google",
+  "meetingsWaitingTitle": "Asking to join…",
+  "meetingsWaitingBody": "Someone in the call will let you in soon.",
+  "meetingsConnecting": "Connecting…",
+  "meetingsYouLeft": "You left the call",
+  "meetingsJoinedElsewhere": "You joined from another tab",
+  "meetingsRejoin": "Rejoin",
+  "meetingsBackToMeetings": "Back to meetings",
+  "meetingsEnded": "The call has ended",
+  "meetingsEndedBody": "Notes and recordings appear under Past calls when they are ready.",
+  "meetingsRemovedTitle": "You were removed from the call",
+  "meetingsRemovedBody": "A host removed you. You can’t rejoin this call.",
+  "meetingsRefused_locked": "The meeting is locked",
+  "meetingsRefused_full": "The meeting is full",
+  "meetingsRefused_removed": "You were removed from this call",
+  "meetingsRefused_guests_off": "This meeting is for the workspace’s members",
+  "meetingsRefused_not_started": "The meeting hasn’t started yet",
+  "meetingsRefused_cancelled": "This meeting was cancelled",
+  "meetingsRefused_denied": "You were not let in",
+  "meetingsRefused_expired": "Nobody answered",
+  "meetingsRole_host": "Host",
+  "meetingsRole_cohost": "Co-host",
+  "meetingsRole_member": "Member",
+  "meetingsRole_guest": "Guest",
+  "meetingsYou": "{name} (you)",
+  "@meetingsYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsYouShort": "you",
+  "meetingsScreenOf": "{name}’s screen",
+  "@meetingsScreenOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsPoorConnection": "Poor connection",
+  "meetingsHandRaised": "Hand raised",
+  "meetingsPin": "Pin",
+  "meetingsUnpin": "Unpin",
+  "meetingsRecording": "Recording",
+  "meetingsTakingNotes": "Taking notes",
+  "meetingsLocked": "Locked",
+  "meetingsReconnecting": "Reconnecting…",
+  "meetingsEnableAudio": "Turn the sound on",
+  "meetingsWantsToJoin": "wants to join",
+  "meetingsAndMore": "and {n} more",
+  "@meetingsAndMore": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsAdmit": "Admit",
+  "meetingsDeny": "Deny",
+  "meetingsSeeAll": "See all",
+  "meetingsAskedToUnmute": "{name} asks you to unmute.",
+  "@meetingsAskedToUnmute": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsUnmute": "Unmute",
+  "meetingsNotNow": "Not now",
+  "meetingsChat": "Chat",
+  "meetingsPeople": "People",
+  "meetingsMicToggle": "Microphone (Ctrl+D)",
+  "meetingsCamToggle": "Camera (Ctrl+E)",
+  "meetingsShareScreen": "Share your screen",
+  "meetingsStopSharing": "Stop sharing",
+  "meetingsRaiseHand": "Raise your hand",
+  "meetingsLowerHand": "Lower hand",
+  "meetingsReact": "React",
+  "meetingsSpeakerView": "Speaker view",
+  "meetingsGridView": "Grid view",
+  "meetingsHostControls": "Host controls",
+  "meetingsStartRecording": "Start recording",
+  "meetingsStopRecording": "Stop recording",
+  "meetingsRecordTitle": "Record this call?",
+  "meetingsRecordBody": "Everyone in the call sees that it is recorded, and people who join are told before they do.",
+  "meetingsStartNotes": "Take notes",
+  "meetingsStopNotes": "Stop taking notes",
+  "meetingsLock": "Lock the meeting",
+  "meetingsUnlock": "Unlock the meeting",
+  "meetingsMuteAll": "Mute everyone",
+  "meetingsQuietGuests": "Turn off guests’ chat and screen sharing",
+  "meetingsGuestsSpeakAgain": "Let guests chat and share again",
+  "meetingsOpenTitle": "Let anyone with the link in?",
+  "meetingsOpenBody": "Until this call ends, guests join without waiting.",
+  "meetingsLetAnyoneIn": "Let them in",
+  "meetingsEndForAll": "End the call for everyone",
+  "meetingsEndTitle": "End the call for everyone?",
+  "meetingsEndBody": "Everyone is disconnected. Notes are written from what was recorded.",
+  "meetingsLeave": "Leave",
+  "meetingsWaiting": "{n, plural, one {{n} waiting} other {{n} waiting}}",
+  "@meetingsWaiting": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsAdmitAll": "Admit all",
+  "meetingsHands": "{n, plural, one {{n} raised hand} other {{n} raised hands}}",
+  "@meetingsHands": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsInCall": "{n, plural, one {{n} in the call} other {{n} in the call}}",
+  "@meetingsInCall": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsDevices": "{n} devices",
+  "@meetingsDevices": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsActionsFor": "Actions for {name}",
+  "@meetingsActionsFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsMuteMic": "Mute microphone",
+  "meetingsStopCamera": "Stop camera",
+  "meetingsStopScreen": "Stop screen sharing",
+  "meetingsAskUnmute": "Ask to unmute",
+  "meetingsMakeCohost": "Make co-host",
+  "meetingsUncohost": "Remove as co-host",
+  "meetingsRemove": "Remove from the call",
+  "meetingsRemoveTitle": "Remove {name}?",
+  "@meetingsRemoveTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsRemoveBody": "They are disconnected on every device and can’t come back to this call.",
+  "meetingsChatEmpty": "No messages yet. Messages are kept with the call.",
+  "meetingsChatPlaceholder": "Send a message to everyone",
+  "meetingsChatOff": "The hosts turned guests’ chat off.",
+  "meetingsSend": "Send",
+  "meetingsCallingYou": "{name} is calling you",
+  "@meetingsCallingYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsStartsSoon": "A meeting starts soon",
+  "meetingsHasStarted": "A meeting you’re invited to has started",
+  "meetingsKnockAway": "{name} wants to join your meeting",
+  "@meetingsKnockAway": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsDecline": "Decline",
+  "meetingsDismiss": "Dismiss",
+  "meetingsColHost": "Host",
+  "meetingsFullscreen": "Full screen",
+  "meetingsExitFullscreen": "Exit full screen",
+  "meetingsColPerson": "Person",
+  "meetingsColInCall": "In the call",
+  "meetingsColDuration": "Time",
+  "meetingsLeaveTitle": "Leave the call?",
+  "meetingsLeaveBody": "You can join again with the same link while the call is on.",
+  "meetingsLeaveBodyHost": "The call goes on without you. To close it for everyone, choose “End the call for everyone” in Host controls.",
+  "meetingsStopRecordingTitle": "Stop recording?",
+  "meetingsStopRecordingBody": "What was recorded so far is saved and appears on the call’s page.",
+  "meetingsStopNotesTitle": "Stop taking notes?",
+  "meetingsStopNotesBody": "Muse writes the notes from what it heard until now.",
+  "meetingsMuteAllTitle": "Mute everyone?",
+  "meetingsMuteAllBody": "Everyone except you is muted. They can unmute themselves.",
+  "meetingsLockTitle": "Lock the meeting?",
+  "meetingsLockBody": "Nobody new can join or knock until you unlock it. People already admitted, and the hosts, can still come back.",
+  "meetingsAdmitAllTitle": "{n, plural, one {Let {n} person in?} other {Let {n} people in?}}",
+  "@meetingsAdmitAllTitle": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsAdmitAllBody": "Everyone waiting joins the call now.",
+  "meetingsCohostTitle": "Make {name} a co-host?",
+  "@meetingsCohostTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsCohostBody": "Co-hosts can let people in, mute and remove them, record the call and take notes.",
+  "meetingsWriteAgainTitle": "Write the notes again?",
+  "meetingsWriteAgainBody": "Muse writes them again from the call and replaces the current notes, with any changes made to them.",
+  "meetingsUninviteTitle": "Remove {name} from the invitations?",
+  "@meetingsUninviteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsUninviteBody": "They are no longer invited and get no more reminders.",
   "mgroupsGroups": "Groups",
   "mgroupsRepos": "Repositories",
   "mgroupsPickHint": "Pick one or more. The first one is the main one.",
@@ -5166,6 +5489,7 @@
   "navAssistantCode": "Code",
   "navAssistantConversations": "Conversations",
   "navDocuments": "Documents",
+  "navMeetings": "Meetings",
   "networkTitle": "Private networks",
   "networkSub": "Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.",
   "networkUnavailable": "Private networks are not set up on this server: the operator runs the gateway service and sets AGNTS_GATEWAY.",
@@ -5740,25 +6064,11 @@
   "previewAutoPreview": "Take screenshots of every UI change",
   "previewAutoPreviewHelp": "While a change waits for you, agnts starts the app, opens the pages it touches and shows screenshots next to the diff. It never blocks approval.",
   "previewVisualCheck": "Let coding runs look at the app",
-  "previewVisualCheckHelp": "{agent} may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.",
-  "@previewVisualCheckHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "previewVisualCheckHelp": "Muse may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.",
   "previewModel_": "Preview model",
   "previewModelHelp": "Picks the pages and judges the screenshots.",
   "previewEgress": "Allowed hosts",
-  "previewEgressHelp": "Hosts run containers may reach besides the built-in list ({agent}, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.",
-  "@previewEgressHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "previewEgressHelp": "Hosts run containers may reach besides the built-in list (Muse, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.",
   "previewNotify": "When preview screenshots are ready",
   "previewNotifyPhotos": "Send phone screenshots to Telegram",
   "previewNotifyPhotosHelp": "Up to four screenshots go with the Telegram message.",
@@ -6012,25 +6322,11 @@
   "queueBadge_blocked": "Waiting · related",
   "queueBadge_slots": "Queued · slots",
   "queueBadge_server": "Queued · server",
-  "queueBadge_claude": "Paused · {agent}",
-  "@queueBadge_claude": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "queueBadge_claude": "Paused · Muse",
   "queueTitle_blocked": "Waiting for related tickets",
   "queueTitle_slots": "Waiting for a free slot",
   "queueTitle_server": "In the server queue",
-  "queueTitle_claude": "Waiting for {agent}",
-  "@queueTitle_claude": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "queueTitle_claude": "Waiting for Muse",
   "queuePosition": "#{position} in the server queue",
   "@queuePosition": {
     "placeholders": {
@@ -6081,24 +6377,10 @@
     }
   },
   "queueAddSlot": "Add a slot",
-  "queueClaudeHint": "Connect an account or turn on credits in Workspace settings → {agent}.",
-  "@queueClaudeHint": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "queueClaudeHint": "Connect an account or turn on credits in Workspace settings → Muse.",
   "queueMember": "Member",
   "queueTakeOver": "Take over",
-  "queueTakenOver": "The ticket is yours: it runs on your {agent} account in per-member mode.",
-  "@queueTakenOver": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "queueTakenOver": "The ticket is yours: it runs on your Muse account in per-member mode.",
   "queueCreatedBy": "Created by {name}",
   "@queueCreatedBy": {
     "placeholders": {
@@ -6220,13 +6502,10 @@
   "replayTitle": "Replay with today's agnts",
   "replaySub": "Re-run this ticket from the commit it started from, with the current prompts, brief and rules, and compare the result with what you approved. The replay is never pushed.",
   "replayStart": "Replay",
-  "replayConfirm": "agnts creates a new task that re-does {key} from where it started. It uses your {agent} plan like any ticket.",
+  "replayConfirm": "agnts creates a new task that re-does {key} from where it started. It uses your Muse plan like any ticket.",
   "@replayConfirm": {
     "placeholders": {
       "key": {
-        "type": "String"
-      },
-      "agent": {
         "type": "String"
       }
     }
@@ -6271,13 +6550,10 @@
   "replayBenchmarkRun": "Run benchmark",
   "replayBenchmarkModel": "Coding model",
   "replayBenchmarkModelDefault": "as the originals",
-  "replayBenchmarkConfirm": "agnts replays the {n} benchmark tickets from where each started. They use your {agent} plan like any ticket.",
+  "replayBenchmarkConfirm": "agnts replays the {n} benchmark tickets from where each started. They use your Muse plan like any ticket.",
   "@replayBenchmarkConfirm": {
     "placeholders": {
       "n": {
-        "type": "String"
-      },
-      "agent": {
         "type": "String"
       }
     }
@@ -6459,14 +6735,7 @@
   "repoCommit": "Commit",
   "repoOpen": "Open",
   "repoNoEnvironments": "No deployment environments on the git host.",
-  "repoDeployHelp": "agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from {agent} chat.",
-  "@repoDeployHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "repoDeployHelp": "agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Muse chat.",
   "repoDeployBranch": "Deploy {branch}",
   "@repoDeployBranch": {
     "placeholders": {
@@ -6732,22 +7001,8 @@
   "reposToolchainBad": "Write it as tool@version, e.g. node@20 or rust@stable.",
   "reposToolchainsNone": "None yet: they are detected after you save, or press Detect.",
   "reposDetect": "Detect",
-  "reposDetectDeep": "Ask {agent}",
-  "@reposDetectDeep": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
-  "reposDetectDeepHelp": "{agent} reads the README and CI files when the scan finds no commands. Takes about a minute and uses your {agent} plan.",
-  "@reposDetectDeepHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "reposDetectDeep": "Ask Muse",
+  "reposDetectDeepHelp": "Muse reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Muse plan.",
   "reposDetecting": "Reading the repository…",
   "reposDetectDone": "Found {list}.",
   "@reposDetectDone": {
@@ -6757,23 +7012,9 @@
       }
     }
   },
-  "reposDetectNothing": "No known build files found. Add the toolchains and commands by hand, or ask {agent}.",
-  "@reposDetectNothing": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "reposDetectNothing": "No known build files found. Add the toolchains and commands by hand, or ask Muse.",
   "reposDetectFilled": "Empty check commands were filled in; review them before saving.",
-  "reposDetectByClaude": "{agent} filled in what the scan could not find.",
-  "@reposDetectByClaude": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "reposDetectByClaude": "Muse filled in what the scan could not find.",
   "reposDetectNeedsUrl": "Enter the clone URL first.",
   "reposCmdAuto": "detected after saving",
   "reposNotes": "Notes from detection",
@@ -6784,14 +7025,7 @@
   "reposMemoryHelp": "Optional, for heavy builds (JVM, Rust, .NET). Server default unless set; the server caps it (AGNTS_RUN_MEMORY_MAX_MB, 8 GB by default).",
   "reposMemoryDefault": "Server default",
   "reposBuildEnv": "Build environment",
-  "reposBuildEnvHelp": "KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. {agent} can read them while it works, so use read-only tokens.",
-  "@reposBuildEnvHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "reposBuildEnvHelp": "KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Muse can read them while it works, so use read-only tokens.",
   "reposBuildEnvSet": "Set: {names}",
   "@reposBuildEnvSet": {
     "placeholders": {
@@ -7082,24 +7316,10 @@
     }
   },
   "rulesTitle": "Rules",
-  "rulesLede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. {agent} reviews each rule and asks about anything unclear before it applies.",
-  "@rulesLede": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "rulesLede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Muse reviews each rule and asks about anything unclear before it applies.",
   "rulesAdd": "Add rule",
   "rulesAddSubmit": "Add and review",
-  "rulesDrawerSub": "Write it the way you would brief a new teammate. {agent} checks it before any ticket follows it.",
-  "@rulesDrawerSub": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "rulesDrawerSub": "Write it the way you would brief a new teammate. Muse checks it before any ticket follows it.",
   "rulesRuleTitle": "Title",
   "rulesTitlePlaceholder": "Tests for new endpoints",
   "rulesScope": "Applies to",
@@ -7118,23 +7338,9 @@
       }
     }
   },
-  "rulesRereviewHelp": "You changed what the rule says, so {agent} reviews it again. Tickets stop getting it until the review is done.",
-  "@rulesRereviewHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "rulesRereviewHelp": "You changed what the rule says, so Muse reviews it again. Tickets stop getting it until the review is done.",
   "rulesSaved": "Rule saved",
-  "rulesSavedReview": "Rule saved; {agent} is reviewing it",
-  "@rulesSavedReview": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "rulesSavedReview": "Rule saved; Muse is reviewing it",
   "rulesScopeLabel": "Show rules for",
   "rulesScopeAll": "All rules ({n})",
   "@rulesScopeAll": {
@@ -7178,22 +7384,8 @@
       }
     }
   },
-  "rulesPending": "Waiting for a free worker. {agent} reviews rules before the next ticket starts.",
-  "@rulesPending": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
-  "rulesAnalyzing": "{agent} is reading the rule and checking it for anything unclear or conflicting.",
-  "@rulesAnalyzing": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "rulesPending": "Waiting for a free worker. Muse reviews rules before the next ticket starts.",
+  "rulesAnalyzing": "Muse is reading the rule and checking it for anything unclear or conflicting.",
   "rulesQuestionsTitle": "{n, plural, one {{n} question before this rule applies} other {{n} questions before this rule applies}}",
   "@rulesQuestionsTitle": {
     "placeholders": {
@@ -7202,14 +7394,7 @@
       }
     }
   },
-  "rulesQuestionsSub": "{agent} found something unclear. Your answers become part of the rule.",
-  "@rulesQuestionsSub": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "rulesQuestionsSub": "Muse found something unclear. Your answers become part of the rule.",
   "rulesYourAnswer": "Your answer",
   "rulesAddDetails": "Add details (optional)",
   "rulesAnswerFor": "Answer to question {n}",
@@ -7241,12 +7426,9 @@
   "rulesAccept": "Use as written",
   "rulesAcceptTitle": "Use the rule as written?",
   "rulesAcceptBody": "Tickets get the rule as you wrote it, with the answers given so far. Open questions are dropped.",
-  "rulesFailed": "{agent} could not review this rule: {error}",
+  "rulesFailed": "Muse could not review this rule: {error}",
   "@rulesFailed": {
     "placeholders": {
-      "agent": {
-        "type": "String"
-      },
       "error": {
         "type": "String"
       }
@@ -7280,14 +7462,7 @@
       }
     }
   },
-  "rulesAnswered": "Answers sent; {agent} is reviewing the rule again",
-  "@rulesAnswered": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "rulesAnswered": "Answers sent; Muse is reviewing the rule again",
   "rulesAccepted": "The rule applies as written",
   "rulesQueued": "Queued for review",
   "rulesDeleted": "Rule deleted",
@@ -7329,14 +7504,7 @@
   "rulesTag_other": "other",
   "runsNavRuns": "Runs",
   "runsTitle": "Run history",
-  "runsLede": "Every {agent} and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.",
-  "@runsLede": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "runsLede": "Every Muse and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.",
   "runsRunTitle": "Invocation",
   "runsBack": "All runs",
   "runsSettings": "Settings",
@@ -7394,14 +7562,7 @@
   "runsS_oom": "Out of memory",
   "runsFEngine": "Engine",
   "runsAnyEngine": "Any engine",
-  "runsE_claude": "{agent}",
-  "@runsE_claude": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "runsE_claude": "Muse",
   "runsE_codex": "Codex",
   "runsFModel": "Model",
   "runsFTicket": "Ticket",
@@ -7461,14 +7622,7 @@
   "runsNotFound": "This transcript no longer exists.",
   "runsUnreadable": "Part of this transcript could not be read; what follows is what could.",
   "runsTruncated": "The size limit was reached; later content was left out.",
-  "runsAccount": "{agent} account",
-  "@runsAccount": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "runsAccount": "Muse account",
   "runsSession": "Session",
   "runsStartedAt": "Started",
   "runsFinishedAt": "Finished",
@@ -7691,14 +7845,7 @@
   "settingsProgressHelp": "Analysis done, code written. Phone only, silent, one notification per ticket",
   "settingsLessons": "When agnts finds something new to learn",
   "settingsReviewDone": "When agnts's code review finishes",
-  "settingsSecretsHelp": "Tokens for Jira, GitHub and {agent} are stored encrypted on your server. This page never shows them.",
-  "@settingsSecretsHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "settingsSecretsHelp": "Tokens for Jira, GitHub and Muse are stored encrypted on your server. This page never shows them.",
   "settingsSaved": "Settings saved",
   "settingsParallelSlots": "{n, plural, one {{n} run} other {{n} runs}} at once",
   "@settingsParallelSlots": {
@@ -7738,14 +7885,7 @@
       }
     }
   },
-  "spendEmpty": "Nothing recorded yet. Spend appears after agnts's first {agent} run on this ticket.",
-  "@spendEmpty": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "spendEmpty": "Nothing recorded yet. Spend appears after agnts's first Muse run on this ticket.",
   "spendInput": "Input",
   "spendOutput": "Output",
   "spendCache": "Cache: {read} read, {write} written",
@@ -7768,14 +7908,7 @@
     }
   },
   "spendPartial": "A run was cut off, so its cost is unknown",
-  "spendCostNote": "Cost is {agent}'s estimate of the same work at API prices. On a {agent} plan you are not charged it; it shows the relative weight of each stage.",
-  "@spendCostNote": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "spendCostNote": "Cost is Muse's estimate of the same work at API prices. On a Muse plan you are not charged it; it shows the relative weight of each stage.",
   "spendTokens": "{n} tokens",
   "@spendTokens": {
     "placeholders": {
@@ -7806,22 +7939,8 @@
     }
   },
   "spendTopSubEmpty": "Which tickets used the most of your plan",
-  "spendTopEmpty": "No {agent} runs recorded in this period.",
-  "@spendTopEmpty": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
-  "spendTopNote": "Ranked by {agent}'s cost estimate, which weighs cache traffic properly. Share is of the period's estimated cost. Only spend inside the period counts.",
-  "@spendTopNote": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "spendTopEmpty": "No Muse runs recorded in this period.",
+  "spendTopNote": "Ranked by Muse's cost estimate, which weighs cache traffic properly. Share is of the period's estimated cost. Only spend inside the period counts.",
   "spendColStage": "Costliest stage",
   "spendColCost": "Est. cost",
   "spendColShare": "Share",
@@ -7954,14 +8073,7 @@
   },
   "swaggerNeedSpec": "Read a spec first.",
   "swaggerNeedToken": "Enter the token.",
-  "swaggerClaudeOnly": "Swagger tests always run on {agent}'s light model, whatever model the workspace codes with.",
-  "@swaggerClaudeOnly": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "swaggerClaudeOnly": "Swagger tests always run on Muse's light model, whatever model the workspace codes with.",
   "swaggerTab": "API results",
   "swaggerRequestsTab": "Requests",
   "swaggerNoRun": "No results yet: the test is running or has not run.",
@@ -8499,14 +8611,7 @@
   "ticketNoChecks": "No checks configured",
   "ticketChecksSkipped": "Skipped for this ticket",
   "ticketSkipChecks": "Skip checks: go to review on the code alone",
-  "ticketSkipChecksHint": "For checks the run container can't run, such as a private dependency it can't fetch. {agent} won't run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.",
-  "@ticketSkipChecksHint": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "ticketSkipChecksHint": "For checks the run container can't run, such as a private dependency it can't fetch. Muse won't run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.",
   "ticketStopRun": "Stop run",
   "ticketStopConfirm": "Stop the run on {key}? You can retry it later.",
   "@ticketStopConfirm": {
@@ -8994,14 +9099,7 @@
   "ticketsSourceGit": "PR",
   "ticketsSourceCi": "CI",
   "usageTitle": "Plan usage",
-  "usageLede": "agnts runs on your {agent} plan. These limits are shared with your own {agent} use.",
-  "@usageLede": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "usageLede": "agnts runs on your Muse plan. These limits are shared with your own Muse use.",
   "usageCard": "Plan usage",
   "usageUpdated": "Updated {time}",
   "@usageUpdated": {
@@ -9051,14 +9149,7 @@
   "usageStatus_allowed_warning": "Close to the limit",
   "usageStatus_rejected": "Limit reached",
   "usageStatus_unknown": "Unknown",
-  "usageSource": "Read from {agent}'s rate limit events. Includes your own {agent} use on this account.",
-  "@usageSource": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "usageSource": "Read from Muse's rate limit events. Includes your own Muse use on this account.",
   "usageLimitTitle": "When a limit is reached",
   "usageLimitSub": "How agnts behaves near the limit",
   "usageAbove": "Above {pct}% of the session",
@@ -9077,14 +9168,7 @@
   "usageResumeManual": "Wait for you to resume",
   "usageIdle": "Idle refresh",
   "usageIdleDo": "Every 30 min",
-  "usageHelp": "Numbers come from the rate limit events {agent} emits during each run. When agnts is idle, a tiny refresh run keeps them current.",
-  "@usageHelp": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "usageHelp": "Numbers come from the rate limit events Muse emits during each run. When agnts is idle, a tiny refresh run keeps them current.",
   "wsTitle": "Workspace",
   "wsSwitcher": "Switch workspace",
   "wsAll": "All workspaces",
@@ -9143,14 +9227,7 @@
   },
   "wsDeleted": "Workspace deleted",
   "wsMembers": "Members",
-  "wsMembersSub": "Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, {agent}, members and billing.",
-  "@wsMembersSub": {
-    "placeholders": {
-      "agent": {
-        "type": "String"
-      }
-    }
-  },
+  "wsMembersSub": "Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Muse, members and billing.",
   "wsYou": "you",
   "wsRemove": "Remove",
   "wsRemoveTitle": "Remove {name}?",

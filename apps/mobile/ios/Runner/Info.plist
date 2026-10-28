@@ -34,7 +34,14 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>agnts connects to your agnts server on this network.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>agnts uses the camera to attach a photo to a task or an answer.</string>
+	<string>agnts uses the camera in meetings, and to attach a photo to a task or an answer.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>agnts uses the microphone in meetings and for spoken questions.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>remote-notification</string>
+	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>agnts attaches the pictures you pick to a task or an answer.</string>
 	<key>UIApplicationSceneManifest</key>

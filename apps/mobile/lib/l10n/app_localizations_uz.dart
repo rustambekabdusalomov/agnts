@@ -320,6 +320,15 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get accountMyClaudeMuse => 'Sizning Muse hisobingiz';
+
+  @override
+  String get accountClaudeSavedMuse => 'Muse hisobi ulandi';
+
+  @override
+  String get accountClaudeRemovedMuse => 'Muse hisobi uzildi';
+
+  @override
   String get analyticsTitle => 'Analitika';
 
   @override
@@ -522,7 +531,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsSpend => 'Token sarfi';
 
   @override
-  String get analyticsSpendSub => 'Claude kuniga sarflagan tokenlar, kirish va chiqish';
+  String get analyticsSpendSub => 'Muse kuniga sarflagan tokenlar, kirish va chiqish';
 
   @override
   String get analyticsSpendTokens => 'Kirish va chiqish tokenlari';
@@ -537,7 +546,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsSpendStagesSub => 'Tokenlar qayerga ketgani, eng qimmati yuqorida';
 
   @override
-  String get analyticsNoSpend => 'Bu davrda Claude ishga tushirilmagan.';
+  String get analyticsNoSpend => 'Bu davrda Muse ishga tushirilmagan.';
 
   @override
   String get analyticsRepos => 'Repozitoriylar boʻyicha';
@@ -678,7 +687,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsColFixes => 'Tekshiruv tuzatishlari';
 
   @override
-  String get analyticsColFixesHint => 'Muvaffaqiyatsiz tekshiruvlar Claude’ga o‘rtacha necha marta qaytarilgan';
+  String get analyticsColFixesHint => 'Muvaffaqiyatsiz tekshiruvlar Muse’ga o‘rtacha necha marta qaytarilgan';
 
   @override
   String get analyticsColSerious => 'Jiddiy kamchiliklar';
@@ -1118,7 +1127,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get analyticsColRepos => 'Repozitoriylar';
 
   @override
-  String get analyticsKpiCostNote => 'Davrdagi barcha Claude chaqiruvlari';
+  String get analyticsKpiCostNote => 'Davrdagi barcha Muse chaqiruvlari';
 
   @override
   String analyticsKpiDaysAboveNote(String n) {
@@ -1393,6 +1402,26 @@ class AppLocalizationsUz extends AppLocalizations {
   String get billingReason_document => 'Hujjatga sarflandi';
 
   @override
+  String get billingFreeCredits => 'Bepul kreditlaringiz';
+
+  @override
+  String get billingFreeCreditsSub => 'agnts’dan. agnts’ning Muse kalitidagi ishlar ularni ish maydoni kreditlaridan oldin sarflaydi.';
+
+  @override
+  String billingFreeCreditsLeft(String n, String limit) {
+    return '$limit kreditdan $n tasi qoldi';
+  }
+
+  @override
+  String billingFreeCreditsWorth(String amount, String total) {
+    return '$total dan $amount';
+  }
+
+  @override
+  String get billingFreeCreditsNone =>
+      'Hozircha yo‘q. Administrator sizga agnts’ning Muse kalitidagi ishlar uchun bepul kredit berishi mumkin.';
+
+  @override
   String get briefTitle => 'Repozitoriy tavsifi';
 
   @override
@@ -1421,10 +1450,10 @@ class AppLocalizationsUz extends AppLocalizations {
   String get briefEditHint => 'Markdown. Saqlaganingizni bundan keyin ishga tushirishlar o‘qiydi; tavsif bermaslik uchun bo‘sh qoldiring.';
 
   @override
-  String get briefNone => 'Hali tavsif yo‘q. Claude qoralama yozishi uchun repozitoriyni o‘rganing yoki o‘zingiz yozing.';
+  String get briefNone => 'Hali tavsif yo‘q. Muse qoralama yozishi uchun repozitoriyni o‘rganing yoki o‘zingiz yozing.';
 
   @override
-  String get briefSurveying => 'Claude repozitoriyni o‘rganmoqda. Qoralama tasdiqlashingiz uchun shu yerda paydo bo‘ladi.';
+  String get briefSurveying => 'Muse repozitoriyni o‘rganmoqda. Qoralama tasdiqlashingiz uchun shu yerda paydo bo‘ladi.';
 
   @override
   String briefFailed(String error) {
@@ -1924,6 +1953,348 @@ class AppLocalizationsUz extends AppLocalizations {
       'Regulyar ifodalar, har qatorda bittadan. Mos kelgan log infratuzilma yiqilishi hisoblanadi: koʻrsatiladi va sanaladi, lekin tiket ochilmaydi. Oʻrnatilganlariga qoʻshiladi.';
 
   @override
+  String get codechatTitle => 'Kod';
+
+  @override
+  String get codechatModeLabel => 'Chat rejimi';
+
+  @override
+  String get codechatModeChat => 'Chat';
+
+  @override
+  String get codechatModeCode => 'Kod';
+
+  @override
+  String get codechatNewConversation => 'Yangi kod suhbati';
+
+  @override
+  String get codechatEmptyTitle => 'Kodni chatdan oʻzgartiring';
+
+  @override
+  String get codechatEmptyText =>
+      'Repozitoriylarni tanlang va nima qilish kerakligini yozing. agnts buni tiket sifatida bajaradi: ishni shu yerda kuzating, savollarga javob bering, oʻzgarish soʻrang va pull requestni tasdiqlang.';
+
+  @override
+  String get codechatViewersOnly => 'Kod rejimi ish maydonini oʻzgartira oladiganlar uchun.';
+
+  @override
+  String get codechatRepos => 'Repozitoriylar';
+
+  @override
+  String get codechatReposNone => 'Ishlash uchun repozitoriylarni tanlang yoki xabarda @ bilan ayting';
+
+  @override
+  String get codechatReposChange => 'Oʻzgartirish';
+
+  @override
+  String get codechatReposSave => 'Repozitoriylarni saqlash';
+
+  @override
+  String get codechatReposSaved => 'Repozitoriylar oʻzgardi: keyingi tiket ularda ishlaydi';
+
+  @override
+  String get codechatKind => 'Turi';
+
+  @override
+  String get codechatQuick => 'Tez: tekshiruvlarsiz';
+
+  @override
+  String get codechatQuickHint => 'Build, lint va testlar ishlamaydi, shuning uchun koʻrib chiqish tezroq keladi.';
+
+  @override
+  String get codechatTicketPick => 'Yoki mavjud tiket ustida ishlang';
+
+  @override
+  String get codechatTicketPlaceholder => 'Tiket kaliti, masalan PAY-214';
+
+  @override
+  String get codechatTicketAttach => 'Ulash';
+
+  @override
+  String codechatTicketAttached(String key) {
+    return 'Endi $key ustida ishlaymiz';
+  }
+
+  @override
+  String get codechatPlaceholderNew => 'Oʻzgarishni tasvirlang…';
+
+  @override
+  String get codechatPlaceholderReview => 'Oʻzgarish soʻrang yoki yuqorida tasdiqlang…';
+
+  @override
+  String get codechatPlaceholderAnswers => 'Savolga javob bering…';
+
+  @override
+  String get codechatPlaceholderRunning => 'Soʻrovga qoʻshing: bu ishga tushirish tugaganda yuboriladi…';
+
+  @override
+  String get codechatPlaceholderStopped => 'Buni qanday chetlab oʻtishni yozing, u qayta urinadi…';
+
+  @override
+  String get codechatPlaceholderPushing => 'Yuborilmoqda…';
+
+  @override
+  String get codechatPlaceholderDone => 'Keyingi oʻzgarishni yozing…';
+
+  @override
+  String get codechatSend => 'Yuborish';
+
+  @override
+  String get codechatSendHint => 'Enter yuboradi, Shift+Enter yangi qator, @ repozitoriyni ko‘rsatadi';
+
+  @override
+  String codechatCount(String n) {
+    return '$n / 4000';
+  }
+
+  @override
+  String codechatRoutedCreated(String key) {
+    return '$key boshlandi';
+  }
+
+  @override
+  String codechatRoutedAnswered(String key) {
+    return '$key savollariga javob berildi';
+  }
+
+  @override
+  String codechatRoutedChanges(String key) {
+    return '$key dan oʻzgarish soʻraldi';
+  }
+
+  @override
+  String codechatRoutedContinued(String key) {
+    return '$key davom ettirildi';
+  }
+
+  @override
+  String codechatRoutedRetried(String key) {
+    return '$key qayta ishga tushirildi';
+  }
+
+  @override
+  String codechatRoutedQueued(String key) {
+    return '$key ishga tushirishi tugashini kutmoqda';
+  }
+
+  @override
+  String codechatRoutedSent(String key) {
+    return '$key ga yuborildi';
+  }
+
+  @override
+  String codechatRoutedFailed(String reason) {
+    return 'Yuborilmadi: $reason';
+  }
+
+  @override
+  String get codechatRoutedSteered => 'Ishlayotgan agentga yetkazildi';
+
+  @override
+  String codechatQueuedTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta xabar');
+    return '$_temp0 bu ishga tushirish tugashini kutmoqda';
+  }
+
+  @override
+  String get codechatSendNow => 'Toʻxtatib, hozir yuborish';
+
+  @override
+  String codechatSendNowTitle(String key) {
+    return '$key hozir toʻxtatilsinmi?';
+  }
+
+  @override
+  String get codechatSendNowText => 'Joriy bosqich toʻxtaydi va xabarlaringiz darhol tiketga ketadi.';
+
+  @override
+  String codechatSteps(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n qadam');
+    return '$_temp0';
+  }
+
+  @override
+  String codechatStateLine(String key, String state) {
+    return '$key: $state';
+  }
+
+  @override
+  String codechatCheckPassed(String name) {
+    return '$name: oʻtdi';
+  }
+
+  @override
+  String codechatCheckFailed(String name) {
+    return '$name: xato';
+  }
+
+  @override
+  String get codechatPrOpened => 'Pull request ochildi';
+
+  @override
+  String get codechatPushed => 'Yuborildi';
+
+  @override
+  String get codechatMerged => 'Birlashtirildi';
+
+  @override
+  String get codechatWorking => 'Ishlayapman…';
+
+  @override
+  String codechatResultTitle(String key) {
+    return '$key koʻrib chiqishingizga tayyor';
+  }
+
+  @override
+  String codechatReportTitle(String key) {
+    return '$key hisobotini yozdi';
+  }
+
+  @override
+  String codechatFilesChanged(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta fayl oʻzgardi');
+    return '$_temp0';
+  }
+
+  @override
+  String get codechatChecksPassed => 'Tekshiruvlar oʻtdi';
+
+  @override
+  String codechatChecksFailed(String failed, String n) {
+    return '$n tadan $failed ta tekshiruv oʻtmadi';
+  }
+
+  @override
+  String get codechatChecksSkipped => 'Tekshiruvlar oʻtkazib yuborildi';
+
+  @override
+  String get codechatViewDiff => 'Diffni koʻrsatish';
+
+  @override
+  String get codechatHideDiff => 'Diffni yashirish';
+
+  @override
+  String get codechatApprove => 'Tasdiqlash';
+
+  @override
+  String codechatApproveTitle(String key) {
+    return '$key tasdiqlansinmi?';
+  }
+
+  @override
+  String codechatApprovePr(String branch) {
+    return 'agnts $branch ni yuboradi va pull request ochadi.';
+  }
+
+  @override
+  String get codechatApproveMain => 'agnts oʻzgarishni toʻgʻridan-toʻgʻri asosiy branchga yuboradi.';
+
+  @override
+  String get codechatApproveReport => 'Tiket shu hisobot bilan yopiladi.';
+
+  @override
+  String get codechatReject => 'Rad etish';
+
+  @override
+  String codechatRejectTitle(String key) {
+    return '$key rad etilsinmi?';
+  }
+
+  @override
+  String get codechatRejectText => 'Undagi barcha ish toʻxtaydi. Keyinroq uni shu chatdan davom ettirish mumkin.';
+
+  @override
+  String get codechatOpenTicket => 'Tiketni ochish';
+
+  @override
+  String codechatQuestionsTitle(String key) {
+    return '$key davom etishdan oldin soʻrayapti';
+  }
+
+  @override
+  String get codechatAnswersSend => 'Javoblarni yuborish';
+
+  @override
+  String codechatStoppedTitle(String key) {
+    return '$key toʻxtadi';
+  }
+
+  @override
+  String get codechatStoppedHint => 'Buni qanday chetlab oʻtishni yozing: u maslahatingiz bilan qayta urinadi.';
+
+  @override
+  String codechatDoneTitle(String key) {
+    return '$key tayyor';
+  }
+
+  @override
+  String get codechatDoneHint => 'Keyingi xabaringiz oʻsha repozitoriylarda yangi tiket boshlaydi.';
+
+  @override
+  String codechatRejectedTitle(String key) {
+    return '$key rad etildi';
+  }
+
+  @override
+  String get codechatRejectedHint => 'Nimani boshqacha qilishni yozing va u davom etadi.';
+
+  @override
+  String codechatMovedHint(String key) {
+    return '$key boshqa suhbatingizga oʻtkazildi.';
+  }
+
+  @override
+  String get codechatApprovalTitle => 'Agent buni ishga tushirishga ruxsat soʻrayapti';
+
+  @override
+  String codechatApprovalReason(String reason) {
+    return 'Qoida soʻrashni talab qiladi: $reason';
+  }
+
+  @override
+  String get codechatApprovalAllow => 'Ruxsat berish';
+
+  @override
+  String get codechatApprovalDeny => 'Taqiqlash';
+
+  @override
+  String get codechatApprovalAllowed => 'Ruxsat berildi';
+
+  @override
+  String get codechatApprovalDenied => 'Taqiqlandi';
+
+  @override
+  String get codechatApprovalExpired => 'Javob boʻlmadi: taqiqlandi';
+
+  @override
+  String codechatApprovalLeft(String seconds) {
+    return '$seconds s qoldi';
+  }
+
+  @override
+  String get codechatHandoffTitle => 'Buni Kod rejimida qilish';
+
+  @override
+  String get codechatHandoffOpen => 'Kodda ochish';
+
+  @override
+  String get codechatTicketChat => 'Chatda muhokama qilinmoqda';
+
+  @override
+  String get codechatContinueInChat => 'Chatda davom ettirish';
+
+  @override
+  String get codechatCodeBadge => 'Kod';
+
+  @override
+  String codechatMentioned(String names) {
+    return 'Ish joyi: $names';
+  }
+
+  @override
+  String get codechatMentionLabel => 'Repozitoriylar';
+
+  @override
   String get commitBack => 'Commitlarga qaytish';
 
   @override
@@ -1992,6 +2363,23 @@ class AppLocalizationsUz extends AppLocalizations {
   String commitFilesCapped(String n) {
     return 'Bu commit bu yerda koʻrsatib boʻladiganidan koʻproq faylni oʻzgartiradi. Dastlabki $n tasi koʻrsatildi; hammasini git xostingida oching.';
   }
+
+  @override
+  String get commonPagePrev => 'Oldingi sahifa';
+
+  @override
+  String get commonPageNext => 'Keyingi sahifa';
+
+  @override
+  String commonPageRange(String from, String to, String n) {
+    return '$n tadan $from–$to';
+  }
+
+  @override
+  String get commonPerPage => 'Sahifada';
+
+  @override
+  String get commonPager => 'Sahifalar';
 
   @override
   String get commonLoading => 'Yuklanmoqda…';
@@ -3440,7 +3828,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get filesAddFile => 'Fayl';
 
   @override
-  String get filesHint => 'Rasmlar, PDF, loglar yoki matn, har biri 10 MB gacha. Claude ularning barchasini oʻqiydi.';
+  String get filesHint => 'Rasmlar, PDF, loglar yoki matn, har biri 10 MB gacha. Muse ularning barchasini oʻqiydi.';
 
   @override
   String filesUploading(String name) {
@@ -3958,7 +4346,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessRepoTitle => 'Himoya';
 
   @override
-  String get harnessRepoSub => 'agnts-guard bu repozitoriyda Claude ishini qanchalik qatʼiy tekshiradi — ish davomida va undan keyin.';
+  String get harnessRepoSub => 'agnts-guard bu repozitoriyda Muse ishini qanchalik qatʼiy tekshiradi — ish davomida va undan keyin.';
 
   @override
   String get harnessRepoSave => 'Himoyani saqlash';
@@ -4006,7 +4394,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessRepoKind_encoded_blob => 'Kodlangan matn';
 
   @override
-  String get harnessRepoKind_hooks => 'Claude Code hooklari';
+  String get harnessRepoKind_hooks => 'Muse hooklari';
 
   @override
   String get harnessRepoKind_mcp_server => 'MCP serverlar';
@@ -4033,16 +4421,15 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessRepoProfileHelp_ => 'Ish maydoni sozlamasiga amal qiladi.';
 
   @override
-  String get harnessRepoProfileHelp_minimal =>
-      'Faqat sirlar va majburiy qoidalar bloklanadi; Claude tugatishidan oldin build tekshiriladi.';
+  String get harnessRepoProfileHelp_minimal => 'Faqat sirlar va majburiy qoidalar bloklanadi; Muse tugatishidan oldin build tekshiriladi.';
 
   @override
   String get harnessRepoProfileHelp_standard =>
-      'Oʻtkazib yuborilgan testlar, oʻchirilgan linterlar va tekshiruv sozlamalariga oʻzgartirishlar ham bloklanadi; tugatishdan oldin build va lint oʻtishi kerak.';
+      'Oʻtkazib yuborilgan testlar, oʻchirilgan linterlar va tekshiruv sozlamalariga oʻzgartirishlar ham bloklanadi; Muse tugatishidan oldin build va lint oʻtishi kerak.';
 
   @override
   String get harnessRepoProfileHelp_strict =>
-      'Yutib yuborilgan xatolar va testlardan olib tashlangan tekshiruvlar ham bloklanadi, tugatishdan oldin testlar ishga tushadi, faylni tahrirlashdan oldin faktlar soʻralishi mumkin.';
+      'Yutib yuborilgan xatolar va testlardan olib tashlangan tekshiruvlar ham bloklanadi, Muse tugatishidan oldin testlar ishga tushadi, faylni tahrirlashdan oldin faktlar soʻralishi mumkin.';
 
   @override
   String get harnessRepoSecretAllow => 'Namuna kalitlarga ruxsat berilgan joylar';
@@ -4055,13 +4442,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get harnessRepoChecksSub =>
-      'Claude tahrirlagan har bir faylda agnts-guard ishga tushiradigan tez formatter va linterlar, muammolar darhol tuzatilishi uchun.';
+      'Muse tahrirlagan har bir faylda agnts-guard ishga tushiradigan tez formatter va linterlar, muammolar darhol tuzatilishi uchun.';
 
   @override
   String get harnessRepoChecksOff => 'Fayl tekshiruvlarini oʻchirish';
 
   @override
-  String get harnessRepoChecksOffHelp => 'Claude har bir tahrirdan keyin tekshirilmaydi; ishga tushirishdan keyingi tekshiruvlar qoladi.';
+  String get harnessRepoChecksOffHelp => 'Muse har bir tahrirdan keyin tekshirilmaydi; ishga tushirishdan keyingi tekshiruvlar qoladi.';
 
   @override
   String get harnessRepoOwnChecks => 'Oʻz tekshiruvlarim';
@@ -4204,13 +4591,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get harnessRulesDeliveryHelp_skill =>
-      'Tavsifi ishga mos kelganda Claude yuklaydigan koʻnikma: qoidalar koʻpayganda promptlar qisqa qoladi. Muhim qoidalarni har bir promptda saqlang.';
+      'Tavsifi ishga mos kelganda Muse yuklaydigan koʻnikma: qoidalar koʻpayganda promptlar qisqa qoladi. Muhim qoidalarni har bir promptda saqlang.';
 
   @override
   String get harnessRulesEnforce => 'Majburiy';
 
   @override
-  String get harnessRulesEnforceHelp => 'agnts-guard qoidani faqat soʻramaydi, Claude ishlayotganda tekshiradi.';
+  String get harnessRulesEnforceHelp => 'agnts-guard qoidani faqat soʻramaydi, Muse ishlayotganda tekshiradi.';
 
   @override
   String get harnessRulesOn => 'Tekshirish';
@@ -4228,7 +4615,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessRulesOnHelp_file => 'Quyidagi fayllar tahrirlari; shablon bilan — faqat unga mos keladigan qoʻshilgan qatorlar.';
 
   @override
-  String get harnessRulesOnHelp_bash => 'Claude ishga tushiradigan va shablonga mos keladigan shell buyruqlari.';
+  String get harnessRulesOnHelp_bash => 'Muse ishga tushiradigan va shablonga mos keladigan shell buyruqlari.';
 
   @override
   String get harnessRulesOnHelp_diff => 'Tayyor oʻzgarish, ishga tushirishdan keyin serverda tekshiriladi.';
@@ -4252,7 +4639,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessRulesAction_warn => 'Ogohlantirish';
 
   @override
-  String get harnessRulesMessage => 'Claude uchun xabar';
+  String get harnessRulesMessage => 'Muse uchun xabar';
 
   @override
   String get harnessRulesMessagePlaceholder => 'Oʻrniga yangi migratsiya qoʻshing.';
@@ -4329,7 +4716,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get harnessSettingsSub =>
-      'agnts-guard Claude ishini har bir ishga tushirish ichida, jarayonning oʻzida tekshiradi; ishga tushirishdan keyingi agnts tekshiruvlari ham amal qiladi.';
+      'agnts-guard Muse ishini har bir ishga tushirish ichida, jarayonning oʻzida tekshiradi; ishga tushirishdan keyingi agnts tekshiruvlari ham amal qiladi.';
 
   @override
   String get harnessSettingsProfile => 'Cheklov profili';
@@ -4345,7 +4732,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get harnessSettingsProfileHelp_minimal =>
-      'Maxfiy maʼlumotlar va .env fayllarini bloklaydi, shablonli jamoa qoidalarini qoʻllaydi va Claude tugatishidan oldin build muvaffaqiyatli boʻlishini talab qiladi.';
+      'Maxfiy maʼlumotlar va .env fayllarini bloklaydi, shablonli jamoa qoidalarini qoʻllaydi va Muse tugatishidan oldin build muvaffaqiyatli boʻlishini talab qiladi.';
 
   @override
   String get harnessSettingsProfileHelp_standard =>
@@ -4413,7 +4800,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get harnessSettingsMethodSkillsHelp =>
-      'Kodlash ishga tushirishlari agnts uslubiy koʻnikmalarini oladi: repozitoriyda allaqachon qilinganidek yana bir element qoʻshish, atrofdagi uslubga amal qilish, yozishdan oldin qayta foydalanish va maʼlumotlar bazasi sxemasini xavfsiz oʻzgartirish. Claude koʻnikmani faqat mos kelganda yuklaydi; Analitikada solishtiring.';
+      'Kodlash ishga tushirishlari agnts uslubiy koʻnikmalarini oladi: repozitoriyda allaqachon qilinganidek yana bir element qoʻshish, atrofdagi uslubga amal qilish, yozishdan oldin qayta foydalanish va maʼlumotlar bazasi sxemasini xavfsiz oʻzgartirish. Muse koʻnikmani faqat mos kelganda yuklaydi; Analitikada solishtiring.';
 
   @override
   String get harnessSettingsSecondOpinion => 'Ikkinchi fikr';
@@ -4451,7 +4838,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessSettingsHook_post_edit_check => 'har bir tahrirlangan faylni tekshirish (formatter, linter)';
 
   @override
-  String get harnessSettingsHook_stop_gate => 'Claude tugatishidan oldin build va lint oʻtishi kerak';
+  String get harnessSettingsHook_stop_gate => 'Muse tugatishidan oldin build va lint oʻtishi kerak';
 
   @override
   String get harnessSettingsHook_session_progress => 'kontekst siqilgandan keyin rejani qaytarish';
@@ -4461,7 +4848,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get harnessSettingsCodexHelp =>
-      'Codex model nomi kod yozishni Claude oʻrniga Codex CLI da ishga tushiradi; boʻsh boʻlsa Claude. OpenAI integratsiyasi va ruxsat etilgan hostlarda api.openai.com kerak (Sozlamalar → Preview).';
+      'Codex model nomi kod yozishni Muse oʻrniga Codex CLI da ishga tushiradi; boʻsh boʻlsa Muse. OpenAI integratsiyasi va ruxsat etilgan hostlarda api.openai.com kerak (Sozlamalar → Preview).';
 
   @override
   String get harnessSettingsCodexConnect => 'OpenAI integratsiyasi';
@@ -4539,7 +4926,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessSettingsColLoaded => 'Yuklangan';
 
   @override
-  String get harnessSettingsColLoadedHint => 'Claude koʻnikmani yuklagan tiketlar ulushi';
+  String get harnessSettingsColLoadedHint => 'Muse koʻnikmani yuklagan tiketlar ulushi';
 
   @override
   String get harnessSettingsColSkillFirstTry => 'Birinchi urinishda';
@@ -4551,7 +4938,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get harnessSettingsColLoadedFirstTry => 'Birinchi urinishda, yuklangan';
 
   @override
-  String get harnessSettingsColLoadedFirstTryHint => 'Claude koʻnikmani yuklagan tayyor tiketlarning birinchi urinish ulushi';
+  String get harnessSettingsColLoadedFirstTryHint => 'Muse koʻnikmani yuklagan tayyor tiketlarning birinchi urinish ulushi';
 
   @override
   String get harnessSettingsColTargeted => 'Maqsadli izohlar';
@@ -4575,7 +4962,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get harnessSettingsEffortHelp =>
-      'Claude har bir bosqichda qanchalik chuqur o‘ylashi (Claude Code’dagi --effort). Yuqori daraja sekinroq va rejangizdan ko‘proq sarflaydi. Murakkab tiketlarda kod va ko‘rib chiqish o‘z darajasidan foydalanadi.';
+      'Muse har bir bosqichda qanchalik chuqur o‘ylashi (Muse’dagi --effort). Yuqori daraja sekinroq va rejangizdan ko‘proq sarflaydi. Murakkab tiketlarda kod va ko‘rib chiqish o‘z darajasidan foydalanadi.';
 
   @override
   String get harnessSettingsEffortAnalyze => 'Tahlil';
@@ -5502,6 +5889,9 @@ class AppLocalizationsUz extends AppLocalizations {
       'Codex ishga tushirishlarida agnts-guard hooklari yoʻq: ishga tushirishdan keyingi agnts tekshiruvlari (qizil bayroqlar, build, lint, testlar, review) baribir ishlaydi. Ishga tushirishlarga ruxsat etilgan hostlarda api.openai.com ham kerak.';
 
   @override
+  String get integrationsName_muse => 'Muse Code';
+
+  @override
   String get kindTitle => 'Turi';
 
   @override
@@ -5670,7 +6060,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get learnReadingTitle => 'Qoʻshimcha oʻqish';
 
   @override
-  String get learnReadingNote => 'Bu havolalarni Claude taklif qilgan. Ularga tayanishdan oldin tekshiring.';
+  String get learnReadingNote => 'Bu havolalarni Muse taklif qilgan. Ularga tayanishdan oldin tekshiring.';
 
   @override
   String get learnCategory_pattern => 'Pattern';
@@ -5989,6 +6379,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get logsTypeEvent => 'Hodisa';
 
   @override
+  String get logsTypeBudget => 'Sarf';
+
+  @override
   String get maccountPasswordInstead => 'Parol bilan kirish';
 
   @override
@@ -6274,7 +6667,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String massistantStatsParts(String start, String snapshot, String claude) {
-    return 'Konteyner $start · maʼlumot $snapshot · Claude $claude';
+    return 'Konteyner $start · maʼlumot $snapshot · Muse $claude';
   }
 
   @override
@@ -6361,6 +6754,29 @@ class AppLocalizationsUz extends AppLocalizations {
   String massistantStatsVersionActions(String proposed, String done) {
     return '$proposed amal taklif qilindi · $done bajarildi';
   }
+
+  @override
+  String get massistantVoiceStart => 'Ovoz bilan soʻrash';
+
+  @override
+  String get massistantVoiceSend => 'Toʻxtatib soʻrash';
+
+  @override
+  String get massistantVoiceRecording => 'Yozilmoqda';
+
+  @override
+  String get massistantVoiceHearing => 'Muse savolingizni tinglamoqda…';
+
+  @override
+  String massistantVoiceLimit(String n) {
+    return '$n daqiqagacha';
+  }
+
+  @override
+  String get massistantVoiceDenied => 'Ovoz bilan soʻrash uchun bu saytga mikrofonga ruxsat bering.';
+
+  @override
+  String get massistantVoiceNoMic => 'Mikrofonni ochib boʻlmadi.';
 
   @override
   String get mciTitle => 'CI nosozliklari';
@@ -6782,6 +7198,1002 @@ class AppLocalizationsUz extends AppLocalizations {
   String mdocumentsMadeFrom(String title) {
     return 'Manba: “$title”';
   }
+
+  @override
+  String get meetingsPageTitle => 'Uchrashuvlar';
+
+  @override
+  String get meetingsLede =>
+      'Jamoa va siz kiritgan mehmonlar uchun videoqoʻngʻiroqlar. Muse eslatmalarni yozib, kelishilgan ishlarni vazifaga aylantiradi.';
+
+  @override
+  String get meetingsStartNow => 'Hozir boshlash';
+
+  @override
+  String get meetingsSchedule => 'Rejalashtirish';
+
+  @override
+  String get meetingsGetLink => 'Havola olish';
+
+  @override
+  String meetingsLinkCopied(String link) {
+    return 'Havola nusxalandi: $link';
+  }
+
+  @override
+  String get meetingsLinkCopiedShort => 'Havola nusxalandi';
+
+  @override
+  String get meetingsCopyLink => 'Havolani nusxalash';
+
+  @override
+  String get meetingsJoinWithCode => 'Kod yoki havola orqali kirish';
+
+  @override
+  String get meetingsCodePlaceholder => 'abc-defg-hij';
+
+  @override
+  String get meetingsBadCode => 'Bu uchrashuv kodi emas: u abc-defg-hij koʻrinishida boʻladi.';
+
+  @override
+  String get meetingsJoin => 'Kirish';
+
+  @override
+  String get meetingsOpen => 'Ochish';
+
+  @override
+  String get meetingsTab_upcoming => 'Kelgusi';
+
+  @override
+  String get meetingsTab_past => 'Oʻtgan qoʻngʻiroqlar';
+
+  @override
+  String get meetingsTab_mine => 'Men olib boraman';
+
+  @override
+  String get meetingsNoneUpcoming => 'Hozir yoki keyin boʻladigan uchrashuv yoʻq. Hozir boshlang yoki rejalashtiring.';
+
+  @override
+  String get meetingsNoneMine => 'Siz hali uchrashuv olib bormaysiz.';
+
+  @override
+  String get meetingsNonePast => 'Hali qoʻngʻiroq boʻlmagan.';
+
+  @override
+  String get meetingsLive => 'Davom etmoqda';
+
+  @override
+  String meetingsInCallNow(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Qoʻngʻiroqda $n kishi', one: 'Qoʻngʻiroqda $n kishi');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsLiveEmpty => 'Qoʻngʻiroq ochiq';
+
+  @override
+  String get meetingsNobodyYet => 'Qoʻngʻiroqda hali hech kim yoʻq';
+
+  @override
+  String meetingsHostedBy(String name) {
+    return 'Olib boruvchi: $name';
+  }
+
+  @override
+  String get meetingsUntitled => 'Uchrashuv';
+
+  @override
+  String get meetingsKind_instant => 'Hozir';
+
+  @override
+  String get meetingsKind_scheduled => 'Keyinroq';
+
+  @override
+  String get meetingsColMeeting => 'Uchrashuv';
+
+  @override
+  String get meetingsColWhen => 'Qachon';
+
+  @override
+  String get meetingsColPeople => 'Ishtirokchilar';
+
+  @override
+  String get meetingsColNotes => 'Eslatmalar';
+
+  @override
+  String meetingsRecordings(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n yozuv', one: '$n yozuv');
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsActionItemsN(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n vazifa', one: '$n vazifa');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsOpenNotes => 'Eslatmalarni ochish';
+
+  @override
+  String get meetingsNotes_none => 'Eslatmasiz';
+
+  @override
+  String get meetingsNotes_recording => 'Eslatma yozilmoqda';
+
+  @override
+  String get meetingsNotes_queued => 'Eslatmalar navbatda';
+
+  @override
+  String get meetingsNotes_transcribing => 'Muse tinglamoqda';
+
+  @override
+  String get meetingsNotes_writing => 'Muse yozmoqda';
+
+  @override
+  String get meetingsNotes_done => 'Eslatmalar tayyor';
+
+  @override
+  String get meetingsNotes_failed => 'Eslatmalar chiqmadi';
+
+  @override
+  String get meetingsOffTitle => 'Bu serverda uchrashuvlar oʻchirilgan';
+
+  @override
+  String get meetingsOffBody => 'Server administratori ularni LiveKit serveri bilan yoqadi (AGNTS_LIVEKIT_URL).';
+
+  @override
+  String get meetingsYourReminders => 'Eslatmalaringiz';
+
+  @override
+  String get meetingsRemindersSub => 'Siz taklif qilingan uchrashuv boshlanishidan oldin — telefoningizda va shu yerda.';
+
+  @override
+  String meetingsMinutesBefore(String n) {
+    return '$n daqiqa oldin';
+  }
+
+  @override
+  String get meetingsNoReminders => 'Eslatmasiz';
+
+  @override
+  String get meetingsSettingsTitle => 'Bu ish maydonidagi uchrashuvlar';
+
+  @override
+  String get meetingsSettingsSub => 'Yozuvlar, nima va qancha saqlanadi, bitta qoʻngʻiroqqa necha kishi sigʻadi.';
+
+  @override
+  String get meetingsAllowRecording => 'Olib boruvchilar qoʻngʻiroqni videoga yozishi mumkin';
+
+  @override
+  String get meetingsKeepAudio => 'Muse tinglagandan keyin eslatmalar ovozini saqlash';
+
+  @override
+  String get meetingsRetention => 'Yozuv va matnlarni saqlash muddati (kun)';
+
+  @override
+  String get meetingsRetentionHelp => '0 — doim saqlanadi.';
+
+  @override
+  String get meetingsMaxPeople => 'Bitta qoʻngʻiroqdagi odamlar';
+
+  @override
+  String get meetingsServerCan => 'Bu server qila oladi:';
+
+  @override
+  String get meetingsRecordingWord => 'Yozuv';
+
+  @override
+  String get meetingsNotesWord => 'Eslatmalar';
+
+  @override
+  String get meetingsSave => 'Saqlash';
+
+  @override
+  String get meetingsSettingsSaved => 'Saqlandi';
+
+  @override
+  String get meetingsNewTitle => 'Yangi uchrashuv';
+
+  @override
+  String get meetingsNewSub => 'Hozirgi qoʻngʻiroq yoki taklifnomali taqvimdagi uchrashuv.';
+
+  @override
+  String get meetingsEditTitle => 'Uchrashuvni oʻzgartirish';
+
+  @override
+  String get meetingsWhen => 'Qachon';
+
+  @override
+  String get meetingsTitle => 'Nomi';
+
+  @override
+  String get meetingsTitlePlaceholder => 'Sprintni rejalashtirish';
+
+  @override
+  String get meetingsDate => 'Sana';
+
+  @override
+  String get meetingsTime => 'Vaqt';
+
+  @override
+  String get meetingsDuration => 'Davomiyligi';
+
+  @override
+  String meetingsMinutes(String n) {
+    return '$n daqiqa';
+  }
+
+  @override
+  String meetingsTimeZoneIs(String zone) {
+    return 'Vaqt $zone boʻyicha.';
+  }
+
+  @override
+  String get meetingsDescription => 'Kun tartibi';
+
+  @override
+  String get meetingsDescriptionPlaceholder => 'Uchrashuv nima uchun. Muse eslatmalarni yozganda buni oʻqiydi.';
+
+  @override
+  String get meetingsAccess => 'Kim taqillatmasdan kiradi';
+
+  @override
+  String get meetingsAccess_workspace => 'Ish maydonidagi hamma';
+
+  @override
+  String get meetingsAccess_invited => 'Faqat taklif qilinganlar';
+
+  @override
+  String get meetingsAccessHelp_workspace => 'Aʼzolar kiradi; mehmonlar taqillatadi.';
+
+  @override
+  String get meetingsAccessHelp_invited => 'Taklif qilinganlar kiradi; boshqa aʼzolar va mehmonlar taqillatadi.';
+
+  @override
+  String get meetingsGuestsMode => 'Mehmonlar';
+
+  @override
+  String get meetingsGuests_knock => 'Taqillatadi';
+
+  @override
+  String get meetingsGuests_open => 'Ochiq';
+
+  @override
+  String get meetingsGuests_off => 'Yoʻq';
+
+  @override
+  String get meetingsGuestsHelp_knock => 'Aʼzo boʻlmaganlar olib boruvchi kiritguncha kutadi.';
+
+  @override
+  String get meetingsGuestsHelp_open => 'Havolasi borlar qoʻngʻiroq tugaguncha kutmasdan kiradi.';
+
+  @override
+  String get meetingsGuestsHelp_off => 'Faqat ish maydoni aʼzolari.';
+
+  @override
+  String meetingsGuestsAre(String mode) {
+    return 'mehmonlar: $mode';
+  }
+
+  @override
+  String get meetingsInvite => 'Taklif qilish';
+
+  @override
+  String get meetingsEmailsPlaceholder => 'Elektron pochta manzillari, vergul bilan';
+
+  @override
+  String get meetingsInviteHelp => 'Hamma taqvim tadbiri bilan xat oladi; ish maydonidan tashqaridagilar shaxsiy havola oladi.';
+
+  @override
+  String get meetingsInviteHelpNow => 'Aʼzolarga agnts\'da xabar keladi; manzillarga havola xat bilan yuboriladi.';
+
+  @override
+  String get meetingsAi => 'Eslatmalar va yozuv';
+
+  @override
+  String get meetingsAutoNotes => 'Eslatma yozish: Muse qoʻngʻiroqni tinglab, qarorlar va vazifalarni yozadi';
+
+  @override
+  String get meetingsAutoRecord => 'Qoʻngʻiroqni videoga yozish';
+
+  @override
+  String get meetingsAutoNotesOn => 'Eslatmalar yoqilgan';
+
+  @override
+  String get meetingsAutoRecordOn => 'Yozilmoqda';
+
+  @override
+  String get meetingsNotesUnavailable => 'Bu serverda eslatmalar sozlanmagan.';
+
+  @override
+  String get meetingsLanguage => 'Eslatmalar tili';
+
+  @override
+  String get meetingsLang_auto => 'Gapirilgan tilda';
+
+  @override
+  String get meetingsCancel => 'Bekor qilish';
+
+  @override
+  String get meetingsEdit => 'Oʻzgartirish';
+
+  @override
+  String get meetingsDelete => 'Oʻchirish';
+
+  @override
+  String get meetingsCancelMeeting => 'Uchrashuvni bekor qilish';
+
+  @override
+  String get meetingsCancelTitle => 'Bu uchrashuv bekor qilinsinmi?';
+
+  @override
+  String get meetingsCancelBody => 'Taklif qilinganlar bekor qilinganini taqvimida koʻradi. Davom etayotgan qoʻngʻiroq tugaydi.';
+
+  @override
+  String get meetingsCancelled => 'Bu uchrashuv bekor qilingan.';
+
+  @override
+  String get meetingsCancelledShort => 'Bekor qilingan';
+
+  @override
+  String get meetingsDeleteTitle => 'Bu uchrashuv oʻchirilsinmi?';
+
+  @override
+  String get meetingsDeleteBody => 'Uning qoʻngʻiroqlari, yozuvlari, matnlari va chati oʻchiriladi. Eslatma hujjatlari qoladi.';
+
+  @override
+  String get meetingsLink => 'Havola';
+
+  @override
+  String get meetingsRing => 'Qoʻngʻiroq qilish';
+
+  @override
+  String get meetingsRingWho => 'Hozir kimga qoʻngʻiroq qilish';
+
+  @override
+  String get meetingsRingNow => 'Qoʻngʻiroq qilish';
+
+  @override
+  String get meetingsRinging => 'Qoʻngʻiroq qilinmoqda…';
+
+  @override
+  String get meetingsAreYouComing => 'Kelasizmi?';
+
+  @override
+  String get meetingsRsvp_yes => 'Ha';
+
+  @override
+  String get meetingsRsvp_no => 'Yoʻq';
+
+  @override
+  String get meetingsRsvp_maybe => 'Balki';
+
+  @override
+  String get meetingsRsvp_none => 'Javob yoʻq';
+
+  @override
+  String meetingsInvitees(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n taklif qilingan',
+      one: '$n taklif qilingan',
+      zero: 'Taklif qilinganlar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsInviteMore => 'Taklif qilish';
+
+  @override
+  String get meetingsNoInvitees => 'Hech kim taklif qilinmagan.';
+
+  @override
+  String get meetingsByEmail => 'pochta orqali';
+
+  @override
+  String get meetingsUninvite => 'Taklifni qaytarish';
+
+  @override
+  String get meetingsCalls => 'Qoʻngʻiroqlar';
+
+  @override
+  String get meetingsNoCalls => 'Uchrashuv hali oʻtkazilmagan.';
+
+  @override
+  String get meetingsTheMeeting => 'uchrashuv';
+
+  @override
+  String get meetingsNotesTitle => 'Eslatmalar';
+
+  @override
+  String get meetingsNoNotes => 'Bu qoʻngʻiroqda eslatma yozilmagan.';
+
+  @override
+  String get meetingsNotesBusy_recording => 'Eslatma yozilmoqda; Muse ularni qoʻngʻiroq tugagach yozadi.';
+
+  @override
+  String get meetingsNotesBusy_queued => 'Muse qoʻngʻiroqni tinglashini kutyapmiz…';
+
+  @override
+  String get meetingsNotesBusy_transcribing => 'Muse qoʻngʻiroqni tinglamoqda…';
+
+  @override
+  String get meetingsNotesBusy_writing => 'Muse eslatmalarni yozmoqda…';
+
+  @override
+  String meetingsNotesFailed(String reason) {
+    return 'Eslatmalarni yozib boʻlmadi: $reason';
+  }
+
+  @override
+  String get meetingsWriteAgain => 'Qayta yozish';
+
+  @override
+  String get meetingsNotesAgain => 'Muse eslatmalarni qayta yozmoqda';
+
+  @override
+  String get meetingsActionItems => 'Vazifalar';
+
+  @override
+  String get meetingsAnyRepo => 'Istalgan repozitoriy';
+
+  @override
+  String get meetingsRepository => 'Repozitoriy';
+
+  @override
+  String get meetingsCreateTicket => 'Tiket yaratish';
+
+  @override
+  String meetingsTicketMade(String key) {
+    return '$key yaratildi';
+  }
+
+  @override
+  String get meetingsRecordingsTitle => 'Yozuv';
+
+  @override
+  String get meetingsRecordingNow => 'Yozilmoqda…';
+
+  @override
+  String get meetingsDownload => 'Yuklab olish';
+
+  @override
+  String get meetingsDeleteRecordingTitle => 'Bu yozuv oʻchirilsinmi?';
+
+  @override
+  String get meetingsDeleteRecordingBody => 'Video hamma uchun oʻchiriladi. Matn va eslatmalar qoladi.';
+
+  @override
+  String meetingsAttendance(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n kishi', one: '$n kishi');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsStillIn => 'hali qoʻngʻiroqda';
+
+  @override
+  String get meetingsGuest => 'Mehmon';
+
+  @override
+  String get meetingsMember => 'Aʼzo';
+
+  @override
+  String get meetingsTranscript => 'Matn';
+
+  @override
+  String get meetingsNoTranscript => 'Matn yoʻq.';
+
+  @override
+  String get meetingsSearchTranscript => 'Aytilganlardan qidirish';
+
+  @override
+  String get meetingsMixedNote => 'Hammaning ovozi birga tinglangan, shuning uchun matn kim gapirganini koʻrsatmaydi.';
+
+  @override
+  String meetingsChatLog(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Chat · $n xabar', one: 'Chat · $n xabar', zero: 'Chat');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsShow => 'Koʻrsatish';
+
+  @override
+  String get meetingsHide => 'Yashirish';
+
+  @override
+  String get meetingsTicketTitle => 'Uchrashuvlarda muhokama qilingan';
+
+  @override
+  String get meetingsNotFound => 'Bunday uchrashuv yoʻq';
+
+  @override
+  String get meetingsSomethingWrong => 'Nimadir xato ketdi';
+
+  @override
+  String get meetingsTryAgain => 'Qayta urinish';
+
+  @override
+  String get meetingsCameraStarting => 'Kamera yoqilmoqda…';
+
+  @override
+  String get meetingsCameraOff => 'Kamera oʻchiq';
+
+  @override
+  String get meetingsMicOn => 'Mikrofon yoqiq';
+
+  @override
+  String get meetingsMicOff => 'Mikrofon oʻchiq';
+
+  @override
+  String get meetingsCamOn => 'Kamera yoqiq';
+
+  @override
+  String get meetingsCamOff => 'Kamera oʻchiq';
+
+  @override
+  String get meetingsMicLevel => 'Mikrofon darajasi';
+
+  @override
+  String get meetingsDevicesBlocked => 'Brauzer kamera va mikrofonni taqiqladi. Ularni manzil qatorida ruxsat bering va qayta urining.';
+
+  @override
+  String get meetingsDevicesFailed => 'Kamera yoki mikrofon ishga tushmadi. Uni boshqa dastur ishlatayotgan boʻlishi mumkin.';
+
+  @override
+  String get meetingsMicrophone => 'Mikrofon';
+
+  @override
+  String get meetingsCamera => 'Kamera';
+
+  @override
+  String get meetingsSpeakers => 'Karnaylar';
+
+  @override
+  String get meetingsDefaultDevice => 'Standart';
+
+  @override
+  String get meetingsLobbyRecording => 'Bu qoʻngʻiroq yozib olinmoqda.';
+
+  @override
+  String get meetingsLobbyNotes => 'agnts bu qoʻngʻiroqning eslatmalarini yozmoqda.';
+
+  @override
+  String get meetingsNotStartedYet => 'Boshlanishidan 15 daqiqa oldin kirish mumkin.';
+
+  @override
+  String get meetingsYourName => 'Ismingiz';
+
+  @override
+  String get meetingsYourNamePlaceholder => 'Boshqalar sizni qanday koʻradi';
+
+  @override
+  String meetingsJoiningAs(String name) {
+    return 'Siz $name sifatida kirasiz.';
+  }
+
+  @override
+  String get meetingsJoinNow => 'Kirish';
+
+  @override
+  String get meetingsAskToJoin => 'Kirishni soʻrash';
+
+  @override
+  String get meetingsJoining => 'Kirilmoqda…';
+
+  @override
+  String get meetingsOrGoogle => 'Yoki Google orqali kimligingizni koʻrsating';
+
+  @override
+  String get meetingsWaitingTitle => 'Kirishga ruxsat soʻralmoqda…';
+
+  @override
+  String get meetingsWaitingBody => 'Qoʻngʻiroqdagi kimdir tez orada sizni kiritadi.';
+
+  @override
+  String get meetingsConnecting => 'Ulanmoqda…';
+
+  @override
+  String get meetingsYouLeft => 'Siz qoʻngʻiroqdan chiqdingiz';
+
+  @override
+  String get meetingsJoinedElsewhere => 'Siz boshqa oynadan kirdingiz';
+
+  @override
+  String get meetingsRejoin => 'Qaytib kirish';
+
+  @override
+  String get meetingsBackToMeetings => 'Uchrashuvlarga';
+
+  @override
+  String get meetingsEnded => 'Qoʻngʻiroq tugadi';
+
+  @override
+  String get meetingsEndedBody => 'Eslatmalar va yozuvlar tayyor boʻlgach oʻtgan qoʻngʻiroqlarda chiqadi.';
+
+  @override
+  String get meetingsRemovedTitle => 'Siz qoʻngʻiroqdan chiqarildingiz';
+
+  @override
+  String get meetingsRemovedBody => 'Olib boruvchi sizni chiqardi. Bu qoʻngʻiroqqa qaytib boʻlmaydi.';
+
+  @override
+  String get meetingsRefused_locked => 'Uchrashuv yopilgan';
+
+  @override
+  String get meetingsRefused_full => 'Uchrashuv toʻla';
+
+  @override
+  String get meetingsRefused_removed => 'Siz bu qoʻngʻiroqdan chiqarilgansiz';
+
+  @override
+  String get meetingsRefused_guests_off => 'Bu uchrashuv faqat ish maydoni aʼzolari uchun';
+
+  @override
+  String get meetingsRefused_not_started => 'Uchrashuv hali boshlanmagan';
+
+  @override
+  String get meetingsRefused_cancelled => 'Bu uchrashuv bekor qilingan';
+
+  @override
+  String get meetingsRefused_denied => 'Sizni kiritishmadi';
+
+  @override
+  String get meetingsRefused_expired => 'Hech kim javob bermadi';
+
+  @override
+  String get meetingsRole_host => 'Olib boruvchi';
+
+  @override
+  String get meetingsRole_cohost => 'Yordamchi olib boruvchi';
+
+  @override
+  String get meetingsRole_member => 'Aʼzo';
+
+  @override
+  String get meetingsRole_guest => 'Mehmon';
+
+  @override
+  String meetingsYou(String name) {
+    return '$name (siz)';
+  }
+
+  @override
+  String get meetingsYouShort => 'siz';
+
+  @override
+  String meetingsScreenOf(String name) {
+    return '$name ekrani';
+  }
+
+  @override
+  String get meetingsPoorConnection => 'Aloqa yomon';
+
+  @override
+  String get meetingsHandRaised => 'Qoʻl koʻtarilgan';
+
+  @override
+  String get meetingsPin => 'Mahkamlash';
+
+  @override
+  String get meetingsUnpin => 'Mahkamlashni olish';
+
+  @override
+  String get meetingsRecording => 'Yozuv';
+
+  @override
+  String get meetingsTakingNotes => 'Eslatma';
+
+  @override
+  String get meetingsLocked => 'Yopiq';
+
+  @override
+  String get meetingsReconnecting => 'Qayta ulanmoqda…';
+
+  @override
+  String get meetingsEnableAudio => 'Ovozni yoqish';
+
+  @override
+  String get meetingsWantsToJoin => 'kirmoqchi';
+
+  @override
+  String meetingsAndMore(String n) {
+    return 'va yana $n kishi';
+  }
+
+  @override
+  String get meetingsAdmit => 'Kiritish';
+
+  @override
+  String get meetingsDeny => 'Rad etish';
+
+  @override
+  String get meetingsSeeAll => 'Hammasi';
+
+  @override
+  String meetingsAskedToUnmute(String name) {
+    return '$name mikrofonni yoqishingizni soʻrayapti.';
+  }
+
+  @override
+  String get meetingsUnmute => 'Mikrofonni yoqish';
+
+  @override
+  String get meetingsNotNow => 'Hozir emas';
+
+  @override
+  String get meetingsChat => 'Chat';
+
+  @override
+  String get meetingsPeople => 'Ishtirokchilar';
+
+  @override
+  String get meetingsMicToggle => 'Mikrofon (Ctrl+D)';
+
+  @override
+  String get meetingsCamToggle => 'Kamera (Ctrl+E)';
+
+  @override
+  String get meetingsShareScreen => 'Ekranni koʻrsatish';
+
+  @override
+  String get meetingsStopSharing => 'Koʻrsatishni toʻxtatish';
+
+  @override
+  String get meetingsRaiseHand => 'Qoʻl koʻtarish';
+
+  @override
+  String get meetingsLowerHand => 'Qoʻlni tushirish';
+
+  @override
+  String get meetingsReact => 'Munosabat';
+
+  @override
+  String get meetingsSpeakerView => 'Soʻzlovchi katta';
+
+  @override
+  String get meetingsGridView => 'Toʻr';
+
+  @override
+  String get meetingsHostControls => 'Boshqaruv';
+
+  @override
+  String get meetingsStartRecording => 'Yozishni boshlash';
+
+  @override
+  String get meetingsStopRecording => 'Yozishni toʻxtatish';
+
+  @override
+  String get meetingsRecordTitle => 'Bu qoʻngʻiroq yozib olinsinmi?';
+
+  @override
+  String get meetingsRecordBody => 'Qoʻngʻiroqdagilarning hammasi yozuv ketayotganini koʻradi, kiruvchilar esa oldindan ogohlantiriladi.';
+
+  @override
+  String get meetingsStartNotes => 'Eslatma yozish';
+
+  @override
+  String get meetingsStopNotes => 'Eslatmani toʻxtatish';
+
+  @override
+  String get meetingsLock => 'Uchrashuvni yopish';
+
+  @override
+  String get meetingsUnlock => 'Uchrashuvni ochish';
+
+  @override
+  String get meetingsMuteAll => 'Hammaning mikrofonini oʻchirish';
+
+  @override
+  String get meetingsQuietGuests => 'Mehmonlarga chat va ekran koʻrsatishni oʻchirish';
+
+  @override
+  String get meetingsGuestsSpeakAgain => 'Mehmonlarga chat va ekran koʻrsatishni qaytarish';
+
+  @override
+  String get meetingsOpenTitle => 'Havolasi borlarning hammasi kirsinmi?';
+
+  @override
+  String get meetingsOpenBody => 'Qoʻngʻiroq tugaguncha mehmonlar kutmasdan kiradi.';
+
+  @override
+  String get meetingsLetAnyoneIn => 'Kiritish';
+
+  @override
+  String get meetingsEndForAll => 'Qoʻngʻiroqni hamma uchun tugatish';
+
+  @override
+  String get meetingsEndTitle => 'Qoʻngʻiroq hamma uchun tugatilsinmi?';
+
+  @override
+  String get meetingsEndBody => 'Hamma uziladi. Eslatmalar yozib olingan narsadan yoziladi.';
+
+  @override
+  String get meetingsLeave => 'Chiqish';
+
+  @override
+  String meetingsWaiting(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n kishi kutmoqda', one: '$n kishi kutmoqda');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsAdmitAll => 'Hammasini kiritish';
+
+  @override
+  String meetingsHands(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n koʻtarilgan qoʻl', one: '$n koʻtarilgan qoʻl');
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsInCall(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Qoʻngʻiroqda $n', one: 'Qoʻngʻiroqda $n');
+    return '$_temp0';
+  }
+
+  @override
+  String meetingsDevices(String n) {
+    return '$n ta qurilma';
+  }
+
+  @override
+  String meetingsActionsFor(String name) {
+    return '$name uchun amallar';
+  }
+
+  @override
+  String get meetingsMuteMic => 'Mikrofonni oʻchirish';
+
+  @override
+  String get meetingsStopCamera => 'Kamerani oʻchirish';
+
+  @override
+  String get meetingsStopScreen => 'Ekran koʻrsatishni toʻxtatish';
+
+  @override
+  String get meetingsAskUnmute => 'Mikrofonni yoqishni soʻrash';
+
+  @override
+  String get meetingsMakeCohost => 'Yordamchi olib boruvchi qilish';
+
+  @override
+  String get meetingsUncohost => 'Yordamchilikdan olish';
+
+  @override
+  String get meetingsRemove => 'Qoʻngʻiroqdan chiqarish';
+
+  @override
+  String meetingsRemoveTitle(String name) {
+    return '$name chiqarilsinmi?';
+  }
+
+  @override
+  String get meetingsRemoveBody => 'U barcha qurilmalarida uziladi va bu qoʻngʻiroqqa qaytolmaydi.';
+
+  @override
+  String get meetingsChatEmpty => 'Hali xabar yoʻq. Xabarlar qoʻngʻiroq bilan saqlanadi.';
+
+  @override
+  String get meetingsChatPlaceholder => 'Hammaga xabar';
+
+  @override
+  String get meetingsChatOff => 'Olib boruvchilar mehmonlar uchun chatni oʻchirgan.';
+
+  @override
+  String get meetingsSend => 'Yuborish';
+
+  @override
+  String meetingsCallingYou(String name) {
+    return '$name sizga qoʻngʻiroq qilyapti';
+  }
+
+  @override
+  String get meetingsStartsSoon => 'Uchrashuv tez orada boshlanadi';
+
+  @override
+  String get meetingsHasStarted => 'Siz taklif qilingan uchrashuv boshlandi';
+
+  @override
+  String meetingsKnockAway(String name) {
+    return '$name uchrashuvingizga kirmoqchi';
+  }
+
+  @override
+  String get meetingsDecline => 'Rad etish';
+
+  @override
+  String get meetingsDismiss => 'Yopish';
+
+  @override
+  String get meetingsColHost => 'Tashkilotchi';
+
+  @override
+  String get meetingsFullscreen => 'Toʻliq ekran';
+
+  @override
+  String get meetingsExitFullscreen => 'Toʻliq ekrandan chiqish';
+
+  @override
+  String get meetingsColPerson => 'Ishtirokchi';
+
+  @override
+  String get meetingsColInCall => 'Qoʻngʻiroqda';
+
+  @override
+  String get meetingsColDuration => 'Vaqt';
+
+  @override
+  String get meetingsLeaveTitle => 'Qoʻngʻiroqdan chiqasizmi?';
+
+  @override
+  String get meetingsLeaveBody => 'Qoʻngʻiroq davom etayotgan paytda xuddi shu havola orqali qaytishingiz mumkin.';
+
+  @override
+  String get meetingsLeaveBodyHost =>
+      'Qoʻngʻiroq sizsiz davom etadi. Uni hamma uchun tugatish uchun «Boshqaruv» menyusida «Qoʻngʻiroqni hamma uchun tugatish»ni tanlang.';
+
+  @override
+  String get meetingsStopRecordingTitle => 'Yozib olish toʻxtatilsinmi?';
+
+  @override
+  String get meetingsStopRecordingBody => 'Shu paytgacha yozilgani saqlanadi va qoʻngʻiroq sahifasida chiqadi.';
+
+  @override
+  String get meetingsStopNotesTitle => 'Qaydlar toʻxtatilsinmi?';
+
+  @override
+  String get meetingsStopNotesBody => 'Muse qaydlarni shu paytgacha eshitganlari asosida yozadi.';
+
+  @override
+  String get meetingsMuteAllTitle => 'Hammaning mikrofoni oʻchirilsinmi?';
+
+  @override
+  String get meetingsMuteAllBody => 'Sizdan boshqa hammaning mikrofoni oʻchadi. Har kim oʻzinikini qayta yoqishi mumkin.';
+
+  @override
+  String get meetingsLockTitle => 'Uchrashuv yopilsinmi?';
+
+  @override
+  String get meetingsLockBody =>
+      'Siz ochmaguningizcha yangi odamlar kira olmaydi va taqillata olmaydi. Avval kiritilganlar va tashkilotchilar qaytishi mumkin.';
+
+  @override
+  String meetingsAdmitAllTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n kishi kiritilsinmi?');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsAdmitAllBody => 'Kutayotganlarning hammasi hoziroq qoʻngʻiroqqa kiradi.';
+
+  @override
+  String meetingsCohostTitle(String name) {
+    return '$name hamtashkilotchi qilinsinmi?';
+  }
+
+  @override
+  String get meetingsCohostBody =>
+      'Hamtashkilotchilar odamlarni kiritishi, mikrofonini oʻchirishi va chiqarishi, qoʻngʻiroqni yozib olishi va qayd yuritishi mumkin.';
+
+  @override
+  String get meetingsWriteAgainTitle => 'Qaydlar qayta yozilsinmi?';
+
+  @override
+  String get meetingsWriteAgainBody =>
+      'Muse ularni qoʻngʻiroq asosida qayta yozadi va hozirgi qaydlarni ulardagi oʻzgarishlar bilan birga almashtiradi.';
+
+  @override
+  String meetingsUninviteTitle(String name) {
+    return '$name taklif qilinganlardan olib tashlansinmi?';
+  }
+
+  @override
+  String get meetingsUninviteBody => 'U endi taklif qilinmagan va eslatmalar olmaydi.';
 
   @override
   String get mgroupsGroups => 'Guruhlar';
@@ -7479,6 +8891,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navOverview => 'Umumiy';
 
   @override
+  String get navWorkflow => 'Ish jarayoni';
+
+  @override
   String get navDashboard => 'Boshqaruv paneli';
 
   @override
@@ -7530,7 +8945,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navSettings => 'Sozlamalar';
 
   @override
-  String get navSearch => 'Tiket va vazifalarni qidirish';
+  String get navSearch => 'Sahifa, repozitoriy, tiket, suhbat va darslarni qidirish';
+
+  @override
+  String get navSearchPages => 'Sahifalar';
+
+  @override
+  String get navSearchNone => 'Hech narsa topilmadi';
+
+  @override
+  String get navSearchResults => 'Qidiruv natijalari';
 
   @override
   String get navSyncJira => 'Jira bilan sinxronlash';
@@ -7545,6 +8969,11 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navWeek => 'Shu hafta';
+
+  @override
+  String navCreditsLeft(String amount, String total) {
+    return '$total dan $amount kredit qoldi';
+  }
 
   @override
   String get navDayMode => 'Kunduzgi rejimga oʻtish';
@@ -7653,10 +9082,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navAssistantChat => 'Chat';
 
   @override
+  String get navAssistantCode => 'Kod';
+
+  @override
   String get navAssistantConversations => 'Suhbatlar';
 
   @override
   String get navDocuments => 'Hujjatlar';
+
+  @override
+  String get navMeetings => 'Uchrashuvlar';
 
   @override
   String get networkTitle => 'Xususiy tarmoqlar';
@@ -8344,6 +9779,33 @@ class AppLocalizationsUz extends AppLocalizations {
   String get platformDeleteAdminBody => 'U endi kira olmaydi. Buni qaytarib bo\'lmaydi.';
 
   @override
+  String get platformFreeCredits => 'Bepul kreditlar';
+
+  @override
+  String get platformSetFreeCredits => 'Bepul kreditlarni belgilash';
+
+  @override
+  String platformFreeCreditsSet(String name, String n, String amount) {
+    return '$name $n bepul kredit ($amount) sarflashi mumkin';
+  }
+
+  @override
+  String platformFreeCreditsUsed(String used, String limit) {
+    return 'Hozircha $limit dan $used sarflangan.';
+  }
+
+  @override
+  String get platformFreeCreditsLimit => 'Kreditlar (1 kredit = \$0.01; 0 — kreditsiz)';
+
+  @override
+  String platformFreeCreditsWorth(String amount) {
+    return 'Bu agnts’ning Muse kaliti orqali $amount lik model chaqiruvlari.';
+  }
+
+  @override
+  String get platformFreeCreditsInvalid => '0 dan 10 000 000 gacha butun son kiriting.';
+
+  @override
   String get previewTab => 'Oldindan koʻrish';
 
   @override
@@ -8549,7 +10011,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get previewVisualCheckHelp =>
-      'Claude tugatishdan oldin ilovani ishga tushirib, oʻzgartirgan sahifalarini koʻrishi va buzilgan joylarni tuzatishi mumkin. Bir necha qoʻshimcha qadamga tushadi.';
+      'Muse tugatishdan oldin ilovani ishga tushirib, oʻzgartirgan sahifalarini koʻrishi va buzilgan joylarni tuzatishi mumkin. Bir necha qoʻshimcha qadamga tushadi.';
 
   @override
   String get previewModel_ => 'Oldindan koʻrish modeli';
@@ -8562,7 +10024,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get previewEgressHelp =>
-      'Ichki roʻyxatdan (Claude, git xostinglar, paket reyestrlari) tashqari ishga tushirish konteynerlari murojaat qila oladigan hostlar, masalan oldindan koʻrishda ilova murojaat qiladigan staging API. .example.com uning subdomenlariga ruxsat beradi.';
+      'Ichki roʻyxatdan (Muse, git xostinglar, paket reyestrlari) tashqari ishga tushirish konteynerlari murojaat qila oladigan hostlar, masalan oldindan koʻrishda ilova murojaat qiladigan staging API. .example.com uning subdomenlariga ruxsat beradi.';
 
   @override
   String get previewNotify => 'Oldindan koʻrish skrinshotlari tayyor boʻlganda';
@@ -8892,7 +10354,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get queueBadge_server => 'Navbatda · server';
 
   @override
-  String get queueBadge_claude => 'Pauza · Claude';
+  String get queueBadge_claude => 'Pauza · Muse';
 
   @override
   String get queueTitle_blocked => 'Bog‘liq tiketlarni kutmoqda';
@@ -8904,7 +10366,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get queueTitle_server => 'Server navbatida';
 
   @override
-  String get queueTitle_claude => 'Claude’ni kutmoqda';
+  String get queueTitle_claude => 'Muse’ni kutmoqda';
 
   @override
   String queuePosition(String position) {
@@ -8936,7 +10398,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get queueAddSlot => 'Slot qo‘shish';
 
   @override
-  String get queueClaudeHint => 'Ish maydoni sozlamalari → Claude bo‘limida hisob ulang yoki kreditlarni yoqing.';
+  String get queueClaudeHint => 'Ish maydoni sozlamalari → Muse bo‘limida hisob ulang yoki kreditlarni yoqing.';
 
   @override
   String get queueMember => 'A’zo';
@@ -8945,7 +10407,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get queueTakeOver => 'O‘zimga olish';
 
   @override
-  String get queueTakenOver => 'Tiket sizniki: «har kimniki o‘zi» rejimida u sizning Claude hisobingizda bajariladi.';
+  String get queueTakenOver => 'Tiket sizniki: «har kimniki o‘zi» rejimida u sizning Muse hisobingizda bajariladi.';
 
   @override
   String queueCreatedBy(String name) {
@@ -9159,7 +10621,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String replayConfirm(String key) {
-    return 'agnts ${key}ni boshlangan joyidan qayta bajaradigan yangi vazifa yaratadi. U har qanday tiket kabi Claude rejangizdan foydalanadi.';
+    return 'agnts ${key}ni boshlangan joyidan qayta bajaradigan yangi vazifa yaratadi. U har qanday tiket kabi Muse rejangizdan foydalanadi.';
   }
 
   @override
@@ -9268,7 +10730,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String replayBenchmarkConfirm(String n) {
-    return 'agnts benchmarkdagi $n ta tiketni har biri boshlangan joydan qayta ishga tushiradi. Ular oddiy tiketlar kabi Claude rejangizdan foydalanadi.';
+    return 'agnts benchmarkdagi $n ta tiketni har biri boshlangan joydan qayta ishga tushiradi. Ular oddiy tiketlar kabi Muse rejangizdan foydalanadi.';
   }
 
   @override
@@ -9532,7 +10994,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get repoDeployHelp =>
-      'agnts tiket tekshiruvingizga kelishidan oldin tekshiruvlarni kutadi. Deploy har doim sizning qaroringiz va Claude chatidan mavjud emas.';
+      'agnts tiket tekshiruvingizga kelishidan oldin tekshiruvlarni kutadi. Deploy har doim sizning qaroringiz va Muse chatidan mavjud emas.';
 
   @override
   String repoDeployBranch(String branch) {
@@ -9940,11 +11402,11 @@ class AppLocalizationsUz extends AppLocalizations {
   String get reposDetect => 'Aniqlash';
 
   @override
-  String get reposDetectDeep => 'Claude’dan so‘rash';
+  String get reposDetectDeep => 'Muse’dan so‘rash';
 
   @override
   String get reposDetectDeepHelp =>
-      'Skanerlash buyruqlarni topmasa, Claude README va CI fayllarini o‘qiydi. Taxminan bir daqiqa oladi va Claude tarifingizdan foydalanadi.';
+      'Skanerlash buyruqlarni topmasa, Muse README va CI fayllarini o‘qiydi. Taxminan bir daqiqa oladi va Muse tarifingizdan foydalanadi.';
 
   @override
   String get reposDetecting => 'Repozitoriy o‘qilmoqda…';
@@ -9955,13 +11417,13 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get reposDetectNothing => 'Ma’lum yig‘ish fayllari topilmadi. Toolchain va buyruqlarni qo‘lda qo‘shing yoki Claude’dan so‘rang.';
+  String get reposDetectNothing => 'Ma’lum yig‘ish fayllari topilmadi. Toolchain va buyruqlarni qo‘lda qo‘shing yoki Muse’dan so‘rang.';
 
   @override
   String get reposDetectFilled => 'Bo‘sh tekshiruv buyruqlari to‘ldirildi — saqlashdan oldin ko‘rib chiqing.';
 
   @override
-  String get reposDetectByClaude => 'Claude skanerlash topa olmagan narsalarni to‘ldirdi.';
+  String get reposDetectByClaude => 'Muse skanerlash topa olmagan narsalarni to‘ldirdi.';
 
   @override
   String get reposDetectNeedsUrl => 'Avval klonlash URL manzilini kiriting.';
@@ -9997,7 +11459,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get reposBuildEnvHelp =>
-      'Har bir ishga tushirish uchun KEY=value qatorlari, masalan, xususiy paket reyestrlari tokenlari (NPM_TOKEN, PIP_INDEX_URL). Shifrlangan holda saqlanadi va boshqa ko‘rsatilmaydi. Claude ishlayotganda ularni o‘qishi mumkin, shuning uchun faqat o‘qish uchun tokenlardan foydalaning.';
+      'Har bir ishga tushirish uchun KEY=value qatorlari, masalan, xususiy paket reyestrlari tokenlari (NPM_TOKEN, PIP_INDEX_URL). Shifrlangan holda saqlanadi va boshqa ko‘rsatilmaydi. Muse ishlayotganda ularni o‘qishi mumkin, shuning uchun faqat o‘qish uchun tokenlardan foydalaning.';
 
   @override
   String reposBuildEnvSet(String names) {
@@ -10427,7 +11889,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get rulesLede =>
-      'agnts har bir tiketda amal qiladigan koʻrsatmalar: barcha repozitoriylar uchun global qoidalar va bitta repozitoriy uchun qoidalar. Claude har bir qoidani tekshiradi va u kuchga kirishidan oldin noaniq joylar haqida savol beradi.';
+      'agnts har bir tiketda amal qiladigan koʻrsatmalar: barcha repozitoriylar uchun global qoidalar va bitta repozitoriy uchun qoidalar. Muse har bir qoidani tekshiradi va u kuchga kirishidan oldin noaniq joylar haqida savol beradi.';
 
   @override
   String get rulesAdd => 'Qoida qoʻshish';
@@ -10436,7 +11898,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get rulesAddSubmit => 'Qoʻshish va tekshirish';
 
   @override
-  String get rulesDrawerSub => 'Yangi hamkasbga tushuntirgandek yozing. Claude uni biror tiket amal qilishidan oldin tekshiradi.';
+  String get rulesDrawerSub => 'Yangi hamkasbga tushuntirgandek yozing. Muse uni biror tiket amal qilishidan oldin tekshiradi.';
 
   @override
   String get rulesRuleTitle => 'Nomi';
@@ -10476,13 +11938,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get rulesRereviewHelp =>
-      'Qoida matnini oʻzgartirdingiz, shuning uchun Claude uni qayta tekshiradi. Tekshiruv tugaguncha tiketlar uni olmaydi.';
+      'Qoida matnini oʻzgartirdingiz, shuning uchun Muse uni qayta tekshiradi. Tekshiruv tugaguncha tiketlar uni olmaydi.';
 
   @override
   String get rulesSaved => 'Qoida saqlandi';
 
   @override
-  String get rulesSavedReview => 'Qoida saqlandi; Claude uni tekshirmoqda';
+  String get rulesSavedReview => 'Qoida saqlandi; Muse uni tekshirmoqda';
 
   @override
   String get rulesScopeLabel => 'Qoidalarni koʻrsatish';
@@ -10539,10 +12001,10 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get rulesPending => 'Boʻsh ishchini kutmoqda. Claude qoidalarni keyingi tiket boshlanishidan oldin tekshiradi.';
+  String get rulesPending => 'Boʻsh ishchini kutmoqda. Muse qoidalarni keyingi tiket boshlanishidan oldin tekshiradi.';
 
   @override
-  String get rulesAnalyzing => 'Claude qoidani oʻqib, undagi noaniqlik va ziddiyatlarni qidirmoqda.';
+  String get rulesAnalyzing => 'Muse qoidani oʻqib, undagi noaniqlik va ziddiyatlarni qidirmoqda.';
 
   @override
   String rulesQuestionsTitle(num n) {
@@ -10550,7 +12012,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get rulesQuestionsSub => 'Claude noaniq joy topdi. Javoblaringiz qoidaning bir qismiga aylanadi.';
+  String get rulesQuestionsSub => 'Muse noaniq joy topdi. Javoblaringiz qoidaning bir qismiga aylanadi.';
 
   @override
   String get rulesYourAnswer => 'Javobingiz';
@@ -10591,7 +12053,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String rulesFailed(String error) {
-    return 'Claude bu qoidani tekshira olmadi: $error';
+    return 'Muse bu qoidani tekshira olmadi: $error';
   }
 
   @override
@@ -10622,7 +12084,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get rulesAnswered => 'Javoblar yuborildi; Claude qoidani qayta tekshirmoqda';
+  String get rulesAnswered => 'Javoblar yuborildi; Muse qoidani qayta tekshirmoqda';
 
   @override
   String get rulesAccepted => 'Qoida yozilganicha amal qiladi';
@@ -10713,7 +12175,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get runsLede =>
-      'Barcha ish maydonlaridagi har bir Claude Code va Codex chaqiruvi: qancha turgani, qancha davom etgani va qanday tugagani. Ochilgan chaqiruv mijoz ma’lumotlarini ko‘rsatadi, har bir ko‘rish jurnalga yoziladi.';
+      'Barcha ish maydonlaridagi har bir Muse va Codex chaqiruvi: qancha turgani, qancha davom etgani va qanday tugagani. Ochilgan chaqiruv mijoz ma’lumotlarini ko‘rsatadi, har bir ko‘rish jurnalga yoziladi.';
 
   @override
   String get runsRunTitle => 'Chaqiruv';
@@ -10849,7 +12311,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get runsAnyEngine => 'Istalgan dvijok';
 
   @override
-  String get runsE_claude => 'Claude';
+  String get runsE_claude => 'Muse';
 
   @override
   String get runsE_codex => 'Codex';
@@ -10984,7 +12446,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get runsTruncated => 'Hajm chegarasiga yetildi; keyingi tarkib saqlanmadi.';
 
   @override
-  String get runsAccount => 'Claude hisobi';
+  String get runsAccount => 'Muse hisobi';
 
   @override
   String get runsSession => 'Seans';
@@ -11276,6 +12738,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsMaxTurnsHelp => 'Ish shu limitga yetganda toʻxtaydi va xabar beradi';
 
   @override
+  String get settingsRunBudget => 'Bitta ish uchun byudjet';
+
+  @override
+  String get settingsRunBudgetHelp =>
+      'Kreditdagi bitta ish sarflashi mumkin bo‘lgan eng ko‘p miqdor; 80% da Muse’ga yakunlash aytiladi va oshib ketishidan oldin to‘xtatiladi';
+
+  @override
+  String get settingsRunBudgetServer => 'Server limiti';
+
+  @override
   String get settingsTimeout => 'Ish vaqti chegarasi';
 
   @override
@@ -11415,7 +12887,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsSecretsHelp =>
-      'Jira, GitHub va Claude tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.';
+      'Jira, GitHub va Muse tokenlari serveringizda shifrlangan holda saqlanadi. Bu sahifa ularni hech qachon koʻrsatmaydi.';
 
   @override
   String get settingsSaved => 'Sozlamalar saqlandi';
@@ -11459,6 +12931,31 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsCiRed => 'Kuzatiladigan branch qizarganda';
 
   @override
+  String get settingsClaudeMuse => 'Muse Code';
+
+  @override
+  String get settingsClaudeMovedMuse => 'Muse har bir ish maydoni uchun alohida ulanadi.';
+
+  @override
+  String get settingsClaudeOpenMuse => 'Ish maydoni → Muse';
+
+  @override
+  String get settingsModelsHelpMuse => 'Har bir bosqich uchun modelni tanlang. Muse Spark eng arzoni; Muse Wonder kuchliroq va qimmatroq.';
+
+  @override
+  String get settingsStageCodingHelpMuse => 'Asosiy ish. Eng ko‘p sarflaydi.';
+
+  @override
+  String get settingsStageReviewHelpMuse =>
+      'Siz ko‘rib chiqayotganda har bir natijani tekshiradi. «Avto» murakkab tiketlar uchun Muse Wonder, qolganlari uchun Muse Spark’dan foydalanadi.';
+
+  @override
+  String get settingsAllowHelpMuse => 'Muse Code bularni so‘ramasdan ishga tushira oladi';
+
+  @override
+  String get settingsDenyHelpMuse => 'Tiket so‘rasa ham doim rad etiladi. Push’ni Muse Code emas, agnts bajaradi.';
+
+  @override
   String get spendTitle => 'Token sarfi';
 
   @override
@@ -11468,7 +12965,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get spendEmpty =>
-      'Hali hech narsa yozilmagan. Sarf agnts bu tiket boʻyicha Claude\'ni birinchi marta ishga tushirgandan keyin koʻrinadi.';
+      'Hali hech narsa yozilmagan. Sarf agnts bu tiket boʻyicha Muse\'ni birinchi marta ishga tushirgandan keyin koʻrinadi.';
 
   @override
   String get spendInput => 'Kirish';
@@ -11492,7 +12989,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get spendCostNote =>
-      'Narx — Claude Code\'ning xuddi shu ish uchun API narxlaridagi bahosi. Claude obunasida u toʻlanmaydi; u har bir bosqichning nisbiy ogʻirligini koʻrsatadi.';
+      'Narx — Muse\'ning xuddi shu ish uchun API narxlaridagi bahosi. Muse obunasida u toʻlanmaydi; u har bir bosqichning nisbiy ogʻirligini koʻrsatadi.';
 
   @override
   String spendTokens(String n) {
@@ -11538,11 +13035,11 @@ class AppLocalizationsUz extends AppLocalizations {
   String get spendTopSubEmpty => 'Qaysi tiketlar obunangizni eng koʻp sarflagan';
 
   @override
-  String get spendTopEmpty => 'Bu davrda Claude ishlari yozilmagan.';
+  String get spendTopEmpty => 'Bu davrda Muse ishlari yozilmagan.';
 
   @override
   String get spendTopNote =>
-      'Tartib Claude Code narx bahosi boʻyicha, u keshni toʻgʻri hisobga oladi. Ulush — davrdagi taxminiy narxdan. Faqat davr ichidagi sarf hisoblanadi.';
+      'Tartib Muse narx bahosi boʻyicha, u keshni toʻgʻri hisobga oladi. Ulush — davrdagi taxminiy narxdan. Faqat davr ichidagi sarf hisoblanadi.';
 
   @override
   String get spendColStage => 'Eng qimmat bosqich';
@@ -11800,7 +13297,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get swaggerClaudeOnly =>
-      'Swagger testlari ish maydoni qaysi model bilan kod yozishidan qatʼi nazar, doim Claude\'da (Sonnet) bajariladi.';
+      'Swagger testlari ish maydoni qaysi model bilan kod yozishidan qatʼi nazar, doim Muse\'ning yengil modelida bajariladi.';
 
   @override
   String get swaggerTab => 'API natijalari';
@@ -12588,7 +14085,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketSkipChecksHint =>
-      'Konteynerda ishga tushirib boʻlmaydigan tekshiruvlar uchun, masalan, u yopiq bogʻliqlikni yuklab ololmasa. Claude ham build, lint va testlarni ishga tushirmaydi, shuning uchun kodni oʻzingiz tekshirasiz. Belgini olib tashlamaguningizcha bu vazifa uchun amal qiladi.';
+      'Konteynerda ishga tushirib boʻlmaydigan tekshiruvlar uchun, masalan, u yopiq bogʻliqlikni yuklab ololmasa. Muse ham build, lint va testlarni ishga tushirmaydi, shuning uchun kodni oʻzingiz tekshirasiz. Belgini olib tashlamaguningizcha bu vazifa uchun amal qiladi.';
 
   @override
   String get ticketStopRun => 'Ishni toʻxtatish';
@@ -13055,6 +14552,21 @@ class AppLocalizationsUz extends AppLocalizations {
   String get ticketTabsLabel => 'Tiket tafsilotlari';
 
   @override
+  String get ticketFactsTicket => 'Tiket';
+
+  @override
+  String get ticketFactsCode => 'Kod';
+
+  @override
+  String get ticketFactsPeople => 'Odamlar';
+
+  @override
+  String get ticketFactsLinks => 'Bogʻliq tiketlar';
+
+  @override
+  String get ticketFactsRuns => 'Ishga tushirishlar';
+
+  @override
   String get ticketTabReview => 'Kod sharhi';
 
   @override
@@ -13136,6 +14648,38 @@ class AppLocalizationsUz extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n marta', one: '$n marta');
     return 'CI pull requestni $_temp0 qaytardi';
   }
+
+  @override
+  String get ticketMuseMeter => 'Ushbu ish uchun Muse sarfi';
+
+  @override
+  String ticketMuseSpentOf(String spent, String limit) {
+    return '$limit dan $spent';
+  }
+
+  @override
+  String ticketMuseCalls(num n) {
+    return '$n ta chaqiruv';
+  }
+
+  @override
+  String ticketMuseCharged(String amount) {
+    return '$amount yechildi';
+  }
+
+  @override
+  String get ticketMuseSteered => 'Byudjet kam: yakunlash buyurildi';
+
+  @override
+  String get ticketMuseStopped => 'Byudjet tugagani uchun to‘xtatildi';
+
+  @override
+  String ticketMuseEscalated(String model) {
+    return '$model ga o‘tkazildi';
+  }
+
+  @override
+  String get ticketsTabsLabel => 'Tiket roʻyxatlari';
 
   @override
   String get ticketsTitle => 'Tiketlar';
@@ -13264,8 +14808,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get usageTitle => 'Tarif limitlari';
 
   @override
-  String get usageLede =>
-      'agnts Claude obunangizda ishlaydi. Bu limitlar Claude va Claude Code\'dan oʻzingiz foydalanishingiz bilan umumiy.';
+  String get usageLede => 'agnts Muse rejangizda ishlaydi. Bu limitlar Muse\'dan oʻzingiz foydalanishingiz bilan umumiy.';
 
   @override
   String get usageCard => 'Tarif limitlari';
@@ -13339,8 +14882,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get usageStatus_unknown => 'Nomaʼlum';
 
   @override
-  String get usageSource =>
-      'Claude Code limit hodisalaridan olinadi. Ushbu hisobdagi Claude\'dan oʻzingiz foydalanishingizni ham oʻz ichiga oladi.';
+  String get usageSource => 'Muse limit hodisalaridan olinadi. Ushbu hisobdagi Muse\'dan oʻzingiz foydalanishingizni ham oʻz ichiga oladi.';
 
   @override
   String get usageLimitTitle => 'Limitga yetilganda';
@@ -13379,7 +14921,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get usageHelp =>
-      'Raqamlar Claude Code har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi.';
+      'Raqamlar Muse har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi.';
 
   @override
   String get wsTitle => 'Ish maydoni';
@@ -13482,7 +15024,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get wsMembersSub =>
-      'Ish maydonidagi har bir a’zo uning tiketlarini ko‘radi, ularni yaratadi, javob beradi, tekshiradi va qayta ishga tushiradi. Egasi bundan tashqari sozlamalar, integratsiyalar, Claude, a’zolar va to‘lovni boshqaradi.';
+      'Ish maydonidagi har bir a’zo uning tiketlarini ko‘radi, ularni yaratadi, javob beradi, tekshiradi va qayta ishga tushiradi. Egasi bundan tashqari sozlamalar, integratsiyalar, Muse, a’zolar va to‘lovni boshqaradi.';
 
   @override
   String get wsYou => 'siz';
@@ -13740,347 +15282,75 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get codechatTitle => 'Kod';
+  String get wsTabMuse => 'Muse';
 
   @override
-  String get codechatModeLabel => 'Chat rejimi';
+  String get wsClaudeMuse => 'Muse';
 
   @override
-  String get codechatModeChat => 'Chat';
+  String get wsClaudeSubMuse => 'Bu ish maydonidagi ishlar qaysi Muse hisobidan foydalanadi.';
 
   @override
-  String get codechatModeCode => 'Kod';
+  String get wsClaudeSavedMuse => 'Muse sozlamalari saqlandi';
 
   @override
-  String get codechatNewConversation => 'Yangi kod suhbati';
+  String get wsFallbackHelpMuse =>
+      'Tanlangan hisob ulanmagan yoki byudjeti tugagan bo‘lsa, ishlar to‘xtab qolmaydi: agnts’ning Muse kaliti bilan davom etadi va avval bepul kreditlaringizni, keyin ish maydoni kreditlarini sarflaydi.';
 
   @override
-  String get codechatEmptyTitle => 'Kodni chatdan oʻzgartiring';
+  String get wsMemberAccountsSubMuse => 'Kim o‘z Muse hisobini ulagan (Profil → Muse).';
 
   @override
-  String get codechatEmptyText =>
-      'Repozitoriylarni tanlang va nima qilish kerakligini yozing. agnts buni tiket sifatida bajaradi: ishni shu yerda kuzating, savollarga javob bering, oʻzgarish soʻrang va pull requestni tasdiqlang.';
+  String get wsMuseBadge => 'Muse ulangan';
 
   @override
-  String get codechatViewersOnly => 'Kod rejimi ish maydonini oʻzgartira oladiganlar uchun.';
+  String get wsNoMuseBadge => 'Muse yo‘q';
 
   @override
-  String get codechatRepos => 'Repozitoriylar';
+  String get wsKindMuseLogin => 'Meta hisobi';
 
   @override
-  String get codechatReposNone => 'Ishlash uchun repozitoriylarni tanlang yoki xabarda @ bilan ayting';
+  String get wsKindMuseApiKey => 'Muse API kaliti';
 
   @override
-  String get codechatReposChange => 'Oʻzgartirish';
+  String get wsMuseSignIn => 'Meta orqali kirish';
 
   @override
-  String get codechatReposSave => 'Repozitoriylarni saqlash';
+  String get wsMuseSignInHelp =>
+      'Meta sahifasida tasdiqlash uchun kod ko‘rsatiladi; shundan so‘ng ishlar shu Meta hisobining Muse’idan foydalanadi.';
 
   @override
-  String get codechatReposSaved => 'Repozitoriylar oʻzgardi: keyingi tiket ularda ishlaydi';
+  String get wsMuseCode => 'Bu kodni Meta sahifasiga kiriting';
 
   @override
-  String get codechatKind => 'Turi';
+  String get wsMuseCopyCode => 'Kodni nusxalash';
 
   @override
-  String get codechatQuick => 'Tez: tekshiruvlarsiz';
+  String get wsMuseOpenMeta => 'Meta’ni ochish';
 
   @override
-  String get codechatQuickHint => 'Build, lint va testlar ishlamaydi, shuning uchun koʻrib chiqish tezroq keladi.';
+  String get wsMuseWaiting => 'Tasdiqlashingizni kutyapmiz…';
 
   @override
-  String get codechatTicketPick => 'Yoki mavjud tiket ustida ishlang';
-
-  @override
-  String get codechatTicketPlaceholder => 'Tiket kaliti, masalan PAY-214';
-
-  @override
-  String get codechatTicketAttach => 'Ulash';
-
-  @override
-  String codechatTicketAttached(String key) {
-    return 'Endi $key ustida ishlaymiz';
+  String wsMuseExpires(String time) {
+    return 'Kod $time gacha amal qiladi.';
   }
 
   @override
-  String get codechatPlaceholderNew => 'Oʻzgarishni tasvirlang…';
+  String get wsMuse_denied => 'Kirish Meta sahifasida rad etildi.';
 
   @override
-  String get codechatPlaceholderReview => 'Oʻzgarish soʻrang yoki yuqorida tasdiqlang…';
+  String get wsMuse_expired => 'Kod tasdiqlanmasdan muddati tugadi.';
 
   @override
-  String get codechatPlaceholderAnswers => 'Savolga javob bering…';
+  String get wsMuse_failed => 'Kirish amalga oshmadi.';
 
   @override
-  String get codechatPlaceholderRunning => 'Soʻrovga qoʻshing: bu ishga tushirish tugaganda yuboriladi…';
+  String get wsMuseTryAgain => 'Qayta urinish';
 
   @override
-  String get codechatPlaceholderStopped => 'Buni qanday chetlab oʻtishni yozing, u qayta urinadi…';
+  String get wsMuseUseKey => 'API kalitidan foydalanish';
 
   @override
-  String get codechatPlaceholderPushing => 'Yuborilmoqda…';
-
-  @override
-  String get codechatPlaceholderDone => 'Keyingi oʻzgarishni yozing…';
-
-  @override
-  String get codechatSend => 'Yuborish';
-
-  @override
-  String get codechatSendHint => 'Enter yuboradi, Shift+Enter yangi qator, @ repozitoriyni ko‘rsatadi';
-
-  @override
-  String codechatCount(String n) {
-    return '$n / 4000';
-  }
-
-  @override
-  String codechatMentioned(String names) {
-    return 'Ish joyi: $names';
-  }
-
-  @override
-  String get codechatMentionLabel => 'Repozitoriylar';
-
-  @override
-  String codechatRoutedCreated(String key) {
-    return '$key boshlandi';
-  }
-
-  @override
-  String codechatRoutedAnswered(String key) {
-    return '$key savollariga javob berildi';
-  }
-
-  @override
-  String codechatRoutedChanges(String key) {
-    return '$key dan oʻzgarish soʻraldi';
-  }
-
-  @override
-  String codechatRoutedContinued(String key) {
-    return '$key davom ettirildi';
-  }
-
-  @override
-  String codechatRoutedRetried(String key) {
-    return '$key qayta ishga tushirildi';
-  }
-
-  @override
-  String codechatRoutedQueued(String key) {
-    return '$key ishga tushirishi tugashini kutmoqda';
-  }
-
-  @override
-  String codechatRoutedSent(String key) {
-    return '$key ga yuborildi';
-  }
-
-  @override
-  String codechatRoutedFailed(String reason) {
-    return 'Yuborilmadi: $reason';
-  }
-
-  @override
-  String get codechatRoutedSteered => 'Ishlayotgan agentga yetkazildi';
-
-  @override
-  String codechatQueuedTitle(num n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta xabar');
-    return '$_temp0 bu ishga tushirish tugashini kutmoqda';
-  }
-
-  @override
-  String get codechatSendNow => 'Toʻxtatib, hozir yuborish';
-
-  @override
-  String codechatSendNowTitle(String key) {
-    return '$key hozir toʻxtatilsinmi?';
-  }
-
-  @override
-  String get codechatSendNowText => 'Joriy bosqich toʻxtaydi va xabarlaringiz darhol tiketga ketadi.';
-
-  @override
-  String codechatSteps(num n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n qadam');
-    return '$_temp0';
-  }
-
-  @override
-  String codechatStateLine(String key, String state) {
-    return '$key: $state';
-  }
-
-  @override
-  String codechatCheckPassed(String name) {
-    return '$name: oʻtdi';
-  }
-
-  @override
-  String codechatCheckFailed(String name) {
-    return '$name: xato';
-  }
-
-  @override
-  String get codechatPrOpened => 'Pull request ochildi';
-
-  @override
-  String get codechatPushed => 'Yuborildi';
-
-  @override
-  String get codechatMerged => 'Birlashtirildi';
-
-  @override
-  String get codechatWorking => 'Ishlayapman…';
-
-  @override
-  String codechatResultTitle(String key) {
-    return '$key koʻrib chiqishingizga tayyor';
-  }
-
-  @override
-  String codechatReportTitle(String key) {
-    return '$key hisobotini yozdi';
-  }
-
-  @override
-  String codechatFilesChanged(num n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ta fayl oʻzgardi');
-    return '$_temp0';
-  }
-
-  @override
-  String get codechatChecksPassed => 'Tekshiruvlar oʻtdi';
-
-  @override
-  String codechatChecksFailed(String failed, String n) {
-    return '$n tadan $failed ta tekshiruv oʻtmadi';
-  }
-
-  @override
-  String get codechatChecksSkipped => 'Tekshiruvlar oʻtkazib yuborildi';
-
-  @override
-  String get codechatViewDiff => 'Diffni koʻrsatish';
-
-  @override
-  String get codechatHideDiff => 'Diffni yashirish';
-
-  @override
-  String get codechatApprove => 'Tasdiqlash';
-
-  @override
-  String codechatApproveTitle(String key) {
-    return '$key tasdiqlansinmi?';
-  }
-
-  @override
-  String codechatApprovePr(String branch) {
-    return 'agnts $branch ni yuboradi va pull request ochadi.';
-  }
-
-  @override
-  String get codechatApproveMain => 'agnts oʻzgarishni toʻgʻridan-toʻgʻri asosiy branchga yuboradi.';
-
-  @override
-  String get codechatApproveReport => 'Tiket shu hisobot bilan yopiladi.';
-
-  @override
-  String get codechatReject => 'Rad etish';
-
-  @override
-  String codechatRejectTitle(String key) {
-    return '$key rad etilsinmi?';
-  }
-
-  @override
-  String get codechatRejectText => 'Undagi barcha ish toʻxtaydi. Keyinroq uni shu chatdan davom ettirish mumkin.';
-
-  @override
-  String get codechatOpenTicket => 'Tiketni ochish';
-
-  @override
-  String codechatQuestionsTitle(String key) {
-    return '$key davom etishdan oldin soʻrayapti';
-  }
-
-  @override
-  String get codechatAnswersSend => 'Javoblarni yuborish';
-
-  @override
-  String codechatStoppedTitle(String key) {
-    return '$key toʻxtadi';
-  }
-
-  @override
-  String get codechatStoppedHint => 'Buni qanday chetlab oʻtishni yozing: u maslahatingiz bilan qayta urinadi.';
-
-  @override
-  String codechatDoneTitle(String key) {
-    return '$key tayyor';
-  }
-
-  @override
-  String get codechatDoneHint => 'Keyingi xabaringiz oʻsha repozitoriylarda yangi tiket boshlaydi.';
-
-  @override
-  String codechatRejectedTitle(String key) {
-    return '$key rad etildi';
-  }
-
-  @override
-  String get codechatRejectedHint => 'Nimani boshqacha qilishni yozing va u davom etadi.';
-
-  @override
-  String codechatMovedHint(String key) {
-    return '$key boshqa suhbatingizga oʻtkazildi.';
-  }
-
-  @override
-  String get codechatApprovalTitle => 'Agent buni ishga tushirishga ruxsat soʻrayapti';
-
-  @override
-  String codechatApprovalReason(String reason) {
-    return 'Qoida soʻrashni talab qiladi: $reason';
-  }
-
-  @override
-  String get codechatApprovalAllow => 'Ruxsat berish';
-
-  @override
-  String get codechatApprovalDeny => 'Taqiqlash';
-
-  @override
-  String get codechatApprovalAllowed => 'Ruxsat berildi';
-
-  @override
-  String get codechatApprovalDenied => 'Taqiqlandi';
-
-  @override
-  String get codechatApprovalExpired => 'Javob boʻlmadi: taqiqlandi';
-
-  @override
-  String codechatApprovalLeft(String seconds) {
-    return '$seconds s qoldi';
-  }
-
-  @override
-  String get codechatHandoffTitle => 'Buni Kod rejimida qilish';
-
-  @override
-  String get codechatHandoffOpen => 'Kodda ochish';
-
-  @override
-  String get codechatTicketChat => 'Chatda muhokama qilinmoqda';
-
-  @override
-  String get codechatContinueInChat => 'Chatda davom ettirish';
-
-  @override
-  String get codechatCodeBadge => 'Kod';
-
-  @override
-  String get navAssistantCode => 'Kod';
+  String get wsMuseKeyHelp => 'Muse API kalitini joylang (LLM_ bilan boshlanadi). Sarfni Meta’da kalit egasi to‘laydi.';
 }

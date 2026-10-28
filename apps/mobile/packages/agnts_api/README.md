@@ -198,6 +198,46 @@ Class | Method | HTTP request | Description
 [*McpApi*](doc/McpApi.md) | [**getMcpSettings**](doc/McpApi.md#getmcpsettings) | **GET** /mcp-settings | The MCP connector URL and current connections
 [*McpApi*](doc/McpApi.md) | [**revokeMcp**](doc/McpApi.md#revokemcp) | **POST** /mcp-settings/revoke | Disconnect every Claude connection and delete the static token
 [*McpApi*](doc/McpApi.md) | [**rotateMcpToken**](doc/McpApi.md#rotatemcptoken) | **POST** /mcp-settings/token | Create a new static MCP bearer token (shown once; the old one stops working)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**actOnMeetingPerson**](doc/MeetingsApi.md#actonmeetingperson) | **POST** /public/meetings/{code}/call/people/{person}/{action} | Hosts: mute someone (source: microphone, camera or screen_share), ask them to unmute, remove them, lower their hand, make them co-host
+[*MeetingsApi*](doc/MeetingsApi.md) | [**admitAllMeetingKnocks**](doc/MeetingsApi.md#admitallmeetingknocks) | **POST** /public/meetings/{code}/call/admit-all | Let everyone waiting in
+[*MeetingsApi*](doc/MeetingsApi.md) | [**answerMeeting**](doc/MeetingsApi.md#answermeeting) | **PUT** /meetings/{meetingId}/rsvp | Answer an invitation
+[*MeetingsApi*](doc/MeetingsApi.md) | [**cancelMeeting**](doc/MeetingsApi.md#cancelmeeting) | **POST** /meetings/{meetingId}/cancel | Cancel a meeting; invitees get the cancellation in their calendar
+[*MeetingsApi*](doc/MeetingsApi.md) | [**changeMeetingInvitees**](doc/MeetingsApi.md#changemeetinginvitees) | **POST** /meetings/{meetingId}/invitees | Invite more people, or uninvite (the meeting&#39;s hosts)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**createActionItemTicket**](doc/MeetingsApi.md#createactionitemticket) | **POST** /meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/ticket | Make a ticket of an action item, with the words of the meeting that show it
+[*MeetingsApi*](doc/MeetingsApi.md) | [**createMeeting**](doc/MeetingsApi.md#createmeeting) | **POST** /meetings | Make a meeting you host (instant or scheduled) and invite people
+[*MeetingsApi*](doc/MeetingsApi.md) | [**decideMeetingKnock**](doc/MeetingsApi.md#decidemeetingknock) | **POST** /public/meetings/{code}/call/knocks/{knockId}/{decision} | Let someone in, or turn them away
+[*MeetingsApi*](doc/MeetingsApi.md) | [**deleteMeeting**](doc/MeetingsApi.md#deletemeeting) | **DELETE** /meetings/{meetingId} | Delete a meeting with its calls, recordings and transcripts (the host or the owner); notes documents stay
+[*MeetingsApi*](doc/MeetingsApi.md) | [**deleteMeetingRecording**](doc/MeetingsApi.md#deletemeetingrecording) | **DELETE** /meetings/{meetingId}/sessions/{sessionId}/recordings/{mediaId} | Delete a recording now (the host or the owner)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**endMeetingCall**](doc/MeetingsApi.md#endmeetingcall) | **POST** /public/meetings/{code}/call/end | End the call for everyone (the host)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeeting**](doc/MeetingsApi.md#getmeeting) | **GET** /meetings/{meetingId} | A meeting with its invitees
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeetingCall**](doc/MeetingsApi.md#getmeetingcall) | **GET** /public/meetings/{code}/call | The call as you see it in it - people, waiting room, what you may do
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeetingPrefs**](doc/MeetingsApi.md#getmeetingprefs) | **GET** /account/meetings | Your meeting reminders
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeetingRecording**](doc/MeetingsApi.md#getmeetingrecording) | **GET** /meetings/{meetingId}/sessions/{sessionId}/recordings/{mediaId} | Watch or download a call&#39;s recording (MP4; ranges for seeking)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeetingSession**](doc/MeetingsApi.md#getmeetingsession) | **GET** /meetings/{meetingId}/sessions/{sessionId} | A call&#39;s attendance, recordings, notes and action items
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeetingSettings**](doc/MeetingsApi.md#getmeetingsettings) | **GET** /meetings/settings | The workspace&#39;s rules for meetings, and what this server can do
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeetingTranscript**](doc/MeetingsApi.md#getmeetingtranscript) | **GET** /meetings/{meetingId}/sessions/{sessionId}/transcript | What was said, as Muse heard it
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getMeetingUsage**](doc/MeetingsApi.md#getmeetingusage) | **GET** /meetings/usage | The workspace&#39;s use of meetings per day (people-minutes, recordings, transcribed audio)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**getPublicMeeting**](doc/MeetingsApi.md#getpublicmeeting) | **GET** /public/meetings/{code} | What anyone with the link sees before joining
+[*MeetingsApi*](doc/MeetingsApi.md) | [**joinMeeting**](doc/MeetingsApi.md#joinmeeting) | **POST** /public/meetings/{code}/join | Join a meeting, or knock to be let in
+[*MeetingsApi*](doc/MeetingsApi.md) | [**listMeetingCallMessages**](doc/MeetingsApi.md#listmeetingcallmessages) | **GET** /public/meetings/{code}/call/messages | The call&#39;s chat after a message
+[*MeetingsApi*](doc/MeetingsApi.md) | [**listMeetingSessionMessages**](doc/MeetingsApi.md#listmeetingsessionmessages) | **GET** /meetings/{meetingId}/sessions/{sessionId}/messages | A call&#39;s chat
+[*MeetingsApi*](doc/MeetingsApi.md) | [**listMeetingSessions**](doc/MeetingsApi.md#listmeetingsessions) | **GET** /meetings/{meetingId}/sessions | The times a meeting was live, newest first
+[*MeetingsApi*](doc/MeetingsApi.md) | [**listMeetings**](doc/MeetingsApi.md#listmeetings) | **GET** /meetings | The meetings you see
+[*MeetingsApi*](doc/MeetingsApi.md) | [**listPastMeetingSessions**](doc/MeetingsApi.md#listpastmeetingsessions) | **GET** /meetings/past | Calls that happened, newest first, of the meetings you see
+[*MeetingsApi*](doc/MeetingsApi.md) | [**listTicketMeetings**](doc/MeetingsApi.md#listticketmeetings) | **GET** /tickets/{key}/meetings | The meetings a ticket was discussed in or made from
+[*MeetingsApi*](doc/MeetingsApi.md) | [**muteAllInMeeting**](doc/MeetingsApi.md#muteallinmeeting) | **POST** /public/meetings/{code}/call/mute-all | Mute everyone&#39;s microphone but yours (hosts)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**putMeetingPrefs**](doc/MeetingsApi.md#putmeetingprefs) | **PUT** /account/meetings | Change your meeting reminders
+[*MeetingsApi*](doc/MeetingsApi.md) | [**putMeetingSettings**](doc/MeetingsApi.md#putmeetingsettings) | **PUT** /meetings/settings | Change the workspace&#39;s rules for meetings (the owner)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**refreshMeetingToken**](doc/MeetingsApi.md#refreshmeetingtoken) | **POST** /public/meetings/{code}/call/token | A new LiveKit token for your seat (to reconnect)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**regenerateMeetingNotes**](doc/MeetingsApi.md#regeneratemeetingnotes) | **POST** /meetings/{meetingId}/sessions/{sessionId}/notes | Have Muse write a call&#39;s notes again (the meeting&#39;s hosts)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**ringMeeting**](doc/MeetingsApi.md#ringmeeting) | **POST** /meetings/{meetingId}/ring | Ring members into the meeting now (their phone and open agnts pages, for 30 seconds)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**searchMeetingTranscripts**](doc/MeetingsApi.md#searchmeetingtranscripts) | **GET** /meetings/search | Find what was said in the meetings you see
+[*MeetingsApi*](doc/MeetingsApi.md) | [**sendMeetingMessage**](doc/MeetingsApi.md#sendmeetingmessage) | **POST** /public/meetings/{code}/call/messages | Send a chat message to the call (no secrets; at most 30 a minute)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**setMeetingCallSettings**](doc/MeetingsApi.md#setmeetingcallsettings) | **PUT** /public/meetings/{code}/call/settings | Hosts: lock the meeting, change who may come in, quiet guests, record, take notes
+[*MeetingsApi*](doc/MeetingsApi.md) | [**setMeetingCohosts**](doc/MeetingsApi.md#setmeetingcohosts) | **PUT** /meetings/{meetingId}/cohosts | Choose a meeting&#39;s co-hosts (the host)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**setMeetingHost**](doc/MeetingsApi.md#setmeetinghost) | **PUT** /meetings/{meetingId}/host | Hand a meeting to another member (the host or the owner)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**updateMeeting**](doc/MeetingsApi.md#updatemeeting) | **PATCH** /meetings/{meetingId} | Change a meeting (its hosts and the owner); a new time sends the invitees an update
+[*MeetingsApi*](doc/MeetingsApi.md) | [**waitMeetingKnock**](doc/MeetingsApi.md#waitmeetingknock) | **GET** /public/meetings/{code}/knocks/{knockId} | Wait (up to 25 seconds) for a knock to be answered
 [*MetaApi*](doc/MetaApi.md) | [**getMeta**](doc/MetaApi.md#getmeta) | **GET** /meta | Server version and build information
 [*NetworkApi*](doc/NetworkApi.md) | [**connectPrivateNetwork**](doc/NetworkApi.md#connectprivatenetwork) | **POST** /networks/{networkId}/connect | Connect a disconnected network again, with its saved config
 [*NetworkApi*](doc/NetworkApi.md) | [**createPrivateNetwork**](doc/NetworkApi.md#createprivatenetwork) | **POST** /networks | Add a private network
@@ -388,6 +428,8 @@ Class | Method | HTTP request | Description
  - [AcceptFollowUpsResult](doc/AcceptFollowUpsResult.md)
  - [Acceptance](doc/Acceptance.md)
  - [AcceptanceCriteriaInner](doc/AcceptanceCriteriaInner.md)
+ - [ActOnMeetingPersonRequest](doc/ActOnMeetingPersonRequest.md)
+ - [ActionItemTicketInput](doc/ActionItemTicketInput.md)
  - [AddReviewDraftRequest](doc/AddReviewDraftRequest.md)
  - [AddressPullCommentsRequest](doc/AddressPullCommentsRequest.md)
  - [AdminAuditEntry](doc/AdminAuditEntry.md)
@@ -408,6 +450,7 @@ Class | Method | HTTP request | Description
  - [AnswerDraft](doc/AnswerDraft.md)
  - [AnswerDraftRequest](doc/AnswerDraftRequest.md)
  - [AnswerDraftRequestAnswersInner](doc/AnswerDraftRequestAnswersInner.md)
+ - [AnswerMeetingRequest](doc/AnswerMeetingRequest.md)
  - [AnswersRequest](doc/AnswersRequest.md)
  - [AnswersRequestAnswersInner](doc/AnswersRequestAnswersInner.md)
  - [ApiAuthKind](doc/ApiAuthKind.md)
@@ -575,6 +618,38 @@ Class | Method | HTTP request | Description
  - [LoginRequest](doc/LoginRequest.md)
  - [LoginResponse](doc/LoginResponse.md)
  - [McpStatus](doc/McpStatus.md)
+ - [Meeting](doc/Meeting.md)
+ - [MeetingActionItem](doc/MeetingActionItem.md)
+ - [MeetingAttendee](doc/MeetingAttendee.md)
+ - [MeetingCall](doc/MeetingCall.md)
+ - [MeetingCallSettings](doc/MeetingCallSettings.md)
+ - [MeetingDetail](doc/MeetingDetail.md)
+ - [MeetingGrant](doc/MeetingGrant.md)
+ - [MeetingInput](doc/MeetingInput.md)
+ - [MeetingInvitee](doc/MeetingInvitee.md)
+ - [MeetingInviteesInput](doc/MeetingInviteesInput.md)
+ - [MeetingInvites](doc/MeetingInvites.md)
+ - [MeetingJoin](doc/MeetingJoin.md)
+ - [MeetingJoinInput](doc/MeetingJoinInput.md)
+ - [MeetingKnock](doc/MeetingKnock.md)
+ - [MeetingLive](doc/MeetingLive.md)
+ - [MeetingMessage](doc/MeetingMessage.md)
+ - [MeetingNotesStatus](doc/MeetingNotesStatus.md)
+ - [MeetingPerson](doc/MeetingPerson.md)
+ - [MeetingPrefs](doc/MeetingPrefs.md)
+ - [MeetingRecording](doc/MeetingRecording.md)
+ - [MeetingRights](doc/MeetingRights.md)
+ - [MeetingSegment](doc/MeetingSegment.md)
+ - [MeetingSessionBrief](doc/MeetingSessionBrief.md)
+ - [MeetingSessionDetail](doc/MeetingSessionDetail.md)
+ - [MeetingSessionSummary](doc/MeetingSessionSummary.md)
+ - [MeetingSettings](doc/MeetingSettings.md)
+ - [MeetingSettingsAvailable](doc/MeetingSettingsAvailable.md)
+ - [MeetingSettingsInput](doc/MeetingSettingsInput.md)
+ - [MeetingTicketLink](doc/MeetingTicketLink.md)
+ - [MeetingTranscript](doc/MeetingTranscript.md)
+ - [MeetingTranscriptHit](doc/MeetingTranscriptHit.md)
+ - [MeetingUsageDay](doc/MeetingUsageDay.md)
  - [Member](doc/Member.md)
  - [Meta](doc/Meta.md)
  - [ModelCatalog](doc/ModelCatalog.md)
@@ -615,6 +690,7 @@ Class | Method | HTTP request | Description
  - [ProofTest](doc/ProofTest.md)
  - [PublicDocument](doc/PublicDocument.md)
  - [PublicDocumentInfo](doc/PublicDocumentInfo.md)
+ - [PublicMeeting](doc/PublicMeeting.md)
  - [PublishReviewDraftsRequest](doc/PublishReviewDraftsRequest.md)
  - [PublishedReview](doc/PublishedReview.md)
  - [PullComment](doc/PullComment.md)
@@ -685,6 +761,7 @@ Class | Method | HTTP request | Description
  - [ReviewerProfileInput](doc/ReviewerProfileInput.md)
  - [ReviewerStat](doc/ReviewerStat.md)
  - [Reviewers](doc/Reviewers.md)
+ - [RingMeetingRequest](doc/RingMeetingRequest.md)
  - [RotateMcpToken200Response](doc/RotateMcpToken200Response.md)
  - [RotateSwaggerSuiteHook200Response](doc/RotateSwaggerSuiteHook200Response.md)
  - [Rule](doc/Rule.md)
@@ -706,7 +783,9 @@ Class | Method | HTTP request | Description
  - [SecretFindings](doc/SecretFindings.md)
  - [SecretFindingsFindingsInner](doc/SecretFindingsFindingsInner.md)
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
+ - [SendMeetingMessageRequest](doc/SendMeetingMessageRequest.md)
  - [SetFreeCreditsRequest](doc/SetFreeCreditsRequest.md)
+ - [SetMeetingCohostsRequest](doc/SetMeetingCohostsRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [SetSlotsRequest](doc/SetSlotsRequest.md)

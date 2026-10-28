@@ -6221,8 +6221,848 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '429': { $ref: '#/components/responses/TooManyRequests' }
 
+  /meetings:
+    get:
+      operationId: listMeetings
+      x-viewer: true
+      summary: The meetings you see
+      description: 'upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host.'
+      tags: [meetings]
+      parameters:
+        - name: view
+          in: query
+          schema: { type: string, enum: [upcoming, live, mine], default: upcoming }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Meeting' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    post:
+      operationId: createMeeting
+      summary: Make a meeting you host (instant or scheduled) and invite people
+      description: Scheduled meetings' invitees get an email with the calendar event; members are told in agnts too.
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /meetings/past:
+    get:
+      operationId: listPastMeetingSessions
+      x-viewer: true
+      summary: Calls that happened, newest first, of the meetings you see
+      tags: [meetings]
+      parameters:
+        - name: before
+          in: query
+          description: Page back from this start time
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 30 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MeetingSessionSummary' }
+
+  /meetings/search:
+    get:
+      operationId: searchMeetingTranscripts
+      x-viewer: true
+      summary: Find what was said in the meetings you see
+      tags: [meetings]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 2, maxLength: 200 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MeetingTranscriptHit' }
+
+  /meetings/settings:
+    get:
+      operationId: getMeetingSettings
+      x-viewer: true
+      summary: The workspace's rules for meetings, and what this server can do
+      tags: [meetings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingSettings' }
+    put:
+      operationId: putMeetingSettings
+      x-role: owner
+      summary: Change the workspace's rules for meetings (the owner)
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingSettingsInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingSettings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /meetings/usage:
+    get:
+      operationId: getMeetingUsage
+      x-role: owner
+      summary: The workspace's use of meetings per day (people-minutes, recordings, transcribed audio)
+      tags: [meetings]
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 366, default: 30 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MeetingUsageDay' }
+
+  /meetings/{meetingId}:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    get:
+      operationId: getMeeting
+      x-viewer: true
+      summary: A meeting with its invitees
+      tags: [meetings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateMeeting
+      summary: Change a meeting (its hosts and the owner); a new time sends the invitees an update
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteMeeting
+      summary: Delete a meeting with its calls, recordings and transcripts (the host or the owner); notes documents stay
+      tags: [meetings]
+      responses:
+        '204': { description: Deleted }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    post:
+      operationId: cancelMeeting
+      summary: Cancel a meeting; invitees get the cancellation in their calendar
+      tags: [meetings]
+      responses:
+        '204': { description: Cancelled }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/rsvp:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    put:
+      operationId: answerMeeting
+      x-viewer: true
+      summary: Answer an invitation
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answer]
+              properties:
+                answer: { type: string, enum: [yes, no, maybe] }
+      responses:
+        '204': { description: Answered }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/invitees:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    post:
+      operationId: changeMeetingInvitees
+      summary: Invite more people, or uninvite (the meeting's hosts)
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingInviteesInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /meetings/{meetingId}/host:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    put:
+      operationId: setMeetingHost
+      summary: Hand a meeting to another member (the host or the owner)
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /meetings/{meetingId}/cohosts:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    put:
+      operationId: setMeetingCohosts
+      summary: Choose a meeting's co-hosts (the host)
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userIds]
+              properties:
+                userIds:
+                  type: array
+                  maxItems: 50
+                  items: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /meetings/{meetingId}/ring:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    post:
+      operationId: ringMeeting
+      x-viewer: true
+      summary: Ring members into the meeting now (their phone and open agnts pages, for 30 seconds)
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userIds]
+              properties:
+                userIds:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items: { type: integer, format: int64 }
+      responses:
+        '204': { description: Ringing }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/sessions:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    get:
+      operationId: listMeetingSessions
+      x-viewer: true
+      summary: The times a meeting was live, newest first
+      tags: [meetings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MeetingSessionBrief' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/sessions/{sessionId}:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+      - $ref: '#/components/parameters/SessionID'
+    get:
+      operationId: getMeetingSession
+      x-viewer: true
+      summary: A call's attendance, recordings, notes and action items
+      description: For the people who were in it, the meeting's invitees, its hosts and the owner.
+      tags: [meetings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingSessionDetail' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/sessions/{sessionId}/messages:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+      - $ref: '#/components/parameters/SessionID'
+    get:
+      operationId: listMeetingSessionMessages
+      x-viewer: true
+      summary: A call's chat
+      tags: [meetings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MeetingMessage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/sessions/{sessionId}/transcript:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+      - $ref: '#/components/parameters/SessionID'
+    get:
+      operationId: getMeetingTranscript
+      x-viewer: true
+      summary: What was said, as Muse heard it
+      tags: [meetings]
+      parameters:
+        - name: format
+          in: query
+          schema: { type: string, enum: [json, txt, vtt], default: json }
+      responses:
+        '200':
+          description: The transcript; txt and vtt as attachments
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingTranscript' }
+            text/plain:
+              schema: { type: string }
+            text/vtt:
+              schema: { type: string }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/sessions/{sessionId}/recordings/{mediaId}:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+      - $ref: '#/components/parameters/SessionID'
+      - name: mediaId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      operationId: getMeetingRecording
+      x-viewer: true
+      summary: Watch or download a call's recording (MP4; ranges for seeking)
+      tags: [meetings]
+      parameters:
+        - name: download
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: The video
+          content:
+            video/mp4:
+              schema: { type: string, format: binary }
+        '206': { description: Part of the video }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteMeetingRecording
+      summary: Delete a recording now (the host or the owner)
+      tags: [meetings]
+      responses:
+        '204': { description: Deleted }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /meetings/{meetingId}/sessions/{sessionId}/notes:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+      - $ref: '#/components/parameters/SessionID'
+    post:
+      operationId: regenerateMeetingNotes
+      summary: Have Muse write a call's notes again (the meeting's hosts)
+      tags: [meetings]
+      responses:
+        '202': { description: Being written }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/ticket:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+      - $ref: '#/components/parameters/SessionID'
+      - name: itemId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    post:
+      operationId: createActionItemTicket
+      summary: Make a ticket of an action item, with the words of the meeting that show it
+      tags: [meetings]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActionItemTicketInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ticket' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /tickets/{key}/meetings:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: listTicketMeetings
+      x-viewer: true
+      summary: The meetings a ticket was discussed in or made from
+      tags: [meetings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MeetingTicketLink' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /account/meetings:
+    get:
+      operationId: getMeetingPrefs
+      x-scope: user
+      summary: Your meeting reminders
+      tags: [meetings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingPrefs' }
+    put:
+      operationId: putMeetingPrefs
+      x-scope: user
+      summary: Change your meeting reminders
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingPrefs' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingPrefs' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /public/meetings/{code}:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    get:
+      operationId: getPublicMeeting
+      summary: What anyone with the link sees before joining
+      description: Title, host, times and whether it is live. Says whether the signed-in person is a member of its workspace.
+      tags: [meetings]
+      x-scope: user
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicMeeting' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /public/meetings/{code}/join:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    post:
+      operationId: joinMeeting
+      summary: Join a meeting, or knock to be let in
+      description: |
+        Members of the meeting's workspace are recognised by their session; everyone else is a guest: by the name they
+        type, Google, their agnts account, or an invitation link's token. A returning guest sends their guest token
+        (X-Guest-Token) to stay the same guest. joined hands out the LiveKit grant and the seat for in-call requests;
+        waiting hands out a knock to poll. Refusals are 403 with the reason as the code (locked, full, removed,
+        guests_off, not_started, cancelled, denied).
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/GuestToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingJoinInput' }
+      responses:
+        '200':
+          description: Joined or waiting
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingJoin' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/meetings/{code}/knocks/{knockId}:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+      - name: knockId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      operationId: waitMeetingKnock
+      summary: Wait (up to 25 seconds) for a knock to be answered
+      description: joined with the grant once let in, waiting while nobody answered, 403 denied or expired.
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/KnockToken'
+      responses:
+        '200':
+          description: Joined or still waiting
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingJoin' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/meetings/{code}/call:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    get:
+      operationId: getMeetingCall
+      summary: The call as you see it in it - people, waiting room, what you may do
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingCall' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /public/meetings/{code}/call/token:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    post:
+      operationId: refreshMeetingToken
+      summary: A new LiveKit token for your seat (to reconnect)
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingGrant' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /public/meetings/{code}/call/messages:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    get:
+      operationId: listMeetingCallMessages
+      summary: The call's chat after a message
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+        - name: after
+          in: query
+          schema: { type: integer, format: int64, default: 0 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MeetingMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: sendMeetingMessage
+      summary: Send a chat message to the call (no secrets; at most 30 a minute)
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, minLength: 1, maxLength: 2000 }
+      responses:
+        '201':
+          description: Sent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingMessage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /public/meetings/{code}/call/knocks/{knockId}/{decision}:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+      - name: knockId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+      - name: decision
+        in: path
+        required: true
+        schema: { type: string, enum: [admit, deny] }
+    post:
+      operationId: decideMeetingKnock
+      summary: Let someone in, or turn them away
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      responses:
+        '204': { description: Done }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/meetings/{code}/call/admit-all:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    post:
+      operationId: admitAllMeetingKnocks
+      summary: Let everyone waiting in
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      responses:
+        '204': { description: Done }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /public/meetings/{code}/call/people/{person}/{action}:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+      - name: person
+        in: path
+        required: true
+        description: u<user id> or g<guest id>
+        schema: { type: string, pattern: '^[ug][0-9]+$' }
+      - name: action
+        in: path
+        required: true
+        schema: { type: string, enum: [mute, ask-unmute, remove, lower-hand, cohost, uncohost] }
+    post:
+      operationId: actOnMeetingPerson
+      summary: 'Hosts: mute someone (source: microphone, camera or screen_share), ask them to unmute, remove them, lower their hand, make them co-host'
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source: { type: string, enum: [microphone, camera, screen_share] }
+      responses:
+        '204': { description: Done }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /public/meetings/{code}/call/mute-all:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    post:
+      operationId: muteAllInMeeting
+      summary: Mute everyone's microphone but yours (hosts)
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      responses:
+        '204': { description: Done }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /public/meetings/{code}/call/settings:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    put:
+      operationId: setMeetingCallSettings
+      summary: 'Hosts: lock the meeting, change who may come in, quiet guests, record, take notes'
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingCallSettings' }
+      responses:
+        '204': { description: Done }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /public/meetings/{code}/call/end:
+    parameters:
+      - $ref: '#/components/parameters/MeetingCode'
+    post:
+      operationId: endMeetingCall
+      summary: End the call for everyone (the host)
+      tags: [meetings]
+      x-scope: user
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SeatToken'
+      responses:
+        '204': { description: Ended }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
 components:
   parameters:
+    MeetingID:
+      name: meetingId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    SessionID:
+      name: sessionId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    MeetingCode:
+      name: code
+      in: path
+      required: true
+      description: 'The meeting code, abc-defg-hij (dashes optional)'
+      schema: { type: string, minLength: 10, maxLength: 14 }
+    SeatToken:
+      name: X-Meeting-Seat
+      in: header
+      description: The seat a join handed out
+      schema: { type: string, maxLength: 100 }
+    KnockToken:
+      name: X-Knock-Token
+      in: header
+      description: The knock's secret a join handed out
+      schema: { type: string, maxLength: 100 }
     CommentID:
       name: commentId
       in: path
@@ -10625,11 +11465,13 @@ components:
         required), on branch (the default branch when empty), optionally by one author. pulls: repositories' pull
         requests by state and period, or chosen numbers in one repository. repo: one repository read in the sandbox.
         document: a page you can open (documentId), made into slides; only for slide decks. documentVersion is the
-        version read: 0 or absent reads the current one, and the server records which.
+        version read: 0 or absent reads the current one, and the server records which. meeting: a meeting session's
+        transcript and chat (sessionId), made into notes; only the meeting makes these, never a person.
       required: [kind]
       properties:
-        kind: { type: string, enum: [report, tickets, commits, pulls, repo, document] }
-        template: { type: string, enum: [status, release_notes, pr_review, repo_review, ticket_summary, presentation, blank], description: 'Defaults by kind' }
+        kind: { type: string, enum: [report, tickets, commits, pulls, repo, document, meeting] }
+        template: { type: string, enum: [status, release_notes, pr_review, repo_review, ticket_summary, presentation, blank, meeting_notes], description: 'Defaults by kind' }
+        sessionId: { type: integer, format: int64, description: 'meeting: the session' }
         documentId: { type: integer, format: int64 }
         documentVersion: { type: integer, minimum: 0 }
         instruction: { type: string, maxLength: 2000 }
@@ -10926,6 +11768,420 @@ components:
         body: { type: string, description: 'Markdown; a slide deck''s speaker notes are left out' }
         version: { type: integer }
         updatedAt: { type: string, format: date-time }
+
+    Meeting:
+      type: object
+      description: A meeting link and its settings. live is set while a call is going on.
+      required: [id, code, link, title, description, hostName, kind, durationMin, timeZone, access, guests, locked, autoRecord, autoNotes, language, cohostIds, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        code: { type: string, description: 'abc-defg-hij' }
+        link: { type: string, description: 'The meeting''s public link' }
+        title: { type: string }
+        description: { type: string }
+        hostId: { type: integer, format: int64 }
+        hostName: { type: string }
+        kind: { type: string, enum: [instant, scheduled] }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        durationMin: { type: integer }
+        timeZone: { type: string }
+        access: { type: string, enum: [workspace, invited], description: 'workspace: every member joins; invited: only invitees, other members knock' }
+        guests: { type: string, enum: ['off', knock, open], description: 'What people without a membership may do' }
+        locked: { type: boolean }
+        autoRecord: { type: boolean }
+        autoNotes: { type: boolean }
+        language: { type: string, enum: [auto, en, ru, uz] }
+        cohostIds:
+          type: array
+          items: { type: integer, format: int64 }
+        cancelledAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        live: { $ref: '#/components/schemas/MeetingLive' }
+
+    MeetingLive:
+      type: object
+      required: [sessionId, startedAt, inCall, recording, notes]
+      properties:
+        sessionId: { type: integer, format: int64 }
+        startedAt: { type: string, format: date-time }
+        inCall: { type: integer, description: 'People in the call now' }
+        recording: { type: boolean }
+        notes: { type: boolean }
+
+    MeetingDetail:
+      allOf:
+        - $ref: '#/components/schemas/Meeting'
+        - type: object
+          required: [invitees, canManage]
+          properties:
+            invitees:
+              type: array
+              items: { $ref: '#/components/schemas/MeetingInvitee' }
+            myRsvp: { type: string, enum: [none, yes, no, maybe], description: 'Set when you are invited' }
+            canManage: { type: boolean, description: 'You may change, invite, cancel' }
+
+    MeetingInvitee:
+      type: object
+      required: [id, email, name, rsvp]
+      properties:
+        id: { type: integer, format: int64 }
+        userId: { type: integer, format: int64, description: 'A member; absent for an email address' }
+        email: { type: string }
+        name: { type: string }
+        rsvp: { type: string, enum: [none, yes, no, maybe] }
+
+    MeetingInput:
+      type: object
+      properties:
+        title: { type: string, maxLength: 200 }
+        description: { type: string, maxLength: 4000 }
+        kind: { type: string, enum: [instant, scheduled], description: 'instant when absent' }
+        startsAt: { type: string, format: date-time }
+        durationMin: { type: integer, minimum: 5, maximum: 720 }
+        timeZone: { type: string, maxLength: 64, description: 'IANA, e.g. Asia/Tashkent' }
+        access: { type: string, enum: [workspace, invited] }
+        guests: { type: string, enum: ['off', knock, open] }
+        autoRecord: { type: boolean }
+        autoNotes: { type: boolean }
+        language: { type: string, enum: [auto, en, ru, uz] }
+        invite: { $ref: '#/components/schemas/MeetingInvites' }
+
+    MeetingInvites:
+      type: object
+      properties:
+        users:
+          type: array
+          maxItems: 200
+          items: { type: integer, format: int64 }
+        emails:
+          type: array
+          maxItems: 200
+          items: { type: string, maxLength: 254 }
+
+    MeetingInviteesInput:
+      type: object
+      properties:
+        add: { $ref: '#/components/schemas/MeetingInvites' }
+        remove:
+          type: array
+          description: Invitee ids to uninvite
+          items: { type: integer, format: int64 }
+
+    MeetingSessionBrief:
+      type: object
+      required: [id, startedAt, notesStatus, notesError]
+      properties:
+        id: { type: integer, format: int64 }
+        startedAt: { type: string, format: date-time }
+        connectedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+        notesStatus: { $ref: '#/components/schemas/MeetingNotesStatus' }
+        notesError: { type: string }
+        documentId: { type: integer, format: int64 }
+
+    MeetingNotesStatus:
+      type: string
+      description: 'none; recording (notes are on); queued, transcribing (Muse hears the audio), writing (Muse writes the notes); done; failed'
+      enum: [none, recording, queued, transcribing, writing, done, failed]
+
+    MeetingSessionSummary:
+      type: object
+      required: [id, meetingId, meetingCode, meetingTitle, startedAt, people, recordings, actionItems, notesStatus, notesError, documentTitle]
+      properties:
+        id: { type: integer, format: int64 }
+        meetingId: { type: integer, format: int64 }
+        meetingCode: { type: string }
+        meetingTitle: { type: string }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+        people: { type: integer }
+        recordings: { type: integer }
+        actionItems: { type: integer }
+        notesStatus: { $ref: '#/components/schemas/MeetingNotesStatus' }
+        notesError: { type: string }
+        documentId: { type: integer, format: int64 }
+        documentTitle: { type: string }
+
+    MeetingSessionDetail:
+      type: object
+      required: [id, meeting, startedAt, notesStatus, notesError, attendees, recordings, actionItems, messages, canManage]
+      properties:
+        id: { type: integer, format: int64 }
+        meeting: { $ref: '#/components/schemas/Meeting' }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+        notesStatus: { $ref: '#/components/schemas/MeetingNotesStatus' }
+        notesError: { type: string }
+        documentId: { type: integer, format: int64 }
+        attendees:
+          type: array
+          items: { $ref: '#/components/schemas/MeetingAttendee' }
+        recordings:
+          type: array
+          items: { $ref: '#/components/schemas/MeetingRecording' }
+        actionItems:
+          type: array
+          items: { $ref: '#/components/schemas/MeetingActionItem' }
+        messages: { type: integer, description: 'Chat messages' }
+        canManage: { type: boolean }
+
+    MeetingAttendee:
+      type: object
+      required: [person, name, guest, firstIn, seconds]
+      properties:
+        person: { type: string, description: 'u<id> or g<id>' }
+        name: { type: string }
+        guest: { type: boolean }
+        email: { type: string, description: 'A guest''s, when Google or an invitation gave it' }
+        firstIn: { type: string, format: date-time }
+        lastOut: { type: string, format: date-time, description: 'Absent while still in the call' }
+        seconds: { type: integer, format: int64 }
+
+    MeetingRecording:
+      type: object
+      required: [id, startedAt, seconds, bytes, status]
+      properties:
+        id: { type: integer, format: int64 }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+        seconds: { type: integer, format: int64 }
+        bytes: { type: integer, format: int64 }
+        status: { type: string, enum: [active, ready] }
+
+    MeetingActionItem:
+      type: object
+      required: [id, position, text, who, due, quote]
+      properties:
+        id: { type: integer, format: int64 }
+        position: { type: integer }
+        text: { type: string }
+        who: { type: string, description: 'As named in the meeting' }
+        due: { type: string, description: 'As said' }
+        atMs: { type: integer, description: 'When it was said, from the start of the call' }
+        quote: { type: string }
+        ticketKey: { type: string, description: 'The ticket made from it' }
+
+    ActionItemTicketInput:
+      type: object
+      properties:
+        repoId: { type: integer, format: int64, description: 'The repository; absent lets agnts pick, or none' }
+        start: { type: string, enum: [ask, code, queue], description: 'ask when absent' }
+
+    MeetingMessage:
+      type: object
+      required: [id, person, name, body, at]
+      properties:
+        id: { type: integer, format: int64 }
+        person: { type: string, description: 'u<id> or g<id>' }
+        name: { type: string }
+        body: { type: string }
+        at: { type: string, format: date-time }
+
+    MeetingSegment:
+      type: object
+      required: [startMs, endMs, name, text]
+      properties:
+        startMs: { type: integer }
+        endMs: { type: integer }
+        name: { type: string, description: 'Who spoke; empty when the audio did not say' }
+        text: { type: string }
+
+    MeetingTranscript:
+      type: object
+      required: [segments, speakers]
+      properties:
+        segments:
+          type: array
+          items: { $ref: '#/components/schemas/MeetingSegment' }
+        speakers: { type: boolean, description: 'The segments name who spoke' }
+
+    MeetingTranscriptHit:
+      type: object
+      required: [meetingId, meetingTitle, sessionId, startedAt, segment]
+      properties:
+        meetingId: { type: integer, format: int64 }
+        meetingTitle: { type: string }
+        sessionId: { type: integer, format: int64 }
+        startedAt: { type: string, format: date-time }
+        segment: { $ref: '#/components/schemas/MeetingSegment' }
+
+    MeetingTicketLink:
+      type: object
+      required: [meetingId, meetingTitle, meetingCode, ticketKey, quote, createdAt]
+      properties:
+        meetingId: { type: integer, format: int64 }
+        meetingTitle: { type: string }
+        meetingCode: { type: string }
+        sessionId: { type: integer, format: int64 }
+        ticketKey: { type: string }
+        quote: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    MeetingSettings:
+      type: object
+      required: [allowRecording, retentionDays, keepAudio, maxParticipants, available]
+      properties:
+        allowRecording: { type: boolean }
+        retentionDays: { type: integer, description: 'Recordings, notes audio and transcripts are deleted after; 0 keeps them' }
+        keepAudio: { type: boolean, description: 'Keep the audio of notes after it is heard' }
+        maxParticipants: { type: integer }
+        available:
+          type: object
+          description: What this server can do
+          required: [meetings, recording, notes]
+          properties:
+            meetings: { type: boolean }
+            recording: { type: boolean }
+            notes: { type: boolean }
+
+    MeetingSettingsInput:
+      type: object
+      required: [allowRecording, retentionDays, keepAudio, maxParticipants]
+      properties:
+        allowRecording: { type: boolean }
+        retentionDays: { type: integer, minimum: 0, maximum: 3650 }
+        keepAudio: { type: boolean }
+        maxParticipants: { type: integer, minimum: 2, maximum: 100 }
+
+    MeetingPrefs:
+      type: object
+      required: [reminderMinutes]
+      properties:
+        reminderMinutes: { type: integer, enum: [0, 5, 10, 15], description: '0 turns reminders off' }
+
+    MeetingUsageDay:
+      type: object
+      required: [day, sessions, participantMinutes, recordingMinutes, recordingBytes, transcribedMinutes]
+      properties:
+        day: { type: string, format: date }
+        sessions: { type: integer }
+        participantMinutes: { type: integer, format: int64 }
+        recordingMinutes: { type: integer, format: int64 }
+        recordingBytes: { type: integer, format: int64 }
+        transcribedMinutes: { type: integer, format: int64 }
+
+    PublicMeeting:
+      type: object
+      required: [code, title, hostName, workspace, kind, cancelled, guests, member, inCall, recording, notes]
+      properties:
+        code: { type: string }
+        title: { type: string }
+        hostName: { type: string }
+        workspace: { type: string, description: 'The workspace''s name' }
+        kind: { type: string, enum: [instant, scheduled] }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        timeZone: { type: string }
+        cancelled: { type: boolean }
+        guests: { type: string, enum: ['off', knock, open] }
+        live: { type: boolean }
+        inCall: { type: integer }
+        recording: { type: boolean, description: 'The call is being recorded' }
+        notes: { type: boolean, description: 'agnts is taking notes of the call' }
+        member: { type: boolean, description: 'You are signed in as a member of its workspace' }
+        name: { type: string, description: 'Your name, when signed in' }
+        googleClientId: { type: string, description: 'For "Continue with Google"' }
+
+    MeetingJoinInput:
+      type: object
+      properties:
+        name: { type: string, maxLength: 80, description: 'A guest''s name' }
+        googleCredential: { type: string, maxLength: 4096, description: 'A Google ID token: the guest is who Google says' }
+        invite: { type: string, maxLength: 100, description: 'The token of an invitation link (?i=)' }
+        device: { type: string, maxLength: 16, description: 'The browser or phone: 4-16 letters and digits it keeps' }
+
+    MeetingJoin:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [joined, waiting] }
+        grant: { $ref: '#/components/schemas/MeetingGrant' }
+        knockId: { type: integer, format: int64 }
+        knockToken: { type: string, description: 'Send as X-Knock-Token when polling' }
+        guestToken: { type: string, description: 'A new guest''s token: keep it and send it as X-Guest-Token next time' }
+        guestName: { type: string }
+
+    MeetingGrant:
+      type: object
+      required: [url, token, identity, role, rights, sessionId, name]
+      properties:
+        url: { type: string, description: 'The LiveKit server (wss://)' }
+        token: { type: string, description: 'The LiveKit access token' }
+        identity: { type: string }
+        seat: { type: string, description: 'Send as X-Meeting-Seat with in-call requests' }
+        role: { type: string, enum: [host, cohost, member, guest] }
+        rights: { $ref: '#/components/schemas/MeetingRights' }
+        sessionId: { type: integer, format: int64 }
+        name: { type: string }
+
+    MeetingRights:
+      type: object
+      required: [publish, screenShare, chat, admit, moderate, record, manageCohosts]
+      properties:
+        publish: { type: boolean }
+        screenShare: { type: boolean }
+        chat: { type: boolean }
+        admit: { type: boolean }
+        moderate: { type: boolean }
+        record: { type: boolean }
+        manageCohosts: { type: boolean }
+
+    MeetingCall:
+      type: object
+      required: [meeting, sessionId, me, rights, canAdmit, people, knocks, recording, notes, recordingAvailable, notesAvailable, guestsQuiet]
+      properties:
+        meeting: { $ref: '#/components/schemas/Meeting' }
+        sessionId: { type: integer, format: int64 }
+        me: { $ref: '#/components/schemas/MeetingPerson' }
+        rights: { $ref: '#/components/schemas/MeetingRights' }
+        canAdmit: { type: boolean }
+        people:
+          type: array
+          items: { $ref: '#/components/schemas/MeetingPerson' }
+        knocks:
+          type: array
+          items: { $ref: '#/components/schemas/MeetingKnock' }
+        recording: { type: boolean }
+        notes: { type: boolean }
+        notesStatus: { $ref: '#/components/schemas/MeetingNotesStatus' }
+        recordingAvailable: { type: boolean }
+        notesAvailable: { type: boolean }
+        guestsQuiet: { type: boolean }
+        workspace: { type: string, description: 'The workspace''s slug, for members' }
+
+    MeetingPerson:
+      type: object
+      required: [key, name, role, identities, knocked]
+      properties:
+        key: { type: string, description: 'u<id> or g<id>' }
+        name: { type: string }
+        role: { type: string, enum: [host, cohost, member, guest] }
+        identities:
+          type: array
+          description: Their connections (one per device)
+          items: { type: string }
+        email: { type: string, description: 'A guest''s, for hosts' }
+        knocked: { type: boolean }
+
+    MeetingKnock:
+      type: object
+      required: [id, name, guest, at]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        email: { type: string }
+        guest: { type: boolean }
+        at: { type: string, format: date-time }
+
+    MeetingCallSettings:
+      type: object
+      properties:
+        locked: { type: boolean }
+        guests: { type: string, enum: ['off', knock, open] }
+        guestsQuiet: { type: boolean, description: 'Guests can''t chat or share their screen' }
+        recording: { type: boolean, description: 'Start or stop the video recording' }
+        notes: { type: boolean, description: 'Start or stop taking notes' }
 
   responses:
     Preparing:

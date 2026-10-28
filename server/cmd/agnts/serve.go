@@ -38,8 +38,10 @@ import (
 	"agnts/internal/egress"
 	"agnts/internal/google"
 	"agnts/internal/httpapi"
+	"agnts/internal/livekit"
 	"agnts/internal/mail"
 	"agnts/internal/mcpserver"
+	"agnts/internal/meetings"
 	"agnts/internal/metrics"
 	"agnts/internal/musecredits"
 	"agnts/internal/netroute"
@@ -158,6 +160,9 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	}
 	docSvc := documents.New(docDeps)
 	a.orch.SetDocumentWatcher(docSvc)
+	meetSvc := newMeetings(cfg, a, docSvc, broker, mailer, log.With("component", "meetings"))
+	a.meet = meetSvc
+	docSvc.SetMeetingWatcher(meetSvc.NotesChanged)
 	handler, err := httpapi.NewHandler(httpapi.Options{
 		Auth:    svc,
 		Tickets: a.orch,
@@ -180,6 +185,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Swagger:      a.orch,
 		Suites:       a.orch,
 		Documents:    docSvc,
+		Meetings:     meetSvc,
 		OAuth:        a.oauth,
 		MCP:          mcpHandler,
 		DB:           pool,
@@ -253,6 +259,15 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 			log.Info("released expired muse holds", "count", n)
 		}
 	})
+
+	if meetSvc.Ready() {
+		go every(sys, time.Minute, meetSvc.Sweep)
+		go every(sys, time.Minute, meetSvc.Remind)
+		go every(sys, 24*time.Hour, func(ctx context.Context) { a.forEachWorkspace(ctx, meetSvc.Retention) })
+		if cfg.AgentEnabled {
+			go meetSvc.RunNotes(sys) // hearing the audio needs the worker's containers
+		}
+	}
 
 	go a.network.Run(sys)
 	workerDone := make(chan struct{})
@@ -369,6 +384,8 @@ type agent struct {
 	links        *commitlink.Service
 	assistant    *postgres.Assistant
 	docStore     *postgres.Documents
+	meetStore    *postgres.Meetings
+	meet         *meetings.Service // set once the server is built
 }
 
 // mcpDeps are the use cases the MCP tools call, and the assistant's
@@ -378,6 +395,7 @@ func (a *agent) mcpDeps() mcpserver.Deps {
 		Orch: a.orch, Store: a.store, Usage: a.usage, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci,
 		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
 		Role:      a.workspaces.Role,
+		Meetings:  func() *meetings.Service { return a.meet },
 	}
 }
 
@@ -589,6 +607,9 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.orch.SetAssistantActions(&actions.Assistant{Deps: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Role: a.workspaces.Role})
 	a.orch.SetCodeChat(a.assistant, a.workspaces.Role)
 	a.orch.SetTranscriber(a.runner)
+	a.meetStore = postgres.NewMeetings(pool)
+	a.orch.SetMeetings(a.meetStore)
+	a.orch.SetMeetingTranscriber(a.runner)
 	return a, nil
 }
 
@@ -1291,4 +1312,70 @@ func (m museAPI) StartLogin(ctx context.Context, ws, user int64) (musecredits.Lo
 
 func (m museAPI) LoginStatus(id string, ws, user int64) (musecredits.Login, bool) {
 	return m.logins.Status(id, ws, user)
+}
+
+// newMeetings sets up video calls when a LiveKit server is configured;
+// without one the service answers that meetings are off.
+func newMeetings(cfg config.Config, a *agent, docSvc *documents.Service, broker *httpapi.Broker, mailer mail.Sender, log *slog.Logger) *meetings.Service {
+	keys := livekit.Keys{Key: cfg.LiveKitKey, Secret: cfg.LiveKitSecret}
+	mcfg := meetings.Config{LiveKitURL: cfg.LiveKitURL, Keys: keys, PublicURL: cfg.PublicURL.String(), MediaDir: cfg.MeetingsDir,
+		EgressDir: cfg.MeetingsEgressDir, Egress: cfg.LiveKitEgress, MaxRecordings: cfg.MeetMaxRecordings, NotesAudio: cfg.MeetNotesAudio}
+	deps := meetings.Deps{Store: a.meetStore, Workspaces: a.workspaces, Users: a.users, Settings: a.settings, Stream: broker,
+		Pusher: a.notifier, Mailer: mailer, Notes: docSvc, Tickets: meetingTickets{a.orch, a.store}, Log: log}
+	if cfg.LiveKitURL != "" {
+		deps.LiveKit = livekit.NewClient(cfg.LiveKitInternalURL, keys)
+		if cfg.AgentEnabled {
+			deps.Hearer = a.orch
+		}
+		if cfg.LiveKitEgress {
+			if err := meetingsDir(cfg.MeetingsDir); err != nil {
+				log.Warn("recordings and notes are off: the meetings directory is not usable", "dir", cfg.MeetingsDir, "err", err)
+				mcfg.Egress = false
+			}
+		}
+		log.Info("meetings on", "livekit", cfg.LiveKitURL, "recording", mcfg.Egress, "notes", mcfg.Egress && deps.Hearer != nil, "notes_audio", cfg.MeetNotesAudio)
+	} else {
+		log.Info("meetings off: set AGNTS_LIVEKIT_URL, AGNTS_LIVEKIT_API_KEY and AGNTS_LIVEKIT_API_SECRET to enable video calls")
+	}
+	return meetings.New(mcfg, deps)
+}
+
+// meetingsDir makes the directory Egress writes recordings to and agnts
+// reads them from. Egress runs as another user, so it may write here;
+// files stay flat (no folders Egress would own) so agnts can delete them.
+func meetingsDir(dir string) error {
+	// Egress writes as its own user: the directory is open to it (it holds
+	// only recordings, which agnts serves after an access check).
+	if err := os.MkdirAll(dir, 0o777); err != nil { //nolint:gosec // G301: see above
+		return err
+	}
+	// A volume made by Docker may belong to root: leave it alone when it
+	// is already open.
+	if fi, err := os.Stat(dir); err != nil {
+		return err
+	} else if fi.Mode().Perm() != 0o777 {
+		if err := os.Chmod(dir, 0o777); err != nil { //nolint:gosec // G302: see above
+			return err
+		}
+	}
+	probe := filepath.Join(dir, ".agnts-probe")
+	if err := os.WriteFile(probe, []byte("ok"), 0o600); err != nil {
+		return err
+	}
+	return os.Remove(probe)
+}
+
+// meetingTickets makes tickets of action items (the orchestrator) and
+// finds tickets by key (the store).
+type meetingTickets struct {
+	orch  *orchestrator.Orchestrator
+	store *postgres.Agent
+}
+
+func (t meetingTickets) CreateTask(ctx context.Context, in orchestrator.TaskInput, origin domain.Origin) (domain.Ticket, error) {
+	return t.orch.CreateTask(ctx, in, origin)
+}
+
+func (t meetingTickets) TicketByKey(ctx context.Context, key string) (domain.Ticket, error) {
+	return t.store.TicketByKey(ctx, key)
 }

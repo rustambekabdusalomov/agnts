@@ -58,6 +58,7 @@ export const TEMPLATES: Record<DocumentSource['kind'], NonNullable<DocumentSourc
   commits: ['release_notes', 'status', 'blank'],
   pulls: ['pr_review', 'release_notes', 'blank'],
   repo: ['repo_review', 'blank'],
+  meeting: ['meeting_notes'],
   document: ['presentation', 'blank'],
 }
 

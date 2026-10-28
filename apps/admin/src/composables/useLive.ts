@@ -70,6 +70,13 @@ function stale(e: TicketEvent): string[] {
     case 'documents_changed':
       keys.push('documents')
       break
+    case 'meetings_changed':
+    case 'meeting_live':
+    case 'meeting_ended':
+    case 'meeting_notes':
+    case 'meeting_reminder':
+      keys.push('meetings')
+      break
     case 'document_comments': {
       const id = String((e.data as { documentId?: number } | undefined)?.documentId ?? '')
       if (id) keys.push(`document-comments:${id}`)

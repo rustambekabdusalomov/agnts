@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/assistant/assistant_data.dart';
 import '../features/assistant/code_data.dart';
 import '../features/documents/documents_data.dart';
+import '../features/meetings/meetings_data.dart';
 import '../features/tickets/linked_commits.dart';
 import '../features/tickets/pull_comments.dart';
 import 'api.dart';
@@ -138,6 +139,8 @@ class LiveStream {
         ref.invalidate(linkedCommitsProvider);
       case 'document_updated':
         invalidateDocuments(ref); // sent only to people who can open the document
+      case 'meetings_changed' || 'meeting_live' || 'meeting_ended' || 'meeting_notes' || 'meeting_reminder':
+        invalidateMeetings(ref);
     }
     if (e['step'] == 'learn') ref.invalidate(learnQueueProvider);
     // A finished review run writes its drafts.

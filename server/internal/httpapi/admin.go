@@ -520,7 +520,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos, Effort: cur.Effort, RecheckComplex: cur.RecheckComplex, BaselineChecks: cur.BaselineChecks,
 		Git: domain.GitSettings{AuthorName: req.Git.AuthorName, AuthorEmail: req.Git.AuthorEmail, CoAuthor: req.Git.CoAuthor,
 			PRTitle: req.Git.PrTitle, Draft: req.Git.Draft},
-		Notify: cur.Notify, RunBudget: cur.RunBudget,
+		Notify: cur.Notify, RunBudget: cur.RunBudget, Meetings: cur.Meetings,
 	}
 	if req.RunBudget != nil {
 		v.RunBudget = *req.RunBudget

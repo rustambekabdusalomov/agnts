@@ -37,6 +37,7 @@ type Store interface {
 	SetCursor(ctx context.Context, name string, id int64) error
 	Devices(ctx context.Context, ws int64) ([]postgres.Device, error)
 	OwnerDevices(ctx context.Context, ws int64, key string) (int64, []postgres.Device, error)
+	UserDevices(ctx context.Context, ws int64, users []int64) ([]postgres.Device, error)
 	DeleteDevice(ctx context.Context, token string) error
 	SaveTelegramMessage(ctx context.Context, m postgres.TelegramMessage) error
 	TelegramMessage(ctx context.Context, chatID, messageID int64) (postgres.TelegramMessage, error)

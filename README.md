@@ -61,7 +61,12 @@ make dev-user        # create your user: password + authenticator app
 make dev-server      # API on :8080, migrations applied on start
 make dev-admin       # admin panel on http://localhost:5173
 make dev-website     # public website on http://localhost:3000
+make dev-meetings    # LiveKit, Redis and Egress for video calls (Docker)
 ```
+
+Meetings use the LiveKit values in `deploy/.env.dev`; start `make dev-meetings`
+before `make dev-server`. The LiveKit tests run when `AGNTS_TEST_LIVEKIT_URL`
+is set (`ws://localhost:7880`).
 
 Database tests run when `AGNTS_TEST_DATABASE_URL` is set; the dev database
 creates `hiro_test` for them:
