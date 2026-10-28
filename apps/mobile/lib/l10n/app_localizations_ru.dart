@@ -14373,7 +14373,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get codechatRepos => 'Репозитории';
 
   @override
-  String get codechatReposNone => 'Выберите репозитории для работы';
+  String get codechatReposNone => 'Выберите репозитории для работы или назовите их в сообщении через @';
 
   @override
   String get codechatReposChange => 'Изменить';
@@ -14432,7 +14432,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get codechatSend => 'Отправить';
 
   @override
-  String get codechatSendHint => 'Enter отправляет, Shift+Enter переносит строку';
+  String get codechatSendHint => 'Enter отправляет, Shift+Enter переносит строку, @ указывает репозиторий';
 
   @override
   String codechatCount(String n) {

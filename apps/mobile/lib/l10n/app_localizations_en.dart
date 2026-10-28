@@ -13778,7 +13778,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get codechatRepos => 'Repositories';
 
   @override
-  String get codechatReposNone => 'Pick the repositories to work in';
+  String get codechatReposNone => 'Pick the repositories to work in, or name them in the message with @';
 
   @override
   String get codechatReposChange => 'Change';
@@ -13837,7 +13837,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get codechatSend => 'Send';
 
   @override
-  String get codechatSendHint => 'Enter sends, Shift+Enter makes a new line';
+  String get codechatSendHint => 'Enter sends, Shift+Enter makes a new line, @ names a repository';
 
   @override
   String codechatCount(String n) {

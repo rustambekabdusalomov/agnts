@@ -139,3 +139,69 @@ export const queued = (c?: AssistantConversation) => {
 
 /** A tool call as one short line: "Edit · refund.go". */
 export const toolLine = (e: TicketEvent) => e.message
+
+/** A repository as mentions need it. */
+export interface NamedRepo {
+  id: number
+  name: string
+}
+
+const NAME_CHAR = /[a-z0-9\-_./]/
+
+/**
+ * The repositories a message names, as the server reads it
+ * (domain.MentionedRepos): "@name" always, and with plain the name alone
+ * as a word. Matching ignores case; owner/name also answers to name.
+ */
+export function mentionedRepos(text: string, repos: NamedRepo[], plain: boolean): number[] {
+  const words = new Set<string>()
+  const tagged = new Set<string>()
+  const low = text.toLowerCase()
+  for (let i = 0; i < low.length; ) {
+    if (!NAME_CHAR.test(low[i])) {
+      i++
+      continue
+    }
+    let j = i
+    while (j < low.length && NAME_CHAR.test(low[j])) j++
+    const w = low.slice(i, j).replace(/\.+$/, '')
+    words.add(w)
+    if (i > 0 && low[i - 1] === '@') tagged.add(w)
+    i = j
+  }
+  return repos
+    .filter((r) => {
+      const name = r.name.toLowerCase()
+      const k = name.lastIndexOf('/')
+      const names = k >= 0 && k < name.length - 1 ? [name, name.slice(k + 1)] : [name]
+      return names.some((n) => tagged.has(n) || (plain && words.has(n)))
+    })
+    .map((r) => r.id)
+}
+
+/** The @mention being typed at caret: where its @ is and what follows it. */
+export function mentionAt(text: string, caret: number): { start: number; query: string } | undefined {
+  // The caret may lag a text that was just cleared or replaced.
+  caret = Math.min(caret, text.length)
+  let i = caret
+  while (i > 0 && NAME_CHAR.test(text[i - 1].toLowerCase())) i--
+  if (i === 0 || text[i - 1] !== '@') return undefined
+  // An @ inside a word is an e-mail address, not a mention.
+  if (i > 1 && NAME_CHAR.test(text[i - 2].toLowerCase())) return undefined
+  return { start: i - 1, query: text.slice(i, caret) }
+}
+
+/** The repositories to offer for a mention's query: names that start with it first. */
+export function mentionOptions(query: string, repos: NamedRepo[], max = 6): NamedRepo[] {
+  const q = query.toLowerCase()
+  const starts = repos.filter((r) => r.name.toLowerCase().startsWith(q))
+  const inside = repos.filter((r) => !r.name.toLowerCase().startsWith(q) && r.name.toLowerCase().includes(q))
+  return [...starts, ...inside].slice(0, max)
+}
+
+/** text with the mention from start to caret replaced by @name and a space; and where the caret goes. */
+export function insertMention(text: string, start: number, caret: number, name: string): { text: string; caret: number } {
+  const tag = `@${name} `
+  const rest = text.slice(caret).replace(/^\S*/, '').replace(/^ /, '')
+  return { text: text.slice(0, start) + tag + rest, caret: start + tag.length }
+}

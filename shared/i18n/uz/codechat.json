@@ -9,7 +9,7 @@
     "emptyText": "Repozitoriylarni tanlang va nima qilish kerakligini yozing. agnts buni tiket sifatida bajaradi: ishni shu yerda kuzating, savollarga javob bering, oʻzgarish soʻrang va pull requestni tasdiqlang.",
     "viewersOnly": "Kod rejimi ish maydonini oʻzgartira oladiganlar uchun.",
     "repos": "Repozitoriylar",
-    "reposNone": "Ishlash uchun repozitoriylarni tanlang",
+    "reposNone": "Ishlash uchun repozitoriylarni tanlang yoki xabarda @ bilan ayting",
     "reposChange": "Oʻzgartirish",
     "reposSave": "Repozitoriylarni saqlash",
     "reposSaved": "Repozitoriylar oʻzgardi: keyingi tiket ularda ishlaydi",
@@ -28,7 +28,7 @@
     "placeholderPushing": "Yuborilmoqda…",
     "placeholderDone": "Keyingi oʻzgarishni yozing…",
     "send": "Yuborish",
-    "sendHint": "Enter yuboradi, Shift+Enter yangi qator",
+    "sendHint": "Enter yuboradi, Shift+Enter yangi qator, @ repozitoriyni ko‘rsatadi",
     "count": "{n} / 4000",
     "routedCreated": "{key} boshlandi",
     "routedAnswered": "{key} savollariga javob berildi",
@@ -89,6 +89,8 @@
     "handoffOpen": "Kodda ochish",
     "ticketChat": "Chatda muhokama qilinmoqda",
     "continueInChat": "Chatda davom ettirish",
-    "codeBadge": "Kod"
+    "codeBadge": "Kod",
+    "mentioned": "Ish joyi: {names}",
+    "mentionLabel": "Repozitoriylar"
   }
 }

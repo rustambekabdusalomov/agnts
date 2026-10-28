@@ -9,7 +9,7 @@
     "emptyText": "Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.",
     "viewersOnly": "Code mode is for people who can change the workspace.",
     "repos": "Repositories",
-    "reposNone": "Pick the repositories to work in",
+    "reposNone": "Pick the repositories to work in, or name them in the message with @",
     "reposChange": "Change",
     "reposSave": "Save repositories",
     "reposSaved": "Repositories changed: the next ticket works in them",
@@ -28,7 +28,7 @@
     "placeholderPushing": "Pushing now…",
     "placeholderDone": "Ask for the next change…",
     "send": "Send",
-    "sendHint": "Enter sends, Shift+Enter makes a new line",
+    "sendHint": "Enter sends, Shift+Enter makes a new line, @ names a repository",
     "count": "{n} / 4000",
     "routedCreated": "Started {key}",
     "routedAnswered": "Answered {key}",
@@ -89,6 +89,8 @@
     "handoffOpen": "Open in Code",
     "ticketChat": "Discussed in chat",
     "continueInChat": "Continue in chat",
-    "codeBadge": "Code"
+    "codeBadge": "Code",
+    "mentioned": "Works in {names}",
+    "mentionLabel": "Repositories"
   }
 }

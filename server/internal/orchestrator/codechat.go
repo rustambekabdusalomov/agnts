@@ -163,7 +163,15 @@ func (o *Orchestrator) StartCode(ctx context.Context, in CodeStart) (domain.Assi
 		repos = ticketChoice(t)
 	} else {
 		if repos.Empty() {
-			return domain.AssistantConversation{}, invalid("pick the repositories to work in")
+			// None picked: the ones the message names, by @name or by name.
+			ids, err := o.mentionedRepos(ctx, text, true)
+			if err != nil {
+				return domain.AssistantConversation{}, err
+			}
+			repos = domain.ChoiceOf(ids)
+		}
+		if repos.Empty() {
+			return domain.AssistantConversation{}, invalid("pick the repositories to work in, or name them in the message (@name)")
 		}
 		if err := repos.Check(); err != nil {
 			return domain.AssistantConversation{}, invalid("%v", err)
@@ -191,6 +199,19 @@ func (o *Orchestrator) StartCode(ctx context.Context, in CodeStart) (domain.Assi
 		return domain.AssistantConversation{}, err
 	}
 	return o.assistant.AssistantConversation(ctx, user, c.ID)
+}
+
+// mentionedRepos is the workspace's repositories that text names (see
+// domain.MentionedRepos).
+func (o *Orchestrator) mentionedRepos(ctx context.Context, text string, plain bool) ([]int64, error) {
+	if !strings.Contains(text, "@") && !plain {
+		return nil, nil
+	}
+	rs, err := o.listRepos(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return domain.MentionedRepos(text, rs, plain), nil
 }
 
 // ticketChoice is the repositories a ticket works in, as a choice.
@@ -383,6 +404,22 @@ func (o *Orchestrator) newCodeTicket(ctx context.Context, c domain.AssistantConv
 	}
 	if n >= domain.CodeMaxRunning {
 		return "", "", invalid("%d of your Code tickets are running; wait for one to finish or need you, then send this again", n)
+	}
+	// A message that names repositories (@name) works in them, and they
+	// become the conversation's.
+	ids, err := o.mentionedRepos(ctx, text, false)
+	if err != nil {
+		return "", "", err
+	}
+	cur := c.Repos.RepoIDs
+	if c.Repos.RepoID != 0 {
+		cur = []int64{c.Repos.RepoID}
+	}
+	if len(ids) > 0 && (c.Repos.GroupID != 0 || !slices.Equal(ids, cur)) {
+		c.Repos = domain.ChoiceOf(ids)
+		if err := o.codeChat.SetCodeRepos(ctx, user, c.ID, c.Repos); err != nil {
+			return "", "", err
+		}
 	}
 	desc := text
 	if after != "" {

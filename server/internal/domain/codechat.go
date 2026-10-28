@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"slices"
+	"strings"
+	"time"
+)
 
 // A chat has a mode. In Chat mode the assistant answers about the
 // workspace (see assistant.go). In Code mode a person picks repositories
@@ -128,3 +132,54 @@ type CodeApproval struct {
 
 // CodeApprovalTTL is how long a run waits for a person's decision.
 const CodeApprovalTTL = 5 * time.Minute
+
+// MentionedRepos returns the repositories a Code message names, in the
+// order the list has them: "@name" always counts, and with plain the name
+// alone, as a word, counts too. A name is matched without case, and a
+// repository named owner/name also answers to name.
+func MentionedRepos(text string, repos []Repository, plain bool) []int64 {
+	words := map[string]bool{}  // every word, lower case
+	tagged := map[string]bool{} // the words after an @
+	low := strings.ToLower(text)
+	for i := 0; i < len(low); {
+		if !repoNameChar(low[i]) {
+			i++
+			continue
+		}
+		j := i
+		for j < len(low) && repoNameChar(low[j]) {
+			j++
+		}
+		w := strings.TrimRight(low[i:j], ".") // a full stop ends the sentence, not the name
+		words[w] = true
+		if i > 0 && low[i-1] == '@' {
+			tagged[w] = true
+		}
+		i = j
+	}
+	var out []int64
+	for _, r := range repos {
+		name := strings.ToLower(r.Name)
+		names := []string{name}
+		if k := strings.LastIndexByte(name, '/'); k >= 0 && k < len(name)-1 {
+			names = append(names, name[k+1:])
+		}
+		if slices.ContainsFunc(names, func(n string) bool { return tagged[n] || plain && words[n] }) {
+			out = append(out, r.ID)
+		}
+	}
+	return out
+}
+
+// repoNameChar reports whether c may be part of a repository name.
+func repoNameChar(c byte) bool {
+	return c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-' || c == '_' || c == '.' || c == '/'
+}
+
+// ChoiceOf is a choice of the repositories ids.
+func ChoiceOf(ids []int64) RepoChoice {
+	if len(ids) == 1 {
+		return RepoChoice{RepoID: ids[0]}
+	}
+	return RepoChoice{RepoIDs: ids}
+}

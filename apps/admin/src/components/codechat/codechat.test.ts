@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { AssistantConversation, AssistantMessage, TicketEvent, TimelineItem } from '../../api/types'
-import { blocks, currentTicket, liveItems, placeholder, queued, routedLabel, running } from './codechat'
+import { blocks, currentTicket, insertMention, liveItems, mentionAt, mentionedRepos, mentionOptions, placeholder, queued, routedLabel, running } from './codechat'
 
 const t = (k: string, v?: Record<string, unknown>) => (v ? `${k} ${JSON.stringify(v)}` : k)
 const at = (s: number) => new Date(Date.UTC(2026, 9, 28, 9, 0, s)).toISOString()
@@ -72,5 +72,33 @@ describe('conversation state', () => {
     expect(routedLabel(t, msg(1, 'x', { routed: 'changes', ticketKey: 'VIS-1' }))).toBe('codechat.routedChanges {"key":"VIS-1"}')
     expect(routedLabel(t, msg(1, 'x', { routed: 'failed', error: 'asks 2 questions' }))).toBe('codechat.routedFailed {"reason":"asks 2 questions"}')
     expect(routedLabel(t, msg(1, 'x'))).toBe('')
+  })
+})
+
+describe('mentions', () => {
+  const repos = [{ id: 1, name: 'api' }, { id: 2, name: 'web-admin' }, { id: 3, name: 'acme/mobile' }]
+  it('reads the repositories a message names, as the server does', () => {
+    expect(mentionedRepos('fix login in @api', repos, false)).toEqual([1])
+    expect(mentionedRepos('fix login in the api', repos, false)).toEqual([])
+    expect(mentionedRepos('fix login in the api', repos, true)).toEqual([1])
+    expect(mentionedRepos('@WEB-ADMIN and @api: rename it', repos, false)).toEqual([1, 2])
+    expect(mentionedRepos('update @mobile.', repos, false)).toEqual([3])
+    expect(mentionedRepos('see src/api/handler.go', repos, true)).toEqual([])
+    expect(mentionedRepos('mail me at x@api.dev', repos, false)).toEqual([])
+  })
+  it('finds the mention being typed', () => {
+    expect(mentionAt('fix @we', 7)).toEqual({ start: 4, query: 'we' })
+    expect(mentionAt('@', 1)).toEqual({ start: 0, query: '' })
+    expect(mentionAt('fix it', 6)).toBeUndefined()
+    expect(mentionAt('me@ap', 5)).toBeUndefined()
+    expect(mentionAt('', 12)).toBeUndefined()
+  })
+  it('offers names that start with the query first', () => {
+    expect(mentionOptions('a', repos).map((r) => r.id)).toEqual([1, 3, 2])
+    expect(mentionOptions('mob', repos).map((r) => r.id)).toEqual([3])
+  })
+  it('inserts the picked name', () => {
+    expect(insertMention('fix @we in it', 4, 7, 'web-admin')).toEqual({ text: 'fix @web-admin in it', caret: 15 })
+    expect(insertMention('@', 0, 1, 'api')).toEqual({ text: '@api ', caret: 5 })
   })
 })

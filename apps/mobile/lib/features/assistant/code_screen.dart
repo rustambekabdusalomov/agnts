@@ -100,7 +100,8 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     if (_sending || _files.uploading || text.length > _maxMessage) return;
     if (answers == null && text.isEmpty && _files.ids.isEmpty) return;
     final key = _ticketKey.text.trim();
-    if (_id == null && _pick.isEmpty && key.isEmpty) return showSnack(context, l.codechatReposNone);
+    // None picked: the server works in the repositories the message names.
+    if (_id == null && _pick.isEmpty && key.isEmpty && text.isEmpty) return showSnack(context, l.codechatReposNone);
     setState(() => _sending = true);
     final api = ref.read(apiProvider)!.getAssistantApi();
     try {
