@@ -13835,6 +13835,14 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String codechatMentioned(String names) {
+    return 'Ish joyi: $names';
+  }
+
+  @override
+  String get codechatMentionLabel => 'Repozitoriylar';
+
+  @override
   String codechatRoutedCreated(String key) {
     return '$key boshlandi';
   }

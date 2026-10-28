@@ -159,3 +159,69 @@ void refreshAfterDecision(void Function(ProviderOrFamily) invalidate, String key
   invalidate(ticketsProvider);
   invalidate(ticketProvider(key));
 }
+
+final _nameChar = RegExp(r'[a-z0-9\-_./]');
+bool _isNameChar(String ch) => _nameChar.hasMatch(ch.toLowerCase());
+
+/// The repositories a message names, as the server reads it
+/// (domain.MentionedRepos): "@name" always, and with [plain] the name
+/// alone as a word. Matching ignores case; owner/name also answers to name.
+List<int> mentionedRepos(String text, List<Repository> repos, {required bool plain}) {
+  final words = <String>{};
+  final tagged = <String>{};
+  final low = text.toLowerCase();
+  for (var i = 0; i < low.length;) {
+    if (!_isNameChar(low[i])) {
+      i++;
+      continue;
+    }
+    var j = i;
+    while (j < low.length && _isNameChar(low[j])) {
+      j++;
+    }
+    final w = low.substring(i, j).replaceFirst(RegExp(r'\.+$'), '');
+    words.add(w);
+    if (i > 0 && low[i - 1] == '@') tagged.add(w);
+    i = j;
+  }
+  return [
+    for (final r in repos)
+      if (_names(r.name).any((n) => tagged.contains(n) || (plain && words.contains(n)))) r.id,
+  ];
+}
+
+List<String> _names(String name) {
+  final n = name.toLowerCase();
+  final k = n.lastIndexOf('/');
+  return k >= 0 && k < n.length - 1 ? [n, n.substring(k + 1)] : [n];
+}
+
+/// The @mention being typed at [caret]: where its @ is and what follows it.
+({int start, String query})? mentionAt(String text, int caret) {
+  // The caret may lag a text that was just cleared or replaced.
+  caret = caret.clamp(0, text.length);
+  var i = caret;
+  while (i > 0 && _isNameChar(text[i - 1])) {
+    i--;
+  }
+  if (i == 0 || text[i - 1] != '@') return null;
+  // An @ inside a word is an e-mail address, not a mention.
+  if (i > 1 && _isNameChar(text[i - 2])) return null;
+  return (start: i - 1, query: text.substring(i, caret));
+}
+
+/// The repositories to offer for a mention's [query]: names that start with it first.
+List<Repository> mentionOptions(String query, List<Repository> repos, {int max = 6}) {
+  final q = query.toLowerCase();
+  final starts = repos.where((r) => r.name.toLowerCase().startsWith(q));
+  final inside = repos.where((r) => !r.name.toLowerCase().startsWith(q) && r.name.toLowerCase().contains(q));
+  return [...starts, ...inside].take(max).toList();
+}
+
+/// [text] with the mention from [start] to [caret] replaced by @name and a
+/// space, and where the caret goes.
+({String text, int caret}) insertMention(String text, int start, int caret, String name) {
+  final tag = '@$name ';
+  final rest = text.substring(caret).replaceFirst(RegExp(r'^\S*'), '').replaceFirst(RegExp(r'^ '), '');
+  return (text: text.substring(0, start) + tag + rest, caret: start + tag.length);
+}

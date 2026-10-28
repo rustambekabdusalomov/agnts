@@ -24588,7 +24588,7 @@ abstract class AppLocalizations {
   /// No description provided for @codechatReposNone.
   ///
   /// In en, this message translates to:
-  /// **'Pick the repositories to work in'**
+  /// **'Pick the repositories to work in, or name them in the message with @'**
   String get codechatReposNone;
 
   /// No description provided for @codechatReposChange.
@@ -24710,6 +24710,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n} / 4000'**
   String codechatCount(String n);
+
+  /// No description provided for @codechatMentioned.
+  ///
+  /// In en, this message translates to:
+  /// **'Works in {names}'**
+  String codechatMentioned(String names);
+
+  /// No description provided for @codechatMentionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get codechatMentionLabel;
 
   /// No description provided for @codechatRoutedCreated.
   ///

@@ -13845,6 +13845,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String codechatMentioned(String names) {
+    return 'Works in $names';
+  }
+
+  @override
+  String get codechatMentionLabel => 'Repositories';
+
+  @override
   String codechatRoutedCreated(String key) {
     return 'Started $key';
   }
