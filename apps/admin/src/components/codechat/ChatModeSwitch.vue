@@ -10,13 +10,15 @@ const workspace = useWorkspace()
 </script>
 
 <template>
-  <nav v-if="workspace.canEdit" class="tabs cms" :aria-label="t('codechat.modeLabel')">
-    <RouterLink class="tab" :to="{ name: 'assistant' }" :aria-current="mode === 'chat' ? 'page' : undefined" :aria-pressed="mode === 'chat'">{{ t('codechat.modeChat') }}</RouterLink>
-    <RouterLink class="tab" :to="{ name: 'assistantCode' }" :aria-current="mode === 'code' ? 'page' : undefined" :aria-pressed="mode === 'code'">{{ t('codechat.modeCode') }}</RouterLink>
+  <nav v-if="workspace.canEdit" class="seg cms" :aria-label="t('codechat.modeLabel')">
+    <RouterLink class="seg-b" :to="{ name: 'assistant' }" :aria-current="mode === 'chat' ? 'page' : undefined" :aria-pressed="mode === 'chat'">{{ t('codechat.modeChat') }}</RouterLink>
+    <RouterLink class="seg-b" :to="{ name: 'assistantCode' }" :aria-current="mode === 'code' ? 'page' : undefined" :aria-pressed="mode === 'code'">{{ t('codechat.modeCode') }}</RouterLink>
   </nav>
 </template>
 
 <style scoped>
-.cms { display: inline-flex; }
-.cms .tab { text-decoration: none; }
+/* As tall as the header's buttons (40px), each label centred: links do not
+   centre their text the way buttons do. */
+.cms { flex-wrap: nowrap; align-self: center; }
+.cms .seg-b { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; min-width: 72px; text-decoration: none; white-space: nowrap; }
 </style>
