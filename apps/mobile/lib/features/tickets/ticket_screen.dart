@@ -38,6 +38,7 @@ import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../../widgets/workspace.dart';
 import '../account/account_widgets.dart' show openLink;
+import '../assistant/code_screen.dart' show TicketChatButton;
 
 /// One ticket (scrDetail in mobile.html): header, the six-stop progress
 /// track, a block for the current state, folds for answers and history, and
@@ -515,7 +516,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         backLabel: l.navBack,
         title: detail.value == null ? widget.ticketKey : ticketNo(detail.value!.ticket),
         onBack: () => context.canPop() ? context.pop() : context.go('/tickets'),
-        actions: [if (detail.value != null) TranslateButton(widget.ticketKey)],
+        actions: [
+          if (detail.value != null) TicketChatButton(detail.value!.ticket),
+          if (detail.value != null) TranslateButton(widget.ticketKey),
+        ],
       ),
       body: AsyncBody<TicketDetail>(
         value: detail,

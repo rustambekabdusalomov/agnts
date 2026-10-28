@@ -4,6 +4,8 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/assistant_link.dart';
+import 'package:agnts_api/src/model/code_handoff.dart';
+import 'package:agnts_api/src/model/code_routed.dart';
 import 'package:agnts_api/src/model/assistant_language.dart';
 import 'package:agnts_api/src/model/assistant_action.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -52,6 +54,14 @@ class AssistantMessage {
      this.actions,
 
      this.actionErrors,
+
+     this.handoff,
+
+     this.ticketKey,
+
+     this.routed,
+
+     this.attachments,
 
     required  this.createdAt,
   });
@@ -246,6 +256,56 @@ class AssistantMessage {
 
   @JsonKey(
     
+    name: r'handoff',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final CodeHandoff? handoff;
+
+
+
+      /// Code mode: the ticket the message went to
+  @JsonKey(
+    
+    name: r'ticketKey',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? ticketKey;
+
+
+
+  @JsonKey(
+    
+    name: r'routed',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final CodeRouted? routed;
+
+
+
+      /// Code mode: uploads that went with the message
+  @JsonKey(
+    
+    name: r'attachments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? attachments;
+
+
+
+  @JsonKey(
+    
     name: r'createdAt',
     required: true,
     includeIfNull: false,
@@ -275,6 +335,10 @@ class AssistantMessage {
       other.shared == shared &&
       other.actions == actions &&
       other.actionErrors == actionErrors &&
+      other.handoff == handoff &&
+      other.ticketKey == ticketKey &&
+      other.routed == routed &&
+      other.attachments == attachments &&
       other.createdAt == createdAt;
 
     @override
@@ -294,6 +358,10 @@ class AssistantMessage {
         shared.hashCode +
         actions.hashCode +
         actionErrors.hashCode +
+        handoff.hashCode +
+        ticketKey.hashCode +
+        routed.hashCode +
+        attachments.hashCode +
         createdAt.hashCode;
 
   factory AssistantMessage.fromJson(Map<String, dynamic> json) => _$AssistantMessageFromJson(json);

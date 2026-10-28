@@ -53,6 +53,7 @@ async function setup(path: string, c: typeof conv = conv) {
     routes: [
       { path: '/w/:ws/assistant/conversations', name: 'assistantConversations', component: AssistantConversationsPage },
       { path: '/w/:ws/assistant/:id(\\d+)?', name: 'assistant', component: AssistantPage },
+      { path: '/w/:ws/assistant/code/:id(\\d+)?', name: 'assistantCode', component: { template: '<div />' } },
       { path: '/w/:ws/tickets/:key', name: 'ticket', component: { template: '<div />' } },
       { path: '/w/:ws/ci/:id', name: 'ciFailure', component: { template: '<div />' } },
       { path: '/w/:ws/learn/:id', name: 'lesson', component: { template: '<div />' } },

@@ -26,21 +26,43 @@ func NewAssistant(db *pgxpool.Pool, box *secret.Box) *Assistant { return &Assist
 var replayAAD = []byte("assistant_replay")
 
 const assistantMsgCols = `m.id, m.conversation_id, m.role, m.text, m.speech, m.links, m.status, m.error, m.lang, m.prompt_version, m.model,
-	m.tokens, m.cost_usd, m.duration_ms, m.timing, m.files, m.rating, m.rating_comment, m.shared, m.action_errors, m.created_at`
+	m.tokens, m.cost_usd, m.duration_ms, m.timing, m.files, m.rating, m.rating_comment, m.shared, m.action_errors, m.handoff,
+	m.ticket_key, m.routed, m.attachments, m.created_at`
+
+// msgScan holds the columns of assistantMsgCols that need decoding.
+type msgScan struct {
+	m                      domain.AssistantMessage
+	role, status, routed   string
+	links, timing, handoff []byte
+}
+
+func (x *msgScan) dest() []any {
+	m := &x.m
+	return []any{&m.ID, &m.ConversationID, &x.role, &m.Text, &m.Speech, &x.links, &x.status, &m.Error, &m.Lang, &m.PromptVersion, &m.Model,
+		&m.Tokens, &m.CostUSD, &m.DurationMS, &x.timing, &m.Files, &m.Rating, &m.RatingComment, &m.Shared, &m.ActionErrors, &x.handoff,
+		&m.TicketKey, &x.routed, &m.Attachments, &m.CreatedAt}
+}
+
+func (x *msgScan) message() domain.AssistantMessage {
+	m := x.m
+	m.Role, m.Status, m.Routed = domain.AssistantRole(x.role), domain.AssistantStatus(x.status), domain.CodeRouted(x.routed)
+	_ = json.Unmarshal(x.links, &m.Links)
+	_ = json.Unmarshal(x.timing, &m.Timing)
+	if len(x.handoff) > 0 {
+		var h domain.CodeHandoff
+		if json.Unmarshal(x.handoff, &h) == nil {
+			m.Handoff = &h
+		}
+	}
+	return m
+}
 
 func scanAssistantMsg(row pgx.Row) (domain.AssistantMessage, error) {
-	var m domain.AssistantMessage
-	var role, status string
-	var links, timing []byte
-	err := row.Scan(&m.ID, &m.ConversationID, &role, &m.Text, &m.Speech, &links, &status, &m.Error, &m.Lang, &m.PromptVersion, &m.Model,
-		&m.Tokens, &m.CostUSD, &m.DurationMS, &timing, &m.Files, &m.Rating, &m.RatingComment, &m.Shared, &m.ActionErrors, &m.CreatedAt)
-	if err != nil {
-		return m, notFound(err)
+	var x msgScan
+	if err := row.Scan(x.dest()...); err != nil {
+		return x.m, notFound(err)
 	}
-	m.Role, m.Status = domain.AssistantRole(role), domain.AssistantStatus(status)
-	_ = json.Unmarshal(links, &m.Links)
-	_ = json.Unmarshal(timing, &m.Timing)
-	return m, nil
+	return x.message(), nil
 }
 
 func scanAssistantMsgs(rows pgx.Rows) ([]domain.AssistantMessage, error) {
@@ -56,23 +78,48 @@ func scanAssistantMsgs(rows pgx.Rows) ([]domain.AssistantMessage, error) {
 	return out, rows.Err()
 }
 
-// CreateAssistantConversation starts a conversation of userID.
+// CreateAssistantConversation starts a Chat conversation of userID.
 func (s *Assistant) CreateAssistantConversation(ctx context.Context, userID int64, title string) (domain.AssistantConversation, error) {
-	c := domain.AssistantConversation{UserID: userID, Title: title}
+	c := domain.AssistantConversation{UserID: userID, Title: title, Mode: domain.ChatModeChat}
 	err := s.db.QueryRow(ctx, `INSERT INTO assistant_conversations (user_id, title) VALUES ($1, $2)
 		RETURNING id, created_at, updated_at`, userID, title).Scan(&c.ID, &c.CreatedAt, &c.UpdatedAt)
 	return c, err
 }
 
+const conversationCols = `c.id, c.user_id, c.title, c.mode, c.repo_choice, c.kind, c.quick, c.created_at, c.updated_at`
+
+// convScan holds the columns of conversationCols that need decoding.
+type convScan struct {
+	c          domain.AssistantConversation
+	mode       string
+	repoChoice []byte
+}
+
+func (x *convScan) dest() []any {
+	c := &x.c
+	return []any{&c.ID, &c.UserID, &c.Title, &x.mode, &x.repoChoice, &c.Kind, &c.Quick, &c.CreatedAt, &c.UpdatedAt}
+}
+
+func (x *convScan) conversation() domain.AssistantConversation {
+	c := x.c
+	c.Mode = domain.ChatMode(x.mode)
+	var rc repoChoiceJSON
+	if json.Unmarshal(x.repoChoice, &rc) == nil {
+		c.Repos = rc.choice()
+	}
+	return c
+}
+
 // AssistantConversation returns one of userID's conversations with all its
 // messages.
 func (s *Assistant) AssistantConversation(ctx context.Context, userID, id int64) (domain.AssistantConversation, error) {
-	var c domain.AssistantConversation
-	err := s.db.QueryRow(ctx, `SELECT id, user_id, title, created_at, updated_at FROM assistant_conversations
-		WHERE id = $1 AND user_id = $2`, id, userID).Scan(&c.ID, &c.UserID, &c.Title, &c.CreatedAt, &c.UpdatedAt)
+	var x convScan
+	err := s.db.QueryRow(ctx, `SELECT `+conversationCols+` FROM assistant_conversations c
+		WHERE c.id = $1 AND c.user_id = $2`, id, userID).Scan(x.dest()...)
 	if err != nil {
-		return c, notFound(err)
+		return x.c, notFound(err)
 	}
+	c := x.conversation()
 	rows, err := s.db.Query(ctx, `SELECT `+assistantMsgCols+` FROM assistant_messages m WHERE m.conversation_id = $1 ORDER BY m.id`, id)
 	if err != nil {
 		return c, err
@@ -80,44 +127,55 @@ func (s *Assistant) AssistantConversation(ctx context.Context, userID, id int64)
 	if c.Messages, err = scanAssistantMsgs(rows); err != nil {
 		return c, err
 	}
-	return c, attachAssistantActions(ctx, s.db, c.Messages)
+	if err := attachAssistantActions(ctx, s.db, c.Messages); err != nil {
+		return c, err
+	}
+	tickets, err := s.codeTickets(ctx, []int64{c.ID}, false)
+	c.Tickets = tickets[c.ID]
+	return c, err
 }
 
-// AssistantConversations returns userID's conversations, newest first, each
-// with its last message.
-func (s *Assistant) AssistantConversations(ctx context.Context, userID int64, limit int) ([]domain.AssistantConversation, error) {
+// AssistantConversations returns userID's conversations of mode ("" for
+// both), newest first, each with its last message and, in Code mode, its
+// current ticket.
+func (s *Assistant) AssistantConversations(ctx context.Context, userID int64, mode domain.ChatMode, limit int) ([]domain.AssistantConversation, error) {
 	if limit <= 0 || limit > 200 {
 		limit = 50
 	}
-	rows, err := s.db.Query(ctx, `SELECT c.id, c.user_id, c.title, c.created_at, c.updated_at, `+assistantMsgCols+`
+	rows, err := s.db.Query(ctx, `SELECT `+conversationCols+`, `+assistantMsgCols+`
 		FROM assistant_conversations c
 		JOIN LATERAL (SELECT * FROM assistant_messages x WHERE x.conversation_id = c.id ORDER BY x.id DESC LIMIT 1) m ON true
-		WHERE c.user_id = $1 ORDER BY c.updated_at DESC, c.id DESC LIMIT $2`, userID, limit)
+		WHERE c.user_id = $1 AND ($3 = '' OR c.mode = $3) ORDER BY c.updated_at DESC, c.id DESC LIMIT $2`, userID, limit, string(mode))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var out []domain.AssistantConversation
 	for rows.Next() {
-		var c domain.AssistantConversation
-		var m domain.AssistantMessage
-		var role, status string
-		var links, timing []byte
-		if err := rows.Scan(&c.ID, &c.UserID, &c.Title, &c.CreatedAt, &c.UpdatedAt,
-			&m.ID, &m.ConversationID, &role, &m.Text, &m.Speech, &links, &status, &m.Error, &m.Lang, &m.PromptVersion, &m.Model,
-			&m.Tokens, &m.CostUSD, &m.DurationMS, &timing, &m.Files, &m.Rating, &m.RatingComment, &m.Shared, &m.ActionErrors, &m.CreatedAt); err != nil {
+		var cx convScan
+		var mx msgScan
+		if err := rows.Scan(append(cx.dest(), mx.dest()...)...); err != nil {
 			return nil, err
 		}
-		m.Role, m.Status = domain.AssistantRole(role), domain.AssistantStatus(status)
-		_ = json.Unmarshal(links, &m.Links)
-		_ = json.Unmarshal(timing, &m.Timing)
-		c.Messages = []domain.AssistantMessage{m}
+		c := cx.conversation()
+		c.Messages = []domain.AssistantMessage{mx.message()}
 		out = append(out, c)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 	rows.Close()
+	ids := make([]int64, len(out))
+	for i, c := range out {
+		ids[i] = c.ID
+	}
+	tickets, err := s.codeTickets(ctx, ids, true)
+	if err != nil {
+		return nil, err
+	}
+	for i := range out {
+		out[i].Tickets = tickets[out[i].ID]
+	}
 	last := make([]domain.AssistantMessage, len(out))
 	for i, c := range out {
 		last[i] = c.Messages[0]
@@ -155,9 +213,15 @@ func (s *Assistant) AddAssistantMessage(ctx context.Context, m domain.AssistantM
 		return m, err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
-	err = tx.QueryRow(ctx, `INSERT INTO assistant_messages (conversation_id, role, text, links, status, lang, prompt_version)
-		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`,
-		m.ConversationID, string(m.Role), m.Text, links, string(m.Status), m.Lang, m.PromptVersion).Scan(&m.ID, &m.CreatedAt)
+	attachments := m.Attachments
+	if attachments == nil {
+		attachments = []int64{}
+	}
+	err = tx.QueryRow(ctx, `INSERT INTO assistant_messages (conversation_id, role, text, links, status, lang, prompt_version,
+		ticket_key, routed, attachments)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, created_at`,
+		m.ConversationID, string(m.Role), m.Text, links, string(m.Status), m.Lang, m.PromptVersion,
+		m.TicketKey, string(m.Routed), attachments).Scan(&m.ID, &m.CreatedAt)
 	if err != nil {
 		return m, err
 	}
@@ -198,11 +262,17 @@ func (s *Assistant) FinishAssistantMessage(ctx context.Context, m domain.Assista
 	if actionErrors == nil {
 		actionErrors = []string{}
 	}
+	var handoff []byte
+	if m.Handoff != nil {
+		if handoff, err = json.Marshal(m.Handoff); err != nil {
+			return err
+		}
+	}
 	_, err = s.db.Exec(ctx, `UPDATE assistant_messages SET text = $2, speech = $3, links = $4, status = $5, error = $6,
 		prompt_version = $7, model = $8, tokens = $9, cost_usd = $10, duration_ms = $11, timing = $12, files = $13, replay = $14,
-		action_errors = $15
+		action_errors = $15, handoff = $16
 		WHERE id = $1`, m.ID, m.Text, m.Speech, links, string(m.Status), m.Error, m.PromptVersion, m.Model, m.Tokens, m.CostUSD,
-		m.DurationMS, timing, files, sealed, actionErrors)
+		m.DurationMS, timing, files, sealed, actionErrors, handoff)
 	return err
 }
 
@@ -248,19 +318,23 @@ func (s *Assistant) FailOpenAssistant(ctx context.Context, reason string) (int64
 }
 
 // PruneAssistant deletes conversations untouched since before, in every
-// workspace.
+// workspace. A Code conversation stays while one of its tickets is still
+// open: it is where that work is followed.
 func (s *Assistant) PruneAssistant(ctx context.Context, before time.Time) (int64, error) {
-	tag, err := s.db.Exec(domain.System(ctx), `DELETE FROM assistant_conversations WHERE updated_at < $1`, before)
+	tag, err := s.db.Exec(domain.System(ctx), `DELETE FROM assistant_conversations c WHERE c.updated_at < $1
+		AND NOT EXISTS (SELECT 1 FROM code_conversation_tickets l JOIN tickets t ON t.id = l.ticket_id
+			WHERE l.conversation_id = c.id AND l.detached_at IS NULL AND t.state NOT IN ('done', 'rejected'))`, before)
 	return tag.RowsAffected(), err
 }
 
 // AssistantAsked counts the questions userID asked in the workspace since
-// t, and when the oldest of them was asked.
+// t, and when the oldest of them was asked. Code messages are not
+// questions: they run as tickets.
 func (s *Assistant) AssistantAsked(ctx context.Context, userID int64, t time.Time) (int, time.Time, error) {
 	var n int
 	var oldest *time.Time
 	err := s.db.QueryRow(ctx, `SELECT count(*), min(m.created_at) FROM assistant_messages m JOIN assistant_conversations c ON c.id = m.conversation_id
-		WHERE c.user_id = $1 AND m.role = 'user' AND m.created_at >= $2`, userID, t).Scan(&n, &oldest)
+		WHERE c.user_id = $1 AND c.mode = 'chat' AND m.role = 'user' AND m.created_at >= $2`, userID, t).Scan(&n, &oldest)
 	if oldest == nil {
 		return n, time.Time{}, err
 	}

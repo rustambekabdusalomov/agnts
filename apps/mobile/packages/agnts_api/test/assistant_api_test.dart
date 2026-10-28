@@ -16,6 +16,15 @@ void main() {
       // TODO
     });
 
+    // Make an existing ticket the one a Code conversation works on
+    //
+    // The next message goes to it. Another of your conversations that had it lets it go.
+    //
+    //Future<AssistantConversation> attachCodeTicket(int conversationId, AttachCodeTicketRequest attachCodeTicketRequest) async
+    test('test attachCodeTicket', () async {
+      // TODO
+    });
+
     // Decline an action the assistant proposed
     //
     //Future<AssistantAction> cancelAssistantAction(String actionId) async
@@ -29,6 +38,15 @@ void main() {
     //
     //Future<AssistantAction> confirmAssistantAction(String actionId) async
     test('test confirmAssistantAction', () async {
+      // TODO
+    });
+
+    // Allow or deny a tool call the agent asked you about
+    //
+    // A Muse run in one of your Code conversations wants to run a command a rule says to ask about (installing a dependency, say). It waits for your answer; with none in 5 minutes the call is denied.
+    //
+    //Future<CodeApproval> decideCodeApproval(String approvalId, DecideCodeApprovalRequest decideCodeApprovalRequest) async
+    test('test decideCodeApproval', () async {
       // TODO
     });
 
@@ -53,11 +71,27 @@ void main() {
       // TODO
     });
 
+    // A Code conversation with its timeline
+    //
+    // Your messages and its tickets' events (the newest 600), oldest first, and the tool calls waiting for your decision. Live updates come on the event stream: the tickets' own events, code_message and code_approval.
+    //
+    //Future<CodeTimeline> getCodeTimeline(int conversationId) async
+    test('test getCodeTimeline', () async {
+      // TODO
+    });
+
+    // Your Code conversation that works on this ticket
+    //
+    //Future<GetTicketChat200Response> getTicketChat(String key) async
+    test('test getTicketChat', () async {
+      // TODO
+    });
+
     // Your assistant conversations, newest first, each with its last message
     //
-    // A conversation belongs to the person who started it; nobody else sees it. Kept for 30 days after its last message.
+    // A conversation belongs to the person who started it; nobody else sees it. Kept for 30 days after its last message; a Code conversation stays while one of its tickets is open.
     //
-    //Future<List<AssistantConversation>> listAssistantConversations() async
+    //Future<List<AssistantConversation>> listAssistantConversations({ ChatMode mode }) async
     test('test listAssistantConversations', () async {
       // TODO
     });
@@ -78,12 +112,46 @@ void main() {
       // TODO
     });
 
+    // Send a message in a Code conversation
+    //
+    // What it does depends on the current ticket's state, shown as routed: a new ticket when there is none or it is done; answers while it waits for answers; requested changes while it waits for review; continue or retry when it stopped. While a stage runs the message is queued and sent when the stage ends (a Muse run takes it at once: steered). Approve and reject are the ticket's own endpoints.
+    //
+    //Future<AssistantMessage> sendCodeMessage(int conversationId, CodeSend codeSend) async
+    test('test sendCodeMessage', () async {
+      // TODO
+    });
+
+    // Stop the running stage and send the queued messages now
+    //
+    //Future<AssistantConversation> sendCodeQueuedNow(int conversationId) async
+    test('test sendCodeQueuedNow', () async {
+      // TODO
+    });
+
+    // Change the repositories of a Code conversation
+    //
+    // The next ticket works in them; the current one moves too while it has not started on code.
+    //
+    //Future<AssistantConversation> setCodeRepos(int conversationId, RepoChoice repoChoice) async
+    test('test setCodeRepos', () async {
+      // TODO
+    });
+
     // Ask the assistant a question in a new conversation
     //
     // Stores the question and starts answering it from a read-only snapshot of the workspace. Answers take 10-30 seconds: the response has the answer pending; fetch the conversation again, or wait for the assistant_answered (or assistant_failed) event on the event stream. The assistant takes no actions itself: when asked to act it proposes them as actions on its answer, which you confirm.
     //
     //Future<AssistantConversation> startAssistantConversation(AssistantAsk assistantAsk) async
     test('test startAssistantConversation', () async {
+      // TODO
+    });
+
+    // Start a Code conversation
+    //
+    // Code mode: pick the repositories (or an existing ticket with ticketKey) and say what you want done. The work runs as an ordinary ticket the conversation drives; its progress is the ticket's events (see getCodeTimeline). Owners and editors only.
+    //
+    //Future<AssistantConversation> startCodeConversation(CodeStart codeStart) async
+    test('test startCodeConversation', () async {
       // TODO
     });
 

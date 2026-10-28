@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useI18n } from 'vue-i18n'
 import { api, unwrap } from '../api/client'
-import type { AssistantConversation } from '../api/types'
+import { stateKey, type AssistantConversation } from '../api/types'
 import { isOpen } from '../components/assistant/assistant'
 import PageHeader from '../components/PageHeader.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
@@ -51,8 +51,12 @@ async function remove(c: AssistantConversation) {
     </div>
     <ul v-else class="cv-list">
       <li v-for="c in list.data.value" :key="c.id">
-        <RouterLink class="cv-open" :to="{ name: 'assistant', params: { id: c.id } }">
-          <span class="cv-title">{{ c.title }}</span>
+        <RouterLink class="cv-open" :to="{ name: c.mode === 'code' ? 'assistantCode' : 'assistant', params: { id: c.id } }">
+          <span class="cv-title">
+            <span v-if="c.mode === 'code'" class="badge b-info cv-mode"><HiIcon name="code" />{{ t('codechat.codeBadge') }}</span>
+            {{ c.title }}
+            <span v-if="c.mode === 'code' && c.tickets?.[0]" class="cv-ticket mono">{{ c.tickets[0].key }} · {{ t(stateKey(c.tickets[0].state, c.tickets[0].kind)) }}</span>
+          </span>
           <span v-if="last(c) && isOpen(last(c)!)" class="cv-prev">{{ t('massistant.thinking', { seconds: '…' }) }}</span>
           <span v-else-if="last(c)?.status === 'failed'" class="cv-prev bad">{{ t('massistant.failed') }}</span>
           <span v-else-if="preview(c)" class="cv-prev">{{ preview(c) }}</span>
@@ -73,6 +77,9 @@ async function remove(c: AssistantConversation) {
 .cv-open { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 4px 8px; border-radius: 10px; color: var(--ink); text-decoration: none; }
 .cv-open:hover { background: var(--hover); }
 .cv-title { font-weight: 700; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-mode { display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; vertical-align: 1px; }
+.cv-mode svg { width: 13px; height: 13px; }
+.cv-ticket { margin-left: 8px; font-weight: 400; font-size: 12.5px; color: var(--ink-3); }
 .cv-prev { font-size: 13.5px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cv-prev.bad { color: var(--bad-ink); }
 .cv-when { flex: none; white-space: nowrap; }

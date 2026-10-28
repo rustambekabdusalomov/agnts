@@ -4064,7 +4064,7 @@ export interface paths {
         };
         /**
          * Your assistant conversations, newest first, each with its last message
-         * @description A conversation belongs to the person who started it; nobody else sees it. Kept for 30 days after its last message.
+         * @description A conversation belongs to the person who started it; nobody else sees it. Kept for 30 days after its last message; a Code conversation stays while one of its tickets is open.
          */
         get: operations["listAssistantConversations"];
         put?: never;
@@ -4115,6 +4115,174 @@ export interface paths {
          * @description Answered after the conversation's earlier questions, with the last 6 messages as context.
          */
         post: operations["askAssistant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a Code conversation
+         * @description Code mode: pick the repositories (or an existing ticket with ticketKey) and say what you want done. The work runs as an ordinary ticket the conversation drives; its progress is the ticket's events (see getCodeTimeline). Owners and editors only.
+         */
+        post: operations["startCodeConversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/conversations/{conversationId}/code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a message in a Code conversation
+         * @description What it does depends on the current ticket's state, shown as routed: a new ticket when there is none or it is done; answers while it waits for answers; requested changes while it waits for review; continue or retry when it stopped. While a stage runs the message is queued and sent when the stage ends (a Muse run takes it at once: steered). Approve and reject are the ticket's own endpoints.
+         */
+        post: operations["sendCodeMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/conversations/{conversationId}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        /**
+         * A Code conversation with its timeline
+         * @description Your messages and its tickets' events (the newest 600), oldest first, and the tool calls waiting for your decision. Live updates come on the event stream: the tickets' own events, code_message and code_approval.
+         */
+        get: operations["getCodeTimeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/conversations/{conversationId}/repos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change the repositories of a Code conversation
+         * @description The next ticket works in them; the current one moves too while it has not started on code.
+         */
+        put: operations["setCodeRepos"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/conversations/{conversationId}/ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Make an existing ticket the one a Code conversation works on
+         * @description The next message goes to it. Another of your conversations that had it lets it go.
+         */
+        put: operations["attachCodeTicket"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/conversations/{conversationId}/send-now": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop the running stage and send the queued messages now */
+        post: operations["sendCodeQueuedNow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/approvals/{approvalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                approvalId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Allow or deny a tool call the agent asked you about
+         * @description A Muse run in one of your Code conversations wants to run a command a rule says to ask about (installing a dependency, say). It waits for your answer; with none in 5 minutes the call is denied.
+         */
+        post: operations["decideCodeApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** Your Code conversation that works on this ticket */
+        get: operations["getTicketChat"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5581,6 +5749,12 @@ export interface components {
             actions?: components["schemas"]["AssistantAction"][];
             /** @description Actions the assistant tried to propose that agnts could not prepare, and why */
             actionErrors?: string[];
+            handoff?: components["schemas"]["CodeHandoff"];
+            /** @description Code mode: the ticket the message went to */
+            ticketKey?: string;
+            routed?: components["schemas"]["CodeRouted"];
+            /** @description Code mode: uploads that went with the message */
+            attachments?: number[];
             /** Format: date-time */
             createdAt: string;
         };
@@ -5610,12 +5784,107 @@ export interface components {
             id: number;
             /** @description The first question, cut */
             title: string;
+            mode: components["schemas"]["ChatMode"];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
             /** @description Oldest first; in lists, only the last message */
             messages: components["schemas"]["AssistantMessage"][];
+            repos?: components["schemas"]["RepoChoice"];
+            kind?: components["schemas"]["TicketKindChoice"];
+            /** @description Code mode: its tickets skip their checks */
+            quick?: boolean;
+            /** @description Code mode: its tickets, oldest first; in lists, only the current one */
+            tickets?: components["schemas"]["CodeTicket"][];
+        };
+        /**
+         * @description chat: the assistant answers about the workspace. code: the conversation drives tickets that change repositories
+         * @enum {string}
+         */
+        ChatMode: "chat" | "code";
+        /**
+         * @description What a Code message did: created a ticket, answered its questions, asked for changes, continued or retried it, waits for the running stage (queued; then sent or failed), or went into the running Muse turn (steered)
+         * @enum {string}
+         */
+        CodeRouted: "created" | "answered" | "changes" | "continued" | "retried" | "queued" | "sent" | "failed" | "steered";
+        /** @description One of repoId, repoIds and groupId */
+        RepoChoice: {
+            /** Format: int64 */
+            repoId?: number;
+            repoIds?: number[];
+            /** Format: int64 */
+            groupId?: number;
+        };
+        CodeTicket: {
+            key: string;
+            title: string;
+            state: components["schemas"]["TicketState"];
+            kind: components["schemas"]["TicketKind"];
+            /** @description Repository names, the primary first */
+            repos: string[];
+            /** @description New messages go to it */
+            current: boolean;
+            /** @description Another of your conversations has it now */
+            moved: boolean;
+            /** Format: date-time */
+            attachedAt: string;
+        };
+        CodeStart: {
+            /** @description What you want done */
+            text?: string;
+            attachments?: number[];
+            repos?: components["schemas"]["RepoChoice"];
+            kind?: components["schemas"]["TicketKindChoice"];
+            /** @description Tickets skip their checks (build, lint, test) */
+            quick?: boolean;
+            /** @description Work on this existing ticket instead of starting one */
+            ticketKey?: string;
+        };
+        CodeSend: {
+            text?: string;
+            attachments?: number[];
+            /** @description Answers to the ticket's questions, one per question (the question card) */
+            answers?: {
+                /** Format: int64 */
+                questionId: number;
+                answer: string;
+            }[];
+        };
+        /** @description A Chat answer's offer to do a code change in Code mode: open it with these and send */
+        CodeHandoff: {
+            request: string;
+            repoIds: number[];
+            repos: string[];
+        };
+        /** @description One of message (yours) and event (a ticket's) */
+        TimelineItem: {
+            /** Format: date-time */
+            at: string;
+            message?: components["schemas"]["AssistantMessage"];
+            event?: components["schemas"]["Event"];
+        };
+        /** @description A tool call the agent waits on your decision about */
+        CodeApproval: {
+            id: string;
+            /** Format: int64 */
+            conversationId: number;
+            ticketKey: string;
+            tool: string;
+            command?: string;
+            path?: string;
+            /** @description Why a rule asks about it */
+            reason: string;
+            /** @enum {string} */
+            status: "pending" | "allowed" | "denied" | "expired";
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        CodeTimeline: {
+            conversation: components["schemas"]["AssistantConversation"];
+            items: components["schemas"]["TimelineItem"][];
+            /** @description Tool calls waiting for your decision */
+            approvals: components["schemas"]["CodeApproval"][];
         };
         AssistantRating: {
             /** @enum {integer} */
@@ -15510,7 +15779,10 @@ export interface operations {
     };
     listAssistantConversations: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Only Chat or only Code conversations */
+                mode?: components["schemas"]["ChatMode"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -15635,6 +15907,246 @@ export interface operations {
             404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
             501: components["responses"]["NotImplemented"];
+        };
+    };
+    startCodeConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeStart"];
+            };
+        };
+        responses: {
+            /** @description The conversation, with its first message and ticket */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    sendCodeMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeSend"];
+            };
+        };
+        responses: {
+            /** @description The stored message, with what it did */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantMessage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    getCodeTimeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodeTimeline"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    setCodeRepos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepoChoice"];
+            };
+        };
+        responses: {
+            /** @description The conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    attachCodeTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    key: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    sendCodeQueuedNow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: components["parameters"]["ConversationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The conversation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    decideCodeApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                approvalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    allow: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The approval, decided */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodeApproval"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    getTicketChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: int64 */
+                        conversationId: number;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
         };
     };
     transcribeAssistantQuestion: {

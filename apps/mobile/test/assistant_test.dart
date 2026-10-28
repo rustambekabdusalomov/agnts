@@ -61,7 +61,7 @@ void main() {
   });
 
   testWidgets('a conversation shows answers with links, failures and a thinking bubble', (tester) async {
-    final conv = AssistantConversation(id: 7, title: 'What waits on me?', createdAt: _at, updatedAt: _at, messages: [
+    final conv = AssistantConversation(id: 7, title: 'What waits on me?', mode: ChatMode.chat, createdAt: _at, updatedAt: _at, messages: [
       _m(1, _q, 'What waits on me?'),
       _m(2, _a, '**PAY-214** waits for your review.', links: [
         AssistantLink(kind: AssistantLinkKindEnum.ticket, key: 'PAY-214'),
@@ -139,7 +139,7 @@ void main() {
       ],
       actionErrors: ['start_run: no ticket "PAY-404"'],
     );
-    final conv = AssistantConversation(id: 7, title: 'Approve', createdAt: _at, updatedAt: _at, messages: [_m(1, _q, 'Approve PAY-214'), answer]);
+    final conv = AssistantConversation(id: 7, title: 'Approve', mode: ChatMode.chat, createdAt: _at, updatedAt: _at, messages: [_m(1, _q, 'Approve PAY-214'), answer]);
     await tester.pumpWidget(ProviderScope(
       overrides: [assistantConversationProvider(7).overrideWith((ref) async => conv)],
       child: MaterialApp(

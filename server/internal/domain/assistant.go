@@ -11,7 +11,8 @@ import (
 // The assistant answers a person's questions about their workspace, in
 // text, from a read-only snapshot of it. It takes no actions itself: asked
 // to act, it proposes actions on its answer, and only the person's confirm
-// does them.
+// does them. This is the chat's Chat mode; Code mode (codechat.go) drives
+// tickets instead and never runs the assistant.
 
 // AssistantRole says who wrote a message.
 type AssistantRole string
@@ -87,7 +88,14 @@ type AssistantMessage struct {
 	// tried to propose that could not be prepared, and why.
 	Actions      []AssistantAction
 	ActionErrors []string
-	CreatedAt    time.Time
+	// Handoff offers to do a code change in Code mode (Chat answers).
+	Handoff *CodeHandoff
+	// TicketKey and Routed say what a Code message did, and to which
+	// ticket; Attachments are the uploads that went with it.
+	TicketKey   string
+	Routed      CodeRouted
+	Attachments []int64
+	CreatedAt   time.Time
 }
 
 // AssistantProposal is a write an answer asks for: a write tool's name and
@@ -129,16 +137,35 @@ type AssistantAction struct {
 	ExpiresAt      time.Time
 }
 
-// AssistantConversation is one person's thread of questions.
+// AssistantConversation is one person's thread of questions (Chat mode),
+// or of requests for code changes (Code mode, see codechat.go).
 type AssistantConversation struct {
 	ID        int64
 	UserID    int64
 	Title     string
+	Mode      ChatMode
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	// Code mode: the repositories new tickets work in, their kind ("" lets
+	// agnts pick), whether they skip checks, and the conversation's
+	// tickets, oldest first (in lists, only the current one).
+	Repos   RepoChoice
+	Kind    string
+	Quick   bool
+	Tickets []CodeTicket
 	// Messages are oldest first: all of them for one conversation, only
 	// the last one in lists.
 	Messages []AssistantMessage
+}
+
+// CurrentTicket is the ticket a Code conversation's messages go to, or nil.
+func (c AssistantConversation) CurrentTicket() *CodeTicket {
+	for i := len(c.Tickets) - 1; i >= 0; i-- {
+		if c.Tickets[i].Current {
+			return &c.Tickets[i]
+		}
+	}
+	return nil
 }
 
 // Limits of the assistant.

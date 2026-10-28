@@ -111,5 +111,27 @@
       "inbox.json": {"needs_you": [{"key": "PAY-214", "title": "Fix refund rounding", "kind": "code", "state": "waiting_for_review", "source": "jira", "repository": "api"}], "running": []}
     },
     "want": []
+  },
+  {
+    "name": "a code change is offered in Code mode",
+    "lang": "en",
+    "question": "Fix the refund rounding in the api: amounts must round half up",
+    "files": {
+      "me.json": {"role": "user", "can_act": true},
+      "repositories.json": {"repositories": [{"name": "api", "provider": "github", "default_branch": "main"}, {"name": "web", "provider": "github", "default_branch": "main"}]},
+      "groups.json": {"groups": []}
+    },
+    "want": [],
+    "code": true
+  },
+  {
+    "name": "a viewer asking for a code change gets no offer",
+    "lang": "en",
+    "question": "Fix the refund rounding in the api",
+    "files": {
+      "me.json": {"role": "viewer", "can_act": false},
+      "repositories.json": {"repositories": [{"name": "api", "provider": "github", "default_branch": "main"}]}
+    },
+    "want": []
   }
 ]

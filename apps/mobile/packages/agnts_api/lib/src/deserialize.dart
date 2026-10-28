@@ -44,6 +44,7 @@ import 'package:agnts_api/src/model/assistant_stats.dart';
 import 'package:agnts_api/src/model/assistant_stats_actions.dart';
 import 'package:agnts_api/src/model/assistant_stats_versions_inner.dart';
 import 'package:agnts_api/src/model/assistant_transcript.dart';
+import 'package:agnts_api/src/model/attach_code_ticket_request.dart';
 import 'package:agnts_api/src/model/attachment.dart';
 import 'package:agnts_api/src/model/begin_login_totp200_response.dart';
 import 'package:agnts_api/src/model/begin_login_totp_request.dart';
@@ -67,7 +68,14 @@ import 'package:agnts_api/src/model/checkout_credits200_response.dart';
 import 'package:agnts_api/src/model/checkout_credits_request.dart';
 import 'package:agnts_api/src/model/claude_connection_input.dart';
 import 'package:agnts_api/src/model/claude_connection_state.dart';
+import 'package:agnts_api/src/model/code_approval.dart';
+import 'package:agnts_api/src/model/code_handoff.dart';
 import 'package:agnts_api/src/model/code_review.dart';
+import 'package:agnts_api/src/model/code_send.dart';
+import 'package:agnts_api/src/model/code_send_answers_inner.dart';
+import 'package:agnts_api/src/model/code_start.dart';
+import 'package:agnts_api/src/model/code_ticket.dart';
+import 'package:agnts_api/src/model/code_timeline.dart';
 import 'package:agnts_api/src/model/commit.dart';
 import 'package:agnts_api/src/model/commit_detail.dart';
 import 'package:agnts_api/src/model/commit_pull.dart';
@@ -88,6 +96,7 @@ import 'package:agnts_api/src/model/create_workspace_request.dart';
 import 'package:agnts_api/src/model/dashboard.dart';
 import 'package:agnts_api/src/model/dashboard_counts.dart';
 import 'package:agnts_api/src/model/day_stat.dart';
+import 'package:agnts_api/src/model/decide_code_approval_request.dart';
 import 'package:agnts_api/src/model/decide_consent200_response.dart';
 import 'package:agnts_api/src/model/decide_consent_request.dart';
 import 'package:agnts_api/src/model/delete_workspace_request.dart';
@@ -141,6 +150,7 @@ import 'package:agnts_api/src/model/forgot_password_request.dart';
 import 'package:agnts_api/src/model/free_credits.dart';
 import 'package:agnts_api/src/model/get_consent200_response.dart';
 import 'package:agnts_api/src/model/get_platform_run_prompt200_response.dart';
+import 'package:agnts_api/src/model/get_ticket_chat200_response.dart';
 import 'package:agnts_api/src/model/git_settings.dart';
 import 'package:agnts_api/src/model/google_sign_in_request.dart';
 import 'package:agnts_api/src/model/grant_credits_request.dart';
@@ -243,6 +253,7 @@ import 'package:agnts_api/src/model/reply_pull_thread_request.dart';
 import 'package:agnts_api/src/model/repo_activity.dart';
 import 'package:agnts_api/src/model/repo_brief.dart';
 import 'package:agnts_api/src/model/repo_brief_input.dart';
+import 'package:agnts_api/src/model/repo_choice.dart';
 import 'package:agnts_api/src/model/repo_detect_input.dart';
 import 'package:agnts_api/src/model/repo_detection.dart';
 import 'package:agnts_api/src/model/repo_file.dart';
@@ -345,6 +356,7 @@ import 'package:agnts_api/src/model/ticket_repo_state.dart';
 import 'package:agnts_api/src/model/ticket_repos_input.dart';
 import 'package:agnts_api/src/model/ticket_spend_list.dart';
 import 'package:agnts_api/src/model/ticket_spend_row.dart';
+import 'package:agnts_api/src/model/timeline_item.dart';
 import 'package:agnts_api/src/model/token_request.dart';
 import 'package:agnts_api/src/model/token_spend.dart';
 import 'package:agnts_api/src/model/toolchain.dart';
@@ -491,6 +503,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AssistantStatsVersionsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AssistantTranscript':
           return AssistantTranscript.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AttachCodeTicketRequest':
+          return AttachCodeTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Attachment':
           return Attachment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BeginLoginTotp200Response':
@@ -533,6 +547,9 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Capacity.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ChangePasswordRequest':
           return ChangePasswordRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ChatMode':
+          
+          
         case 'CheckStep':
           return CheckStep.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CheckoutCredits200Response':
@@ -543,8 +560,25 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ClaudeConnectionInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ClaudeConnectionState':
           return ClaudeConnectionState.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeApproval':
+          return CodeApproval.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeHandoff':
+          return CodeHandoff.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CodeReview':
           return CodeReview.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeRouted':
+          
+          
+        case 'CodeSend':
+          return CodeSend.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeSendAnswersInner':
+          return CodeSendAnswersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeStart':
+          return CodeStart.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeTicket':
+          return CodeTicket.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CodeTimeline':
+          return CodeTimeline.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Commit':
           return Commit.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CommitDetail':
@@ -585,6 +619,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DashboardCounts.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DayStat':
           return DayStat.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DecideCodeApprovalRequest':
+          return DecideCodeApprovalRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DecideConsent200Response':
           return DecideConsent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DecideConsentRequest':
@@ -700,6 +736,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return GetConsent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GetPlatformRunPrompt200Response':
           return GetPlatformRunPrompt200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GetTicketChat200Response':
+          return GetTicketChat200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GitSettings':
           return GitSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GoogleSignInRequest':
@@ -919,6 +957,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RepoBrief.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoBriefInput':
           return RepoBriefInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RepoChoice':
+          return RepoChoice.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoDetectInput':
           return RepoDetectInput.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RepoDetection':
@@ -1138,6 +1178,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'TicketState':
           
           
+        case 'TimelineItem':
+          return TimelineItem.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TokenRequest':
           return TokenRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TokenSpend':

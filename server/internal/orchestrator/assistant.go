@@ -74,7 +74,7 @@ type AssistantActions interface {
 type AssistantStore interface {
 	CreateAssistantConversation(ctx context.Context, userID int64, title string) (domain.AssistantConversation, error)
 	AssistantConversation(ctx context.Context, userID, id int64) (domain.AssistantConversation, error)
-	AssistantConversations(ctx context.Context, userID int64, limit int) ([]domain.AssistantConversation, error)
+	AssistantConversations(ctx context.Context, userID int64, mode domain.ChatMode, limit int) ([]domain.AssistantConversation, error)
 	DeleteAssistantConversation(ctx context.Context, userID, id int64) error
 	AddAssistantMessage(ctx context.Context, m domain.AssistantMessage) (domain.AssistantMessage, error)
 	SetAssistantStatus(ctx context.Context, id int64, status domain.AssistantStatus) error
@@ -110,8 +110,8 @@ const (
 	TopicLessons AssistantTopic = "lessons"
 	TopicRepos   AssistantTopic = "repos"
 	// TopicAct is a question that asks to create work (a task, a report's
-	// code task, follow-ups): the snapshot then has the repositories and
-	// groups the action may name.
+	// code task, follow-ups) or to change code (offered in Code mode): the
+	// snapshot then has the repositories and groups the action may name.
 	TopicAct AssistantTopic = "act"
 )
 
@@ -224,6 +224,8 @@ func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, 
 		}
 	} else if c, err = o.assistant.AssistantConversation(ctx, user, conversationID); err != nil {
 		return c, err
+	} else if c.Mode == domain.ChatModeCode {
+		return c, invalid("this is a Code conversation: send it a message instead")
 	}
 	q, err := o.assistant.AddAssistantMessage(ctx, domain.AssistantMessage{ConversationID: c.ID, Role: domain.AssistantUser, Text: question,
 		Status: domain.AssistantDone, Lang: lang})
@@ -248,8 +250,9 @@ func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, 
 // WaitAnswers waits for the answers being made (tests and shutdown).
 func (o *Orchestrator) WaitAnswers() { o.answering.Wait() }
 
-// AssistantConversations lists the asker's conversations, newest first.
-func (o *Orchestrator) AssistantConversations(ctx context.Context) ([]domain.AssistantConversation, error) {
+// AssistantConversations lists the asker's conversations of mode ("" for
+// both), newest first.
+func (o *Orchestrator) AssistantConversations(ctx context.Context, mode domain.ChatMode) ([]domain.AssistantConversation, error) {
 	if !o.AssistantReady() {
 		return nil, invalid("the assistant is not available")
 	}
@@ -257,7 +260,7 @@ func (o *Orchestrator) AssistantConversations(ctx context.Context) ([]domain.Ass
 	if err != nil {
 		return nil, err
 	}
-	return o.assistant.AssistantConversations(ctx, user, 50)
+	return o.assistant.AssistantConversations(ctx, user, mode, 50)
 }
 
 // AssistantConversation returns one of the asker's conversations.
@@ -539,10 +542,37 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 			}
 		}
 	}
+	if ans.Code != nil {
+		out.Handoff = o.codeHandoff(ctx, ws, user, *ans.Code)
+	}
 	for _, f := range files {
 		out.Files = append(out.Files, f.Name)
 	}
 	return out, snapshot, nil
+}
+
+// codeHandoff turns an answer's offer to do a code change into the card the
+// person opens in Code mode: its repositories by id (names the workspace
+// does not have are left out). Viewers, and servers without Code mode, get
+// none.
+func (o *Orchestrator) codeHandoff(ctx context.Context, ws, user int64, c AssistantCodeOffer) *domain.CodeHandoff {
+	if !o.CodeReady() {
+		return nil
+	}
+	if o.codeRole != nil {
+		if r, err := o.codeRole(ctx, ws, user); err != nil || !r.CanEdit() {
+			return nil
+		}
+	}
+	h := &domain.CodeHandoff{Request: c.Request}
+	for _, name := range c.Repositories {
+		r, err := o.store.RepositoryByName(ctx, strings.TrimSpace(name))
+		if err != nil || r.ArchivedAt != nil || slices.Contains(h.RepoIDs, r.ID) {
+			continue
+		}
+		h.RepoIDs, h.Repos = append(h.RepoIDs, r.ID), append(h.Repos, r.Name)
+	}
+	return h
 }
 
 // ReplayAnswer answers a stored question again, from the snapshot its
@@ -783,6 +813,15 @@ type AssistantAnswer struct {
 	// Actions are writes the run proposes; nothing trusts them until
 	// they are checked.
 	Actions []domain.AssistantProposal `json:"actions"`
+	// Code offers to do a code change in Code mode: the person opens it
+	// and sends it there. Nothing runs until they do.
+	Code *AssistantCodeOffer `json:"code"`
+}
+
+// AssistantCodeOffer is a code change an answer offers to do in Code mode.
+type AssistantCodeOffer struct {
+	Request      string   `json:"request"`
+	Repositories []string `json:"repositories"`
 }
 
 const assistantMaxLinks = 6
@@ -829,6 +868,14 @@ func ParseAssistantAnswer(raw []byte) (AssistantAnswer, error) {
 		}
 	}
 	a.Actions = acts
+	if c := a.Code; c != nil {
+		c.Request = strings.TrimSpace(c.Request)
+		if c.Request == "" {
+			a.Code = nil
+		} else if utf8.RuneCountInString(c.Request) > domain.CodeMaxMessage {
+			c.Request = string([]rune(c.Request)[:domain.CodeMaxMessage])
+		}
+	}
 	return a, nil
 }
 
@@ -867,7 +914,9 @@ var topicWords = map[AssistantTopic][]string{
 	TopicLessons: {"lesson", "lessons", "learn", "learned", "technique", "pattern", "урок", "научи", "изуч", "dars", "o'rgan", "oʻrgan", "texnika"},
 	TopicRepos:   {"repo", "repos", "repository", "repositories", "project", "репозитор", "проект", "loyiha", "repozitoriy"},
 	TopicAct: {"create", "new task", "implement", "follow-up", "follow up", "follow-ups",
-		"созда", "новую задач", "новая задач", "реализ", "yarat", "yangi vazifa", "amalga osh"},
+		"fix", "change", "add", "refactor", "rename", "remove", "update",
+		"созда", "новую задач", "новая задач", "реализ", "исправ", "добав", "измени", "удали", "переимен",
+		"yarat", "yangi vazifa", "amalga osh", "tuzat", "qoʻsh", "qo'sh", "oʻzgartir", "o'zgartir", "olib tashla"},
 }
 
 // AssistantTopicsOf returns the parts of the workspace a question is about,

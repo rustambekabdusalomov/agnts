@@ -37,6 +37,14 @@ abstract class _$AssistantMessageCWProxy {
 
   AssistantMessage actionErrors(List<String>? actionErrors);
 
+  AssistantMessage handoff(CodeHandoff? handoff);
+
+  AssistantMessage ticketKey(String? ticketKey);
+
+  AssistantMessage routed(CodeRouted? routed);
+
+  AssistantMessage attachments(List<int>? attachments);
+
   AssistantMessage createdAt(DateTime createdAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantMessage(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -61,6 +69,10 @@ abstract class _$AssistantMessageCWProxy {
     bool shared,
     List<AssistantAction>? actions,
     List<String>? actionErrors,
+    CodeHandoff? handoff,
+    String? ticketKey,
+    CodeRouted? routed,
+    List<int>? attachments,
     DateTime createdAt,
   });
 }
@@ -122,6 +134,19 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
       this(actionErrors: actionErrors);
 
   @override
+  AssistantMessage handoff(CodeHandoff? handoff) => this(handoff: handoff);
+
+  @override
+  AssistantMessage ticketKey(String? ticketKey) => this(ticketKey: ticketKey);
+
+  @override
+  AssistantMessage routed(CodeRouted? routed) => this(routed: routed);
+
+  @override
+  AssistantMessage attachments(List<int>? attachments) =>
+      this(attachments: attachments);
+
+  @override
   AssistantMessage createdAt(DateTime createdAt) => this(createdAt: createdAt);
 
   @override
@@ -147,6 +172,10 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
     Object? shared = const $CopyWithPlaceholder(),
     Object? actions = const $CopyWithPlaceholder(),
     Object? actionErrors = const $CopyWithPlaceholder(),
+    Object? handoff = const $CopyWithPlaceholder(),
+    Object? ticketKey = const $CopyWithPlaceholder(),
+    Object? routed = const $CopyWithPlaceholder(),
+    Object? attachments = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return AssistantMessage(
@@ -210,6 +239,22 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
           ? _value.actionErrors
           // ignore: cast_nullable_to_non_nullable
           : actionErrors as List<String>?,
+      handoff: handoff == const $CopyWithPlaceholder()
+          ? _value.handoff
+          // ignore: cast_nullable_to_non_nullable
+          : handoff as CodeHandoff?,
+      ticketKey: ticketKey == const $CopyWithPlaceholder()
+          ? _value.ticketKey
+          // ignore: cast_nullable_to_non_nullable
+          : ticketKey as String?,
+      routed: routed == const $CopyWithPlaceholder()
+          ? _value.routed
+          // ignore: cast_nullable_to_non_nullable
+          : routed as CodeRouted?,
+      attachments: attachments == const $CopyWithPlaceholder()
+          ? _value.attachments
+          // ignore: cast_nullable_to_non_nullable
+          : attachments as List<int>?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -228,74 +273,85 @@ extension $AssistantMessageCopyWith on AssistantMessage {
 // JsonSerializableGenerator
 // **************************************************************************
 
-AssistantMessage _$AssistantMessageFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('AssistantMessage', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'id',
-          'role',
-          'text',
-          'speech',
-          'links',
-          'status',
-          'lang',
-          'rating',
-          'shared',
-          'createdAt',
-        ],
-      );
-      final val = AssistantMessage(
-        id: $checkedConvert('id', (v) => (v as num).toInt()),
-        role: $checkedConvert(
-          'role',
-          (v) => $enumDecode(_$AssistantMessageRoleEnumEnumMap, v),
-        ),
-        text: $checkedConvert('text', (v) => v as String),
-        speech: $checkedConvert('speech', (v) => v as String),
-        links: $checkedConvert(
-          'links',
-          (v) => (v as List<dynamic>)
-              .map((e) => AssistantLink.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        status: $checkedConvert(
-          'status',
-          (v) => $enumDecode(_$AssistantMessageStatusEnumEnumMap, v),
-        ),
-        error: $checkedConvert('error', (v) => v as String?),
-        lang: $checkedConvert(
-          'lang',
-          (v) => $enumDecode(_$AssistantLanguageEnumMap, v),
-        ),
-        durationMs: $checkedConvert('durationMs', (v) => (v as num?)?.toInt()),
-        files: $checkedConvert(
-          'files',
-          (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
-        ),
-        rating: $checkedConvert(
-          'rating',
-          (v) => $enumDecode(_$AssistantMessageRatingEnumEnumMap, v),
-        ),
-        ratingComment: $checkedConvert('ratingComment', (v) => v as String?),
-        shared: $checkedConvert('shared', (v) => v as bool),
-        actions: $checkedConvert(
-          'actions',
-          (v) => (v as List<dynamic>?)
-              ?.map((e) => AssistantAction.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        actionErrors: $checkedConvert(
-          'actionErrors',
-          (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
-        ),
-        createdAt: $checkedConvert(
-          'createdAt',
-          (v) => DateTime.parse(v as String),
-        ),
-      );
-      return val;
-    });
+AssistantMessage _$AssistantMessageFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('AssistantMessage', json, ($checkedConvert) {
+  $checkKeys(
+    json,
+    requiredKeys: const [
+      'id',
+      'role',
+      'text',
+      'speech',
+      'links',
+      'status',
+      'lang',
+      'rating',
+      'shared',
+      'createdAt',
+    ],
+  );
+  final val = AssistantMessage(
+    id: $checkedConvert('id', (v) => (v as num).toInt()),
+    role: $checkedConvert(
+      'role',
+      (v) => $enumDecode(_$AssistantMessageRoleEnumEnumMap, v),
+    ),
+    text: $checkedConvert('text', (v) => v as String),
+    speech: $checkedConvert('speech', (v) => v as String),
+    links: $checkedConvert(
+      'links',
+      (v) => (v as List<dynamic>)
+          .map((e) => AssistantLink.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    status: $checkedConvert(
+      'status',
+      (v) => $enumDecode(_$AssistantMessageStatusEnumEnumMap, v),
+    ),
+    error: $checkedConvert('error', (v) => v as String?),
+    lang: $checkedConvert(
+      'lang',
+      (v) => $enumDecode(_$AssistantLanguageEnumMap, v),
+    ),
+    durationMs: $checkedConvert('durationMs', (v) => (v as num?)?.toInt()),
+    files: $checkedConvert(
+      'files',
+      (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+    ),
+    rating: $checkedConvert(
+      'rating',
+      (v) => $enumDecode(_$AssistantMessageRatingEnumEnumMap, v),
+    ),
+    ratingComment: $checkedConvert('ratingComment', (v) => v as String?),
+    shared: $checkedConvert('shared', (v) => v as bool),
+    actions: $checkedConvert(
+      'actions',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => AssistantAction.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    actionErrors: $checkedConvert(
+      'actionErrors',
+      (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+    ),
+    handoff: $checkedConvert(
+      'handoff',
+      (v) => v == null ? null : CodeHandoff.fromJson(v as Map<String, dynamic>),
+    ),
+    ticketKey: $checkedConvert('ticketKey', (v) => v as String?),
+    routed: $checkedConvert(
+      'routed',
+      (v) => $enumDecodeNullable(_$CodeRoutedEnumMap, v),
+    ),
+    attachments: $checkedConvert(
+      'attachments',
+      (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+    ),
+    createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$AssistantMessageToJson(AssistantMessage instance) =>
     <String, dynamic>{
@@ -314,6 +370,10 @@ Map<String, dynamic> _$AssistantMessageToJson(AssistantMessage instance) =>
       'shared': instance.shared,
       'actions': ?instance.actions?.map((e) => e.toJson()).toList(),
       'actionErrors': ?instance.actionErrors,
+      'handoff': ?instance.handoff?.toJson(),
+      'ticketKey': ?instance.ticketKey,
+      'routed': ?_$CodeRoutedEnumMap[instance.routed],
+      'attachments': ?instance.attachments,
       'createdAt': instance.createdAt.toIso8601String(),
     };
 
@@ -339,4 +399,16 @@ const _$AssistantMessageRatingEnumEnumMap = {
   AssistantMessageRatingEnum.numberNegative1: -1,
   AssistantMessageRatingEnum.number0: 0,
   AssistantMessageRatingEnum.number1: 1,
+};
+
+const _$CodeRoutedEnumMap = {
+  CodeRouted.created: 'created',
+  CodeRouted.answered: 'answered',
+  CodeRouted.changes: 'changes',
+  CodeRouted.continued: 'continued',
+  CodeRouted.retried: 'retried',
+  CodeRouted.queued: 'queued',
+  CodeRouted.sent: 'sent',
+  CodeRouted.failed: 'failed',
+  CodeRouted.steered: 'steered',
 };

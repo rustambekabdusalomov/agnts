@@ -56,7 +56,7 @@ func (f *fakeAssistant) Ask(ctx context.Context, id int64, q, lang string) (doma
 	return c, nil
 }
 
-func (f *fakeAssistant) AssistantConversations(context.Context) ([]domain.AssistantConversation, error) {
+func (f *fakeAssistant) AssistantConversations(context.Context, domain.ChatMode) ([]domain.AssistantConversation, error) {
 	c := f.conv()
 	c.Messages = c.Messages[1:]
 	return []domain.AssistantConversation{c}, nil

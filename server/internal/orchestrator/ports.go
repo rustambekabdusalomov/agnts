@@ -453,6 +453,18 @@ type ClaudeRequest struct {
 	// Budget is the workspace's most a run on credits may spend, in
 	// credits (0: the server's cap).
 	Budget int64
+	// Steer brings messages from the people following the run in a chat
+	// into its running turn; Ask asks them about a tool call the guard
+	// leaves to a person (installing a dependency) and gives their
+	// answer. Muse runs take both; other engines ignore them.
+	Steer <-chan string
+	Ask   func(ToolQuestion) <-chan bool
+}
+
+// ToolQuestion is a tool call a run asks the people following it about.
+type ToolQuestion struct {
+	Tool, Command, Path string
+	Reason              string // why a rule asks
 }
 
 // CodexPrefix marks a model as one Codex CLI runs ("codex:<model>"),

@@ -11,11 +11,21 @@ abstract class _$AssistantConversationCWProxy {
 
   AssistantConversation title(String title);
 
+  AssistantConversation mode(ChatMode mode);
+
   AssistantConversation createdAt(DateTime createdAt);
 
   AssistantConversation updatedAt(DateTime updatedAt);
 
   AssistantConversation messages(List<AssistantMessage> messages);
+
+  AssistantConversation repos(RepoChoice? repos);
+
+  AssistantConversation kind(TicketKindChoice? kind);
+
+  AssistantConversation quick(bool? quick);
+
+  AssistantConversation tickets(List<CodeTicket>? tickets);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantConversation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -26,9 +36,14 @@ abstract class _$AssistantConversationCWProxy {
   AssistantConversation call({
     int id,
     String title,
+    ChatMode mode,
     DateTime createdAt,
     DateTime updatedAt,
     List<AssistantMessage> messages,
+    RepoChoice? repos,
+    TicketKindChoice? kind,
+    bool? quick,
+    List<CodeTicket>? tickets,
   });
 }
 
@@ -46,6 +61,9 @@ class _$AssistantConversationCWProxyImpl
   AssistantConversation title(String title) => this(title: title);
 
   @override
+  AssistantConversation mode(ChatMode mode) => this(mode: mode);
+
+  @override
   AssistantConversation createdAt(DateTime createdAt) =>
       this(createdAt: createdAt);
 
@@ -58,6 +76,19 @@ class _$AssistantConversationCWProxyImpl
       this(messages: messages);
 
   @override
+  AssistantConversation repos(RepoChoice? repos) => this(repos: repos);
+
+  @override
+  AssistantConversation kind(TicketKindChoice? kind) => this(kind: kind);
+
+  @override
+  AssistantConversation quick(bool? quick) => this(quick: quick);
+
+  @override
+  AssistantConversation tickets(List<CodeTicket>? tickets) =>
+      this(tickets: tickets);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantConversation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -67,9 +98,14 @@ class _$AssistantConversationCWProxyImpl
   AssistantConversation call({
     Object? id = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
+    Object? mode = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
     Object? updatedAt = const $CopyWithPlaceholder(),
     Object? messages = const $CopyWithPlaceholder(),
+    Object? repos = const $CopyWithPlaceholder(),
+    Object? kind = const $CopyWithPlaceholder(),
+    Object? quick = const $CopyWithPlaceholder(),
+    Object? tickets = const $CopyWithPlaceholder(),
   }) {
     return AssistantConversation(
       id: id == const $CopyWithPlaceholder()
@@ -80,6 +116,10 @@ class _$AssistantConversationCWProxyImpl
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
           : title as String,
+      mode: mode == const $CopyWithPlaceholder()
+          ? _value.mode
+          // ignore: cast_nullable_to_non_nullable
+          : mode as ChatMode,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -92,6 +132,22 @@ class _$AssistantConversationCWProxyImpl
           ? _value.messages
           // ignore: cast_nullable_to_non_nullable
           : messages as List<AssistantMessage>,
+      repos: repos == const $CopyWithPlaceholder()
+          ? _value.repos
+          // ignore: cast_nullable_to_non_nullable
+          : repos as RepoChoice?,
+      kind: kind == const $CopyWithPlaceholder()
+          ? _value.kind
+          // ignore: cast_nullable_to_non_nullable
+          : kind as TicketKindChoice?,
+      quick: quick == const $CopyWithPlaceholder()
+          ? _value.quick
+          // ignore: cast_nullable_to_non_nullable
+          : quick as bool?,
+      tickets: tickets == const $CopyWithPlaceholder()
+          ? _value.tickets
+          // ignore: cast_nullable_to_non_nullable
+          : tickets as List<CodeTicket>?,
     );
   }
 }
@@ -112,17 +168,40 @@ AssistantConversation _$AssistantConversationFromJson(
 ) => $checkedCreate('AssistantConversation', json, ($checkedConvert) {
   $checkKeys(
     json,
-    requiredKeys: const ['id', 'title', 'createdAt', 'updatedAt', 'messages'],
+    requiredKeys: const [
+      'id',
+      'title',
+      'mode',
+      'createdAt',
+      'updatedAt',
+      'messages',
+    ],
   );
   final val = AssistantConversation(
     id: $checkedConvert('id', (v) => (v as num).toInt()),
     title: $checkedConvert('title', (v) => v as String),
+    mode: $checkedConvert('mode', (v) => $enumDecode(_$ChatModeEnumMap, v)),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
     updatedAt: $checkedConvert('updatedAt', (v) => DateTime.parse(v as String)),
     messages: $checkedConvert(
       'messages',
       (v) => (v as List<dynamic>)
           .map((e) => AssistantMessage.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    repos: $checkedConvert(
+      'repos',
+      (v) => v == null ? null : RepoChoice.fromJson(v as Map<String, dynamic>),
+    ),
+    kind: $checkedConvert(
+      'kind',
+      (v) => $enumDecodeNullable(_$TicketKindChoiceEnumMap, v),
+    ),
+    quick: $checkedConvert('quick', (v) => v as bool?),
+    tickets: $checkedConvert(
+      'tickets',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => CodeTicket.fromJson(e as Map<String, dynamic>))
           .toList(),
     ),
   );
@@ -134,7 +213,23 @@ Map<String, dynamic> _$AssistantConversationToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'title': instance.title,
+  'mode': _$ChatModeEnumMap[instance.mode]!,
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
   'messages': instance.messages.map((e) => e.toJson()).toList(),
+  'repos': ?instance.repos?.toJson(),
+  'kind': ?_$TicketKindChoiceEnumMap[instance.kind],
+  'quick': ?instance.quick,
+  'tickets': ?instance.tickets?.map((e) => e.toJson()).toList(),
+};
+
+const _$ChatModeEnumMap = {ChatMode.chat: 'chat', ChatMode.code: 'code'};
+
+const _$TicketKindChoiceEnumMap = {
+  TicketKindChoice.auto: 'auto',
+  TicketKindChoice.code: 'code',
+  TicketKindChoice.test: 'test',
+  TicketKindChoice.plan: 'plan',
+  TicketKindChoice.analysis: 'analysis',
+  TicketKindChoice.bug: 'bug',
 };

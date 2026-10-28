@@ -35,6 +35,7 @@ type harness struct {
 	tickets    *fakeTickets
 	workspaces *fakeWorkspaces
 	assistant  *fakeAssistant
+	codeChat   *fakeCode
 	swagger    *fakeSwagger
 	runs       *fakeRunHistory
 	links      *fakeLinks
@@ -89,6 +90,7 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	h.tickets = &fakeTickets{}
 	h.workspaces = newFakeWorkspaces()
 	h.assistant = &fakeAssistant{}
+	h.codeChat = &fakeCode{}
 	h.swagger = &fakeSwagger{}
 	h.runs = newFakeRunHistory()
 	h.links = &fakeLinks{}
@@ -97,6 +99,7 @@ func newHarness(t *testing.T, db Pinger) *harness {
 		Auth:        svc,
 		Tickets:     h.tickets,
 		Assistant:   h.assistant,
+		Code:        h.codeChat,
 		Swagger:     h.swagger,
 		Suites:      h.swagger,
 		Workspaces:  h.workspaces,

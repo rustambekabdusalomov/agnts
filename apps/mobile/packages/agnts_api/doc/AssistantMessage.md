@@ -23,6 +23,10 @@ Name | Type | Description | Notes
 **shared** | **bool** | The answer's snapshot is kept for prompt tests | 
 **actions** | [**List&lt;AssistantAction&gt;**](AssistantAction.md) | Actions the answer proposes, each waiting for you to confirm | [optional] 
 **actionErrors** | **List&lt;String&gt;** | Actions the assistant tried to propose that agnts could not prepare, and why | [optional] 
+**handoff** | [**CodeHandoff**](CodeHandoff.md) |  | [optional] 
+**ticketKey** | **String** | Code mode: the ticket the message went to | [optional] 
+**routed** | [**CodeRouted**](CodeRouted.md) |  | [optional] 
+**attachments** | **List&lt;int&gt;** | Code mode: uploads that went with the message | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

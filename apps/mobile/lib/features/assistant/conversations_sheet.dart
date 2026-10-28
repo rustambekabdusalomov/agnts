@@ -86,8 +86,22 @@ class _ConversationsSheet extends ConsumerWidget {
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                           color: conv.id == current ? c.primarySoft : null,
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(conv.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: c.ink)),
+                            Row(children: [
+                              if (conv.mode == ChatMode.code) ...[
+                                ToneBadge(l.codechatCodeBadge, Tone.info, small: true),
+                                const SizedBox(width: 6),
+                              ],
+                              Expanded(
+                                child: Text(conv.title, maxLines: 2, overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: c.ink)),
+                              ),
+                            ]),
+                            if (conv.mode == ChatMode.code && (conv.tickets?.isNotEmpty ?? false))
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Text('${conv.tickets!.first.key} · ${stateLabel(l, conv.tickets!.first.state, conv.tickets!.first.kind)}',
+                                    style: TextStyle(fontSize: 13, fontFamily: AgntsFonts.mono, color: c.ink3)),
+                              ),
                             if (last != null && last.text.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 3),

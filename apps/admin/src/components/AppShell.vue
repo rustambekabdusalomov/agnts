@@ -113,7 +113,16 @@ const page = (name: string, icon: string, more: Partial<NavItem> = {}): NavItem 
 })
 const menus = computed<NavMenu[]>(() => [
   { key: 'overview', icon: 'dashboard', items: [page('dashboard', 'dashboard'), page('analytics', 'analytics')] },
-  { key: 'aiAssistant', icon: 'assistant', items: [page('assistant', 'assistant', { label: 'nav.assistantChat' }), page('assistantConversations', 'logs')] },
+  {
+    key: 'aiAssistant',
+    icon: 'assistant',
+    items: [
+      page('assistant', 'assistant', { label: 'nav.assistantChat' }),
+      // Code mode changes repositories: people who can edit only.
+      ...(workspace.canEdit ? [page('assistantCode', 'code')] : []),
+      page('assistantConversations', 'logs'),
+    ],
+  },
   {
     key: 'workflow',
     icon: 'running',

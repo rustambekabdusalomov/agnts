@@ -140,12 +140,14 @@ func insertTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket, models []byte
 	t.SyncRepos()
 	out, err := scanTicket(tx.QueryRow(ctx, `INSERT INTO tickets
 		(key, source, repo_id, title, description, priority, state, resume_state, models, after_approve, held, ask_first, kind, kind_auto,
-		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha, branch, pr_number, pr_url, pull_request, group_id, ticket_number)
+		 parent_key, follow_up_of, suggest_follow_ups, member_id, created_by, replay_of, base_sha, branch, pr_number, pr_url, pull_request, group_id, ticket_number,
+		 skip_checks)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULLIF($15, ''), NULLIF($16, ''), $17, $18, $19, $20, $21,
-		 $22, $23, $24, $25, $26, $27) RETURNING `+ticketCols,
+		 $22, $23, $24, $25, $26, $27, $28) RETURNING `+ticketCols,
 		t.Key, string(t.Source), t.RepoID, t.Title, t.Description, t.Priority, string(t.State),
 		string(t.ResumeState), models, t.AfterApprove, t.Held, t.AskFirst, string(kindOr(t.Kind)), t.KindAuto, t.ParentKey,
-		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA, t.Branch, t.PRNumber, t.PRURL, pullJSON(t.Pull), t.GroupID, t.TicketNumber))
+		t.FollowUpOf, t.SuggestFollowUps, t.MemberID, t.CreatedBy, t.ReplayOf, t.BaseSHA, t.Branch, t.PRNumber, t.PRURL, pullJSON(t.Pull), t.GroupID, t.TicketNumber,
+		t.SkipChecks))
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return out, domain.ErrConflict

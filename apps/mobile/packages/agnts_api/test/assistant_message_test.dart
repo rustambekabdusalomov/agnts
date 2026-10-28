@@ -90,6 +90,28 @@ void main() {
       // TODO
     });
 
+    // CodeHandoff handoff
+    test('to test the property `handoff`', () async {
+      // TODO
+    });
+
+    // Code mode: the ticket the message went to
+    // String ticketKey
+    test('to test the property `ticketKey`', () async {
+      // TODO
+    });
+
+    // CodeRouted routed
+    test('to test the property `routed`', () async {
+      // TODO
+    });
+
+    // Code mode: uploads that went with the message
+    // List<int> attachments
+    test('to test the property `attachments`', () async {
+      // TODO
+    });
+
     // DateTime createdAt
     test('to test the property `createdAt`', () async {
       // TODO

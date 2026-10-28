@@ -98,6 +98,15 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 		// (analysis.json, review.json), which agnts reads back.
 		g = guard.Chain{guard.Defaults(), guard.ReadOnlyExcept(outDir)}
 	}
+	var ask func(muse.Approval) <-chan bool
+	if req.Ask != nil {
+		// Someone follows the run in a chat: adding a dependency waits for
+		// their answer instead of going ahead.
+		g = guard.Chain{g, guard.AskBeforeInstalls()}
+		ask = func(a muse.Approval) <-chan bool {
+			return req.Ask(orchestrator.ToolQuestion{Tool: museTool(a.Tool), Command: a.Command, Path: a.Path, Reason: a.Reason})
+		}
+	}
 	if req.Timeout > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, req.Timeout)
@@ -112,7 +121,7 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 	res, err := w.museEng.Run(ctx, muse.Request{
 		Prompt: req.Prompt, Workdir: workDir, Model: id, Effort: req.Effort, SessionID: req.Resume,
 		Budget: b, AnnounceBudget: b != nil && b.Limit > 0, Credential: &cred, AuthPath: museAuthPath,
-		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns, ExtraRoots: []string{outDir},
+		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns, ExtraRoots: []string{outDir}, Steer: req.Steer, Ask: ask,
 	}, &dockerExecutor{w: w, ctx: ctx}, func(e muse.Event) { museEvent(e, limit, onEvent) })
 	out := orchestrator.ClaudeResult{
 		SessionID: res.SessionID, Turns: res.Usage.Calls, Text: res.Text, Duration: res.Duration,
@@ -195,15 +204,36 @@ func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
 			"limit_usd": limit, "calls": c.Calls, "model": string(e.Model),
 			"input_tokens": c.Usage.Input, "cached_tokens": c.Usage.Cached, "output_tokens": c.Usage.Output})
 	case muse.EventSteer:
-		budget("steer", "budget running low: told Muse to wrap up", "warn", nil)
+		switch e.Reason {
+		case "person":
+			budget("message", "a message from the chat went to the running agent", "info", nil)
+		case "approval":
+			budget("approval", "told the agent the chat's answer", "info", nil)
+		case "steps":
+			budget("steer", "model calls running low: told Muse to wrap up", "warn", nil)
+		default:
+			budget("steer", "budget running low: told Muse to wrap up", "warn", nil)
+		}
 	case muse.EventEscalate:
 		budget("escalate", "moved to "+string(e.Model)+": "+e.Reason, "info", map[string]any{"model": string(e.Model)})
 	case muse.EventInterrupt:
 		budget("stop", "stopped: "+e.Reason, "warn", nil)
 	case muse.EventApproval:
-		if a := e.Approval; a != nil && !a.Allow {
-			budget("guard", fmt.Sprintf("guard refused %s (%s): %s", firstNonEmpty(a.Command, a.Path, a.Tool), a.Rule, a.Reason), "warn",
-				map[string]any{"rule": a.Rule})
+		a := e.Approval
+		what := ""
+		if a != nil {
+			what = firstNonEmpty(a.Command, a.Path, a.Tool)
+		}
+		switch {
+		case a == nil:
+		case a.Pending:
+			budget("ask", fmt.Sprintf("waiting for the chat to allow %s (%s)", what, a.Reason), "warn", map[string]any{"rule": a.Rule})
+		case a.Ask && a.Allow:
+			budget("ask", "the chat allowed "+what, "info", map[string]any{"rule": a.Rule})
+		case a.Ask:
+			budget("ask", "the chat did not allow "+what, "warn", map[string]any{"rule": a.Rule})
+		case !a.Allow:
+			budget("guard", fmt.Sprintf("guard refused %s (%s): %s", what, a.Rule, a.Reason), "warn", map[string]any{"rule": a.Rule})
 		}
 	case muse.EventSettled:
 		if r := e.Receipt; r != nil {

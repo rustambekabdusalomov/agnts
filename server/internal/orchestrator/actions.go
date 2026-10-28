@@ -1165,6 +1165,8 @@ type TaskInput struct {
 	// Attachments are the files attached to the description: uploads to
 	// link, and on edit the task's files to keep. nil keeps them as they are.
 	Attachments *[]int64
+	// SkipChecks: its coding runs skip the check commands. CreateTask only.
+	SkipChecks bool
 }
 
 // CreateTask adds a side-project task. Its key comes from the
@@ -1215,7 +1217,7 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 		Title:  strings.TrimSpace(in.Title), Description: strings.TrimSpace(in.Description), Priority: in.Priority,
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
 		Held: in.Start == "queue", AskFirst: in.Start == "ask" || (in.Start == "queue" && st.AskFirst),
-		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps, TicketNumber: number,
+		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps, TicketNumber: number, SkipChecks: in.SkipChecks,
 	}
 	res.apply(&t)
 	out, err := o.createTask(ctx, t, prefix, files, origin)

@@ -183,6 +183,10 @@ type Orchestrator struct {
 	transcriber   Transcriber      // nil: no spoken questions
 	asst          assistantState
 	answering     sync.WaitGroup
+
+	codeChat CodeChatStore // nil: no Code mode in the chat
+	codeRole RoleOf        // nil: everyone may edit
+	live     codeLive      // Code conversations' live runs
 }
 
 // New returns an orchestrator.
@@ -303,6 +307,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			o.expireSuggestions(sys)
 			o.pruneAssistant(sys)
 		}
+		o.FlushCodeQueues(sys)
 		if ctx.Err() == nil {
 			o.tick(ctx, func(j scheduled) {
 				o.mu.Lock()
@@ -742,6 +747,10 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		gc.API = o.swaggerGuard(ctx, *t)
 		extraDeny = swaggerDeny(gc.API.Host)
 	}
+	// People following the ticket in a Code conversation talk to a Muse
+	// run as it works, and decide the tool calls it asks about.
+	steer, ask, release := o.codeLiveFor(ctx, *t, run.Stage, model, readOnly)
+	defer release()
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.TranscriptPurpose(run.Stage), WorkspaceID: t.WorkspaceID,
 		Run: run, TicketKey: t.Key, ModelStage: modelStage}, ClaudeRequest{
 		Prompt:   prompt,
@@ -754,6 +763,8 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		Env:      guardEnv(gc),
 		ReadOnly: readOnly,
 		Effort:   effort,
+		Steer:    steer,
+		Ask:      ask,
 	}, o.watch(ctx, s, ws, *t, run, o.streamTo(ctx, *t, run)))
 	run.Turns += res.Turns
 	if res.SessionID != "" {

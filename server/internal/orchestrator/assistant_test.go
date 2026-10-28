@@ -179,7 +179,7 @@ func TestAssistantConversationsArePrivate(t *testing.T) {
 	if _, err := a.o.Ask(a.other, c.ID, "and?", "en"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("another person asked in it: %v", err)
 	}
-	if list, err := a.o.AssistantConversations(a.other); err != nil || len(list) != 0 {
+	if list, err := a.o.AssistantConversations(a.other, ""); err != nil || len(list) != 0 {
 		t.Fatalf("another person's list: %v %v", list, err)
 	}
 	if _, err := a.o.RateAnswer(a.other, 2, -1, "", false); !errors.Is(err, domain.ErrNotFound) {
@@ -188,7 +188,7 @@ func TestAssistantConversationsArePrivate(t *testing.T) {
 	if err := a.o.DeleteAssistantConversation(a.other, c.ID); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("another person deleted it: %v", err)
 	}
-	if list, err := a.o.AssistantConversations(a.ask); err != nil || len(list) != 1 || len(list[0].Messages) != 1 || list[0].Messages[0].Role != domain.AssistantReply {
+	if list, err := a.o.AssistantConversations(a.ask, ""); err != nil || len(list) != 1 || len(list[0].Messages) != 1 || list[0].Messages[0].Role != domain.AssistantReply {
 		t.Fatalf("own list = %+v %v", list, err)
 	}
 	if err := a.o.DeleteAssistantConversation(a.ask, c.ID); err != nil {

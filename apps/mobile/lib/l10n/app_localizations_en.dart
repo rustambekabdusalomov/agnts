@@ -13748,4 +13748,341 @@ class AppLocalizationsEn extends AppLocalizations {
   String wsRoleLabel(String name) {
     return 'Role of $name';
   }
+
+  @override
+  String get codechatTitle => 'Code';
+
+  @override
+  String get codechatModeLabel => 'Chat mode';
+
+  @override
+  String get codechatModeChat => 'Chat';
+
+  @override
+  String get codechatModeCode => 'Code';
+
+  @override
+  String get codechatNewConversation => 'New Code conversation';
+
+  @override
+  String get codechatEmptyTitle => 'Change code from the chat';
+
+  @override
+  String get codechatEmptyText =>
+      'Pick the repositories and say what you want done. agnts works on it as a ticket: follow it here, answer its questions, ask for changes and approve the pull request.';
+
+  @override
+  String get codechatViewersOnly => 'Code mode is for people who can change the workspace.';
+
+  @override
+  String get codechatRepos => 'Repositories';
+
+  @override
+  String get codechatReposNone => 'Pick the repositories to work in';
+
+  @override
+  String get codechatReposChange => 'Change';
+
+  @override
+  String get codechatReposSave => 'Save repositories';
+
+  @override
+  String get codechatReposSaved => 'Repositories changed: the next ticket works in them';
+
+  @override
+  String get codechatKind => 'Kind';
+
+  @override
+  String get codechatQuick => 'Quick: skip checks';
+
+  @override
+  String get codechatQuickHint => 'Build, lint and tests don\'t run, so review comes sooner.';
+
+  @override
+  String get codechatTicketPick => 'Or work on an existing ticket';
+
+  @override
+  String get codechatTicketPlaceholder => 'Ticket key, e.g. PAY-214';
+
+  @override
+  String get codechatTicketAttach => 'Attach';
+
+  @override
+  String codechatTicketAttached(String key) {
+    return 'Now working on $key';
+  }
+
+  @override
+  String get codechatPlaceholderNew => 'Describe the change…';
+
+  @override
+  String get codechatPlaceholderReview => 'Ask for changes, or approve above…';
+
+  @override
+  String get codechatPlaceholderAnswers => 'Answer the question…';
+
+  @override
+  String get codechatPlaceholderRunning => 'Add to the request: it is sent when this run ends…';
+
+  @override
+  String get codechatPlaceholderStopped => 'Say how to get past this, and it retries…';
+
+  @override
+  String get codechatPlaceholderPushing => 'Pushing now…';
+
+  @override
+  String get codechatPlaceholderDone => 'Ask for the next change…';
+
+  @override
+  String get codechatSend => 'Send';
+
+  @override
+  String get codechatSendHint => 'Enter sends, Shift+Enter makes a new line';
+
+  @override
+  String codechatCount(String n) {
+    return '$n / 4000';
+  }
+
+  @override
+  String codechatRoutedCreated(String key) {
+    return 'Started $key';
+  }
+
+  @override
+  String codechatRoutedAnswered(String key) {
+    return 'Answered $key';
+  }
+
+  @override
+  String codechatRoutedChanges(String key) {
+    return 'Asked $key for changes';
+  }
+
+  @override
+  String codechatRoutedContinued(String key) {
+    return 'Continued $key';
+  }
+
+  @override
+  String codechatRoutedRetried(String key) {
+    return 'Retried $key';
+  }
+
+  @override
+  String codechatRoutedQueued(String key) {
+    return 'Waits for $key\'s run to end';
+  }
+
+  @override
+  String codechatRoutedSent(String key) {
+    return 'Sent to $key';
+  }
+
+  @override
+  String codechatRoutedFailed(String reason) {
+    return 'Not sent: $reason';
+  }
+
+  @override
+  String get codechatRoutedSteered => 'Delivered to the running agent';
+
+  @override
+  String codechatQueuedTitle(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n messages wait', one: '$n message waits');
+    return '$_temp0 for this run to end';
+  }
+
+  @override
+  String get codechatSendNow => 'Stop and send now';
+
+  @override
+  String codechatSendNowTitle(String key) {
+    return 'Stop $key now?';
+  }
+
+  @override
+  String get codechatSendNowText => 'The running stage stops, and your messages go to it at once.';
+
+  @override
+  String codechatSteps(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n steps', one: '$n step');
+    return '$_temp0';
+  }
+
+  @override
+  String codechatStateLine(String key, String state) {
+    return '$key: $state';
+  }
+
+  @override
+  String codechatCheckPassed(String name) {
+    return '$name passed';
+  }
+
+  @override
+  String codechatCheckFailed(String name) {
+    return '$name failed';
+  }
+
+  @override
+  String get codechatPrOpened => 'Pull request opened';
+
+  @override
+  String get codechatPushed => 'Pushed';
+
+  @override
+  String get codechatMerged => 'Merged';
+
+  @override
+  String get codechatWorking => 'Working…';
+
+  @override
+  String codechatResultTitle(String key) {
+    return '$key is ready for your review';
+  }
+
+  @override
+  String codechatReportTitle(String key) {
+    return '$key wrote its report';
+  }
+
+  @override
+  String codechatFilesChanged(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n files changed', one: '$n file changed');
+    return '$_temp0';
+  }
+
+  @override
+  String get codechatChecksPassed => 'Checks passed';
+
+  @override
+  String codechatChecksFailed(String failed, String n) {
+    return '$failed of $n checks failed';
+  }
+
+  @override
+  String get codechatChecksSkipped => 'Checks skipped';
+
+  @override
+  String get codechatViewDiff => 'View diff';
+
+  @override
+  String get codechatHideDiff => 'Hide diff';
+
+  @override
+  String get codechatApprove => 'Approve';
+
+  @override
+  String codechatApproveTitle(String key) {
+    return 'Approve $key?';
+  }
+
+  @override
+  String codechatApprovePr(String branch) {
+    return 'agnts pushes $branch and opens a pull request.';
+  }
+
+  @override
+  String get codechatApproveMain => 'agnts pushes the change straight to the default branch.';
+
+  @override
+  String get codechatApproveReport => 'The ticket closes with this report.';
+
+  @override
+  String get codechatReject => 'Reject';
+
+  @override
+  String codechatRejectTitle(String key) {
+    return 'Reject $key?';
+  }
+
+  @override
+  String get codechatRejectText => 'All work on it stops. You can continue it from this chat later.';
+
+  @override
+  String get codechatOpenTicket => 'Open ticket';
+
+  @override
+  String codechatQuestionsTitle(String key) {
+    return '$key asks before it goes on';
+  }
+
+  @override
+  String get codechatAnswersSend => 'Send answers';
+
+  @override
+  String codechatStoppedTitle(String key) {
+    return '$key stopped';
+  }
+
+  @override
+  String get codechatStoppedHint => 'Write how to get past it: it retries with your note.';
+
+  @override
+  String codechatDoneTitle(String key) {
+    return '$key is done';
+  }
+
+  @override
+  String get codechatDoneHint => 'Your next message starts a new ticket in the same repositories.';
+
+  @override
+  String codechatRejectedTitle(String key) {
+    return '$key was rejected';
+  }
+
+  @override
+  String get codechatRejectedHint => 'Write what to do differently and it continues.';
+
+  @override
+  String codechatMovedHint(String key) {
+    return '$key moved to another of your conversations.';
+  }
+
+  @override
+  String get codechatApprovalTitle => 'The agent asks to run this';
+
+  @override
+  String codechatApprovalReason(String reason) {
+    return 'A rule asks about it: $reason';
+  }
+
+  @override
+  String get codechatApprovalAllow => 'Allow';
+
+  @override
+  String get codechatApprovalDeny => 'Deny';
+
+  @override
+  String get codechatApprovalAllowed => 'Allowed';
+
+  @override
+  String get codechatApprovalDenied => 'Denied';
+
+  @override
+  String get codechatApprovalExpired => 'Nobody answered: denied';
+
+  @override
+  String codechatApprovalLeft(String seconds) {
+    return '${seconds}s left';
+  }
+
+  @override
+  String get codechatHandoffTitle => 'Do this in Code';
+
+  @override
+  String get codechatHandoffOpen => 'Open in Code';
+
+  @override
+  String get codechatTicketChat => 'Discussed in chat';
+
+  @override
+  String get codechatContinueInChat => 'Continue in chat';
+
+  @override
+  String get codechatCodeBadge => 'Code';
+
+  @override
+  String get navAssistantCode => 'Code';
 }

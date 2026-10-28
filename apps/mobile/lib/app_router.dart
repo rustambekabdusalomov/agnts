@@ -22,6 +22,7 @@ import 'features/admin/admin_workspaces_screen.dart';
 import 'features/analytics/analytics_screen.dart';
 import 'features/assistant/assistant_screen.dart';
 import 'features/assistant/assistant_stats.dart';
+import 'features/assistant/code_screen.dart';
 import 'features/auth/forgot_screen.dart';
 import 'features/auth/invite_screen.dart';
 import 'features/auth/login_screen.dart';
@@ -158,6 +159,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         screenRoute('/learn', (_, s) => LearnScreen(ticketKey: s.uri.queryParameters['ticket'])),
         screenRoute('/learn-queue', (_, _) => const LearnQueueScreen()),
         screenRoute('/learn/:id', (_, s) => LessonScreen(id: int.parse(s.pathParameters['id']!))),
+        // Prefilled from a Chat answer's offer (?text=…&repos=1,2) or a ticket (?ticket=KEY).
+        screenRoute('/assistant/code', (_, s) => CodeScreen(
+              initialText: s.uri.queryParameters['text'],
+              initialRepos: [for (final x in (s.uri.queryParameters['repos'] ?? '').split(',')) if ((int.tryParse(x) ?? 0) > 0) int.parse(x)],
+              initialTicket: s.uri.queryParameters['ticket'],
+            )),
+        screenRoute('/assistant/code/:id', (_, s) => CodeScreen(conversationId: int.tryParse(s.pathParameters['id']!))),
         screenRoute('/assistant', (_, _) => const AssistantScreen()),
         screenRoute('/assistant-rated', (_, _) => const AssistantRatedScreen()),
         screenRoute('/assistant/:id', (_, s) => AssistantScreen(conversationId: int.tryParse(s.pathParameters['id']!))),
