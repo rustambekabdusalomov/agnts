@@ -804,7 +804,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		if res.Subtype == "error_max_turns" {
 			return res, fmt.Errorf("stopped at the turn limit (%d); raise it in Settings or split the ticket", turns)
 		}
-		return res, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return res, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	return res, nil
 }
@@ -996,7 +996,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	}
 	raw, err := ws.ReadFile(ctx, AnalysisPath)
 	if err != nil {
-		return fmt.Errorf("claude did not write %s: %w", AnalysisPath, err)
+		return fmt.Errorf("%s did not write %s: %w", domain.AgentName(run.Model), AnalysisPath, err)
 	}
 	a, err := parseAnalysis(raw)
 	if err != nil {
@@ -1294,9 +1294,9 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if len(files) == 0 {
 		run.ExitReason = "no_changes"
 		if multi {
-			return fmt.Errorf("claude finished without changing any files in %s", repoNames(rs))
+			return fmt.Errorf("%s finished without changing any files in %s", domain.AgentName(run.Model), repoNames(rs))
 		}
-		return errors.New("claude finished without changing any files")
+		return fmt.Errorf("%s finished without changing any files", domain.AgentName(run.Model))
 	}
 	testsJSON, _ := json.Marshal(checks.Steps)
 	if err := o.store.SaveResult(ctx, domain.Result{
@@ -1575,11 +1575,11 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 	}
 	md, err := ws.ReadFile(ctx, ReportPath)
 	if err != nil {
-		return fmt.Errorf("claude did not write %s: %w", ReportPath, err)
+		return fmt.Errorf("%s did not write %s: %w", domain.AgentName(run.Model), ReportPath, err)
 	}
 	if strings.TrimSpace(string(md)) == "" {
 		run.ExitReason = "no_report"
-		return errors.New("claude wrote an empty report")
+		return fmt.Errorf("%s wrote an empty report", domain.AgentName(run.Model))
 	}
 	summary, err := ws.ReadFile(ctx, SummaryPath)
 	if err != nil {

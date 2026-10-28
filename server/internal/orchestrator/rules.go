@@ -548,11 +548,11 @@ func (o *Orchestrator) runRuleReview(ctx context.Context, r domain.Rule) (RuleRe
 		if res.Subtype == "error_max_turns" {
 			return rv, fmt.Errorf("stopped at the turn limit (%d); shorten the rule or split it", min(s.MaxTurns, ruleMaxTurns))
 		}
-		return rv, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return rv, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, RulePath)
 	if err != nil {
-		return rv, fmt.Errorf("claude did not write %s: %w", RulePath, err)
+		return rv, fmt.Errorf("%s did not write %s: %w", domain.AgentName(res.Model), RulePath, err)
 	}
 	return parseRuleReview(raw)
 }

@@ -254,11 +254,11 @@ func (o *Orchestrator) runReflect(ctx context.Context, r domain.Reflection) ([]d
 		return nil, &stopError{"rate limited"}
 	}
 	if res.IsError {
-		return nil, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return nil, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, ReflectPath)
 	if err != nil {
-		return nil, fmt.Errorf("claude did not write %s: %w", ReflectPath, err)
+		return nil, fmt.Errorf("%s did not write %s: %w", domain.AgentName(res.Model), ReflectPath, err)
 	}
 	var f ReflectFile
 	if err := json.Unmarshal(raw, &f); err != nil {

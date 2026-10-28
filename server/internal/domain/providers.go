@@ -84,6 +84,20 @@ func ToolName() string {
 	return "Claude"
 }
 
+// AgentName names the agent that runs model in messages people read:
+// "Muse", "Codex" or "Claude"; with no model, the primary tool.
+func AgentName(model string) string {
+	switch {
+	case model == "":
+		return ToolName()
+	case IsMuse(model):
+		return "Muse"
+	case IsCodex(model):
+		return "Codex"
+	}
+	return "Claude"
+}
+
 // ProviderEnabled reports whether p is offered here.
 func ProviderEnabled(p string) bool { return slices.Contains(EnabledProviders(), p) }
 

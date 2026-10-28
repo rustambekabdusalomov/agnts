@@ -222,7 +222,7 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 	}
 	raw, err := ws.ReadFile(ctx, ReviewPath)
 	if err != nil {
-		return fmt.Errorf("claude did not write %s: %w", ReviewPath, err)
+		return fmt.Errorf("%s did not write %s: %w", domain.AgentName(run.Model), ReviewPath, err)
 	}
 	rv, err := parseReview(raw)
 	if err != nil {

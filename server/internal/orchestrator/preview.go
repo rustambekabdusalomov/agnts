@@ -290,7 +290,7 @@ func (o *Orchestrator) previewRepo(ctx context.Context, s domain.Settings, ws Wo
 	}
 	raw, err := ws.ReadFile(ctx, PreviewPath)
 	if err != nil {
-		return p, fmt.Errorf("claude did not write %s: %w", PreviewPath, err)
+		return p, fmt.Errorf("%s did not write %s: %w", domain.AgentName(run.Model), PreviewPath, err)
 	}
 	if multi {
 		_ = ws.WriteFile(ctx, PreviewPath, nil) // the next repository writes its own

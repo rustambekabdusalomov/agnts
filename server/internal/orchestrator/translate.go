@@ -247,7 +247,7 @@ func (o *Orchestrator) translateMissing(ctx context.Context, sub translateSubjec
 		done += n
 	}
 	if done == 0 {
-		return errors.New("claude translated nothing")
+		return errors.New(domain.ToolName() + " translated nothing")
 	}
 	o.log.Info("texts translated", "subject", sub.name, "lang", lang, "texts", done, "of", len(texts))
 	return nil
@@ -296,14 +296,14 @@ func (o *Orchestrator) translateBatch(ctx context.Context, ws Workspace, s domai
 		return 0, ErrPlanLimit
 	}
 	if res.IsError {
-		return 0, fmt.Errorf("claude ended with %s: %s", res.Subtype, truncate(res.Text, 500))
+		return 0, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	raw, err := ws.ReadFile(ctx, TranslationPath)
 	if err == nil && len(bytes.TrimSpace(raw)) == 0 {
 		err = errors.New("empty")
 	}
 	if err != nil {
-		return 0, fmt.Errorf("claude did not write %s: %w", TranslationPath, err)
+		return 0, fmt.Errorf("%s did not write %s: %w", domain.AgentName(res.Model), TranslationPath, err)
 	}
 	var tf translationFile
 	if err := json.Unmarshal(raw, &tf); err != nil {

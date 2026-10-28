@@ -185,7 +185,7 @@ func (o *Orchestrator) learnRepo(ctx context.Context, s domain.Settings, t domai
 	}
 	raw, err := ws.ReadFile(ctx, LessonsPath)
 	if err != nil {
-		return nil, fmt.Errorf("claude did not write %s: %w", LessonsPath, err)
+		return nil, fmt.Errorf("%s did not write %s: %w", domain.AgentName(run.Model), LessonsPath, err)
 	}
 	return parseLessons(raw, r.ID, t.Key)
 }
