@@ -1,7 +1,10 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"mime/multipart"
 	"net/http"
 	"strings"
 	"testing"
@@ -19,6 +22,7 @@ type fakeAssistant struct {
 	lastRating             int
 	lastShare              bool
 	user                   int64
+	lastVoice              int
 }
 
 func (f *fakeAssistant) AssistantReady() bool { return true }
@@ -114,6 +118,62 @@ func (f *fakeAssistant) CancelAssistantAction(_ context.Context, id string) (dom
 		return domain.AssistantAction{}, domain.ErrNotFound
 	}
 	return f.action(domain.ActionCancelled, ""), nil
+}
+
+func (f *fakeAssistant) VoiceReady() bool { return true }
+
+func (f *fakeAssistant) Transcribe(_ context.Context, wav []byte) (string, error) {
+	f.lastVoice = len(wav)
+	if string(wav) == "silence" {
+		return "", fmt.Errorf("%w: %w", orchestrator.ErrInvalid, orchestrator.ErrNoSpeech)
+	}
+	return "What waits on me?", nil
+}
+
+// voiceForm is a multipart body with one file field.
+func voiceForm(t *testing.T, field string, data []byte) (string, string) {
+	t.Helper()
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile(field, "question.wav")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = fw.Write(data)
+	_ = mw.Close()
+	return b.String(), mw.FormDataContentType()
+}
+
+func TestAssistantTranscribe(t *testing.T) {
+	h := newHarness(t, pinger{})
+	body, ctype := voiceForm(t, "file", []byte("RIFF....WAVE"))
+	if rec := h.do("POST", "/api/assistant/transcribe", body, map[string]string{"Content-Type": ctype}); rec.Code != http.StatusUnauthorized {
+		t.Fatalf("without session: %d", rec.Code)
+	}
+	rec := h.do("POST", "/api/auth/login", loginBody("rustam", password, h.code(t, 1), "web"), nil)
+	cookie := rec.Result().Cookies()[0].String()
+
+	cases := []struct {
+		name, field string
+		data        []byte
+		want        int
+		contains    string
+	}{
+		{"heard", "file", []byte("RIFF....WAVE"), 200, `{"text":"What waits on me?"}`},
+		{"no words", "file", []byte("silence"), 400, `no words were heard`},
+		{"wrong field", "audio", []byte("RIFF....WAVE"), 400, `in the field \"file\"`},
+		{"too big", "file", bytes.Repeat([]byte{1}, domain.AssistantMaxVoiceBytes+1), 413, `too_large`},
+	}
+	for _, c := range cases {
+		body, ctype := voiceForm(t, c.field, c.data)
+		rec := h.do("POST", "/api/assistant/transcribe", body, map[string]string{"Cookie": cookie, "Content-Type": ctype})
+		if rec.Code != c.want || !strings.Contains(rec.Body.String(), c.contains) {
+			t.Errorf("%s: %d %s (want %d containing %q)", c.name, rec.Code, rec.Body, c.want, c.contains)
+		}
+	}
+	if h.assistant.lastVoice != len("silence") {
+		t.Errorf("recording passed on: %d bytes", h.assistant.lastVoice)
+	}
 }
 
 func TestAssistantEndpoints(t *testing.T) {

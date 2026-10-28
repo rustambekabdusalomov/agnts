@@ -241,12 +241,26 @@
   "analyticsDaysAbove": "Days above 80%",
   "analyticsNoUsage": "No usage readings in this period.",
   "analyticsSpend": "Token spend",
-  "analyticsSpendSub": "Tokens Claude used per day, input and output",
+  "analyticsSpendSub": "Tokens {agent} used per day, input and output",
+  "@analyticsSpendSub": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsSpendTokens": "Tokens in and out",
   "analyticsSpendCost": "At API prices",
   "analyticsSpendStages": "Spend by stage",
   "analyticsSpendStagesSub": "Where the tokens went, costliest first",
-  "analyticsNoSpend": "No Claude runs recorded in this period.",
+  "analyticsNoSpend": "No {agent} runs recorded in this period.",
+  "@analyticsNoSpend": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsRepos": "By repository",
   "analyticsReposSub": "Where agnts works best, and where it struggles",
   "analyticsColRepo": "Repository",
@@ -352,7 +366,14 @@
   "analyticsColCIRounds": "CI rounds",
   "analyticsColCIRoundsHint": "Average times red CI on the pull request sent the work back, per ticket that reached review (not counted in change rounds)",
   "analyticsColFixes": "Check fixes",
-  "analyticsColFixesHint": "Average times failing checks were sent back to Claude",
+  "analyticsColFixesHint": "Average times failing checks were sent back to {agent}",
+  "@analyticsColFixesHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsColSerious": "Serious findings",
   "analyticsColSeriousHint": "Share of reviewed tickets where agnts's review found a blocker or major problem",
   "analyticsColFootprint": "Plan accuracy",
@@ -641,7 +662,14 @@
   "analyticsColManual": "Notes",
   "analyticsColManualHint": "Notes the reviewer wrote by hand",
   "analyticsColRepos": "Repositories",
-  "analyticsKpiCostNote": "All Claude calls in the period",
+  "analyticsKpiCostNote": "All {agent} calls in the period",
+  "@analyticsKpiCostNote": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsKpiDaysAboveNote": "{n} days above 80% of the session limit",
   "@analyticsKpiDaysAboveNote": {
     "placeholders": {
@@ -850,8 +878,22 @@
   "briefSave": "Save brief",
   "briefCancel": "Cancel",
   "briefEditHint": "Markdown. What you save is what runs read from now on; leave it empty to give runs no brief.",
-  "briefNone": "No brief yet. Survey the repository to have Claude write a draft, or write one yourself.",
-  "briefSurveying": "Claude is surveying the repository. The draft appears here for your approval.",
+  "briefNone": "No brief yet. Survey the repository to have {agent} write a draft, or write one yourself.",
+  "@briefNone": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "briefSurveying": "{agent} is surveying the repository. The draft appears here for your approval.",
+  "@briefSurveying": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "briefFailed": "The last survey failed: {error}",
   "@briefFailed": {
     "placeholders": {
@@ -1175,6 +1217,24 @@
       }
     }
   },
+  "commonPagePrev": "Previous page",
+  "commonPageNext": "Next page",
+  "commonPageRange": "{from}–{to} of {n}",
+  "@commonPageRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPerPage": "Per page",
+  "commonPager": "Pages",
   "commonLoading": "Loading…",
   "commonError": "Something went wrong. Try again.",
   "commonSignedInAs": "Signed in as {username}",
@@ -2059,7 +2119,14 @@
   "filesAddPhoto": "Photo",
   "filesCamera": "Camera",
   "filesAddFile": "File",
-  "filesHint": "Pictures, PDFs, logs or text, up to 10 MB each. Claude reads them all.",
+  "filesHint": "Pictures, PDFs, logs or text, up to 10 MB each. {agent} reads them all.",
+  "@filesHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "filesUploading": "Uploading {name}…",
   "@filesUploading": {
     "placeholders": {
@@ -2455,7 +2522,14 @@
   "groupsMaxTicketReposHelp": "How many repositories one ticket, and one repository group, may have.",
   "harnessRepoTab": "Guardrails",
   "harnessRepoTitle": "Guardrails",
-  "harnessRepoSub": "How strictly agnts-guard checks Claude's work in this repository, while it works and after.",
+  "harnessRepoSub": "How strictly agnts-guard checks {agent}'s work in this repository, while it works and after.",
+  "@harnessRepoSub": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRepoSave": "Save guardrails",
   "harnessRepoSaved": "Guardrails saved",
   "harnessRepoAgentTitle": "Agent instruction files",
@@ -2483,7 +2557,14 @@
   "harnessRepoKind_agent_instruction": "Instruction to an agent",
   "harnessRepoKind_exfiltration": "Sends data out",
   "harnessRepoKind_encoded_blob": "Encoded text",
-  "harnessRepoKind_hooks": "Claude Code hooks",
+  "harnessRepoKind_hooks": "{agent} hooks",
+  "@harnessRepoKind_hooks": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRepoKind_mcp_server": "MCP servers",
   "harnessRepoProfile": "Guard profile",
   "harnessRepoProfileHelp": "How strict the in-run checks are for this repository.",
@@ -2492,15 +2573,50 @@
   "harnessRepoProfile_standard": "Standard",
   "harnessRepoProfile_strict": "Strict",
   "harnessRepoProfileHelp_": "Follows the workspace setting.",
-  "harnessRepoProfileHelp_minimal": "Only secrets and enforced rules are blocked; build checked before Claude finishes.",
-  "harnessRepoProfileHelp_standard": "Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before Claude finishes.",
-  "harnessRepoProfileHelp_strict": "Also blocks swallowed errors and removed assertions, runs the tests before Claude finishes, and may ask for facts before editing a file.",
+  "harnessRepoProfileHelp_minimal": "Only secrets and enforced rules are blocked; build checked before {agent} finishes.",
+  "@harnessRepoProfileHelp_minimal": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRepoProfileHelp_standard": "Also blocks skipped tests, silenced linters and edits to check configuration; build and lint must pass before {agent} finishes.",
+  "@harnessRepoProfileHelp_standard": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "harnessRepoProfileHelp_strict": "Also blocks swallowed errors and removed assertions, runs the tests before {agent} finishes, and may ask for facts before editing a file.",
+  "@harnessRepoProfileHelp_strict": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRepoSecretAllow": "Example credentials allowed in",
   "harnessRepoSecretAllowHelp": "Path globs where fake keys are expected, besides testdata/, fixtures/ and *.example.",
   "harnessRepoChecksTitle": "Per-file checks",
-  "harnessRepoChecksSub": "Quick formatters and linters agnts-guard runs on each file Claude edits, so problems are fixed while the change is fresh.",
+  "harnessRepoChecksSub": "Quick formatters and linters agnts-guard runs on each file {agent} edits, so problems are fixed while the change is fresh.",
+  "@harnessRepoChecksSub": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRepoChecksOff": "Turn per-file checks off",
-  "harnessRepoChecksOffHelp": "Claude is not checked after each edit; the checks after the run still apply.",
+  "harnessRepoChecksOffHelp": "{agent} is not checked after each edit; the checks after the run still apply.",
+  "@harnessRepoChecksOffHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRepoOwnChecks": "Use my own checks",
   "harnessRepoOwnChecksHelp": "Replace the checks agnts derives from the toolchains with your list.",
   "harnessRepoDerivedTitle": "Derived from the toolchains",
@@ -2578,15 +2694,36 @@
   "harnessRulesDelivery_prompt": "Every prompt",
   "harnessRulesDelivery_skill": "Skill",
   "harnessRulesDeliveryHelp_prompt": "In every prompt, always in view.",
-  "harnessRulesDeliveryHelp_skill": "A skill Claude loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.",
+  "harnessRulesDeliveryHelp_skill": "A skill {agent} loads when its description matches the work: keeps prompts short as rules grow. Keep critical rules in every prompt.",
+  "@harnessRulesDeliveryHelp_skill": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRulesEnforce": "Enforce",
-  "harnessRulesEnforceHelp": "agnts-guard checks the rule while Claude works, not only asks for it.",
+  "harnessRulesEnforceHelp": "agnts-guard checks the rule while {agent} works, not only asks for it.",
+  "@harnessRulesEnforceHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRulesOn": "Check",
   "harnessRulesOn_file": "File edits",
   "harnessRulesOn_bash": "Commands",
   "harnessRulesOn_diff": "Finished change",
   "harnessRulesOnHelp_file": "Edits of the files below; with a pattern, only added lines that match it.",
-  "harnessRulesOnHelp_bash": "Shell commands Claude runs that match the pattern.",
+  "harnessRulesOnHelp_bash": "Shell commands {agent} runs that match the pattern.",
+  "@harnessRulesOnHelp_bash": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRulesOnHelp_diff": "The finished change, checked on the server after the run.",
   "harnessRulesPaths": "Files (globs)",
   "harnessRulesPathsPlaceholder": "server/migrations/*.sql",
@@ -2594,7 +2731,14 @@
   "harnessRulesAction": "When it matches",
   "harnessRulesAction_block": "Block",
   "harnessRulesAction_warn": "Warn",
-  "harnessRulesMessage": "Message to Claude",
+  "harnessRulesMessage": "Message to {agent}",
+  "@harnessRulesMessage": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessRulesMessagePlaceholder": "Add a new migration instead.",
   "harnessRulesTry": "Try on history",
   "harnessRulesTrying": "Checking…",
@@ -2656,12 +2800,26 @@
   },
   "harnessRulesWatchingHelp": "Lessons agnts noticed once or twice. They become suggestions when it sees them again; until then they reach no ticket.",
   "harnessSettingsTitle": "Guardrails",
-  "harnessSettingsSub": "agnts-guard checks Claude's work inside every run, while it happens; agnts's checks after the run still apply.",
+  "harnessSettingsSub": "agnts-guard checks {agent}'s work inside every run, while it happens; agnts's checks after the run still apply.",
+  "@harnessSettingsSub": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsProfile": "Guard profile",
   "harnessSettingsProfile_minimal": "Minimal",
   "harnessSettingsProfile_standard": "Standard",
   "harnessSettingsProfile_strict": "Strict",
-  "harnessSettingsProfileHelp_minimal": "Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before Claude finishes.",
+  "harnessSettingsProfileHelp_minimal": "Blocks secrets and dotenv files, enforces team rules with a pattern, and asks for a green build before {agent} finishes.",
+  "@harnessSettingsProfileHelp_minimal": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsProfileHelp_standard": "Minimal, plus: blocks skipped tests, silenced linters, deleted tests and check config changes; lint in the stop gate; quick checks of each edited file.",
   "harnessSettingsProfileHelp_strict": "Standard, plus: tests in the stop gate, blocks swallowed errors and removed assertions, and the fact check before first edits.",
   "harnessSettingsFactCheck": "Fact check share",
@@ -2681,7 +2839,14 @@
   "harnessSettingsLearnFromRuns": "Learn from runs",
   "harnessSettingsLearnFromRunsHelp": "After a run with failed checks or a stall, agnts may suggest a tip for the repository. Tips stay watched until seen again.",
   "harnessSettingsMethodSkills": "Method skills",
-  "harnessSettingsMethodSkillsHelp": "Coding runs get agnts's method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. Claude loads one only when it fits; compare on Analytics.",
+  "harnessSettingsMethodSkillsHelp": "Coding runs get agnts's method skills: add one more of something the way the repository already does it, follow the surrounding style, reuse before writing, and change a database schema safely. {agent} loads one only when it fits; compare on Analytics.",
+  "@harnessSettingsMethodSkillsHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsSecondOpinion": "Second opinion",
   "harnessSettingsSecondOpinionHelp": "Another model reads the chosen approach of complex tickets and says whether it agrees. Empty turns it off.",
   "harnessSettingsSecondOpinionHint": "e.g. opus or codex:gpt-5-codex",
@@ -2693,10 +2858,24 @@
   "harnessSettingsHook_pre_fact_check": "ask for facts before the first edit of a file",
   "harnessSettingsHook_pre_destructive": "ask for a rollback plan before destructive commands",
   "harnessSettingsHook_post_edit_check": "check each edited file (formatter, linter)",
-  "harnessSettingsHook_stop_gate": "build and lint must pass before Claude finishes",
+  "harnessSettingsHook_stop_gate": "build and lint must pass before {agent} finishes",
+  "@harnessSettingsHook_stop_gate": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsHook_session_progress": "give the plan back after the context is compacted",
   "harnessSettingsCodex": "Coding on Codex",
-  "harnessSettingsCodexHelp": "A Codex model name runs coding on Codex CLI instead of Claude; empty uses Claude. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).",
+  "harnessSettingsCodexHelp": "A Codex model name runs coding on Codex CLI instead of {agent}; empty uses {agent}. Needs the OpenAI integration and api.openai.com in the allowed hosts (Settings → Preview).",
+  "@harnessSettingsCodexHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsCodexConnect": "OpenAI integration",
   "harnessSettingsQualityTitle": "Guardrails by prompt version",
   "harnessSettingsQualitySub": "What agnts-guard and the harness checks did for the tickets of each prompt version.",
@@ -2721,11 +2900,25 @@
   "harnessSettingsColSkillTickets": "Tickets",
   "harnessSettingsColSkillTicketsHint": "Tickets with a coding run that had the skill",
   "harnessSettingsColLoaded": "Loaded",
-  "harnessSettingsColLoadedHint": "Share of those tickets where Claude loaded the skill",
+  "harnessSettingsColLoadedHint": "Share of those tickets where {agent} loaded the skill",
+  "@harnessSettingsColLoadedHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsColSkillFirstTry": "First try",
   "harnessSettingsColSkillFirstTryHint": "Done without a person asking for changes, of the done tickets",
   "harnessSettingsColLoadedFirstTry": "First try, loaded",
-  "harnessSettingsColLoadedFirstTryHint": "First-try rate of the done tickets where Claude loaded the skill",
+  "harnessSettingsColLoadedFirstTryHint": "First-try rate of the done tickets where {agent} loaded the skill",
+  "@harnessSettingsColLoadedFirstTryHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsColTargeted": "Targeted findings",
   "harnessSettingsColTargetedHint": "Review findings per ticket of the kinds the skills target: architecture, maintainability, and any on a migration file",
   "harnessSettingsXOfY": "{x} of {y}",
@@ -2748,7 +2941,14 @@
     }
   },
   "harnessSettingsEffort": "Thinking effort",
-  "harnessSettingsEffortHelp": "How hard Claude thinks in each stage (Claude Code's --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.",
+  "harnessSettingsEffortHelp": "How hard {agent} thinks in each stage ({agent}'s --effort). Higher is slower and costs more of your plan. Complex tickets use their own level for coding and review.",
+  "@harnessSettingsEffortHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "harnessSettingsEffortAnalyze": "Analysis",
   "harnessSettingsEffortCoding": "Coding",
   "harnessSettingsEffortReview": "Review",
@@ -3339,7 +3539,14 @@
   },
   "learnRetry": "Try again",
   "learnReadingTitle": "Further reading",
-  "learnReadingNote": "Claude suggested these links. Check them before relying on them.",
+  "learnReadingNote": "{agent} suggested these links. Check them before relying on them.",
+  "@learnReadingNote": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "learnCategory_pattern": "Pattern",
   "learnCategory_architecture": "Architecture",
   "learnCategory_algorithm": "Algorithm",
@@ -3750,13 +3957,16 @@
   "massistantStatsRated": "Rated answers",
   "massistantRatedEmpty": "No rated answers yet.",
   "massistantRatedShared": "Kept for prompt tests",
-  "massistantStatsParts": "Container {start} · workspace {snapshot} · Claude {claude}",
+  "massistantStatsParts": "Container {start} · workspace {snapshot} · {agent} {claude}",
   "@massistantStatsParts": {
     "placeholders": {
       "start": {
         "type": "String"
       },
       "snapshot": {
+        "type": "String"
+      },
+      "agent": {
         "type": "String"
       },
       "claude": {
@@ -3845,6 +4055,20 @@
       }
     }
   },
+  "massistantVoiceStart": "Ask by voice",
+  "massistantVoiceSend": "Stop and ask",
+  "massistantVoiceRecording": "Recording",
+  "massistantVoiceHearing": "Muse is listening to your question…",
+  "massistantVoiceLimit": "up to {n} min",
+  "@massistantVoiceLimit": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "massistantVoiceDenied": "Allow the microphone for this site to ask by voice.",
+  "massistantVoiceNoMic": "No microphone could be opened.",
   "mciTitle": "CI failures",
   "mciLede": "Watched branches that went red, one row per error.",
   "mciFilterRed": "Red",
@@ -4520,6 +4744,7 @@
   },
   "mwsSuspended": "Suspended",
   "navOverview": "Overview",
+  "navWorkflow": "Workflow",
   "navDashboard": "Dashboard",
   "navAnalytics": "Analytics",
   "navTickets": "Tickets",
@@ -4537,7 +4762,10 @@
   "navIntegrations": "Integrations",
   "navRepos": "Repositories",
   "navSettings": "Settings",
-  "navSearch": "Search tickets and tasks",
+  "navSearch": "Search pages, repositories, tickets, chats, lessons",
+  "navSearchPages": "Pages",
+  "navSearchNone": "Nothing found",
+  "navSearchResults": "Search results",
   "navSyncJira": "Sync Jira",
   "navSynced": "Jira synced: {found} open, {created} new, {updated} updated, {waiting} waiting for your choice",
   "@navSynced": {
@@ -4558,6 +4786,17 @@
   },
   "navSession": "Current session",
   "navWeek": "This week",
+  "navCreditsLeft": "{amount} of {total} credits left",
+  "@navCreditsLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "navDayMode": "Switch to day mode",
   "navNightMode": "Switch to night mode",
   "navCollapseSidebar": "Collapse sidebar",
@@ -5185,11 +5424,25 @@
   "previewAutoPreview": "Take screenshots of every UI change",
   "previewAutoPreviewHelp": "While a change waits for you, agnts starts the app, opens the pages it touches and shows screenshots next to the diff. It never blocks approval.",
   "previewVisualCheck": "Let coding runs look at the app",
-  "previewVisualCheckHelp": "Claude may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.",
+  "previewVisualCheckHelp": "{agent} may start the app and look at the pages it changed before it finishes, and fix what looks broken. Costs a few more turns.",
+  "@previewVisualCheckHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "previewModel_": "Preview model",
   "previewModelHelp": "Picks the pages and judges the screenshots.",
   "previewEgress": "Allowed hosts",
-  "previewEgressHelp": "Hosts run containers may reach besides the built-in list (Claude, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.",
+  "previewEgressHelp": "Hosts run containers may reach besides the built-in list ({agent}, git hosts, package registries), such as a staging API your app calls in a preview. .example.com allows its subdomains.",
+  "@previewEgressHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "previewNotify": "When preview screenshots are ready",
   "previewNotifyPhotos": "Send phone screenshots to Telegram",
   "previewNotifyPhotosHelp": "Up to four screenshots go with the Telegram message.",
@@ -5443,11 +5696,25 @@
   "queueBadge_blocked": "Waiting · related",
   "queueBadge_slots": "Queued · slots",
   "queueBadge_server": "Queued · server",
-  "queueBadge_claude": "Paused · Claude",
+  "queueBadge_claude": "Paused · {agent}",
+  "@queueBadge_claude": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "queueTitle_blocked": "Waiting for related tickets",
   "queueTitle_slots": "Waiting for a free slot",
   "queueTitle_server": "In the server queue",
-  "queueTitle_claude": "Waiting for Claude",
+  "queueTitle_claude": "Waiting for {agent}",
+  "@queueTitle_claude": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "queuePosition": "#{position} in the server queue",
   "@queuePosition": {
     "placeholders": {
@@ -5498,10 +5765,24 @@
     }
   },
   "queueAddSlot": "Add a slot",
-  "queueClaudeHint": "Connect an account or turn on credits in Workspace settings → Claude.",
+  "queueClaudeHint": "Connect an account or turn on credits in Workspace settings → {agent}.",
+  "@queueClaudeHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "queueMember": "Member",
   "queueTakeOver": "Take over",
-  "queueTakenOver": "The ticket is yours: it runs on your Claude account in per-member mode.",
+  "queueTakenOver": "The ticket is yours: it runs on your {agent} account in per-member mode.",
+  "@queueTakenOver": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "queueCreatedBy": "Created by {name}",
   "@queueCreatedBy": {
     "placeholders": {
@@ -5623,10 +5904,13 @@
   "replayTitle": "Replay with today's agnts",
   "replaySub": "Re-run this ticket from the commit it started from, with the current prompts, brief and rules, and compare the result with what you approved. The replay is never pushed.",
   "replayStart": "Replay",
-  "replayConfirm": "agnts creates a new task that re-does {key} from where it started. It uses your Claude plan like any ticket.",
+  "replayConfirm": "agnts creates a new task that re-does {key} from where it started. It uses your {agent} plan like any ticket.",
   "@replayConfirm": {
     "placeholders": {
       "key": {
+        "type": "String"
+      },
+      "agent": {
         "type": "String"
       }
     }
@@ -5671,10 +5955,13 @@
   "replayBenchmarkRun": "Run benchmark",
   "replayBenchmarkModel": "Coding model",
   "replayBenchmarkModelDefault": "as the originals",
-  "replayBenchmarkConfirm": "agnts replays the {n} benchmark tickets from where each started. They use your Claude plan like any ticket.",
+  "replayBenchmarkConfirm": "agnts replays the {n} benchmark tickets from where each started. They use your {agent} plan like any ticket.",
   "@replayBenchmarkConfirm": {
     "placeholders": {
       "n": {
+        "type": "String"
+      },
+      "agent": {
         "type": "String"
       }
     }
@@ -5856,7 +6143,14 @@
   "repoCommit": "Commit",
   "repoOpen": "Open",
   "repoNoEnvironments": "No deployment environments on the git host.",
-  "repoDeployHelp": "agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from Claude chat.",
+  "repoDeployHelp": "agnts waits for checks before a ticket reaches your review. Deploying is always your decision, and it is never available from {agent} chat.",
+  "@repoDeployHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "repoDeployBranch": "Deploy {branch}",
   "@repoDeployBranch": {
     "placeholders": {
@@ -6122,8 +6416,22 @@
   "reposToolchainBad": "Write it as tool@version, e.g. node@20 or rust@stable.",
   "reposToolchainsNone": "None yet: they are detected after you save, or press Detect.",
   "reposDetect": "Detect",
-  "reposDetectDeep": "Ask Claude",
-  "reposDetectDeepHelp": "Claude reads the README and CI files when the scan finds no commands. Takes about a minute and uses your Claude plan.",
+  "reposDetectDeep": "Ask {agent}",
+  "@reposDetectDeep": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "reposDetectDeepHelp": "{agent} reads the README and CI files when the scan finds no commands. Takes about a minute and uses your {agent} plan.",
+  "@reposDetectDeepHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "reposDetecting": "Reading the repository…",
   "reposDetectDone": "Found {list}.",
   "@reposDetectDone": {
@@ -6133,9 +6441,23 @@
       }
     }
   },
-  "reposDetectNothing": "No known build files found. Add the toolchains and commands by hand, or ask Claude.",
+  "reposDetectNothing": "No known build files found. Add the toolchains and commands by hand, or ask {agent}.",
+  "@reposDetectNothing": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "reposDetectFilled": "Empty check commands were filled in; review them before saving.",
-  "reposDetectByClaude": "Claude filled in what the scan could not find.",
+  "reposDetectByClaude": "{agent} filled in what the scan could not find.",
+  "@reposDetectByClaude": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "reposDetectNeedsUrl": "Enter the clone URL first.",
   "reposCmdAuto": "detected after saving",
   "reposNotes": "Notes from detection",
@@ -6146,7 +6468,14 @@
   "reposMemoryHelp": "Optional, for heavy builds (JVM, Rust, .NET). Server default unless set; the server caps it (AGNTS_RUN_MEMORY_MAX_MB, 8 GB by default).",
   "reposMemoryDefault": "Server default",
   "reposBuildEnv": "Build environment",
-  "reposBuildEnvHelp": "KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. Claude can read them while it works, so use read-only tokens.",
+  "reposBuildEnvHelp": "KEY=value lines given to every run, such as tokens for private package registries (NPM_TOKEN, PIP_INDEX_URL). Stored encrypted and never shown again. {agent} can read them while it works, so use read-only tokens.",
+  "@reposBuildEnvHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "reposBuildEnvSet": "Set: {names}",
   "@reposBuildEnvSet": {
     "placeholders": {
@@ -6437,10 +6766,24 @@
     }
   },
   "rulesTitle": "Rules",
-  "rulesLede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. Claude reviews each rule and asks about anything unclear before it applies.",
+  "rulesLede": "Instructions agnts follows on every ticket: global rules for all repositories and rules for one repository. {agent} reviews each rule and asks about anything unclear before it applies.",
+  "@rulesLede": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "rulesAdd": "Add rule",
   "rulesAddSubmit": "Add and review",
-  "rulesDrawerSub": "Write it the way you would brief a new teammate. Claude checks it before any ticket follows it.",
+  "rulesDrawerSub": "Write it the way you would brief a new teammate. {agent} checks it before any ticket follows it.",
+  "@rulesDrawerSub": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "rulesRuleTitle": "Title",
   "rulesTitlePlaceholder": "Tests for new endpoints",
   "rulesScope": "Applies to",
@@ -6459,9 +6802,23 @@
       }
     }
   },
-  "rulesRereviewHelp": "You changed what the rule says, so Claude reviews it again. Tickets stop getting it until the review is done.",
+  "rulesRereviewHelp": "You changed what the rule says, so {agent} reviews it again. Tickets stop getting it until the review is done.",
+  "@rulesRereviewHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "rulesSaved": "Rule saved",
-  "rulesSavedReview": "Rule saved; Claude is reviewing it",
+  "rulesSavedReview": "Rule saved; {agent} is reviewing it",
+  "@rulesSavedReview": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "rulesScopeLabel": "Show rules for",
   "rulesScopeAll": "All rules ({n})",
   "@rulesScopeAll": {
@@ -6505,8 +6862,22 @@
       }
     }
   },
-  "rulesPending": "Waiting for a free worker. Claude reviews rules before the next ticket starts.",
-  "rulesAnalyzing": "Claude is reading the rule and checking it for anything unclear or conflicting.",
+  "rulesPending": "Waiting for a free worker. {agent} reviews rules before the next ticket starts.",
+  "@rulesPending": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesAnalyzing": "{agent} is reading the rule and checking it for anything unclear or conflicting.",
+  "@rulesAnalyzing": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "rulesQuestionsTitle": "{n, plural, one {{n} question before this rule applies} other {{n} questions before this rule applies}}",
   "@rulesQuestionsTitle": {
     "placeholders": {
@@ -6515,7 +6886,14 @@
       }
     }
   },
-  "rulesQuestionsSub": "Claude found something unclear. Your answers become part of the rule.",
+  "rulesQuestionsSub": "{agent} found something unclear. Your answers become part of the rule.",
+  "@rulesQuestionsSub": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "rulesYourAnswer": "Your answer",
   "rulesAddDetails": "Add details (optional)",
   "rulesAnswerFor": "Answer to question {n}",
@@ -6547,9 +6925,12 @@
   "rulesAccept": "Use as written",
   "rulesAcceptTitle": "Use the rule as written?",
   "rulesAcceptBody": "Tickets get the rule as you wrote it, with the answers given so far. Open questions are dropped.",
-  "rulesFailed": "Claude could not review this rule: {error}",
+  "rulesFailed": "{agent} could not review this rule: {error}",
   "@rulesFailed": {
     "placeholders": {
+      "agent": {
+        "type": "String"
+      },
       "error": {
         "type": "String"
       }
@@ -6583,7 +6964,14 @@
       }
     }
   },
-  "rulesAnswered": "Answers sent; Claude is reviewing the rule again",
+  "rulesAnswered": "Answers sent; {agent} is reviewing the rule again",
+  "@rulesAnswered": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "rulesAccepted": "The rule applies as written",
   "rulesQueued": "Queued for review",
   "rulesDeleted": "Rule deleted",
@@ -6625,7 +7013,14 @@
   "rulesTag_other": "other",
   "runsNavRuns": "Runs",
   "runsTitle": "Run history",
-  "runsLede": "Every Claude Code and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.",
+  "runsLede": "Every {agent} and Codex invocation across workspaces: what it cost, how long it took and how it ended. Opening one shows customer content, and every read is logged.",
+  "@runsLede": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "runsRunTitle": "Invocation",
   "runsBack": "All runs",
   "runsSettings": "Settings",
@@ -6683,7 +7078,14 @@
   "runsS_oom": "Out of memory",
   "runsFEngine": "Engine",
   "runsAnyEngine": "Any engine",
-  "runsE_claude": "Claude",
+  "runsE_claude": "{agent}",
+  "@runsE_claude": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "runsE_codex": "Codex",
   "runsFModel": "Model",
   "runsFTicket": "Ticket",
@@ -6743,7 +7145,14 @@
   "runsNotFound": "This transcript no longer exists.",
   "runsUnreadable": "Part of this transcript could not be read; what follows is what could.",
   "runsTruncated": "The size limit was reached; later content was left out.",
-  "runsAccount": "Claude account",
+  "runsAccount": "{agent} account",
+  "@runsAccount": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "runsSession": "Session",
   "runsStartedAt": "Started",
   "runsFinishedAt": "Finished",
@@ -6966,7 +7375,14 @@
   "settingsProgressHelp": "Analysis done, code written. Phone only, silent, one notification per ticket",
   "settingsLessons": "When agnts finds something new to learn",
   "settingsReviewDone": "When agnts's code review finishes",
-  "settingsSecretsHelp": "Tokens for Jira, GitHub and Claude are stored encrypted on your server. This page never shows them.",
+  "settingsSecretsHelp": "Tokens for Jira, GitHub and {agent} are stored encrypted on your server. This page never shows them.",
+  "@settingsSecretsHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "settingsSaved": "Settings saved",
   "settingsParallelSlots": "{n, plural, one {{n} run} other {{n} runs}} at once",
   "@settingsParallelSlots": {
@@ -7006,7 +7422,14 @@
       }
     }
   },
-  "spendEmpty": "Nothing recorded yet. Spend appears after agnts's first Claude run on this ticket.",
+  "spendEmpty": "Nothing recorded yet. Spend appears after agnts's first {agent} run on this ticket.",
+  "@spendEmpty": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "spendInput": "Input",
   "spendOutput": "Output",
   "spendCache": "Cache: {read} read, {write} written",
@@ -7029,7 +7452,14 @@
     }
   },
   "spendPartial": "A run was cut off, so its cost is unknown",
-  "spendCostNote": "Cost is Claude Code's estimate of the same work at API prices. On a Claude plan you are not charged it; it shows the relative weight of each stage.",
+  "spendCostNote": "Cost is {agent}'s estimate of the same work at API prices. On a {agent} plan you are not charged it; it shows the relative weight of each stage.",
+  "@spendCostNote": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "spendTokens": "{n} tokens",
   "@spendTokens": {
     "placeholders": {
@@ -7060,8 +7490,22 @@
     }
   },
   "spendTopSubEmpty": "Which tickets used the most of your plan",
-  "spendTopEmpty": "No Claude runs recorded in this period.",
-  "spendTopNote": "Ranked by Claude Code's cost estimate, which weighs cache traffic properly. Share is of the period's estimated cost. Only spend inside the period counts.",
+  "spendTopEmpty": "No {agent} runs recorded in this period.",
+  "@spendTopEmpty": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "spendTopNote": "Ranked by {agent}'s cost estimate, which weighs cache traffic properly. Share is of the period's estimated cost. Only spend inside the period counts.",
+  "@spendTopNote": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "spendColStage": "Costliest stage",
   "spendColCost": "Est. cost",
   "spendColShare": "Share",
@@ -7194,7 +7638,14 @@
   },
   "swaggerNeedSpec": "Read a spec first.",
   "swaggerNeedToken": "Enter the token.",
-  "swaggerClaudeOnly": "Swagger tests always run on Claude (Sonnet), whatever model the workspace codes with.",
+  "swaggerClaudeOnly": "Swagger tests always run on {agent}'s light model, whatever model the workspace codes with.",
+  "@swaggerClaudeOnly": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "swaggerTab": "API results",
   "swaggerRequestsTab": "Requests",
   "swaggerNoRun": "No results yet: the test is running or has not run.",
@@ -7732,7 +8183,14 @@
   "ticketNoChecks": "No checks configured",
   "ticketChecksSkipped": "Skipped for this ticket",
   "ticketSkipChecks": "Skip checks: go to review on the code alone",
-  "ticketSkipChecksHint": "For checks the run container can't run, such as a private dependency it can't fetch. Claude won't run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.",
+  "ticketSkipChecksHint": "For checks the run container can't run, such as a private dependency it can't fetch. {agent} won't run the build, lint or tests either, so you review the code yourself. It stays on for this ticket until you untick it.",
+  "@ticketSkipChecksHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "ticketStopRun": "Stop run",
   "ticketStopConfirm": "Stop the run on {key}? You can retry it later.",
   "@ticketStopConfirm": {
@@ -8044,6 +8502,11 @@
   "ticketStopWriting": "Writing",
   "ticketStopDone": "Done",
   "ticketTabsLabel": "Ticket details",
+  "ticketFactsTicket": "Ticket",
+  "ticketFactsCode": "Code",
+  "ticketFactsPeople": "People",
+  "ticketFactsLinks": "Linked tickets",
+  "ticketFactsRuns": "Runs",
   "ticketTabReview": "Code review",
   "ticketTabFollowUps": "Follow-ups",
   "ticketTabAnswers": "Answers",
@@ -8147,6 +8610,7 @@
       }
     }
   },
+  "ticketsTabsLabel": "Ticket lists",
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
   "ticketsRunning": "Running",
@@ -8214,7 +8678,14 @@
   "ticketsSourceGit": "PR",
   "ticketsSourceCi": "CI",
   "usageTitle": "Plan usage",
-  "usageLede": "agnts runs on your Claude subscription. These limits are shared with your own Claude and Claude Code use.",
+  "usageLede": "agnts runs on your {agent} plan. These limits are shared with your own {agent} use.",
+  "@usageLede": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "usageCard": "Plan usage",
   "usageUpdated": "Updated {time}",
   "@usageUpdated": {
@@ -8264,7 +8735,14 @@
   "usageStatus_allowed_warning": "Close to the limit",
   "usageStatus_rejected": "Limit reached",
   "usageStatus_unknown": "Unknown",
-  "usageSource": "Read from Claude Code's rate limit events. Includes your own Claude use on this account.",
+  "usageSource": "Read from {agent}'s rate limit events. Includes your own {agent} use on this account.",
+  "@usageSource": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "usageLimitTitle": "When a limit is reached",
   "usageLimitSub": "How agnts behaves near the limit",
   "usageAbove": "Above {pct}% of the session",
@@ -8283,7 +8761,14 @@
   "usageResumeManual": "Wait for you to resume",
   "usageIdle": "Idle refresh",
   "usageIdleDo": "Every 30 min",
-  "usageHelp": "Numbers come from the rate limit events Claude Code emits during each run. When agnts is idle, a tiny refresh run keeps them current.",
+  "usageHelp": "Numbers come from the rate limit events {agent} emits during each run. When agnts is idle, a tiny refresh run keeps them current.",
+  "@usageHelp": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "wsTitle": "Workspace",
   "wsSwitcher": "Switch workspace",
   "wsAll": "All workspaces",
@@ -8342,7 +8827,14 @@
   },
   "wsDeleted": "Workspace deleted",
   "wsMembers": "Members",
-  "wsMembersSub": "Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, Claude, members and billing.",
+  "wsMembersSub": "Everyone in the workspace sees its tickets and can create, answer, review and retry them. The owner also manages settings, integrations, {agent}, members and billing.",
+  "@wsMembersSub": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "wsYou": "you",
   "wsRemove": "Remove",
   "wsRemoveTitle": "Remove {name}?",

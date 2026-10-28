@@ -87,5 +87,14 @@ void main() {
       // TODO
     });
 
+    // Turn a spoken question into text
+    //
+    // Muse Code hears the recording (`muse voice transcribe`) on the account your answers run on, and returns its words; ask them with startAssistantConversation or askAssistant as you would typed ones. The recording is 16-bit PCM WAV (16 kHz mono is plenty), at most 2 minutes; it is not kept. One recording at a time per person.
+    //
+    //Future<AssistantTranscript> transcribeAssistantQuestion(MultipartFile file) async
+    test('test transcribeAssistantQuestion', () async {
+      // TODO
+    });
+
   });
 }

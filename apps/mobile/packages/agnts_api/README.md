@@ -99,6 +99,7 @@ Class | Method | HTTP request | Description
 [*AssistantApi*](doc/AssistantApi.md) | [**listAssistantRated**](doc/AssistantApi.md#listassistantrated) | **GET** /assistant/rated | Rated answers with their questions, newest rating first
 [*AssistantApi*](doc/AssistantApi.md) | [**rateAssistantAnswer**](doc/AssistantApi.md#rateassistantanswer) | **PUT** /assistant/messages/{messageId}/rating | Rate one of your answers (helpful or not), or take the rating back
 [*AssistantApi*](doc/AssistantApi.md) | [**startAssistantConversation**](doc/AssistantApi.md#startassistantconversation) | **POST** /assistant/conversations | Ask the assistant a question in a new conversation
+[*AssistantApi*](doc/AssistantApi.md) | [**transcribeAssistantQuestion**](doc/AssistantApi.md#transcribeassistantquestion) | **POST** /assistant/transcribe | Turn a spoken question into text
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer or a retry note
@@ -419,6 +420,7 @@ Class | Method | HTTP request | Description
  - [AssistantStats](doc/AssistantStats.md)
  - [AssistantStatsActions](doc/AssistantStatsActions.md)
  - [AssistantStatsVersionsInner](doc/AssistantStatsVersionsInner.md)
+ - [AssistantTranscript](doc/AssistantTranscript.md)
  - [Attachment](doc/Attachment.md)
  - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)
  - [BeginLoginTotpRequest](doc/BeginLoginTotpRequest.md)

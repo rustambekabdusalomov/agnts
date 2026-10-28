@@ -5109,6 +5109,45 @@ paths:
         '429': { $ref: '#/components/responses/TooManyRequests' }
         '501': { $ref: '#/components/responses/NotImplemented' }
 
+  /assistant/transcribe:
+    post:
+      operationId: transcribeAssistantQuestion
+      x-viewer: true
+      summary: Turn a spoken question into text
+      description: >-
+        Muse Code hears the recording (`muse voice transcribe`) on the
+        account your answers run on, and returns its words; ask them with
+        startAssistantConversation or askAssistant as you would typed ones.
+        The recording is 16-bit PCM WAV (16 kHz mono is plenty), at most 2
+        minutes; it is not kept. One recording at a time per person.
+      tags: [assistant]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The recording, WAV, at most 4 MB
+      responses:
+        '200':
+          description: The words heard
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantTranscript' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413':
+          description: The recording is larger than 4 MB
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
   /assistant/messages/{messageId}/rating:
     parameters:
       - $ref: '#/components/parameters/MessageID'
@@ -6880,6 +6919,12 @@ components:
       properties:
         question: { type: string, minLength: 1, maxLength: 1000 }
         lang: { $ref: '#/components/schemas/AssistantLanguage' }
+
+    AssistantTranscript:
+      type: object
+      required: [text]
+      properties:
+        text: { type: string, description: The words Muse heard in the recording }
 
     AssistantLink:
       type: object

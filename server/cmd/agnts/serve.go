@@ -586,6 +586,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.assistant = postgres.NewAssistant(pool, box)
 	a.orch.SetAssistant(a.assistant, mcpserver.NewSnapshotter(a.mcpDeps()))
 	a.orch.SetAssistantActions(&actions.Assistant{Deps: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Role: a.workspaces.Role})
+	a.orch.SetTranscriber(a.runner)
 	return a, nil
 }
 

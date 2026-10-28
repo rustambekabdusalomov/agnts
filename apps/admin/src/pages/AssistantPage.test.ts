@@ -10,7 +10,24 @@ import AssistantConversationsPage from './AssistantConversationsPage.vue'
 import AssistantPage from './AssistantPage.vue'
 
 const call = vi.hoisted(() => ({ GET: vi.fn(), POST: vi.fn(), PUT: vi.fn(), DELETE: vi.fn() }))
-vi.mock('../api/client', () => ({ api: call, unwrap: async (p: Promise<unknown>) => p }))
+const heard = vi.hoisted(() => vi.fn())
+vi.mock('../api/client', () => ({ api: call, unwrap: async (p: Promise<unknown>) => p, transcribeQuestion: heard }))
+const mic = vi.hoisted(() => ({ start: vi.fn(), stop: vi.fn(), cancel: vi.fn() }))
+vi.mock('../composables/useVoiceRecorder', async () => {
+  const { ref } = await import('vue')
+  const state = ref('idle')
+  const seconds = ref(0)
+  return {
+    MAX_VOICE_SECONDS: 120,
+    canRecord: () => true,
+    useVoiceRecorder: () => ({
+      state, seconds,
+      start: async () => { await mic.start(); state.value = 'recording'; seconds.value = 7 },
+      stop: async () => { state.value = 'idle'; return mic.stop() },
+      cancel: () => { mic.cancel(); state.value = 'idle' },
+    }),
+  }
+})
 vi.mock('../composables/useLive', () => ({ useLive: () => ({ connected: ref(true) }), livePoll: (ms: number) => ms }))
 vi.mock('../composables/useConfirm', () => ({ askConfirm: async () => true }))
 
@@ -51,7 +68,7 @@ async function setup(path: string, c: typeof conv = conv) {
 }
 
 beforeEach(() => {
-  for (const f of Object.values(call)) f.mockReset()
+  for (const f of [...Object.values(call), ...Object.values(mic), heard]) f.mockReset()
   live.clear()
 })
 
@@ -113,6 +130,48 @@ describe('AssistantPage', () => {
       params: { path: { messageId: 2 } }, body: { rating: -1, comment: 'wrong ticket', share: true },
     })
     w.unmount()
+  })
+
+  it('asks a spoken question in the words Muse heard', async () => {
+    const { w, router } = await setup('/w/acme/assistant')
+    await w.find('.as-mic').trigger('click')
+    await flushPromises()
+    expect(w.find('.as-voice').text()).toContain('0:07')
+
+    // Cancelled: nothing is sent.
+    await w.findAll('.as-voice button').find((b) => b.text() === 'Cancel')!.trigger('click')
+    expect(mic.cancel).toHaveBeenCalled()
+    expect(w.find('textarea').exists()).toBe(true)
+
+    const clip = new Blob(['RIFF'], { type: 'audio/wav' })
+    mic.stop.mockResolvedValue(clip)
+    heard.mockResolvedValue('  What waits on me?  ')
+    call.POST.mockResolvedValue(conv)
+    await w.find('.as-mic').trigger('click')
+    await flushPromises()
+    await w.findAll('.as-voice button').find((b) => b.text() === 'Stop and ask')!.trigger('click')
+    await flushPromises()
+    expect(heard).toHaveBeenCalledWith(clip)
+    expect(call.POST).toHaveBeenCalledWith('/assistant/conversations', { body: { question: 'What waits on me?', lang: 'en' } })
+    expect(router.currentRoute.value.params.id).toBe('7')
+
+    // Muse heard nothing: the person reads why, and nothing is asked.
+    call.POST.mockClear()
+    heard.mockRejectedValue(new Error('no words were heard in the recording'))
+    await w.find('.as-mic').trigger('click')
+    await flushPromises()
+    await w.findAll('.as-voice button').find((b) => b.text() === 'Stop and ask')!.trigger('click')
+    await flushPromises()
+    expect(w.find('.ferr').text()).toContain('no words were heard')
+    expect(call.POST).not.toHaveBeenCalled()
+  })
+
+  it('says how to allow the microphone when it is refused', async () => {
+    const { w } = await setup('/w/acme/assistant')
+    mic.start.mockRejectedValue(new DOMException('denied', 'NotAllowedError'))
+    await w.find('.as-mic').trigger('click')
+    await flushPromises()
+    expect(w.find('.ferr').text()).toContain('Allow the microphone')
   })
 
   it('shows proposed actions to confirm or decline, and what became of the others', async () => {

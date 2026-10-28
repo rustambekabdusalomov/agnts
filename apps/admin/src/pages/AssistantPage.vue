@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { api, unwrap } from '../api/client'
+import { api, transcribeQuestion, unwrap } from '../api/client'
 import type { AssistantConversation, AssistantLink, AssistantMessage } from '../api/types'
 import { applyLive, assistantLang, fileLabel, isOpen, live, MAX_QUESTION, secs } from '../components/assistant/assistant'
 import AssistantActionCard from '../components/assistant/AssistantActionCard.vue'
@@ -11,6 +11,7 @@ import PageHeader from '../components/PageHeader.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { livePoll, useLive } from '../composables/useLive'
+import { canRecord, MAX_VOICE_SECONDS, useVoiceRecorder } from '../composables/useVoiceRecorder'
 import { useWorkspace } from '../stores/workspace'
 
 // The assistant's chat: questions about the workspace, typed, answered in
@@ -82,6 +83,34 @@ function onKey(e: KeyboardEvent) {
     send()
   }
 }
+// Voice: the person speaks the question; Muse hears it on the server and
+// its words are asked as a typed question is.
+const voiceOn = canRecord()
+const voice = useVoiceRecorder(() => void finishVoice())
+const hearing = ref(false)
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+async function startVoice() {
+  error.value = ''
+  try {
+    await voice.start()
+  } catch (e) {
+    const denied = e instanceof DOMException && (e.name === 'NotAllowedError' || e.name === 'SecurityError')
+    error.value = denied ? t('massistant.voiceDenied') : t('massistant.voiceNoMic')
+  }
+}
+async function finishVoice() {
+  if (voice.state.value !== 'recording') return
+  hearing.value = true
+  try {
+    const question = (await transcribeQuestion(await voice.stop())).trim().slice(0, MAX_QUESTION)
+    if (question) send(question)
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : t('common.error')
+  } finally {
+    hearing.value = false
+  }
+}
+
 /** The question an answer belongs to, to ask it again. */
 function questionOf(m: AssistantMessage): string | undefined {
   const i = messages.value.indexOf(m)
@@ -191,7 +220,22 @@ const suggestions = computed(() => [
       </template>
     </div>
 
-    <form class="as-compose" @submit.prevent="send()">
+    <div v-if="voice.state.value === 'recording' || hearing" class="as-compose as-voice" role="status">
+      <template v-if="hearing">
+        <span class="as-spin" />
+        <span>{{ t('massistant.voiceHearing') }}</span>
+      </template>
+      <template v-else>
+        <span class="as-rec" />
+        <span>{{ t('massistant.voiceRecording') }} <b class="as-clock">{{ clock(voice.seconds.value) }}</b></span>
+        <span class="hint">{{ t('massistant.voiceLimit', { n: MAX_VOICE_SECONDS / 60 }) }}</span>
+        <span class="sp" />
+        <button type="button" class="btn" @click="voice.cancel()">{{ t('form.cancel') }}</button>
+        <button type="button" class="btn btn-p" @click="finishVoice">{{ t('massistant.voiceSend') }}</button>
+      </template>
+      <p v-if="error" class="ferr">{{ error }}</p>
+    </div>
+    <form v-else class="as-compose" @submit.prevent="send()">
       <textarea
         v-model="text"
         rows="2"
@@ -201,7 +245,18 @@ const suggestions = computed(() => [
       />
       <div class="as-send">
         <span class="hint">{{ length > MAX_QUESTION - 100 ? t('massistant.count', { n: length }) : t('massistant.sendHint') }}</span>
-        <button type="submit" class="btn btn-p" :disabled="!length || length > MAX_QUESTION || ask.isPending.value">{{ t('massistant.send') }}</button>
+        <span class="as-btns">
+          <button
+            v-if="voiceOn"
+            type="button"
+            class="btn as-mic"
+            :disabled="ask.isPending.value"
+            :title="t('massistant.voiceStart')"
+            :aria-label="t('massistant.voiceStart')"
+            @click="startVoice"
+          ><HiIcon name="mic" /></button>
+          <button type="submit" class="btn btn-p" :disabled="!length || length > MAX_QUESTION || ask.isPending.value">{{ t('massistant.send') }}</button>
+        </span>
       </div>
       <p v-if="error" class="ferr">{{ error }}</p>
     </form>
@@ -240,6 +295,15 @@ const suggestions = computed(() => [
 .as-compose { border-top: 1px solid var(--line); padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
 .as-compose textarea { min-height: 48px; resize: none; }
 .as-send { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.as-btns { display: flex; gap: 8px; }
+.as-mic { padding-inline: 10px; }
+.as-mic svg { width: 18px; height: 18px; }
+.as-voice { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; min-height: 106px; }
+.as-voice .sp { flex: 1; }
+.as-voice .ferr { flex-basis: 100%; }
+.as-rec { width: 12px; height: 12px; border-radius: 50%; background: var(--bad-ink); animation: as-pulse 1.2s ease-in-out infinite; }
+@keyframes as-pulse { 50% { opacity: 0.3; } }
+.as-clock { font-variant-numeric: tabular-nums; }
 
 @media (max-width: 900px) {
   .as-chat { height: calc(100vh - 160px); }

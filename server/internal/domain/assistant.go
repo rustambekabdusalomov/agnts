@@ -149,6 +149,10 @@ const (
 	AssistantPerHour     = 30
 	AssistantKeepDays    = 30
 	AssistantMaxActions  = 3 // actions one answer may propose
+	// AssistantMaxVoice is the longest spoken question; AssistantMaxVoiceBytes
+	// fits it as 16 kHz mono 16-bit WAV, the panel's recording.
+	AssistantMaxVoice      = 2 * time.Minute
+	AssistantMaxVoiceBytes = 4 << 20
 	// AssistantActionTTL is how long a proposed action waits for a confirm.
 	AssistantActionTTL = 30 * time.Minute
 )

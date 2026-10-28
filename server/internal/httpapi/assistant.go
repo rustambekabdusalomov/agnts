@@ -3,6 +3,8 @@ package httpapi
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -25,6 +27,8 @@ type Assistant interface {
 	AssistantRated(ctx context.Context, rating int) ([]domain.AssistantRated, error)
 	ConfirmAssistantAction(ctx context.Context, id string) (domain.AssistantAction, error)
 	CancelAssistantAction(ctx context.Context, id string) (domain.AssistantAction, error)
+	VoiceReady() bool
+	Transcribe(ctx context.Context, wav []byte) (string, error)
 }
 
 func (s *Server) assistantReady(w http.ResponseWriter) bool {
@@ -103,6 +107,50 @@ func (s *Server) ask(w http.ResponseWriter, r *http.Request, conversation int64)
 		return
 	}
 	writeJSON(w, http.StatusAccepted, toConversation(c))
+}
+
+// maxVoiceBody is the largest spoken question's request: the recording
+// and the multipart around it.
+const maxVoiceBody = domain.AssistantMaxVoiceBytes + 64<<10
+
+// TranscribeAssistantQuestion implements gen.ServerInterface.
+func (s *Server) TranscribeAssistantQuestion(w http.ResponseWriter, r *http.Request) {
+	if !s.assistantReady(w) {
+		return
+	}
+	if !s.opt.Assistant.VoiceReady() {
+		writeError(w, http.StatusNotImplemented, "not_implemented", "spoken questions are not available")
+		return
+	}
+	tooBig := func() {
+		writeError(w, http.StatusRequestEntityTooLarge, "too_large", fmt.Sprintf("a recording can be %d MB at most", domain.AssistantMaxVoiceBytes>>20))
+	}
+	f, _, err := r.FormFile("file")
+	if err != nil {
+		var mb *http.MaxBytesError
+		if errors.As(err, &mb) {
+			tooBig()
+			return
+		}
+		writeError(w, http.StatusBadRequest, "bad_request", "send the recording as multipart/form-data in the field \"file\"")
+		return
+	}
+	defer func() { _ = f.Close() }()
+	wav, err := io.ReadAll(io.LimitReader(f, domain.AssistantMaxVoiceBytes+1))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", "could not read the recording")
+		return
+	}
+	if len(wav) > domain.AssistantMaxVoiceBytes {
+		tooBig()
+		return
+	}
+	text, err := s.opt.Assistant.Transcribe(r.Context(), wav)
+	if err != nil {
+		s.writeAssistantError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, gen.AssistantTranscript{Text: text})
 }
 
 // GetAssistantConversation implements gen.ServerInterface.

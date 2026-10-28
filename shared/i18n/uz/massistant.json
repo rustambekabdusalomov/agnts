@@ -84,6 +84,13 @@
     "statsActions": "Tasdiqlangan amallar",
     "statsActionsLine": "{proposed} taklif qilindi · {done} bajarildi · {failed} bajarilmadi · {cancelled} rad etildi · {expired} muddati oʻtdi · {notOffered} taklif qilinmadi",
     "statsActionsOffered": "Taklif qilindi",
-    "statsVersionActions": "{proposed} amal taklif qilindi · {done} bajarildi"
+    "statsVersionActions": "{proposed} amal taklif qilindi · {done} bajarildi",
+    "voiceStart": "Ovoz bilan soʻrash",
+    "voiceSend": "Toʻxtatib soʻrash",
+    "voiceRecording": "Yozilmoqda",
+    "voiceHearing": "Muse savolingizni tinglamoqda…",
+    "voiceLimit": "{n} daqiqagacha",
+    "voiceDenied": "Ovoz bilan soʻrash uchun bu saytga mikrofonga ruxsat bering.",
+    "voiceNoMic": "Mikrofonni ochib boʻlmadi."
   }
 }

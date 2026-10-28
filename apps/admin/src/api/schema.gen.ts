@@ -4121,6 +4121,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assistant/transcribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Turn a spoken question into text
+         * @description Muse Code hears the recording (`muse voice transcribe`) on the account your answers run on, and returns its words; ask them with startAssistantConversation or askAssistant as you would typed ones. The recording is 16-bit PCM WAV (16 kHz mono is plenty), at most 2 minutes; it is not kept. One recording at a time per person.
+         */
+        post: operations["transcribeAssistantQuestion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assistant/messages/{messageId}/rating": {
         parameters: {
             query?: never;
@@ -5513,6 +5533,10 @@ export interface components {
         AssistantAsk: {
             question: string;
             lang?: components["schemas"]["AssistantLanguage"];
+        };
+        AssistantTranscript: {
+            /** @description The words Muse heard in the recording */
+            text: string;
         };
         /** @description A screen of the app an answer points to */
         AssistantLink: {
@@ -15610,6 +15634,48 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    transcribeAssistantQuestion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description The recording, WAV, at most 4 MB
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The words heard */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantTranscript"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The recording is larger than 4 MB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             501: components["responses"]["NotImplemented"];
         };
     };

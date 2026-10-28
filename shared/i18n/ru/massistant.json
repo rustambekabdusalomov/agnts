@@ -84,6 +84,13 @@
     "statsActions": "Подтверждённые действия",
     "statsActionsLine": "{proposed} предложено · {done} выполнено · {failed} не выполнено · {cancelled} отклонено · {expired} истекло · {notOffered} не предложено",
     "statsActionsOffered": "Предложено",
-    "statsVersionActions": "{proposed} действий предложено · {done} выполнено"
+    "statsVersionActions": "{proposed} действий предложено · {done} выполнено",
+    "voiceStart": "Спросить голосом",
+    "voiceSend": "Остановить и спросить",
+    "voiceRecording": "Запись",
+    "voiceHearing": "Muse слушает ваш вопрос…",
+    "voiceLimit": "до {n} мин",
+    "voiceDenied": "Разрешите этому сайту доступ к микрофону, чтобы спрашивать голосом.",
+    "voiceNoMic": "Не удалось открыть микрофон."
   }
 }

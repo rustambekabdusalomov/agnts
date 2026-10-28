@@ -19,6 +19,7 @@ Method | HTTP request | Description
 [**listAssistantRated**](AssistantApi.md#listassistantrated) | **GET** /assistant/rated | Rated answers with their questions, newest rating first
 [**rateAssistantAnswer**](AssistantApi.md#rateassistantanswer) | **PUT** /assistant/messages/{messageId}/rating | Rate one of your answers (helpful or not), or take the rating back
 [**startAssistantConversation**](AssistantApi.md#startassistantconversation) | **POST** /assistant/conversations | Ask the assistant a question in a new conversation
+[**transcribeAssistantQuestion**](AssistantApi.md#transcribeassistantquestion) | **POST** /assistant/transcribe | Turn a spoken question into text
 
 
 # **askAssistant**
@@ -476,6 +477,53 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **transcribeAssistantQuestion**
+> AssistantTranscript transcribeAssistantQuestion(file)
+
+Turn a spoken question into text
+
+Muse Code hears the recording (`muse voice transcribe`) on the account your answers run on, and returns its words; ask them with startAssistantConversation or askAssistant as you would typed ones. The recording is 16-bit PCM WAV (16 kHz mono is plenty), at most 2 minutes; it is not kept. One recording at a time per person.
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAssistantApi();
+final MultipartFile file = BINARY_DATA_HERE; // MultipartFile | The recording, WAV, at most 4 MB
+
+try {
+    final response = api.transcribeAssistantQuestion(file);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AssistantApi->transcribeAssistantQuestion: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **file** | **MultipartFile**| The recording, WAV, at most 4 MB | 
+
+### Return type
+
+[**AssistantTranscript**](AssistantTranscript.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: multipart/form-data
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

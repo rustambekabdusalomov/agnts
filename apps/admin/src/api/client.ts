@@ -129,3 +129,16 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
   }
   return data as Attachment
 }
+
+/** Muse's words for a spoken question (a WAV clip), to ask as typed ones are. */
+export async function transcribeQuestion(wav: Blob): Promise<string> {
+  const body = new FormData()
+  body.append('file', wav, 'question.wav')
+  const response = await fetch(apiPath('/assistant/transcribe'), { method: 'POST', body, credentials: 'same-origin' })
+  const data = await response.json().catch(() => undefined)
+  if (!response.ok) {
+    if (response.status === 401) onUnauthorized()
+    throw new HttpError(response.status, data as Partial<ApiError> | undefined)
+  }
+  return (data as components['schemas']['AssistantTranscript']).text
+}

@@ -87,6 +87,7 @@ export 'package:agnts_api/src/model/assistant_rating.dart';
 export 'package:agnts_api/src/model/assistant_stats.dart';
 export 'package:agnts_api/src/model/assistant_stats_actions.dart';
 export 'package:agnts_api/src/model/assistant_stats_versions_inner.dart';
+export 'package:agnts_api/src/model/assistant_transcript.dart';
 export 'package:agnts_api/src/model/attachment.dart';
 export 'package:agnts_api/src/model/begin_login_totp200_response.dart';
 export 'package:agnts_api/src/model/begin_login_totp_request.dart';

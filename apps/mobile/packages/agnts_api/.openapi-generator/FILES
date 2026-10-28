@@ -53,6 +53,7 @@ doc/AssistantRating.md
 doc/AssistantStats.md
 doc/AssistantStatsActions.md
 doc/AssistantStatsVersionsInner.md
+doc/AssistantTranscript.md
 doc/Attachment.md
 doc/AttachmentsApi.md
 doc/AuthApi.md
@@ -513,6 +514,7 @@ lib/src/model/assistant_rating.dart
 lib/src/model/assistant_stats.dart
 lib/src/model/assistant_stats_actions.dart
 lib/src/model/assistant_stats_versions_inner.dart
+lib/src/model/assistant_transcript.dart
 lib/src/model/attachment.dart
 lib/src/model/begin_login_totp200_response.dart
 lib/src/model/begin_login_totp_request.dart
@@ -912,6 +914,7 @@ test/assistant_rating_test.dart
 test/assistant_stats_actions_test.dart
 test/assistant_stats_test.dart
 test/assistant_stats_versions_inner_test.dart
+test/assistant_transcript_test.dart
 test/attachment_test.dart
 test/attachments_api_test.dart
 test/auth_api_test.dart

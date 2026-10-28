@@ -180,6 +180,7 @@ type Orchestrator struct {
 	snapshots     AssistantSnapshotter
 	assistantEv   AssistantEvents
 	assistantActs AssistantActions // nil: the assistant only answers
+	transcriber   Transcriber      // nil: no spoken questions
 	asst          assistantState
 	answering     sync.WaitGroup
 }

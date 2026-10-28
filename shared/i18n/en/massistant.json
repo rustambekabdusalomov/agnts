@@ -84,6 +84,13 @@
     "statsActions": "Actions confirmed",
     "statsActionsLine": "{proposed} offered · {done} done · {failed} not done · {cancelled} declined · {expired} expired · {notOffered} not offered",
     "statsActionsOffered": "Offered",
-    "statsVersionActions": "{proposed} actions offered · {done} done"
+    "statsVersionActions": "{proposed} actions offered · {done} done",
+    "voiceStart": "Ask by voice",
+    "voiceSend": "Stop and ask",
+    "voiceRecording": "Recording",
+    "voiceHearing": "Muse is listening to your question…",
+    "voiceLimit": "up to {n} min",
+    "voiceDenied": "Allow the microphone for this site to ask by voice.",
+    "voiceNoMic": "No microphone could be opened."
   }
 }

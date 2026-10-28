@@ -43,6 +43,7 @@ import 'package:agnts_api/src/model/assistant_rating.dart';
 import 'package:agnts_api/src/model/assistant_stats.dart';
 import 'package:agnts_api/src/model/assistant_stats_actions.dart';
 import 'package:agnts_api/src/model/assistant_stats_versions_inner.dart';
+import 'package:agnts_api/src/model/assistant_transcript.dart';
 import 'package:agnts_api/src/model/attachment.dart';
 import 'package:agnts_api/src/model/begin_login_totp200_response.dart';
 import 'package:agnts_api/src/model/begin_login_totp_request.dart';
@@ -488,6 +489,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AssistantStatsActions.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AssistantStatsVersionsInner':
           return AssistantStatsVersionsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AssistantTranscript':
+          return AssistantTranscript.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Attachment':
           return Attachment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BeginLoginTotp200Response':

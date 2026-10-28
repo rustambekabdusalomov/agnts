@@ -231,6 +231,9 @@ func bodyLimit(next http.Handler) http.Handler {
 		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/attachments") {
 			limit = maxUploadBytes
 		}
+		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/assistant/transcribe") {
+			limit = maxVoiceBody
+		}
 		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/swagger-tests/spec") {
 			limit = maxSpecBody
 		}
