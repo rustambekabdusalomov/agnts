@@ -8,6 +8,7 @@ import PageHeader from '../../components/PageHeader.vue'
 import ClaudeConnect from '../../components/account/ClaudeConnect.vue'
 import FeedbackDialog from '../../components/account/FeedbackDialog.vue'
 import MuseConnect from '../../components/account/MuseConnect.vue'
+import CreditLimitsCard from '../../components/account/CreditLimitsCard.vue'
 import FreeCreditsCard from '../../components/account/FreeCreditsCard.vue'
 import PrefsControls from '../../components/PrefsControls.vue'
 import { useModels } from '../../composables/useModels'
@@ -185,6 +186,7 @@ async function signOut() {
     </section>
 
     <FreeCreditsCard v-if="catalog.isMuse.value" always />
+    <CreditLimitsCard v-if="catalog.isMuse.value" />
 
     <section class="card">
       <div class="ch"><div><h2>{{ t('settings.appearance') }}</h2><p class="sub">{{ t('settings.appearanceSub') }}</p></div></div>

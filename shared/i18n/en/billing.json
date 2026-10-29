@@ -34,6 +34,12 @@
     "freeCreditsSub": "From agnts. Runs on agnts's Muse key spend them before the workspace's credits.",
     "freeCreditsLeft": "{n} of {limit} credits left",
     "freeCreditsWorth": "{amount} of {total}",
-    "freeCreditsNone": "None yet. An Admin can give you free credits for runs on agnts's Muse key."
+    "freeCreditsNone": "None yet. An Admin can give you free credits for runs on agnts's Muse key.",
+    "limitsTitle": "Your limits this month",
+    "limitsSub": "Set by an Admin for runs on agnts's Muse key. They reset on the 1st of each month.",
+    "monthLimit": "{used} of {limit} credits used",
+    "fallbackLimit": "{name}: {used} of {limit} credits used",
+    "fallbackNoLimit": "{name}: {used} credits used, no limit",
+    "fallbackHint": "{name} is the backup provider: your runs use it only while agnts's Meta access is out. When this is used up, they wait for Meta instead."
   }
 }

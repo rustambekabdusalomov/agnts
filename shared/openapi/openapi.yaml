@@ -3938,6 +3938,19 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/FreeCredits' }
 
+  /account/credit-usage:
+    get:
+      operationId: getMyCreditUsage
+      summary: What you spent on agnts's Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreditUsage' }
+
   /models:
     get:
       operationId: listModels

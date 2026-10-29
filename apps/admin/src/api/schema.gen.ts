@@ -3204,6 +3204,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/account/credit-usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What you spent on agnts's Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten) */
+        get: operations["getMyCreditUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/models": {
         parameters: {
             query?: never;
@@ -15600,6 +15617,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FreeCredits"];
+                };
+            };
+        };
+    };
+    getMyCreditUsage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreditUsage"];
                 };
             };
         };

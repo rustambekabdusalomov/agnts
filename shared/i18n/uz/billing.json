@@ -34,6 +34,12 @@
     "freeCreditsSub": "agnts’dan. agnts’ning Muse kalitidagi ishlar ularni ish maydoni kreditlaridan oldin sarflaydi.",
     "freeCreditsLeft": "{limit} kreditdan {n} tasi qoldi",
     "freeCreditsWorth": "{total} dan {amount}",
-    "freeCreditsNone": "Hozircha yo‘q. Administrator sizga agnts’ning Muse kalitidagi ishlar uchun bepul kredit berishi mumkin."
+    "freeCreditsNone": "Hozircha yo‘q. Administrator sizga agnts’ning Muse kalitidagi ishlar uchun bepul kredit berishi mumkin.",
+    "limitsTitle": "Bu oydagi limitlaringiz",
+    "limitsSub": "agnts’ning Muse kalitidagi ishlar uchun administrator belgilaydi. Har oyning 1-sanasida yangilanadi.",
+    "monthLimit": "{limit} kreditdan {used} tasi ishlatildi",
+    "fallbackLimit": "{name}: {limit} kreditdan {used} tasi ishlatildi",
+    "fallbackNoLimit": "{name}: {used} kredit ishlatildi, limitsiz",
+    "fallbackHint": "{name} — zaxira provayder: ishlaringiz uni faqat agnts’ning Meta’ga kirishi tugaganda ishlatadi. Limit tugaganda ular Meta’ni kutadi."
   }
 }

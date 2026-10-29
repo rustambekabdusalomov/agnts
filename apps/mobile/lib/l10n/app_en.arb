@@ -841,6 +841,52 @@
     }
   },
   "billingFreeCreditsNone": "None yet. An Admin can give you free credits for runs on agnts's Muse key.",
+  "billingLimitsTitle": "Your limits this month",
+  "billingLimitsSub": "Set by an Admin for runs on agnts's Muse key. They reset on the 1st of each month.",
+  "billingMonthLimit": "{used} of {limit} credits used",
+  "@billingMonthLimit": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "billingFallbackLimit": "{name}: {used} of {limit} credits used",
+  "@billingFallbackLimit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "billingFallbackNoLimit": "{name}: {used} credits used, no limit",
+  "@billingFallbackNoLimit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "used": {
+        "type": "String"
+      }
+    }
+  },
+  "billingFallbackHint": "{name} is the backup provider: your runs use it only while agnts's Meta access is out. When this is used up, they wait for Meta instead.",
+  "@billingFallbackHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "briefTitle": "Repository brief",
   "briefSub": "How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository's tickets reads it, so agnts builds things the way your team does.",
   "briefSurvey": "Survey",
