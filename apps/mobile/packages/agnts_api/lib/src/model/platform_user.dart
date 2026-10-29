@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/workspace_summary.dart';
+import 'package:agnts_api/src/model/credit_usage.dart';
 import 'package:agnts_api/src/model/user.dart';
 import 'package:agnts_api/src/model/free_credits.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -32,6 +33,8 @@ class PlatformUser {
     required  this.workspaces,
 
      this.freeCredits,
+
+     this.creditUsage,
   });
 
   @JsonKey(
@@ -97,6 +100,18 @@ class PlatformUser {
 
 
 
+  @JsonKey(
+    
+    name: r'creditUsage',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final CreditUsage? creditUsage;
+
+
+
 
 
     @override
@@ -105,7 +120,8 @@ class PlatformUser {
       other.hasPassword == hasPassword &&
       other.lastSignInAt == lastSignInAt &&
       other.workspaces == workspaces &&
-      other.freeCredits == freeCredits;
+      other.freeCredits == freeCredits &&
+      other.creditUsage == creditUsage;
 
     @override
     int get hashCode =>
@@ -113,7 +129,8 @@ class PlatformUser {
         hasPassword.hashCode +
         lastSignInAt.hashCode +
         workspaces.hashCode +
-        freeCredits.hashCode;
+        freeCredits.hashCode +
+        creditUsage.hashCode;
 
   factory PlatformUser.fromJson(Map<String, dynamic> json) => _$PlatformUserFromJson(json);
 

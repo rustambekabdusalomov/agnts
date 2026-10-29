@@ -13,20 +13,20 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child, {List overrides = const [], bool scroll = false}) => ProviderScope(
-      overrides: [...overrides],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: scroll ? SingleChildScrollView(child: child) : child),
-      ),
-    );
+  overrides: [...overrides],
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    locale: const Locale('en'),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: scroll ? SingleChildScrollView(child: child) : child),
+  ),
+);
 
 void main() {
   test('an invite link or bare token gives the token', () {
@@ -75,12 +75,17 @@ void main() {
   });
 
   testWidgets('a connected Claude account shows its kind and hint, and the form opens on Replace', (tester) async {
-    await tester.pumpWidget(_app(ClaudeConnect(
-      state: ClaudeConnectionState(connected: true, kind: ClaudeConnectionStateKindEnum.apiKey, tokenHint: 'a1b2'),
-      subscriptions: false,
-      onConnect: (_, _) async => true,
-      onDisconnect: () {},
-    ), scroll: true));
+    await tester.pumpWidget(
+      _app(
+        ClaudeConnect(
+          state: ClaudeConnectionState(connected: true, kind: ClaudeConnectionStateKindEnum.apiKey, tokenHint: 'a1b2'),
+          subscriptions: false,
+          onConnect: (_, _) async => true,
+          onDisconnect: () {},
+        ),
+        scroll: true,
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Anthropic API key · …a1b2'), findsOneWidget);
     await tester.tap(find.text('Replace'));

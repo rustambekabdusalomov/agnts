@@ -78,40 +78,56 @@ class CIFailureCard extends StatelessWidget {
     return HCard(
       onTap: () => context.push('/ci/${f.id}'),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          ToneBadge(status, tone),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '${f.repo} · ${f.branch}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ToneBadge(status, tone),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${f.repo} · ${f.branch}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+                ),
+              ),
+              Text(
+                '×${f.count}',
+                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            f.title,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, height: 1.3, color: c.ink),
+          ),
+          const SizedBox(height: 8),
+          DefaultTextStyle.merge(
+            style: TextStyle(fontSize: 13, color: c.ink3),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (f.job.isNotEmpty) SourceChip(f.job),
+                Text(l.mciLastSeen(ciAgo(l, f.lastSeenAt))),
+                if (f.ticketKey.isNotEmpty) ...[
+                  Text(
+                    f.ticketKey,
+                    style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2),
+                  ),
+                  if (f.ticketState != null) ToneBadge(stateLabel(l, f.ticketState!), stateTone(f.ticketState!), small: true),
+                ],
+              ],
             ),
           ),
-          Text('×${f.count}', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2)),
-        ]),
-        const SizedBox(height: 6),
-        Text(
-          f.title,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, height: 1.3, color: c.ink),
-        ),
-        const SizedBox(height: 8),
-        DefaultTextStyle.merge(
-          style: TextStyle(fontSize: 13, color: c.ink3),
-          child: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            if (f.job.isNotEmpty) SourceChip(f.job),
-            Text(l.mciLastSeen(ciAgo(l, f.lastSeenAt))),
-            if (f.ticketKey.isNotEmpty) ...[
-              Text(f.ticketKey, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
-              if (f.ticketState != null) ToneBadge(stateLabel(l, f.ticketState!), stateTone(f.ticketState!), small: true),
-            ],
-          ]),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

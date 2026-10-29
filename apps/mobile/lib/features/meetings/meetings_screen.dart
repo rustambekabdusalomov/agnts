@@ -40,7 +40,9 @@ class _MeetingsScreenState extends ConsumerState<MeetingsScreen> {
     final l = AppLocalizations.of(context);
     setState(() => _starting = true);
     try {
-      final m = (await ref.read(apiProvider)!.getMeetingsApi().createMeeting(meetingInput: MeetingInput(kind: MeetingInputKindEnum.instant))).data!;
+      final m =
+          (await ref.read(apiProvider)!.getMeetingsApi().createMeeting(meetingInput: MeetingInput(kind: MeetingInputKindEnum.instant)))
+              .data!;
       if (mounted) context.push('/m/${m.code}');
     } catch (e) {
       if (mounted) showSnack(context, errorMessage(e, l.meetingsSomethingWrong));
@@ -80,19 +82,21 @@ class _MeetingsScreenState extends ConsumerState<MeetingsScreen> {
             PageHeader(title: l.meetingsPageTitle, sub: l.meetingsLede),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: Row(children: [
-                Expanded(
-                  child: TextField(
-                    controller: _code,
-                    autocorrect: false,
-                    textInputAction: TextInputAction.go,
-                    onSubmitted: (_) => _join(),
-                    decoration: InputDecoration(hintText: l.meetingsCodePlaceholder, labelText: l.meetingsJoinWithCode),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _code,
+                      autocorrect: false,
+                      textInputAction: TextInputAction.go,
+                      onSubmitted: (_) => _join(),
+                      decoration: InputDecoration(hintText: l.meetingsCodePlaceholder, labelText: l.meetingsJoinWithCode),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                FilledButton(onPressed: _join, child: Text(l.meetingsJoin)),
-              ]),
+                  const SizedBox(width: 8),
+                  FilledButton(onPressed: _join, child: Text(l.meetingsJoin)),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -120,7 +124,10 @@ class _Upcoming extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final list = ref.watch(upcomingMeetingsProvider);
     return list.when(
-      loading: () => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
+      loading: () => const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      ),
       error: (e, _) => EmptyState(title: errorMessage(e, l.meetingsSomethingWrong)),
       data: (all) => all.isEmpty
           ? EmptyState(title: l.meetingsNoneUpcoming)
@@ -145,8 +152,8 @@ class _MeetingRow extends StatelessWidget {
     final when = live != null
         ? (live.inCall > 0 ? l.meetingsInCallNow(live.inCall) : l.meetingsLiveEmpty)
         : m.startsAt != null
-            ? DateFormat('EEE d MMM, HH:mm', locale).format(m.startsAt!.toLocal())
-            : l.meetingsKind_instant;
+        ? DateFormat('EEE d MMM, HH:mm', locale).format(m.startsAt!.toLocal())
+        : l.meetingsKind_instant;
     return InkWell(
       onTap: () => context.push('/m/${m.code}'),
       onLongPress: () {
@@ -155,20 +162,33 @@ class _MeetingRow extends StatelessWidget {
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(children: [
-          HIcon('video', size: 22, color: live != null ? c.okInk : c.ink3),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(m.title.isEmpty ? m.code : m.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink)),
-              const SizedBox(height: 3),
-              Text('$when · ${l.meetingsHostedBy(m.hostName)}', maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: c.ink3)),
-            ]),
-          ),
-          if (live != null) ToneBadge(l.meetingsLive, Tone.ok, small: true),
-        ]),
+        child: Row(
+          children: [
+            HIcon('video', size: 22, color: live != null ? c.okInk : c.ink3),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    m.title.isEmpty ? m.code : m.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '$when · ${l.meetingsHostedBy(m.hostName)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 13, color: c.ink3),
+                  ),
+                ],
+              ),
+            ),
+            if (live != null) ToneBadge(l.meetingsLive, Tone.ok, small: true),
+          ],
+        ),
       ),
     );
   }
@@ -184,36 +204,54 @@ class _Past extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toLanguageTag();
     final list = ref.watch(pastMeetingsProvider);
     return list.when(
-      loading: () => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
+      loading: () => const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      ),
       error: (e, _) => EmptyState(title: errorMessage(e, l.meetingsSomethingWrong)),
       data: (all) => all.isEmpty
           ? EmptyState(title: l.meetingsNonePast)
           : Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListGroup(children: [
-                for (final s in all)
-                  InkWell(
-                    onTap: s.documentId != null && s.notesStatus == MeetingNotesStatus.done ? () => context.push('/documents/${s.documentId}') : null,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(s.meetingTitle.isEmpty ? s.meetingCode : s.meetingTitle,
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink)),
-                        const SizedBox(height: 3),
-                        Text('${DateFormat('d MMM, HH:mm', locale).format(s.startedAt.toLocal())} · ${l.meetingsAttendance(s.people)}',
-                            style: TextStyle(fontSize: 13, color: c.ink3)),
-                        const SizedBox(height: 6),
-                        Wrap(spacing: 6, runSpacing: 4, children: [
-                          if (s.notesStatus == MeetingNotesStatus.done) ToneBadge(l.meetingsOpenNotes, Tone.ok, small: true),
-                          if (notesBusy(s.notesStatus)) ToneBadge(l.meetingsNotes_writing, Tone.warn, small: true),
-                          if (s.notesStatus == MeetingNotesStatus.failed) ToneBadge(l.meetingsNotes_failed, Tone.bad, small: true),
-                          if (s.actionItems > 0) ToneBadge(l.meetingsActionItemsN(s.actionItems), Tone.gray, small: true),
-                          if (s.recordings > 0) ToneBadge(l.meetingsRecordings(s.recordings), Tone.gray, small: true),
-                        ]),
-                      ]),
+              child: ListGroup(
+                children: [
+                  for (final s in all)
+                    InkWell(
+                      onTap: s.documentId != null && s.notesStatus == MeetingNotesStatus.done
+                          ? () => context.push('/documents/${s.documentId}')
+                          : null,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.meetingTitle.isEmpty ? s.meetingCode : s.meetingTitle,
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${DateFormat('d MMM, HH:mm', locale).format(s.startedAt.toLocal())} · ${l.meetingsAttendance(s.people)}',
+                              style: TextStyle(fontSize: 13, color: c.ink3),
+                            ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                if (s.notesStatus == MeetingNotesStatus.done) ToneBadge(l.meetingsOpenNotes, Tone.ok, small: true),
+                                if (notesBusy(s.notesStatus)) ToneBadge(l.meetingsNotes_writing, Tone.warn, small: true),
+                                if (s.notesStatus == MeetingNotesStatus.failed) ToneBadge(l.meetingsNotes_failed, Tone.bad, small: true),
+                                if (s.actionItems > 0) ToneBadge(l.meetingsActionItemsN(s.actionItems), Tone.gray, small: true),
+                                if (s.recordings > 0) ToneBadge(l.meetingsRecordings(s.recordings), Tone.gray, small: true),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-              ]),
+                ],
+              ),
             ),
     );
   }

@@ -148,7 +148,11 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
               onPressed: () => context.pushReplacement('/assistant/code'),
               icon: HIcon('code', size: 22, color: c.primary),
             ),
-          IconButton(tooltip: l.massistantHistory, onPressed: _history, icon: HIcon('logs', size: 22, color: c.primary)),
+          IconButton(
+            tooltip: l.massistantHistory,
+            onPressed: _history,
+            icon: HIcon('logs', size: 22, color: c.primary),
+          ),
           if (_id != null)
             IconButton(
               tooltip: l.massistantNewConversation,
@@ -159,10 +163,12 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: Column(children: [
-          Expanded(child: body),
-          _InputBar(controller: _text, sending: _sending, onSend: () => _send()),
-        ]),
+        child: Column(
+          children: [
+            Expanded(child: body),
+            _InputBar(controller: _text, sending: _sending, onSend: () => _send()),
+          ],
+        ),
       ),
     );
   }
@@ -184,22 +190,34 @@ class _Empty extends ConsumerWidget {
       l.massistantSuggestDone,
       if (ref.watch(canEditProvider)) l.massistantSuggestAct,
     ];
-    return ListView(padding: const EdgeInsets.fromLTRB(16, 24, 16, 16), children: [
-      Center(child: HIcon('assistant', size: 40, color: c.primary)),
-      EmptyState(title: l.massistantEmptyTitle, text: l.massistantEmptyText),
-      Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [
-        for (final s in suggestions)
-          ActionChip(
-            label: Text(s),
-            onPressed: () => onAsk(s),
-            backgroundColor: c.surface,
-            side: BorderSide(color: c.line),
-            labelStyle: TextStyle(color: c.ink, fontSize: 14),
-          ),
-      ]),
-      const SizedBox(height: 24),
-      Text(l.massistantPrivate, textAlign: TextAlign.center, style: TextStyle(color: c.ink3, fontSize: 13)),
-    ]);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      children: [
+        Center(child: HIcon('assistant', size: 40, color: c.primary)),
+        EmptyState(title: l.massistantEmptyTitle, text: l.massistantEmptyText),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final s in suggestions)
+              ActionChip(
+                label: Text(s),
+                onPressed: () => onAsk(s),
+                backgroundColor: c.surface,
+                side: BorderSide(color: c.line),
+                labelStyle: TextStyle(color: c.ink, fontSize: 14),
+              ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Text(
+          l.massistantPrivate,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: c.ink3, fontSize: 13),
+        ),
+      ],
+    );
   }
 }
 
@@ -238,62 +256,94 @@ class _Answer extends ConsumerWidget {
     if (isOpen(m)) {
       final live = ref.watch(assistantLiveProvider)[m.id];
       final secs = DateTime.now().difference(m.createdAt.toLocal()).inSeconds.clamp(0, 999);
-      child = Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Padding(padding: EdgeInsets.only(top: 3), child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(l.massistantThinking('$secs'), style: TextStyle(fontSize: 15, color: c.ink2, fontWeight: FontWeight.w700)),
-            if (live?.file != null && live?.text == null)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(l.massistantReading(fileLabel(l, live!.file!)), style: TextStyle(fontSize: 13.5, color: c.ink3)),
-              ),
-          ]),
-        ),
-      ]);
+      child = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 3),
+            child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.massistantThinking('$secs'),
+                  style: TextStyle(fontSize: 15, color: c.ink2, fontWeight: FontWeight.w700),
+                ),
+                if (live?.file != null && live?.text == null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(l.massistantReading(fileLabel(l, live!.file!)), style: TextStyle(fontSize: 13.5, color: c.ink3)),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
       // The answer as the run says it, before it is stored.
       if (live?.text != null) {
-        child = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          child,
-          const SizedBox(height: 8),
-          Opacity(opacity: 0.6, child: ReportMarkdown(live!.text!)),
-        ]);
+        child = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            child,
+            const SizedBox(height: 8),
+            Opacity(opacity: 0.6, child: ReportMarkdown(live!.text!)),
+          ],
+        );
       }
     } else if (m.status == AssistantMessageStatusEnum.failed) {
-      child = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(l.massistantFailed, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.badInk)),
-        if (m.error != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(m.error!, style: TextStyle(fontSize: 14, color: c.ink2))),
-        if (onAskAgain != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: TextButton(onPressed: onAskAgain, child: Text(l.massistantAskAgain)),
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.massistantFailed,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.badInk),
           ),
-      ]);
-    } else {
-      child = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        ReportMarkdown(m.text),
-        for (final a in m.actions ?? const <AssistantAction>[]) _ActionCard(a, key: ValueKey(a.id)),
-        if (m.handoff != null) _HandoffCard(m.handoff!),
-        for (final e in m.actionErrors ?? const <String>[])
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(l.massistantActionNotOffered(e), style: TextStyle(fontSize: 13, color: c.ink3)),
-          ),
-        if (m.links.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Wrap(spacing: 8, runSpacing: 8, children: [for (final link in m.links) _LinkChip(link)]),
+          if (m.error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(m.error!, style: TextStyle(fontSize: 14, color: c.ink2)),
+            ),
+          if (onAskAgain != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: TextButton(onPressed: onAskAgain, child: Text(l.massistantAskAgain)),
+            ),
         ],
-        const SizedBox(height: 6),
-        _Footer(m),
-      ]);
+      );
+    } else {
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ReportMarkdown(m.text),
+          for (final a in m.actions ?? const <AssistantAction>[]) _ActionCard(a, key: ValueKey(a.id)),
+          if (m.handoff != null) _HandoffCard(m.handoff!),
+          for (final e in m.actionErrors ?? const <String>[])
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(l.massistantActionNotOffered(e), style: TextStyle(fontSize: 13, color: c.ink3)),
+            ),
+          if (m.links.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(spacing: 8, runSpacing: 8, children: [for (final link in m.links) _LinkChip(link)]),
+          ],
+          const SizedBox(height: 6),
+          _Footer(m),
+        ],
+      );
     }
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(top: 10, right: 24),
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-        decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(18), border: Border.all(color: c.line)),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: c.line),
+        ),
         child: child,
       ),
     );
@@ -337,11 +387,13 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
     final l = AppLocalizations.of(context);
     final a = widget.a;
     if (confirm && a.destructive) {
-      final ok = await confirmAction(context,
-          title: l.massistantActionConfirmTitle,
-          message: l.massistantActionConfirmText(a.summary),
-          confirmLabel: l.massistantActionConfirm,
-          danger: true);
+      final ok = await confirmAction(
+        context,
+        title: l.massistantActionConfirmTitle,
+        message: l.massistantActionConfirmText(a.summary),
+        confirmLabel: l.massistantActionConfirm,
+        danger: true,
+      );
       if (!ok || !mounted) return;
     }
     setState(() => _busy = true);
@@ -361,45 +413,70 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
     final a = widget.a;
     final waits = actionWaits(a);
     final status = a.status == AssistantActionStatusEnum.proposed && !waits ? AssistantActionStatusEnum.expired : a.status;
-    Widget outcome(IconData icon, Color color, String label, String? result) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text.rich(TextSpan(children: [
-              TextSpan(text: label, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
-              if (result != null && result.isNotEmpty) TextSpan(text: ' · $result', style: TextStyle(color: c.ink2)),
-            ])),
+    Widget outcome(IconData icon, Color color, String label, String? result) => Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: label,
+                  style: TextStyle(fontWeight: FontWeight.w700, color: color),
+                ),
+                if (result != null && result.isNotEmpty)
+                  TextSpan(
+                    text: ' · $result',
+                    style: TextStyle(color: c.ink2),
+                  ),
+              ],
+            ),
           ),
-        ]);
+        ),
+      ],
+    );
     final Widget foot = switch (status) {
-      AssistantActionStatusEnum.proposed => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      AssistantActionStatusEnum.proposed => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           Text(l.massistantActionHint, style: TextStyle(fontSize: 12.5, color: c.ink3)),
           const SizedBox(height: 6),
-          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            TextButton(onPressed: _busy ? null : () => _decide(false), child: Text(l.massistantActionDecline)),
-            const SizedBox(width: 6),
-            FilledButton(
-              style: a.destructive ? FilledButton.styleFrom(backgroundColor: c.bad, foregroundColor: Colors.white) : null,
-              onPressed: _busy ? null : () => _decide(true),
-              child: _busy
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(l.massistantActionConfirm),
-            ),
-          ]),
-        ]),
-      AssistantActionStatusEnum.running => Row(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(onPressed: _busy ? null : () => _decide(false), child: Text(l.massistantActionDecline)),
+              const SizedBox(width: 6),
+              FilledButton(
+                style: a.destructive ? FilledButton.styleFrom(backgroundColor: c.bad, foregroundColor: Colors.white) : null,
+                onPressed: _busy ? null : () => _decide(true),
+                child: _busy
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text(l.massistantActionConfirm),
+              ),
+            ],
+          ),
+        ],
+      ),
+      AssistantActionStatusEnum.running => Row(
+        children: [
           const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
           const SizedBox(width: 10),
           Text(l.massistantActionRunning, style: TextStyle(color: c.ink2)),
-        ]),
-      AssistantActionStatusEnum.done => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ],
+      ),
+      AssistantActionStatusEnum.done => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           outcome(Icons.check_circle_outline, c.okInk, l.massistantActionDone, a.result),
           if (a.ticketKey != null && a.ticketKey!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: _LinkChip(AssistantLink(kind: AssistantLinkKindEnum.ticket, key: a.ticketKey)),
             ),
-        ]),
+        ],
+      ),
       AssistantActionStatusEnum.failed => outcome(Icons.error_outline, c.badInk, l.massistantActionFailed, a.result),
       AssistantActionStatusEnum.cancelled => Text(l.massistantActionCancelled, style: TextStyle(color: c.ink3)),
       AssistantActionStatusEnum.expired => Text(l.massistantActionExpired, style: TextStyle(color: c.ink3)),
@@ -412,14 +489,17 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: waits && a.destructive ? c.bad.withValues(alpha: 0.5) : c.line),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Opacity(
-          opacity: waits || status == AssistantActionStatusEnum.done || status == AssistantActionStatusEnum.running ? 1 : 0.6,
-          child: SelectableText(a.summary, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink)),
-        ),
-        const SizedBox(height: 8),
-        foot,
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Opacity(
+            opacity: waits || status == AssistantActionStatusEnum.done || status == AssistantActionStatusEnum.running ? 1 : 0.6,
+            child: SelectableText(a.summary, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink)),
+          ),
+          const SizedBox(height: 8),
+          foot,
+        ],
+      ),
     );
   }
 }
@@ -439,8 +519,11 @@ class _LinkChip extends StatelessWidget {
       AssistantLinkKindEnum.lesson => (l.massistantLinkLesson('${link.id}'), '/learn/${link.id}'),
     };
     return ActionChip(
-      avatar: HIcon(link.kind == AssistantLinkKindEnum.ticket ? 'tasks' : (link.kind == AssistantLinkKindEnum.ci ? 'running' : 'learn'),
-          size: 16, color: c.primaryInk),
+      avatar: HIcon(
+        link.kind == AssistantLinkKindEnum.ticket ? 'tasks' : (link.kind == AssistantLinkKindEnum.ci ? 'running' : 'learn'),
+        size: 16,
+        color: c.primaryInk,
+      ),
       label: Text(label, style: TextStyle(fontFamily: link.kind == AssistantLinkKindEnum.ticket ? AgntsFonts.mono : null, fontSize: 13.5)),
       backgroundColor: c.primarySoft,
       side: BorderSide.none,
@@ -461,19 +544,32 @@ class _Footer extends ConsumerWidget {
     final c = Agnts.of(context);
     final rating = m.rating;
     Widget thumb(AssistantRatingRatingEnum value, IconData on, IconData off, String tip, bool selected) => IconButton(
-          tooltip: tip,
-          visualDensity: VisualDensity.compact,
-          onPressed: () => rateAnswer(context, ref, m, value, selected),
-          icon: Icon(selected ? on : off, size: 18, color: selected ? c.primary : c.ink3),
-        );
-    return Row(children: [
-      if (m.durationMs != null) Text(l.massistantTook('${(m.durationMs! / 1000).round()}'), style: TextStyle(fontSize: 12.5, color: c.ink3)),
-      const Spacer(),
-      thumb(AssistantRatingRatingEnum.number1, Icons.thumb_up_alt, Icons.thumb_up_alt_outlined, l.massistantHelpful,
-          rating == AssistantMessageRatingEnum.number1),
-      thumb(AssistantRatingRatingEnum.numberNegative1, Icons.thumb_down_alt, Icons.thumb_down_alt_outlined, l.massistantNotHelpful,
-          rating == AssistantMessageRatingEnum.numberNegative1),
-    ]);
+      tooltip: tip,
+      visualDensity: VisualDensity.compact,
+      onPressed: () => rateAnswer(context, ref, m, value, selected),
+      icon: Icon(selected ? on : off, size: 18, color: selected ? c.primary : c.ink3),
+    );
+    return Row(
+      children: [
+        if (m.durationMs != null)
+          Text(l.massistantTook('${(m.durationMs! / 1000).round()}'), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+        const Spacer(),
+        thumb(
+          AssistantRatingRatingEnum.number1,
+          Icons.thumb_up_alt,
+          Icons.thumb_up_alt_outlined,
+          l.massistantHelpful,
+          rating == AssistantMessageRatingEnum.number1,
+        ),
+        thumb(
+          AssistantRatingRatingEnum.numberNegative1,
+          Icons.thumb_down_alt,
+          Icons.thumb_down_alt_outlined,
+          l.massistantNotHelpful,
+          rating == AssistantMessageRatingEnum.numberNegative1,
+        ),
+      ],
+    );
   }
 }
 
@@ -530,39 +626,45 @@ class _RateSheetState extends State<_RateSheet> {
     final up = widget.value == AssistantRatingRatingEnum.number1;
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Icon(up ? Icons.thumb_up_alt : Icons.thumb_down_alt, color: c.primary),
-          const SizedBox(width: 10),
-          Text(l.massistantRateTitle, style: Theme.of(context).textTheme.titleLarge),
-        ]),
-        const SizedBox(height: 14),
-        TextField(
-          controller: _comment,
-          minLines: 2,
-          maxLines: 5,
-          maxLength: _maxQuestion,
-          decoration: InputDecoration(hintText: l.massistantRateComment, border: const OutlineInputBorder()),
-        ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          value: _share,
-          onChanged: (v) => setState(() => _share = v),
-          title: Text(l.massistantRateShare, style: TextStyle(fontSize: 14.5, color: c.ink)),
-        ),
-        Text(l.massistantRateNote, style: TextStyle(fontSize: 13, color: c.ink3)),
-        const SizedBox(height: 14),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: () => Navigator.pop(
-              context,
-              AssistantRating(rating: widget.value, comment: _comment.text.trim().isEmpty ? null : _comment.text.trim(), share: _share),
-            ),
-            child: Text(l.massistantRateSend),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(up ? Icons.thumb_up_alt : Icons.thumb_down_alt, color: c.primary),
+              const SizedBox(width: 10),
+              Text(l.massistantRateTitle, style: Theme.of(context).textTheme.titleLarge),
+            ],
           ),
-        ),
-      ]),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _comment,
+            minLines: 2,
+            maxLines: 5,
+            maxLength: _maxQuestion,
+            decoration: InputDecoration(hintText: l.massistantRateComment, border: const OutlineInputBorder()),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _share,
+            onChanged: (v) => setState(() => _share = v),
+            title: Text(l.massistantRateShare, style: TextStyle(fontSize: 14.5, color: c.ink)),
+          ),
+          Text(l.massistantRateNote, style: TextStyle(fontSize: 13, color: c.ink3)),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => Navigator.pop(
+                context,
+                AssistantRating(rating: widget.value, comment: _comment.text.trim().isEmpty ? null : _comment.text.trim(), share: _share),
+              ),
+              child: Text(l.massistantRateSend),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -600,42 +702,52 @@ class _InputBarState extends State<_InputBar> {
     final n = widget.controller.text.trim().length;
     final can = n > 0 && n <= _maxQuestion && !widget.sending;
     return Container(
-      decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(top: BorderSide(color: c.line)),
+      ),
       padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Expanded(
-            child: TextField(
-              controller: widget.controller,
-              minLines: 1,
-              maxLines: 5,
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.newline,
-              decoration: InputDecoration(
-                hintText: l.massistantPlaceholder,
-                filled: true,
-                fillColor: c.field,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: widget.controller,
+                  minLines: 1,
+                  maxLines: 5,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.newline,
+                  decoration: InputDecoration(
+                    hintText: l.massistantPlaceholder,
+                    filled: true,
+                    fillColor: c.field,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                  ),
+                ),
               ),
+              const SizedBox(width: 6),
+              IconButton.filled(
+                tooltip: l.massistantSend,
+                onPressed: can ? widget.onSend : null,
+                icon: widget.sending
+                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
+                    : const Icon(Icons.arrow_upward_rounded),
+              ),
+            ],
+          ),
+          if (n > _maxQuestion - 100)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, right: 8),
+              child: Text(l.massistantCount('$n'), style: TextStyle(fontSize: 12, color: n > _maxQuestion ? c.badInk : c.ink3)),
             ),
-          ),
-          const SizedBox(width: 6),
-          IconButton.filled(
-            tooltip: l.massistantSend,
-            onPressed: can ? widget.onSend : null,
-            icon: widget.sending
-                ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
-                : const Icon(Icons.arrow_upward_rounded),
-          ),
-        ]),
-        if (n > _maxQuestion - 100)
-          Padding(
-            padding: const EdgeInsets.only(top: 4, right: 8),
-            child: Text(l.massistantCount('$n'), style: TextStyle(fontSize: 12, color: n > _maxQuestion ? c.badInk : c.ink3)),
-          ),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -654,25 +766,35 @@ class _HandoffCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-      decoration: BoxDecoration(color: c.bg, borderRadius: BorderRadius.circular(14), border: Border.all(color: c.primary)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.codechatHandoffTitle, style: TextStyle(fontWeight: FontWeight.w700, color: c.ink)),
-        const SizedBox(height: 4),
-        SelectableText(h.request, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink)),
-        if (h.repos.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text('${l.codechatRepos}: ${h.repos.join(', ')}', style: TextStyle(fontSize: 13, color: c.ink3)),
+      decoration: BoxDecoration(
+        color: c.bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: c.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l.codechatHandoffTitle,
+            style: TextStyle(fontWeight: FontWeight.w700, color: c.ink),
           ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: FilledButton.icon(
-            onPressed: () => context.push('/assistant/code?$q'),
-            icon: HIcon('code', size: 18, color: c.onPrimary),
-            label: Text(l.codechatHandoffOpen),
+          const SizedBox(height: 4),
+          SelectableText(h.request, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink)),
+          if (h.repos.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text('${l.codechatRepos}: ${h.repos.join(', ')}', style: TextStyle(fontSize: 13, color: c.ink3)),
+            ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: () => context.push('/assistant/code?$q'),
+              icon: HIcon('code', size: 18, color: c.onPrimary),
+              label: Text(l.codechatHandoffOpen),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

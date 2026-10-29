@@ -67,21 +67,23 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   actions: [RoundIconButton('info', tooltip: l.navGuide, onTap: () => _showGuide(context))],
                 ),
                 if (tasks.isNotEmpty || sideRepos.isNotEmpty)
-                  ChipRow(children: [
-                    FilterChipH(
-                      label: l.tasksAllRepos('${tasks.length}'),
-                      selected: repo == null,
-                      onTap: () => setState(() => _repo = null),
-                    ),
-                    for (final r in chips)
+                  ChipRow(
+                    children: [
                       FilterChipH(
-                        label: r.name,
-                        dot: _repoColor(r),
-                        count: tasks.where((t) => t.repoId == r.id).length,
-                        selected: repo == r.id,
-                        onTap: () => setState(() => _repo = r.id),
+                        label: l.tasksAllRepos('${tasks.length}'),
+                        selected: repo == null,
+                        onTap: () => setState(() => _repo = null),
                       ),
-                  ]),
+                      for (final r in chips)
+                        FilterChipH(
+                          label: r.name,
+                          dot: _repoColor(r),
+                          count: tasks.where((t) => t.repoId == r.id).length,
+                          selected: repo == r.id,
+                          onTap: () => setState(() => _repo = r.id),
+                        ),
+                    ],
+                  ),
                 const SizedBox(height: 12),
                 if (tasks.isEmpty && sideRepos.isEmpty && repos.hasValue)
                   EmptyState(title: l.tasksNoRepos, text: l.mobileNoSideRepos)
@@ -96,12 +98,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 else
                   Padding(
                     padding: screenPad,
-                    child: Column(children: [
-                      for (final (i, t) in rows.indexed) ...[
-                        if (i > 0) const SizedBox(height: 10),
-                        _TaskCard(t),
+                    child: Column(
+                      children: [
+                        for (final (i, t) in rows.indexed) ...[if (i > 0) const SizedBox(height: 10), _TaskCard(t)],
                       ],
-                    ]),
+                    ),
                   ),
               ],
             );
@@ -111,8 +112,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  static List<Repository> _taskRepos(List<Repository> repos) =>
-      repos.where((r) => r.archivedAt == null).toList();
+  static List<Repository> _taskRepos(List<Repository> repos) => repos.where((r) => r.archivedAt == null).toList();
 
   void _showGuide(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -124,13 +124,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(l.tasksTitle, style: Theme.of(ctx).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(l.tasksLede, style: TextStyle(color: c.ink2, fontSize: 15, height: 1.45)),
-            const SizedBox(height: 12),
-            Text(l.tasksHelp, style: TextStyle(color: c.ink2, fontSize: 15, height: 1.45)),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.tasksTitle, style: Theme.of(ctx).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Text(l.tasksLede, style: TextStyle(color: c.ink2, fontSize: 15, height: 1.45)),
+              const SizedBox(height: 12),
+              Text(l.tasksHelp, style: TextStyle(color: c.ink2, fontSize: 15, height: 1.45)),
+            ],
+          ),
         ),
       ),
     );
@@ -222,7 +226,10 @@ class _TaskCard extends ConsumerWidget {
             child: InkResponse(
               onTap: () => showTaskActions(context, ref, t),
               radius: 20,
-              child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), child: HIcon('more', size: 18, color: c.ink3)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: HIcon('more', size: 18, color: c.ink3),
+              ),
             ),
           ),
       ],
@@ -278,10 +285,10 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
   bool get _reportKind => _kind == TicketKindChoice.plan || _kind == TicketKindChoice.analysis || _kind == TicketKindChoice.bug;
 
   void _pickKind(TicketKindChoice k) => setState(() {
-        _kind = k;
-        // Code and tests need a repository: pick the first rather than show an error.
-        if (_changeKind && _pick.isEmpty && widget.repos.isNotEmpty) _pick = RepoPick.single(widget.repos.first.id);
-      });
+    _kind = k;
+    // Code and tests need a repository: pick the first rather than show an error.
+    if (_changeKind && _pick.isEmpty && widget.repos.isNotEmpty) _pick = RepoPick.single(widget.repos.first.id);
+  });
   String? _err;
 
   @override
@@ -314,7 +321,10 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
     });
     final repo = _pick.payload;
     try {
-      final res = await ref.read(apiProvider)!.getTasksApi().createTask(
+      final res = await ref
+          .read(apiProvider)!
+          .getTasksApi()
+          .createTask(
             taskCreate: TaskCreate(
               repoId: repo.repoId,
               repoIds: repo.repoIds,
@@ -345,54 +355,72 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
     final sub = TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3);
     final hint = TextStyle(fontSize: 13, color: c.ink3, height: 1.35);
     final group = _pick.group;
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (groups.isNotEmpty) ...[
-        Text(l.mgroupsGroups, style: sub),
-        const SizedBox(height: 6),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final g in groups)
-            FilterChipH(
-              label: g.name,
-              count: RepoPick.members(g).length,
-              selected: _pick.wholeGroup?.id == g.id,
-              onTap: () => setState(() => _pick = _pick.wholeGroup?.id == g.id ? const RepoPick() : _pick.pickGroup(g)),
-            ),
-        ]),
-        const SizedBox(height: 12),
-        Text(l.mgroupsRepos, style: sub),
-        const SizedBox(height: 6),
-      ],
-      Wrap(spacing: 8, runSpacing: 8, children: [
-        if (!_changeKind) FilterChipH(label: l.tasksNoRepo, selected: _pick.isEmpty, onTap: () => setState(() => _pick = const RepoPick())),
-        for (final r in widget.repos)
-          FilterChipH(label: r.name, dot: _repoColor(r), selected: _pick.contains(r.id), onTap: () => setState(() => _pick = _pick.toggle(r.id))),
-      ]),
-      if (widget.repos.length > 1) ...[
-        const SizedBox(height: 6),
-        Text(l.mgroupsPickHint, style: hint),
-      ],
-      if (group != null || _pick.ids.length > 1) ...[
-        const SizedBox(height: 12),
-        Text(l.mgroupsInTask, style: sub),
-        if (group != null) ...[
-          const SizedBox(height: 2),
-          Text(_pick.edited ? l.mgroupsFromGroupEdited(group.name) : l.mgroupsFromGroup(group.name), style: hint),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (groups.isNotEmpty) ...[
+          Text(l.mgroupsGroups, style: sub),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final g in groups)
+                FilterChipH(
+                  label: g.name,
+                  count: RepoPick.members(g).length,
+                  selected: _pick.wholeGroup?.id == g.id,
+                  onTap: () => setState(() => _pick = _pick.wholeGroup?.id == g.id ? const RepoPick() : _pick.pickGroup(g)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(l.mgroupsRepos, style: sub),
+          const SizedBox(height: 6),
         ],
-        const SizedBox(height: 6),
-        if (_pick.isEmpty)
-          Text(l.mgroupsNoMembers, style: hint)
-        else
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final (i, id) in _pick.ids.indexed)
-              _RepoTag(
-                name: _repoName(id),
-                primary: i == 0 ? l.mgroupsPrimary : null,
-                removeLabel: l.mgroupsRemove(_repoName(id)),
-                onRemove: _busy ? null : () => setState(() => _pick = _pick.remove(id)),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            if (!_changeKind)
+              FilterChipH(label: l.tasksNoRepo, selected: _pick.isEmpty, onTap: () => setState(() => _pick = const RepoPick())),
+            for (final r in widget.repos)
+              FilterChipH(
+                label: r.name,
+                dot: _repoColor(r),
+                selected: _pick.contains(r.id),
+                onTap: () => setState(() => _pick = _pick.toggle(r.id)),
               ),
-          ]),
+          ],
+        ),
+        if (widget.repos.length > 1) ...[const SizedBox(height: 6), Text(l.mgroupsPickHint, style: hint)],
+        if (group != null || _pick.ids.length > 1) ...[
+          const SizedBox(height: 12),
+          Text(l.mgroupsInTask, style: sub),
+          if (group != null) ...[
+            const SizedBox(height: 2),
+            Text(_pick.edited ? l.mgroupsFromGroupEdited(group.name) : l.mgroupsFromGroup(group.name), style: hint),
+          ],
+          const SizedBox(height: 6),
+          if (_pick.isEmpty)
+            Text(l.mgroupsNoMembers, style: hint)
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final (i, id) in _pick.ids.indexed)
+                  _RepoTag(
+                    name: _repoName(id),
+                    primary: i == 0 ? l.mgroupsPrimary : null,
+                    removeLabel: l.mgroupsRemove(_repoName(id)),
+                    onRemove: _busy ? null : () => setState(() => _pick = _pick.remove(id)),
+                  ),
+              ],
+            ),
+        ],
       ],
-    ]);
+    );
   }
 
   String _repoName(int id) {
@@ -413,152 +441,192 @@ class _NewTaskSheetState extends ConsumerState<_NewTaskSheet> {
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return Padding(
       padding: EdgeInsets.only(bottom: keyboard),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        // .sh-h
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(l.mobileNewTask, style: t.titleLarge),
-                const SizedBox(height: 2),
-                Text(l.tasksDrawerSub, style: TextStyle(color: c.ink3, fontSize: 14)),
-              ]),
-            ),
-            const SizedBox(width: 12),
-            RoundIconButton('close', tooltip: l.navClose, onTap: () => Navigator.pop(context)),
-          ]),
-        ),
-        // .sh-b
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              _Field(label: l.kindTitle, child: KindChoices(value: _kind, onPick: _pickKind, enabled: !_busy)),
-              _Field(label: l.mobileTaskRepo, child: _repoChoice(l, c)),
-              _Field(
-                label: l.mobileTaskTitle,
-                child: TextField(
-                  controller: _title,
-                  autofocus: true,
-                  textInputAction: TextInputAction.next,
-                  textCapitalization: TextCapitalization.sentences,
-                  onChanged: (_) {
-                    if (_err != null) setState(() => _err = null);
-                  },
-                  decoration: InputDecoration(hintText: l.tasksTitlePh),
-                ),
-              ),
-              _Field(
-                label: l.tasksTicketNumber,
-                child: TextField(
-                  controller: _number,
-                  enabled: !_busy,
-                  maxLength: 64,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  textInputAction: TextInputAction.next,
-                  style: TextStyle(fontFamily: AgntsFonts.mono),
-                  decoration: InputDecoration(hintText: l.tasksTicketNumberPh, helperText: l.tasksTicketNumberHelp, helperMaxLines: 3, counterText: ''),
-                ),
-              ),
-              _Field(
-                label: l.mobileTaskDescription,
-                child: TextField(
-                  controller: _desc,
-                  minLines: 4,
-                  maxLines: 8,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(hintText: l.tasksDescPh),
-                ),
-              ),
-              _Field(label: l.filesTitle, child: AttachmentPicker(controller: _files, enabled: !_busy)),
-              _Field(
-                label: l.mobileTaskPriority,
-                child: Segmented<TaskCreatePriorityEnum>(
-                  full: true,
-                  options: [
-                    (TaskCreatePriorityEnum.low, l.mobilePriorityLow),
-                    (TaskCreatePriorityEnum.medium, l.mobilePriorityMedium),
-                    (TaskCreatePriorityEnum.high, l.mobilePriorityHigh),
-                  ],
-                  value: _priority,
-                  onChanged: (v) => setState(() => _priority = v),
-                ),
-              ),
-              if (!_reportKind)
-                _Field(
-                  label: l.mobileAfterApprove,
-                  child: Segmented<TaskCreateAfterApproveEnum>(
-                    full: true,
-                    options: [
-                      (TaskCreateAfterApproveEnum.main, l.mobileAfterMain),
-                      (TaskCreateAfterApproveEnum.pr, l.mobileAfterPr),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // .sh-h
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.mobileNewTask, style: t.titleLarge),
+                      const SizedBox(height: 2),
+                      Text(l.tasksDrawerSub, style: TextStyle(color: c.ink3, fontSize: 14)),
                     ],
-                    value: _after,
-                    onChanged: (v) => setState(() => _after = v),
                   ),
                 ),
-              _Field(
-                label: l.followUpsMode,
-                child: Segmented<FollowUpsMode>(
-                  full: true,
-                  options: [
-                    (FollowUpsMode.inherit, l.followUpsModeInherit),
-                    (FollowUpsMode.on_, l.followUpsModeOn),
-                    (FollowUpsMode.off, l.followUpsModeOff),
-                  ],
-                  value: _followUps,
-                  onChanged: (v) => setState(() => _followUps = v),
-                ),
-              ),
-              _Field(
-                label: l.mobileStart,
-                last: true,
-                child: Column(children: [
-                  for (final (v, title, hint) in [
-                    (TaskCreateStartEnum.ask, l.mobileStartAsk, l.tasksStartAskHint),
-                    (TaskCreateStartEnum.code, l.mobileStartCode, l.tasksStartCodeHint),
-                    (TaskCreateStartEnum.queue, l.mobileStartQueue, l.tasksStartQueueHint),
-                  ]) ...[
-                    if (v != TaskCreateStartEnum.ask) const SizedBox(height: 8),
-                    _Choice(title: title, hint: hint, selected: _start == v, onTap: () => setState(() => _start = v)),
-                  ],
-                ]),
-              ),
-              if (_err != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(_err!, style: TextStyle(color: c.badInk, fontSize: 13.5, fontWeight: FontWeight.w700)),
-                ),
-            ]),
+                const SizedBox(width: 12),
+                RoundIconButton('close', tooltip: l.navClose, onTap: () => Navigator.pop(context)),
+              ],
+            ),
           ),
-        ),
-        // .sh-f
-        Container(
-          decoration: BoxDecoration(border: Border(top: BorderSide(color: c.line))),
-          padding: EdgeInsets.fromLTRB(20, 10, 20, 12 + (keyboard > 0 ? 0 : MediaQuery.paddingOf(context).bottom)),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            if (_files.uploading)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(l.filesWait, style: TextStyle(fontSize: 13, color: c.ink3)),
+          // .sh-b
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Field(
+                    label: l.kindTitle,
+                    child: KindChoices(value: _kind, onPick: _pickKind, enabled: !_busy),
+                  ),
+                  _Field(label: l.mobileTaskRepo, child: _repoChoice(l, c)),
+                  _Field(
+                    label: l.mobileTaskTitle,
+                    child: TextField(
+                      controller: _title,
+                      autofocus: true,
+                      textInputAction: TextInputAction.next,
+                      textCapitalization: TextCapitalization.sentences,
+                      onChanged: (_) {
+                        if (_err != null) setState(() => _err = null);
+                      },
+                      decoration: InputDecoration(hintText: l.tasksTitlePh),
+                    ),
+                  ),
+                  _Field(
+                    label: l.tasksTicketNumber,
+                    child: TextField(
+                      controller: _number,
+                      enabled: !_busy,
+                      maxLength: 64,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      textInputAction: TextInputAction.next,
+                      style: TextStyle(fontFamily: AgntsFonts.mono),
+                      decoration: InputDecoration(
+                        hintText: l.tasksTicketNumberPh,
+                        helperText: l.tasksTicketNumberHelp,
+                        helperMaxLines: 3,
+                        counterText: '',
+                      ),
+                    ),
+                  ),
+                  _Field(
+                    label: l.mobileTaskDescription,
+                    child: TextField(
+                      controller: _desc,
+                      minLines: 4,
+                      maxLines: 8,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(hintText: l.tasksDescPh),
+                    ),
+                  ),
+                  _Field(
+                    label: l.filesTitle,
+                    child: AttachmentPicker(controller: _files, enabled: !_busy),
+                  ),
+                  _Field(
+                    label: l.mobileTaskPriority,
+                    child: Segmented<TaskCreatePriorityEnum>(
+                      full: true,
+                      options: [
+                        (TaskCreatePriorityEnum.low, l.mobilePriorityLow),
+                        (TaskCreatePriorityEnum.medium, l.mobilePriorityMedium),
+                        (TaskCreatePriorityEnum.high, l.mobilePriorityHigh),
+                      ],
+                      value: _priority,
+                      onChanged: (v) => setState(() => _priority = v),
+                    ),
+                  ),
+                  if (!_reportKind)
+                    _Field(
+                      label: l.mobileAfterApprove,
+                      child: Segmented<TaskCreateAfterApproveEnum>(
+                        full: true,
+                        options: [(TaskCreateAfterApproveEnum.main, l.mobileAfterMain), (TaskCreateAfterApproveEnum.pr, l.mobileAfterPr)],
+                        value: _after,
+                        onChanged: (v) => setState(() => _after = v),
+                      ),
+                    ),
+                  _Field(
+                    label: l.followUpsMode,
+                    child: Segmented<FollowUpsMode>(
+                      full: true,
+                      options: [
+                        (FollowUpsMode.inherit, l.followUpsModeInherit),
+                        (FollowUpsMode.on_, l.followUpsModeOn),
+                        (FollowUpsMode.off, l.followUpsModeOff),
+                      ],
+                      value: _followUps,
+                      onChanged: (v) => setState(() => _followUps = v),
+                    ),
+                  ),
+                  _Field(
+                    label: l.mobileStart,
+                    last: true,
+                    child: Column(
+                      children: [
+                        for (final (v, title, hint) in [
+                          (TaskCreateStartEnum.ask, l.mobileStartAsk, l.tasksStartAskHint),
+                          (TaskCreateStartEnum.code, l.mobileStartCode, l.tasksStartCodeHint),
+                          (TaskCreateStartEnum.queue, l.mobileStartQueue, l.tasksStartQueueHint),
+                        ]) ...[
+                          if (v != TaskCreateStartEnum.ask) const SizedBox(height: 8),
+                          _Choice(title: title, hint: hint, selected: _start == v, onTap: () => setState(() => _start = v)),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (_err != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        _err!,
+                        style: TextStyle(color: c.badInk, fontSize: 13.5, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                ],
               ),
-            Row(children: [
-              Expanded(child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(l.mobileCancel))),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  onPressed: _busy || _files.uploading ? null : _create,
-                  child: _busy
-                      ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
-                      : Text(_start == TaskCreateStartEnum.queue ? l.tasksCreate : l.tasksCreateStart, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+          ),
+          // .sh-f
+          Container(
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: c.line)),
+            ),
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 12 + (keyboard > 0 ? 0 : MediaQuery.paddingOf(context).bottom)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_files.uploading)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(l.filesWait, style: TextStyle(fontSize: 13, color: c.ink3)),
+                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(l.mobileCancel)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: _busy || _files.uploading ? null : _create,
+                        child: _busy
+                            ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
+                            : Text(
+                                _start == TaskCreateStartEnum.queue ? l.tasksCreate : l.tasksCreateStart,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ]),
-          ]),
-        ),
-      ]),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -577,22 +645,28 @@ class _RepoTag extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: 36),
       padding: const EdgeInsets.only(left: 14, right: 2),
-      decoration: ShapeDecoration(color: c.surface, shape: StadiumBorder(side: BorderSide(color: c.line4))),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Text(name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink)),
-        if (primary != null) ...[
-          const SizedBox(width: 6),
-          Text(primary!, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+      decoration: ShapeDecoration(
+        color: c.surface,
+        shape: StadiumBorder(side: BorderSide(color: c.line4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            name,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink),
+          ),
+          if (primary != null) ...[const SizedBox(width: 6), Text(primary!, style: TextStyle(fontSize: 12.5, color: c.ink3))],
+          IconButton(
+            tooltip: removeLabel,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            padding: EdgeInsets.zero,
+            onPressed: onRemove,
+            icon: HIcon('close', size: 14, color: c.ink3, stroke: 2.4),
+          ),
         ],
-        IconButton(
-          tooltip: removeLabel,
-          visualDensity: VisualDensity.compact,
-          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-          padding: EdgeInsets.zero,
-          onPressed: onRemove,
-          icon: HIcon('close', size: 14, color: c.ink3, stroke: 2.4),
-        ),
-      ]),
+      ),
     );
   }
 }
@@ -609,11 +683,17 @@ class _Field extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: last ? 0 : 16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, color: c.ink)),
-        const SizedBox(height: 7),
-        child,
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, color: c.ink),
+          ),
+          const SizedBox(height: 7),
+          child,
+        ],
+      ),
     );
   }
 }
@@ -645,26 +725,42 @@ class _Choice extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(
-                width: 20,
-                height: 20,
-                margin: const EdgeInsets.only(top: 1),
-                decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: selected ? c.primary : c.line3, width: 2)),
-                alignment: Alignment.center,
-                child: selected
-                    ? Container(width: 10, height: 10, decoration: BoxDecoration(color: c.primary, shape: BoxShape.circle))
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: c.ink)),
-                  const SizedBox(height: 2),
-                  Text(hint, style: TextStyle(fontSize: 13.5, color: c.ink2, height: 1.35)),
-                ]),
-              ),
-            ]),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  margin: const EdgeInsets.only(top: 1),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: selected ? c.primary : c.line3, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  child: selected
+                      ? Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(color: c.primary, shape: BoxShape.circle),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: c.ink),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(hint, style: TextStyle(fontSize: 13.5, color: c.ink2, height: 1.35)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -680,19 +776,27 @@ Future<void> showTaskActions(BuildContext context, WidgetRef ref, Ticket t) asyn
     context: context,
     showDragHandle: true,
     builder: (ctx) => SafeArea(
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-          child: Text('${t.key} · ${t.title}', maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(ctx).textTheme.titleMedium),
-        ),
-        ListTile(leading: HIcon('tasks', size: 22, color: c.primary), title: Text(l.minsightsEditTask), onTap: () => Navigator.pop(ctx, 'edit')),
-        ListTile(
-          leading: HIcon('close', size: 22, color: c.badInk),
-          title: Text(l.ticketDelete, style: TextStyle(color: c.badInk)),
-          onTap: () => Navigator.pop(ctx, 'delete'),
-        ),
-        const SizedBox(height: 8),
-      ]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Text('${t.key} · ${t.title}', maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(ctx).textTheme.titleMedium),
+          ),
+          ListTile(
+            leading: HIcon('tasks', size: 22, color: c.primary),
+            title: Text(l.minsightsEditTask),
+            onTap: () => Navigator.pop(ctx, 'edit'),
+          ),
+          ListTile(
+            leading: HIcon('close', size: 22, color: c.badInk),
+            title: Text(l.ticketDelete, style: TextStyle(color: c.badInk)),
+            onTap: () => Navigator.pop(ctx, 'delete'),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
     ),
   );
   if (!context.mounted) return;
@@ -710,7 +814,13 @@ Future<void> showTaskActions(BuildContext context, WidgetRef ref, Ticket t) asyn
       showSnack(context, l.minsightsTaskSaved);
     }
   } else if (pick == 'delete') {
-    final ok = await confirmAction(context, title: l.ticketDelete, body: l.ticketDeleteConfirm(t.key), action: l.ticketDelete, danger: true);
+    final ok = await confirmAction(
+      context,
+      title: l.ticketDelete,
+      body: l.ticketDeleteConfirm(t.key),
+      action: l.ticketDelete,
+      danger: true,
+    );
     if (!ok || !context.mounted) return;
     try {
       await ref.read(apiProvider)!.getTasksApi().deleteTask(key: t.key);
@@ -736,7 +846,10 @@ class _EditTaskSheetState extends ConsumerState<_EditTaskSheet> {
   late final _title = TextEditingController(text: widget.t.title);
   late final _number = TextEditingController(text: widget.t.ticketNumber ?? '');
   late final _desc = TextEditingController(text: widget.t.description);
-  late var _priority = TaskUpdatePriorityEnum.values.firstWhere((p) => p.value == widget.t.priority, orElse: () => TaskUpdatePriorityEnum.medium);
+  late var _priority = TaskUpdatePriorityEnum.values.firstWhere(
+    (p) => p.value == widget.t.priority,
+    orElse: () => TaskUpdatePriorityEnum.medium,
+  );
   late var _after = widget.t.afterApprove == TicketAfterApproveEnum.main ? TaskUpdateAfterApproveEnum.main : TaskUpdateAfterApproveEnum.pr;
   late var _kind = TicketKindChoice.values.firstWhere((k) => k.value == widget.t.kind.value, orElse: () => TicketKindChoice.auto);
   bool _busy = false;
@@ -763,7 +876,10 @@ class _EditTaskSheetState extends ConsumerState<_EditTaskSheet> {
       _err = null;
     });
     try {
-      await ref.read(apiProvider)!.getTasksApi().updateTask(
+      await ref
+          .read(apiProvider)!
+          .getTasksApi()
+          .updateTask(
             key: widget.t.key,
             taskUpdate: TaskUpdate(
               title: _title.text.trim(),
@@ -789,108 +905,135 @@ class _EditTaskSheetState extends ConsumerState<_EditTaskSheet> {
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return Padding(
       padding: EdgeInsets.only(bottom: keyboard),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(l.minsightsEditTask, style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 2),
-                Text(l.minsightsEditTaskSub, style: TextStyle(color: c.ink3, fontSize: 14)),
-              ]),
-            ),
-            const SizedBox(width: 12),
-            RoundIconButton('close', tooltip: l.navClose, onTap: () => Navigator.pop(context)),
-          ]),
-        ),
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              _Field(label: l.kindTitle, child: KindChoices(value: _kind, onPick: (k) => setState(() => _kind = k), enabled: !_busy)),
-              _Field(
-                label: l.mobileTaskTitle,
-                child: TextField(
-                  controller: _title,
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLength: 300,
-                  decoration: InputDecoration(hintText: l.tasksTitlePh, counterText: ''),
-                ),
-              ),
-              _Field(
-                label: l.tasksTicketNumber,
-                child: TextField(
-                  controller: _number,
-                  maxLength: 64,
-                  autocorrect: false,
-                  style: TextStyle(fontFamily: AgntsFonts.mono),
-                  decoration: InputDecoration(hintText: l.tasksTicketNumberPh, helperText: l.tasksTicketNumberHelp, helperMaxLines: 3, counterText: ''),
-                ),
-              ),
-              _Field(
-                label: l.mobileTaskDescription,
-                child: TextField(
-                  controller: _desc,
-                  minLines: 4,
-                  maxLines: 8,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(hintText: l.tasksDescPh),
-                ),
-              ),
-              _Field(
-                label: l.mobileTaskPriority,
-                last: _reportKind,
-                child: Segmented<TaskUpdatePriorityEnum>(
-                  full: true,
-                  options: [
-                    (TaskUpdatePriorityEnum.low, l.mobilePriorityLow),
-                    (TaskUpdatePriorityEnum.medium, l.mobilePriorityMedium),
-                    (TaskUpdatePriorityEnum.high, l.mobilePriorityHigh),
-                  ],
-                  value: _priority,
-                  onChanged: (v) => setState(() => _priority = v),
-                ),
-              ),
-              if (!_reportKind)
-                _Field(
-                  label: l.mobileAfterApprove,
-                  last: true,
-                  child: Segmented<TaskUpdateAfterApproveEnum>(
-                    full: true,
-                    options: [
-                      (TaskUpdateAfterApproveEnum.main, l.mobileAfterMain),
-                      (TaskUpdateAfterApproveEnum.pr, l.mobileAfterPr),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.minsightsEditTask, style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: 2),
+                      Text(l.minsightsEditTaskSub, style: TextStyle(color: c.ink3, fontSize: 14)),
                     ],
-                    value: _after,
-                    onChanged: (v) => setState(() => _after = v),
                   ),
                 ),
-              if (_err != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(_err!, style: TextStyle(color: c.badInk, fontSize: 13.5, fontWeight: FontWeight.w700)),
-                ),
-            ]),
+                const SizedBox(width: 12),
+                RoundIconButton('close', tooltip: l.navClose, onTap: () => Navigator.pop(context)),
+              ],
+            ),
           ),
-        ),
-        Container(
-          decoration: BoxDecoration(border: Border(top: BorderSide(color: c.line))),
-          padding: EdgeInsets.fromLTRB(20, 10, 20, 12 + (keyboard > 0 ? 0 : MediaQuery.paddingOf(context).bottom)),
-          child: Row(children: [
-            Expanded(child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(l.mobileCancel))),
-            const SizedBox(width: 10),
-            Expanded(
-              child: FilledButton(
-                onPressed: _busy ? null : _save,
-                child: _busy
-                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
-                    : Text(l.minsightsSave),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Field(
+                    label: l.kindTitle,
+                    child: KindChoices(value: _kind, onPick: (k) => setState(() => _kind = k), enabled: !_busy),
+                  ),
+                  _Field(
+                    label: l.mobileTaskTitle,
+                    child: TextField(
+                      controller: _title,
+                      textCapitalization: TextCapitalization.sentences,
+                      maxLength: 300,
+                      decoration: InputDecoration(hintText: l.tasksTitlePh, counterText: ''),
+                    ),
+                  ),
+                  _Field(
+                    label: l.tasksTicketNumber,
+                    child: TextField(
+                      controller: _number,
+                      maxLength: 64,
+                      autocorrect: false,
+                      style: TextStyle(fontFamily: AgntsFonts.mono),
+                      decoration: InputDecoration(
+                        hintText: l.tasksTicketNumberPh,
+                        helperText: l.tasksTicketNumberHelp,
+                        helperMaxLines: 3,
+                        counterText: '',
+                      ),
+                    ),
+                  ),
+                  _Field(
+                    label: l.mobileTaskDescription,
+                    child: TextField(
+                      controller: _desc,
+                      minLines: 4,
+                      maxLines: 8,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(hintText: l.tasksDescPh),
+                    ),
+                  ),
+                  _Field(
+                    label: l.mobileTaskPriority,
+                    last: _reportKind,
+                    child: Segmented<TaskUpdatePriorityEnum>(
+                      full: true,
+                      options: [
+                        (TaskUpdatePriorityEnum.low, l.mobilePriorityLow),
+                        (TaskUpdatePriorityEnum.medium, l.mobilePriorityMedium),
+                        (TaskUpdatePriorityEnum.high, l.mobilePriorityHigh),
+                      ],
+                      value: _priority,
+                      onChanged: (v) => setState(() => _priority = v),
+                    ),
+                  ),
+                  if (!_reportKind)
+                    _Field(
+                      label: l.mobileAfterApprove,
+                      last: true,
+                      child: Segmented<TaskUpdateAfterApproveEnum>(
+                        full: true,
+                        options: [(TaskUpdateAfterApproveEnum.main, l.mobileAfterMain), (TaskUpdateAfterApproveEnum.pr, l.mobileAfterPr)],
+                        value: _after,
+                        onChanged: (v) => setState(() => _after = v),
+                      ),
+                    ),
+                  if (_err != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        _err!,
+                        style: TextStyle(color: c.badInk, fontSize: 13.5, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                ],
               ),
             ),
-          ]),
-        ),
-      ]),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: c.line)),
+            ),
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 12 + (keyboard > 0 ? 0 : MediaQuery.paddingOf(context).bottom)),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(l.mobileCancel)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _busy ? null : _save,
+                    child: _busy
+                        ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
+                        : Text(l.minsightsSave),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

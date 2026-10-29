@@ -103,7 +103,10 @@ class _RuleCardState extends ConsumerState<RuleCard> {
   void _enable(bool on) {
     final l = AppLocalizations.of(context);
     _run(
-      () => _api.updateRule(id: r.id, ruleInput: RuleInput(title: r.title, body: r.body, repoId: r.repoId, enabled: on, kind: r.kind)),
+      () => _api.updateRule(
+        id: r.id,
+        ruleInput: RuleInput(title: r.title, body: r.body, repoId: r.repoId, enabled: on, kind: r.kind),
+      ),
       on ? l.rulesTurnedOn : l.rulesTurnedOff,
     );
   }
@@ -118,7 +121,13 @@ class _RuleCardState extends ConsumerState<RuleCard> {
           note: _note(q.index).text.trim().isEmpty ? null : _note(q.index).text.trim(),
         ),
     ];
-    _run(() => _api.answerRule(id: r.id, ruleAnswers: RuleAnswers(answers: answers)), l.rulesAnswered);
+    _run(
+      () => _api.answerRule(
+        id: r.id,
+        ruleAnswers: RuleAnswers(answers: answers),
+      ),
+      l.rulesAnswered,
+    );
   }
 
   @override
@@ -132,25 +141,39 @@ class _RuleCardState extends ConsumerState<RuleCard> {
 
     final body = <Widget>[
       // Head: title, scope and badges, the on/off switch.
-      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(
-          child: Text(r.title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink, height: 1.3)),
-        ),
-        Switch.adaptive(value: r.enabled, onChanged: locked || r.status == RuleStatus.suggested ? null : _enable),
-      ]),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              r.title,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink, height: 1.3),
+            ),
+          ),
+          Switch.adaptive(value: r.enabled, onChanged: locked || r.status == RuleStatus.suggested ? null : _enable),
+        ],
+      ),
       const SizedBox(height: 6),
-      Wrap(spacing: 6, runSpacing: 6, children: [
-        SourceChip(r.repoName ?? l.rulesGlobal),
-        ToneBadge(ruleStatusLabel(l, r.status), ruleTone(r.status), small: true),
-        if (r.kind == RuleKind.context) ToneBadge(l.rulesKindContext, Tone.gray, small: true),
-        for (final (label, tone) in ruleBadges(l, r)) ToneBadge(label, tone, small: true),
-        if (!r.enabled) ToneBadge(l.rulesOff, Tone.gray, small: true),
-      ]),
+      Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          SourceChip(r.repoName ?? l.rulesGlobal),
+          ToneBadge(ruleStatusLabel(l, r.status), ruleTone(r.status), small: true),
+          if (r.kind == RuleKind.context) ToneBadge(l.rulesKindContext, Tone.gray, small: true),
+          for (final (label, tone) in ruleBadges(l, r)) ToneBadge(label, tone, small: true),
+          if (!r.enabled) ToneBadge(l.rulesOff, Tone.gray, small: true),
+        ],
+      ),
       const SizedBox(height: 10),
       Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: c.bg, border: Border.all(color: c.line2), borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(
+          color: c.bg,
+          border: Border.all(color: c.line2),
+          borderRadius: BorderRadius.circular(10),
+        ),
         child: SelectableText(r.body, style: TextStyle(fontSize: 14, color: c.ink2, height: 1.45)),
       ),
       const SizedBox(height: 10),
@@ -164,18 +187,36 @@ class _RuleCardState extends ConsumerState<RuleCard> {
               ? null
               : GestureDetector(
                   onTap: () => context.push('/tickets/${r.sourceTicket}'),
-                  child: Text.rich(TextSpan(children: [
-                    TextSpan(text: r.sourceTicket, style: TextStyle(fontWeight: FontWeight.w700, color: c.primary)),
-                    if ((r.reason ?? '').isNotEmpty) TextSpan(text: ': ${r.reason}', style: TextStyle(color: c.ink2)),
-                  ])),
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: r.sourceTicket,
+                          style: TextStyle(fontWeight: FontWeight.w700, color: c.primary),
+                        ),
+                        if ((r.reason ?? '').isNotEmpty)
+                          TextSpan(
+                            text: ': ${r.reason}',
+                            style: TextStyle(color: c.ink2),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
         ),
         const SizedBox(height: 10),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          FilledButton(onPressed: locked ? null : _review, child: Text(l.rulesAdopt)),
-          OutlinedButton(onPressed: locked ? null : () => _run(() => _api.acceptRule(id: r.id), l.rulesAccepted), child: Text(l.rulesAdoptAsWritten)),
-          OutlinedButton(onPressed: locked ? null : () => _delete(dismiss: true), child: Text(l.rulesDismiss)),
-        ]),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton(onPressed: locked ? null : _review, child: Text(l.rulesAdopt)),
+            OutlinedButton(
+              onPressed: locked ? null : () => _run(() => _api.acceptRule(id: r.id), l.rulesAccepted),
+              child: Text(l.rulesAdoptAsWritten),
+            ),
+            OutlinedButton(onPressed: locked ? null : () => _delete(dismiss: true), child: Text(l.rulesDismiss)),
+          ],
+        ),
         const SizedBox(height: 6),
         Text(l.rulesSuggestedHint, style: hint),
       ]);
@@ -193,10 +234,14 @@ class _RuleCardState extends ConsumerState<RuleCard> {
           Text(q.text, style: TextStyle(fontSize: 14.5, color: c.ink, height: 1.4)),
           if (q.options.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final o in q.options)
-                FilterChipH(label: o, selected: _answer(q.index).text == o, onTap: () => _answer(q.index).text = o),
-            ]),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final o in q.options)
+                  FilterChipH(label: o, selected: _answer(q.index).text == o, onTap: () => _answer(q.index).text = o),
+              ],
+            ),
           ],
           const SizedBox(height: 8),
           TextField(
@@ -214,10 +259,15 @@ class _RuleCardState extends ConsumerState<RuleCard> {
           ),
         ],
         const SizedBox(height: 12),
-        Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          FilledButton(onPressed: locked || left > 0 ? null : _sendAnswers, child: Text(l.rulesSendAnswers)),
-          OutlinedButton(onPressed: locked ? null : _accept, child: Text(l.rulesAccept)),
-        ]),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            FilledButton(onPressed: locked || left > 0 ? null : _sendAnswers, child: Text(l.rulesSendAnswers)),
+            OutlinedButton(onPressed: locked ? null : _accept, child: Text(l.rulesAccept)),
+          ],
+        ),
         const SizedBox(height: 6),
         Text(left > 0 ? l.rulesQuestionsLeft(left) : l.rulesAllAnswered, style: hint),
       ]);
@@ -225,14 +275,23 @@ class _RuleCardState extends ConsumerState<RuleCard> {
       body.addAll([
         HelpBox(l.rulesFailed(r.error), tone: Tone.bad, copyable: r.error.isNotEmpty),
         const SizedBox(height: 10),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          FilledButton(onPressed: locked ? null : _review, child: Text(l.rulesReviewAgain)),
-          OutlinedButton(onPressed: locked ? null : _accept, child: Text(l.rulesAccept)),
-        ]),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton(onPressed: locked ? null : _review, child: Text(l.rulesReviewAgain)),
+            OutlinedButton(onPressed: locked ? null : _accept, child: Text(l.rulesAccept)),
+          ],
+        ),
       ]);
     } else if (r.status == RuleStatus.ready) {
       if (r.interpretation.isNotEmpty) {
-        body.addAll([Text(l.rulesInterpretation, style: h3), const SizedBox(height: 4), SelectableText(r.interpretation), const SizedBox(height: 10)]);
+        body.addAll([
+          Text(l.rulesInterpretation, style: h3),
+          const SizedBox(height: 4),
+          SelectableText(r.interpretation),
+          const SizedBox(height: 10),
+        ]);
       }
       if (r.text != r.body) {
         body.addAll([Text(l.rulesClarified, style: h3), const SizedBox(height: 4), SelectableText(r.text), const SizedBox(height: 10)]);
@@ -246,19 +305,32 @@ class _RuleCardState extends ConsumerState<RuleCard> {
         const SizedBox(height: 10),
         Fold(
           title: l.rulesAnswersTitle(answered.length),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            for (final q in answered)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(q.text, style: hint),
-                  Text.rich(TextSpan(children: [
-                    TextSpan(text: q.answer, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    if (q.note != null && q.note!.isNotEmpty) TextSpan(text: '. ${q.note}'),
-                  ])),
-                ]),
-              ),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final q in answered)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(q.text, style: hint),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: q.answer,
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            if (q.note != null && q.note!.isNotEmpty) TextSpan(text: '. ${q.note}'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ]);
     }
@@ -267,25 +339,29 @@ class _RuleCardState extends ConsumerState<RuleCard> {
     final when = r.analyzedAt != null ? l.rulesReviewedAgo(_ago(l, r.analyzedAt!)) : l.rulesAddedAgo(_ago(l, r.createdAt));
     body.addAll([
       const SizedBox(height: 10),
-      Row(children: [
-        Expanded(child: Text(when, style: hint)),
-        if (widget.canEdit) ...[
-          if (r.status == RuleStatus.ready || r.status == RuleStatus.questions)
-            TextButton(onPressed: _busy ? null : _review, child: Text(l.rulesReviewAgain)),
-          TextButton(onPressed: _busy ? null : widget.onEdit, child: Text(l.rulesEdit)),
-          if (r.status != RuleStatus.suggested)
-            TextButton(
-              onPressed: _busy ? null : () => _delete(),
-              style: TextButton.styleFrom(foregroundColor: c.badInk),
-              child: Text(l.rulesDelete),
-            ),
+      Row(
+        children: [
+          Expanded(child: Text(when, style: hint)),
+          if (widget.canEdit) ...[
+            if (r.status == RuleStatus.ready || r.status == RuleStatus.questions)
+              TextButton(onPressed: _busy ? null : _review, child: Text(l.rulesReviewAgain)),
+            TextButton(onPressed: _busy ? null : widget.onEdit, child: Text(l.rulesEdit)),
+            if (r.status != RuleStatus.suggested)
+              TextButton(
+                onPressed: _busy ? null : () => _delete(),
+                style: TextButton.styleFrom(foregroundColor: c.badInk),
+                child: Text(l.rulesDelete),
+              ),
+          ],
         ],
-      ]),
+      ),
     ]);
 
     return Opacity(
       opacity: r.enabled ? 1 : 0.72,
-      child: HCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: body)),
+      child: HCard(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: body),
+      ),
     );
   }
 }

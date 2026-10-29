@@ -22,8 +22,17 @@ String ruleStatusLabel(AppLocalizations l, RuleStatus s) => switch (s) {
 
 /// Starter pack names, for "Starter: Go" (pack:go).
 const _packName = {
-  'go': 'Go', 'typescript': 'TypeScript', 'python': 'Python', 'java': 'Java', 'kotlin': 'Kotlin', 'rust': 'Rust',
-  'ruby': 'Ruby', 'php': 'PHP', 'csharp': 'C#', 'swift': 'Swift', 'dart': 'Dart',
+  'go': 'Go',
+  'typescript': 'TypeScript',
+  'python': 'Python',
+  'java': 'Java',
+  'kotlin': 'Kotlin',
+  'rust': 'Rust',
+  'ruby': 'Ruby',
+  'php': 'PHP',
+  'csharp': 'C#',
+  'swift': 'Swift',
+  'dart': 'Dart',
 };
 
 /// The harness badges of a rule: how it is enforced and delivered, its kind
@@ -31,7 +40,9 @@ const _packName = {
 List<(String, Tone)> ruleBadges(AppLocalizations l, Rule r) {
   final out = <(String, Tone)>[];
   final e = r.enforce;
-  if (e != null) out.add(e.action == RuleEnforceActionEnum.block ? (l.harnessRulesBadgeBlock, Tone.bad) : (l.harnessRulesBadgeWarn, Tone.warn));
+  if (e != null) {
+    out.add(e.action == RuleEnforceActionEnum.block ? (l.harnessRulesBadgeBlock, Tone.bad) : (l.harnessRulesBadgeWarn, Tone.warn));
+  }
   if (r.delivery == RuleDeliveryEnum.skill) out.add((l.harnessRulesBadgeSkill, Tone.info));
   if (r.kind == RuleKind.tip) out.add((l.harnessRulesBadgeTip, Tone.gray));
   final src = r.source_ ?? '';

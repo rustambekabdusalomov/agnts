@@ -87,7 +87,11 @@ class _FollowUpsFoldState extends ConsumerState<FollowUpsFold> {
         full: true,
         value: _t.suggestFollowUps ?? FollowUpsMode.inherit,
         onChanged: (m) => _busy ? null : _setMode(m),
-        options: [(FollowUpsMode.inherit, l.followUpsModeInherit), (FollowUpsMode.on_, l.followUpsModeOn), (FollowUpsMode.off, l.followUpsModeOff)],
+        options: [
+          (FollowUpsMode.inherit, l.followUpsModeInherit),
+          (FollowUpsMode.on_, l.followUpsModeOn),
+          (FollowUpsMode.off, l.followUpsModeOff),
+        ],
       ),
       const SizedBox(height: 10),
       if (!f.enabled && f.suggestions.isEmpty)
@@ -171,7 +175,10 @@ class _FollowUpsFoldState extends ConsumerState<FollowUpsFold> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Checkbox(value: on, onChanged: !s.ready || _busy ? null : (v) => setState(() => v == true ? _picked.add(s.id) : _picked.remove(s.id))),
+          Checkbox(
+            value: on,
+            onChanged: !s.ready || _busy ? null : (v) => setState(() => v == true ? _picked.add(s.id) : _picked.remove(s.id)),
+          ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +226,10 @@ class _FollowUpsFoldState extends ConsumerState<FollowUpsFold> {
                         }
                         setState(() => _target[s.id] = v);
                       },
-                      options: [(AcceptFollowUpTargetEnum.local, l.followUpsTargetLocal), (AcceptFollowUpTargetEnum.jira, l.followUpsTargetJira)],
+                      options: [
+                        (AcceptFollowUpTargetEnum.local, l.followUpsTargetLocal),
+                        (AcceptFollowUpTargetEnum.jira, l.followUpsTargetJira),
+                      ],
                     ),
                   ),
                 Align(

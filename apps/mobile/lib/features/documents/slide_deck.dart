@@ -28,7 +28,11 @@ class SlideCard extends StatelessWidget {
       _ => 22.7,
     };
     final lead = slide.layout == SlideLayout.lead;
-    final base = TextStyle(fontSize: lead ? size * 1.15 : size, height: slide.layout == SlideLayout.denser ? 1.32 : 1.4, color: lead ? _dim : _ink);
+    final base = TextStyle(
+      fontSize: lead ? size * 1.15 : size,
+      height: slide.layout == SlideLayout.denser ? 1.32 : 1.4,
+      color: lead ? _dim : _ink,
+    );
     final align = lead ? WrapAlignment.center : WrapAlignment.start;
     TextStyle head(double em) => TextStyle(fontSize: size * em, fontWeight: FontWeight.w700, height: 1.18, color: _ink);
     final body = MarkdownBody(
@@ -49,7 +53,9 @@ class SlideCard extends StatelessWidget {
         tableBody: base.copyWith(fontSize: size * 0.8),
         tableHead: base.copyWith(fontSize: size * 0.8, fontWeight: FontWeight.w700),
         tableBorder: TableBorder.all(color: const Color(0xFFD5D5D8)),
-        blockquoteDecoration: const BoxDecoration(border: Border(left: BorderSide(color: Color(0xFFD5D5D8), width: 3))),
+        blockquoteDecoration: const BoxDecoration(
+          border: Border(left: BorderSide(color: Color(0xFFD5D5D8), width: 3)),
+        ),
         blockquotePadding: const EdgeInsets.only(left: 12),
       ),
     );
@@ -63,20 +69,26 @@ class SlideCard extends StatelessWidget {
             child: SizedBox(
               width: 960,
               height: 540,
-              child: Stack(children: [
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(68, 49, 68, 53),
-                    // Too much text is cut at the frame, as on the web.
-                    child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: lead ? SizedBox(height: 438, child: Center(child: body)) : body,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(68, 49, 68, 53),
+                      // Too much text is cut at the frame, as on the web.
+                      child: SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: lead ? SizedBox(height: 438, child: Center(child: body)) : body,
+                      ),
                     ),
                   ),
-                ),
-                if (number != null)
-                  Positioned(right: 34, bottom: 23, child: Text('$number / $total', style: const TextStyle(fontSize: 12, color: Color(0xFF8A8A90)))),
-              ]),
+                  if (number != null)
+                    Positioned(
+                      right: 34,
+                      bottom: 23,
+                      child: Text('$number / $total', style: const TextStyle(fontSize: 12, color: Color(0xFF8A8A90))),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -105,7 +117,10 @@ class SlideDeck extends StatelessWidget {
           GestureDetector(
             onTap: () => presentSlides(context, markdown, start: i),
             child: DecoratedBox(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: c.line)),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: c.line),
+              ),
               child: SlideCard(s, number: i + 1, total: slides.length),
             ),
           ),
@@ -114,7 +129,9 @@ class SlideDeck extends StatelessWidget {
               padding: const EdgeInsets.only(top: 6),
               child: Container(
                 padding: const EdgeInsets.only(left: 10),
-                decoration: BoxDecoration(border: Border(left: BorderSide(color: c.line3, width: 3))),
+                decoration: BoxDecoration(
+                  border: Border(left: BorderSide(color: c.line3, width: 3)),
+                ),
                 child: Text(s.notes, style: TextStyle(fontSize: 13.5, color: c.ink2)),
               ),
             ),
@@ -125,8 +142,12 @@ class SlideDeck extends StatelessWidget {
 }
 
 /// Shows a deck full screen, one slide at a time, from slide start.
-Future<void> presentSlides(BuildContext context, String markdown, {int start = 0}) =>
-    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(fullscreenDialog: true, builder: (_) => PresentScreen(markdown: markdown, start: start)));
+Future<void> presentSlides(BuildContext context, String markdown, {int start = 0}) => Navigator.of(context, rootNavigator: true).push(
+  MaterialPageRoute(
+    fullscreenDialog: true,
+    builder: (_) => PresentScreen(markdown: markdown, start: start),
+  ),
+);
 
 /// A deck full screen: swipe or tap the sides to move, the notes under
 /// the slide on demand.
@@ -170,59 +191,66 @@ class _PresentScreenState extends State<PresentScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       body: SafeArea(
-        child: Column(children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _pages,
-              itemCount: _slides.length,
-              onPageChanged: (i) => setState(() => _i = i),
-              itemBuilder: (_, i) => LayoutBuilder(
-                builder: (context, box) => GestureDetector(
-                  onTapUp: (e) => _go(_i + (e.localPosition.dx < box.maxWidth / 3 ? -1 : 1)),
-                  child: Center(child: SlideCard(_slides[i], radius: 0)),
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pages,
+                itemCount: _slides.length,
+                onPageChanged: (i) => setState(() => _i = i),
+                itemBuilder: (_, i) => LayoutBuilder(
+                  builder: (context, box) => GestureDetector(
+                    onTapUp: (e) => _go(_i + (e.localPosition.dx < box.maxWidth / 3 ? -1 : 1)),
+                    child: Center(child: SlideCard(_slides[i], radius: 0)),
+                  ),
                 ),
               ),
             ),
-          ),
-          if (_notes)
-            Container(
-              height: 140,
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(18, 10, 18, 10),
-              child: SingleChildScrollView(
-                child: Text(notes.isEmpty ? l.mdocumentsNoNotes : notes,
-                    style: TextStyle(fontSize: 16, height: 1.45, color: notes.isEmpty ? const Color(0xFF888888) : const Color(0xFFEEEEEE))),
+            if (_notes)
+              Container(
+                height: 140,
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(18, 10, 18, 10),
+                child: SingleChildScrollView(
+                  child: Text(
+                    notes.isEmpty ? l.mdocumentsNoNotes : notes,
+                    style: TextStyle(fontSize: 16, height: 1.45, color: notes.isEmpty ? const Color(0xFF888888) : const Color(0xFFEEEEEE)),
+                  ),
+                ),
+              ),
+            SizedBox(
+              height: 48,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: _i > 0 ? () => _go(_i - 1) : null,
+                    tooltip: l.mdocumentsPrevSlide,
+                    icon: const Icon(Icons.chevron_left_rounded),
+                    color: Colors.white,
+                  ),
+                  Text('${_i + 1} / ${_slides.length}', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                  IconButton(
+                    onPressed: _i < _slides.length - 1 ? () => _go(_i + 1) : null,
+                    tooltip: l.mdocumentsNextSlide,
+                    icon: const Icon(Icons.chevron_right_rounded),
+                    color: Colors.white,
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => _notes = !_notes),
+                    child: Text(l.mdocumentsNotes, style: TextStyle(color: _notes ? Colors.white : const Color(0xFF999999))),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    tooltip: l.mdocumentsStopPresenting,
+                    icon: const Icon(Icons.close_rounded),
+                    color: Colors.white,
+                  ),
+                ],
               ),
             ),
-          SizedBox(
-            height: 48,
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              IconButton(
-                onPressed: _i > 0 ? () => _go(_i - 1) : null,
-                tooltip: l.mdocumentsPrevSlide,
-                icon: const Icon(Icons.chevron_left_rounded),
-                color: Colors.white,
-              ),
-              Text('${_i + 1} / ${_slides.length}', style: const TextStyle(color: Colors.white, fontSize: 14)),
-              IconButton(
-                onPressed: _i < _slides.length - 1 ? () => _go(_i + 1) : null,
-                tooltip: l.mdocumentsNextSlide,
-                icon: const Icon(Icons.chevron_right_rounded),
-                color: Colors.white,
-              ),
-              TextButton(
-                onPressed: () => setState(() => _notes = !_notes),
-                child: Text(l.mdocumentsNotes, style: TextStyle(color: _notes ? Colors.white : const Color(0xFF999999))),
-              ),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: l.mdocumentsStopPresenting,
-                icon: const Icon(Icons.close_rounded),
-                color: Colors.white,
-              ),
-            ]),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }

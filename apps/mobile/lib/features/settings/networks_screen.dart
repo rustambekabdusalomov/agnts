@@ -24,19 +24,19 @@ final networkActivityProvider = FutureProvider.autoDispose.family<NetworkActivit
 });
 
 Tone networkTone(PrivateNetworkStatusEnum s) => switch (s) {
-      PrivateNetworkStatusEnum.up => Tone.ok,
-      PrivateNetworkStatusEnum.connecting => Tone.warn,
-      PrivateNetworkStatusEnum.error || PrivateNetworkStatusEnum.gatewayDown => Tone.bad,
-      PrivateNetworkStatusEnum.disabled => Tone.gray,
-    };
+  PrivateNetworkStatusEnum.up => Tone.ok,
+  PrivateNetworkStatusEnum.connecting => Tone.warn,
+  PrivateNetworkStatusEnum.error || PrivateNetworkStatusEnum.gatewayDown => Tone.bad,
+  PrivateNetworkStatusEnum.disabled => Tone.gray,
+};
 
 String networkStatusLabel(AppLocalizations l, PrivateNetworkStatusEnum s) => switch (s) {
-      PrivateNetworkStatusEnum.up => l.networkStatus_up,
-      PrivateNetworkStatusEnum.connecting => l.networkStatus_connecting,
-      PrivateNetworkStatusEnum.error => l.networkStatus_error,
-      PrivateNetworkStatusEnum.gatewayDown => l.networkStatus_gateway_down,
-      PrivateNetworkStatusEnum.disabled => l.networkStatus_disabled,
-    };
+  PrivateNetworkStatusEnum.up => l.networkStatus_up,
+  PrivateNetworkStatusEnum.connecting => l.networkStatus_connecting,
+  PrivateNetworkStatusEnum.error => l.networkStatus_error,
+  PrivateNetworkStatusEnum.gatewayDown => l.networkStatus_gateway_down,
+  PrivateNetworkStatusEnum.disabled => l.networkStatus_disabled,
+};
 
 /// Runs one network action, refreshes the list and says how it went.
 /// Settings and the Home header's sheet both use it; true when it worked.
@@ -132,7 +132,15 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
 
   Future<void> _remove(PrivateNetwork n) async {
     final l = AppLocalizations.of(context);
-    if (!await confirmAction(context, title: l.networkRemove, message: l.networkRemoveConfirm(n.name), confirmLabel: l.networkRemove, danger: true)) return;
+    if (!await confirmAction(
+      context,
+      title: l.networkRemove,
+      message: l.networkRemoveConfirm(n.name),
+      confirmLabel: l.networkRemove,
+      danger: true,
+    )) {
+      return;
+    }
     await _run((api) => api.deletePrivateNetwork(networkId: n.id), l.networkRemoved);
   }
 
@@ -143,10 +151,14 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
     if (_target.text.trim().isEmpty) return;
     setState(() => _testing = true);
     try {
-      final r = (await ref.read(apiProvider)!.getNetworkApi().testPrivateNetwork(
-                testPrivateNetworkRequest: TestPrivateNetworkRequest(target: _target.text.trim(), network: _testNetwork),
-              ))
-          .data!;
+      final r =
+          (await ref
+                  .read(apiProvider)!
+                  .getNetworkApi()
+                  .testPrivateNetwork(
+                    testPrivateNetworkRequest: TestPrivateNetworkRequest(target: _target.text.trim(), network: _testNetwork),
+                  ))
+              .data!;
       ref.invalidate(networkActivityProvider);
       if (mounted) setState(() => _result = r);
     } catch (e) {
@@ -164,8 +176,8 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
     return s < 90
         ? l.networkSecondsAgo('$s')
         : s < 5400
-            ? l.networkMinutesAgo('${(s / 60).round()}')
-            : l.networkHoursAgo('${(s / 3600).round()}');
+        ? l.networkMinutesAgo('${(s / 60).round()}')
+        : l.networkHoursAgo('${(s / 3600).round()}');
   }
 
   @override
@@ -186,89 +198,134 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
           final nets = list.networks;
           final atMax = nets.length >= list.max;
           final hint = TextStyle(fontSize: 13, color: c.ink3);
-          return ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-            PageHeader(title: l.networkTitle, sub: l.networkSub, long: true),
-            if (!list.available)
-              Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 12), child: HelpBox(l.networkUnavailable, tone: Tone.warn))
-            else ...[
-              if (owner)
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 32),
+            children: [
+              PageHeader(title: l.networkTitle, sub: l.networkSub, long: true),
+              if (!list.available)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: FilledButton.icon(
-                    onPressed: atMax ? null : () => _edit(list, null),
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text(atMax ? l.networkLimit('${list.max}') : l.networkAdd),
+                  child: HelpBox(l.networkUnavailable, tone: Tone.warn),
+                )
+              else ...[
+                if (owner)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: FilledButton.icon(
+                      onPressed: atMax ? null : () => _edit(list, null),
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text(atMax ? l.networkLimit('${list.max}') : l.networkAdd),
+                    ),
                   ),
-                ),
-              if (nets.isEmpty) EmptyState(title: l.networkEmpty),
-              for (final n in nets)
-                padCard(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(n.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink)),
-                        Text(kindName(n.kind), style: hint),
-                      ]),
-                    ),
-                    ToneBadge(networkStatusLabel(l, n.status), networkTone(n.status), small: true),
-                  ]),
-                  if (n.routes.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(routeText(n.routes), style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
-                    ),
-                  if (n.lastError != null) Padding(padding: const EdgeInsets.only(top: 8), child: HelpBox(n.lastError!, tone: Tone.bad, copyable: true)),
-                  const SizedBox(height: 6),
-                  for (final m in [
-                    if (n.summary != null) n.summary!,
-                    if (n.handshakeAt != null)
-                      '${n.kind == PrivateNetworkKindEnum.wireguard ? l.networkHandshake : l.networkHeartbeat}: ${_ago(l, n.handshakeAt!)}',
-                    if (n.detail != null) n.detail!,
-                    n.webhooks == PrivateNetworkWebhooksEnum.relay ? l.networkWebhooksRelay : l.networkWebhooksPolling('${n.pollMinutes}'),
-                    if (n.ca != null) l.networkCaShort(n.ca!.subjects.join(', ')),
-                  ])
-                    Padding(padding: const EdgeInsets.only(top: 2), child: Text(m, style: hint)),
-                  if (owner) ...[
-                    const SizedBox(height: 10),
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      if (n.enabled)
-                        OutlinedButton(
-                          onPressed: _busy ? null : () => _run((api) => api.reconnectPrivateNetwork(networkId: n.id), l.networkReconnecting),
-                          child: Text(l.networkReconnect),
+                if (nets.isEmpty) EmptyState(title: l.networkEmpty),
+                for (final n in nets)
+                  padCard(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    n.name,
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink),
+                                  ),
+                                  Text(kindName(n.kind), style: hint),
+                                ],
+                              ),
+                            ),
+                            ToneBadge(networkStatusLabel(l, n.status), networkTone(n.status), small: true),
+                          ],
                         ),
-                      OutlinedButton(onPressed: _busy ? null : () => _toggle(n), child: Text(n.enabled ? l.networkDisconnect : l.networkConnect)),
-                      OutlinedButton(onPressed: () => _edit(list, n), child: Text(l.networkEdit)),
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(foregroundColor: c.badInk),
-                        onPressed: _busy ? null : () => _remove(n),
-                        child: Text(l.networkRemove),
-                      ),
-                    ]),
-                  ],
-                ])),
-              if (nets.isNotEmpty && owner)
-                padCard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  CardTitle(l.networkTest, sub: l.networkTestHelp),
-                  ManageInput(controller: _target, mono: true, hint: 'gitlab.corp.local:443', keyboardType: TextInputType.url),
-                  const SizedBox(height: 10),
-                  ManageField(
-                    label: l.networkTestThrough,
-                    child: DropdownButtonFormField<int?>(
-                      initialValue: _testNetwork,
-                      isExpanded: true,
-                      items: [
-                        DropdownMenuItem(value: null, child: Text(l.networkTestAuto)),
-                        for (final n in nets.where((n) => n.enabled)) DropdownMenuItem(value: n.id, child: Text(n.name)),
+                        if (n.routes.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              routeText(n.routes),
+                              style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2),
+                            ),
+                          ),
+                        if (n.lastError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: HelpBox(n.lastError!, tone: Tone.bad, copyable: true),
+                          ),
+                        const SizedBox(height: 6),
+                        for (final m in [
+                          if (n.summary != null) n.summary!,
+                          if (n.handshakeAt != null)
+                            '${n.kind == PrivateNetworkKindEnum.wireguard ? l.networkHandshake : l.networkHeartbeat}: ${_ago(l, n.handshakeAt!)}',
+                          if (n.detail != null) n.detail!,
+                          n.webhooks == PrivateNetworkWebhooksEnum.relay
+                              ? l.networkWebhooksRelay
+                              : l.networkWebhooksPolling('${n.pollMinutes}'),
+                          if (n.ca != null) l.networkCaShort(n.ca!.subjects.join(', ')),
+                        ])
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(m, style: hint),
+                          ),
+                        if (owner) ...[
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (n.enabled)
+                                OutlinedButton(
+                                  onPressed: _busy
+                                      ? null
+                                      : () => _run((api) => api.reconnectPrivateNetwork(networkId: n.id), l.networkReconnecting),
+                                  child: Text(l.networkReconnect),
+                                ),
+                              OutlinedButton(
+                                onPressed: _busy ? null : () => _toggle(n),
+                                child: Text(n.enabled ? l.networkDisconnect : l.networkConnect),
+                              ),
+                              OutlinedButton(onPressed: () => _edit(list, n), child: Text(l.networkEdit)),
+                              OutlinedButton(
+                                style: OutlinedButton.styleFrom(foregroundColor: c.badInk),
+                                onPressed: _busy ? null : () => _remove(n),
+                                child: Text(l.networkRemove),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
-                      onChanged: (v) => setState(() => _testNetwork = v),
                     ),
                   ),
-                  FilledButton(onPressed: _testing ? null : _test, child: Text(_testing ? l.networkTesting : l.networkTestRun)),
-                  if (_result != null) Padding(padding: const EdgeInsets.only(top: 10), child: _TestResult(_result!)),
-                ])),
-              if (nets.isNotEmpty) _activity(l, c, nets),
+                if (nets.isNotEmpty && owner)
+                  padCard(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        CardTitle(l.networkTest, sub: l.networkTestHelp),
+                        ManageInput(controller: _target, mono: true, hint: 'gitlab.corp.local:443', keyboardType: TextInputType.url),
+                        const SizedBox(height: 10),
+                        ManageField(
+                          label: l.networkTestThrough,
+                          child: DropdownButtonFormField<int?>(
+                            initialValue: _testNetwork,
+                            isExpanded: true,
+                            items: [
+                              DropdownMenuItem(value: null, child: Text(l.networkTestAuto)),
+                              for (final n in nets.where((n) => n.enabled)) DropdownMenuItem(value: n.id, child: Text(n.name)),
+                            ],
+                            onChanged: (v) => setState(() => _testNetwork = v),
+                          ),
+                        ),
+                        FilledButton(onPressed: _testing ? null : _test, child: Text(_testing ? l.networkTesting : l.networkTestRun)),
+                        if (_result != null) Padding(padding: const EdgeInsets.only(top: 10), child: _TestResult(_result!)),
+                      ],
+                    ),
+                  ),
+                if (nets.isNotEmpty) _activity(l, c, nets),
+              ],
             ],
-          ]);
+          );
         },
       ),
     );
@@ -277,51 +334,73 @@ class _NetworksScreenState extends ConsumerState<NetworksScreen> {
   Widget _activity(AppLocalizations l, Agnts c, List<PrivateNetwork> nets) {
     final a = ref.watch(networkActivityProvider(_activityFilter)).value;
     String nameOf(int? id) => id == null ? '—' : nets.where((n) => n.id == id).firstOrNull?.name ?? l.networkGone;
-    return padCard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      CardTitle(l.networkActivity),
-      ManageField(
-        label: l.networkActivityNetwork,
-        child: DropdownButtonFormField<int?>(
-          initialValue: _activityFilter,
-          isExpanded: true,
-          items: [
-            DropdownMenuItem(value: null, child: Text(l.networkActivityAll)),
-            for (final n in nets) DropdownMenuItem(value: n.id, child: Text(n.name)),
-          ],
-          onChanged: (v) => setState(() => _activityFilter = v),
-        ),
-      ),
-      if (a == null)
-        const LinearProgressIndicator()
-      else ...[
-        Text(l.networkActivityCounts('${a.today}', '${a.refused}'), style: TextStyle(fontSize: 14, color: c.ink2)),
-        if (a.dials.isNotEmpty)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () => setState(() => _showActivity = !_showActivity),
-              child: Text(_showActivity ? l.networkActivityHide : l.networkActivityShow),
+    return padCard(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CardTitle(l.networkActivity),
+          ManageField(
+            label: l.networkActivityNetwork,
+            child: DropdownButtonFormField<int?>(
+              initialValue: _activityFilter,
+              isExpanded: true,
+              items: [
+                DropdownMenuItem(value: null, child: Text(l.networkActivityAll)),
+                for (final n in nets) DropdownMenuItem(value: n.id, child: Text(n.name)),
+              ],
+              onChanged: (v) => setState(() => _activityFilter = v),
             ),
           ),
-        if (_showActivity)
-          for (final d in a.dials.take(100))
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(d.target, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
-                    Text(
-                      [TimeOfDay.fromDateTime(d.at.toLocal()).format(context), nameOf(d.network), d.ticket ?? d.source_].join(' · '),
-                      style: TextStyle(fontSize: 12, color: c.ink3),
-                    ),
-                  ]),
+          if (a == null)
+            const LinearProgressIndicator()
+          else ...[
+            Text(l.networkActivityCounts('${a.today}', '${a.refused}'), style: TextStyle(fontSize: 14, color: c.ink2)),
+            if (a.dials.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () => setState(() => _showActivity = !_showActivity),
+                  child: Text(_showActivity ? l.networkActivityHide : l.networkActivityShow),
                 ),
-                ToneBadge(d.ok ? '${byteText(d.bytesIn)} / ${byteText(d.bytesOut)}' : l.networkRefused, d.ok ? Tone.ok : Tone.bad, small: true),
-              ]),
-            ),
-      ],
-    ]));
+              ),
+            if (_showActivity)
+              for (final d in a.dials.take(100))
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              d.target,
+                              style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink),
+                            ),
+                            Text(
+                              [
+                                TimeOfDay.fromDateTime(d.at.toLocal()).format(context),
+                                nameOf(d.network),
+                                d.ticket ?? d.source_,
+                              ].join(' · '),
+                              style: TextStyle(fontSize: 12, color: c.ink3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ToneBadge(
+                        d.ok ? '${byteText(d.bytesIn)} / ${byteText(d.bytesOut)}' : l.networkRefused,
+                        d.ok ? Tone.ok : Tone.bad,
+                        small: true,
+                      ),
+                    ],
+                  ),
+                ),
+          ],
+        ],
+      ),
+    );
   }
 }
 

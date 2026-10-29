@@ -331,7 +331,10 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
                   Text(l.draftsPublishSub(accepted.length, host), style: TextStyle(fontSize: 14, height: 1.45, color: c.ink3)),
                   if (old != null) ...[
                     const SizedBox(height: 10),
-                    HelpBox(l.draftsHeadMoved(old.headSha.substring(0, 7), head.length >= 7 ? head.substring(0, 7) : head, host), tone: Tone.warn),
+                    HelpBox(
+                      l.draftsHeadMoved(old.headSha.substring(0, 7), head.length >= 7 ? head.substring(0, 7) : head, host),
+                      tone: Tone.warn,
+                    ),
                   ],
                   const SizedBox(height: 10),
                   ConstrainedBox(
@@ -347,8 +350,15 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
                               runSpacing: 2,
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                ToneBadge(x.kind == ReviewDraftKindEnum.finding ? (x.severity ?? '') : _kind(l, x.kind), Tone.gray, small: true),
-                                Text(x.title ?? (x.body.length > 80 ? x.body.substring(0, 80) : x.body), style: TextStyle(fontSize: 13.5, color: c.ink)),
+                                ToneBadge(
+                                  x.kind == ReviewDraftKindEnum.finding ? (x.severity ?? '') : _kind(l, x.kind),
+                                  Tone.gray,
+                                  small: true,
+                                ),
+                                Text(
+                                  x.title ?? (x.body.length > 80 ? x.body.substring(0, 80) : x.body),
+                                  style: TextStyle(fontSize: 13.5, color: c.ink),
+                                ),
                                 if (x.path != null)
                                   Text(
                                     '${x.path}${x.line != null ? ':${x.line}' : ''}',
@@ -427,7 +437,8 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: HelpBox(l.pullsFilesError(d.filesError!), tone: Tone.warn),
                 ),
-              if (pullReviewing(d)) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: HelpBox(l.draftsReviewingNow(review?.key ?? ''))),
+              if (pullReviewing(d))
+                Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: HelpBox(l.draftsReviewingNow(review?.key ?? ''))),
               if (drafts != null && drafts.isNotEmpty) _draftsPanel(context, d, drafts),
               ..._conversation(context, d, drafts),
             ],
@@ -486,10 +497,7 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
                   child: Text(latestReview(d) != null ? l.draftsReviewAgainBtn : l.draftsReviewWithBtn),
                 ),
               if (d.own && d.ticketKey != null)
-                OutlinedButton(
-                  onPressed: () => context.push('/tickets/${d.ticketKey}'),
-                  child: Text(l.pullsOwnTicket(d.ticketKey!)),
-                ),
+                OutlinedButton(onPressed: () => context.push('/tickets/${d.ticketKey}'), child: Text(l.pullsOwnTicket(d.ticketKey!))),
               OutlinedButton(onPressed: () => openLink(context, p.url), child: Text(l.mpullsCopyLink(host))),
             ],
           ),
@@ -503,29 +511,41 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
     final reviews = d.reviews ?? const <PullReviewRef>[];
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.reviewsHistory, trailing: reviews.isEmpty ? null : Text('${reviews.length}')),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: reviews.isEmpty
-            ? HCard(child: Text(l.reviewsHistoryEmpty, style: TextStyle(color: c.ink3)))
-            : ListGroup(children: [
-                for (final (i, r) in reviews.indexed)
-                  ListRow(
-                    title: r.key,
-                    subtitle: [
-                      if ((r.headSha ?? '').length >= 7) l.reviewsReviewedAt(r.headSha!.substring(0, 7)),
-                      ciAgo(l, r.createdAt),
-                    ].join(' · '),
-                    trailing: Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                      if (i == 0 && (r.headSha ?? '').isNotEmpty && r.headSha != d.pull.headSha) ToneBadge(l.reviewsNewCommits, Tone.warn, small: true),
-                      StateBadge(r.state, kind: TicketKind.review),
-                    ]),
-                    onTap: () => context.push('/tickets/${r.key}'),
-                  ),
-              ]),
-      ),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l.reviewsHistory, trailing: reviews.isEmpty ? null : Text('${reviews.length}')),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: reviews.isEmpty
+              ? HCard(
+                  child: Text(l.reviewsHistoryEmpty, style: TextStyle(color: c.ink3)),
+                )
+              : ListGroup(
+                  children: [
+                    for (final (i, r) in reviews.indexed)
+                      ListRow(
+                        title: r.key,
+                        subtitle: [
+                          if ((r.headSha ?? '').length >= 7) l.reviewsReviewedAt(r.headSha!.substring(0, 7)),
+                          ciAgo(l, r.createdAt),
+                        ].join(' · '),
+                        trailing: Wrap(
+                          spacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            if (i == 0 && (r.headSha ?? '').isNotEmpty && r.headSha != d.pull.headSha)
+                              ToneBadge(l.reviewsNewCommits, Tone.warn, small: true),
+                            StateBadge(r.state, kind: TicketKind.review),
+                          ],
+                        ),
+                        onTap: () => context.push('/tickets/${r.key}'),
+                      ),
+                  ],
+                ),
+        ),
+      ],
+    );
   }
 
   Widget _draftsPanel(BuildContext context, PullDetail d, List<ReviewDraft> drafts) {
@@ -560,9 +580,12 @@ class _PullScreenState extends ConsumerState<PullScreen> implements PullOps {
               children: [
                 ToneBadge(l.draftsNAccepted('${n[ReviewDraftStateEnum.accepted]}'), Tone.ok, small: true),
                 ToneBadge(l.draftsNDraft(open), Tone.gray, small: true),
-                if (n[ReviewDraftStateEnum.dismissed]! > 0) ToneBadge(l.draftsNDismissed('${n[ReviewDraftStateEnum.dismissed]}'), Tone.gray, small: true),
-                if (n[ReviewDraftStateEnum.published]! > 0) ToneBadge(l.draftsNPublished('${n[ReviewDraftStateEnum.published]}'), Tone.info, small: true),
-                if (n[ReviewDraftStateEnum.outdated]! > 0) ToneBadge(l.draftsNOutdated('${n[ReviewDraftStateEnum.outdated]}'), Tone.warn, small: true),
+                if (n[ReviewDraftStateEnum.dismissed]! > 0)
+                  ToneBadge(l.draftsNDismissed('${n[ReviewDraftStateEnum.dismissed]}'), Tone.gray, small: true),
+                if (n[ReviewDraftStateEnum.published]! > 0)
+                  ToneBadge(l.draftsNPublished('${n[ReviewDraftStateEnum.published]}'), Tone.info, small: true),
+                if (n[ReviewDraftStateEnum.outdated]! > 0)
+                  ToneBadge(l.draftsNOutdated('${n[ReviewDraftStateEnum.outdated]}'), Tone.warn, small: true),
               ],
             ),
             const SizedBox(height: 8),

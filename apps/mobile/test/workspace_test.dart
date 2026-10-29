@@ -13,49 +13,49 @@ import 'package:agnts_mobile/theme.dart';
 import 'package:agnts_mobile/widgets/workspace.dart';
 
 Widget _app(Widget child, {List overrides = const []}) => ProviderScope(
-      overrides: [...overrides],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: child),
-      ),
-    );
+  overrides: [...overrides],
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    locale: const Locale('en'),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: child),
+  ),
+);
 
 Ticket _ticket(WaitReason? reason, {String? message}) => Ticket(
-      key: 'PAY-7',
-      source_: TicketSource_Enum.jira,
-      title: 't',
-      description: '',
-      priority: 'medium',
-      state: TicketState.new_,
-      revision: 0,
-      turns: 0,
-      branch: '',
-      prUrl: '',
-      kind: TicketKind.code,
-      kindAuto: false,
-      skipChecks: false,
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-      waitReason: reason,
-      waitMessage: message,
-    );
+  key: 'PAY-7',
+  source_: TicketSource_Enum.jira,
+  title: 't',
+  description: '',
+  priority: 'medium',
+  state: TicketState.new_,
+  revision: 0,
+  turns: 0,
+  branch: '',
+  prUrl: '',
+  kind: TicketKind.code,
+  kindAuto: false,
+  skipChecks: false,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+  waitReason: reason,
+  waitMessage: message,
+);
 
 QueueStatus _queue() => QueueStatus(
-      running: 2,
-      slots: 2,
-      waiting: QueueStatusWaiting(server: 1),
-      serverQueue: [QueueStatusServerQueueInner(key: 'PAY-7', position: 3, others: 2, estimateSec: 240)],
-      serverQueueLength: 3,
-      capacity: Capacity(budgetMb: 8192, reservedMb: 8192, runs: 4, full: true),
-    );
+  running: 2,
+  slots: 2,
+  waiting: QueueStatusWaiting(server: 1),
+  serverQueue: [QueueStatusServerQueueInner(key: 'PAY-7', position: 3, others: 2, estimateSec: 240)],
+  serverQueueLength: 3,
+  capacity: Capacity(budgetMb: 8192, reservedMb: 8192, runs: 4, full: true),
+);
 
 WorkspaceSummary _ws(int id, String slug) =>
     WorkspaceSummary(id: id, slug: slug, name: slug.toUpperCase(), role: WorkspaceRole.user, members: 2, plan: 'base', slots: 2);
@@ -74,10 +74,12 @@ class _FakeSession extends SessionNotifier {
 
 void main() {
   testWidgets('a ticket in the server queue shows its place and the wait', (tester) async {
-    await tester.pumpWidget(_app(
-      WaitBanner(_ticket(WaitReason.server, message: 'The server is busy.')),
-      overrides: [queueProvider.overrideWith((_) async => _queue())],
-    ));
+    await tester.pumpWidget(
+      _app(
+        WaitBanner(_ticket(WaitReason.server, message: 'The server is busy.')),
+        overrides: [queueProvider.overrideWith((_) async => _queue())],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('In the server queue'), findsOneWidget);
     final body = tester.widget<Text>(find.textContaining('#3 in the server queue')).data!;
@@ -100,10 +102,12 @@ void main() {
 
   test('the current workspace is the chosen one, else the server\'s last one', () async {
     final me = User(id: 1, username: 'ali', lastWorkspace: 'b', workspaces: [_ws(1, 'a'), _ws(2, 'b')]);
-    final c = ProviderContainer(overrides: [
-      meProvider.overrideWith((_) async => me),
-      sessionProvider.overrideWith(() => _FakeSession(const Session(server: 'https://x', token: 't', username: 'ali'))),
-    ]);
+    final c = ProviderContainer(
+      overrides: [
+        meProvider.overrideWith((_) async => me),
+        sessionProvider.overrideWith(() => _FakeSession(const Session(server: 'https://x', token: 't', username: 'ali'))),
+      ],
+    );
     addTearDown(c.dispose);
     await c.read(sessionProvider.future);
     await c.read(meProvider.future);
@@ -119,10 +123,15 @@ void main() {
 
   testWidgets('the switcher appears with more than one workspace', (tester) async {
     final me = User(id: 1, username: 'ali', lastWorkspace: 'a', workspaces: [_ws(1, 'a'), _ws(2, 'b')]);
-    await tester.pumpWidget(_app(const WorkspaceChip(), overrides: [
-      meProvider.overrideWith((_) async => me),
-      sessionProvider.overrideWith(() => _FakeSession(const Session(server: 'https://x', token: 't', username: 'ali'))),
-    ]));
+    await tester.pumpWidget(
+      _app(
+        const WorkspaceChip(),
+        overrides: [
+          meProvider.overrideWith((_) async => me),
+          sessionProvider.overrideWith(() => _FakeSession(const Session(server: 'https://x', token: 't', username: 'ali'))),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('A'), findsOneWidget);
     await tester.tap(find.text('A'));

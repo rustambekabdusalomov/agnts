@@ -64,10 +64,10 @@ class _RepoCodeTabState extends ConsumerState<RepoCodeTab> {
   String get _branch => _ref ?? widget.defaultBranch;
 
   void _go({String dir = '', String? file}) => setState(() {
-        _dir = file == null ? dir : parentOf(file);
-        _file = file;
-        _source = false;
-      });
+    _dir = file == null ? dir : parentOf(file);
+    _file = file;
+    _source = false;
+  });
 
   Future<void> _pickBranch() async {
     final l = AppLocalizations.of(context);
@@ -83,18 +83,29 @@ class _RepoCodeTabState extends ConsumerState<RepoCodeTab> {
       builder: (ctx) => SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.7),
-          child: ListView(shrinkWrap: true, padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), children: [
-            Padding(padding: const EdgeInsets.only(left: 4, bottom: 8), child: Text(l.repoCodeBranch, style: Theme.of(ctx).textTheme.titleLarge)),
-            ListGroup(children: [
-              for (final b in names)
-                ListRow(
-                  title: b,
-                  subtitle: b == widget.defaultBranch ? l.repoDefault : null,
-                  trailing: b == _branch ? HIcon('check', size: 18, color: Agnts.of(ctx).primary, stroke: 2.4) : const SizedBox.shrink(),
-                  onTap: () => Navigator.pop(ctx, b),
-                ),
-            ]),
-          ]),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                child: Text(l.repoCodeBranch, style: Theme.of(ctx).textTheme.titleLarge),
+              ),
+              ListGroup(
+                children: [
+                  for (final b in names)
+                    ListRow(
+                      title: b,
+                      subtitle: b == widget.defaultBranch ? l.repoDefault : null,
+                      trailing: b == _branch
+                          ? HIcon('check', size: 18, color: Agnts.of(ctx).primary, stroke: 2.4)
+                          : const SizedBox.shrink(),
+                      onTap: () => Navigator.pop(ctx, b),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -117,32 +128,46 @@ class _RepoCodeTabState extends ConsumerState<RepoCodeTab> {
     final cur = TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.repoCodeSub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: OutlinedButton.icon(
-            onPressed: _pickBranch,
-            icon: HIcon('down', size: 16, color: c.ink2, stroke: 2.2),
-            label: Text(_branch, style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.repoCodeSub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: _pickBranch,
+              icon: HIcon('down', size: 16, color: c.ink2, stroke: 2.2),
+              label: Text(_branch, style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13)),
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        // Breadcrumbs: Root / a / b
-        Wrap(spacing: 4, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          InkWell(onTap: crumbs.isEmpty ? null : () => _go(), child: Text(l.repoCodeRoot, style: crumbs.isEmpty ? cur : link)),
-          for (final (i, cr) in crumbs.indexed) ...[
-            Text('/', style: TextStyle(color: c.ink3)),
-            if (i == crumbs.length - 1)
-              Text(cr.name, style: cur)
-            else
-              InkWell(onTap: () => _go(dir: cr.path), child: Text(cr.name, style: link)),
-          ],
-        ]),
-        const SizedBox(height: 12),
-        if (_file != null) _fileView(context, _file!) else _folderView(context),
-      ]),
+          const SizedBox(height: 10),
+          // Breadcrumbs: Root / a / b
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              InkWell(
+                onTap: crumbs.isEmpty ? null : () => _go(),
+                child: Text(l.repoCodeRoot, style: crumbs.isEmpty ? cur : link),
+              ),
+              for (final (i, cr) in crumbs.indexed) ...[
+                Text('/', style: TextStyle(color: c.ink3)),
+                if (i == crumbs.length - 1)
+                  Text(cr.name, style: cur)
+                else
+                  InkWell(
+                    onTap: () => _go(dir: cr.path),
+                    child: Text(cr.name, style: link),
+                  ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_file != null) _fileView(context, _file!) else _folderView(context),
+        ],
+      ),
     );
   }
 
@@ -151,29 +176,38 @@ class _RepoCodeTabState extends ConsumerState<RepoCodeTab> {
     final c = Agnts.of(context);
     final tree = ref.watch(_treeProvider((id: widget.repoId, ref: _branch, path: _dir)));
     return switch (tree) {
-      AsyncData(:final value) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      AsyncData(:final value) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           if (value.entries.isEmpty && _dir.isEmpty)
             EmptyState(title: l.repoCodeEmpty)
           else
-            ListGroup(children: [
-              if (_dir.isNotEmpty) _EntryRow(name: '..', dir: true, onTap: () => _go(dir: parentOf(_dir))),
-              for (final e in value.entries)
-                _EntryRow(
-                  name: e.name,
-                  dir: e.type == TreeEntryTypeEnum.dir,
-                  badge: switch (e.type) {
-                    TreeEntryTypeEnum.submodule => l.repoCodeSubmodule,
-                    TreeEntryTypeEnum.symlink => l.repoCodeSymlink,
-                    _ => null,
-                  },
-                  size: e.size,
-                  onTap: switch (e.type) {
-                    TreeEntryTypeEnum.dir => () => _go(dir: e.path),
-                    TreeEntryTypeEnum.submodule => null,
-                    _ => () => _go(file: e.path),
-                  },
-                ),
-            ]),
+            ListGroup(
+              children: [
+                if (_dir.isNotEmpty)
+                  _EntryRow(
+                    name: '..',
+                    dir: true,
+                    onTap: () => _go(dir: parentOf(_dir)),
+                  ),
+                for (final e in value.entries)
+                  _EntryRow(
+                    name: e.name,
+                    dir: e.type == TreeEntryTypeEnum.dir,
+                    badge: switch (e.type) {
+                      TreeEntryTypeEnum.submodule => l.repoCodeSubmodule,
+                      TreeEntryTypeEnum.symlink => l.repoCodeSymlink,
+                      _ => null,
+                    },
+                    size: e.size,
+                    onTap: switch (e.type) {
+                      TreeEntryTypeEnum.dir => () => _go(dir: e.path),
+                      TreeEntryTypeEnum.submodule => null,
+                      _ => () => _go(file: e.path),
+                    },
+                  ),
+              ],
+            ),
           if (value.capped == true)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -181,9 +215,13 @@ class _RepoCodeTabState extends ConsumerState<RepoCodeTab> {
             ),
           if (value.entries.where((e) => e.type == TreeEntryTypeEnum.file && isReadme(e.name)).firstOrNull case final readme?)
             _Readme(repoId: widget.repoId, branch: _branch, entry: readme),
-        ]),
+        ],
+      ),
       AsyncError(:final error) => HelpBox(errorMessage(error, l.commonError), tone: Tone.bad),
-      _ => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
+      _ => const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      ),
     };
   }
 
@@ -193,62 +231,76 @@ class _RepoCodeTabState extends ConsumerState<RepoCodeTab> {
     final blob = ref.watch(_fileProvider((id: widget.repoId, ref: _branch, path: path)));
     return switch (blob) {
       AsyncData(:final value) => () {
-          final content = value.content;
-          final lines = content == null ? null : codeLines(content);
-          final md = isMarkdown(path) && content != null && content.isNotEmpty;
-          final Widget body;
-          if (value.binary) {
-            body = _note(context, l.repoCodeBinary);
-          } else if (value.tooLarge) {
-            body = _note(context, l.repoCodeTooLarge);
-          } else if (content == null || content.isEmpty) {
-            body = _note(context, l.repoCodeEmptyFile);
-          } else if (md && !_source) {
-            body = Padding(padding: const EdgeInsets.all(14), child: ReportMarkdown(content));
-          } else {
-            body = CodeBlock(lines: lines!, path: path);
-          }
-          return Container(
-            decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
-            clipBehavior: Clip.antiAlias,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        final content = value.content;
+        final lines = content == null ? null : codeLines(content);
+        final md = isMarkdown(path) && content != null && content.isNotEmpty;
+        final Widget body;
+        if (value.binary) {
+          body = _note(context, l.repoCodeBinary);
+        } else if (value.tooLarge) {
+          body = _note(context, l.repoCodeTooLarge);
+        } else if (content == null || content.isEmpty) {
+          body = _note(context, l.repoCodeEmptyFile);
+        } else if (md && !_source) {
+          body = Padding(padding: const EdgeInsets.all(14), child: ReportMarkdown(content));
+        } else {
+          body = CodeBlock(lines: lines!, path: path);
+        }
+        return Container(
+          decoration: BoxDecoration(
+            color: c.surface,
+            border: Border.all(color: c.line),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               Container(
                 color: c.graySoft,
                 padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
-                child: Row(children: [
-                  Expanded(
-                    child: Text(
-                      [if (lines != null) l.repoCodeLines(lines.length), fmtBytes(value.size)].join(' · '),
-                      style: TextStyle(fontSize: 13, color: c.ink2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        [if (lines != null) l.repoCodeLines(lines.length), fmtBytes(value.size)].join(' · '),
+                        style: TextStyle(fontSize: 13, color: c.ink2),
+                      ),
                     ),
-                  ),
-                  if (md)
-                    Segmented<bool>(
-                      options: [(false, l.repoCodePreview), (true, l.repoCodeSource)],
-                      value: _source,
-                      onChanged: (v) => setState(() => _source = v),
-                    ),
-                  if (value.url.isNotEmpty)
-                    IconButton(
-                      tooltip: l.repoOpenRun,
-                      icon: Icon(Icons.open_in_new_rounded, size: 18, color: c.ink2),
-                      onPressed: () => openLink(context, value.url),
-                    ),
-                ]),
+                    if (md)
+                      Segmented<bool>(
+                        options: [(false, l.repoCodePreview), (true, l.repoCodeSource)],
+                        value: _source,
+                        onChanged: (v) => setState(() => _source = v),
+                      ),
+                    if (value.url.isNotEmpty)
+                      IconButton(
+                        tooltip: l.repoOpenRun,
+                        icon: Icon(Icons.open_in_new_rounded, size: 18, color: c.ink2),
+                        onPressed: () => openLink(context, value.url),
+                      ),
+                  ],
+                ),
               ),
               body,
               if (lines != null && lines.length > maxCodeLines && (!md || _source))
                 _note(context, l.mrepodetailLinesCapped('$maxCodeLines')),
-            ]),
-          );
-        }(),
+            ],
+          ),
+        );
+      }(),
       AsyncError(:final error) => HelpBox(errorMessage(error, l.commonError), tone: Tone.bad),
-      _ => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
+      _ => const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      ),
     };
   }
 
-  Widget _note(BuildContext context, String text) =>
-      Padding(padding: const EdgeInsets.all(16), child: Text(text, style: TextStyle(color: Agnts.of(context).ink3)));
+  Widget _note(BuildContext context, String text) => Padding(
+    padding: const EdgeInsets.all(16),
+    child: Text(text, style: TextStyle(color: Agnts.of(context).ink3)),
+  );
 }
 
 /// A folder or file row: icon, mono name, a badge for links and submodules, the size.
@@ -267,18 +319,26 @@ class _EntryRow extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-        child: Row(children: [
-          dir ? Icon(Icons.folder_outlined, size: 19, color: c.primary) : HIcon('file', size: 18, color: c.ink3),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(name,
+        child: Row(
+          children: [
+            dir ? Icon(Icons.folder_outlined, size: 19, color: c.primary) : HIcon('file', size: 18, color: c.ink3),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13.5, color: onTap == null ? c.ink3 : c.ink)),
-          ),
-          if (badge != null) Padding(padding: const EdgeInsets.only(left: 6), child: ToneBadge(badge!, Tone.gray, small: true)),
-          if (size != null) Padding(padding: const EdgeInsets.only(left: 8), child: Text(fmtBytes(size!), style: TextStyle(fontSize: 12.5, color: c.ink3))),
-        ]),
+                style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13.5, color: onTap == null ? c.ink3 : c.ink),
+              ),
+            ),
+            if (badge != null) Padding(padding: const EdgeInsets.only(left: 6), child: ToneBadge(badge!, Tone.gray, small: true)),
+            if (size != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(fmtBytes(size!), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -298,25 +358,37 @@ class _Readme extends ConsumerWidget {
     if (content == null || content.isEmpty) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.only(top: 14),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
       clipBehavior: Clip.antiAlias,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Container(
-          color: c.graySoft,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          child: Row(children: [
-            HIcon('file', size: 15, color: c.ink2),
-            const SizedBox(width: 6),
-            Text(entry.name, style: TextStyle(fontSize: 13, color: c.ink2)),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child: isMarkdown(entry.name)
-              ? ReportMarkdown(content)
-              : SelectableText(content, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink)),
-        ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            color: c.graySoft,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            child: Row(
+              children: [
+                HIcon('file', size: 15, color: c.ink2),
+                const SizedBox(width: 6),
+                Text(entry.name, style: TextStyle(fontSize: 13, color: c.ink2)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: isMarkdown(entry.name)
+                ? ReportMarkdown(content)
+                : SelectableText(
+                    content,
+                    style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }

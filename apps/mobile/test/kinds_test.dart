@@ -11,44 +11,50 @@ import 'package:agnts_mobile/widgets/common.dart';
 import 'package:agnts_mobile/widgets/ui.dart';
 
 Widget _app(Widget child) => ProviderScope(
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      ),
-    );
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  ),
+);
 
 Ticket _ticket(TicketKind kind, {bool auto = false, TicketState state = TicketState.new_}) => Ticket(
-      key: 'PAY-1',
-      source_: TicketSource_Enum.jira,
-      title: 't',
-      description: '',
-      priority: 'medium',
-      state: state,
-      revision: 0,
-      turns: 0,
-      branch: '',
-      prUrl: '',
-      kind: kind,
-      kindAuto: auto,
-      skipChecks: false,
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-    );
+  key: 'PAY-1',
+  source_: TicketSource_Enum.jira,
+  title: 't',
+  description: '',
+  priority: 'medium',
+  state: state,
+  revision: 0,
+  turns: 0,
+  branch: '',
+  prUrl: '',
+  kind: kind,
+  kindAuto: auto,
+  skipChecks: false,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+);
 
 void main() {
   testWidgets('a report reads Writing, a change reads Coding', (tester) async {
-    await tester.pumpWidget(_app(const Column(children: [
-      StateBadge(TicketState.coding, kind: TicketKind.plan),
-      StateBadge(TicketState.coding, kind: TicketKind.code),
-      StateBadge(TicketState.done, kind: TicketKind.bug),
-    ])));
+    await tester.pumpWidget(
+      _app(
+        const Column(
+          children: [
+            StateBadge(TicketState.coding, kind: TicketKind.plan),
+            StateBadge(TicketState.coding, kind: TicketKind.code),
+            StateBadge(TicketState.done, kind: TicketKind.bug),
+          ],
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Writing'), findsOneWidget);
     expect(find.text('Coding'), findsOneWidget);
@@ -56,10 +62,9 @@ void main() {
   });
 
   testWidgets('the kind chip marks a kind agnts picked', (tester) async {
-    await tester.pumpWidget(_app(Column(children: [
-      KindChip(_ticket(TicketKind.analysis)),
-      KindChip(_ticket(TicketKind.code, auto: true)),
-    ])));
+    await tester.pumpWidget(
+      _app(Column(children: [KindChip(_ticket(TicketKind.analysis)), KindChip(_ticket(TicketKind.code, auto: true))])),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Analysis'), findsOneWidget);
     expect(find.text('Code · Auto'), findsOneWidget);

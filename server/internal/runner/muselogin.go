@@ -23,7 +23,7 @@ import (
 // it too, so Muse reads the file it is given and writes a refreshed
 // token back into it. (Valid backends, from Muse 1.4.13: file, keychain,
 // keychain_fallback_file.)
-const museFileCredentials = "TBH_CREDENTIAL_BACKEND=file"
+const museFileCredentials = "TBH_CREDENTIAL_BACKEND=file" //nolint:gosec // a setting, not a credential
 
 // museLoginHome is the login container's home: the agent user's real one,
 // on a tmpfs (the root filesystem stays read-only). Muse saves its login

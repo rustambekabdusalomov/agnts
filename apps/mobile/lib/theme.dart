@@ -48,31 +48,75 @@ class Agnts extends ThemeExtension<Agnts> {
   final Color taskSoft, taskInk; // the "Task" source chip
 
   static const light = Agnts(
-    bg: Color(0xFFF5F5F2), surface: Color(0xFFFFFFFF), ink: Color(0xFF16181D), ink2: Color(0xFF555A63), ink3: Color(0xFF6B6F78),
-    line: Color(0xFFE4E2DC), line2: Color(0xFFEFEDE8), line3: Color(0xFFD2CFC6), line4: Color(0xFFD9D6CE),
-    hover: Color(0xFFF2F1ED), field: Color(0xFFFAFAF8),
-    primary: Color(0xFF2E46A8), onPrimary: Color(0xFFFFFFFF), primarySoft: Color(0xFFE9ECF8), primaryInk: Color(0xFF26398C),
-    ring: Color(0xFFDCE2F5), help: Color(0xFFF3F5FC),
-    ok: Color(0xFF1F7A4D), okSoft: Color(0xFFE3F2EA), okInk: Color(0xFF1A6B43),
-    warn: Color(0xFFC98A14), warnSoft: Color(0xFFFBEFD9), warnInk: Color(0xFF8A510A),
-    bad: Color(0xFFB3261E), badSoft: Color(0xFFFBE4E2), badInk: Color(0xFFA3241B),
-    graySoft: Color(0xFFEFEEEA), grayInk: Color(0xFF4A4E57),
-    code: Color(0xFF16181D), codeInk: Color(0xFFE9E7E1), codeDim: Color(0xFF9AA0A8),
-    taskSoft: Color(0xFFF0E8F8), taskInk: Color(0xFF5E3790),
+    bg: Color(0xFFF5F5F2),
+    surface: Color(0xFFFFFFFF),
+    ink: Color(0xFF16181D),
+    ink2: Color(0xFF555A63),
+    ink3: Color(0xFF6B6F78),
+    line: Color(0xFFE4E2DC),
+    line2: Color(0xFFEFEDE8),
+    line3: Color(0xFFD2CFC6),
+    line4: Color(0xFFD9D6CE),
+    hover: Color(0xFFF2F1ED),
+    field: Color(0xFFFAFAF8),
+    primary: Color(0xFF2E46A8),
+    onPrimary: Color(0xFFFFFFFF),
+    primarySoft: Color(0xFFE9ECF8),
+    primaryInk: Color(0xFF26398C),
+    ring: Color(0xFFDCE2F5),
+    help: Color(0xFFF3F5FC),
+    ok: Color(0xFF1F7A4D),
+    okSoft: Color(0xFFE3F2EA),
+    okInk: Color(0xFF1A6B43),
+    warn: Color(0xFFC98A14),
+    warnSoft: Color(0xFFFBEFD9),
+    warnInk: Color(0xFF8A510A),
+    bad: Color(0xFFB3261E),
+    badSoft: Color(0xFFFBE4E2),
+    badInk: Color(0xFFA3241B),
+    graySoft: Color(0xFFEFEEEA),
+    grayInk: Color(0xFF4A4E57),
+    code: Color(0xFF16181D),
+    codeInk: Color(0xFFE9E7E1),
+    codeDim: Color(0xFF9AA0A8),
+    taskSoft: Color(0xFFF0E8F8),
+    taskInk: Color(0xFF5E3790),
   );
 
   static const dark = Agnts(
-    bg: Color(0xFF121317), surface: Color(0xFF1B1D23), ink: Color(0xFFECEBE6), ink2: Color(0xFFB4B6BC), ink3: Color(0xFF8E9199),
-    line: Color(0xFF2C2F37), line2: Color(0xFF24272E), line3: Color(0xFF3A3E46), line4: Color(0xFF3A3E46),
-    hover: Color(0xFF24272E), field: Color(0xFF16181D),
-    primary: Color(0xFF8299EC), onPrimary: Color(0xFF0F1220), primarySoft: Color(0xFF232B4A), primaryInk: Color(0xFFB5C3F3),
-    ring: Color(0xFF2F3A66), help: Color(0xFF1D2340),
-    ok: Color(0xFF5CC28E), okSoft: Color(0xFF183626), okInk: Color(0xFF7FD3A6),
-    warn: Color(0xFFF0B95A), warnSoft: Color(0xFF3A2C12), warnInk: Color(0xFFF0B95A),
-    bad: Color(0xFFF08A80), badSoft: Color(0xFF3D1C1A), badInk: Color(0xFFF08A80),
-    graySoft: Color(0xFF2A2C33), grayInk: Color(0xFFC4C6CB),
-    code: Color(0xFF0D0E11), codeInk: Color(0xFFE9E7E1), codeDim: Color(0xFF9AA0A8),
-    taskSoft: Color(0xFF2E2340), taskInk: Color(0xFFCDB4EE),
+    bg: Color(0xFF121317),
+    surface: Color(0xFF1B1D23),
+    ink: Color(0xFFECEBE6),
+    ink2: Color(0xFFB4B6BC),
+    ink3: Color(0xFF8E9199),
+    line: Color(0xFF2C2F37),
+    line2: Color(0xFF24272E),
+    line3: Color(0xFF3A3E46),
+    line4: Color(0xFF3A3E46),
+    hover: Color(0xFF24272E),
+    field: Color(0xFF16181D),
+    primary: Color(0xFF8299EC),
+    onPrimary: Color(0xFF0F1220),
+    primarySoft: Color(0xFF232B4A),
+    primaryInk: Color(0xFFB5C3F3),
+    ring: Color(0xFF2F3A66),
+    help: Color(0xFF1D2340),
+    ok: Color(0xFF5CC28E),
+    okSoft: Color(0xFF183626),
+    okInk: Color(0xFF7FD3A6),
+    warn: Color(0xFFF0B95A),
+    warnSoft: Color(0xFF3A2C12),
+    warnInk: Color(0xFFF0B95A),
+    bad: Color(0xFFF08A80),
+    badSoft: Color(0xFF3D1C1A),
+    badInk: Color(0xFFF08A80),
+    graySoft: Color(0xFF2A2C33),
+    grayInk: Color(0xFFC4C6CB),
+    code: Color(0xFF0D0E11),
+    codeInk: Color(0xFFE9E7E1),
+    codeDim: Color(0xFF9AA0A8),
+    taskSoft: Color(0xFF2E2340),
+    taskInk: Color(0xFFCDB4EE),
   );
 
   /// The tokens for the current theme: `Agnts.of(context).primary`.
@@ -129,7 +173,10 @@ ThemeData agntsTheme(Brightness brightness) {
         labelLarge: TextStyle(fontFamily: AgntsFonts.sans, fontSize: 15.5, fontWeight: FontWeight.w700),
       );
   final radius12 = BorderRadius.circular(12);
-  OutlineInputBorder field(Color col, [double w = 1]) => OutlineInputBorder(borderRadius: radius12, borderSide: BorderSide(color: col, width: w));
+  OutlineInputBorder field(Color col, [double w = 1]) => OutlineInputBorder(
+    borderRadius: radius12,
+    borderSide: BorderSide(color: col, width: w),
+  );
   final btnShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(14));
   const btnSize = Size(48, 48);
   final btnText = const TextStyle(fontFamily: AgntsFonts.sans, fontSize: 15.5, fontWeight: FontWeight.w700);
@@ -142,18 +189,26 @@ ThemeData agntsTheme(Brightness brightness) {
     splashFactory: NoSplash.splashFactory,
     // iOS: swipe back from anywhere on the page, as native apps do since
     // iOS 26 (Flutter's own gesture starts only at the left edge).
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
-      TargetPlatform.iOS: SwipeablePageTransitionsBuilder(),
-    }),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {TargetPlatform.android: PredictiveBackPageTransitionsBuilder(), TargetPlatform.iOS: SwipeablePageTransitionsBuilder()},
+    ),
     highlightColor: c.hover,
     dividerTheme: DividerThemeData(color: c.line2, thickness: 1, space: 1),
-    appBarTheme: AppBarTheme(backgroundColor: c.bg, foregroundColor: c.ink, elevation: 0, scrolledUnderElevation: 0, surfaceTintColor: Colors.transparent),
+    appBarTheme: AppBarTheme(
+      backgroundColor: c.bg,
+      foregroundColor: c.ink,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+    ),
     cardTheme: CardThemeData(
       color: c.surface,
       elevation: 0,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: BorderSide(color: c.line)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: c.line),
+      ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -211,7 +266,11 @@ ThemeData agntsTheme(Brightness brightness) {
       contentTextStyle: const TextStyle(fontFamily: AgntsFonts.sans, color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
-    dialogTheme: DialogThemeData(backgroundColor: c.surface, surfaceTintColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+    dialogTheme: DialogThemeData(
+      backgroundColor: c.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
     popupMenuTheme: PopupMenuThemeData(color: c.surface, surfaceTintColor: Colors.transparent),
   );
 }

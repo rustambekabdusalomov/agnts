@@ -19,19 +19,26 @@ class Push {
 
   // Android channels the server names in its pushes: everything that needs
   // a look, and the silent steps of a running ticket.
-  static const _channel = AndroidNotificationChannel('agnts', 'Tickets',
-      description: 'Questions, reviews, failures and pushed changes', importance: Importance.high);
-  static const _quietChannel = AndroidNotificationChannel('agnts_progress', 'Ticket progress',
-      description: 'An agent finished a step', importance: Importance.low, playSound: false, enableVibration: false);
+  static const _channel = AndroidNotificationChannel(
+    'agnts',
+    'Tickets',
+    description: 'Questions, reviews, failures and pushed changes',
+    importance: Importance.high,
+  );
+  static const _quietChannel = AndroidNotificationChannel(
+    'agnts_progress',
+    'Ticket progress',
+    description: 'An agent finished a step',
+    importance: Importance.low,
+    playSound: false,
+    enableVibration: false,
+  );
 
   /// Called on app start; [open] handles taps on notifications with the
   /// app route to show (a ticket, lessons, or a CI failure) and the id of
   /// the workspace it is in (0 when the server did not say). [showing]
   /// says whether a route is on screen now: a push about it is not shown.
-  static Future<void> init(
-    void Function(String route, int workspace) open, {
-    bool Function(String route)? showing,
-  }) async {
+  static Future<void> init(void Function(String route, int workspace) open, {bool Function(String route)? showing}) async {
     try {
       await Firebase.initializeApp();
       available = true;
@@ -54,8 +61,7 @@ class Push {
         settings: const InitializationSettings(
           android: AndroidInitializationSettings('@mipmap/ic_launcher'),
           // Permission is asked for once, by Firebase in register.
-          iOS: DarwinInitializationSettings(
-              requestAlertPermission: false, requestBadgePermission: false, requestSoundPermission: false),
+          iOS: DarwinInitializationSettings(requestAlertPermission: false, requestBadgePermission: false, requestSoundPermission: false),
         ),
         onDidReceiveNotificationResponse: (r) {
           final p = r.payload;
@@ -90,12 +96,15 @@ class Push {
       body: n.body,
       payload: jsonEncode(m.data),
       notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(ch.id, ch.name,
-            channelDescription: ch.description,
-            importance: ch.importance,
-            priority: quiet ? Priority.low : Priority.high,
-            playSound: !quiet,
-            tag: tag.isEmpty ? null : tag),
+        android: AndroidNotificationDetails(
+          ch.id,
+          ch.name,
+          channelDescription: ch.description,
+          importance: ch.importance,
+          priority: quiet ? Priority.low : Priority.high,
+          playSound: !quiet,
+          tag: tag.isEmpty ? null : tag,
+        ),
         iOS: DarwinNotificationDetails(
           presentSound: !quiet,
           threadIdentifier: ticket.isEmpty ? null : ticket,
@@ -141,12 +150,12 @@ class Push {
   static Future<void> _send(AgntsApi api, String token, String appVersion) async {
     try {
       await api.getDevicesApi().registerDevice(
-            deviceRegistration: DeviceRegistration(
-              platform: Platform.isIOS ? DeviceRegistrationPlatformEnum.ios : DeviceRegistrationPlatformEnum.android,
-              fcmToken: token,
-              appVersion: appVersion,
-            ),
-          );
+        deviceRegistration: DeviceRegistration(
+          platform: Platform.isIOS ? DeviceRegistrationPlatformEnum.ios : DeviceRegistrationPlatformEnum.android,
+          fcmToken: token,
+          appVersion: appVersion,
+        ),
+      );
     } catch (e) {
       debugPrint('register device: $e');
     }

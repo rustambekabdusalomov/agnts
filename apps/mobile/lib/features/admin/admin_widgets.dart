@@ -23,7 +23,10 @@ class Initials extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(color: c.primarySoft, shape: BoxShape.circle),
-      child: Text(text.isEmpty ? '?' : text, style: TextStyle(color: c.primaryInk, fontSize: size * 0.38, fontWeight: FontWeight.w700)),
+      child: Text(
+        text.isEmpty ? '?' : text,
+        style: TextStyle(color: c.primaryInk, fontSize: size * 0.38, fontWeight: FontWeight.w700),
+      ),
     );
   }
 }
@@ -42,33 +45,56 @@ class PersonRow extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      child: Row(children: [
-        Initials(user),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text.rich(
-              TextSpan(children: [
-                TextSpan(text: nameOf(user)),
-                if (nameSuffix != null) TextSpan(text: ' · $nameSuffix', style: TextStyle(color: c.ink3, fontWeight: FontWeight.w400)),
-              ]),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
+      child: Row(
+        children: [
+          Initials(user),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: nameOf(user)),
+                      if (nameSuffix != null)
+                        TextSpan(
+                          text: ' · $nameSuffix',
+                          style: TextStyle(color: c.ink3, fontWeight: FontWeight.w400),
+                        ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  sub,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, color: c.ink3),
+                ),
+              ],
             ),
-            const SizedBox(height: 1),
-            Text(sub, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: c.ink3)),
-          ]),
-        ),
-        if (trailing != null) ...[const SizedBox(width: 10), trailing!],
-      ]),
+          ),
+          if (trailing != null) ...[const SizedBox(width: 10), trailing!],
+        ],
+      ),
     );
   }
 }
 
 /// Filter chips with counts over a search field, as the cabinet's lists have.
 class FilterBar<T> extends StatelessWidget {
-  const FilterBar({super.key, required this.filters, required this.value, required this.onChanged, required this.hint, required this.onSearch});
+  const FilterBar({
+    super.key,
+    required this.filters,
+    required this.value,
+    required this.onChanged,
+    required this.hint,
+    required this.onSearch,
+  });
   final List<(T, String, int)> filters;
   final T value;
   final ValueChanged<T> onChanged;
@@ -77,13 +103,19 @@ class FilterBar<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SearchBox(hint: hint, onChanged: onSearch),
-      ChipRow(children: [
-        for (final (f, label, count) in filters) FilterChipH(label: label, count: count, selected: f == value, onTap: () => onChanged(f)),
-      ]),
-      const SizedBox(height: 10),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SearchBox(hint: hint, onChanged: onSearch),
+        ChipRow(
+          children: [
+            for (final (f, label, count) in filters)
+              FilterChipH(label: label, count: count, selected: f == value, onTap: () => onChanged(f)),
+          ],
+        ),
+        const SizedBox(height: 10),
+      ],
+    );
   }
 }
 
@@ -138,22 +170,28 @@ class LabeledField extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, color: c.ink)),
-        const SizedBox(height: 7),
-        TextField(
-          controller: controller,
-          keyboardType: keyboard,
-          obscureText: obscure,
-          autocorrect: autocorrect && !obscure,
-          enableSuggestions: autocorrect && !obscure,
-          textCapitalization: TextCapitalization.none,
-          maxLength: maxLength,
-          onChanged: onChanged,
-          inputFormatters: formatters,
-          decoration: InputDecoration(counterText: '', helperText: help, helperMaxLines: 3),
-        ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, color: c.ink),
+          ),
+          const SizedBox(height: 7),
+          TextField(
+            controller: controller,
+            keyboardType: keyboard,
+            obscureText: obscure,
+            autocorrect: autocorrect && !obscure,
+            enableSuggestions: autocorrect && !obscure,
+            textCapitalization: TextCapitalization.none,
+            maxLength: maxLength,
+            onChanged: onChanged,
+            inputFormatters: formatters,
+            decoration: InputDecoration(counterText: '', helperText: help, helperMaxLines: 3),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -222,29 +260,44 @@ class _FormSheetState extends State<_FormSheet> {
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
-          if (widget.sub != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(widget.sub!, style: TextStyle(fontSize: 14, color: c.ink3))),
-          const SizedBox(height: 16),
-          ...widget.fields(setState),
-          if (_err != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(_err!, style: TextStyle(color: c.badInk, fontSize: 13.5, fontWeight: FontWeight.w700)),
-            ),
-          Row(children: [
-            Expanded(child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: Text(l.mobileCancel))),
-            const SizedBox(width: 10),
-            Expanded(
-              child: FilledButton(
-                onPressed: _busy || !ok ? null : _go,
-                child: _busy
-                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
-                    : Text(widget.action, maxLines: 1, overflow: TextOverflow.ellipsis),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
+            if (widget.sub != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(widget.sub!, style: TextStyle(fontSize: 14, color: c.ink3)),
               ),
+            const SizedBox(height: 16),
+            ...widget.fields(setState),
+            if (_err != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  _err!,
+                  style: TextStyle(color: c.badInk, fontSize: 13.5, fontWeight: FontWeight.w700),
+                ),
+              ),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: Text(l.mobileCancel)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _busy || !ok ? null : _go,
+                    child: _busy
+                        ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
+                        : Text(widget.action, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -264,8 +317,15 @@ class LoadLine extends StatelessWidget {
 }
 
 /// The tone of a workspace's state badge.
-Tone wsTone(PlatformWorkspace w) => w.deletedAt != null ? Tone.bad : (w.suspended ?? false) ? Tone.warn : Tone.ok;
+Tone wsTone(PlatformWorkspace w) => w.deletedAt != null
+    ? Tone.bad
+    : (w.suspended ?? false)
+    ? Tone.warn
+    : Tone.ok;
 
 /// A workspace's state label.
-String wsState(AppLocalizations l, PlatformWorkspace w) =>
-    w.deletedAt != null ? l.platformDeleted : (w.suspended ?? false) ? l.platformSuspended : l.platformActive;
+String wsState(AppLocalizations l, PlatformWorkspace w) => w.deletedAt != null
+    ? l.platformDeleted
+    : (w.suspended ?? false)
+    ? l.platformSuspended
+    : l.platformActive;

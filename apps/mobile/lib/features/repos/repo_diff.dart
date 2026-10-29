@@ -47,26 +47,47 @@ class _RepoFileDiffState extends State<RepoFileDiff> {
     final f = widget.file;
     return Container(
       margin: const EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
       clipBehavior: Clip.antiAlias,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        InkWell(
-          onTap: f.diff.isEmpty ? null : () => setState(() => _open = !_open),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                child: Text(f.path, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: f.diff.isEmpty ? null : () => setState(() => _open = !_open),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      f.path,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '+${f.add}',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '−${f.del}',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.badInk),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Text('+${f.add}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk)),
-              const SizedBox(width: 5),
-              Text('−${f.del}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.badInk)),
-            ]),
+            ),
           ),
-        ),
-        if (_open && f.diff.isNotEmpty) CodeBlock(lines: numberDiff(f.diff), path: f.path, diff: true),
-      ]),
+          if (_open && f.diff.isNotEmpty) CodeBlock(lines: numberDiff(f.diff), path: f.path, diff: true),
+        ],
+      ),
     );
   }
 }
@@ -115,11 +136,11 @@ class _CodeBlockState extends State<CodeBlock> {
   }
 
   static Color? _bg(DiffKind k) => switch (k) {
-        DiffKind.add => _codeAdd,
-        DiffKind.del => _codeDel,
-        DiffKind.hunk => _codeHunk,
-        DiffKind.plain => null,
-      };
+    DiffKind.add => _codeAdd,
+    DiffKind.del => _codeDel,
+    DiffKind.hunk => _codeHunk,
+    DiffKind.plain => null,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -137,48 +158,63 @@ class _CodeBlockState extends State<CodeBlock> {
     final numWidth = tp.width;
     tp.dispose();
     Widget num(int? n) => SizedBox(
-          width: numWidth.ceilToDouble() + 1,
-          child: Text(n?.toString() ?? '', textAlign: TextAlign.right, softWrap: false, style: numStyle),
-        );
+      width: numWidth.ceilToDouble() + 1,
+      child: Text(n?.toString() ?? '', textAlign: TextAlign.right, softWrap: false, style: numStyle),
+    );
     return Container(
       color: c.code,
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          decoration: BoxDecoration(border: Border(right: BorderSide(color: const Color(0xFF7F7F7F).withValues(alpha: 0.25)))),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
-            for (final l in lines)
-              Container(
-                color: _bg(l.kind),
-                padding: const EdgeInsets.only(left: 4, right: 8),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  if (diff) ...[num(l.old), const SizedBox(width: 6)],
-                  num(l.neu),
-                ]),
-              ),
-          ]),
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, box) => SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: box.maxWidth),
-                child: IntrinsicWidth(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    for (final (i, l) in lines.indexed)
-                      Container(
-                        padding: const EdgeInsets.only(left: 10, right: 14),
-                        color: _bg(l.kind),
-                        child: _line(l, _spans?[i], style.copyWith(color: c.codeInk)),
-                      ),
-                  ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(color: const Color(0xFF7F7F7F).withValues(alpha: 0.25))),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final l in lines)
+                  Container(
+                    color: _bg(l.kind),
+                    padding: const EdgeInsets.only(left: 4, right: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (diff) ...[num(l.old), const SizedBox(width: 6)],
+                        num(l.neu),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, box) => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: box.maxWidth),
+                  child: IntrinsicWidth(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (i, l) in lines.indexed)
+                          Container(
+                            padding: const EdgeInsets.only(left: 10, right: 14),
+                            color: _bg(l.kind),
+                            child: _line(l, _spans?[i], style.copyWith(color: c.codeInk)),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -190,7 +226,10 @@ class _CodeBlockState extends State<CodeBlock> {
       return Text(text.isEmpty ? ' ' : text, softWrap: false, style: l.kind == DiffKind.hunk ? style.copyWith(color: _hunkInk) : style);
     }
     return Text.rich(
-      TextSpan(text: lead, children: [for (final sp in spans) TextSpan(text: sp.text, style: styleFor(sp.scope))]),
+      TextSpan(
+        text: lead,
+        children: [for (final sp in spans) TextSpan(text: sp.text, style: styleFor(sp.scope))],
+      ),
       softWrap: false,
       style: style,
     );

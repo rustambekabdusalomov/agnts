@@ -85,16 +85,17 @@ class _InviteScreenState extends ConsumerState<InviteScreen> {
     final clientId = info?.googleClientId ?? '';
     return AuthScaffold(
       title: p != null ? l.accountInviteTitle(p.workspace) : l.accountInviteJoin,
-      links: [
-        if (!signedIn && p != null) AuthLink(l.accountSignIn, prefix: l.accountHaveAccount, onTap: () => goSignIn(context, _server)),
-      ],
+      links: [if (!signedIn && p != null) AuthLink(l.accountSignIn, prefix: l.accountHaveAccount, onTap: () => goSignIn(context, _server))],
       children: [
         if (preview.isLoading)
-          const Center(child: Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator()))
+          const Center(
+            child: Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator()),
+          )
         else if (preview.hasError || p == null)
           HelpBox(l.accountInviteInvalid, tone: Tone.bad)
         else ...[
-          if (p.invitedBy?.isNotEmpty == true) Padding(padding: const EdgeInsets.only(bottom: 8), child: HelpBox(l.accountInviteBy(p.invitedBy!))),
+          if (p.invitedBy?.isNotEmpty == true)
+            Padding(padding: const EdgeInsets.only(bottom: 8), child: HelpBox(l.accountInviteBy(p.invitedBy!))),
           if (p.email?.isNotEmpty == true) Text(l.accountInviteFor(p.email!)),
           const SizedBox(height: 12),
           if (signedIn)
@@ -102,15 +103,17 @@ class _InviteScreenState extends ConsumerState<InviteScreen> {
           else if (clientId.isNotEmpty) ...[
             Text(l.accountInviteGoogle),
             const SizedBox(height: 12),
-            FilledButton(onPressed: _busy ? null : () => _google(clientId), child: Text(_busy ? l.authGoogleRedirecting : l.mobileGoogleContinue)),
+            FilledButton(
+              onPressed: _busy ? null : () => _google(clientId),
+              child: Text(_busy ? l.authGoogleRedirecting : l.mobileGoogleContinue),
+            ),
           ] else ...[
             Text(l.accountInviteSignInFirst),
             const SizedBox(height: 12),
             FilledButton(
-              onPressed: () => context.push(withServer('/signup', _server, {
-                'invite': widget.token,
-                if (p.email?.isNotEmpty == true) 'email': p.email!,
-              })),
+              onPressed: () => context.push(
+                withServer('/signup', _server, {'invite': widget.token, if (p.email?.isNotEmpty == true) 'email': p.email!}),
+              ),
               child: Text(l.accountSignUp),
             ),
           ],

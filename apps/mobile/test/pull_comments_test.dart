@@ -10,59 +10,101 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child, List<PullThread> threads, {bool canEdit = true}) => ProviderScope(
-      overrides: [
-        canEditProvider.overrideWith((ref) => canEdit),
-        pullThreadsProvider((3, 7)).overrideWith((ref) async => threads),
-        reviewDraftsProvider('PAY-40').overrideWith((ref) async => _drafts),
-      ],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      ),
-    );
+  overrides: [
+    canEditProvider.overrideWith((ref) => canEdit),
+    pullThreadsProvider((3, 7)).overrideWith((ref) async => threads),
+    reviewDraftsProvider('PAY-40').overrideWith((ref) async => _drafts),
+  ],
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  ),
+);
 
 Ticket _ticket({TicketKind kind = TicketKind.code, TicketState state = TicketState.done}) => Ticket(
-      key: 'PAY-40',
-      source_: TicketSource_Enum.jira,
-      title: 'Fix refunds',
-      description: '',
-      priority: 'high',
-      state: state,
-      revision: 1,
-      turns: 3,
-      branch: 'agnts/PAY-40',
-      prUrl: 'https://github.com/acme/api/pull/7',
-      prNumber: 7,
-      repoId: 3,
-      kind: kind,
-      kindAuto: false,
-      skipChecks: false,
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-    );
+  key: 'PAY-40',
+  source_: TicketSource_Enum.jira,
+  title: 'Fix refunds',
+  description: '',
+  priority: 'high',
+  state: state,
+  revision: 1,
+  turns: 3,
+  branch: 'agnts/PAY-40',
+  prUrl: 'https://github.com/acme/api/pull/7',
+  prNumber: 7,
+  repoId: 3,
+  kind: kind,
+  kindAuto: false,
+  skipChecks: false,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+);
 
 PullComment _c(String id, String author, String body, {bool mine = false}) => PullComment(
-      id: id, author: author, body: body, createdAt: DateTime(2026), updatedAt: DateTime(2026), mine: mine, system: false, agnts: false);
+  id: id,
+  author: author,
+  body: body,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+  mine: mine,
+  system: false,
+  agnts: false,
+);
 
 final _threads = [
-  PullThread(id: 'th:A:1', kind: PullThreadKindEnum.inline, path: 'refund.go', line: 12, outdated: false, resolvable: true, resolved: false,
-      comments: [_c('rc:1', 'bob', 'Round half up here, please.')]),
-  PullThread(id: 'ic:2', kind: PullThreadKindEnum.general, outdated: false, resolvable: false, resolved: false,
-      comments: [_c('ic:2', 'me', 'Thanks!', mine: true)]),
-  PullThread(id: 'th:B:3', kind: PullThreadKindEnum.inline, path: 'a.go', line: 1, outdated: false, resolvable: true, resolved: true,
-      comments: [_c('rc:3', 'bob', 'Settled long ago')]),
+  PullThread(
+    id: 'th:A:1',
+    kind: PullThreadKindEnum.inline,
+    path: 'refund.go',
+    line: 12,
+    outdated: false,
+    resolvable: true,
+    resolved: false,
+    comments: [_c('rc:1', 'bob', 'Round half up here, please.')],
+  ),
+  PullThread(
+    id: 'ic:2',
+    kind: PullThreadKindEnum.general,
+    outdated: false,
+    resolvable: false,
+    resolved: false,
+    comments: [_c('ic:2', 'me', 'Thanks!', mine: true)],
+  ),
+  PullThread(
+    id: 'th:B:3',
+    kind: PullThreadKindEnum.inline,
+    path: 'a.go',
+    line: 1,
+    outdated: false,
+    resolvable: true,
+    resolved: true,
+    comments: [_c('rc:3', 'bob', 'Settled long ago')],
+  ),
 ];
 
 ReviewDraft _d(int id, ReviewDraftStateEnum state, String title, {ReviewDraftKindEnum kind = ReviewDraftKindEnum.finding}) => ReviewDraft(
-      id: id, kind: kind, key: 'k$id', severity: 'major', title: title, path: 'refund.go', line: 12, headSha: 'h1',
-      body: '**[major] $title**', edited: false, state: state, createdAt: DateTime(2026), updatedAt: DateTime(2026));
+  id: id,
+  kind: kind,
+  key: 'k$id',
+  severity: 'major',
+  title: title,
+  path: 'refund.go',
+  line: 12,
+  headSha: 'h1',
+  body: '**[major] $title**',
+  edited: false,
+  state: state,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+);
 
 final _drafts = [
   _d(1, ReviewDraftStateEnum.accepted, 'Rounds down'),

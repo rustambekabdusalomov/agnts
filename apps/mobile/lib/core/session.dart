@@ -45,38 +45,40 @@ class SessionNotifier extends AsyncNotifier<Session?> {
     server = _trim(server);
     try {
       final res = await _client(server).getAuthApi().login(
-            loginRequest: LoginRequest(
-              username: username.trim(),
-              password: password,
-              code: code.trim().isEmpty ? null : code.trim(),
-              totpSecret: totpSecret,
-              client: LoginRequestClientEnum.mobile,
-            ),
-          );
+        loginRequest: LoginRequest(
+          username: username.trim(),
+          password: password,
+          code: code.trim().isEmpty ? null : code.trim(),
+          totpSecret: totpSecret,
+          client: LoginRequestClientEnum.mobile,
+        ),
+      );
       await _signedIn(server, res.data);
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       final data = e.response?.data;
       final code = data is Map ? data['code'] : null;
-      throw SignInError(status == 401 && code == 'code_required'
-          ? 'codeRequired'
-          : code == 'totp_setup_required'
-              ? 'totpSetup'
-              : status == 403 && code == 'use_google'
-                  ? 'useGoogle'
-                  : status == 401
-              ? 'credentials'
-              : status == 429
-                  ? 'rateLimited'
-                  : 'server');
+      throw SignInError(
+        status == 401 && code == 'code_required'
+            ? 'codeRequired'
+            : code == 'totp_setup_required'
+            ? 'totpSetup'
+            : status == 403 && code == 'use_google'
+            ? 'useGoogle'
+            : status == 401
+            ? 'credentials'
+            : status == 429
+            ? 'rateLimited'
+            : 'server',
+      );
     }
   }
 
   /// A new two-factor secret for an Admin who signs in without one yet.
   Future<BeginLoginTotp200Response> beginLoginTotp(String server, String username, String password) async {
     final res = await client(server).getAuthApi().beginLoginTotp(
-          beginLoginTotpRequest: BeginLoginTotpRequest(username: username.trim(), password: password),
-        );
+      beginLoginTotpRequest: BeginLoginTotpRequest(username: username.trim(), password: password),
+    );
     return res.data!;
   }
 
@@ -104,7 +106,9 @@ class SessionNotifier extends AsyncNotifier<Session?> {
   Future<void> signInWithGoogle(String server, String idToken, {String? invite}) async {
     server = _trim(server);
     try {
-      final res = await _client(server).getAuthApi().signInWithGoogle(googleSignInRequest: GoogleSignInRequest(idToken: idToken, invite: invite));
+      final res = await _client(server).getAuthApi().signInWithGoogle(
+        googleSignInRequest: GoogleSignInRequest(idToken: idToken, invite: invite),
+      );
       await _signedIn(server, res.data);
     } on DioException catch (e) {
       final data = e.response?.data;
@@ -126,8 +130,10 @@ class SessionNotifier extends AsyncNotifier<Session?> {
   /// reset, email confirmation, invite preview).
   static AgntsApi client(String server) => _client(_trim(server));
 
-  static AgntsApi _client(String server) =>
-      AgntsApi(dio: Dio(BaseOptions(baseUrl: '$server/api', connectTimeout: const Duration(seconds: 15))), interceptors: []);
+  static AgntsApi _client(String server) => AgntsApi(
+    dio: Dio(BaseOptions(baseUrl: '$server/api', connectTimeout: const Duration(seconds: 15))),
+    interceptors: [],
+  );
 
   Future<void> _signedIn(String server, LoginResponse? res) async {
     final token = res?.token;

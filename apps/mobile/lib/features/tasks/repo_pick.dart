@@ -23,16 +23,19 @@ class RepoPick {
 
   /// The group's active members, in the group's order.
   static List<int> members(RepoGroup g) => [
-        for (final m in g.members)
-          if (!m.archived) m.repoId,
-      ];
+    for (final m in g.members)
+      if (!m.archived) m.repoId,
+  ];
 
   RepoPick pickGroup(RepoGroup g) => RepoPick(ids: members(g), group: g);
 
   /// Adds a repository at the end, or drops it when picked.
   RepoPick toggle(int id) => ids.contains(id) ? remove(id) : _edit([...ids, id]);
 
-  RepoPick remove(int id) => _edit([for (final x in ids) if (x != id) x]);
+  RepoPick remove(int id) => _edit([
+    for (final x in ids)
+      if (x != id) x,
+  ]);
 
   RepoPick _edit(List<int> next) => next.isEmpty ? const RepoPick() : RepoPick(ids: next, group: group, edited: group != null);
 

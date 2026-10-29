@@ -48,14 +48,14 @@ String modelLabel(String id) {
 }
 
 String _stageLabel(AppLocalizations l, StageSpendStageEnum s, bool report) => switch (s) {
-      StageSpendStageEnum.analyze => l.spendStageAnalyze,
-      StageSpendStageEnum.coding => report ? l.spendStageWriting : l.spendStageCoding,
-      StageSpendStageEnum.retry => l.spendStageRetry,
-      StageSpendStageEnum.review => l.spendStageReview,
-      StageSpendStageEnum.learn => l.spendStageLearn,
-      StageSpendStageEnum.helper => l.spendStageHelper,
-      StageSpendStageEnum.preview => l.spendStagePreview,
-    };
+  StageSpendStageEnum.analyze => l.spendStageAnalyze,
+  StageSpendStageEnum.coding => report ? l.spendStageWriting : l.spendStageCoding,
+  StageSpendStageEnum.retry => l.spendStageRetry,
+  StageSpendStageEnum.review => l.spendStageReview,
+  StageSpendStageEnum.learn => l.spendStageLearn,
+  StageSpendStageEnum.helper => l.spendStageHelper,
+  StageSpendStageEnum.preview => l.spendStagePreview,
+};
 
 /// A ticket's token spend: totals, then a row per stage with its model.
 class SpendFold extends StatelessWidget {
@@ -77,17 +77,20 @@ class SpendFold extends StatelessWidget {
       hint: s == null ? null : tok(ioTokens(s)),
       child: s == null
           ? Text(l.spendEmpty, style: TextStyle(color: c.ink3))
-          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(l.spendSub(tok(ioTokens(s)), fmtUsd(s.costUsd, loc)), style: TextStyle(fontSize: 14, color: c.ink2, height: 1.4)),
-              const SizedBox(height: 10),
-              Grid2(gap: 8, children: [Fact(l.spendInput, tok(s.input)), Fact(l.spendOutput, tok(s.output))]),
-              const SizedBox(height: 8),
-              Text(l.spendCache(tok(s.cacheRead), tok(s.cacheWrite)), style: hint),
-              for (final st in stages) _StageRow(stage: st, top: stages.map((x) => ioTokens(x.spend)).fold(1, math.max), report: report),
-              if (stages.any((x) => x.partial)) ...[const SizedBox(height: 8), Text(l.spendPartial, style: hint)],
-              const SizedBox(height: 10),
-              Text(l.spendCostNote, style: hint.copyWith(fontSize: 12.5)),
-            ]),
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.spendSub(tok(ioTokens(s)), fmtUsd(s.costUsd, loc)), style: TextStyle(fontSize: 14, color: c.ink2, height: 1.4)),
+                const SizedBox(height: 10),
+                Grid2(gap: 8, children: [Fact(l.spendInput, tok(s.input)), Fact(l.spendOutput, tok(s.output))]),
+                const SizedBox(height: 8),
+                Text(l.spendCache(tok(s.cacheRead), tok(s.cacheWrite)), style: hint),
+                for (final st in stages) _StageRow(stage: st, top: stages.map((x) => ioTokens(x.spend)).fold(1, math.max), report: report),
+                if (stages.any((x) => x.partial)) ...[const SizedBox(height: 8), Text(l.spendPartial, style: hint)],
+                const SizedBox(height: 10),
+                Text(l.spendCostNote, style: hint.copyWith(fontSize: 12.5)),
+              ],
+            ),
     );
   }
 }
@@ -108,26 +111,43 @@ class _StageRow extends StatelessWidget {
     final cost = stage.partial && sp.costUsd == 0 ? '—' : fmtUsd(sp.costUsd, loc);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: c.line2))),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: c.line2)),
+      ),
       margin: const EdgeInsets.only(top: 10),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Expanded(
-            child: Text.rich(TextSpan(children: [
-              TextSpan(text: _stageLabel(l, stage.stage, report)),
-              TextSpan(text: ' · ${modelLabel(stage.model)}', style: TextStyle(color: c.ink3)),
-            ])),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: _stageLabel(l, stage.stage, report)),
+                      TextSpan(
+                        text: ' · ${modelLabel(stage.model)}',
+                        style: TextStyle(color: c.ink3),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Text(
+                fmtTokens(n, loc),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontFeatures: [FontFeature.tabularFigures()]),
+              ),
+            ],
           ),
-          Text(fmtTokens(n, loc), style: const TextStyle(fontWeight: FontWeight.w700, fontFeatures: [FontFeature.tabularFigures()])),
-        ]),
-        const SizedBox(height: 6),
-        Bar(value: n / top),
-        const SizedBox(height: 6),
-        Text(
-          '${l.spendCalls(stage.calls)} · ${l.spendCache(fmtTokens(sp.cacheRead, loc), fmtTokens(sp.cacheWrite, loc))} · $cost',
-          style: TextStyle(fontSize: 13, color: c.ink3, height: 1.4),
-        ),
-      ]),
+          const SizedBox(height: 6),
+          Bar(value: n / top),
+          const SizedBox(height: 6),
+          Text(
+            '${l.spendCalls(stage.calls)} · ${l.spendCache(fmtTokens(sp.cacheRead, loc), fmtTokens(sp.cacheWrite, loc))} · $cost',
+            style: TextStyle(fontSize: 13, color: c.ink3, height: 1.4),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**createPlatformAdmin**](PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
 [**deletePlatformAdmin**](PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [**downloadPlatformRun**](PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
+[**getMuseProvider**](PlatformApi.md#getmuseprovider) | **GET** /platform/muse-provider | Where runs on agnts&#39;s Muse credits go, the fallback provider, and whether agnts&#39;s Meta account is out (Admin)
 [**getPlatformOverview**](PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
 [**getPlatformRun**](PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
 [**getPlatformRunPrompt**](PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
@@ -23,7 +24,10 @@ Method | HTTP request | Description
 [**listPlatformRuns**](PlatformApi.md#listplatformruns) | **GET** /platform/runs | Run history across every workspace, newest first, without prompts or transcripts (Admin)
 [**listPlatformUsers**](PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user, with their workspaces and last sign-in (Admin)
 [**listPlatformWorkspaces**](PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
+[**setCreditLimit**](PlatformApi.md#setcreditlimit) | **PUT** /platform/users/{id}/credit-limit | Set the most credits a person may spend on agnts&#39;s Muse key per calendar month, free and bought together (Admin); 0 is no limit
+[**setFallbackLimit**](PlatformApi.md#setfallbacklimit) | **PUT** /platform/users/{id}/fallback-limit | Set the most credits a person may spend on the fallback Muse provider (Baseten) per calendar month (Admin); null is the server&#39;s default, 0 is no limit
 [**setFreeCredits**](PlatformApi.md#setfreecredits) | **PUT** /platform/users/{id}/free-credits | Set how many free credits a person may spend on agnts&#39;s Muse key (Admin); 0 gives none
+[**setMuseProvider**](PlatformApi.md#setmuseprovider) | **PUT** /platform/muse-provider | Choose where runs on agnts&#39;s Muse credits go (Admin); agnts&#39;s Meta account is tried again from the next run
 [**setRunHistorySettings**](PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
 [**updatePlatformFeedback**](PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [**updatePlatformUser**](PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
@@ -161,6 +165,47 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: Not defined
  - **Accept**: application/x-ndjson, application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getMuseProvider**
+> MuseProvider getMuseProvider()
+
+Where runs on agnts's Muse credits go, the fallback provider, and whether agnts's Meta account is out (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+
+try {
+    final response = api.getMuseProvider();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->getMuseProvider: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**MuseProvider**](MuseProvider.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -689,6 +734,100 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **setCreditLimit**
+> CreditUsage setCreditLimit(id, setCreditLimitRequest)
+
+Set the most credits a person may spend on agnts's Muse key per calendar month, free and bought together (Admin); 0 is no limit
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int id = 789; // int | 
+final SetCreditLimitRequest setCreditLimitRequest = ; // SetCreditLimitRequest | 
+
+try {
+    final response = api.setCreditLimit(id, setCreditLimitRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->setCreditLimit: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **setCreditLimitRequest** | [**SetCreditLimitRequest**](SetCreditLimitRequest.md)|  | 
+
+### Return type
+
+[**CreditUsage**](CreditUsage.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setFallbackLimit**
+> CreditUsage setFallbackLimit(id, setFallbackLimitRequest)
+
+Set the most credits a person may spend on the fallback Muse provider (Baseten) per calendar month (Admin); null is the server's default, 0 is no limit
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int id = 789; // int | 
+final SetFallbackLimitRequest setFallbackLimitRequest = ; // SetFallbackLimitRequest | 
+
+try {
+    final response = api.setFallbackLimit(id, setFallbackLimitRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->setFallbackLimit: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **setFallbackLimitRequest** | [**SetFallbackLimitRequest**](SetFallbackLimitRequest.md)|  | 
+
+### Return type
+
+[**CreditUsage**](CreditUsage.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **setFreeCredits**
 > FreeCredits setFreeCredits(id, setFreeCreditsRequest)
 
@@ -724,6 +863,51 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**FreeCredits**](FreeCredits.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setMuseProvider**
+> MuseProvider setMuseProvider(setMuseProviderRequest)
+
+Choose where runs on agnts's Muse credits go (Admin); agnts's Meta account is tried again from the next run
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final SetMuseProviderRequest setMuseProviderRequest = ; // SetMuseProviderRequest | 
+
+try {
+    final response = api.setMuseProvider(setMuseProviderRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->setMuseProvider: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **setMuseProviderRequest** | [**SetMuseProviderRequest**](SetMuseProviderRequest.md)|  | 
+
+### Return type
+
+[**MuseProvider**](MuseProvider.md)
 
 ### Authorization
 

@@ -57,7 +57,10 @@ class _CommitReapplySheetState extends State<CommitReapplySheet> {
       }
       setState(() {
         _changes = changes;
-        _picked = {for (final c in changes) if (c.suggested) c.sha};
+        _picked = {
+          for (final c in changes)
+            if (c.suggested) c.sha,
+        };
       });
     } catch (e) {
       if (mounted) setState(() => _error = errorMessage(e, l.commonError));
@@ -79,34 +82,45 @@ class _CommitReapplySheetState extends State<CommitReapplySheet> {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
         child: SingleChildScrollView(
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(l.ticketCommitsReapply, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 6),
-            Text(l.ticketCommitsReapplyHelp, style: grey),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _number,
-              enabled: !_busy,
-              autocorrect: false,
-              enableSuggestions: false,
-              inputFormatters: [LengthLimitingTextInputFormatter(64)],
-              style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
-              decoration: InputDecoration(labelText: l.ticketCommitsNumber('{number}'), hintText: widget.ticket.key),
-              onChanged: (_) => setState(() => _changes = null),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton(onPressed: _busy ? null : () => _go(true), child: Text(l.ticketCommitsPreview)),
-            if (_error.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_error, style: TextStyle(fontSize: 13, color: c.badInk))),
-            if (changes != null && changes.isEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: Text(l.ticketCommitsUpToDate, style: grey)),
-            if (changes != null && changes.isNotEmpty) ...[
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l.ticketCommitsReapply, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 6),
-              for (final x in changes)
-                CheckboxListTile(
-                  key: ValueKey(x.sha),
-                  value: _picked.contains(x.sha),
-                  onChanged: _busy
-                      ? null
-                      : (v) => setState(() {
+              Text(l.ticketCommitsReapplyHelp, style: grey),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _number,
+                enabled: !_busy,
+                autocorrect: false,
+                enableSuggestions: false,
+                inputFormatters: [LengthLimitingTextInputFormatter(64)],
+                style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
+                decoration: InputDecoration(labelText: l.ticketCommitsNumber('{number}'), hintText: widget.ticket.key),
+                onChanged: (_) => setState(() => _changes = null),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(onPressed: _busy ? null : () => _go(true), child: Text(l.ticketCommitsPreview)),
+              if (_error.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(_error, style: TextStyle(fontSize: 13, color: c.badInk)),
+                ),
+              if (changes != null && changes.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(l.ticketCommitsUpToDate, style: grey),
+                ),
+              if (changes != null && changes.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                for (final x in changes)
+                  CheckboxListTile(
+                    key: ValueKey(x.sha),
+                    value: _picked.contains(x.sha),
+                    onChanged: _busy
+                        ? null
+                        : (v) => setState(() {
                             _picked = {..._picked};
                             if (v ?? false) {
                               _picked.add(x.sha);
@@ -114,23 +128,34 @@ class _CommitReapplySheetState extends State<CommitReapplySheet> {
                               _picked.remove(x.sha);
                             }
                           }),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text('${multi ? '${x.repoName} · ' : ''}${x.sha.length > 7 ? x.sha.substring(0, 7) : x.sha}', style: grey),
-                  subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(x.from.split('\n').first, style: mono.copyWith(color: c.ink3, decoration: TextDecoration.lineThrough)),
-                    const SizedBox(height: 2),
-                    Text(x.to, style: mono),
-                    if (!x.suggested) Padding(padding: const EdgeInsets.only(top: 4), child: Text(l.ticketCommitsNotSuggested, style: grey)),
-                  ]),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('${multi ? '${x.repoName} · ' : ''}${x.sha.length > 7 ? x.sha.substring(0, 7) : x.sha}', style: grey),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          x.from.split('\n').first,
+                          style: mono.copyWith(color: c.ink3, decoration: TextDecoration.lineThrough),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(x.to, style: mono),
+                        if (!x.suggested)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(l.ticketCommitsNotSuggested, style: grey),
+                          ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  onPressed: _busy || _picked.isEmpty ? null : () => _go(false),
+                  child: Text(l.ticketCommitsApply(_picked.length)),
                 ),
-              const SizedBox(height: 8),
-              FilledButton(
-                onPressed: _busy || _picked.isEmpty ? null : () => _go(false),
-                child: Text(l.ticketCommitsApply(_picked.length)),
-              ),
+              ],
             ],
-          ]),
+          ),
         ),
       ),
     );

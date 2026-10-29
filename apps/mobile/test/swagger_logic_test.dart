@@ -22,7 +22,11 @@ void main() {
   });
 
   test('groups operations by their first tag in spec order and searches them', () {
-    final ops = [_op('GET', '/users', tags: ['users']), _op('GET', '/health'), _op('POST', '/users', tags: ['users'], summary: 'Create user')];
+    final ops = [
+      _op('GET', '/users', tags: ['users']),
+      _op('GET', '/health'),
+      _op('POST', '/users', tags: ['users'], summary: 'Create user'),
+    ];
     final groups = byTag(ops);
     expect(groups.map((g) => g.$1), ['users', '']);
     expect(groups.first.$2.length, 2);
@@ -38,8 +42,23 @@ void main() {
 
   test('a bug description lists the failures only', () {
     final cases = [
-      ApiCase(id: '1', operation: 'GET /a', case_: 'ok', verdict: ApiCaseVerdictEnum.pass, requests: const ['r-1'], source_: ApiCaseSource_Enum.claude),
-      ApiCase(id: '2', operation: 'GET /b', case_: 'bad id', verdict: ApiCaseVerdictEnum.fail, reason: '500', requests: const ['r-2'], source_: ApiCaseSource_Enum.claude),
+      ApiCase(
+        id: '1',
+        operation: 'GET /a',
+        case_: 'ok',
+        verdict: ApiCaseVerdictEnum.pass,
+        requests: const ['r-1'],
+        source_: ApiCaseSource_Enum.claude,
+      ),
+      ApiCase(
+        id: '2',
+        operation: 'GET /b',
+        case_: 'bad id',
+        verdict: ApiCaseVerdictEnum.fail,
+        reason: '500',
+        requests: const ['r-2'],
+        source_: ApiCaseSource_Enum.claude,
+      ),
     ];
     expect(bugDescription('Intro', cases), 'Intro\n\n- GET /b — bad id: 500 [r-2]');
   });

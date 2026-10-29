@@ -20,8 +20,15 @@ ApiCase _case(String id, ApiCaseVerdictEnum v, {String? reason, ApiCaseSource_En
 void main() {
   testWidgets('shows the counts, what is new and the failures first', (tester) async {
     final r = SwaggerResults(
-      test: SwaggerTestView(baseUrl: 'https://staging.test', operations: const ['GET /users/{id}'], writeEnabled: false,
-          authKind: ApiAuthKind.bearer, hasToken: true, rateLimit: 5, maxRequests: 300),
+      test: SwaggerTestView(
+        baseUrl: 'https://staging.test',
+        operations: const ['GET /users/{id}'],
+        writeEnabled: false,
+        authKind: ApiAuthKind.bearer,
+        hasToken: true,
+        rateLimit: 5,
+        maxRequests: 300,
+      ),
       runId: 3,
       counts: ApiCounts(passed: 1, failed: 1, skipped: 1, blocked: 0),
       cases: [
@@ -34,12 +41,20 @@ void main() {
       newFailures: const ['GET /users/{id} · schema mismatch'],
       previous: ApiCounts(passed: 2, failed: 0, skipped: 1, blocked: 0),
     );
-    await tester.pumpWidget(MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [AppLocalizations.delegate, GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SingleChildScrollView(child: ApiResultsBody(results: r, limit: 5))),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: agntsTheme(Brightness.light),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(child: ApiResultsBody(results: r, limit: 5)),
+        ),
+      ),
+    );
     expect(find.text('1 passed'), findsOneWidget);
     expect(find.text('1 failed'), findsOneWidget);
     expect(find.textContaining('1 new failure since the last run'), findsOneWidget);

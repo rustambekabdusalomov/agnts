@@ -8,7 +8,8 @@ import 'package:agnts_mobile/features/repos/repo_members.dart';
 import 'package:agnts_mobile/features/tickets/diff_lines.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Pipeline _p(CI s) => Pipeline(id: 1, name: '', branch: '', sha: '', message: '', trigger: '', status: s, durationMs: 0, url: '', stages: const []);
+Pipeline _p(CI s) =>
+    Pipeline(id: 1, name: '', branch: '', sha: '', message: '', trigger: '', status: s, durationMs: 0, url: '', stages: const []);
 
 void main() {
   group('code browser', () {

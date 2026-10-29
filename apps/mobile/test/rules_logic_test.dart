@@ -5,30 +5,39 @@ import 'package:agnts_mobile/features/rules/rules_logic.dart';
 import 'package:agnts_mobile/l10n/app_localizations_en.dart';
 import 'package:agnts_mobile/widgets/ui.dart' show Tone;
 
-Rule _rule(int id, RuleStatus status, {int? repoId, String title = 'r', bool? watching, RuleEnforce? enforce, String? source, num? confidence, int? evidence}) =>
-    Rule(
-      id: id,
-      kind: RuleKind.rule,
-      repoId: repoId,
-      repoName: repoId == null ? null : 'api',
-      title: title,
-      body: 'body $id',
-      enabled: true,
-      status: status,
-      interpretation: '',
-      clarified: '',
-      text: '',
-      questions: const [],
-      rounds: 0,
-      error: '',
-      enforce: enforce,
-      source_: source,
-      confidence: confidence,
-      evidence: evidence,
-      watching: watching,
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-    );
+Rule _rule(
+  int id,
+  RuleStatus status, {
+  int? repoId,
+  String title = 'r',
+  bool? watching,
+  RuleEnforce? enforce,
+  String? source,
+  num? confidence,
+  int? evidence,
+}) => Rule(
+  id: id,
+  kind: RuleKind.rule,
+  repoId: repoId,
+  repoName: repoId == null ? null : 'api',
+  title: title,
+  body: 'body $id',
+  enabled: true,
+  status: status,
+  interpretation: '',
+  clarified: '',
+  text: '',
+  questions: const [],
+  rounds: 0,
+  error: '',
+  enforce: enforce,
+  source_: source,
+  confidence: confidence,
+  evidence: evidence,
+  watching: watching,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+);
 
 void main() {
   final l = AppLocalizationsEn();

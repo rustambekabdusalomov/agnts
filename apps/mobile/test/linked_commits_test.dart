@@ -9,21 +9,19 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child, Map<int, LinkedCommits> pages) => ProviderScope(
-      overrides: [
-        for (final e in pages.entries) linkedCommitsProvider(('PAY-40', e.key)).overrideWith((ref) async => e.value),
-      ],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      ),
-    );
+  overrides: [for (final e in pages.entries) linkedCommitsProvider(('PAY-40', e.key)).overrideWith((ref) async => e.value)],
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  ),
+);
 
 final _ticket = Ticket(
   key: 'PAY-40',
@@ -45,18 +43,18 @@ final _ticket = Ticket(
 );
 
 LinkedCommit _c(int i) => LinkedCommit(
-      sha: 'abcdef$i',
-      shortSha: 'abcdef$i',
-      subject: 'AMANAT-2288: step $i',
-      author: 'Alice',
-      authorLogin: i == 0 ? 'alice' : null,
-      branch: 'feature/AMANAT-2288',
-      repoId: 3,
-      repo: 'api',
-      url: 'https://github.com/acme/api/commit/abcdef$i',
-      committedAt: DateTime.now().subtract(const Duration(hours: 2)),
-      matchedOn: i == 0 ? [LinkedCommitMatchedOnEnum.branch, LinkedCommitMatchedOnEnum.message] : [LinkedCommitMatchedOnEnum.branch],
-    );
+  sha: 'abcdef$i',
+  shortSha: 'abcdef$i',
+  subject: 'AMANAT-2288: step $i',
+  author: 'Alice',
+  authorLogin: i == 0 ? 'alice' : null,
+  branch: 'feature/AMANAT-2288',
+  repoId: 3,
+  repo: 'api',
+  url: 'https://github.com/acme/api/commit/abcdef$i',
+  committedAt: DateTime.now().subtract(const Duration(hours: 2)),
+  matchedOn: i == 0 ? [LinkedCommitMatchedOnEnum.branch, LinkedCommitMatchedOnEnum.message] : [LinkedCommitMatchedOnEnum.branch],
+);
 
 void main() {
   testWidgets('nothing shows until a commit is linked', (tester) async {
@@ -66,10 +64,12 @@ void main() {
   });
 
   testWidgets('the commits, where the number was found, and more', (tester) async {
-    await tester.pumpWidget(_app(LinkedCommitsFold(ticket: _ticket), {
-      20: LinkedCommits(commits: [for (var i = 0; i < 20; i++) _c(i)], total: 23),
-      40: LinkedCommits(commits: [for (var i = 0; i < 23; i++) _c(i)], total: 23),
-    }));
+    await tester.pumpWidget(
+      _app(LinkedCommitsFold(ticket: _ticket), {
+        20: LinkedCommits(commits: [for (var i = 0; i < 20; i++) _c(i)], total: 23),
+        40: LinkedCommits(commits: [for (var i = 0; i < 23; i++) _c(i)], total: 23),
+      }),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Commits'), findsOneWidget);
     expect(find.text('23'), findsOneWidget);

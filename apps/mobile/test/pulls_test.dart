@@ -89,7 +89,12 @@ PullDetail _detail({PullItemStateEnum state = PullItemStateEnum.open, List<Ticke
       own: own,
       reviews: [
         for (final (i, s) in reviews.indexed)
-          PullReviewRef(key: 'API-PR7${i == reviews.length - 1 ? '' : '-${reviews.length - i}'}', state: s, createdAt: DateTime(2026), updatedAt: DateTime(2026)),
+          PullReviewRef(
+            key: 'API-PR7${i == reviews.length - 1 ? '' : '-${reviews.length - i}'}',
+            state: s,
+            createdAt: DateTime(2026),
+            updatedAt: DateTime(2026),
+          ),
       ],
     );
 
@@ -193,7 +198,15 @@ void main() {
       ticketKey: 'PAY-2',
       ticketState: TicketState.waitingForReview,
       own: false,
-      reviews: [PullReviewRef(key: 'PAY-2', state: TicketState.waitingForReview, headSha: 'h1', createdAt: DateTime(2026), updatedAt: DateTime(2026))],
+      reviews: [
+        PullReviewRef(
+          key: 'PAY-2',
+          state: TicketState.waitingForReview,
+          headSha: 'h1',
+          createdAt: DateTime(2026),
+          updatedAt: DateTime(2026),
+        ),
+      ],
     );
     await tester.pumpWidget(
       ProviderScope(

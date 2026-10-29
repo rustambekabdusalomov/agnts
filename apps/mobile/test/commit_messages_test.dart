@@ -8,55 +8,59 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child) => MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SingleChildScrollView(child: child)),
-    );
+  theme: agntsTheme(Brightness.light),
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(body: SingleChildScrollView(child: child)),
+);
 
 TicketRepoState _rs(int id, String name, {List<BranchCommit>? commits}) => TicketRepoState(
-      repoId: id,
-      repoName: name,
-      role: '',
-      folder: name,
-      branch: 'agnts/SHOP-3',
-      headSha: '',
-      prUrl: '',
-      ciFixes: 0,
-      state: TicketRepoStateStateEnum.pending,
-      files: 1,
-      commits: commits,
-    );
+  repoId: id,
+  repoName: name,
+  role: '',
+  folder: name,
+  branch: 'agnts/SHOP-3',
+  headSha: '',
+  prUrl: '',
+  ciFixes: 0,
+  state: TicketRepoStateStateEnum.pending,
+  files: 1,
+  commits: commits,
+);
 
 Ticket _ticket(List<TicketRepoState> repos) => Ticket(
-      key: 'SHOP-3',
-      source_: TicketSource_Enum.local,
-      title: 't',
-      description: '',
-      priority: 'medium',
-      state: TicketState.waitingForReview,
-      revision: 1,
-      turns: 3,
-      branch: 'agnts/SHOP-3',
-      prUrl: '',
-      kind: TicketKind.code,
-      kindAuto: false,
-      skipChecks: false,
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-      repos: repos,
-    );
+  key: 'SHOP-3',
+  source_: TicketSource_Enum.local,
+  title: 't',
+  description: '',
+  priority: 'medium',
+  state: TicketState.waitingForReview,
+  revision: 1,
+  turns: 3,
+  branch: 'agnts/SHOP-3',
+  prUrl: '',
+  kind: TicketKind.code,
+  kindAuto: false,
+  skipChecks: false,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+  repos: repos,
+);
 
 final _two = [
-  _rs(1, 'api', commits: [
-    BranchCommit(sha: 'bbbbbbb2222', message: 'SHOP-3: Login (revision 1)'),
-    BranchCommit(sha: 'aaaaaaa1111', message: 'SHOP-3: Login\n\nWhy it changed'),
-  ]),
+  _rs(
+    1,
+    'api',
+    commits: [
+      BranchCommit(sha: 'bbbbbbb2222', message: 'SHOP-3: Login (revision 1)'),
+      BranchCommit(sha: 'aaaaaaa1111', message: 'SHOP-3: Login\n\nWhy it changed'),
+    ],
+  ),
   _rs(2, 'web'),
 ];
 
@@ -88,7 +92,13 @@ void main() {
   });
 
   testWidgets('one repository: no heading', (tester) async {
-    final one = [_rs(1, 'api', commits: [BranchCommit(sha: 'aaaaaaa1111', message: 'SHOP-3: Login')])];
+    final one = [
+      _rs(
+        1,
+        'api',
+        commits: [BranchCommit(sha: 'aaaaaaa1111', message: 'SHOP-3: Login')],
+      ),
+    ];
     await tester.pumpWidget(_app(CommitMessages(_ticket(one))));
     expect(find.textContaining('agnts/SHOP-3', findRichText: true), findsNothing);
     expect(find.text('SHOP-3: Login'), findsOneWidget);

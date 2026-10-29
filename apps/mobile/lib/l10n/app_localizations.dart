@@ -17565,6 +17565,180 @@ abstract class AppLocalizations {
   /// **'Enter a whole number from 0 to 10,000,000.'**
   String get platformFreeCreditsInvalid;
 
+  /// No description provided for @platformCreditUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage this month'**
+  String get platformCreditUsage;
+
+  /// No description provided for @platformCreditUsageTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} ever'**
+  String platformCreditUsageTotal(String n);
+
+  /// No description provided for @platformSetLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Set limit'**
+  String get platformSetLimit;
+
+  /// No description provided for @platformLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly credit limit'**
+  String get platformLimitTitle;
+
+  /// No description provided for @platformLimitSet.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} may spend up to {n} credits ({amount}) a month'**
+  String platformLimitSet(String name, String n, String amount);
+
+  /// No description provided for @platformMuseProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse provider'**
+  String get platformMuseProvider;
+
+  /// No description provided for @platformMuseProviderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Where runs on agnts\'s credits go. People\'s own Meta accounts are not affected.'**
+  String get platformMuseProviderSub;
+
+  /// No description provided for @platformMp_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get platformMp_auto;
+
+  /// No description provided for @platformMp_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'Meta only'**
+  String get platformMp_primary;
+
+  /// No description provided for @platformMp_fallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback only'**
+  String get platformMp_fallback;
+
+  /// No description provided for @platformMpNote_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s Meta key. When it runs out, runs continue their session on {name}.'**
+  String platformMpNote_auto(String name);
+
+  /// No description provided for @platformMpNote_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts\'s Meta key only. Runs stop when it runs out.'**
+  String get platformMpNote_primary;
+
+  /// No description provided for @platformMpNote_fallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Every run on credits goes to {name}.'**
+  String platformMpNote_fallback(String name);
+
+  /// No description provided for @platformMpFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback'**
+  String get platformMpFallback;
+
+  /// No description provided for @platformMpNone.
+  ///
+  /// In en, this message translates to:
+  /// **'This server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY).'**
+  String get platformMpNone;
+
+  /// No description provided for @platformMpOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Meta is out until {time}'**
+  String platformMpOut(String time);
+
+  /// No description provided for @platformMpSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs on credits: {mode}'**
+  String platformMpSet(String mode);
+
+  /// No description provided for @platformLimitRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has no monthly limit now'**
+  String platformLimitRemoved(String name);
+
+  /// No description provided for @platformLimitUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} credits ({amount}) spent this month, {total} ever.'**
+  String platformLimitUsed(String used, String amount, String total);
+
+  /// No description provided for @platformLimitField.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits per month (1 credit = \$0.01; 0 is no limit)'**
+  String get platformLimitField;
+
+  /// No description provided for @platformLimitHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Free and workspace credits together. Runs stop once it is spent and resume next month or when you raise it.'**
+  String get platformLimitHelp;
+
+  /// No description provided for @platformLimitWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {amount} of model calls a month.'**
+  String platformLimitWorth(String amount);
+
+  /// No description provided for @platformLimitNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No limit: only their credits bound what they spend.'**
+  String get platformLimitNone;
+
+  /// No description provided for @platformFbUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {used}'**
+  String platformFbUsage(String name, String used);
+
+  /// No description provided for @platformFbUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent on {name} this month: {used} credits ({amount}).'**
+  String platformFbUsed(String name, String used, String amount);
+
+  /// No description provided for @platformFbUseDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the server\'s default limit'**
+  String get platformFbUseDefault;
+
+  /// No description provided for @platformFbField.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits per month on {name} (0 is no limit)'**
+  String platformFbField(String name);
+
+  /// No description provided for @platformFbHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted only while agnts\'s Meta key is out and runs continue on {name}. When it is used up, their runs wait for Meta instead.'**
+  String platformFbHelp(String name);
+
+  /// No description provided for @platformUsageTotals.
+  ///
+  /// In en, this message translates to:
+  /// **'This month: {used} credits ({amount}) across everyone; {limited} people have a limit.'**
+  String platformUsageTotals(String used, String amount, String limited);
+
   /// No description provided for @previewTab.
   ///
   /// In en, this message translates to:

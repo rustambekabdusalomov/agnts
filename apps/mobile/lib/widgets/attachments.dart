@@ -51,7 +51,10 @@ class AttachmentsController extends ChangeNotifier {
   List<PendingUpload> get files => List.unmodifiable(_files);
 
   /// Ids of the finished uploads, in the order they were picked.
-  List<int> get ids => [for (final f in _files) if (f.uploaded != null) f.uploaded!.id];
+  List<int> get ids => [
+    for (final f in _files)
+      if (f.uploaded != null) f.uploaded!.id,
+  ];
 
   /// Whether a file is still uploading: submitting now would leave it out.
   bool get uploading => _files.any((f) => f.uploaded == null);
@@ -109,18 +112,21 @@ class _AttachmentPickerState extends ConsumerState<AttachmentPicker> {
     final source = await showModalBottomSheet<_Source>(
       context: context,
       builder: (ctx) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          for (final (s, icon, label) in [
-            (_Source.gallery, 'image', l.filesAddPhoto),
-            (_Source.camera, 'camera', l.filesCamera),
-            (_Source.file, 'file', l.filesAddFile),
-          ])
-            ListTile(
-              leading: HIcon(icon, size: 22, color: c.ink2),
-              title: Text(label, style: const TextStyle(fontSize: 16)),
-              onTap: () => Navigator.pop(ctx, s),
-            ),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (s, icon, label) in [
+              (_Source.gallery, 'image', l.filesAddPhoto),
+              (_Source.camera, 'camera', l.filesCamera),
+              (_Source.file, 'file', l.filesAddFile),
+            ])
+              ListTile(
+                leading: HIcon(icon, size: 22, color: c.ink2),
+                title: Text(label, style: const TextStyle(fontSize: 16)),
+                onTap: () => Navigator.pop(ctx, s),
+              ),
+          ],
+        ),
       ),
     );
     if (source == null || !mounted) return;
@@ -224,29 +230,34 @@ class _AttachmentPickerState extends ConsumerState<AttachmentPicker> {
       builder: (context, _) {
         final files = _ctrl.files;
         final busy = files.where((f) => f.uploaded == null).firstOrNull;
-        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (files.isNotEmpty) ...[
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final f in files) _PendingTile(file: f, onRemove: widget.enabled ? () => _removeFile(f) : null),
-            ]),
-            const SizedBox(height: 10),
-          ],
-          OutlinedButton.icon(
-            onPressed: widget.enabled && files.length < maxAttachments ? _choose : null,
-            icon: HIcon('attach', size: 18, stroke: 2, color: widget.enabled ? c.ink : c.line3),
-            label: Text(l.filesAttach),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            busy != null ? l.filesUploading(busy.name) : l.filesHint,
-            style: TextStyle(fontSize: 13, height: 1.35, color: c.ink3),
-          ),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(_error!, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.badInk)),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (files.isNotEmpty) ...[
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [for (final f in files) _PendingTile(file: f, onRemove: widget.enabled ? () => _removeFile(f) : null)],
+              ),
+              const SizedBox(height: 10),
+            ],
+            OutlinedButton.icon(
+              onPressed: widget.enabled && files.length < maxAttachments ? _choose : null,
+              icon: HIcon('attach', size: 18, stroke: 2, color: widget.enabled ? c.ink : c.line3),
+              label: Text(l.filesAttach),
             ),
-        ]);
+            const SizedBox(height: 6),
+            Text(busy != null ? l.filesUploading(busy.name) : l.filesHint, style: TextStyle(fontSize: 13, height: 1.35, color: c.ink3)),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  _error!,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.badInk),
+                ),
+              ),
+          ],
+        );
       },
     );
   }
@@ -269,7 +280,11 @@ class _PendingTile extends StatelessWidget {
     final picture = f.bytes != null && (f.uploaded?.image ?? _looksLikePicture(f.name));
     final progress = f.uploaded != null
         ? null
-        : SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, value: f.progress, color: c.primary));
+        : SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2, value: f.progress, color: c.primary),
+          );
     final remove = onRemove == null
         ? null
         : Semantics(
@@ -290,35 +305,46 @@ class _PendingTile extends StatelessWidget {
       return SizedBox(
         width: 72,
         height: 72,
-        child: Stack(children: [
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.memory(f.bytes!, fit: BoxFit.cover, cacheWidth: 216),
-            ),
-          ),
-          if (progress != null)
+        child: Stack(
+          children: [
             Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(color: c.surface.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(12)),
-                alignment: Alignment.center,
-                child: progress,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(f.bytes!, fit: BoxFit.cover, cacheWidth: 216),
               ),
             ),
-          if (remove != null) Positioned(top: 4, right: 4, child: remove),
-        ]),
+            if (progress != null)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(color: c.surface.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(12)),
+                  alignment: Alignment.center,
+                  child: progress,
+                ),
+              ),
+            if (remove != null) Positioned(top: 4, right: 4, child: remove),
+          ],
+        ),
       );
     }
     return Container(
       constraints: const BoxConstraints(maxWidth: 260),
       padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line4), borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        progress ?? HIcon('file', size: 18, color: c.ink3),
-        const SizedBox(width: 8),
-        Flexible(child: _NameSize(name: f.name, size: f.size)),
-        if (remove != null) ...[const SizedBox(width: 8), remove],
-      ]),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line4),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          progress ?? HIcon('file', size: 18, color: c.ink3),
+          const SizedBox(width: 8),
+          Flexible(
+            child: _NameSize(name: f.name, size: f.size),
+          ),
+          if (remove != null) ...[const SizedBox(width: 8), remove],
+        ],
+      ),
     );
   }
 }
@@ -331,10 +357,19 @@ class _NameSize extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-      Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink)),
-      Text(fileSize(size), style: TextStyle(fontSize: 12, color: c.ink3)),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink),
+        ),
+        Text(fileSize(size), style: TextStyle(fontSize: 12, color: c.ink3)),
+      ],
+    );
   }
 }
 
@@ -352,43 +387,62 @@ class AttachmentList extends StatelessWidget {
     if (files.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (label != null) ...[
-          Text(label!, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3)),
-          const SizedBox(height: 6),
-        ],
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final a in files)
-            if (a.image == true)
-              Semantics(
-                button: true,
-                label: l.filesOpen(a.name),
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _FullAttachment(a))),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      color: c.field,
-                      child: AttachmentImage(a, fit: BoxFit.cover, cacheWidth: 216),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (label != null) ...[
+            Text(
+              label!,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
+            ),
+            const SizedBox(height: 6),
+          ],
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final a in files)
+                if (a.image == true)
+                  Semantics(
+                    button: true,
+                    label: l.filesOpen(a.name),
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _FullAttachment(a))),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 72,
+                          height: 72,
+                          color: c.field,
+                          child: AttachmentImage(a, fit: BoxFit.cover, cacheWidth: 216),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    constraints: const BoxConstraints(maxWidth: 260),
+                    padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
+                    decoration: BoxDecoration(
+                      color: c.surface,
+                      border: Border.all(color: c.line4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        HIcon('file', size: 18, color: c.ink3),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: _NameSize(name: a.name, size: a.size),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              )
-            else
-              Container(
-                constraints: const BoxConstraints(maxWidth: 260),
-                padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
-                decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line4), borderRadius: BorderRadius.circular(12)),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  HIcon('file', size: 18, color: c.ink3),
-                  const SizedBox(width: 8),
-                  Flexible(child: _NameSize(name: a.name, size: a.size)),
-                ]),
-              ),
-        ]),
-      ]),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -413,7 +467,9 @@ class AttachmentImage extends ConsumerWidget {
       cacheWidth: cacheWidth,
       loadingBuilder: (context, child, progress) => progress == null
           ? child
-          : Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.primary))),
+          : Center(
+              child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.primary)),
+            ),
       errorBuilder: (context, _, _) => Center(child: HIcon('image', size: 22, color: c.ink3)),
     );
   }

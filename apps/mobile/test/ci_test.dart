@@ -11,26 +11,26 @@ import 'package:agnts_mobile/theme.dart';
 final _now = DateTime.now();
 
 CIFailure _f({CIStatus status = CIStatus.open, String ticketKey = '', TicketState? ticketState, int prNumber = 0}) => CIFailure(
-      id: 7,
-      repoId: 1,
-      repo: 'shop',
-      branch: 'main',
-      workflow: 'CI',
-      job: 'test (1.22)',
-      title: 'TestCheckout: expected 3, got 2',
-      class_: 'test',
-      status: status,
-      count: 4,
-      flakyCount: 0,
-      firstSeenAt: _now,
-      lastSeenAt: _now,
-      firstSha: 'abcdef1234567',
-      lastSha: '1234567abcdef',
-      occurrences: const [],
-      ticketKey: ticketKey,
-      ticketState: ticketState,
-      prNumber: prNumber,
-    );
+  id: 7,
+  repoId: 1,
+  repo: 'shop',
+  branch: 'main',
+  workflow: 'CI',
+  job: 'test (1.22)',
+  title: 'TestCheckout: expected 3, got 2',
+  class_: 'test',
+  status: status,
+  count: 4,
+  flakyCount: 0,
+  firstSeenAt: _now,
+  lastSeenAt: _now,
+  firstSha: 'abcdef1234567',
+  lastSha: '1234567abcdef',
+  occurrences: const [],
+  ticketKey: ticketKey,
+  ticketState: ticketState,
+  prNumber: prNumber,
+);
 
 void main() {
   test('the first error block between the markers', () {
@@ -76,17 +76,21 @@ void main() {
   });
 
   testWidgets('a failure card shows status, place, count and ticket', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: CIFailureCard(_f(status: CIStatus.fixing, ticketKey: 'CI-3', ticketState: TicketState.coding))),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: agntsTheme(Brightness.light),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: CIFailureCard(_f(status: CIStatus.fixing, ticketKey: 'CI-3', ticketState: TicketState.coding)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Fixing'), findsOneWidget);
     expect(find.text('shop · main'), findsOneWidget);

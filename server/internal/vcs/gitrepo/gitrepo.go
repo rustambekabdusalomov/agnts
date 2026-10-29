@@ -379,7 +379,7 @@ func (g *Repos) RenameBranch(ctx context.Context, repo domain.Repository, from, 
 	defer cancel()
 	if err := fetch(fctx, r, repo, auth, true, originRefs); err != nil {
 		if errors.Is(fctx.Err(), context.DeadlineExceeded) && ctx.Err() == nil {
-			return fmt.Errorf("%w: %v", context.DeadlineExceeded, err)
+			return fmt.Errorf("%w: %w", context.DeadlineExceeded, err)
 		}
 		return err
 	}

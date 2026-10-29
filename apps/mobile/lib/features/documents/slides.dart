@@ -55,7 +55,10 @@ int _runes(String s) => s.runes.length;
 /// A slide's layout from its text: lead for headings and at most two
 /// short lines, then by how much text there is.
 SlideLayout slideLayout(String body) {
-  final lines = [for (final l in body.split('\n')) if (l.trim().isNotEmpty) l.trim()];
+  final lines = [
+    for (final l in body.split('\n'))
+      if (l.trim().isNotEmpty) l.trim(),
+  ];
   final chars = lines.fold<int>(0, (n, l) => n + _runes(l));
   var heading = false;
   var others = 0;
