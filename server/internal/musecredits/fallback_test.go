@@ -15,9 +15,8 @@ import (
 
 // TestFallbackLimit follows a person's allowance on Baseten: the server's
 // default of 20 credits a month applies until an Admin sets one, only
-// spend on Baseten counts against it (not spend on Meta), the platform
-// pays for it (not their credits, and billing leaves it out), and with
-// none left their runs may not move there.
+// spend on Baseten counts against it (not spend on Meta), and with none
+// left their runs may not move there.
 func TestFallbackLimit(t *testing.T) {
 	pool := pgtest.Open(t)
 	pgtest.Reset(t, pool)
@@ -47,7 +46,7 @@ func TestFallbackLimit(t *testing.T) {
 		}
 		req := budget.HoldRequest{Key: b.Key, Payers: b.Payers, Caps: b.Caps, Amount: amount}
 		if onFallback {
-			req = budget.HoldRequest{Key: b.Key + ":baseten", Payers: b.FallbackPayers, Caps: b.FallbackCaps, Amount: amount}
+			req.Key, req.Caps = b.Key+":baseten", append(req.Caps, b.FallbackCaps...)
 		}
 		h, err := l.Hold(ctx, req)
 		if err != nil {
@@ -65,12 +64,8 @@ func TestFallbackLimit(t *testing.T) {
 	spend(9201, false, 50*money.Cent) // on Meta: not counted
 	spend(9202, true, 15*money.Cent)  // on Baseten
 	u, err := svc.Usage(ctx, dev)
-	if err != nil || u.Fallback == nil || u.Fallback.MonthUsed != 15 || u.Fallback.MonthLimit != 20 || !u.Fallback.Default || u.MonthUsed != 50 {
-		t.Fatalf("usage = %+v / %+v, %v; want 15 on Baseten and only the 50 on Meta as their credits", u, u.Fallback, err)
-	}
-	// Billing charges the workspace nothing for Baseten.
-	if paid, err := svc.FreeChargedUSD(ctx, 9202); err != nil || paid != 0.15 {
-		t.Fatalf("not billed for run 9202 = %v, %v; want the whole 15¢", paid, err)
+	if err != nil || u.Fallback == nil || u.Fallback.MonthUsed != 15 || u.Fallback.MonthLimit != 20 || !u.Fallback.Default || u.MonthUsed != 65 {
+		t.Fatalf("usage = %+v / %+v, %v", u, u.Fallback, err)
 	}
 	if b, _ = svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9203, WorkspaceID: ws}); b.FallbackLimit != 5*money.Cent {
 		t.Fatalf("fallback limit = %v, want 5¢ left", b.FallbackLimit)
@@ -78,9 +73,6 @@ func TestFallbackLimit(t *testing.T) {
 	spend(9203, true, 5*money.Cent)
 	if b, _ = svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9204, WorkspaceID: ws}); b.FallbackLimit != -1 || b.Limit <= 0 {
 		t.Fatalf("budget = %+v; want Meta still allowed and Baseten not", b)
-	}
-	if svc.FallbackAvailable(ctx, dev) {
-		t.Fatal("FallbackAvailable with the allowance spent")
 	}
 
 	// An Admin raises this person's limit, then removes it; null is the default again.
@@ -107,8 +99,7 @@ func TestFallbackLimit(t *testing.T) {
 	}
 }
 
-// TestFallbackPlatformCap keeps all runs together inside the host's
-// credit: the platform's fallback account holds what is left of it.
+// TestFallbackPlatformCap keeps all runs together inside the host's credit.
 func TestFallbackPlatformCap(t *testing.T) {
 	pool := pgtest.Open(t)
 	pgtest.Reset(t, pool)
@@ -127,11 +118,11 @@ func TestFallbackPlatformCap(t *testing.T) {
 	}
 	rctx := domain.WithClaude(ctx, domain.ClaudeAccount{Credits: true, UserID: dev})
 	b, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9301, WorkspaceID: ws})
-	if err != nil || b.FallbackLimit != 10*money.Cent || len(b.FallbackPayers) != 1 || len(b.FallbackCaps) != 0 {
+	if err != nil || b.FallbackLimit != 10*money.Cent || len(b.FallbackCaps) != 1 {
 		t.Fatalf("budget = %+v, %v", b, err)
 	}
 	l := svc.Ledger()
-	h, err := l.Hold(ctx, budget.HoldRequest{Key: b.Key + ":baseten", Payers: b.FallbackPayers, Amount: 10 * money.Cent})
+	h, err := l.Hold(ctx, budget.HoldRequest{Key: b.Key + ":baseten", Payers: b.Payers, Caps: b.FallbackCaps, Amount: 10 * money.Cent})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,34 +134,5 @@ func TestFallbackPlatformCap(t *testing.T) {
 	}
 	if b, _ = svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9302, WorkspaceID: ws}); b.FallbackLimit != -1 {
 		t.Fatalf("fallback limit = %v after the cap was spent", b.FallbackLimit)
-	}
-	if svc.FallbackAvailable(ctx, dev) {
-		t.Fatal("FallbackAvailable with the server's cap spent")
-	}
-}
-
-// TestPreferFallbackNeedsNoCredits lets a person whose own account is at
-// its limit start on Baseten with no credits at all: it costs them nothing.
-func TestPreferFallbackNeedsNoCredits(t *testing.T) {
-	pool := pgtest.Open(t)
-	pgtest.Reset(t, pool)
-	pgtest.Exec(t, pool, `DROP TABLE IF EXISTS muse_entries, muse_hold_legs, muse_holds, muse_accounts`)
-	ctx, ws := pgtest.Workspace(t, pool, "muse-fallback-first")
-	dev := pgtest.User(t, pool, "dev")
-	pgtest.Exec(t, pool, `UPDATE workspaces SET credits_balance = 0 WHERE id = $1`, ws)
-	svc := musecredits.New(musecredits.Config{RunCap: 2500, Fallback: "baseten", FallbackUserLimit: 500}, pool, postgres.NewCredits(pool))
-	if err := svc.Migrate(ctx); err != nil {
-		t.Fatal(err)
-	}
-	req := orchestrator.ClaudeRequest{RunID: 9401, WorkspaceID: ws}
-	if _, err := svc.Budget(domain.WithClaude(ctx, domain.ClaudeAccount{Credits: true, UserID: dev}), req); err == nil {
-		t.Fatal("a run on credits started with no credits")
-	}
-	if !svc.FallbackAvailable(ctx, dev) {
-		t.Fatal("no fallback room for a person with a fresh allowance")
-	}
-	b, err := svc.Budget(domain.WithClaude(ctx, domain.ClaudeAccount{Credits: true, UserID: dev, PreferFallback: true}), req)
-	if err != nil || b.FallbackLimit != 5*money.Dollar || len(b.FallbackPayers) != 1 {
-		t.Fatalf("budget = %+v, %v; want $5 on Baseten, paid by the platform", b, err)
 	}
 }

@@ -130,9 +130,8 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 	if b != nil {
 		limit = b.Limit.Float()
 	}
-	acct, _ := domain.ClaudeOf(ctx)
 	res, err := run(ctx, muse.Request{
-		Prompt: req.Prompt, Workdir: workDir, Model: id, Effort: req.Effort, SessionID: req.Resume, PreferFallback: acct.PreferFallback,
+		Prompt: req.Prompt, Workdir: workDir, Model: id, Effort: req.Effort, SessionID: req.Resume,
 		Budget: b, AnnounceBudget: b != nil && b.Limit > 0, Credential: &cred, AuthPath: museAuthPath,
 		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns, ExtraRoots: []string{outDir}, Steer: req.Steer, Ask: ask,
 	}, &dockerExecutor{w: w, ctx: ctx}, func(e muse.Event) { museEvent(e, limit, onEvent) })
@@ -236,7 +235,7 @@ func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
 	case muse.EventContinue:
 		budget("continue", e.Reason, "warn", nil)
 	case muse.EventFailover:
-		budget("failover", "continuing on "+string(e.Model)+": "+e.Reason, "warn", map[string]any{"model": string(e.Model)})
+		budget("failover", "continuing on the fallback provider ("+string(e.Model)+"): "+e.Reason, "warn", map[string]any{"model": string(e.Model)})
 	case muse.EventInterrupt:
 		budget("stop", "stopped: "+e.Reason, "warn", nil)
 	case muse.EventApproval:

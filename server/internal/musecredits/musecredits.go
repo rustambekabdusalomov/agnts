@@ -162,9 +162,7 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 			return nil, err
 		}
 		if limit > 0 {
-			// A run starting on the fallback costs the person nothing, so
-			// it may start; the cap still stops it on agnts's key.
-			if left <= 0 && !acct.PreferFallback {
+			if left <= 0 {
 				return nil, fmt.Errorf("%w: this person reached their monthly limit of %d credits (set by an Admin)", muse.ErrBudget, limit)
 			}
 			b.Caps = append(b.Caps, capAcct)
@@ -202,7 +200,7 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 			funds += money.Max(bal.Available, 0)
 		}
 	}
-	if funds <= 0 && !acct.PreferFallback {
+	if funds <= 0 {
 		return nil, fmt.Errorf("%w: no credits left (free credits and the workspace's)", muse.ErrBudget)
 	}
 	if b.Limit == 0 || funds < b.Limit {
@@ -264,14 +262,13 @@ func (s *Service) fillCap(ctx context.Context, acct budget.AccountID, target mon
 }
 
 // spentSince is what runs on agnts's key charged for a person since t,
-// whatever paid (their free credits or a workspace's wallet); what the
-// platform paid for the fallback is not theirs and is left out. Runs from
+// whatever paid (their free credits or a workspace's wallet). Runs from
 // before the person was in the hold key count by their free credits.
 func (s *Service) spentSince(ctx context.Context, user int64, t time.Time) (money.USD, error) {
 	var micro int64
 	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(l.charged), 0) FROM muse_hold_legs l JOIN muse_holds h ON h.id = l.hold_id
-		WHERE NOT l.is_cap AND l.account_id <> $4 AND h.created_at >= $1 AND (h.key LIKE $2 OR l.account_id = $3)`,
-		t, "ws:%:run:%:"+userKeyPart(user)+"%", string(freeAccount(user)), string(platformFallback)).Scan(&micro)
+		WHERE NOT l.is_cap AND h.created_at >= $1 AND (h.key LIKE $2 OR l.account_id = $3)`,
+		t, "ws:%:run:%:"+userKeyPart(user)+"%", string(freeAccount(user))).Scan(&micro)
 	return money.USD(micro), err
 }
 
@@ -380,13 +377,13 @@ func (s *Service) syncWallet(ctx context.Context, ws int64) error {
 	return nil
 }
 
-// FreeChargedUSD is what a run's free credits and the platform's fallback
-// account paid (billing charges the wallet only the rest).
+// FreeChargedUSD is what free credits paid of a run (billing charges the
+// wallet only the rest).
 func (s *Service) FreeChargedUSD(ctx context.Context, runID int64) (float64, error) {
 	var micro int64
 	err := s.db.QueryRow(domain.System(ctx), `SELECT COALESCE(sum(l.charged), 0) FROM muse_hold_legs l JOIN muse_holds h ON h.id = l.hold_id
-		WHERE (l.account_id LIKE 'user:%:free' OR l.account_id = $2) AND split_part(h.key, ':', 3) = 'run' AND split_part(h.key, ':', 4) = $1`,
-		strconv.FormatInt(runID, 10), string(platformFallback)).Scan(&micro)
+		WHERE l.account_id LIKE 'user:%:free' AND split_part(h.key, ':', 3) = 'run' AND split_part(h.key, ':', 4) = $1`,
+		strconv.FormatInt(runID, 10)).Scan(&micro)
 	return money.USD(micro).Float(), err
 }
 

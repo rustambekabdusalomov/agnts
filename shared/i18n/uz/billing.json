@@ -40,6 +40,6 @@
     "monthLimit": "{limit} kreditdan {used} tasi ishlatildi",
     "fallbackLimit": "{name}: {limit} kreditdan {used} tasi ishlatildi",
     "fallbackNoLimit": "{name}: {used} kredit ishlatildi, limitsiz",
-    "fallbackHint": "{name} — zaxira provayder, siz uchun bepul: o‘z Meta akkauntingiz (yoki agnts’niki) tugaganda ishlaringiz unga o‘tadi. Limit tugaganda ular kreditlar hisobidan davom etadi."
+    "fallbackHint": "{name} — zaxira provayder: ishlaringiz uni faqat agnts’ning Meta’ga kirishi tugaganda ishlatadi. Limit tugaganda ular Meta’ni kutadi."
   }
 }

@@ -66,10 +66,6 @@ type Config struct {
 	// them); a run then continues on credits even when the workspace has
 	// not turned on continuing with credits.
 	Free func(ctx context.Context, userID int64) bool
-	// Fallback says whether a person may run on the fallback provider
-	// (room left in their allowance there); when their own account is at
-	// its limit, runs start there, free to them, before any credits.
-	Fallback func(ctx context.Context, userID int64) bool
 }
 
 // Service picks accounts and manages connections.
@@ -172,9 +168,6 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64) (
 		why, until = toolName()+" limit reached on "+acct.Label, at
 		if !at.IsZero() {
 			why += "; resumes at " + at.Format("15:04")
-		}
-		if payer := whose(w, member); s.CreditsEnabled() && s.cfg.Fallback != nil && s.cfg.Fallback(ctx, payer) {
-			return domain.ClaudeAccount{Credits: true, PreferFallback: true, Label: "the backup provider", UserID: payer}, true, "", time.Time{}
 		}
 	}
 	payer := whose(w, member)
