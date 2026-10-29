@@ -513,8 +513,13 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		return p.URL, p.Code, p.ExpiresAt, out, nil
 	}, a.claude, log.With("component", "muse-login"))
 	run.SetMuseLoginKeeper(a.claude.KeepMuseLogin)
+	// Runs are in their own container behind the egress proxy, and Muse's
+	// own shell sandbox cannot start there (bwrap needs user namespaces the
+	// container does not allow): with it on, the first try of every shell
+	// command fails. A turn that ends without any answer (Muse Spark Open
+	// on Baseten drops a step now and then) is continued twice.
 	museEng := muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
-		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}})
+		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}, ServeArgs: []string{"--disable-sandbox"}, Continues: 2})
 	run.SetMuse(museEng, a.museCredits)
 	if cfg.MuseFallbackKey != "" {
 		cred, err := credential.Hosted(cfg.MuseFallbackURL, cfg.MuseFallbackKey, "")

@@ -233,6 +233,8 @@ func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
 		}
 	case muse.EventEscalate:
 		budget("escalate", "moved to "+string(e.Model)+": "+e.Reason, "info", map[string]any{"model": string(e.Model)})
+	case muse.EventContinue:
+		budget("continue", e.Reason, "warn", nil)
 	case muse.EventFailover:
 		budget("failover", "continuing on "+string(e.Model)+": "+e.Reason, "warn", map[string]any{"model": string(e.Model)})
 	case muse.EventInterrupt:

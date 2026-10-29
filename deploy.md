@@ -1,7 +1,8 @@
 # Deploy
 
-How the production server is updated by hand. CI's deploy job
-(`.github/workflows/ci.yml`) is not used: the server builds its own image.
+How the production server is updated by hand: the server builds its own
+image. This repository has no CI workflow for now (Actions minutes), so run
+`make test` and `make lint` before deploying.
 
 ## Server
 
