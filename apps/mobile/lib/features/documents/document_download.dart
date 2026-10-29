@@ -48,7 +48,12 @@ Future<void> downloadDocument(BuildContext context, WidgetRef ref, int id, Strin
       final file = File('${dir.path}/$name');
       await file.writeAsBytes(res.data ?? const [], flush: true);
       final mime = format == 'pdf' ? 'application/pdf' : 'text/markdown';
-      await SharePlus.instance.share(ShareParams(files: [XFile(file.path, mimeType: mime, name: name)], sharePositionOrigin: origin));
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: mime, name: name)],
+          sharePositionOrigin: origin,
+        ),
+      );
       return;
     }
   } on DioException catch (e) {

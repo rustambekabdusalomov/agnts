@@ -96,6 +96,7 @@ import 'package:agnts_api/src/model/create_invite_request.dart';
 import 'package:agnts_api/src/model/create_platform_admin_request.dart';
 import 'package:agnts_api/src/model/create_ticket_document_request.dart';
 import 'package:agnts_api/src/model/create_workspace_request.dart';
+import 'package:agnts_api/src/model/credit_usage.dart';
 import 'package:agnts_api/src/model/dashboard.dart';
 import 'package:agnts_api/src/model/dashboard_counts.dart';
 import 'package:agnts_api/src/model/day_stat.dart';
@@ -139,6 +140,7 @@ import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/event.dart';
 import 'package:agnts_api/src/model/event_page.dart';
 import 'package:agnts_api/src/model/event_summary.dart';
+import 'package:agnts_api/src/model/fallback_usage.dart';
 import 'package:agnts_api/src/model/feedback.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:agnts_api/src/model/finding.dart';
@@ -219,6 +221,8 @@ import 'package:agnts_api/src/model/model_catalog.dart';
 import 'package:agnts_api/src/model/model_catalog_models_inner.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
 import 'package:agnts_api/src/model/muse_login.dart';
+import 'package:agnts_api/src/model/muse_provider.dart';
+import 'package:agnts_api/src/model/muse_provider_fallback.dart';
 import 'package:agnts_api/src/model/network_activity.dart';
 import 'package:agnts_api/src/model/network_activity_dials_inner.dart';
 import 'package:agnts_api/src/model/network_route.dart';
@@ -344,9 +348,12 @@ import 'package:agnts_api/src/model/secret_findings.dart';
 import 'package:agnts_api/src/model/secret_findings_findings_inner.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/send_meeting_message_request.dart';
+import 'package:agnts_api/src/model/set_credit_limit_request.dart';
+import 'package:agnts_api/src/model/set_fallback_limit_request.dart';
 import 'package:agnts_api/src/model/set_free_credits_request.dart';
 import 'package:agnts_api/src/model/set_meeting_cohosts_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
+import 'package:agnts_api/src/model/set_muse_provider_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/set_slots_request.dart';
 import 'package:agnts_api/src/model/set_ticket_benchmark_request.dart';
@@ -657,6 +664,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return CreateTicketDocumentRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateWorkspaceRequest':
           return CreateWorkspaceRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CreditUsage':
+          return CreditUsage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Dashboard':
           return Dashboard.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DashboardCounts':
@@ -749,6 +758,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return EventPage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'EventSummary':
           return EventSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FallbackUsage':
+          return FallbackUsage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Feedback':
           return Feedback.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FileChange':
@@ -927,6 +938,13 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ModelOverrides.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MuseLogin':
           return MuseLogin.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MuseProvider':
+          return MuseProvider.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MuseProviderFallback':
+          return MuseProviderFallback.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MuseProviderMode':
+          
+          
         case 'NetworkActivity':
           return NetworkActivity.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'NetworkActivityDialsInner':
@@ -1186,12 +1204,18 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendMeetingMessageRequest':
           return SendMeetingMessageRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetCreditLimitRequest':
+          return SetCreditLimitRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetFallbackLimitRequest':
+          return SetFallbackLimitRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetFreeCreditsRequest':
           return SetFreeCreditsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMeetingCohostsRequest':
           return SetMeetingCohostsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMemberRoleRequest':
           return SetMemberRoleRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetMuseProviderRequest':
+          return SetMuseProviderRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetPlaneWebhookSecretRequest':
           return SetPlaneWebhookSecretRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetSlotsRequest':

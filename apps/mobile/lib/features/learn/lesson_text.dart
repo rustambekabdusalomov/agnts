@@ -6,23 +6,23 @@ import '../../theme.dart';
 
 /// A lesson's category in the user's language.
 String categoryLabel(AppLocalizations l, LessonCategory c) => switch (c) {
-      LessonCategory.pattern => l.learnCategory_pattern,
-      LessonCategory.architecture => l.learnCategory_architecture,
-      LessonCategory.algorithm => l.learnCategory_algorithm,
-      LessonCategory.library_ => l.learnCategory_library,
-      LessonCategory.language => l.learnCategory_language,
-      LessonCategory.testing => l.learnCategory_testing,
-      LessonCategory.security => l.learnCategory_security,
-      LessonCategory.performance => l.learnCategory_performance,
-      LessonCategory.tooling => l.learnCategory_tooling,
-      LessonCategory.other => l.learnCategory_other,
-    };
+  LessonCategory.pattern => l.learnCategory_pattern,
+  LessonCategory.architecture => l.learnCategory_architecture,
+  LessonCategory.algorithm => l.learnCategory_algorithm,
+  LessonCategory.library_ => l.learnCategory_library,
+  LessonCategory.language => l.learnCategory_language,
+  LessonCategory.testing => l.learnCategory_testing,
+  LessonCategory.security => l.learnCategory_security,
+  LessonCategory.performance => l.learnCategory_performance,
+  LessonCategory.tooling => l.learnCategory_tooling,
+  LessonCategory.other => l.learnCategory_other,
+};
 
 String levelLabel(AppLocalizations l, LessonLevel v) => switch (v) {
-      LessonLevel.beginner => l.learnLevel_beginner,
-      LessonLevel.intermediate => l.learnLevel_intermediate,
-      LessonLevel.advanced => l.learnLevel_advanced,
-    };
+  LessonLevel.beginner => l.learnLevel_beginner,
+  LessonLevel.intermediate => l.learnLevel_intermediate,
+  LessonLevel.advanced => l.learnLevel_advanced,
+};
 
 /// Splits a lesson's plain text into paragraphs and code blocks (fenced
 /// with ``` or indented as a whole), as the admin panel does.
@@ -54,21 +54,27 @@ class LessonText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      for (final b in lessonBlocks(text))
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: b.code
-              ? Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: c.code, borderRadius: BorderRadius.circular(12)),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Text(b.text, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, height: 1.5, color: c.codeInk)),
-                  ),
-                )
-              : Text(b.text, style: TextStyle(fontSize: 15, height: 1.5, color: c.ink)),
-        ),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final b in lessonBlocks(text))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: b.code
+                ? Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: c.code, borderRadius: BorderRadius.circular(12)),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(
+                        b.text,
+                        style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, height: 1.5, color: c.codeInk),
+                      ),
+                    ),
+                  )
+                : Text(b.text, style: TextStyle(fontSize: 15, height: 1.5, color: c.ink)),
+          ),
+      ],
+    );
   }
 }

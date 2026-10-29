@@ -6,9 +6,9 @@ typedef RouteRow = ({String target, String ports});
 /// Route rows to the API's routes: a "/" makes a CIDR, anything else a
 /// host; ports split on commas and spaces, the invalid ones dropped.
 List<NetworkRoute> toRoutes(List<RouteRow> rows) => [
-      for (final r in rows)
-        if (r.target.trim().isNotEmpty) _route(r),
-    ];
+  for (final r in rows)
+    if (r.target.trim().isNotEmpty) _route(r),
+];
 
 NetworkRoute _route(RouteRow r) {
   final target = r.target.trim();
@@ -22,8 +22,8 @@ NetworkRoute _route(RouteRow r) {
 
 /// A saved network's routes back to editable rows.
 List<RouteRow> fromRoutes(List<NetworkRoute> routes) => [
-      for (final r in routes) (target: r.host ?? r.cidr ?? '', ports: (r.ports ?? const []).join(', ')),
-    ];
+  for (final r in routes) (target: r.host ?? r.cidr ?? '', ports: (r.ports ?? const []).join(', ')),
+];
 
 /// Routes as one line: "gitlab.corp.local :443, 10.20.0.0/16".
 String routeText(List<NetworkRoute> routes) =>
@@ -48,14 +48,14 @@ String linkCommand({required String name, required String linkUrl, required Stri
 }
 
 String kindName(PrivateNetworkKindEnum k) => switch (k) {
-      PrivateNetworkKindEnum.connector => 'agnts-link',
-      PrivateNetworkKindEnum.wireguard => 'WireGuard',
-      PrivateNetworkKindEnum.openvpn => 'OpenVPN',
-    };
+  PrivateNetworkKindEnum.connector => 'agnts-link',
+  PrivateNetworkKindEnum.wireguard => 'WireGuard',
+  PrivateNetworkKindEnum.openvpn => 'OpenVPN',
+};
 
 /// "512 B", "1.5 KB", "2.0 MB".
 String byteText(int n) => n < 1024
     ? '$n B'
     : n < 1 << 20
-        ? '${(n / 1024).toStringAsFixed(1)} KB'
-        : '${(n / (1 << 20)).toStringAsFixed(1)} MB';
+    ? '${(n / 1024).toStringAsFixed(1)} KB'
+    : '${(n / (1 << 20)).toStringAsFixed(1)} MB';

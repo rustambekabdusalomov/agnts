@@ -33,16 +33,16 @@ const _endOfLog = '=== end of the log ===';
 
 /// A CI status's label and tone.
 (String, Tone) ciStatusBadge(AppLocalizations l, CIStatus s) => switch (s) {
-      CIStatus.triage => (l.mciStatus_triage, Tone.gray),
-      CIStatus.open => (l.mciStatus_open, Tone.bad),
-      CIStatus.fixing => (l.mciStatus_fixing, Tone.info),
-      CIStatus.fixed => (l.mciStatus_fixed, Tone.ok),
-      CIStatus.resolved => (l.mciStatus_resolved, Tone.ok),
-      CIStatus.flaky => (l.mciStatus_flaky, Tone.warn),
-      CIStatus.infra => (l.mciStatus_infra, Tone.gray),
-      CIStatus.muted => (l.mciStatus_muted, Tone.gray),
-      CIStatus.regression => (l.mciStatus_regression, Tone.bad),
-    };
+  CIStatus.triage => (l.mciStatus_triage, Tone.gray),
+  CIStatus.open => (l.mciStatus_open, Tone.bad),
+  CIStatus.fixing => (l.mciStatus_fixing, Tone.info),
+  CIStatus.fixed => (l.mciStatus_fixed, Tone.ok),
+  CIStatus.resolved => (l.mciStatus_resolved, Tone.ok),
+  CIStatus.flaky => (l.mciStatus_flaky, Tone.warn),
+  CIStatus.infra => (l.mciStatus_infra, Tone.gray),
+  CIStatus.muted => (l.mciStatus_muted, Tone.gray),
+  CIStatus.regression => (l.mciStatus_regression, Tone.bad),
+};
 
 /// Whether the failure's ticket is still at work (not done or rejected).
 bool hasLiveTicket(CIFailure f) {

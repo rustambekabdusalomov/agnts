@@ -8,16 +8,16 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child) => MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: child),
-    );
+  theme: agntsTheme(Brightness.light),
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(body: child),
+);
 
 final _ticket = Ticket(
   key: 'SHOP-3',
@@ -38,20 +38,38 @@ final _ticket = Ticket(
 );
 
 final _changes = [
-  CommitReapplyChange(repoId: 1, repoName: 'api', sha: 'bbbbbbb2222', from: 'feat(auth): my own words', to: '[AMANAT-2677] feat: Login', suggested: false),
-  CommitReapplyChange(repoId: 1, repoName: 'api', sha: 'aaaaaaa1111', from: 'SHOP-3: Login', to: '[AMANAT-2677] feat: Login', suggested: true),
+  CommitReapplyChange(
+    repoId: 1,
+    repoName: 'api',
+    sha: 'bbbbbbb2222',
+    from: 'feat(auth): my own words',
+    to: '[AMANAT-2677] feat: Login',
+    suggested: false,
+  ),
+  CommitReapplyChange(
+    repoId: 1,
+    repoName: 'api',
+    sha: 'aaaaaaa1111',
+    from: 'SHOP-3: Login',
+    to: '[AMANAT-2677] feat: Login',
+    suggested: true,
+  ),
 ];
 
 void main() {
   testWidgets('previews with the number, ticks the suggested changes, applies only the ticked ones', (tester) async {
     final calls = <(String?, bool, List<String>?)>[];
-    await tester.pumpWidget(_app(CommitReapplySheet(
-      ticket: _ticket,
-      call: (number, dryRun, only) async {
-        calls.add((number, dryRun, only));
-        return _changes;
-      },
-    )));
+    await tester.pumpWidget(
+      _app(
+        CommitReapplySheet(
+          ticket: _ticket,
+          call: (number, dryRun, only) async {
+            calls.add((number, dryRun, only));
+            return _changes;
+          },
+        ),
+      ),
+    );
     expect(find.text('Ticket number for {number}'), findsOneWidget);
     await tester.enterText(find.byType(TextField), ' AMANAT-2677 ');
     await tester.tap(find.text('Preview'));

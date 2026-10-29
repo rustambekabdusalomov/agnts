@@ -27,12 +27,15 @@ void main() {
   });
 
   test('secret lines from a 422 answer', () {
-    expect(secretLines({
-      'findings': [
-        {'line': 3, 'excerpt': 'Token: •••'},
-        {'line': 'bad'},
-      ],
-    }), [(3, 'Token: •••')]);
+    expect(
+      secretLines({
+        'findings': [
+          {'line': 3, 'excerpt': 'Token: •••'},
+          {'line': 'bad'},
+        ],
+      }),
+      [(3, 'Token: •••')],
+    );
     expect(secretLines('nope'), isEmpty);
   });
 

@@ -70,7 +70,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       _error = null;
     });
     try {
-      await ref.read(sessionProvider.notifier).register(
+      await ref
+          .read(sessionProvider.notifier)
+          .register(
             _server,
             RegisterRequest(
               email: _email.text.trim(),
@@ -139,7 +141,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextField(
                   controller: _workspace,
                   maxLength: 80,
-                  decoration: InputDecoration(labelText: l.accountWorkspaceName, helperText: l.accountWorkspaceNameHelp, helperMaxLines: 3, counterText: ''),
+                  decoration: InputDecoration(
+                    labelText: l.accountWorkspaceName,
+                    helperText: l.accountWorkspaceNameHelp,
+                    helperMaxLines: 3,
+                    counterText: '',
+                  ),
                 ),
               ],
               if (_error != null) AuthNote(_error!),

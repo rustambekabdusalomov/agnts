@@ -48,9 +48,9 @@ class _ResetScreenState extends ConsumerState<ResetScreen> {
       _error = null;
     });
     try {
-      await SessionNotifier.client(_server)
-          .getAuthApi()
-          .resetPassword(resetPasswordRequest: ResetPasswordRequest(token: widget.token, password: _pass.text));
+      await SessionNotifier.client(_server).getAuthApi().resetPassword(
+        resetPasswordRequest: ResetPasswordRequest(token: widget.token, password: _pass.text),
+      );
       if (mounted) setState(() => _done = true);
     } catch (e) {
       if (mounted) setState(() => _error = authError(l, e));
@@ -68,7 +68,11 @@ class _ResetScreenState extends ConsumerState<ResetScreen> {
       children: _done
           ? [HelpBox(l.accountResetDone, tone: Tone.ok)]
           : [
-              if (widget.token.isEmpty) Padding(padding: const EdgeInsets.only(bottom: 12), child: HelpBox(l.accountVerifyFailed, tone: Tone.bad)),
+              if (widget.token.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: HelpBox(l.accountVerifyFailed, tone: Tone.bad),
+                ),
               TextField(
                 controller: _pass,
                 autofocus: true,

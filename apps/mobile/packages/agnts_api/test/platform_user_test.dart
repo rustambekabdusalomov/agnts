@@ -35,5 +35,10 @@ void main() {
       // TODO
     });
 
+    // CreditUsage creditUsage
+    test('to test the property `creditUsage`', () async {
+      // TODO
+    });
+
   });
 }

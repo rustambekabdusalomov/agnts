@@ -74,55 +74,75 @@ class _LearnQueueSectionState extends ConsumerState<LearnQueueSection> {
     final l = AppLocalizations.of(context);
     final items = ref.watch(learnQueueProvider).value ?? const <LearnQueueItem>[];
     if (items.isEmpty) return EmptyState(title: l.learnQueueEmpty);
-    final idle = [for (final x in items) if (x.status == LearnQueueItemStatusEnum.none) x.key];
-    final pending = [for (final x in items) if (x.status == LearnQueueItemStatusEnum.pending) x.key];
+    final idle = [
+      for (final x in items)
+        if (x.status == LearnQueueItemStatusEnum.none) x.key,
+    ];
+    final pending = [
+      for (final x in items)
+        if (x.status == LearnQueueItemStatusEnum.pending) x.key,
+    ];
     (String, Tone) badge(LearnQueueItemStatusEnum s) => switch (s) {
-          LearnQueueItemStatusEnum.running => (l.learnStatus_running, Tone.info),
-          LearnQueueItemStatusEnum.pending => (l.learnStatus_pending, Tone.warn),
-          LearnQueueItemStatusEnum.failed => (l.learnStatus_failed, Tone.bad),
-          LearnQueueItemStatusEnum.none => (l.learnStatus_none, Tone.gray),
-        };
+      LearnQueueItemStatusEnum.running => (l.learnStatus_running, Tone.info),
+      LearnQueueItemStatusEnum.pending => (l.learnStatus_pending, Tone.warn),
+      LearnQueueItemStatusEnum.failed => (l.learnStatus_failed, Tone.bad),
+      LearnQueueItemStatusEnum.none => (l.learnStatus_none, Tone.gray),
+    };
     return Section(
       title: l.learnQueueTitle,
       trailing: idle.length > 1
           ? TextButton(onPressed: _busy ? null : () => _learn(idle), child: Text(l.learnQueueAll('${idle.length}')))
           : null,
-      child: Column(children: [
-        for (final x in items)
-          InkWell(
-            onTap: () => context.push('/tickets/${x.key}'),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(children: [
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(x.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Row(children: [
-                      ToneBadge(badge(x.status).$1, badge(x.status).$2, small: true),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          x.status == LearnQueueItemStatusEnum.pending
-                              ? l.learnQueuePosition('${pending.indexOf(x.key) + 1}')
-                              : '${x.key} · ${x.repoName}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12.5),
-                        ),
+      child: Column(
+        children: [
+          for (final x in items)
+            InkWell(
+              onTap: () => context.push('/tickets/${x.key}'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            x.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              ToneBadge(badge(x.status).$1, badge(x.status).$2, small: true),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  x.status == LearnQueueItemStatusEnum.pending
+                                      ? l.learnQueuePosition('${pending.indexOf(x.key) + 1}')
+                                      : '${x.key} · ${x.repoName}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ]),
-                  ]),
+                    ),
+                    if (x.status == LearnQueueItemStatusEnum.none || x.status == LearnQueueItemStatusEnum.failed)
+                      TextButton(
+                        onPressed: _busy ? null : () => _learn([x.key]),
+                        child: Text(x.status == LearnQueueItemStatusEnum.failed ? l.learnRetryBtn : l.learnQueueBtn),
+                      ),
+                  ],
                 ),
-                if (x.status == LearnQueueItemStatusEnum.none || x.status == LearnQueueItemStatusEnum.failed)
-                  TextButton(
-                    onPressed: _busy ? null : () => _learn([x.key]),
-                    child: Text(x.status == LearnQueueItemStatusEnum.failed ? l.learnRetryBtn : l.learnQueueBtn),
-                  ),
-              ]),
+              ),
             ),
-          ),
-      ]),
+        ],
+      ),
     );
   }
 }

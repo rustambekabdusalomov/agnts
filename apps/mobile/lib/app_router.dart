@@ -66,9 +66,9 @@ import 'widgets/ui.dart';
 /// its own unless it is a MaterialPage; this one slides in and, on iOS,
 /// swipes back from anywhere on the page (theme.dart's pageTransitionsTheme).
 GoRoute screenRoute(String path, Widget Function(BuildContext, GoRouterState) builder) => GoRoute(
-      path: path,
-      pageBuilder: (context, s) => MaterialPage<void>(key: s.pageKey, name: s.path, restorationId: s.pageKey.value, child: builder(context, s)),
-    );
+  path: path,
+  pageBuilder: (context, s) => MaterialPage<void>(key: s.pageKey, name: s.path, restorationId: s.pageKey.value, child: builder(context, s)),
+);
 
 /// Screens open without signing in.
 const _publicPaths = ['/signup', '/forgot', '/reset-password', '/verify', '/invite'];
@@ -121,24 +121,40 @@ final routerProvider = Provider<GoRouter>((ref) {
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _AdminShell(shell: shell),
           branches: [
-            StatefulShellBranch(routes: [GoRoute(path: '/admin', builder: (_, _) => const AdminDashboardScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/admin/workspaces', builder: (_, _) => const AdminWorkspacesScreen())]),
             StatefulShellBranch(
-              routes: [GoRoute(path: '/admin/users', builder: (_, s) => AdminUsersScreen(filter: s.uri.queryParameters['f']))],
+              routes: [GoRoute(path: '/admin', builder: (_, _) => const AdminDashboardScreen())],
             ),
-            StatefulShellBranch(routes: [GoRoute(path: '/admin/feedback', builder: (_, _) => const AdminFeedbackScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/admin/more', builder: (_, _) => const AdminMoreScreen())]),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/admin/workspaces', builder: (_, _) => const AdminWorkspacesScreen())],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/admin/users',
+                  builder: (_, s) => AdminUsersScreen(filter: s.uri.queryParameters['f']),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/admin/feedback', builder: (_, _) => const AdminFeedbackScreen())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/admin/more', builder: (_, _) => const AdminMoreScreen())],
+            ),
           ],
         ),
       ] else ...[
         // Notification taps deep-link here.
         screenRoute('/tickets/:key', (_, s) => TicketScreen(ticketKey: s.pathParameters['key']!)),
         screenRoute('/tickets/:key/api-results', (_, s) => ApiResultsScreen(ticketKey: s.pathParameters['key']!)),
-        screenRoute('/repos/:id', (_, s) => RepoScreen(id: int.parse(s.pathParameters['id']!), name: s.uri.queryParameters['name'] ?? ''),
+        screenRoute('/repos/:id', (_, s) => RepoScreen(id: int.parse(s.pathParameters['id']!), name: s.uri.queryParameters['name'] ?? '')),
+        screenRoute(
+          '/repos/:id/commits/:sha',
+          (_, s) => CommitScreen(repoId: int.parse(s.pathParameters['id']!), sha: s.pathParameters['sha']!),
         ),
-        screenRoute('/repos/:id/commits/:sha', (_, s) => CommitScreen(repoId: int.parse(s.pathParameters['id']!), sha: s.pathParameters['sha']!),
-        ),
-        screenRoute('/repos/:id/pulls/:number', (_, s) => PullScreen(repoId: int.parse(s.pathParameters['id']!), number: int.parse(s.pathParameters['number']!)),
+        screenRoute(
+          '/repos/:id/pulls/:number',
+          (_, s) => PullScreen(repoId: int.parse(s.pathParameters['id']!), number: int.parse(s.pathParameters['number']!)),
         ),
         screenRoute('/repos', (_, _) => const ReposScreen()),
         screenRoute('/rules', (_, _) => const RulesScreen()),
@@ -165,11 +181,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         screenRoute('/learn-queue', (_, _) => const LearnQueueScreen()),
         screenRoute('/learn/:id', (_, s) => LessonScreen(id: int.parse(s.pathParameters['id']!))),
         // Prefilled from a Chat answer's offer (?text=…&repos=1,2) or a ticket (?ticket=KEY).
-        screenRoute('/assistant/code', (_, s) => CodeScreen(
-              initialText: s.uri.queryParameters['text'],
-              initialRepos: [for (final x in (s.uri.queryParameters['repos'] ?? '').split(',')) if ((int.tryParse(x) ?? 0) > 0) int.parse(x)],
-              initialTicket: s.uri.queryParameters['ticket'],
-            )),
+        screenRoute(
+          '/assistant/code',
+          (_, s) => CodeScreen(
+            initialText: s.uri.queryParameters['text'],
+            initialRepos: [
+              for (final x in (s.uri.queryParameters['repos'] ?? '').split(','))
+                if ((int.tryParse(x) ?? 0) > 0) int.parse(x),
+            ],
+            initialTicket: s.uri.queryParameters['ticket'],
+          ),
+        ),
         screenRoute('/assistant/code/:id', (_, s) => CodeScreen(conversationId: int.tryParse(s.pathParameters['id']!))),
         screenRoute('/assistant', (_, _) => const AssistantScreen()),
         screenRoute('/assistant-rated', (_, _) => const AssistantRatedScreen()),
@@ -179,11 +201,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _Shell(shell: shell),
           branches: [
-            StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (_, _) => const HomeScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/tickets', builder: (_, _) => const TicketsScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/tasks', builder: (_, _) => const TasksScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/analytics', builder: (_, _) => const AnalyticsScreen())]),
-            StatefulShellBranch(routes: [GoRoute(path: '/more', builder: (_, _) => const MoreScreen())]),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/home', builder: (_, _) => const HomeScreen())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/tickets', builder: (_, _) => const TicketsScreen())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/tasks', builder: (_, _) => const TasksScreen())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/analytics', builder: (_, _) => const AnalyticsScreen())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/more', builder: (_, _) => const MoreScreen())],
+            ),
           ],
         ),
       ],
@@ -205,17 +237,20 @@ class _WrongApp extends ConsumerWidget {
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              HIcon(adminApp ? 'shield' : 'info', size: 40, color: c.ink3),
-              const SizedBox(height: 14),
-              Text(
-                adminApp ? l.platformForbidden : l.mobileAdminAppOnly,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, height: 1.4, color: c.ink),
-              ),
-              const SizedBox(height: 20),
-              FilledButton(onPressed: () => signOut(ref), child: Text(l.mobileSignOut)),
-            ]),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                HIcon(adminApp ? 'shield' : 'info', size: 40, color: c.ink3),
+                const SizedBox(height: 14),
+                Text(
+                  adminApp ? l.platformForbidden : l.mobileAdminAppOnly,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, height: 1.4, color: c.ink),
+                ),
+                const SizedBox(height: 20),
+                FilledButton(onPressed: () => signOut(ref), child: Text(l.mobileSignOut)),
+              ],
+            ),
           ),
         ),
       ),
@@ -233,13 +268,16 @@ class _Shell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final needs = ref.watch(dashboardProvider).value?.counts.needs ?? 0;
-    return _TabScaffold(shell: shell, tabs: [
-      ('dashboard', l.mobileHome, needs),
-      ('all', l.navTickets, 0),
-      ('tasks', l.navTasks, 0),
-      ('analytics', l.navAnalytics, 0),
-      ('more', l.mobileMore, 0),
-    ]);
+    return _TabScaffold(
+      shell: shell,
+      tabs: [
+        ('dashboard', l.mobileHome, needs),
+        ('all', l.navTickets, 0),
+        ('tasks', l.navTasks, 0),
+        ('analytics', l.navAnalytics, 0),
+        ('more', l.mobileMore, 0),
+      ],
+    );
   }
 }
 
@@ -252,13 +290,16 @@ class _AdminShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final fresh = ref.watch(platformFeedbackProvider).value?.where((f) => f.status == FeedbackStatusEnum.new_).length ?? 0;
-    return _TabScaffold(shell: shell, tabs: [
-      ('dashboard', l.platformNavDashboard, 0),
-      ('repos', l.platformWorkspaces, 0),
-      ('users', l.platformUsers, 0),
-      ('feedback', l.feedbackAdminTitle, fresh),
-      ('more', l.mobileMore, 0),
-    ]);
+    return _TabScaffold(
+      shell: shell,
+      tabs: [
+        ('dashboard', l.platformNavDashboard, 0),
+        ('repos', l.platformWorkspaces, 0),
+        ('users', l.platformUsers, 0),
+        ('feedback', l.feedbackAdminTitle, fresh),
+        ('more', l.mobileMore, 0),
+      ],
+    );
   }
 }
 
@@ -274,21 +315,26 @@ class _TabScaffold extends StatelessWidget {
     return Scaffold(
       body: shell,
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
+        decoration: BoxDecoration(
+          color: c.surface,
+          border: Border(top: BorderSide(color: c.line)),
+        ),
         padding: EdgeInsets.fromLTRB(4, 6, 4, 6 + MediaQuery.paddingOf(context).bottom),
-        child: Row(children: [
-          for (final (i, (icon, label, badge)) in tabs.indexed)
-            Expanded(
-              child: _Tab(
-                icon: icon,
-                label: label,
-                badge: badge,
-                selected: i == shell.currentIndex,
-                // Tapping the current tab again goes back to its first screen.
-                onTap: () => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+        child: Row(
+          children: [
+            for (final (i, (icon, label, badge)) in tabs.indexed)
+              Expanded(
+                child: _Tab(
+                  icon: icon,
+                  label: label,
+                  badge: badge,
+                  selected: i == shell.currentIndex,
+                  // Tapping the current tab again goes back to its first screen.
+                  onTap: () => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+                ),
               ),
-            ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -315,26 +361,44 @@ class _Tab extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Stack(clipBehavior: Clip.none, children: [
-              HIcon(icon, size: 24, color: col, stroke: 1.8),
-              if (badge > 0)
-                Positioned(
-                  left: 14,
-                  top: -6,
-                  child: Container(
-                    constraints: const BoxConstraints(minWidth: 18),
-                    height: 18,
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(color: c.bad, borderRadius: BorderRadius.circular(9), border: Border.all(color: c.surface, width: 2)),
-                    child: Text('$badge', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, height: 1)),
-                  ),
-                ),
-            ]),
-            const SizedBox(height: 3),
-            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: col)),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  HIcon(icon, size: 24, color: col, stroke: 1.8),
+                  if (badge > 0)
+                    Positioned(
+                      left: 14,
+                      top: -6,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 18),
+                        height: 18,
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: c.bad,
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(color: c.surface, width: 2),
+                        ),
+                        child: Text(
+                          '$badge',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, height: 1),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: col),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -10,18 +10,19 @@ import 'package:agnts_mobile/theme.dart';
 import 'package:agnts_mobile/widgets/ui.dart';
 
 Widget _app(Widget child) => MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SingleChildScrollView(child: child)),
-    );
+  theme: agntsTheme(Brightness.light),
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(body: SingleChildScrollView(child: child)),
+);
 
-RepoGroupMember _m(int id, String name, {bool archived = false}) => RepoGroupMember(repoId: id, repoName: name, role: '', archived: archived);
+RepoGroupMember _m(int id, String name, {bool archived = false}) =>
+    RepoGroupMember(repoId: id, repoName: name, role: '', archived: archived);
 
 final _group = RepoGroup(
   id: 7,
@@ -37,7 +38,8 @@ final _group = RepoGroup(
   updatedAt: DateTime(2026),
 );
 
-TicketRepoState _rs(int id, String name, TicketRepoStateStateEnum state, {String role = '', String prUrl = '', String? pushError}) => TicketRepoState(
+TicketRepoState _rs(int id, String name, TicketRepoStateStateEnum state, {String role = '', String prUrl = '', String? pushError}) =>
+    TicketRepoState(
       repoId: id,
       repoName: name,
       role: role,
@@ -52,25 +54,25 @@ TicketRepoState _rs(int id, String name, TicketRepoStateStateEnum state, {String
     );
 
 Ticket _ticket({List<TicketRepoState>? repos}) => Ticket(
-      key: 'SHOP-1',
-      source_: TicketSource_Enum.local,
-      title: 'Checkout',
-      description: '',
-      priority: 'high',
-      state: TicketState.waitingForReview,
-      revision: 0,
-      turns: 0,
-      branch: 'agnts/SHOP-1',
-      prUrl: '',
-      kind: TicketKind.code,
-      kindAuto: false,
-      skipChecks: false,
-      repoId: 1,
-      repoName: 'api',
-      repos: repos,
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-    );
+  key: 'SHOP-1',
+  source_: TicketSource_Enum.local,
+  title: 'Checkout',
+  description: '',
+  priority: 'high',
+  state: TicketState.waitingForReview,
+  revision: 0,
+  turns: 0,
+  branch: 'agnts/SHOP-1',
+  prUrl: '',
+  kind: TicketKind.code,
+  kindAuto: false,
+  skipChecks: false,
+  repoId: 1,
+  repoName: 'api',
+  repos: repos,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+);
 
 /// The payload as [repoId, repoIds, groupId], to compare deeply.
 List<Object?> _payload(RepoPick p) => [p.payload.repoId, p.payload.repoIds, p.payload.groupId];
@@ -88,8 +90,16 @@ void main() {
 
     test('several repositories send repoIds in pick order', () {
       final p = RepoPick.single(2).toggle(1).toggle(4);
-      expect(_payload(p), [null, [2, 1, 4], null]);
-      expect(_payload(p.toggle(2)), [null, [1, 4], null]);
+      expect(_payload(p), [
+        null,
+        [2, 1, 4],
+        null,
+      ]);
+      expect(_payload(p.toggle(2)), [
+        null,
+        [1, 4],
+        null,
+      ]);
     });
 
     test('an untouched group sends groupId and skips archived members', () {
@@ -103,10 +113,18 @@ void main() {
       final removed = const RepoPick().pickGroup(_group).remove(2);
       expect(removed.edited, isTrue);
       expect(removed.group, _group);
-      expect(_payload(removed), [null, [1, 4], null]);
+      expect(_payload(removed), [
+        null,
+        [1, 4],
+        null,
+      ]);
 
       final added = const RepoPick().pickGroup(_group).toggle(9);
-      expect(_payload(added), [null, [1, 2, 4, 9], null]);
+      expect(_payload(added), [
+        null,
+        [1, 2, 4, 9],
+        null,
+      ]);
 
       // Down to one repository: a plain repoId.
       expect(_payload(removed.remove(4)), [1, null, null]);
@@ -119,11 +137,15 @@ void main() {
     expect(repoLabel(_ticket()), 'api');
     expect(repoLabel(_ticket(repos: [_rs(1, 'api', TicketRepoStateStateEnum.pending)])), 'api');
     expect(
-      repoLabel(_ticket(repos: [
-        _rs(1, 'api', TicketRepoStateStateEnum.pending),
-        _rs(2, 'web', TicketRepoStateStateEnum.pending),
-        _rs(4, 'admin', TicketRepoStateStateEnum.pending),
-      ])),
+      repoLabel(
+        _ticket(
+          repos: [
+            _rs(1, 'api', TicketRepoStateStateEnum.pending),
+            _rs(2, 'web', TicketRepoStateStateEnum.pending),
+            _rs(4, 'admin', TicketRepoStateStateEnum.pending),
+          ],
+        ),
+      ),
       'api +2',
     );
   });
@@ -134,11 +156,13 @@ void main() {
   });
 
   testWidgets('a multi-repo ticket lists each repository', (tester) async {
-    final t = _ticket(repos: [
-      _rs(1, 'api', TicketRepoStateStateEnum.merged, role: 'backend', prUrl: 'https://git.example/api/pull/3'),
-      _rs(2, 'web', TicketRepoStateStateEnum.pushed, pushError: 'remote rejected'),
-      _rs(4, 'admin', TicketRepoStateStateEnum.unchanged),
-    ]);
+    final t = _ticket(
+      repos: [
+        _rs(1, 'api', TicketRepoStateStateEnum.merged, role: 'backend', prUrl: 'https://git.example/api/pull/3'),
+        _rs(2, 'web', TicketRepoStateStateEnum.pushed, pushError: 'remote rejected'),
+        _rs(4, 'admin', TicketRepoStateStateEnum.unchanged),
+      ],
+    );
     await tester.pumpWidget(_app(TicketRepos(t)));
     await tester.pumpAndSettle();
     expect(find.text('Repositories'), findsOneWidget);

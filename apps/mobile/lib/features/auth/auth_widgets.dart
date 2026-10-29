@@ -76,7 +76,10 @@ class AuthScaffold extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(title, style: theme.textTheme.headlineSmall),
-                    if (lede != null) ...[const SizedBox(height: 8), Text(lede!, style: TextStyle(fontSize: 15, height: 1.45, color: c.ink2))],
+                    if (lede != null) ...[
+                      const SizedBox(height: 8),
+                      Text(lede!, style: TextStyle(fontSize: 15, height: 1.45, color: c.ink2)),
+                    ],
                     const SizedBox(height: 18),
                     HCard(
                       padding: const EdgeInsets.all(16),

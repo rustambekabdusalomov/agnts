@@ -70,11 +70,13 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
       title: l.accountVerifyTitle,
       children: [
         switch (_state) {
-          _State.busy => Row(children: [
+          _State.busy => Row(
+            children: [
               const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
               const SizedBox(width: 10),
               Text(l.accountVerifying),
-            ]),
+            ],
+          ),
           _State.ok => HelpBox(l.accountVerified, tone: Tone.ok),
           _State.failed => HelpBox(l.accountVerifyFailed, tone: Tone.bad),
         },

@@ -28,10 +28,13 @@ class ActivityScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          PageHeader(title: l.mobileActivity),
-          const Expanded(child: ActivityFeed()),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PageHeader(title: l.mobileActivity),
+            const Expanded(child: ActivityFeed()),
+          ],
+        ),
       ),
     );
   }
@@ -56,9 +59,11 @@ class _ActivityFeedState extends ConsumerState<ActivityFeed> {
     final types = {'all': l.mobileFilterAll, 'user': l.mobileFilterYou, 'problems': l.mobileFilterProblems};
     final events = ref.watch(activityProvider(_type));
 
-    final chips = ChipRow(children: [
-      for (final e in types.entries) FilterChipH(label: e.value, selected: _type == e.key, onTap: () => setState(() => _type = e.key)),
-    ]);
+    final chips = ChipRow(
+      children: [
+        for (final e in types.entries) FilterChipH(label: e.value, selected: _type == e.key, onTap: () => setState(() => _type = e.key)),
+      ],
+    );
 
     return AsyncBody<List<Event>>(
       value: events,
@@ -79,7 +84,11 @@ class _ActivityFeedState extends ConsumerState<ActivityFeed> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: list.isEmpty
                 ? Container(
-                    decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(16)),
+                    decoration: BoxDecoration(
+                      color: c.surface,
+                      border: Border.all(color: c.line),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: EmptyState(title: l.mobileNoEvents),
                   )
                 : ListGroup(children: [for (final e in list) _EventRow(e)]),
@@ -87,11 +96,17 @@ class _ActivityFeedState extends ConsumerState<ActivityFeed> {
           // The log's last 90 days as a file, like the Logs page's buttons.
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-            child: Row(children: [
-              Expanded(child: OutlinedButton(onPressed: () => _export('json'), child: Text(l.logsExportJson))),
-              const SizedBox(width: 10),
-              Expanded(child: OutlinedButton(onPressed: () => _export('csv'), child: Text(l.logsExportCsv))),
-            ]),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(onPressed: () => _export('json'), child: Text(l.logsExportJson)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(onPressed: () => _export('csv'), child: Text(l.logsExportCsv)),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -138,59 +153,91 @@ class _RunSummary extends ConsumerWidget {
     final by = {for (final x in s.steps) x.state: x};
     final top = s.steps.fold<int>(1, (m, x) => (x.avgMs ?? 0) > m ? x.avgMs! : m);
     final rate = s.runsStarted == 0 ? 0 : (s.reachedReview * 100 / s.runsStarted).round();
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.logsPeriod),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Grid2(children: [
-          KpiCard(label: l.logsRunsStarted, value: '${s.runsStarted}', note: l.logsRunsNote),
-          KpiCard(label: l.logsReached, value: '$rate%', note: l.logsReachedNote('${s.reachedReview}', '${s.runsStarted}')),
-          KpiCard(label: l.logsAvgTurns, value: '${s.avgTurns}', note: l.logsAvgTurnsNote),
-          KpiCard(label: l.logsStops, value: '${s.stops}', valueColor: s.stops > 0 ? c.badInk : null, note: l.logsStopsNote(s.errors)),
-        ]),
-      ),
-      SectionHeader(l.logsWhereTime),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: HCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(l.logsWhereTimeSub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
-            const SizedBox(height: 6),
-            for (final (state, you) in _steps)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Row(children: [
-                    Expanded(
-                      child: Text.rich(TextSpan(children: [
-                        TextSpan(text: stateLabelOf(l, state)),
-                        if ((by[state]?.count ?? 0) > 0) TextSpan(text: ' (${by[state]!.count})', style: TextStyle(color: c.ink3)),
-                      ]), style: TextStyle(fontSize: 13.5, color: c.ink)),
-                    ),
-                    Text(
-                      by[state]?.avgMs == null ? l.logsNoData : _dur(by[state]!.avgMs!),
-                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink),
-                    ),
-                  ]),
-                  const SizedBox(height: 4),
-                  Bar(value: (by[state]?.avgMs ?? 0) / top, tone: you ? Tone.warn : Tone.info),
-                ]),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Wrap(spacing: 14, children: [
-                for (final (tone, label) in [(Tone.info, l.logsLegendAgnts), (Tone.warn, l.logsLegendYou)])
-                  Row(mainAxisSize: MainAxisSize.min, children: [
-                    Container(width: 10, height: 10, decoration: BoxDecoration(color: tone.solid(c), borderRadius: BorderRadius.circular(3))),
-                    const SizedBox(width: 5),
-                    Text(label, style: TextStyle(fontSize: 12.5, color: c.ink3)),
-                  ]),
-              ]),
-            ),
-          ]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l.logsPeriod),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Grid2(
+            children: [
+              KpiCard(label: l.logsRunsStarted, value: '${s.runsStarted}', note: l.logsRunsNote),
+              KpiCard(label: l.logsReached, value: '$rate%', note: l.logsReachedNote('${s.reachedReview}', '${s.runsStarted}')),
+              KpiCard(label: l.logsAvgTurns, value: '${s.avgTurns}', note: l.logsAvgTurnsNote),
+              KpiCard(label: l.logsStops, value: '${s.stops}', valueColor: s.stops > 0 ? c.badInk : null, note: l.logsStopsNote(s.errors)),
+            ],
+          ),
         ),
-      ),
-    ]);
+        SectionHeader(l.logsWhereTime),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: HCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(l.logsWhereTimeSub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
+                const SizedBox(height: 6),
+                for (final (state, you) in _steps)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(text: stateLabelOf(l, state)),
+                                    if ((by[state]?.count ?? 0) > 0)
+                                      TextSpan(
+                                        text: ' (${by[state]!.count})',
+                                        style: TextStyle(color: c.ink3),
+                                      ),
+                                  ],
+                                ),
+                                style: TextStyle(fontSize: 13.5, color: c.ink),
+                              ),
+                            ),
+                            Text(
+                              by[state]?.avgMs == null ? l.logsNoData : _dur(by[state]!.avgMs!),
+                              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Bar(value: (by[state]?.avgMs ?? 0) / top, tone: you ? Tone.warn : Tone.info),
+                      ],
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Wrap(
+                    spacing: 14,
+                    children: [
+                      for (final (tone, label) in [(Tone.info, l.logsLegendAgnts), (Tone.warn, l.logsLegendYou)])
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(color: tone.solid(c), borderRadius: BorderRadius.circular(3)),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(label, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -210,33 +257,48 @@ class _EventRow extends StatelessWidget {
     final mono = TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3);
     final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 3),
-          child: Text(_time(context, e.createdAt.toLocal()), style: mono.copyWith(fontSize: 12)),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              if (e.ticketKey.isNotEmpty) Text(e.ticketKey, style: mono),
-              ToneBadge(label, tone, small: true),
-              Text(e.origin.value, style: mono.copyWith(fontSize: 11.5)),
-            ]),
-            const SizedBox(height: 4),
-            Text(
-              e.message,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 14,
-                color: error ? c.badInk : warn ? c.warnInk : c.ink,
-                fontWeight: error ? FontWeight.w700 : null,
-              ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(_time(context, e.createdAt.toLocal()), style: mono.copyWith(fontSize: 12)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (e.ticketKey.isNotEmpty) Text(e.ticketKey, style: mono),
+                    ToneBadge(label, tone, small: true),
+                    Text(e.origin.value, style: mono.copyWith(fontSize: 11.5)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  e.message,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: error
+                        ? c.badInk
+                        : warn
+                        ? c.warnInk
+                        : c.ink,
+                    fontWeight: error ? FontWeight.w700 : null,
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
     if (e.ticketKey.isEmpty) return row;
     return InkWell(onTap: () => context.push('/tickets/${e.ticketKey}'), child: row);
@@ -280,34 +342,55 @@ class _WeekStats extends ConsumerWidget {
     final cur = a.current;
     final firstTry = cur.pushed == 0 ? 0 : (cur.firstTry * 100 / cur.pushed).round();
     Widget stat(String label, String value) => Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, color: c.ink3)),
-              const SizedBox(height: 2),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(value, style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink)),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: c.surface,
+          border: Border.all(color: c.line),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12.5, color: c.ink3),
+            ),
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: c.ink),
               ),
-            ]),
-          ),
-        );
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.mobileLastDays, padding: const EdgeInsets.fromLTRB(20, 4, 20, 8)),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: IntrinsicHeight(
-          child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            stat(l.mobilePushed, '${cur.pushed}'),
-            const SizedBox(width: 10),
-            stat(l.mobileFirstTry, '$firstTry%'),
-            const SizedBox(width: 10),
-            stat(l.mobileWaitingAvg, l.mobileMinutes(cur.waitMin.round().toString())),
-          ]),
+            ),
+          ],
         ),
       ),
-    ]);
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l.mobileLastDays, padding: const EdgeInsets.fromLTRB(20, 4, 20, 8)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                stat(l.mobilePushed, '${cur.pushed}'),
+                const SizedBox(width: 10),
+                stat(l.mobileFirstTry, '$firstTry%'),
+                const SizedBox(width: 10),
+                stat(l.mobileWaitingAvg, l.mobileMinutes(cur.waitMin.round().toString())),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -9806,6 +9806,123 @@ class AppLocalizationsUz extends AppLocalizations {
   String get platformFreeCreditsInvalid => '0 dan 10 000 000 gacha butun son kiriting.';
 
   @override
+  String get platformCreditUsage => 'Shu oydagi sarf';
+
+  @override
+  String platformCreditUsageTotal(String n) {
+    return 'jami $n';
+  }
+
+  @override
+  String get platformSetLimit => 'Limit belgilash';
+
+  @override
+  String get platformLimitTitle => 'Oylik kredit limiti';
+
+  @override
+  String platformLimitSet(String name, String n, String amount) {
+    return '$name oyiga $n kreditgacha ($amount) sarflashi mumkin';
+  }
+
+  @override
+  String get platformMuseProvider => 'Muse provayderi';
+
+  @override
+  String get platformMuseProviderSub =>
+      'agnts kreditlari hisobidan ishlar qayerga boradi. Odamlarning o‘z Meta akkauntlariga ta’sir qilmaydi.';
+
+  @override
+  String get platformMp_auto => 'Avto';
+
+  @override
+  String get platformMp_primary => 'Faqat Meta';
+
+  @override
+  String get platformMp_fallback => 'Faqat zaxira';
+
+  @override
+  String platformMpNote_auto(String name) {
+    return 'agnts’ning Meta kaliti. U tugaganda ishlar o‘z sessiyasini ${name}da davom ettiradi.';
+  }
+
+  @override
+  String get platformMpNote_primary => 'Faqat agnts’ning Meta kaliti. U tugaganda ishlar to‘xtaydi.';
+
+  @override
+  String platformMpNote_fallback(String name) {
+    return 'Kredit hisobidagi barcha ishlar ${name}ga boradi.';
+  }
+
+  @override
+  String get platformMpFallback => 'Zaxira';
+
+  @override
+  String get platformMpNone => 'Bu serverda zaxira provayder yo‘q (AGNTS_MUSE_FALLBACK_KEY).';
+
+  @override
+  String platformMpOut(String time) {
+    return 'Meta $time gacha ishlamaydi';
+  }
+
+  @override
+  String platformMpSet(String mode) {
+    return 'Kredit hisobidagi ishlar: $mode';
+  }
+
+  @override
+  String platformLimitRemoved(String name) {
+    return '$name uchun oylik limit olib tashlandi';
+  }
+
+  @override
+  String platformLimitUsed(String used, String amount, String total) {
+    return 'Shu oy $used kredit ($amount) sarflangan, jami $total.';
+  }
+
+  @override
+  String get platformLimitField => 'Oyiga kreditlar (1 kredit = \$0.01; 0 — limitsiz)';
+
+  @override
+  String get platformLimitHelp =>
+      'Bepul va ish maydoni kreditlari birgalikda. Limit tugagach, ishga tushirishlar keyingi oygacha yoki siz uni oshirguningizcha to\'xtaydi.';
+
+  @override
+  String platformLimitWorth(String amount) {
+    return 'Oyiga $amount gacha model chaqiruvlari.';
+  }
+
+  @override
+  String get platformLimitNone => 'Limitsiz: sarfni faqat ularning kreditlari cheklaydi.';
+
+  @override
+  String platformFbUsage(String name, String used) {
+    return '$name: $used';
+  }
+
+  @override
+  String platformFbUsed(String name, String used, String amount) {
+    return 'Bu oy ${name}ga sarflangan: $used kredit ($amount).';
+  }
+
+  @override
+  String get platformFbUseDefault => 'Serverning standart limitidan foydalanish';
+
+  @override
+  String platformFbField(String name) {
+    return '${name}da oyiga kredit (0 — limitsiz)';
+  }
+
+  @override
+  String platformFbHelp(String name) {
+    return 'Faqat agnts’ning Meta kaliti tugaganda va ishlar ${name}da davom etganda hisoblanadi. Limit tugaganda ularning ishlari Meta’ni kutadi.';
+  }
+
+  @override
+  String platformUsageTotals(String used, String amount, String limited) {
+    return 'Shu oy: hammada $used kredit ($amount); $limited kishida limit bor.';
+  }
+
+  @override
   String get previewTab => 'Oldindan koʻrish';
 
   @override

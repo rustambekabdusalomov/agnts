@@ -12,19 +12,19 @@ import 'package:agnts_mobile/widgets/common.dart';
 import 'package:agnts_mobile/widgets/ui.dart';
 
 Widget _app(Widget child, {Locale locale = const Locale('en')}) => ProviderScope(
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: locale,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: child),
-      ),
-    );
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    locale: locale,
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: child),
+  ),
+);
 
 void main() {
   testWidgets('state badges use the shared translations', (tester) async {

@@ -28,6 +28,13 @@ void main() {
       // TODO
     });
 
+    // Where runs on agnts's Muse credits go, the fallback provider, and whether agnts's Meta account is out (Admin)
+    //
+    //Future<MuseProvider> getMuseProvider() async
+    test('test getMuseProvider', () async {
+      // TODO
+    });
+
     // Servers, runs and the queue across every workspace (Admin)
     //
     //Future<PlatformOverview> getPlatformOverview() async
@@ -105,10 +112,31 @@ void main() {
       // TODO
     });
 
+    // Set the most credits a person may spend on agnts's Muse key per calendar month, free and bought together (Admin); 0 is no limit
+    //
+    //Future<CreditUsage> setCreditLimit(int id, SetCreditLimitRequest setCreditLimitRequest) async
+    test('test setCreditLimit', () async {
+      // TODO
+    });
+
+    // Set the most credits a person may spend on the fallback Muse provider (Baseten) per calendar month (Admin); null is the server's default, 0 is no limit
+    //
+    //Future<CreditUsage> setFallbackLimit(int id, SetFallbackLimitRequest setFallbackLimitRequest) async
+    test('test setFallbackLimit', () async {
+      // TODO
+    });
+
     // Set how many free credits a person may spend on agnts's Muse key (Admin); 0 gives none
     //
     //Future<FreeCredits> setFreeCredits(int id, SetFreeCreditsRequest setFreeCreditsRequest) async
     test('test setFreeCredits', () async {
+      // TODO
+    });
+
+    // Choose where runs on agnts's Muse credits go (Admin); agnts's Meta account is tried again from the next run
+    //
+    //Future<MuseProvider> setMuseProvider(SetMuseProviderRequest setMuseProviderRequest) async
+    test('test setMuseProvider', () async {
       // TODO
     });
 

@@ -20,10 +20,13 @@ void main() {
     expect(csvField('a,b'), '"a,b"');
     expect(csvField('say "hi"'), '"say ""hi"""');
     expect(csvField(null), '');
-    expect(toCsv([
-      ['a', 1],
-      ['b,c', null],
-    ]), 'a,1\n"b,c",\n');
+    expect(
+      toCsv([
+        ['a', 1],
+        ['b,c', null],
+      ]),
+      'a,1\n"b,c",\n',
+    );
   });
 
   test('delivery and learning CSVs have one row per day or item', () {
@@ -62,35 +65,41 @@ void main() {
       pauseAbove: 90,
       refreshing: false,
     );
-    final spend = TicketSpendList(days: 30, total: _sp(10000, 5000, 2.0), tickets: [
-      TicketSpendRow(
-        key: 'TASK-7',
-        title: 'Speed up the importer',
-        kind: TicketKind.code,
-        state: TicketState.done,
-        calls: 3,
-        topStage: TicketSpendRowTopStageEnum.coding,
-        spend: _sp(8000, 4000, 1.5),
-      ),
-    ]);
-    await tester.pumpWidget(ProviderScope(
-      overrides: [
-        usageProvider.overrideWith((_) async => usage),
-        settingsProvider.overrideWith((_) => Future<Settings>.error('offline')),
-        ticketSpendProvider.overrideWith((_, _) async => spend),
+    final spend = TicketSpendList(
+      days: 30,
+      total: _sp(10000, 5000, 2.0),
+      tickets: [
+        TicketSpendRow(
+          key: 'TASK-7',
+          title: 'Speed up the importer',
+          kind: TicketKind.code,
+          state: TicketState.done,
+          calls: 3,
+          topStage: TicketSpendRowTopStageEnum.coding,
+          spend: _sp(8000, 4000, 1.5),
+        ),
       ],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          usageProvider.overrideWith((_) async => usage),
+          settingsProvider.overrideWith((_) => Future<Settings>.error('offline')),
+          ticketSpendProvider.overrideWith((_, _) async => spend),
         ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const UsageScreen(),
+        child: MaterialApp(
+          theme: agntsTheme(Brightness.light),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const UsageScreen(),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     expect(find.text('85%'), findsOneWidget);
     expect(find.text('Close to the limit'), findsOneWidget);
@@ -102,30 +111,30 @@ void main() {
 }
 
 DeliveryPeriod _period() => DeliveryPeriod(
-      opened: 0,
-      merged: 0,
-      closed: 0,
-      mergeMin: Spread(),
-      pushed: 0,
-      pushedMin: Spread(),
-      mergedTickets: 0,
-      mergedMin: Spread(),
-      questions: 0,
-      askedTickets: 0,
-      analyzedTickets: 0,
-      answerMin: Spread(),
-    );
+  opened: 0,
+  merged: 0,
+  closed: 0,
+  mergeMin: Spread(),
+  pushed: 0,
+  pushedMin: Spread(),
+  mergedTickets: 0,
+  mergedMin: Spread(),
+  questions: 0,
+  askedTickets: 0,
+  analyzedTickets: 0,
+  answerMin: Spread(),
+);
 
 LearningPeriod _learning() => LearningPeriod(
-      lessons: 0,
-      lessonsLearned: 0,
-      rulesSuggested: 0,
-      rulesAdopted: 0,
-      rulesManual: 0,
-      reflections: 0,
-      reflectionRules: 0,
-      followUps: 0,
-      accepted: 0,
-      dismissed: 0,
-      reviewerNotes: 0,
-    );
+  lessons: 0,
+  lessonsLearned: 0,
+  rulesSuggested: 0,
+  rulesAdopted: 0,
+  rulesManual: 0,
+  reflections: 0,
+  reflectionRules: 0,
+  followUps: 0,
+  accepted: 0,
+  dismissed: 0,
+  reviewerNotes: 0,
+);

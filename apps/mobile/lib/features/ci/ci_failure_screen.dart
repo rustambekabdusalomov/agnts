@@ -75,23 +75,14 @@ class _CIFailureScreenState extends ConsumerState<CIFailureScreen> {
     final f = failure.value;
     return Scaffold(
       backgroundColor: c.bg,
-      appBar: DetailBar(
-        backLabel: l.navBack,
-        title: l.mciCardTitle,
-        onBack: () => context.canPop() ? context.pop() : context.go('/ci'),
-      ),
+      appBar: DetailBar(backLabel: l.navBack, title: l.mciCardTitle, onBack: () => context.canPop() ? context.pop() : context.go('/ci')),
       body: AsyncBody<CIFailure>(
         value: failure,
         onRefresh: () => ref.refresh(ciFailureProvider(widget.id).future),
         builder: (f) => ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 24),
-          children: [
-            _header(context, f),
-            _facts(context, f),
-            _log(context, f),
-            _runs(context, f),
-          ],
+          children: [_header(context, f), _facts(context, f), _log(context, f), _runs(context, f)],
         ),
       ),
       // Viewers read the failure but cannot act on it.
@@ -106,38 +97,56 @@ class _CIFailureScreenState extends ConsumerState<CIFailureScreen> {
     final job = [f.workflow, f.job].where((x) => x.isNotEmpty).join(' / ');
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        DefaultTextStyle.merge(
-          style: TextStyle(fontSize: 13, color: c.ink3),
-          child: Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            ToneBadge(status, tone),
-            Text(f.repo),
-            Text(f.branch, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
-          ]),
-        ),
-        const SizedBox(height: 8),
-        SelectableText(f.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(height: 1.15)),
-        if (job.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text('${l.mciJob}: $job', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
-          ),
-        if (f.ticketKey.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: GestureDetector(
-              onTap: () => context.push('/tickets/${f.ticketKey}'),
-              child: Wrap(spacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                Text('${l.mciTicket} ${f.ticketKey}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary)),
-                if (f.ticketState != null) ToneBadge(stateLabel(l, f.ticketState!), stateTone(f.ticketState!), small: true),
-              ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DefaultTextStyle.merge(
+            style: TextStyle(fontSize: 13, color: c.ink3),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ToneBadge(status, tone),
+                Text(f.repo),
+                Text(
+                  f.branch,
+                  style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+                ),
+              ],
             ),
           ),
-        if (f.prNumber > 0) ...[
-          const SizedBox(height: 10),
-          HelpBox(l.mciForeignPr('${f.prNumber}'), tone: Tone.gray),
+          const SizedBox(height: 8),
+          SelectableText(f.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(height: 1.15)),
+          if (job.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                '${l.mciJob}: $job',
+                style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+              ),
+            ),
+          if (f.ticketKey.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: GestureDetector(
+                onTap: () => context.push('/tickets/${f.ticketKey}'),
+                child: Wrap(
+                  spacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      '${l.mciTicket} ${f.ticketKey}',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary),
+                    ),
+                    if (f.ticketState != null) ToneBadge(stateLabel(l, f.ticketState!), stateTone(f.ticketState!), small: true),
+                  ],
+                ),
+              ),
+            ),
+          if (f.prNumber > 0) ...[const SizedBox(height: 10), HelpBox(l.mciForeignPr('${f.prNumber}'), tone: Tone.gray)],
         ],
-      ]),
+      ),
     );
   }
 
@@ -146,12 +155,15 @@ class _CIFailureScreenState extends ConsumerState<CIFailureScreen> {
     final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-      child: Grid2(gap: 8, children: [
-        Fact(l.mciFactFirstCommit, shortSha(f.firstSha)),
-        Fact(l.mciFactCount, l.mciTimes(f.count)),
-        Fact(l.mciFactLastSeen, ciAgo(l, f.lastSeenAt)),
-        if (f.flakyCount > 0) Fact(l.mciFactFlaky, l.mciTimes(f.flakyCount)),
-      ]),
+      child: Grid2(
+        gap: 8,
+        children: [
+          Fact(l.mciFactFirstCommit, shortSha(f.firstSha)),
+          Fact(l.mciFactCount, l.mciTimes(f.count)),
+          Fact(l.mciFactLastSeen, ciAgo(l, f.lastSeenAt)),
+          if (f.flakyCount > 0) Fact(l.mciFactFlaky, l.mciTimes(f.flakyCount)),
+        ],
+      ),
     );
   }
 
@@ -161,30 +173,39 @@ class _CIFailureScreenState extends ConsumerState<CIFailureScreen> {
     final c = Agnts.of(context);
     final sample = f.sample ?? '';
     if (sample.trim().isEmpty) {
-      return Section(title: l.mciFirstError, child: Text(l.mciNoSample, style: TextStyle(color: c.ink3)));
+      return Section(
+        title: l.mciFirstError,
+        child: Text(l.mciNoSample, style: TextStyle(color: c.ink3)),
+      );
     }
     final x = sampleExcerpt(sample);
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(x.first ? l.mciFirstError : l.mciLogTail, trailing: CopyButton(x.text)),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Container(
-          constraints: const BoxConstraints(maxHeight: 360),
-          decoration: BoxDecoration(color: c.code, borderRadius: BorderRadius.circular(14)),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(x.first ? l.mciFirstError : l.mciLogTail, trailing: CopyButton(x.text)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 360),
+            decoration: BoxDecoration(color: c.code, borderRadius: BorderRadius.circular(14)),
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SelectableText(x.text, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, height: 1.55, color: c.codeInk)),
+              padding: const EdgeInsets.all(12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SelectableText(
+                  x.text,
+                  style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, height: 1.55, color: c.codeInk),
+                ),
+              ),
             ),
           ),
         ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-        child: Text(l.mciLogNote, style: TextStyle(fontSize: 12.5, color: c.ink3)),
-      ),
-    ]);
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+          child: Text(l.mciLogNote, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+        ),
+      ],
+    );
   }
 
   /// The latest failing runs: when, the commit, and the run's link to copy.
@@ -193,20 +214,29 @@ class _CIFailureScreenState extends ConsumerState<CIFailureScreen> {
     final c = Agnts.of(context);
     final runs = f.occurrences.toList()..sort((a, b) => b.at.compareTo(a.at));
     if (runs.isEmpty) return const SizedBox.shrink();
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.mciRuns, trailing: Text('${runs.length}')),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ListGroup(children: [
-          for (final o in runs)
-            ListRow(
-              title: '${_when(context, o.at)} · ${shortSha(o.sha)}',
-              subtitle: [if (o.job.isNotEmpty && o.job != f.job) o.job, if (o.flaky == true) l.mciRunFlaky, if (o.url.isNotEmpty) o.url].join(' · '),
-              trailing: o.url.isEmpty ? const SizedBox.shrink() : CopyButton(o.url, color: c.ink3),
-            ),
-        ]),
-      ),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l.mciRuns, trailing: Text('${runs.length}')),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: ListGroup(
+            children: [
+              for (final o in runs)
+                ListRow(
+                  title: '${_when(context, o.at)} · ${shortSha(o.sha)}',
+                  subtitle: [
+                    if (o.job.isNotEmpty && o.job != f.job) o.job,
+                    if (o.flaky == true) l.mciRunFlaky,
+                    if (o.url.isNotEmpty) o.url,
+                  ].join(' · '),
+                  trailing: o.url.isEmpty ? const SizedBox.shrink() : CopyButton(o.url, color: c.ink3),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   /// Time today, otherwise the short date and time.
@@ -223,25 +253,30 @@ class _CIFailureScreenState extends ConsumerState<CIFailureScreen> {
   Widget? _actionBar(BuildContext context, CIFailure f) {
     final l = AppLocalizations.of(context);
     final muted = f.status == CIStatus.muted;
-    return ActionBar(children: [
-      if (canFixCI(f)) Expanded(child: FilledButton(onPressed: _busy ? null : _fix, child: Text(l.mciFix))),
-      Expanded(
-        child: OutlinedButton(
-          onPressed: _busy
-              ? null
-              : () => _run(
+    return ActionBar(
+      children: [
+        if (canFixCI(f))
+          Expanded(
+            child: FilledButton(onPressed: _busy ? null : _fix, child: Text(l.mciFix)),
+          ),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _busy
+                ? null
+                : () => _run(
                     () => muted ? _ci.unmuteCIFailure(failureId: f.id) : _ci.muteCIFailure(failureId: f.id),
                     done: muted ? l.mciUnmutedDone : l.mciMutedDone,
                   ),
-          child: Text(muted ? l.mciUnmute : l.mciMute),
+            child: Text(muted ? l.mciUnmute : l.mciMute),
+          ),
         ),
-      ),
-      Expanded(
-        child: OutlinedButton(
-          onPressed: _busy ? null : () => _run(() => _ci.rerunCIFailure(failureId: f.id), done: l.mciRerunDone),
-          child: Text(l.mciRerun, maxLines: 1, overflow: TextOverflow.ellipsis),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _busy ? null : () => _run(() => _ci.rerunCIFailure(failureId: f.id), done: l.mciRerunDone),
+            child: Text(l.mciRerun, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }

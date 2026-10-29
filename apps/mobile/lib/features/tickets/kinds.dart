@@ -188,10 +188,17 @@ class _ImplementReportState extends ConsumerState<ImplementReport> {
       context: context,
       useSafeArea: true,
       builder: (c) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Text(l.implementPickRepo, style: Theme.of(c).textTheme.titleMedium)),
-          for (final r in repos) ListTile(title: Text(r.name), onTap: () => Navigator.pop(c, r.id)),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(l.implementPickRepo, style: Theme.of(c).textTheme.titleMedium),
+            ),
+            for (final r in repos) ListTile(title: Text(r.name), onTap: () => Navigator.pop(c, r.id)),
+          ],
+        ),
       ),
     );
   }
@@ -202,7 +209,10 @@ class _ImplementReportState extends ConsumerState<ImplementReport> {
     if (repo == null || !mounted) return;
     setState(() => _busy = true);
     try {
-      final res = await ref.read(apiProvider)!.getTicketsApi().implementTicket(
+      final res = await ref
+          .read(apiProvider)!
+          .getTicketsApi()
+          .implementTicket(
             key: widget.ticket.key,
             implementInput: ImplementInput(repoId: widget.ticket.repoId == null ? repo : null),
           );
@@ -225,20 +235,26 @@ class _ImplementReportState extends ConsumerState<ImplementReport> {
     final child = widget.childKey;
     return Padding(
       padding: const EdgeInsets.only(top: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.implementTitle, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3)),
-        const SizedBox(height: 8),
-        if (child != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(onPressed: () => context.push('/tickets/$child'), child: Text('${l.implementDoneBy} $child')),
-          )
-        else ...[
-          Text(bug ? l.implementSubBug : l.implementSubPlan, style: TextStyle(fontSize: 14, height: 1.45, color: c.ink3)),
-          const SizedBox(height: 10),
-          FilledButton(onPressed: _busy ? null : _implement, child: Text(bug ? l.implementFix : l.implementImplement)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l.implementTitle,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
+          ),
+          const SizedBox(height: 8),
+          if (child != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(onPressed: () => context.push('/tickets/$child'), child: Text('${l.implementDoneBy} $child')),
+            )
+          else ...[
+            Text(bug ? l.implementSubBug : l.implementSubPlan, style: TextStyle(fontSize: 14, height: 1.45, color: c.ink3)),
+            const SizedBox(height: 10),
+            FilledButton(onPressed: _busy ? null : _implement, child: Text(bug ? l.implementFix : l.implementImplement)),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }

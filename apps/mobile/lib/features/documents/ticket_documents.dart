@@ -31,7 +31,10 @@ class _TicketDocumentsFoldState extends ConsumerState<TicketDocumentsFold> {
     setState(() => _busy = true);
     try {
       final lang = Localizations.localeOf(context).languageCode;
-      final res = await ref.read(apiProvider)!.getDocumentsApi().createTicketDocument(
+      final res = await ref
+          .read(apiProvider)!
+          .getDocumentsApi()
+          .createTicketDocument(
             key: widget.ticket.key,
             createTicketDocumentRequest: CreateTicketDocumentRequest(
               language: CreateTicketDocumentRequestLanguageEnum.values.where((x) => x.value == lang).firstOrNull,
@@ -59,15 +62,18 @@ class _TicketDocumentsFoldState extends ConsumerState<TicketDocumentsFold> {
     return Fold(
       title: l.mdocumentsTicketSection,
       hint: docs.isEmpty ? null : '${docs.length}',
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        if (docs.isEmpty) Text(l.mdocumentsTicketNone, style: TextStyle(color: c.ink3)),
-        for (final d in docs) DocumentRow(d),
-        if (widget.hasReport)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: OutlinedButton(onPressed: _busy ? null : _fromReport, child: Text(l.mdocumentsFromReport)),
-          ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (docs.isEmpty) Text(l.mdocumentsTicketNone, style: TextStyle(color: c.ink3)),
+          for (final d in docs) DocumentRow(d),
+          if (widget.hasReport)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: OutlinedButton(onPressed: _busy ? null : _fromReport, child: Text(l.mdocumentsFromReport)),
+            ),
+        ],
+      ),
     );
   }
 }

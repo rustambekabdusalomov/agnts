@@ -28,8 +28,25 @@ void onCodeEvent(Ref ref, Map<String, dynamic> e) {
 
 /// The ticket events a Code conversation shows (as the server's CodeTimelineTypes).
 const codeTimelineTypes = {
-  'state_changed', 'ticket_created', 'claude_text', 'claude_tool', 'check', 'answered', 'feedback', 'pushed', 'pr_opened', 'pr_merged',
-  'error', 'rate_limit', 'review_done', 'review_ready', 'queued', 'guard', 'checkpoint', 'budget', 'kind_changed',
+  'state_changed',
+  'ticket_created',
+  'claude_text',
+  'claude_tool',
+  'check',
+  'answered',
+  'feedback',
+  'pushed',
+  'pr_opened',
+  'pr_merged',
+  'error',
+  'rate_limit',
+  'review_done',
+  'review_ready',
+  'queued',
+  'guard',
+  'checkpoint',
+  'budget',
+  'kind_changed',
 };
 
 /// The ticket new messages go to, or null.
@@ -48,7 +65,10 @@ bool codeRunning(TicketState? s) =>
 /// Messages still waiting for the current ticket's run.
 List<AssistantMessage> codeQueued(AssistantConversation? c) {
   final key = currentTicket(c)?.key;
-  return [for (final m in c?.messages ?? const <AssistantMessage>[]) if (m.routed == CodeRouted.queued && m.ticketKey == key) m];
+  return [
+    for (final m in c?.messages ?? const <AssistantMessage>[])
+      if (m.routed == CodeRouted.queued && m.ticketKey == key) m,
+  ];
 }
 
 /// A block of the timeline: a message, a run (the agent's texts with its
@@ -120,7 +140,8 @@ List<TimelineItem> codeLiveItems(List<TimelineItem> timeline, List<Event> events
   final seen = <int>{};
   return [
     for (final e in events)
-      if (e.id > newest && keys.contains(e.ticketKey) && codeTimelineTypes.contains(e.type) && seen.add(e.id)) TimelineItem(at: e.createdAt, event: e),
+      if (e.id > newest && keys.contains(e.ticketKey) && codeTimelineTypes.contains(e.type) && seen.add(e.id))
+        TimelineItem(at: e.createdAt, event: e),
   ];
 }
 
@@ -143,14 +164,14 @@ String routedLabel(AppLocalizations l, AssistantMessage m) {
 
 /// What the composer asks for, by the current ticket's state.
 String codePlaceholder(AppLocalizations l, TicketState? s) => switch (s) {
-      null => l.codechatPlaceholderNew,
-      TicketState.waitingForReview => l.codechatPlaceholderReview,
-      TicketState.waitingForAnswers => l.codechatPlaceholderAnswers,
-      TicketState.failed || TicketState.rateLimited => l.codechatPlaceholderStopped,
-      TicketState.pushing => l.codechatPlaceholderPushing,
-      TicketState.done || TicketState.rejected => l.codechatPlaceholderDone,
-      _ => l.codechatPlaceholderRunning,
-    };
+  null => l.codechatPlaceholderNew,
+  TicketState.waitingForReview => l.codechatPlaceholderReview,
+  TicketState.waitingForAnswers => l.codechatPlaceholderAnswers,
+  TicketState.failed || TicketState.rateLimited => l.codechatPlaceholderStopped,
+  TicketState.pushing => l.codechatPlaceholderPushing,
+  TicketState.done || TicketState.rejected => l.codechatPlaceholderDone,
+  _ => l.codechatPlaceholderRunning,
+};
 
 /// A done or rejected ticket changed lists elsewhere: refresh them.
 void refreshAfterDecision(void Function(ProviderOrFamily) invalidate, String key) {

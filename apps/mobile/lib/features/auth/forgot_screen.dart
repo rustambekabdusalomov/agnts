@@ -42,7 +42,9 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
       _error = null;
     });
     try {
-      await SessionNotifier.client(_server).getAuthApi().forgotPassword(forgotPasswordRequest: ForgotPasswordRequest(email: _email.text.trim()));
+      await SessionNotifier.client(
+        _server,
+      ).getAuthApi().forgotPassword(forgotPasswordRequest: ForgotPasswordRequest(email: _email.text.trim()));
       if (mounted) setState(() => _sent = true);
     } catch (e) {
       if (mounted) setState(() => _error = authError(l, e));

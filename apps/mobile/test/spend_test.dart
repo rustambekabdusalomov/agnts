@@ -8,28 +8,35 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child) => MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SingleChildScrollView(child: child)),
-    );
+  theme: agntsTheme(Brightness.light),
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(body: SingleChildScrollView(child: child)),
+);
 
 TokenSpend _sp(int input, int output, double cost, {int cacheRead = 0, int cacheWrite = 0}) => TokenSpend(
-      input: input,
-      output: output,
-      cacheRead: cacheRead,
-      cacheWrite: cacheWrite,
-      total: input + output + cacheRead + cacheWrite,
-      costUsd: cost,
-    );
+  input: input,
+  output: output,
+  cacheRead: cacheRead,
+  cacheWrite: cacheWrite,
+  total: input + output + cacheRead + cacheWrite,
+  costUsd: cost,
+);
 
 final _stages = [
-  StageSpend(stage: StageSpendStageEnum.analyze, model: 'claude-sonnet-5-5', calls: 1, turns: 5, partial: false, spend: _sp(1000, 500, 0.1, cacheRead: 20000)),
+  StageSpend(
+    stage: StageSpendStageEnum.analyze,
+    model: 'claude-sonnet-5-5',
+    calls: 1,
+    turns: 5,
+    partial: false,
+    spend: _sp(1000, 500, 0.1, cacheRead: 20000),
+  ),
   StageSpend(stage: StageSpendStageEnum.coding, model: 'claude-opus-5-5', calls: 1, turns: 12, partial: false, spend: _sp(2000, 4000, 0.5)),
   StageSpend(stage: StageSpendStageEnum.retry, model: 'opus', calls: 2, turns: 6, partial: true, spend: _sp(300, 200, 0)),
 ];

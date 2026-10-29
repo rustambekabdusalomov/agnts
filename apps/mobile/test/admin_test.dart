@@ -17,46 +17,58 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child, {List overrides = const []}) => ProviderScope(
-      overrides: [...overrides],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: child,
-      ),
-    );
+  overrides: [...overrides],
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    locale: const Locale('en'),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: child,
+  ),
+);
 
 final _now = DateTime.now();
 
-PlatformUser _user(int id, String name, {bool admin = false, bool password = false, int daysAgo = 1, List<WorkspaceSummary> ws = const []}) =>
-    PlatformUser(
-      user: User(id: id, username: name, email: '$name@x.uz', isAdmin: admin, createdAt: _now.subtract(Duration(days: daysAgo))),
-      hasPassword: password,
-      lastSignInAt: _now.subtract(Duration(days: daysAgo)),
-      workspaces: ws,
-    );
+PlatformUser _user(
+  int id,
+  String name, {
+  bool admin = false,
+  bool password = false,
+  int daysAgo = 1,
+  List<WorkspaceSummary> ws = const [],
+}) => PlatformUser(
+  user: User(
+    id: id,
+    username: name,
+    email: '$name@x.uz',
+    isAdmin: admin,
+    createdAt: _now.subtract(Duration(days: daysAgo)),
+  ),
+  hasPassword: password,
+  lastSignInAt: _now.subtract(Duration(days: daysAgo)),
+  workspaces: ws,
+);
 
 PlatformWorkspace _ws(int id, String name, {bool suspended = false, DateTime? deletedAt}) => PlatformWorkspace(
-      id: id,
-      slug: name.toLowerCase(),
-      name: name,
-      owner: 'ali',
-      plan: 'base',
-      slots: 2,
-      memberLimit: 0,
-      members: 1,
-      creditsBalance: 500,
-      running: 0,
-      suspended: suspended,
-      deletedAt: deletedAt,
-      createdAt: _now,
-    );
+  id: id,
+  slug: name.toLowerCase(),
+  name: name,
+  owner: 'ali',
+  plan: 'base',
+  slots: 2,
+  memberLimit: 0,
+  members: 1,
+  creditsBalance: 500,
+  running: 0,
+  suspended: suspended,
+  deletedAt: deletedAt,
+  createdAt: _now,
+);
 
 Feedback _fb(int id, String title, FeedbackStatusEnum status) =>
     Feedback(id: id, kind: FeedbackKindEnum.feedback, title: title, description: 'details', status: status, sender: 'ali', createdAt: _now);
@@ -88,13 +100,16 @@ void main() {
   });
 
   testWidgets('Users lists people, not Admins, and filters by sign-in', (tester) async {
-    await tester.pumpWidget(_app(const AdminUsersScreen(), overrides: [
-      platformUsersProvider.overrideWith((_) async => [
-            _user(1, 'root', admin: true, password: true),
-            _user(2, 'ali'),
-            _user(3, 'vali', password: true, daysAgo: 20),
-          ]),
-    ]));
+    await tester.pumpWidget(
+      _app(
+        const AdminUsersScreen(),
+        overrides: [
+          platformUsersProvider.overrideWith(
+            (_) async => [_user(1, 'root', admin: true, password: true), _user(2, 'ali'), _user(3, 'vali', password: true, daysAgo: 20)],
+          ),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('ali'), findsOneWidget);
     expect(find.text('vali'), findsOneWidget);
@@ -107,10 +122,17 @@ void main() {
   });
 
   testWidgets('Workspaces filters by state', (tester) async {
-    await tester.pumpWidget(_app(const AdminWorkspacesScreen(), overrides: [
-      platformWorkspacesProvider.overrideWith((_) async => [_ws(1, 'Acme'), _ws(2, 'Beta', suspended: true), _ws(3, 'Gone', deletedAt: _now)]),
-      platformUsersProvider.overrideWith((_) async => <PlatformUser>[]),
-    ]));
+    await tester.pumpWidget(
+      _app(
+        const AdminWorkspacesScreen(),
+        overrides: [
+          platformWorkspacesProvider.overrideWith(
+            (_) async => [_ws(1, 'Acme'), _ws(2, 'Beta', suspended: true), _ws(3, 'Gone', deletedAt: _now)],
+          ),
+          platformUsersProvider.overrideWith((_) async => <PlatformUser>[]),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Acme'), findsOneWidget);
     expect(find.text('Gone'), findsOneWidget);
@@ -122,9 +144,16 @@ void main() {
   });
 
   testWidgets('Feedback opens on the new ones', (tester) async {
-    await tester.pumpWidget(_app(const AdminFeedbackScreen(), overrides: [
-      platformFeedbackProvider.overrideWith((_) async => [_fb(1, 'Dark mode', FeedbackStatusEnum.new_), _fb(2, 'Old bug', FeedbackStatusEnum.done)]),
-    ]));
+    await tester.pumpWidget(
+      _app(
+        const AdminFeedbackScreen(),
+        overrides: [
+          platformFeedbackProvider.overrideWith(
+            (_) async => [_fb(1, 'Dark mode', FeedbackStatusEnum.new_), _fb(2, 'Old bug', FeedbackStatusEnum.done)],
+          ),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Dark mode'), findsOneWidget);
     expect(find.text('Old bug'), findsNothing);
@@ -133,14 +162,29 @@ void main() {
 
   testWidgets('the audit log lists reads and filters by action', (tester) async {
     AdminAuditEntry row(int id, String action, String target, {int? adminId = 7}) => AdminAuditEntry(
-        id: id, adminId: adminId, adminName: 'olim', action: action, target: target, workspace: 'Iman', ip: '203.0.113.9', createdAt: _now);
-    await tester.pumpWidget(_app(const AdminAuditScreen(), overrides: [
-      platformAuditProvider.overrideWith((_) async => [
-            row(3, 'transcript.view', 'transcript:18342'),
-            row(2, 'transcript.prompt', 'transcript:18342', adminId: null),
-            row(1, 'run_history.settings', 'retention 90d, tool 16KB, text 32KB, transcript 8MB'),
-          ]),
-    ]));
+      id: id,
+      adminId: adminId,
+      adminName: 'olim',
+      action: action,
+      target: target,
+      workspace: 'Iman',
+      ip: '203.0.113.9',
+      createdAt: _now,
+    );
+    await tester.pumpWidget(
+      _app(
+        const AdminAuditScreen(),
+        overrides: [
+          platformAuditProvider.overrideWith(
+            (_) async => [
+              row(3, 'transcript.view', 'transcript:18342'),
+              row(2, 'transcript.prompt', 'transcript:18342', adminId: null),
+              row(1, 'run_history.settings', 'retention 90d, tool 16KB, text 32KB, transcript 8MB'),
+            ],
+          ),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Viewed a transcript'), findsWidgets);
     expect(find.text('Transcript #18342'), findsNWidgets(2));
@@ -173,31 +217,33 @@ class _Signed extends SessionNotifier {
 }
 
 Future<void> _openApp(WidgetTester tester, {required bool adminApp, required User me}) async {
-  await tester.pumpWidget(ProviderScope(
-    overrides: [
-      adminAppProvider.overrideWithValue(adminApp),
-      sessionProvider.overrideWith(_Signed.new),
-      meProvider.overrideWith((_) async => me),
-      platformUsersProvider.overrideWith((_) async => <PlatformUser>[]),
-      platformWorkspacesProvider.overrideWith((_) async => <PlatformWorkspace>[]),
-      platformFeedbackProvider.overrideWith((_) async => <Feedback>[]),
-      platformOverviewProvider.overrideWith((_) async => throw StateError('offline')),
-    ],
-    child: Consumer(
-      builder: (_, ref, _) => MaterialApp.router(
-        locale: const Locale('en'),
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: ref.watch(routerProvider),
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        adminAppProvider.overrideWithValue(adminApp),
+        sessionProvider.overrideWith(_Signed.new),
+        meProvider.overrideWith((_) async => me),
+        platformUsersProvider.overrideWith((_) async => <PlatformUser>[]),
+        platformWorkspacesProvider.overrideWith((_) async => <PlatformWorkspace>[]),
+        platformFeedbackProvider.overrideWith((_) async => <Feedback>[]),
+        platformOverviewProvider.overrideWith((_) async => throw StateError('offline')),
+      ],
+      child: Consumer(
+        builder: (_, ref, _) => MaterialApp.router(
+          locale: const Locale('en'),
+          theme: agntsTheme(Brightness.light),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: ref.watch(routerProvider),
+        ),
       ),
     ),
-  ));
+  );
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 100));
 }

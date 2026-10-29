@@ -62,44 +62,61 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(children: [
-          PageHeader(title: l.navAll),
-          SearchBox(hint: l.navSearch, controller: _search, onChanged: (v) => setState(() => _query = v)),
-          ChipRow(children: [
-            for (final e in labels.entries)
-              FilterChipH(
-                label: e.value,
-                selected: _filter == e.key,
-                count: tickets.hasValue ? all.where((t) => _inFilter(t, e.key)).length : null,
-                onTap: () => setState(() => _filter = e.key),
-              ),
-          ]),
-          const SizedBox(height: 8),
-          Expanded(
-            child: AsyncBody<List<Ticket>>(
-              value: tickets,
-              onRefresh: () {
-                ref.invalidate(dashboardProvider);
-                return ref.refresh(ticketsProvider('all').future);
-              },
-              builder: (list) {
-                final rows = list.where((t) => _inFilter(t, _filter) && (q.isEmpty || '${t.key} ${t.ticketNumber ?? ''} ${t.title}'.toLowerCase().contains(q))).toList();
-                if (rows.isEmpty) {
-                  return ListView(children: [
-                    EmptyState(title: q.isNotEmpty ? l.mhomeSearchEmpty : _filter == 'needs' ? l.ticketsEmptyNeeds : l.ticketsEmpty),
-                  ]);
-                }
-                return ListView.separated(
-                  padding: screenPad.copyWith(top: 4),
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  itemCount: rows.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, i) => ticketCardFor(context, rows[i], live: live[rows[i].key]),
-                );
-              },
+        child: Column(
+          children: [
+            PageHeader(title: l.navAll),
+            SearchBox(hint: l.navSearch, controller: _search, onChanged: (v) => setState(() => _query = v)),
+            ChipRow(
+              children: [
+                for (final e in labels.entries)
+                  FilterChipH(
+                    label: e.value,
+                    selected: _filter == e.key,
+                    count: tickets.hasValue ? all.where((t) => _inFilter(t, e.key)).length : null,
+                    onTap: () => setState(() => _filter = e.key),
+                  ),
+              ],
             ),
-          ),
-        ]),
+            const SizedBox(height: 8),
+            Expanded(
+              child: AsyncBody<List<Ticket>>(
+                value: tickets,
+                onRefresh: () {
+                  ref.invalidate(dashboardProvider);
+                  return ref.refresh(ticketsProvider('all').future);
+                },
+                builder: (list) {
+                  final rows = list
+                      .where(
+                        (t) =>
+                            _inFilter(t, _filter) && (q.isEmpty || '${t.key} ${t.ticketNumber ?? ''} ${t.title}'.toLowerCase().contains(q)),
+                      )
+                      .toList();
+                  if (rows.isEmpty) {
+                    return ListView(
+                      children: [
+                        EmptyState(
+                          title: q.isNotEmpty
+                              ? l.mhomeSearchEmpty
+                              : _filter == 'needs'
+                              ? l.ticketsEmptyNeeds
+                              : l.ticketsEmpty,
+                        ),
+                      ],
+                    );
+                  }
+                  return ListView.separated(
+                    padding: screenPad.copyWith(top: 4),
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    itemCount: rows.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (context, i) => ticketCardFor(context, rows[i], live: live[rows[i].key]),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -107,13 +124,13 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
 
 /// The next step for a ticket that waits on the user, and its tone (actionLine).
 (String, Tone)? ticketAction(AppLocalizations l, Ticket t) => switch (t.state) {
-      TicketState.waitingForAnswers => (l.mhomeActAnswers, Tone.warn),
-      TicketState.waitingForReview => (l.mhomeActReview, Tone.warn),
-      TicketState.failed => (l.mhomeActStopped, Tone.bad),
-      TicketState.rateLimited => (l.mhomeActResume, Tone.bad),
-      TicketState.new_ when t.held == true => (l.mhomeActStart, Tone.info),
-      _ => null,
-    };
+  TicketState.waitingForAnswers => (l.mhomeActAnswers, Tone.warn),
+  TicketState.waitingForReview => (l.mhomeActReview, Tone.warn),
+  TicketState.failed => (l.mhomeActStopped, Tone.bad),
+  TicketState.rateLimited => (l.mhomeActResume, Tone.bad),
+  TicketState.new_ when t.held == true => (l.mhomeActStart, Tone.info),
+  _ => null,
+};
 
 bool _isRunning(TicketState s) => filterStates['running']!.contains(s);
 
@@ -147,7 +164,10 @@ Widget ticketCardFor(BuildContext context, Ticket t, {LiveRun? live, bool showTu
       Text(_when(context, t.updatedAt)),
     if (t.spend != null) Text(l.spendTokens(fmtTokens(ioTokens(t.spend), Localizations.localeOf(context).toLanguageTag()))),
     if (showTurns && live != null) ...[
-      Text(live.model, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
+      Text(
+        live.model,
+        style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3),
+      ),
       Text(l.mobileTurnsOf(live.turns.toString(), live.maxTurns.toString())),
       SizedBox(width: 48, child: Bar(value: live.maxTurns == 0 ? 0 : live.turns / live.maxTurns, height: 4)),
     ],
@@ -158,7 +178,13 @@ Widget ticketCardFor(BuildContext context, Ticket t, {LiveRun? live, bool showTu
     meta: meta,
     action: action?.$1,
     actionTone: action?.$2 ?? Tone.info,
-    live: running ? (live == null ? null : live.lastMessage.isNotEmpty ? live.lastMessage : l.mhomeLiveFallback) : null,
+    live: running
+        ? (live == null
+              ? null
+              : live.lastMessage.isNotEmpty
+              ? live.lastMessage
+              : l.mhomeLiveFallback)
+        : null,
   );
 }
 
@@ -172,11 +198,7 @@ class TicketTile extends StatelessWidget {
     final l = AppLocalizations.of(context);
     return ListTile(
       title: Text(t.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-      subtitle: Text([
-        ticketNo(t),
-        sourceLabel(l, t.source_),
-        ?repoLabel(t),
-      ].join(' · ')),
+      subtitle: Text([ticketNo(t), sourceLabel(l, t.source_), ?repoLabel(t)].join(' · ')),
       trailing: StateBadge(t.state, kind: t.kind),
       onTap: () => context.push('/tickets/${t.key}'),
     );

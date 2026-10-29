@@ -394,13 +394,15 @@ func (r *Runner) stampCache(vol string) {
 	if r.cfg.StampDir == "" {
 		return
 	}
-	if err := os.MkdirAll(r.cfg.StampDir, 0o750); err != nil {
+	// StampDir is the server's own setting and vol a volume name agnts
+	// made, so neither comes from a person.
+	if err := os.MkdirAll(r.cfg.StampDir, 0o750); err != nil { //nolint:gosec // see above
 		return
 	}
 	p := filepath.Join(r.cfg.StampDir, vol)
 	now := time.Now()
 	if err := os.Chtimes(p, now, now); err != nil {
-		_ = os.WriteFile(p, nil, 0o600)
+		_ = os.WriteFile(p, nil, 0o600) //nolint:gosec // see above
 	}
 }
 

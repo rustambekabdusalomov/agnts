@@ -9,16 +9,18 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child) => MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: ListView(padding: const EdgeInsets.all(16), children: [child])),
-    );
+  theme: agntsTheme(Brightness.light),
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(
+    body: ListView(padding: const EdgeInsets.all(16), children: [child]),
+  ),
+);
 
 const _goDiff = '''diff --git a/api/handlers/v1/survey_result.go b/api/handlers/v1/survey_result.go
 index ba433ce..4cd59a5 100644
@@ -40,7 +42,15 @@ index ba433ce..4cd59a5 100644
 void main() {
   testWidgets('an opened Go file shows its code, highlighted, next to the line numbers', (tester) async {
     final f = FileChange(repo: 'gateway', path: 'api/handlers/v1/survey_result.go', add: 3, del: 1, diff: _goDiff);
-    await tester.pumpWidget(_app(RepoDiffs(files: [f], openFirst: true, file: (f, open) => FileDiff(file: f, initiallyOpen: open))));
+    await tester.pumpWidget(
+      _app(
+        RepoDiffs(
+          files: [f],
+          openFirst: true,
+          file: (f, open) => FileDiff(file: f, initiallyOpen: open),
+        ),
+      ),
+    );
     expect(tester.takeException(), isNull);
     expect(find.textContaining('errx.FromGRPCError', findRichText: true), findsOneWidget, reason: 'plain text before highlighting');
     // Highlighting runs on another isolate; let it finish, then rebuild.
@@ -58,10 +68,16 @@ void main() {
     String long(String name) => 'diff --git a/$name b/$name\n@@ -1,1 +1,60 @@\n${[for (var i = 0; i < 60; i++) '+line $i'].join('\n')}\n';
     final a = FileChange(path: 'notes/a.txt', add: 60, del: 0, diff: long('notes/a.txt'));
     final b = FileChange(path: 'notes/b.txt', add: 60, del: 0, diff: long('notes/b.txt'));
-    await tester.pumpWidget(_app(Column(children: [
-      FileDiff(file: a, initiallyOpen: true),
-      FileDiff(file: b, initiallyOpen: true),
-    ])));
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: [
+            FileDiff(file: a, initiallyOpen: true),
+            FileDiff(file: b, initiallyOpen: true),
+          ],
+        ),
+      ),
+    );
     await tester.pump();
     final list = tester.getTopLeft(find.byType(ListView)).dy;
     // The painted header is the last of the path's two texts (the first keeps its space, unseen).

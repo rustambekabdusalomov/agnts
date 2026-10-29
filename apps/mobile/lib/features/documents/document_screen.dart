@@ -111,16 +111,24 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: screenPad,
           children: [
-            Text(tr?.title ?? d.title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, height: 1.2, color: c.ink)),
+            Text(
+              tr?.title ?? d.title,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, height: 1.2, color: c.ink),
+            ),
             const SizedBox(height: 6),
-            Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              if (d.kind == DocumentKind.slides) ToneBadge(l.mdocumentsSlides, Tone.gray, small: true),
-              d.type == DocumentTypeEnum.public
-                  ? ToneBadge(l.mdocumentsTypePublic, Tone.info, small: true)
-                  : ToneBadge(l.mdocumentsTypePrivate, Tone.gray, small: true),
-              if (d.version > 0) Text(l.mdocumentsVersion('${d.version}'), style: TextStyle(fontSize: 13, color: c.ink3)),
-              Text(d.ownerName, style: TextStyle(fontSize: 13, color: c.ink3)),
-            ]),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (d.kind == DocumentKind.slides) ToneBadge(l.mdocumentsSlides, Tone.gray, small: true),
+                d.type == DocumentTypeEnum.public
+                    ? ToneBadge(l.mdocumentsTypePublic, Tone.info, small: true)
+                    : ToneBadge(l.mdocumentsTypePrivate, Tone.gray, small: true),
+                if (d.version > 0) Text(l.mdocumentsVersion('${d.version}'), style: TextStyle(fontSize: 13, color: c.ink3)),
+                Text(d.ownerName, style: TextStyle(fontSize: 13, color: c.ink3)),
+              ],
+            ),
             if (d.dataAsOf != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -137,10 +145,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                   child: Text(l.mdocumentsMadeFrom(d.derivedFrom!.title), style: TextStyle(fontSize: 13, color: c.primaryInk)),
                 ),
               ),
-            if (docWriting(d.generation)) ...[
-              const SizedBox(height: 12),
-              HelpBox(l.mdocumentsWriting, tone: Tone.warn),
-            ],
+            if (docWriting(d.generation)) ...[const SizedBox(height: 12), HelpBox(l.mdocumentsWriting, tone: Tone.warn)],
             if (docFailed(d.generation)) ...[
               const SizedBox(height: 12),
               HelpBox(l.mdocumentsFailedText(d.generation!.error), tone: Tone.bad, copyable: true),
@@ -154,7 +159,9 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
               ),
             const SizedBox(height: 14),
             if (d.body.trim().isEmpty)
-              HCard(child: Text(l.mdocumentsNoBody, style: TextStyle(color: c.ink3)))
+              HCard(
+                child: Text(l.mdocumentsNoBody, style: TextStyle(color: c.ink3)),
+              )
             else if (d.kind == DocumentKind.slides)
               SlideDeck(tr?.body ?? d.body)
             else
@@ -182,15 +189,12 @@ class _LinkedTickets extends ConsumerWidget {
       title: l.mdocumentsLinkedTickets,
       hint: '${ts.length}',
       initiallyOpen: true,
-      child: Column(children: [
-        for (final t in ts)
-          ListRow(
-            title: t.title,
-            subtitle: t.number,
-            titleColor: c.ink,
-            onTap: () => context.push('/tickets/${t.key}'),
-          ),
-      ]),
+      child: Column(
+        children: [
+          for (final t in ts)
+            ListRow(title: t.title, subtitle: t.number, titleColor: c.ink, onTap: () => context.push('/tickets/${t.key}')),
+        ],
+      ),
     );
   }
 }

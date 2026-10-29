@@ -144,8 +144,13 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
 
   Future<void> _sendNow(String key) async {
     final l = AppLocalizations.of(context);
-    final ok = await confirmAction(context,
-        title: l.codechatSendNowTitle(key), message: l.codechatSendNowText, confirmLabel: l.codechatSendNow, danger: true);
+    final ok = await confirmAction(
+      context,
+      title: l.codechatSendNowTitle(key),
+      message: l.codechatSendNowText,
+      confirmLabel: l.codechatSendNow,
+      danger: true,
+    );
     if (!ok || !mounted) return;
     try {
       await ref.read(apiProvider)!.getAssistantApi().sendCodeQueuedNow(conversationId: _id!);
@@ -184,7 +189,10 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
 
     // Events the next fetch already has are dropped from the live list.
     final base = tl?.value?.items ?? const <TimelineItem>[];
-    final items = [...base, ...codeLiveItems(base, _live, {for (final t in conv?.tickets ?? const <CodeTicket>[]) t.key})];
+    final items = [
+      ...base,
+      ...codeLiveItems(base, _live, {for (final t in conv?.tickets ?? const <CodeTicket>[]) t.key}),
+    ];
     final blocks = codeBlocks(items);
 
     Widget body;
@@ -207,7 +215,13 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     } else {
       final cards = <Widget>[
         for (final a in tl.value!.approvals.where((a) => a.status == CodeApprovalStatusEnum.pending)) _ApprovalCard(a, key: ValueKey(a.id)),
-        if (cur != null && codeRunning(state)) _Working(events: [for (final it in items) if (it.event?.ticketKey == cur.key) it.event!]),
+        if (cur != null && codeRunning(state))
+          _Working(
+            events: [
+              for (final it in items)
+                if (it.event?.ticketKey == cur.key) it.event!,
+            ],
+          ),
         if (cur != null && codeRunning(state) && codeQueued(conv).isNotEmpty)
           _Note(
             tone: Tone.warn,
@@ -216,26 +230,37 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
           ),
         if (cur != null && state == TicketState.waitingForReview && detail != null) _Result(detail, conversationId: _id!),
         if (cur != null && state == TicketState.waitingForAnswers && detail != null)
-          _Questions(detail, busy: _sending, onSend: (a) => _send(answers: a)),
+          _Questions(
+            detail,
+            busy: _sending,
+            onSend: (a) => _send(answers: a),
+          ),
         if (cur != null && (state == TicketState.failed || state == TicketState.rateLimited))
-          _Note(tone: Tone.bad, title: l.codechatStoppedTitle(cur.key), text: [if (tk?.stopReason != null) tk!.stopReason!, l.codechatStoppedHint].join('\n\n')),
+          _Note(
+            tone: Tone.bad,
+            title: l.codechatStoppedTitle(cur.key),
+            text: [if (tk?.stopReason != null) tk!.stopReason!, l.codechatStoppedHint].join('\n\n'),
+          ),
         if (cur != null && state == TicketState.done) _Note(tone: Tone.ok, title: l.codechatDoneTitle(cur.key), text: l.codechatDoneHint),
-        if (cur != null && state == TicketState.rejected) _Note(tone: Tone.gray, title: l.codechatRejectedTitle(cur.key), text: l.codechatRejectedHint),
+        if (cur != null && state == TicketState.rejected)
+          _Note(tone: Tone.gray, title: l.codechatRejectedTitle(cur.key), text: l.codechatRejectedHint),
         if (cur == null && (conv.tickets?.isNotEmpty ?? false)) _Note(tone: Tone.gray, title: l.codechatMovedHint(conv.tickets!.last.key)),
       ];
       // Newest at the bottom, kept in view as the work goes on.
       final rows = <Widget>[for (final b in blocks) _BlockView(b), ...cards];
-      body = Column(children: [
-        _Header(conv: conv, cur: cur, state: state),
-        Expanded(
-          child: ListView.builder(
-            reverse: true,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            itemCount: rows.length,
-            itemBuilder: (_, i) => rows[rows.length - 1 - i],
+      body = Column(
+        children: [
+          _Header(conv: conv, cur: cur, state: state),
+          Expanded(
+            child: ListView.builder(
+              reverse: true,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              itemCount: rows.length,
+              itemBuilder: (_, i) => rows[rows.length - 1 - i],
+            ),
           ),
-        ),
-      ]);
+        ],
+      );
     }
 
     return Scaffold(
@@ -250,7 +275,11 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
             onPressed: () => context.pushReplacement('/assistant'),
             icon: HIcon('assistant', size: 22, color: c.primary),
           ),
-          IconButton(tooltip: l.massistantHistory, onPressed: _history, icon: HIcon('logs', size: 22, color: c.primary)),
+          IconButton(
+            tooltip: l.massistantHistory,
+            onPressed: _history,
+            icon: HIcon('logs', size: 22, color: c.primary),
+          ),
           if (_id != null)
             IconButton(
               tooltip: l.codechatNewConversation,
@@ -264,25 +293,27 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: Column(children: [
-          Expanded(child: body),
-          if (canEdit)
-            _InputBar(
-              controller: _text,
-              files: _files,
-              attach: _attach,
-              onAttach: () => setState(() => _attach = !_attach),
-              sending: _sending,
-              enabled: state != TicketState.pushing,
-              hint: codePlaceholder(l, conv == null ? null : state),
-              onSend: () => _send(),
-              repos: ref.watch(reposProvider).value ?? const <Repository>[],
-              // A message that starts a ticket works in its @mentions; a
-              // first one with none picked, in the names it uses.
-              startsTicket: _id == null ? _ticketKey.text.trim().isEmpty : cur == null || state == TicketState.done,
-              plain: _id == null && _pick.isEmpty && _ticketKey.text.trim().isEmpty,
-            ),
-        ]),
+        child: Column(
+          children: [
+            Expanded(child: body),
+            if (canEdit)
+              _InputBar(
+                controller: _text,
+                files: _files,
+                attach: _attach,
+                onAttach: () => setState(() => _attach = !_attach),
+                sending: _sending,
+                enabled: state != TicketState.pushing,
+                hint: codePlaceholder(l, conv == null ? null : state),
+                onSend: () => _send(),
+                repos: ref.watch(reposProvider).value ?? const <Repository>[],
+                // A message that starts a ticket works in its @mentions; a
+                // first one with none picked, in the names it uses.
+                startsTicket: _id == null ? _ticketKey.text.trim().isEmpty : cur == null || state == TicketState.done,
+                plain: _id == null && _pick.isEmpty && _ticketKey.text.trim().isEmpty,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -323,44 +354,53 @@ class _Setup extends ConsumerWidget {
       TicketKindChoice.analysis: l.kindAnalysis,
       TicketKindChoice.bug: l.kindBug,
     };
-    return ListView(padding: const EdgeInsets.fromLTRB(16, 20, 16, 16), children: [
-      Center(child: HIcon('code', size: 36, color: c.primary)),
-      EmptyState(title: l.codechatEmptyTitle, text: l.codechatEmptyText),
-      Text(l.codechatRepos, style: sub),
-      const SizedBox(height: 6),
-      Wrap(spacing: 8, runSpacing: 8, children: [
-        for (final g in groups)
-          FilterChipH(
-            label: g.name,
-            count: RepoPick.members(g).length,
-            selected: pick.wholeGroup?.id == g.id,
-            onTap: () => onPick(pick.wholeGroup?.id == g.id ? const RepoPick() : pick.pickGroup(g)),
-          ),
-        for (final r in repos.where((r) => r.archivedAt == null))
-          FilterChipH(label: r.name, selected: pick.contains(r.id), onTap: () => onPick(pick.toggle(r.id))),
-      ]),
-      const SizedBox(height: 16),
-      Text(l.codechatKind, style: sub),
-      const SizedBox(height: 6),
-      Wrap(spacing: 8, runSpacing: 8, children: [
-        for (final e in kinds.entries) FilterChipH(label: e.value, selected: kind == e.key, onTap: () => onKind(e.key)),
-      ]),
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        value: quick,
-        onChanged: onQuick,
-        title: Text(l.codechatQuick, style: TextStyle(fontSize: 14.5, color: c.ink)),
-        subtitle: Text(l.codechatQuickHint, style: TextStyle(fontSize: 13, color: c.ink3)),
-      ),
-      const SizedBox(height: 8),
-      Text(l.codechatTicketPick, style: sub),
-      const SizedBox(height: 6),
-      TextField(
-        controller: ticketKey,
-        textCapitalization: TextCapitalization.characters,
-        decoration: InputDecoration(hintText: l.codechatTicketPlaceholder, isDense: true, border: const OutlineInputBorder()),
-      ),
-    ]);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      children: [
+        Center(child: HIcon('code', size: 36, color: c.primary)),
+        EmptyState(title: l.codechatEmptyTitle, text: l.codechatEmptyText),
+        Text(l.codechatRepos, style: sub),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final g in groups)
+              FilterChipH(
+                label: g.name,
+                count: RepoPick.members(g).length,
+                selected: pick.wholeGroup?.id == g.id,
+                onTap: () => onPick(pick.wholeGroup?.id == g.id ? const RepoPick() : pick.pickGroup(g)),
+              ),
+            for (final r in repos.where((r) => r.archivedAt == null))
+              FilterChipH(label: r.name, selected: pick.contains(r.id), onTap: () => onPick(pick.toggle(r.id))),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Text(l.codechatKind, style: sub),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [for (final e in kinds.entries) FilterChipH(label: e.value, selected: kind == e.key, onTap: () => onKind(e.key))],
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: quick,
+          onChanged: onQuick,
+          title: Text(l.codechatQuick, style: TextStyle(fontSize: 14.5, color: c.ink)),
+          subtitle: Text(l.codechatQuickHint, style: TextStyle(fontSize: 13, color: c.ink3)),
+        ),
+        const SizedBox(height: 8),
+        Text(l.codechatTicketPick, style: sub),
+        const SizedBox(height: 6),
+        TextField(
+          controller: ticketKey,
+          textCapitalization: TextCapitalization.characters,
+          decoration: InputDecoration(hintText: l.codechatTicketPlaceholder, isDense: true, border: const OutlineInputBorder()),
+        ),
+      ],
+    );
   }
 }
 
@@ -379,18 +419,29 @@ class _Header extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      decoration: BoxDecoration(color: c.surface, border: Border(bottom: BorderSide(color: c.line))),
-      child: Wrap(spacing: 10, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        if (t != null) ...[
-          InkWell(
-            onTap: () => context.push('/tickets/${t.key}'),
-            child: Text(t.key, style: TextStyle(fontFamily: AgntsFonts.mono, fontWeight: FontWeight.w700, color: c.primary)),
-          ),
-          StateBadge(state ?? t.state, kind: t.kind),
-          Text(t.repos.join(', '), style: TextStyle(fontSize: 13, color: c.ink3)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(bottom: BorderSide(color: c.line)),
+      ),
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (t != null) ...[
+            InkWell(
+              onTap: () => context.push('/tickets/${t.key}'),
+              child: Text(
+                t.key,
+                style: TextStyle(fontFamily: AgntsFonts.mono, fontWeight: FontWeight.w700, color: c.primary),
+              ),
+            ),
+            StateBadge(state ?? t.state, kind: t.kind),
+            Text(t.repos.join(', '), style: TextStyle(fontSize: 13, color: c.ink3)),
+          ],
+          if (conv.quick ?? false) ToneBadge(l.codechatQuick, Tone.gray, small: true),
         ],
-        if (conv.quick ?? false) ToneBadge(l.codechatQuick, Tone.gray, small: true),
-      ]),
+      ),
     );
   }
 }
@@ -411,25 +462,31 @@ class _BlockView extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: Padding(
             padding: const EdgeInsets.only(top: 10, left: 48),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(color: c.primarySoft, borderRadius: BorderRadius.circular(18)),
-                child: SelectableText(message.text, style: TextStyle(fontSize: 15, height: 1.4, color: c.primaryInk)),
-              ),
-              if (routed.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Text(routed,
-                      style: TextStyle(
-                          fontSize: 12.5,
-                          color: message.routed == CodeRouted.failed
-                              ? c.badInk
-                              : message.routed == CodeRouted.queued
-                                  ? c.warnInk
-                                  : c.ink3)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(color: c.primarySoft, borderRadius: BorderRadius.circular(18)),
+                  child: SelectableText(message.text, style: TextStyle(fontSize: 15, height: 1.4, color: c.primaryInk)),
                 ),
-            ]),
+                if (routed.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Text(
+                      routed,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: message.routed == CodeRouted.failed
+                            ? c.badInk
+                            : message.routed == CodeRouted.queued
+                            ? c.warnInk
+                            : c.ink3,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       case CodeRunBlock(:final parts):
@@ -440,16 +497,19 @@ class _BlockView extends StatelessWidget {
             padding: const EdgeInsets.only(top: 10, right: 24),
             child: Material(
               color: c.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: BorderSide(color: c.line)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+                side: BorderSide(color: c.line),
+              ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  for (final p in parts)
-                    if (p is Event)
-                      ReportMarkdown(p.message)
-                    else
-                      _Steps(p as List<Event>),
-                ]),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final p in parts)
+                      if (p is Event) ReportMarkdown(p.message) else _Steps(p as List<Event>),
+                  ],
+                ),
               ),
             ),
           ),
@@ -462,11 +522,22 @@ class _BlockView extends StatelessWidget {
           padding: const EdgeInsets.only(top: 10),
           child: Center(
             child: event.type == 'state_changed' && state != null
-                ? Wrap(spacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                    Text(event.ticketKey, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
-                    StateBadge(state),
-                  ])
-                : Text(event.message, textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: color)),
+                ? Wrap(
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        event.ticketKey,
+                        style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+                      ),
+                      StateBadge(state),
+                    ],
+                  )
+                : Text(
+                    event.message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: color),
+                  ),
           ),
         );
     }
@@ -490,9 +561,20 @@ class _Steps extends StatelessWidget {
         childrenPadding: const EdgeInsets.only(bottom: 6),
         dense: true,
         visualDensity: VisualDensity.compact,
-        title: Text('${l.codechatSteps(events.length)} · ${events.last.message}', maxLines: 1, overflow: TextOverflow.ellipsis, style: style),
+        title: Text(
+          '${l.codechatSteps(events.length)} · ${events.last.message}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: style,
+        ),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        children: [for (final e in events) Padding(padding: const EdgeInsets.only(top: 2), child: Text(e.message, style: style))],
+        children: [
+          for (final e in events)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(e.message, style: style),
+            ),
+        ],
       ),
     );
   }
@@ -517,15 +599,23 @@ class _Working extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.only(top: 12),
-      child: Row(children: [
-        const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
-        const SizedBox(width: 10),
-        Text(l.codechatWorking, style: TextStyle(fontWeight: FontWeight.w700, color: c.ink2)),
-        if (spent != null) ...[
+      child: Row(
+        children: [
+          const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
           const SizedBox(width: 10),
-          Text('\$${spent.toStringAsFixed(spent < 1 ? 3 : 2)}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink3)),
+          Text(
+            l.codechatWorking,
+            style: TextStyle(fontWeight: FontWeight.w700, color: c.ink2),
+          ),
+          if (spent != null) ...[
+            const SizedBox(width: 10),
+            Text(
+              '\$${spent.toStringAsFixed(spent < 1 ? 3 : 2)}',
+              style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink3),
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }
@@ -541,17 +631,35 @@ class _Note extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
-    final ink = switch (tone) { Tone.bad => c.badInk, Tone.warn => c.warnInk, Tone.ok => c.okInk, _ => c.ink };
+    final ink = switch (tone) {
+      Tone.bad => c.badInk,
+      Tone.warn => c.warnInk,
+      Tone.ok => c.okInk,
+      _ => c.ink,
+    };
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
-          color: tone == Tone.warn ? c.warnSoft : c.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: c.line)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: TextStyle(fontWeight: FontWeight.w700, color: ink)),
-        if (text != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text(text!, style: TextStyle(fontSize: 13.5, color: c.ink2))),
-        if (action != null) Align(alignment: Alignment.centerRight, child: action),
-      ]),
+        color: tone == Tone.warn ? c.warnSoft : c.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: c.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.w700, color: ink),
+          ),
+          if (text != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(text!, style: TextStyle(fontSize: 13.5, color: c.ink2)),
+            ),
+          if (action != null) Align(alignment: Alignment.centerRight, child: action),
+        ],
+      ),
     );
   }
 }
@@ -578,15 +686,17 @@ class _ResultState extends ConsumerState<_Result> {
     final message = !approve
         ? l.codechatRejectText
         : _report
-            ? l.codechatApproveReport
-            : t.afterApprove == TicketAfterApproveEnum.main
-                ? l.codechatApproveMain
-                : l.codechatApprovePr(t.branch);
-    final ok = await confirmAction(context,
-        title: approve ? l.codechatApproveTitle(t.key) : l.codechatRejectTitle(t.key),
-        message: message,
-        confirmLabel: approve ? l.codechatApprove : l.codechatReject,
-        danger: !approve);
+        ? l.codechatApproveReport
+        : t.afterApprove == TicketAfterApproveEnum.main
+        ? l.codechatApproveMain
+        : l.codechatApprovePr(t.branch);
+    final ok = await confirmAction(
+      context,
+      title: approve ? l.codechatApproveTitle(t.key) : l.codechatRejectTitle(t.key),
+      message: message,
+      confirmLabel: approve ? l.codechatApprove : l.codechatReject,
+      danger: !approve,
+    );
     if (!ok || !mounted) return;
     setState(() => _busy = true);
     final api = ref.read(apiProvider)!.getTicketsApi();
@@ -619,35 +729,70 @@ class _ResultState extends ConsumerState<_Result> {
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: c.primary)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(_report ? l.codechatReportTitle(t.key) : l.codechatResultTitle(t.key), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-        const SizedBox(height: 6),
-        if (_report && r?.report != null) ReportMarkdown(r!.report!) else if (r != null && r.summary.isNotEmpty) ReportMarkdown(r.summary),
-        if (!_report)
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              Text.rich(TextSpan(children: [
-                TextSpan(text: '${l.codechatFilesChanged(files.length)} '),
-                TextSpan(text: '+$add', style: TextStyle(color: c.okInk, fontWeight: FontWeight.w700)),
-                TextSpan(text: ' −$del', style: TextStyle(color: c.badInk, fontWeight: FontWeight.w700)),
-              ]), style: TextStyle(fontSize: 14, color: c.ink2)),
-              if (t.skipChecks)
-                ToneBadge(l.codechatChecksSkipped, Tone.gray, small: true)
-              else if (checks.isNotEmpty)
-                failed > 0
-                    ? ToneBadge(l.codechatChecksFailed('$failed', '${checks.length}'), Tone.bad, small: true)
-                    : ToneBadge(l.codechatChecksPassed, Tone.ok, small: true),
-            ]),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: c.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _report ? l.codechatReportTitle(t.key) : l.codechatResultTitle(t.key),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
           ),
-        const SizedBox(height: 6),
-        Wrap(spacing: 8, children: [
-          FilledButton(onPressed: _busy ? null : () => _decide(true), child: Text(l.codechatApprove)),
-          OutlinedButton(onPressed: _busy ? null : () => _decide(false), child: Text(l.codechatReject)),
-          TextButton(onPressed: () => context.push('/tickets/${t.key}'), child: Text(files.isEmpty ? l.codechatOpenTicket : l.codechatViewDiff)),
-        ]),
-      ]),
+          const SizedBox(height: 6),
+          if (_report && r?.report != null)
+            ReportMarkdown(r!.report!)
+          else if (r != null && r.summary.isNotEmpty)
+            ReportMarkdown(r.summary),
+          if (!_report)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: '${l.codechatFilesChanged(files.length)} '),
+                        TextSpan(
+                          text: '+$add',
+                          style: TextStyle(color: c.okInk, fontWeight: FontWeight.w700),
+                        ),
+                        TextSpan(
+                          text: ' −$del',
+                          style: TextStyle(color: c.badInk, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                    style: TextStyle(fontSize: 14, color: c.ink2),
+                  ),
+                  if (t.skipChecks)
+                    ToneBadge(l.codechatChecksSkipped, Tone.gray, small: true)
+                  else if (checks.isNotEmpty)
+                    failed > 0
+                        ? ToneBadge(l.codechatChecksFailed('$failed', '${checks.length}'), Tone.bad, small: true)
+                        : ToneBadge(l.codechatChecksPassed, Tone.ok, small: true),
+                ],
+              ),
+            ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            children: [
+              FilledButton(onPressed: _busy ? null : () => _decide(true), child: Text(l.codechatApprove)),
+              OutlinedButton(onPressed: _busy ? null : () => _decide(false), child: Text(l.codechatReject)),
+              TextButton(
+                onPressed: () => context.push('/tickets/${t.key}'),
+                child: Text(files.isEmpty ? l.codechatOpenTicket : l.codechatViewDiff),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -696,34 +841,53 @@ class _QuestionsState extends State<_Questions> {
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: c.warn)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.codechatQuestionsTitle(widget.d.ticket.key), style: const TextStyle(fontWeight: FontWeight.w700)),
-        for (final q in open) ...[
-          const SizedBox(height: 10),
-          Text(q.text, style: TextStyle(fontWeight: FontWeight.w600, color: c.ink)),
-          if (q.options.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Wrap(spacing: 6, runSpacing: 6, children: [
-                for (final o in q.options)
-                  FilterChipH(label: o, selected: _field(q.id).text.split('\n').contains(o), onTap: () => setState(() => _pick(q, o))),
-              ]),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: c.warn),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.codechatQuestionsTitle(widget.d.ticket.key), style: const TextStyle(fontWeight: FontWeight.w700)),
+          for (final q in open) ...[
+            const SizedBox(height: 10),
+            Text(
+              q.text,
+              style: TextStyle(fontWeight: FontWeight.w600, color: c.ink),
             ),
-          const SizedBox(height: 6),
-          TextField(controller: _field(q.id), minLines: 1, maxLines: 4, decoration: const InputDecoration(isDense: true, border: OutlineInputBorder())),
-        ],
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerRight,
-          child: FilledButton(
-            onPressed: !ready || widget.busy
-                ? null
-                : () => widget.onSend([for (final q in open) CodeSendAnswersInner(questionId: q.id, answer: _field(q.id).text.trim())]),
-            child: Text(l.codechatAnswersSend),
+            if (q.options.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final o in q.options)
+                      FilterChipH(label: o, selected: _field(q.id).text.split('\n').contains(o), onTap: () => setState(() => _pick(q, o))),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _field(q.id),
+              minLines: 1,
+              maxLines: 4,
+              decoration: const InputDecoration(isDense: true, border: OutlineInputBorder()),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton(
+              onPressed: !ready || widget.busy
+                  ? null
+                  : () => widget.onSend([for (final q in open) CodeSendAnswersInner(questionId: q.id, answer: _field(q.id).text.trim())]),
+              child: Text(l.codechatAnswersSend),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -759,7 +923,10 @@ class _ApprovalCardState extends ConsumerState<_ApprovalCard> {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
     try {
-      await ref.read(apiProvider)!.getAssistantApi().decideCodeApproval(
+      await ref
+          .read(apiProvider)!
+          .getAssistantApi()
+          .decideCodeApproval(
             approvalId: widget.a.id,
             decideCodeApprovalRequest: DecideCodeApprovalRequest(allow: allow),
           );
@@ -780,20 +947,38 @@ class _ApprovalCardState extends ConsumerState<_ApprovalCard> {
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-      decoration: BoxDecoration(color: c.warnSoft, borderRadius: BorderRadius.circular(14), border: Border.all(color: c.warn)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(l.codechatApprovalTitle, style: TextStyle(fontWeight: FontWeight.w700, color: c.warnInk)),
-        const SizedBox(height: 6),
-        SelectableText(a.command ?? a.path ?? a.tool, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink)),
-        const SizedBox(height: 4),
-        Text(l.codechatApprovalReason(a.reason), style: TextStyle(fontSize: 13, color: c.ink2)),
-        Row(children: [
-          Text(left == 0 ? l.codechatApprovalExpired : l.codechatApprovalLeft('$left'), style: TextStyle(fontSize: 12.5, color: c.ink3)),
-          const Spacer(),
-          TextButton(onPressed: _busy || left == 0 ? null : () => _decide(false), child: Text(l.codechatApprovalDeny)),
-          FilledButton(onPressed: _busy || left == 0 ? null : () => _decide(true), child: Text(l.codechatApprovalAllow)),
-        ]),
-      ]),
+      decoration: BoxDecoration(
+        color: c.warnSoft,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: c.warn),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.codechatApprovalTitle,
+            style: TextStyle(fontWeight: FontWeight.w700, color: c.warnInk),
+          ),
+          const SizedBox(height: 6),
+          SelectableText(
+            a.command ?? a.path ?? a.tool,
+            style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink),
+          ),
+          const SizedBox(height: 4),
+          Text(l.codechatApprovalReason(a.reason), style: TextStyle(fontSize: 13, color: c.ink2)),
+          Row(
+            children: [
+              Text(
+                left == 0 ? l.codechatApprovalExpired : l.codechatApprovalLeft('$left'),
+                style: TextStyle(fontSize: 12.5, color: c.ink3),
+              ),
+              const Spacer(),
+              TextButton(onPressed: _busy || left == 0 ? null : () => _decide(false), child: Text(l.codechatApprovalDeny)),
+              FilledButton(onPressed: _busy || left == 0 ? null : () => _decide(true), child: Text(l.codechatApprovalAllow)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -848,7 +1033,10 @@ class _InputBarState extends State<_InputBar> {
   void _pickMention(({int start, String query}) m, Repository r) {
     final t = widget.controller;
     final out = insertMention(t.text, m.start, t.selection.baseOffset, r.name);
-    t.value = TextEditingValue(text: out.text, selection: TextSelection.collapsed(offset: out.caret));
+    t.value = TextEditingValue(
+      text: out.text,
+      selection: TextSelection.collapsed(offset: out.caret),
+    );
   }
 
   @override
@@ -864,73 +1052,97 @@ class _InputBarState extends State<_InputBar> {
     final names = [for (final id in named) widget.repos.firstWhere((r) => r.id == id).name].join(', ');
     final can = widget.enabled && (n > 0 || widget.files.ids.isNotEmpty) && n <= _maxMessage && !widget.sending && !widget.files.uploading;
     return Container(
-      decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(top: BorderSide(color: c.line)),
+      ),
       padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        if (widget.attach) Padding(padding: const EdgeInsets.fromLTRB(8, 0, 0, 8), child: AttachmentPicker(controller: widget.files)),
-        if (options.isNotEmpty && widget.enabled)
-          Semantics(
-            label: l.codechatMentionLabel,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.attach)
+            Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
-              child: Row(children: [
-                for (final r in options)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: FilterChipH(label: '@${r.name}', selected: false, onTap: () => _pickMention(mention!, r)),
-                  ),
-              ]),
+              child: AttachmentPicker(controller: widget.files),
             ),
-          ),
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          IconButton(
-            tooltip: l.filesTitle,
-            onPressed: widget.enabled ? widget.onAttach : null,
-            icon: Icon(Icons.attach_file_rounded, color: widget.files.ids.isNotEmpty ? c.primary : c.ink3),
-          ),
-          Expanded(
-            child: TextField(
-              controller: widget.controller,
-              enabled: widget.enabled,
-              minLines: 1,
-              maxLines: 6,
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.newline,
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                filled: true,
-                fillColor: c.field,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+          if (options.isNotEmpty && widget.enabled)
+            Semantics(
+              label: l.codechatMentionLabel,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
+                child: Row(
+                  children: [
+                    for (final r in options)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: FilterChipH(label: '@${r.name}', selected: false, onTap: () => _pickMention(mention!, r)),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 6),
-          IconButton.filled(
-            tooltip: l.codechatSend,
-            onPressed: can ? widget.onSend : null,
-            icon: widget.sending
-                ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
-                : const Icon(Icons.arrow_upward_rounded),
-          ),
-        ]),
-        if (names.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 6, 8, 0),
-            child: Row(children: [
-              HIcon('code', size: 14, color: c.primary),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton(
+                tooltip: l.filesTitle,
+                onPressed: widget.enabled ? widget.onAttach : null,
+                icon: Icon(Icons.attach_file_rounded, color: widget.files.ids.isNotEmpty ? c.primary : c.ink3),
+              ),
+              Expanded(
+                child: TextField(
+                  controller: widget.controller,
+                  enabled: widget.enabled,
+                  minLines: 1,
+                  maxLines: 6,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.newline,
+                  decoration: InputDecoration(
+                    hintText: widget.hint,
+                    filled: true,
+                    fillColor: c.field,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                  ),
+                ),
+              ),
               const SizedBox(width: 6),
-              Expanded(child: Text(l.codechatMentioned(names), style: TextStyle(fontSize: 12.5, color: c.ink2))),
-            ]),
+              IconButton.filled(
+                tooltip: l.codechatSend,
+                onPressed: can ? widget.onSend : null,
+                icon: widget.sending
+                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.onPrimary))
+                    : const Icon(Icons.arrow_upward_rounded),
+              ),
+            ],
           ),
-        if (n > _maxMessage - 200)
-          Padding(
-            padding: const EdgeInsets.only(top: 4, right: 8),
-            child: Text(l.codechatCount('$n'), textAlign: TextAlign.end, style: TextStyle(fontSize: 12, color: n > _maxMessage ? c.badInk : c.ink3)),
-          ),
-      ]),
+          if (names.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 6, 8, 0),
+              child: Row(
+                children: [
+                  HIcon('code', size: 14, color: c.primary),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(l.codechatMentioned(names), style: TextStyle(fontSize: 12.5, color: c.ink2)),
+                  ),
+                ],
+              ),
+            ),
+          if (n > _maxMessage - 200)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, right: 8),
+              child: Text(
+                l.codechatCount('$n'),
+                textAlign: TextAlign.end,
+                style: TextStyle(fontSize: 12, color: n > _maxMessage ? c.badInk : c.ink3),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -954,7 +1166,9 @@ class TicketChatButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    if (!ref.watch(canEditProvider) || ticket.kind == TicketKind.review || ticket.kind == TicketKind.swaggertest) return const SizedBox.shrink();
+    if (!ref.watch(canEditProvider) || ticket.kind == TicketKind.review || ticket.kind == TicketKind.swaggertest) {
+      return const SizedBox.shrink();
+    }
     final id = ref.watch(ticketChatProvider(ticket.key)).value;
     return IconButton(
       tooltip: id != null ? l.codechatTicketChat : l.codechatContinueInChat,

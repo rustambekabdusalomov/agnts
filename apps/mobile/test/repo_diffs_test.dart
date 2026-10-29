@@ -9,18 +9,19 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child) => MaterialApp(
-      theme: agntsTheme(Brightness.light),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SingleChildScrollView(child: child)),
-    );
+  theme: agntsTheme(Brightness.light),
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(body: SingleChildScrollView(child: child)),
+);
 
-FileChange _f(String? repo, String path, int add, int del) => FileChange(repo: repo, path: path, add: add, del: del, diff: '@@ -1 +1 @@\n-a\n+b');
+FileChange _f(String? repo, String path, int add, int del) =>
+    FileChange(repo: repo, path: path, add: add, del: del, diff: '@@ -1 +1 @@\n-a\n+b');
 
 final _files = [_f('gateway', 'api/a.go', 3, 1), _f('gateway', 'api/b.go', 2, 0), _f('protos', 'content.proto', 10, 4)];
 

@@ -71,112 +71,162 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         bottom: false,
         child: RefreshIndicator(
           onRefresh: refresh,
-          child: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-            PageHeader(title: l.platformNavDashboard, sub: l.platformCabinetBadge),
-            if (users.hasError && all.isEmpty)
-              pad(HCard(child: Text(l.mobileOffline)))
-            else if (users.isLoading && all.isEmpty)
-              const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()))
-            else ...[
-              pad(Grid2(children: [
-                KpiCard(
-                  label: l.platformUsers,
-                  value: '${us.length}',
-                  note: '${l.platformNewThisWeek('${us.where((u) => within(u.user.createdAt, 7)).length}')} · '
-                      '${l.platformViaGoogle('${us.where((u) => !u.hasPassword).length}')}',
-                  onTap: () => context.go('/admin/users'),
-                ),
-                KpiCard(
-                  label: l.platformActiveUsers,
-                  value: '${us.where((u) => within(u.lastSignInAt, 7)).length}',
-                  note: l.platformActiveNote,
-                  onTap: () => context.go('/admin/users?f=active'),
-                ),
-                KpiCard(
-                  label: l.platformWorkspaces,
-                  value: '${ws.length}',
-                  note: '${l.platformNewThisWeek('${ws.where((w) => within(w.createdAt, 7)).length}')} · '
-                      '${l.platformTeams(ws.where((w) => w.members > 1).length)}',
-                  onTap: () => context.go('/admin/workspaces'),
-                ),
-                KpiCard(
-                  label: l.platformAdmins,
-                  value: '$admins',
-                  note: l.platformRunsNow(cap?.runs ?? 0),
-                  onTap: () => context.push('/admin/admins'),
-                ),
-              ])),
-              // Sign-ups per day
-              SectionHeader(l.platformGrowthTitle),
-              pad(HCard(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(l.platformGrowthSub('$_days'), style: TextStyle(fontSize: 13, color: c.ink3)),
-                  const SizedBox(height: 12),
-                  BarChart(
-                    series: [
-                      ChartSeries(l.platformLegendUsers, perDay(us.map((u) => u.user.createdAt), _days), c.primary),
-                      ChartSeries(l.platformLegendWorkspaces, perDay(ws.map((w) => w.createdAt), _days), c.warn),
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              PageHeader(title: l.platformNavDashboard, sub: l.platformCabinetBadge),
+              if (users.hasError && all.isEmpty)
+                pad(HCard(child: Text(l.mobileOffline)))
+              else if (users.isLoading && all.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else ...[
+                pad(
+                  Grid2(
+                    children: [
+                      KpiCard(
+                        label: l.platformUsers,
+                        value: '${us.length}',
+                        note:
+                            '${l.platformNewThisWeek('${us.where((u) => within(u.user.createdAt, 7)).length}')} · '
+                            '${l.platformViaGoogle('${us.where((u) => !u.hasPassword).length}')}',
+                        onTap: () => context.go('/admin/users'),
+                      ),
+                      KpiCard(
+                        label: l.platformActiveUsers,
+                        value: '${us.where((u) => within(u.lastSignInAt, 7)).length}',
+                        note: l.platformActiveNote,
+                        onTap: () => context.go('/admin/users?f=active'),
+                      ),
+                      KpiCard(
+                        label: l.platformWorkspaces,
+                        value: '${ws.length}',
+                        note:
+                            '${l.platformNewThisWeek('${ws.where((w) => within(w.createdAt, 7)).length}')} · '
+                            '${l.platformTeams(ws.where((w) => w.members > 1).length)}',
+                        onTap: () => context.go('/admin/workspaces'),
+                      ),
+                      KpiCard(
+                        label: l.platformAdmins,
+                        value: '$admins',
+                        note: l.platformRunsNow(cap?.runs ?? 0),
+                        onTap: () => context.push('/admin/admins'),
+                      ),
                     ],
-                    labels: labels,
-                    maxLabels: 5,
-                    height: 170,
                   ),
-                  ChartLegend([(c.primary, l.platformLegendUsers), (c.warn, l.platformLegendWorkspaces)]),
-                ]),
-              )),
-              // Newest accounts
-              SectionHeader(
-                l.platformRecentTitle,
-                trailing: GestureDetector(
-                  onTap: () => context.go('/admin/users'),
-                  child: Text(l.platformSeeAll, style: TextStyle(color: c.primary)),
                 ),
-              ),
-              pad(recent.isEmpty
-                  ? HCard(child: Text(l.platformNoUsers, style: TextStyle(color: c.ink3)))
-                  : ListGroup(children: [
-                      for (final u in recent.take(6))
-                        PersonRow(
-                          user: u.user,
-                          sub: contactOf(u.user),
-                          trailing: Text(agoText(context, u.user.createdAt), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                // Sign-ups per day
+                SectionHeader(l.platformGrowthTitle),
+                pad(
+                  HCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l.platformGrowthSub('$_days'), style: TextStyle(fontSize: 13, color: c.ink3)),
+                        const SizedBox(height: 12),
+                        BarChart(
+                          series: [
+                            ChartSeries(l.platformLegendUsers, perDay(us.map((u) => u.user.createdAt), _days), c.primary),
+                            ChartSeries(l.platformLegendWorkspaces, perDay(ws.map((w) => w.createdAt), _days), c.warn),
+                          ],
+                          labels: labels,
+                          maxLabels: 5,
+                          height: 170,
                         ),
-                    ])),
-              // The server: memory, runs, disk
-              SectionHeader(l.platformCapacity, trailing: (cap?.full ?? false) ? ToneBadge(l.platformFull, Tone.warn, small: true) : null),
-              pad(cap == null
-                  ? const HCard(child: LoadLine())
-                  : Grid2(children: [
-                      Fact(l.platformReserved, cap.budgetMb > 0 ? '${gb(cap.reservedMb)} / ${gb(cap.budgetMb)}' : '${gb(cap.reservedMb)} (${l.platformBudgetNone})'),
-                      Fact(l.platformRuns, '${cap.runs}'),
-                      if (cap.diskFreeMb != null) Fact(l.platformDisk, gb(cap.diskFreeMb!)),
-                    ])),
-              // Running now
-              SectionHeader(l.platformRunning),
-              pad((overview?.runs ?? const []).isEmpty
-                  ? HCard(child: Text(l.platformNoRuns, style: TextStyle(color: c.ink3)))
-                  : ListGroup(children: [
-                      for (final r in overview!.runs)
-                        ListRow(
-                          title: r.ticketKey,
-                          subtitle: '${r.workspace ?? '—'} · ${r.stage}',
-                          trailing: Text(agoText(context, r.startedAt), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                        ChartLegend([(c.primary, l.platformLegendUsers), (c.warn, l.platformLegendWorkspaces)]),
+                      ],
+                    ),
+                  ),
+                ),
+                // Newest accounts
+                SectionHeader(
+                  l.platformRecentTitle,
+                  trailing: GestureDetector(
+                    onTap: () => context.go('/admin/users'),
+                    child: Text(l.platformSeeAll, style: TextStyle(color: c.primary)),
+                  ),
+                ),
+                pad(
+                  recent.isEmpty
+                      ? HCard(
+                          child: Text(l.platformNoUsers, style: TextStyle(color: c.ink3)),
+                        )
+                      : ListGroup(
+                          children: [
+                            for (final u in recent.take(6))
+                              PersonRow(
+                                user: u.user,
+                                sub: contactOf(u.user),
+                                trailing: Text(agoText(context, u.user.createdAt), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                              ),
+                          ],
                         ),
-                    ])),
-              // Waiting for the server
-              SectionHeader(l.platformQueue),
-              pad((overview?.serverQueue ?? const []).isEmpty
-                  ? HCard(child: Text(l.platformNoQueue, style: TextStyle(color: c.ink3)))
-                  : ListGroup(children: [
-                      for (final (i, q) in overview!.serverQueue.indexed)
-                        ListRow(
-                          leading: Text('#${i + 1}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink3)),
-                          title: q.ticketKey,
-                          subtitle: q.workspace,
+                ),
+                // The server: memory, runs, disk
+                SectionHeader(
+                  l.platformCapacity,
+                  trailing: (cap?.full ?? false) ? ToneBadge(l.platformFull, Tone.warn, small: true) : null,
+                ),
+                pad(
+                  cap == null
+                      ? const HCard(child: LoadLine())
+                      : Grid2(
+                          children: [
+                            Fact(
+                              l.platformReserved,
+                              cap.budgetMb > 0
+                                  ? '${gb(cap.reservedMb)} / ${gb(cap.budgetMb)}'
+                                  : '${gb(cap.reservedMb)} (${l.platformBudgetNone})',
+                            ),
+                            Fact(l.platformRuns, '${cap.runs}'),
+                            if (cap.diskFreeMb != null) Fact(l.platformDisk, gb(cap.diskFreeMb!)),
+                          ],
                         ),
-                    ])),
+                ),
+                // Running now
+                SectionHeader(l.platformRunning),
+                pad(
+                  (overview?.runs ?? const []).isEmpty
+                      ? HCard(
+                          child: Text(l.platformNoRuns, style: TextStyle(color: c.ink3)),
+                        )
+                      : ListGroup(
+                          children: [
+                            for (final r in overview!.runs)
+                              ListRow(
+                                title: r.ticketKey,
+                                subtitle: '${r.workspace ?? '—'} · ${r.stage}',
+                                trailing: Text(agoText(context, r.startedAt), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                              ),
+                          ],
+                        ),
+                ),
+                // Waiting for the server
+                SectionHeader(l.platformQueue),
+                pad(
+                  (overview?.serverQueue ?? const []).isEmpty
+                      ? HCard(
+                          child: Text(l.platformNoQueue, style: TextStyle(color: c.ink3)),
+                        )
+                      : ListGroup(
+                          children: [
+                            for (final (i, q) in overview!.serverQueue.indexed)
+                              ListRow(
+                                leading: Text(
+                                  '#${i + 1}',
+                                  style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13, color: c.ink3),
+                                ),
+                                title: q.ticketKey,
+                                subtitle: q.workspace,
+                              ),
+                          ],
+                        ),
+                ),
+              ],
             ],
-          ]),
+          ),
         ),
       ),
     );

@@ -36,34 +36,57 @@ class _FileDiffState extends State<FileDiff> {
     // The path and counts; tapping opens or closes the diff. Stuck at the
     // top of the page while an open diff scrolls under it, it gets a line.
     Widget header(bool stuck) => Material(
-          color: c.surface,
-          child: InkWell(
-            onTap: () => setState(() => _open = !_open),
-            child: Container(
-              decoration: stuck
-                  ? BoxDecoration(
-                      border: Border(bottom: BorderSide(color: c.line)),
-                      boxShadow: [BoxShadow(color: const Color(0xFF000000).withValues(alpha: 0.08), blurRadius: 6, offset: const Offset(0, 2))],
-                    )
-                  : null,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(
-                  child: Text(filePath(f), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink)),
+      color: c.surface,
+      child: InkWell(
+        onTap: () => setState(() => _open = !_open),
+        child: Container(
+          decoration: stuck
+              ? BoxDecoration(
+                  border: Border(bottom: BorderSide(color: c.line)),
+                  boxShadow: [BoxShadow(color: const Color(0xFF000000).withValues(alpha: 0.08), blurRadius: 6, offset: const Offset(0, 2))],
+                )
+              : null,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  filePath(f),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink),
                 ),
-                const SizedBox(width: 10),
-                Text('+${f.add}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk)),
-                const SizedBox(width: 5),
-                Text('−${f.del}', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.badInk)),
-              ]),
-            ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                '+${f.add}',
+                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.okInk),
+              ),
+              const SizedBox(width: 5),
+              Text(
+                '−${f.del}',
+                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.badInk),
+              ),
+            ],
           ),
-        );
+        ),
+      ),
+    );
     return Container(
       margin: const EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
       clipBehavior: Clip.antiAlias,
-      child: _open ? StickyHeader(header: header, content: _Diff(f.diff, path: f.path)) : header(false),
+      child: _open
+          ? StickyHeader(
+              header: header,
+              content: _Diff(f.diff, path: f.path),
+            )
+          : header(false),
     );
   }
 }
@@ -108,11 +131,11 @@ class _DiffState extends State<_Diff> {
   }
 
   static Color? _bg(DiffKind k) => switch (k) {
-        DiffKind.add => _codeAdd,
-        DiffKind.del => _codeDel,
-        DiffKind.hunk => _codeHunk,
-        DiffKind.plain => null,
-      };
+    DiffKind.add => _codeAdd,
+    DiffKind.del => _codeDel,
+    DiffKind.hunk => _codeHunk,
+    DiffKind.plain => null,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -130,60 +153,77 @@ class _DiffState extends State<_Diff> {
     final numWidth = tp.width;
     tp.dispose();
     Widget num(int? n) => SizedBox(
-          width: numWidth.ceilToDouble() + 1,
-          child: Text(n?.toString() ?? '', textAlign: TextAlign.right, softWrap: false, style: numStyle),
-        );
+      width: numWidth.ceilToDouble() + 1,
+      child: Text(n?.toString() ?? '', textAlign: TextAlign.right, softWrap: false, style: numStyle),
+    );
     // Old and new numbers stay put while long lines scroll sideways, as in
     // the admin panel's DiffView.vue. Every row is one line of the same
     // style, so the gutter and code rows line up.
     return Container(
       color: c.code,
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          decoration: BoxDecoration(border: Border(right: BorderSide(color: const Color(0xFF7F7F7F).withValues(alpha: 0.25)))),
-          // As wide as its rows: in the Row it has no width to stretch them to.
-          child: IntrinsicWidth(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
-              for (final l in lines)
-                Container(
-                  color: _bg(l.kind),
-                  padding: const EdgeInsets.only(left: 4, right: 8),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [num(l.old), const SizedBox(width: 6), num(l.neu)]),
-                ),
-            ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(color: const Color(0xFF7F7F7F).withValues(alpha: 0.25))),
+            ),
+            // As wide as its rows: in the Row it has no width to stretch them to.
+            child: IntrinsicWidth(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final l in lines)
+                    Container(
+                      color: _bg(l.kind),
+                      padding: const EdgeInsets.only(left: 4, right: 8),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [num(l.old), const SizedBox(width: 6), num(l.neu)]),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, box) => SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: box.maxWidth),
-                child: IntrinsicWidth(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    for (final (i, l) in lines.indexed)
-                      Container(
-                        padding: const EdgeInsets.only(left: 10, right: 14),
-                        color: _bg(l.kind),
-                        child: switch (_spans?[i]) {
-                          final spans? => Text.rich(
-                              TextSpan(text: l.text[0], children: [
-                                for (final sp in spans) TextSpan(text: sp.text, style: styleFor(sp.scope)),
-                              ]),
-                              softWrap: false,
-                              style: style.copyWith(color: c.codeInk),
-                            ),
-                          null => Text(l.text, softWrap: false, style: style.copyWith(color: l.kind == DiffKind.hunk ? _hunkInk : c.codeInk)),
-                        },
-                      ),
-                  ]),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, box) => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: box.maxWidth),
+                  child: IntrinsicWidth(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (i, l) in lines.indexed)
+                          Container(
+                            padding: const EdgeInsets.only(left: 10, right: 14),
+                            color: _bg(l.kind),
+                            child: switch (_spans?[i]) {
+                              final spans? => Text.rich(
+                                TextSpan(
+                                  text: l.text[0],
+                                  children: [for (final sp in spans) TextSpan(text: sp.text, style: styleFor(sp.scope))],
+                                ),
+                                softWrap: false,
+                                style: style.copyWith(color: c.codeInk),
+                              ),
+                              null => Text(
+                                l.text,
+                                softWrap: false,
+                                style: style.copyWith(color: l.kind == DiffKind.hunk ? _hunkInk : c.codeInk),
+                              ),
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

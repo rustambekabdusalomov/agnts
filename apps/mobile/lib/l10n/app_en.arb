@@ -5958,6 +5958,160 @@
     }
   },
   "platformFreeCreditsInvalid": "Enter a whole number from 0 to 10,000,000.",
+  "platformCreditUsage": "Usage this month",
+  "platformCreditUsageTotal": "{n} ever",
+  "@platformCreditUsageTotal": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "platformSetLimit": "Set limit",
+  "platformLimitTitle": "Monthly credit limit",
+  "platformLimitSet": "{name} may spend up to {n} credits ({amount}) a month",
+  "@platformLimitSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMuseProvider": "Muse provider",
+  "platformMuseProviderSub": "Where runs on agnts's credits go. People's own Meta accounts are not affected.",
+  "platformMp_auto": "Auto",
+  "platformMp_primary": "Meta only",
+  "platformMp_fallback": "Fallback only",
+  "platformMpNote_auto": "agnts's Meta key. When it runs out, runs continue their session on {name}.",
+  "@platformMpNote_auto": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMpNote_primary": "agnts's Meta key only. Runs stop when it runs out.",
+  "platformMpNote_fallback": "Every run on credits goes to {name}.",
+  "@platformMpNote_fallback": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMpFallback": "Fallback",
+  "platformMpNone": "This server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY).",
+  "platformMpOut": "Meta is out until {time}",
+  "@platformMpOut": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMpSet": "Runs on credits: {mode}",
+  "@platformMpSet": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "platformLimitRemoved": "{name} has no monthly limit now",
+  "@platformLimitRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformLimitUsed": "{used} credits ({amount}) spent this month, {total} ever.",
+  "@platformLimitUsed": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "platformLimitField": "Credits per month (1 credit = $0.01; 0 is no limit)",
+  "platformLimitHelp": "Free and workspace credits together. Runs stop once it is spent and resume next month or when you raise it.",
+  "platformLimitWorth": "Up to {amount} of model calls a month.",
+  "@platformLimitWorth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "platformLimitNone": "No limit: only their credits bound what they spend.",
+  "platformFbUsage": "{name}: {used}",
+  "@platformFbUsage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "used": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFbUsed": "Spent on {name} this month: {used} credits ({amount}).",
+  "@platformFbUsed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "used": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFbUseDefault": "Use the server's default limit",
+  "platformFbField": "Credits per month on {name} (0 is no limit)",
+  "@platformFbField": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFbHelp": "Counted only while agnts's Meta key is out and runs continue on {name}. When it is used up, their runs wait for Meta instead.",
+  "@platformFbHelp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformUsageTotals": "This month: {used} credits ({amount}) across everyone; {limited} people have a limit.",
+  "@platformUsageTotals": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "limited": {
+        "type": "String"
+      }
+    }
+  },
   "previewTab": "Preview",
   "previewTitle": "Screenshots of the app",
   "previewSub": "agnts started the app with this change and took screenshots. Advice only: it never blocks approval.",

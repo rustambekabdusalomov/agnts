@@ -66,34 +66,46 @@ class _McpScreenState extends ConsumerState<McpScreen> {
       body: AsyncBody<McpStatus>(
         value: ref.watch(mcpProvider),
         onRefresh: () async => ref.invalidate(mcpProvider),
-        builder: (s) => ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-          PageHeader(title: l.mcpTitle, sub: l.mcpSub, long: true),
-          padCard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            CopyLine(l.mcpUrl, s.url),
-            const SizedBox(height: 6),
-            KvRow(l.mcpConnections, '${s.connections}'),
-            KvRow(l.mcpStaticToken, s.staticToken ? l.mcpSet : l.mcpNotSet),
-            const SizedBox(height: 10),
-            HelpBox(l.mcpHowTo),
-            if (_newToken.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              CopyLine(l.mcpNewToken, _newToken),
-              Text(l.mcpShownOnce, style: TextStyle(fontSize: 13, color: c.warnInk)),
-            ],
-            const SizedBox(height: 14),
-            Row(children: [
-              Expanded(child: OutlinedButton(onPressed: _busy ? null : _rotate, child: Text(s.staticToken ? l.mcpRotate : l.mcpCreate))),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(foregroundColor: c.badInk),
-                  onPressed: _busy ? null : _revoke,
-                  child: Text(l.mcpRevoke),
-                ),
+        builder: (s) => ListView(
+          padding: const EdgeInsets.only(bottom: 32),
+          children: [
+            PageHeader(title: l.mcpTitle, sub: l.mcpSub, long: true),
+            padCard(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CopyLine(l.mcpUrl, s.url),
+                  const SizedBox(height: 6),
+                  KvRow(l.mcpConnections, '${s.connections}'),
+                  KvRow(l.mcpStaticToken, s.staticToken ? l.mcpSet : l.mcpNotSet),
+                  const SizedBox(height: 10),
+                  HelpBox(l.mcpHowTo),
+                  if (_newToken.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    CopyLine(l.mcpNewToken, _newToken),
+                    Text(l.mcpShownOnce, style: TextStyle(fontSize: 13, color: c.warnInk)),
+                  ],
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(onPressed: _busy ? null : _rotate, child: Text(s.staticToken ? l.mcpRotate : l.mcpCreate)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(foregroundColor: c.badInk),
+                          onPressed: _busy ? null : _revoke,
+                          child: Text(l.mcpRevoke),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ]),
-          ])),
-        ]),
+            ),
+          ],
+        ),
       ),
     );
   }

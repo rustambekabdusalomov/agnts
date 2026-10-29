@@ -65,12 +65,8 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
     });
     try {
       final ws = (await api.getWorkspacesApi().createWorkspace(
-                createWorkspaceRequest: CreateWorkspaceRequest(
-                  name: _name.text.trim(),
-                  slug: _slug.text.trim().isEmpty ? null : _slug.text.trim(),
-                ),
-              ))
-          .data!;
+        createWorkspaceRequest: CreateWorkspaceRequest(name: _name.text.trim(), slug: _slug.text.trim().isEmpty ? null : _slug.text.trim()),
+      )).data!;
       ref.invalidate(meProvider);
       await ref.read(meProvider.future);
       await _open(ws);
@@ -93,82 +89,101 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
       appBar: DetailBar(backLabel: l.mobileMore),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(meProvider),
-        child: ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-          PageHeader(title: l.accountWorkspacesTitle, long: true),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-            child: Text(l.accountWorkspacesLede, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink2)),
-          ),
-          const SizedBox(height: 8),
-          if (list.isEmpty)
-            EmptyState(title: l.accountNoWorkspacesTitle, text: l.accountNoWorkspaces)
-          else
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 32),
+          children: [
+            PageHeader(title: l.accountWorkspacesTitle, long: true),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+              child: Text(l.accountWorkspacesLede, style: TextStyle(fontSize: 14.5, height: 1.4, color: c.ink2)),
+            ),
+            const SizedBox(height: 8),
+            if (list.isEmpty)
+              EmptyState(title: l.accountNoWorkspacesTitle, text: l.accountNoWorkspaces)
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ListGroup(
+                  children: [
+                    for (final w in list)
+                      ListRow(
+                        title: w.name,
+                        subtitle: [
+                          '/w/${w.slug}',
+                          roleLabel(l, w.role),
+                          l.accountMemberCount(w.members),
+                          l.accountSlotCount(w.slots),
+                          if (w.suspended == true) l.accountSuspended,
+                        ].join(' · '),
+                        trailing: w.slug == current ? ToneBadge(l.maccountCurrent, Tone.ok) : null,
+                        onTap: () => _open(w),
+                      ),
+                  ],
+                ),
+              ),
+            SectionHeader(list.isEmpty ? l.accountCreateFirst : l.accountCreateWorkspace),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListGroup(children: [
-                for (final w in list)
-                  ListRow(
-                    title: w.name,
-                    subtitle: [
-                      '/w/${w.slug}',
-                      roleLabel(l, w.role),
-                      l.accountMemberCount(w.members),
-                      l.accountSlotCount(w.slots),
-                      if (w.suspended == true) l.accountSuspended,
-                    ].join(' · '),
-                    trailing: w.slug == current ? ToneBadge(l.maccountCurrent, Tone.ok) : null,
-                    onTap: () => _open(w),
-                  ),
-              ]),
+              child: HCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l.accountCreateWorkspaceSub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _name,
+                      maxLength: 80,
+                      decoration: InputDecoration(labelText: l.accountWorkspaceName, counterText: ''),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _slug,
+                      maxLength: 40,
+                      autocorrect: false,
+                      style: const TextStyle(fontFamily: AgntsFonts.mono),
+                      decoration: InputDecoration(
+                        labelText: l.accountWorkspaceSlug,
+                        helperText: l.accountWorkspaceSlugHelp,
+                        counterText: '',
+                      ),
+                    ),
+                    if (_error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: HelpBox(_error!, tone: Tone.bad),
+                      ),
+                    const SizedBox(height: 14),
+                    FilledButton(onPressed: _busy || _name.text.trim().isEmpty ? null : _create, child: Text(l.accountCreateWs)),
+                  ],
+                ),
+              ),
             ),
-          SectionHeader(list.isEmpty ? l.accountCreateFirst : l.accountCreateWorkspace),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: HCard(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Text(l.accountCreateWorkspaceSub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _name,
-                  maxLength: 80,
-                  decoration: InputDecoration(labelText: l.accountWorkspaceName, counterText: ''),
-                  onChanged: (_) => setState(() {}),
+            SectionHeader(l.maccountHaveInvite),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: HCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      controller: _invite,
+                      autocorrect: false,
+                      keyboardType: TextInputType.url,
+                      decoration: InputDecoration(labelText: l.maccountInviteHint),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: token == null ? null : () => context.push('/invite/${Uri.encodeComponent(token)}'),
+                      child: Text(l.maccountInviteOpen),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _slug,
-                  maxLength: 40,
-                  autocorrect: false,
-                  style: const TextStyle(fontFamily: AgntsFonts.mono),
-                  decoration: InputDecoration(labelText: l.accountWorkspaceSlug, helperText: l.accountWorkspaceSlugHelp, counterText: ''),
-                ),
-                if (_error != null) Padding(padding: const EdgeInsets.only(top: 12), child: HelpBox(_error!, tone: Tone.bad)),
-                const SizedBox(height: 14),
-                FilledButton(onPressed: _busy || _name.text.trim().isEmpty ? null : _create, child: Text(l.accountCreateWs)),
-              ]),
+              ),
             ),
-          ),
-          SectionHeader(l.maccountHaveInvite),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: HCard(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                TextField(
-                  controller: _invite,
-                  autocorrect: false,
-                  keyboardType: TextInputType.url,
-                  decoration: InputDecoration(labelText: l.maccountInviteHint),
-                  onChanged: (_) => setState(() {}),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: token == null ? null : () => context.push('/invite/${Uri.encodeComponent(token)}'),
-                  child: Text(l.maccountInviteOpen),
-                ),
-              ]),
-            ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }

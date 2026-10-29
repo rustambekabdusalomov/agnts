@@ -34,9 +34,11 @@ const _icons = <String, String>{
   'plug': '<path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z"/><path d="M12 16v5"/>',
   'tasks': '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   'plus': '<path d="M12 5v14M5 12h14"/>',
-  'network': '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"/>',
+  'network':
+      '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"/>',
   'code': '<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>',
-  'assistant': '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/><path d="M12 7.2l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z"/>',
+  'assistant':
+      '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/><path d="M12 7.2l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z"/>',
   'close': '<path d="M6 6l12 12M18 6L6 18"/>',
   'check': '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   'search': '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
@@ -52,13 +54,18 @@ const _icons = <String, String>{
   'feedback': '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
   // Meetings.
   'video': '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>',
-  'videoOff': '<path d="M3 3l18 18"/><path d="M10 6h4a2 2 0 0 1 2 2v4M16 16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2"/><path d="M16 10l5-3v10l-3-1.8"/>',
+  'videoOff':
+      '<path d="M3 3l18 18"/><path d="M10 6h4a2 2 0 0 1 2 2v4M16 16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2"/><path d="M16 10l5-3v10l-3-1.8"/>',
   'mic': '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
-  'micOff': '<path d="M3 3l18 18"/><path d="M9 9V6a3 3 0 0 1 5.8-1M15 11.5V11M9.5 13.5A3 3 0 0 0 15 12"/><path d="M5 11a7 7 0 0 0 11.6 5.3M19 11a7 7 0 0 1-.7 3M12 18v3"/>',
-  'hand': '<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4.5a1.5 1.5 0 0 1 3 0V11M14 10.5V6a1.5 1.5 0 0 1 3 0v7.5c0 4-2.7 7.5-6.5 7.5-2.4 0-4-1-5.3-3L3 14.5a1.6 1.6 0 0 1 2.5-2L8 15"/>',
-  'hangup': '<path d="M3.5 14.5c4.7-4.7 12.3-4.7 17 0l-1.8 2.3a1 1 0 0 1-1.3.2l-2.6-1.6a1 1 0 0 1-.5-.9v-1.8a10 10 0 0 0-4.6 0v1.8a1 1 0 0 1-.5.9L6.6 17a1 1 0 0 1-1.3-.2z"/>',
+  'micOff':
+      '<path d="M3 3l18 18"/><path d="M9 9V6a3 3 0 0 1 5.8-1M15 11.5V11M9.5 13.5A3 3 0 0 0 15 12"/><path d="M5 11a7 7 0 0 0 11.6 5.3M19 11a7 7 0 0 1-.7 3M12 18v3"/>',
+  'hand':
+      '<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4.5a1.5 1.5 0 0 1 3 0V11M14 10.5V6a1.5 1.5 0 0 1 3 0v7.5c0 4-2.7 7.5-6.5 7.5-2.4 0-4-1-5.3-3L3 14.5a1.6 1.6 0 0 1 2.5-2L8 15"/>',
+  'hangup':
+      '<path d="M3.5 14.5c4.7-4.7 12.3-4.7 17 0l-1.8 2.3a1 1 0 0 1-1.3.2l-2.6-1.6a1 1 0 0 1-.5-.9v-1.8a10 10 0 0 0-4.6 0v1.8a1 1 0 0 1-.5.9L6.6 17a1 1 0 0 1-1.3-.2z"/>',
   'chat': '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/>',
-  'people': '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
+  'people':
+      '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
   'flip': '<path d="M4 7h11a4 4 0 0 1 4 4v1M20 17H9a4 4 0 0 1-4-4v-1"/><path d="M17 9l2 2.5L21 9M7 15l-2-2.5L3 15"/>',
   'speaker': '<path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>',
   'record': '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',
@@ -564,7 +571,7 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
     final col = widget.color ?? Agnts.of(context).primary;
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) => Opacity(
+      builder: (_, _) => Opacity(
         opacity: 1 - 0.4 * _c.value,
         child: Transform.scale(
           scale: 1 - 0.45 * _c.value,
@@ -803,7 +810,7 @@ class KpiCard extends StatelessWidget {
                         color: valueColor ?? c.ink,
                       ),
               ),
-              if (delta != null) delta!,
+              ?delta,
             ],
           ),
           if (bar != null)
@@ -1059,29 +1066,33 @@ class _FoldState extends State<Fold> {
     // While open, the title stays at the top of the page as the content
     // scrolls past (see StickyHeader); a line sets it apart then.
     Widget header(bool stuck) => Material(
-          color: c.surface,
-          child: InkWell(
-            onTap: _toggle,
-            child: Container(
-              decoration: stuck ? BoxDecoration(border: Border(bottom: BorderSide(color: c.line))) : null,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                  ),
-                  if (widget.hint != null) Text(widget.hint!, style: TextStyle(color: c.ink2)),
-                  const SizedBox(width: 8),
-                  AnimatedRotation(
-                    turns: _open ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 150),
-                    child: HIcon('down', size: 18, color: c.ink3, stroke: 2.2),
-                  ),
-                ],
+      color: c.surface,
+      child: InkWell(
+        onTap: _toggle,
+        child: Container(
+          decoration: stuck
+              ? BoxDecoration(
+                  border: Border(bottom: BorderSide(color: c.line)),
+                )
+              : null,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700)),
               ),
-            ),
+              if (widget.hint != null) Text(widget.hint!, style: TextStyle(color: c.ink2)),
+              const SizedBox(width: 8),
+              AnimatedRotation(
+                turns: _open ? 0.5 : 0,
+                duration: const Duration(milliseconds: 150),
+                child: HIcon('down', size: 18, color: c.ink3, stroke: 2.2),
+              ),
+            ],
           ),
-        );
+        ),
+      ),
+    );
     return Container(
       decoration: BoxDecoration(
         color: c.surface,
@@ -1093,7 +1104,10 @@ class _FoldState extends State<Fold> {
         duration: const Duration(milliseconds: 180),
         alignment: Alignment.topCenter,
         child: _open
-            ? StickyHeader(header: header, content: Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: widget.child))
+            ? StickyHeader(
+                header: header,
+                content: Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: widget.child),
+              )
             : header(false),
       ),
     );
