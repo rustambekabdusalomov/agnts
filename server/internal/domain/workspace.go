@@ -218,11 +218,6 @@ type ClaudeAccount struct {
 	// UserID is whose free credits a run on credits spends first (the
 	// ticket's member); 0 for none.
 	UserID int64
-	// PreferFallback is set when the person's own account is at its limit
-	// and they have room on the fallback provider: the run starts there,
-	// at no cost to them, and moves to agnts's key on credits when that
-	// room is spent.
-	PreferFallback bool
 }
 
 type claudeKey struct{}

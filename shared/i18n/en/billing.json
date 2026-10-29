@@ -37,9 +37,6 @@
     "freeCreditsNone": "None yet. An Admin can give you free credits for runs on agnts's Muse key.",
     "limitsTitle": "Your limits this month",
     "limitsSub": "Set by an Admin for runs on agnts's Muse key. They reset on the 1st of each month.",
-    "monthLimit": "{used} of {limit} credits used",
-    "fallbackLimit": "{name}: {used} of {limit} credits used",
-    "fallbackNoLimit": "{name}: {used} credits used, no limit",
-    "fallbackHint": "{name} is the backup provider, free for you: your runs move there when your own Meta account (or agnts's) is at its limit. When this allowance is used up, they continue on credits."
+    "monthLimit": "{used} of {limit} credits used"
   }
 }

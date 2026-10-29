@@ -43,14 +43,6 @@ type Config struct {
 	// GlobalCapUSD caps every workspace's spend on agnts's key together,
 	// per calendar month (0: no cap).
 	GlobalCapUSD float64
-	// Fallback names the fallback provider runs may move to (muse.Failover;
-	// "" without one). Its spend is limited apart: FallbackUserLimit is the
-	// credits a person may spend there a calendar month unless an Admin set
-	// their own limit (0: no limit), and FallbackCapUSD what all runs
-	// together may ever spend there, such as the host's credit (0: no cap).
-	Fallback          string
-	FallbackUserLimit int64
-	FallbackCapUSD    float64
 }
 
 // Spend reads a run's model spend so far (billing's store has it).
@@ -65,7 +57,6 @@ type Service struct {
 	ledger *pgledger.Ledger
 	spend  Spend
 	now    func() time.Time
-	modes  modeCache
 }
 
 // New returns the service. Call Migrate before use.
@@ -162,9 +153,7 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 			return nil, err
 		}
 		if limit > 0 {
-			// A run starting on the fallback costs the person nothing, so
-			// it may start; the cap still stops it on agnts's key.
-			if left <= 0 && !acct.PreferFallback {
+			if left <= 0 {
 				return nil, fmt.Errorf("%w: this person reached their monthly limit of %d credits (set by an Admin)", muse.ErrBudget, limit)
 			}
 			b.Caps = append(b.Caps, capAcct)
@@ -202,7 +191,7 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 			funds += money.Max(bal.Available, 0)
 		}
 	}
-	if funds <= 0 && !acct.PreferFallback {
+	if funds <= 0 {
 		return nil, fmt.Errorf("%w: no credits left (free credits and the workspace's)", muse.ErrBudget)
 	}
 	if b.Limit == 0 || funds < b.Limit {
@@ -210,9 +199,6 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 	}
 	if room >= 0 && room < b.Limit {
 		b.Limit = room
-	}
-	if err := s.fallbackBudget(sys, b, acct.UserID); err != nil {
-		return nil, err
 	}
 	return b, nil
 }
@@ -234,21 +220,13 @@ func (s *Service) syncUserCap(ctx context.Context, user int64) (budget.AccountID
 	if err != nil {
 		return "", 0, 0, err
 	}
-	room, err := s.fillCap(ctx, acct, money.USD(limit)*CreditUSD-used, fmt.Sprintf("ucap:%s:%d:%d", acct, limit, int64(used)))
-	return acct, room, limit, err
-}
-
-// fillCap makes a cap account hold target (what its limit leaves after
-// the spend so far) and returns its available room. The deposit's key is
-// tag and the balance it corrects, so a sync happens once per change.
-func (s *Service) fillCap(ctx context.Context, acct budget.AccountID, target money.USD, tag string) (money.USD, error) {
 	cur, err := s.ledger.Balance(ctx, acct)
 	if err != nil {
-		return 0, err
+		return "", 0, 0, err
 	}
-	target = money.Max(target, 0)
+	target := money.Max(money.USD(limit)*CreditUSD-used, 0)
 	if delta := target - cur.Total; delta != 0 {
-		key := fmt.Sprintf("%s:%d", tag, int64(cur.Total))
+		key := fmt.Sprintf("ucap:%s:%d:%d:%d", acct, limit, int64(used), int64(cur.Total))
 		if _, err := s.ledger.Deposit(ctx, acct, delta, key); errors.Is(err, budget.ErrInsufficient) {
 			// Running holds reserve more than the lowered limit leaves:
 			// take what is free, so no new run starts.
@@ -256,22 +234,21 @@ func (s *Service) fillCap(ctx context.Context, acct budget.AccountID, target mon
 				_, _ = s.ledger.Deposit(ctx, acct, -b.Available, key+":partial")
 			}
 		} else if err != nil {
-			return 0, err
+			return "", 0, 0, err
 		}
 	}
 	b, err := s.ledger.Balance(ctx, acct)
-	return b.Available, err
+	return acct, b.Available, limit, err
 }
 
 // spentSince is what runs on agnts's key charged for a person since t,
-// whatever paid (their free credits or a workspace's wallet); what the
-// platform paid for the fallback is not theirs and is left out. Runs from
+// whatever paid (their free credits or a workspace's wallet). Runs from
 // before the person was in the hold key count by their free credits.
 func (s *Service) spentSince(ctx context.Context, user int64, t time.Time) (money.USD, error) {
 	var micro int64
 	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(l.charged), 0) FROM muse_hold_legs l JOIN muse_holds h ON h.id = l.hold_id
-		WHERE NOT l.is_cap AND l.account_id <> $4 AND h.created_at >= $1 AND (h.key LIKE $2 OR l.account_id = $3)`,
-		t, "ws:%:run:%:"+userKeyPart(user)+"%", string(freeAccount(user)), string(platformFallback)).Scan(&micro)
+		WHERE NOT l.is_cap AND h.created_at >= $1 AND (h.key LIKE $2 OR l.account_id = $3)`,
+		t, "ws:%:run:%:"+userKeyPart(user)+"%", string(freeAccount(user))).Scan(&micro)
 	return money.USD(micro), err
 }
 
@@ -288,8 +265,6 @@ type Usage struct {
 	TotalUsed  int64
 	SetBy      *int64
 	SetAt      *time.Time
-	// Fallback is their spend on the fallback provider (nil without one).
-	Fallback *FallbackUsage
 }
 
 // Usage returns a person's spend and monthly limit.
@@ -309,13 +284,6 @@ func (s *Service) Usage(ctx context.Context, user int64) (Usage, error) {
 		return u, err
 	}
 	u.MonthUsed, u.TotalUsed = toCredits(month), toCredits(total)
-	if s.cfg.Fallback != "" {
-		f, err := s.fallbackUsage(sys, user)
-		if err != nil {
-			return u, err
-		}
-		u.Fallback = &f
-	}
 	return u, nil
 }
 
@@ -380,13 +348,13 @@ func (s *Service) syncWallet(ctx context.Context, ws int64) error {
 	return nil
 }
 
-// FreeChargedUSD is what a run's free credits and the platform's fallback
-// account paid (billing charges the wallet only the rest).
+// FreeChargedUSD is what free credits paid of a run (billing charges the
+// wallet only the rest).
 func (s *Service) FreeChargedUSD(ctx context.Context, runID int64) (float64, error) {
 	var micro int64
 	err := s.db.QueryRow(domain.System(ctx), `SELECT COALESCE(sum(l.charged), 0) FROM muse_hold_legs l JOIN muse_holds h ON h.id = l.hold_id
-		WHERE (l.account_id LIKE 'user:%:free' OR l.account_id = $2) AND split_part(h.key, ':', 3) = 'run' AND split_part(h.key, ':', 4) = $1`,
-		strconv.FormatInt(runID, 10), string(platformFallback)).Scan(&micro)
+		WHERE l.account_id LIKE 'user:%:free' AND split_part(h.key, ':', 3) = 'run' AND split_part(h.key, ':', 4) = $1`,
+		strconv.FormatInt(runID, 10)).Scan(&micro)
 	return money.USD(micro).Float(), err
 }
 

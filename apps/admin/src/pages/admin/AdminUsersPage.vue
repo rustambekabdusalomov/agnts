@@ -74,31 +74,13 @@ const usedLevel = (u: PlatformUser) => (usedPct(u) >= 100 ? 'bad' : usedPct(u) >
 const LIMIT_PRESETS = [0, 1000, 5000, 20000]
 const limiting = ref<PlatformUser | null>(null)
 const monthLimit = ref(0)
-// The limit on the fallback provider (Baseten), counted apart; it follows
-// the server's default until an Admin sets one.
-const fbDefault = ref(true)
-const fbLimit = ref(0)
 function editLimit(u: PlatformUser) {
   limiting.value = u
   monthLimit.value = u.creditUsage?.monthLimit ?? 0
-  fbDefault.value = u.creditUsage?.fallback?.isDefault ?? true
-  fbLimit.value = u.creditUsage?.fallback?.monthLimit ?? 0
 }
-const inRange = (n: number) => Number.isInteger(n) && n >= 0 && n <= 10_000_000
-const limitOk = computed(() => inRange(monthLimit.value) && (fbDefault.value || inRange(fbLimit.value)))
-const fbPct = (u: PlatformUser) => {
-  const f = u.creditUsage?.fallback
-  return f?.monthLimit ? Math.min(100, Math.round((f.monthUsed / f.monthLimit) * 100)) : 0
-}
-const fbLevel = (u: PlatformUser) => (fbPct(u) >= 100 ? 'bad' : fbPct(u) >= 80 ? 'warn' : '')
+const limitOk = computed(() => Number.isInteger(monthLimit.value) && monthLimit.value >= 0 && monthLimit.value <= 10_000_000)
 const setLimit = useMutation({
-  mutationFn: async (u: PlatformUser) => {
-    const id = u.user.id
-    const cu = await unwrap(api.PUT('/platform/users/{id}/credit-limit', { params: { path: { id } }, body: { limit: monthLimit.value } }))
-    const f = u.creditUsage?.fallback
-    if (!f || (fbDefault.value === f.isDefault && (fbDefault.value || fbLimit.value === f.monthLimit))) return cu
-    return unwrap(api.PUT('/platform/users/{id}/fallback-limit', { params: { path: { id } }, body: { limit: fbDefault.value ? null : fbLimit.value } }))
-  },
+  mutationFn: (u: PlatformUser) => unwrap(api.PUT('/platform/users/{id}/credit-limit', { params: { path: { id: u.user.id } }, body: { limit: monthLimit.value } })),
   onSuccess: (cu, u) => {
     ui.notify(cu.monthLimit ? t('platform.limitSet', { name: nameOf(u.user), n: cu.monthLimit, amount: usd(cu.monthLimit) }) : t('platform.limitRemoved', { name: nameOf(u.user) }))
     limiting.value = null
@@ -171,10 +153,6 @@ const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => {
                 <small class="muted" style="display: block">
                   <template v-if="!u.creditUsage.monthLimit">{{ t('platform.noLimit') }} · </template>{{ t('platform.creditUsageTotal', { n: u.creditUsage.totalUsed }) }}
                 </small>
-                <small v-if="u.creditUsage.fallback" class="muted" style="display: block; margin-top: 4px">
-                  {{ t('platform.fbUsage', { name: u.creditUsage.fallback.provider, used: u.creditUsage.fallback.monthUsed }) }}<template v-if="u.creditUsage.fallback.monthLimit"> / {{ u.creditUsage.fallback.monthLimit }}</template><template v-else> · {{ t('platform.noLimit') }}</template>
-                </small>
-                <span v-if="u.creditUsage.fallback?.monthLimit" class="bar me-bar" :class="fbLevel(u)" aria-hidden="true"><span :style="{ width: fbPct(u) + '%' }" /></span>
               </template>
               <span v-else class="muted">—</span>
             </td>
@@ -240,21 +218,6 @@ const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => {
         </button>
       </div>
       <p class="hint">{{ t('platform.limitHelp') }}</p>
-      <template v-if="limiting?.creditUsage?.fallback">
-        <hr style="width: 100%; border: 0; border-top: 1px solid var(--line); margin: 4px 0">
-        <p class="hint">
-          {{ t('platform.fbUsed', { name: limiting.creditUsage.fallback.provider, used: limiting.creditUsage.fallback.monthUsed, amount: usd(limiting.creditUsage.fallback.monthUsed) }) }}
-        </p>
-        <label class="field" style="flex-direction: row; align-items: center; gap: 8px">
-          <input v-model="fbDefault" type="checkbox">
-          <span>{{ t('platform.fbUseDefault') }}</span>
-        </label>
-        <label v-if="!fbDefault" class="field">
-          <span class="flbl">{{ t('platform.fbField', { name: limiting.creditUsage.fallback.provider }) }}</span>
-          <input v-model.number="fbLimit" class="cfg-in" type="number" min="0" max="10000000" step="100">
-        </label>
-        <p class="hint">{{ t('platform.fbHelp', { name: limiting.creditUsage.fallback.provider }) }}</p>
-      </template>
     </div>
   </ConfirmDialog>
 </template>

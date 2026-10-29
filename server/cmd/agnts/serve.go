@@ -2,7 +2,6 @@ package main
 
 import (
 	muse "github.com/rustambekabdusalomov/agnts-muse"
-	"github.com/rustambekabdusalomov/agnts-muse/credential"
 	"github.com/rustambekabdusalomov/agnts-muse/model"
 
 	gitclient "github.com/go-git/go-git/v5/plumbing/transport/client"
@@ -202,7 +201,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Claude:       a.claude,
 		Queue:        a.orch,
 		Billing:      a.billing,
-		Muse:         museAPI{a.museCredits, a.museDevice, a.museFailover},
+		Muse:         museAPI{a.museCredits, a.museDevice},
 		EventLog:     a.store,
 		Cloud:        cfg.Cloud,
 		Google:       googleSignIn(cfg, acc),
@@ -379,7 +378,6 @@ type agent struct {
 	claude       *claude.Service
 	billing      *billing.Service
 	museCredits  *musecredits.Service
-	museFailover *muse.Failover // nil without a fallback provider
 	museDevice   *musecredits.Logins
 	budget       *orchestrator.MemoryBudget
 	network      *network.Service
@@ -434,17 +432,12 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.usage = usage.New(postgres.NewUsage(pool), a.store, log.With("component", "usage"))
 	conns := postgres.NewClaudeConnections(pool, box)
 	credits := postgres.NewCredits(pool)
-	mcfg := musecredits.Config{RunCap: cfg.RunCreditCap, GlobalCapUSD: cfg.MuseGlobalCapUSD}
-	if cfg.MuseFallbackKey != "" {
-		mcfg.Fallback, mcfg.FallbackUserLimit, mcfg.FallbackCapUSD = providerName(cfg.MuseFallbackURL), cfg.MuseFallbackUserLimit, cfg.MuseFallbackCapUSD
-	}
-	a.museCredits = musecredits.New(mcfg, pool, credits)
+	a.museCredits = musecredits.New(musecredits.Config{RunCap: cfg.RunCreditCap, GlobalCapUSD: cfg.MuseGlobalCapUSD}, pool, credits)
 	if err := a.museCredits.Migrate(context.Background()); err != nil {
 		return nil, fmt.Errorf("muse ledger: %w", err)
 	}
 	a.claude = claude.New(claude.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud, MuseKey: cfg.MusePlatformKey,
-		Free:     func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 },
-		Fallback: a.museCredits.FallbackAvailable},
+		Free: func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 }},
 		conns, a.usage, a.settings, a.users)
 	a.usage.OnPaused(a.claude.Paused)
 	a.usage.SetResolver(func(ctx context.Context) (domain.ClaudeAccount, bool) {
@@ -516,20 +509,10 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	// Runs are in their own container behind the egress proxy, and Muse's
 	// own shell sandbox cannot start there (bwrap needs user namespaces the
 	// container does not allow): with it on, the first try of every shell
-	// command fails. A turn that ends without any answer (Muse Spark Open
-	// on Baseten drops a step now and then) is continued twice.
-	museEng := muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
-		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}, ServeArgs: []string{"--disable-sandbox"}, Continues: 2})
-	run.SetMuse(museEng, a.museCredits)
-	if cfg.MuseFallbackKey != "" {
-		cred, err := credential.Hosted(cfg.MuseFallbackURL, cfg.MuseFallbackKey, "")
-		if err != nil {
-			return nil, fmt.Errorf("AGNTS_MUSE_FALLBACK_KEY / _URL: %w", err)
-		}
-		a.museFailover = &muse.Failover{Engine: museEng, Mode: a.museCredits.Mode,
-			Fallback: muse.Provider{Name: providerName(cfg.MuseFallbackURL), Credential: cred, Model: model.ID(cfg.MuseFallbackModel)}}
-		run.SetMuseFailover(a.museFailover)
-	}
+	// command fails. A turn that ends without any answer (the model's last
+	// step was reasoning only) is continued twice.
+	run.SetMuse(muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
+		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}, ServeArgs: []string{"--disable-sandbox"}, Continues: 2}), a.museCredits)
 	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),
@@ -858,17 +841,11 @@ func (f workspaceFiles) RemoveWorkspace(ctx context.Context, ws int64) error {
 	return errors.Join(errs...)
 }
 
-// egressAllow is every workspace's allowed hosts, and the Muse fallback's
-// host when there is one: run containers share the egress proxy.
+// egressAllow is every workspace's allowed hosts: run containers share
+// the egress proxy.
 func (a *agent) egressAllow(ctx context.Context) ([]string, error) {
 	seen := map[string]bool{}
 	var out []string
-	if f := a.museFailover; f != nil {
-		if u, err := url.Parse(f.Fallback.Credential.BaseURL); err == nil && u.Hostname() != "" {
-			seen[u.Hostname()] = true
-			out = append(out, u.Hostname())
-		}
-	}
 	var firstErr error
 	a.forEachWorkspace(domain.System(ctx), func(ctx context.Context) {
 		s, err := a.settings.Get(ctx)
@@ -1333,38 +1310,7 @@ func (h gitHooks) CIRunFinished(ctx context.Context, run domain.CIRun) error {
 // museAPI serves the Muse operations: Meta sign-in and free credits.
 type museAPI struct {
 	*musecredits.Service
-	logins   *musecredits.Logins
-	failover *muse.Failover // nil without a fallback provider
-}
-
-func (m museAPI) Provider(ctx context.Context) (musecredits.ProviderStatus, error) {
-	pm, err := m.ProviderMode(ctx)
-	if err != nil {
-		return musecredits.ProviderStatus{}, err
-	}
-	st := musecredits.ProviderStatus{ProviderMode: pm}
-	if f := m.failover; f != nil {
-		st.Fallback, st.FallbackModel = f.Fallback.Name, string(f.Fallback.Model)
-		st.OutUntil, st.OutReason = f.OutUntil()
-	}
-	return st, nil
-}
-
-func (m museAPI) SetProvider(ctx context.Context, mode string, by int64) (musecredits.ProviderStatus, error) {
-	md, err := muse.ParseMode(mode)
-	if err != nil {
-		return musecredits.ProviderStatus{}, err
-	}
-	if md != muse.ModePrimary && m.failover == nil {
-		return musecredits.ProviderStatus{}, errors.New("this server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY)")
-	}
-	if _, err := m.SetProviderMode(ctx, md, by); err != nil {
-		return musecredits.ProviderStatus{}, err
-	}
-	if m.failover != nil {
-		m.failover.Reset()
-	}
-	return m.Provider(ctx)
+	logins *musecredits.Logins
 }
 
 func (m museAPI) StartLogin(ctx context.Context, ws, user int64) (musecredits.Login, error) {
@@ -1439,17 +1385,4 @@ func (t meetingTickets) CreateTask(ctx context.Context, in orchestrator.TaskInpu
 
 func (t meetingTickets) TicketByKey(ctx context.Context, key string) (domain.Ticket, error) {
 	return t.store.TicketByKey(ctx, key)
-}
-
-// providerName names a host for people and budget keys by its domain:
-// "https://inference.baseten.co/v1" is "baseten".
-func providerName(baseURL string) string {
-	host := strings.TrimPrefix(baseURL, "https://")
-	host, _, _ = strings.Cut(host, "/")
-	host, _, _ = strings.Cut(host, ":")
-	labels := strings.Split(host, ".")
-	if len(labels) >= 2 {
-		return labels[len(labels)-2]
-	}
-	return host
 }

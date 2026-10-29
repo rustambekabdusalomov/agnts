@@ -76,7 +76,7 @@ Class | Method | HTTP request | Description
 [*AccountApi*](doc/AccountApi.md) | [**deleteMyClaude**](doc/AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
 [*AccountApi*](doc/AccountApi.md) | [**disableTotp**](doc/AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
 [*AccountApi*](doc/AccountApi.md) | [**getMyClaude**](doc/AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
-[*AccountApi*](doc/AccountApi.md) | [**getMyCreditUsage**](doc/AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+[*AccountApi*](doc/AccountApi.md) | [**getMyCreditUsage**](doc/AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the monthly limit an Admin set
 [*AccountApi*](doc/AccountApi.md) | [**getMyFreeCredits**](doc/AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
 [*AccountApi*](doc/AccountApi.md) | [**getMyMuseLogin**](doc/AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
 [*AccountApi*](doc/AccountApi.md) | [**resendVerification**](doc/AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
@@ -254,7 +254,6 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**createPlatformAdmin**](doc/PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**deletePlatformAdmin**](doc/PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**downloadPlatformRun**](doc/PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
-[*PlatformApi*](doc/PlatformApi.md) | [**getMuseProvider**](doc/PlatformApi.md#getmuseprovider) | **GET** /platform/muse-provider | Where runs on agnts&#39;s Muse credits go, the fallback provider, and whether agnts&#39;s Meta account is out (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformOverview**](doc/PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRun**](doc/PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRunPrompt**](doc/PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
@@ -267,9 +266,7 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformUsers**](doc/PlatformApi.md#listplatformusers) | **GET** /platform/users | Every user, with their workspaces and last sign-in (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformWorkspaces**](doc/PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**setCreditLimit**](doc/PlatformApi.md#setcreditlimit) | **PUT** /platform/users/{id}/credit-limit | Set the most credits a person may spend on agnts&#39;s Muse key per calendar month, free and bought together (Admin); 0 is no limit
-[*PlatformApi*](doc/PlatformApi.md) | [**setFallbackLimit**](doc/PlatformApi.md#setfallbacklimit) | **PUT** /platform/users/{id}/fallback-limit | Set the most credits a person may spend on the fallback Muse provider (Baseten) per calendar month (Admin); null is the server&#39;s default, 0 is no limit
 [*PlatformApi*](doc/PlatformApi.md) | [**setFreeCredits**](doc/PlatformApi.md#setfreecredits) | **PUT** /platform/users/{id}/free-credits | Set how many free credits a person may spend on agnts&#39;s Muse key (Admin); 0 gives none
-[*PlatformApi*](doc/PlatformApi.md) | [**setMuseProvider**](doc/PlatformApi.md#setmuseprovider) | **PUT** /platform/muse-provider | Choose where runs on agnts&#39;s Muse credits go (Admin); agnts&#39;s Meta account is tried again from the next run
 [*PlatformApi*](doc/PlatformApi.md) | [**setRunHistorySettings**](doc/PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformFeedback**](doc/PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
@@ -576,7 +573,6 @@ Class | Method | HTTP request | Description
  - [Event](doc/Event.md)
  - [EventPage](doc/EventPage.md)
  - [EventSummary](doc/EventSummary.md)
- - [FallbackUsage](doc/FallbackUsage.md)
  - [Feedback](doc/Feedback.md)
  - [FileChange](doc/FileChange.md)
  - [Finding](doc/Finding.md)
@@ -663,9 +659,6 @@ Class | Method | HTTP request | Description
  - [ModelCatalogModelsInner](doc/ModelCatalogModelsInner.md)
  - [ModelOverrides](doc/ModelOverrides.md)
  - [MuseLogin](doc/MuseLogin.md)
- - [MuseProvider](doc/MuseProvider.md)
- - [MuseProviderFallback](doc/MuseProviderFallback.md)
- - [MuseProviderMode](doc/MuseProviderMode.md)
  - [NetworkActivity](doc/NetworkActivity.md)
  - [NetworkActivityDialsInner](doc/NetworkActivityDialsInner.md)
  - [NetworkRoute](doc/NetworkRoute.md)
@@ -795,11 +788,9 @@ Class | Method | HTTP request | Description
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
  - [SendMeetingMessageRequest](doc/SendMeetingMessageRequest.md)
  - [SetCreditLimitRequest](doc/SetCreditLimitRequest.md)
- - [SetFallbackLimitRequest](doc/SetFallbackLimitRequest.md)
  - [SetFreeCreditsRequest](doc/SetFreeCreditsRequest.md)
  - [SetMeetingCohostsRequest](doc/SetMeetingCohostsRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
- - [SetMuseProviderRequest](doc/SetMuseProviderRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [SetSlotsRequest](doc/SetSlotsRequest.md)
  - [SetTicketBenchmarkRequest](doc/SetTicketBenchmarkRequest.md)

@@ -19,22 +19,19 @@ const show = async (u: unknown) => {
 }
 
 describe('CreditLimitsCard', () => {
-  it('shows the Baseten allowance with its bar, amber from 80%', async () => {
-    const w = await show({ monthLimit: 0, monthUsed: 120, totalUsed: 300, fallback: { provider: 'baseten', monthLimit: 500, monthUsed: 420, isDefault: true } })
-    expect(w.text()).toContain('baseten: 420 of 500 credits used')
+  it('shows the monthly limit with its bar, amber from 80%', async () => {
+    const w = await show({ monthLimit: 500, monthUsed: 420, totalUsed: 900 })
+    expect(w.text()).toContain('420 of 500 credits used')
     expect(w.text()).toContain('$4.20 of $5.00')
-    expect(w.findAll('.bar')).toHaveLength(1)
     expect(w.find('.bar').classes()).toContain('warn')
   })
 
-  it('shows the monthly limit beside an unlimited Baseten allowance', async () => {
-    const w = await show({ monthLimit: 1000, monthUsed: 1000, totalUsed: 1000, fallback: { provider: 'baseten', monthLimit: 0, monthUsed: 15, isDefault: false } })
-    expect(w.text()).toContain('1000 of 1000 credits used')
-    expect(w.text()).toContain('baseten: 15 credits used, no limit')
+  it('is red at the limit', async () => {
+    const w = await show({ monthLimit: 1000, monthUsed: 1000, totalUsed: 1000 })
     expect(w.find('.bar').classes()).toContain('bad')
   })
 
-  it('stays hidden with no limit and no fallback', async () => {
+  it('stays hidden without a limit', async () => {
     const w = await show({ monthLimit: 0, monthUsed: 5, totalUsed: 5 })
     expect(w.find('section').exists()).toBe(false)
   })

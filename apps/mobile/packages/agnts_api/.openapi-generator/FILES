@@ -164,7 +164,6 @@ doc/Error.md
 doc/Event.md
 doc/EventPage.md
 doc/EventSummary.md
-doc/FallbackUsage.md
 doc/Feedback.md
 doc/FeedbackApi.md
 doc/FileChange.md
@@ -258,9 +257,6 @@ doc/ModelCatalog.md
 doc/ModelCatalogModelsInner.md
 doc/ModelOverrides.md
 doc/MuseLogin.md
-doc/MuseProvider.md
-doc/MuseProviderFallback.md
-doc/MuseProviderMode.md
 doc/NetworkActivity.md
 doc/NetworkActivityDialsInner.md
 doc/NetworkApi.md
@@ -396,11 +392,9 @@ doc/SecretFindingsFindingsInner.md
 doc/SendFeedbackRequest.md
 doc/SendMeetingMessageRequest.md
 doc/SetCreditLimitRequest.md
-doc/SetFallbackLimitRequest.md
 doc/SetFreeCreditsRequest.md
 doc/SetMeetingCohostsRequest.md
 doc/SetMemberRoleRequest.md
-doc/SetMuseProviderRequest.md
 doc/SetPlaneWebhookSecretRequest.md
 doc/SetSlotsRequest.md
 doc/SetTicketBenchmarkRequest.md
@@ -680,7 +674,6 @@ lib/src/model/error.dart
 lib/src/model/event.dart
 lib/src/model/event_page.dart
 lib/src/model/event_summary.dart
-lib/src/model/fallback_usage.dart
 lib/src/model/feedback.dart
 lib/src/model/file_change.dart
 lib/src/model/finding.dart
@@ -767,9 +760,6 @@ lib/src/model/model_catalog.dart
 lib/src/model/model_catalog_models_inner.dart
 lib/src/model/model_overrides.dart
 lib/src/model/muse_login.dart
-lib/src/model/muse_provider.dart
-lib/src/model/muse_provider_fallback.dart
-lib/src/model/muse_provider_mode.dart
 lib/src/model/network_activity.dart
 lib/src/model/network_activity_dials_inner.dart
 lib/src/model/network_route.dart
@@ -899,11 +889,9 @@ lib/src/model/secret_findings_findings_inner.dart
 lib/src/model/send_feedback_request.dart
 lib/src/model/send_meeting_message_request.dart
 lib/src/model/set_credit_limit_request.dart
-lib/src/model/set_fallback_limit_request.dart
 lib/src/model/set_free_credits_request.dart
 lib/src/model/set_meeting_cohosts_request.dart
 lib/src/model/set_member_role_request.dart
-lib/src/model/set_muse_provider_request.dart
 lib/src/model/set_plane_webhook_secret_request.dart
 lib/src/model/set_slots_request.dart
 lib/src/model/set_ticket_benchmark_request.dart
@@ -1149,7 +1137,6 @@ test/error_test.dart
 test/event_page_test.dart
 test/event_summary_test.dart
 test/event_test.dart
-test/fallback_usage_test.dart
 test/feedback_api_test.dart
 test/feedback_test.dart
 test/file_change_test.dart
@@ -1243,9 +1230,6 @@ test/model_catalog_models_inner_test.dart
 test/model_catalog_test.dart
 test/model_overrides_test.dart
 test/muse_login_test.dart
-test/muse_provider_fallback_test.dart
-test/muse_provider_mode_test.dart
-test/muse_provider_test.dart
 test/network_activity_dials_inner_test.dart
 test/network_activity_test.dart
 test/network_api_test.dart
@@ -1381,11 +1365,9 @@ test/secret_findings_test.dart
 test/send_feedback_request_test.dart
 test/send_meeting_message_request_test.dart
 test/set_credit_limit_request_test.dart
-test/set_fallback_limit_request_test.dart
 test/set_free_credits_request_test.dart
 test/set_meeting_cohosts_request_test.dart
 test/set_member_role_request_test.dart
-test/set_muse_provider_request_test.dart
 test/set_plane_webhook_secret_request_test.dart
 test/set_slots_request_test.dart
 test/set_ticket_benchmark_request_test.dart

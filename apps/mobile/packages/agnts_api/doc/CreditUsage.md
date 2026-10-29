@@ -12,7 +12,6 @@ Name | Type | Description | Notes
 **monthUsed** | **int** | Credits spent this calendar month | 
 **totalUsed** | **int** | Credits spent ever | 
 **setAt** | [**DateTime**](DateTime.md) |  | [optional] 
-**fallback** | [**FallbackUsage**](FallbackUsage.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -15,7 +15,7 @@ Method | HTTP request | Description
 [**deleteMyClaude**](AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
 [**disableTotp**](AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
 [**getMyClaude**](AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
-[**getMyCreditUsage**](AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+[**getMyCreditUsage**](AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the monthly limit an Admin set
 [**getMyFreeCredits**](AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
 [**getMyMuseLogin**](AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
 [**resendVerification**](AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
@@ -281,7 +281,7 @@ This endpoint does not need any parameter.
 # **getMyCreditUsage**
 > CreditUsage getMyCreditUsage()
 
-What you spent on agnts's Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+What you spent on agnts's Muse key this month and the monthly limit an Admin set
 
 ### Example
 ```dart

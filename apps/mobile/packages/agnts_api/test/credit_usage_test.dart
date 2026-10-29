@@ -30,10 +30,5 @@ void main() {
       // TODO
     });
 
-    // FallbackUsage fallback
-    test('to test the property `fallback`', () async {
-      // TODO
-    });
-
   });
 }
