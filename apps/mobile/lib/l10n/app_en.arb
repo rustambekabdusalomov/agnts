@@ -879,7 +879,7 @@
       }
     }
   },
-  "billingFallbackHint": "{name} is the backup provider: your runs use it only while agnts's Meta access is out. When this is used up, they wait for Meta instead.",
+  "billingFallbackHint": "{name} is the backup provider, free for you: your runs move there when your own Meta account (or agnts's) is at its limit. When this allowance is used up, they continue on credits.",
   "@billingFallbackHint": {
     "placeholders": {
       "name": {
@@ -6136,7 +6136,7 @@
       }
     }
   },
-  "platformFbHelp": "Counted only while agnts's Meta key is out and runs continue on {name}. When it is used up, their runs wait for Meta instead.",
+  "platformFbHelp": "Free for them: runs use {name} when their own Meta account or agnts's is at its limit. When it is used up, their runs continue on credits.",
   "@platformFbHelp": {
     "placeholders": {
       "name": {
