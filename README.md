@@ -319,9 +319,9 @@ access key, or build the images yourself (`docker compose --profile build build
 runner`); then `docker compose up -d` and `docker compose exec agnts agnts user
 create <name>`.
 
-To deploy your own build from CI on every push to `main`, set the repository
-variable `DEPLOY_ENABLED=true` and the secrets listed in
-`.github/workflows/ci.yml`. Tagging `v*` runs `.github/workflows/release.yml`,
+There is no CI workflow for this repository for now (it was using up the
+GitHub Actions minutes); run `make test` and `make lint` before merging.
+agnts-muse keeps its own CI. Tagging `v*` runs `.github/workflows/release.yml`,
 which publishes the images to `registry.agnts.uz` and the CLI to agnts.uz.
 
 Run containers sit on the internal `agnts-runs` network; the `egress`
