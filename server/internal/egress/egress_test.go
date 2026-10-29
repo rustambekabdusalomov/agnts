@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -89,6 +90,37 @@ func TestExtraAllowList(t *testing.T) {
 	p.SetExtra(nil)
 	if p.Allowed("staging.acme.com") {
 		t.Fatal("extra list not replaced")
+	}
+}
+
+// TestFollowRetriesSoon fetches again within followRetry after a failure,
+// not a whole interval later: agnts restarts beside the proxy, and runs
+// started meanwhile need their hosts (the Muse fallback's) at once.
+func TestFollowRetriesSoon(t *testing.T) {
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		if calls.Add(1) == 1 {
+			http.Error(w, "starting", http.StatusServiceUnavailable)
+			return
+		}
+		_, _ = io.WriteString(w, "inference.baseten.co\n")
+	}))
+	defer srv.Close()
+	old := followRetry
+	followRetry = 20 * time.Millisecond
+	defer func() { followRetry = old }()
+	p := New([]string{"github.com"}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() { p.Follow(ctx, srv.URL, time.Hour); close(done) }()
+	deadline := time.Now().Add(2 * time.Second)
+	for !p.Allowed("inference.baseten.co") && time.Now().Before(deadline) {
+		time.Sleep(5 * time.Millisecond)
+	}
+	cancel()
+	<-done
+	if !p.Allowed("inference.baseten.co") {
+		t.Fatalf("not allowed after a failed first fetch (%d fetches)", calls.Load())
 	}
 }
 

@@ -256,10 +256,15 @@ func (p *Proxy) Follow(ctx context.Context, url string, every time.Duration) {
 	c := &http.Client{Timeout: 10 * time.Second}
 	var last string
 	for {
+		wait := every
 		if list, err := fetchList(ctx, c, url); err != nil {
 			if ctx.Err() == nil {
 				p.log.Warn("egress: fetch the extra allowlist", "url", url, "err", err)
 			}
+			// agnts restarts beside the proxy, so the first fetch often
+			// fails; a run started meanwhile must not wait a whole interval
+			// for its hosts (the Muse fallback's among them).
+			wait = min(every, followRetry)
 		} else {
 			if joined := strings.Join(list, ","); joined != last {
 				last = joined
@@ -270,10 +275,13 @@ func (p *Proxy) Follow(ctx context.Context, url string, every time.Duration) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(every):
+		case <-time.After(wait):
 		}
 	}
 }
+
+// followRetry is how soon Follow tries again after a failed fetch.
+var followRetry = 2 * time.Second
 
 func fetchList(ctx context.Context, c *http.Client, url string) ([]string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
