@@ -23,6 +23,8 @@ class ContinueTicketRequest {
      this.note,
 
      this.attachments,
+
+     this.discardWork,
   });
 
       /// What to do differently. The next coding run gets it, like requested changes. Not allowed when the ticket goes back to answers or to a failed state, since no Claude run follows.
@@ -51,17 +53,32 @@ class ContinueTicketRequest {
 
 
 
+      /// Throw away the unfinished change a stopped run left (the ticket's savedWork); the next coding run starts from the last commit instead.
+  @JsonKey(
+    
+    name: r'discardWork',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? discardWork;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is ContinueTicketRequest &&
       other.note == note &&
-      other.attachments == attachments;
+      other.attachments == attachments &&
+      other.discardWork == discardWork;
 
     @override
     int get hashCode =>
         note.hashCode +
-        attachments.hashCode;
+        attachments.hashCode +
+        discardWork.hashCode;
 
   factory ContinueTicketRequest.fromJson(Map<String, dynamic> json) => _$ContinueTicketRequestFromJson(json);
 

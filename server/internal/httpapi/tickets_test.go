@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 
@@ -28,6 +29,7 @@ type fakeTickets struct {
 	lastAccept        []orchestrator.AcceptInput
 	lastFollowUps     *bool
 	lastSkipChecks    *bool
+	discarded         []string // keys whose saved work was discarded
 	lastCommit        string
 	lastRelation      string
 	lastCompare       *bool
@@ -306,6 +308,11 @@ func (f *fakeTickets) SetSkipChecks(_ context.Context, key string, skip bool, o 
 	return f.ticket(key, domain.StateFailed)
 }
 
+func (f *fakeTickets) DiscardWork(_ context.Context, key string, o domain.Origin) error {
+	f.lastOrigin, f.discarded = o, append(f.discarded, key)
+	return nil
+}
+
 func (f *fakeTickets) Continue(_ context.Context, key, note string, files []int64, o domain.Origin) (domain.Ticket, error) {
 	f.lastOrigin, f.lastNote, f.lastFiles = o, note, files
 	return f.ticket(key, domain.StateWaitingForReview)
@@ -519,6 +526,7 @@ func TestTicketEndpoints(t *testing.T) {
 		{"POST", "/api/tickets/PAY-1/continue", "", 200, `"state":"waiting_for_review"`},
 		{"POST", "/api/tickets/PAY-1/continue", `{"note":"keep the old API","attachments":[7]}`, 200, `"state":"waiting_for_review"`},
 		{"POST", "/api/tickets/PAY-1/continue", `{"reason":"x"}`, 400, `unknown field`},
+		{"POST", "/api/tickets/PAY-2/continue", `{"discardWork":true}`, 200, `"state":"waiting_for_review"`},
 		{"POST", "/api/tickets/PAY-1/start-over", "", 200, `"state":"new"`},
 		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"feature/PAY-1-login"}`, 200, `"branch":"feature/PAY-1-login"`},
 		{"PUT", "/api/tickets/PAY-1/branch", `{"branch":"taken","repoId":3}`, 409, `already exists on the git host`},
@@ -528,6 +536,8 @@ func TestTicketEndpoints(t *testing.T) {
 		{"PUT", "/api/tickets/PAY-1/commit", `{"sha":"abc1234","message":"feat: login","repoId":3}`, 200, `"state":"waiting_for_review"`},
 		{"POST", "/api/tickets/PAY-1/retry", "", 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", `{"skipChecks":true}`, 200, `"state":"new"`},
+		{"POST", "/api/tickets/PAY-3/retry", `{"discardWork":true}`, 200, `"state":"new"`},
+		{"POST", "/api/tickets/PAY-4/retry", `{"discardWork":false}`, 200, `"state":"new"`},
 		{"POST", "/api/tickets/PAY-1/retry", `{"note":"skip the symlink","attachments":[9,9]}`, 200, `"state":"new"`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"multiple":true`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"attachments":[{"contentType":"image/png","createdAt":"0001-01-01T00:00:00Z","id":4,"image":true,"name":"a.png","purpose":"answer","questionId":9,"size":3,"url":"/attachments/4"}]`},
@@ -592,6 +602,9 @@ func TestTicketEndpoints(t *testing.T) {
 	}
 	if h.tickets.lastSkipChecks == nil || !*h.tickets.lastSkipChecks {
 		t.Errorf("retry skipChecks: %v", h.tickets.lastSkipChecks)
+	}
+	if !slices.Equal(h.tickets.discarded, []string{"PAY-2", "PAY-3"}) {
+		t.Errorf("discarded work of %v", h.tickets.discarded)
 	}
 	if g := h.tickets.lastGroup; g.Name != "Shop" || len(g.Members) != 1 {
 		t.Errorf("group input: %+v", g)

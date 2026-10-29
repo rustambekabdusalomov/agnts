@@ -373,6 +373,7 @@ type agent struct {
 	workspaces   *postgres.Workspaces
 	git          *gitrepo.Repos
 	homes        *gitrepo.Homes
+	progress     *gitrepo.Progress
 	shots        *gitrepo.Shots
 	users        *postgres.Users
 	claude       *claude.Service
@@ -531,6 +532,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		a.commitAuthor)
 	homes := gitrepo.NewHomes(filepath.Join(cfg.DataDir, "sessions"))
 	a.git, a.homes = repos, homes
+	a.progress = gitrepo.NewProgress(filepath.Join(cfg.DataDir, "progress"))
 	a.shots = gitrepo.NewShots(filepath.Join(cfg.DataDir, "previews"))
 	if err := os.MkdirAll(cfg.DataDir, 0o750); err != nil {
 		return nil, fmt.Errorf("data dir: %w", err)
@@ -544,7 +546,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	previewEnvs := postgres.NewPreviewEnvs(pool, box)
 	a.docStore = postgres.NewDocuments(pool)
 	a.orch = orchestrator.New(ocfg, orchestrator.Deps{
-		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Homes: homes,
+		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Homes: homes, Progress: a.progress,
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: a.jira, domain.SourcePlane: a.plane},
 		Settings: a.settings, Usage: a.usage, Lessons: a.lessons, Rules: postgres.NewRules(pool), Briefs: postgres.NewBriefs(pool),
 		Reflections:  postgres.NewReflections(pool),
@@ -847,7 +849,7 @@ func (f workspaceFiles) RemoveWorkspace(ctx context.Context, ws int64) error {
 			errs = append(errs, f.a.runner.RemoveCache(ctx, "repo-"+strconv.FormatInt(r.ID, 10)))
 		}
 	}
-	errs = append(errs, f.a.git.RemoveWorkspace(ws), f.a.homes.Delete(ws), f.a.shots.Delete(ws))
+	errs = append(errs, f.a.git.RemoveWorkspace(ws), f.a.homes.Delete(ws), f.a.progress.Delete(ws), f.a.shots.Delete(ws))
 	return errors.Join(errs...)
 }
 

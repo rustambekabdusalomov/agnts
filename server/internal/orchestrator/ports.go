@@ -692,3 +692,12 @@ type Homes interface {
 	Load(ws int64, ticketKey string) ([]byte, error) // nil, nil when there is none
 	Save(ws int64, ticketKey string, tar []byte) error
 }
+
+// Progress keeps a ticket's uncommitted work between its coding runs: a
+// run that ends without committing (stopped, rate limited, failed) saves
+// it, and the next run puts it back (see savedWork).
+type Progress interface {
+	Load(ws int64, ticketKey string) ([]byte, error) // nil, nil when there is none
+	Save(ws int64, ticketKey string, data []byte) error
+	Drop(ws int64, ticketKey string) error
+}

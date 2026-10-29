@@ -1421,6 +1421,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingFreeCreditsNone => 'None yet. An Admin can give you free credits for runs on agnts\'s Muse key.';
 
   @override
+  String get billingLimitsTitle => 'Your limits this month';
+
+  @override
+  String get billingLimitsSub => 'Set by an Admin for runs on agnts\'s Muse key. They reset on the 1st of each month.';
+
+  @override
+  String billingMonthLimit(String used, String limit) {
+    return '$used of $limit credits used';
+  }
+
+  @override
+  String billingFallbackLimit(String name, String used, String limit) {
+    return '$name: $used of $limit credits used';
+  }
+
+  @override
+  String billingFallbackNoLimit(String name, String used) {
+    return '$name: $used credits used, no limit';
+  }
+
+  @override
+  String billingFallbackHint(String name) {
+    return '$name is the backup provider, free for you: your runs move there when your own Meta account (or agnts\'s) is at its limit. When this allowance is used up, they continue on credits.';
+  }
+
+  @override
   String get briefTitle => 'Repository brief';
 
   @override
@@ -9898,7 +9924,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String platformFbHelp(String name) {
-    return 'Counted only while agnts\'s Meta key is out and runs continue on $name. When it is used up, their runs wait for Meta instead.';
+    return 'Free for them: runs use $name when their own Meta account or agnts\'s is at its limit. When it is used up, their runs continue on credits.';
   }
 
   @override
@@ -14352,6 +14378,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketRetryNoteHint => 'Optional. Tell agnts how to get past the error; the next coding run gets it with the error.';
+
+  @override
+  String ticketSavedWork(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The stopped run left $count changed files unfinished.',
+      one: 'The stopped run left $count changed file unfinished.',
+    );
+    return '$_temp0 The next run picks it up where it stopped.';
+  }
+
+  @override
+  String get ticketSavedWorkFiles => 'Show files';
+
+  @override
+  String get ticketDiscardWork => 'Discard the unfinished change';
+
+  @override
+  String get ticketDiscardWorkHint =>
+      'The next run starts from the last commit instead. Use it when the stopped run was going the wrong way.';
 
   @override
   String get ticketTakeItMyself => 'Take it myself';

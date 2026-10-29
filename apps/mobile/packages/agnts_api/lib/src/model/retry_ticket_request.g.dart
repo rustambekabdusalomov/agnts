@@ -13,6 +13,8 @@ abstract class _$RetryTicketRequestCWProxy {
 
   RetryTicketRequest skipChecks(bool? skipChecks);
 
+  RetryTicketRequest discardWork(bool? discardWork);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RetryTicketRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +25,7 @@ abstract class _$RetryTicketRequestCWProxy {
     String? note,
     List<int>? attachments,
     bool? skipChecks,
+    bool? discardWork,
   });
 }
 
@@ -44,6 +47,10 @@ class _$RetryTicketRequestCWProxyImpl implements _$RetryTicketRequestCWProxy {
       this(skipChecks: skipChecks);
 
   @override
+  RetryTicketRequest discardWork(bool? discardWork) =>
+      this(discardWork: discardWork);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RetryTicketRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -54,6 +61,7 @@ class _$RetryTicketRequestCWProxyImpl implements _$RetryTicketRequestCWProxy {
     Object? note = const $CopyWithPlaceholder(),
     Object? attachments = const $CopyWithPlaceholder(),
     Object? skipChecks = const $CopyWithPlaceholder(),
+    Object? discardWork = const $CopyWithPlaceholder(),
   }) {
     return RetryTicketRequest(
       note: note == const $CopyWithPlaceholder()
@@ -68,6 +76,10 @@ class _$RetryTicketRequestCWProxyImpl implements _$RetryTicketRequestCWProxy {
           ? _value.skipChecks
           // ignore: cast_nullable_to_non_nullable
           : skipChecks as bool?,
+      discardWork: discardWork == const $CopyWithPlaceholder()
+          ? _value.discardWork
+          // ignore: cast_nullable_to_non_nullable
+          : discardWork as bool?,
     );
   }
 }
@@ -92,6 +104,7 @@ RetryTicketRequest _$RetryTicketRequestFromJson(Map<String, dynamic> json) =>
           (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
         ),
         skipChecks: $checkedConvert('skipChecks', (v) => v as bool?),
+        discardWork: $checkedConvert('discardWork', (v) => v as bool?),
       );
       return val;
     });
@@ -101,4 +114,5 @@ Map<String, dynamic> _$RetryTicketRequestToJson(RetryTicketRequest instance) =>
       'note': ?instance.note,
       'attachments': ?instance.attachments,
       'skipChecks': ?instance.skipChecks,
+      'discardWork': ?instance.discardWork,
     };

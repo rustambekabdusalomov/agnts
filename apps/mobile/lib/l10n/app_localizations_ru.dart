@@ -1459,6 +1459,32 @@ class AppLocalizationsRu extends AppLocalizations {
   String get billingFreeCreditsNone => 'Пока нет. Администратор может выдать вам бесплатные кредиты для запусков на ключе Muse от agnts.';
 
   @override
+  String get billingLimitsTitle => 'Ваши лимиты в этом месяце';
+
+  @override
+  String get billingLimitsSub => 'Устанавливает администратор для запусков на ключе Muse от agnts. Сбрасываются 1-го числа каждого месяца.';
+
+  @override
+  String billingMonthLimit(String used, String limit) {
+    return 'Использовано $used из $limit кредитов';
+  }
+
+  @override
+  String billingFallbackLimit(String name, String used, String limit) {
+    return '$name: использовано $used из $limit кредитов';
+  }
+
+  @override
+  String billingFallbackNoLimit(String name, String used) {
+    return '$name: использовано $used кредитов, без лимита';
+  }
+
+  @override
+  String billingFallbackHint(String name) {
+    return '$name — резервный провайдер, для вас бесплатный: запуски переходят на него, когда ваш аккаунт Meta (или аккаунт agnts) исчерпан. Когда лимит закончится, они продолжатся за кредиты.';
+  }
+
+  @override
   String get briefTitle => 'Описание репозитория';
 
   @override
@@ -10313,7 +10339,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String platformFbHelp(String name) {
-    return 'Считается только пока ключ Meta от agnts исчерпан и запуски продолжаются на $name. Когда лимит исчерпан, их запуски ждут Meta.';
+    return 'Бесплатно для них: запуски используют $name, когда их аккаунт Meta или аккаунт agnts исчерпан. Когда лимит закончится, запуски продолжатся за кредиты.';
   }
 
   @override
@@ -14980,6 +15006,29 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get ticketRetryNoteHint =>
       'Необязательно. Подскажите agnts, как обойти ошибку; следующий запуск получит заметку вместе с ошибкой.';
+
+  @override
+  String ticketSavedWork(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'После остановленного запуска осталось $count незавершённого изменённого файла.',
+      many: 'После остановленного запуска осталось $count незавершённых изменённых файлов.',
+      few: 'После остановленного запуска осталось $count незавершённых изменённых файла.',
+      one: 'После остановленного запуска остался $count незавершённый изменённый файл.',
+    );
+    return '$_temp0 Следующий запуск продолжит с того места, где он остановился.';
+  }
+
+  @override
+  String get ticketSavedWorkFiles => 'Показать файлы';
+
+  @override
+  String get ticketDiscardWork => 'Отбросить незавершённые изменения';
+
+  @override
+  String get ticketDiscardWorkHint =>
+      'Тогда следующий запуск начнёт с последнего коммита. Пригодится, если остановленный запуск шёл не туда.';
 
   @override
   String get ticketTakeItMyself => 'Сделаю сам';

@@ -8921,6 +8921,17 @@
   "ticketFailedUnknown": "The run stopped. Check the run log for details.",
   "ticketRetryNote": "Note for the retry",
   "ticketRetryNoteHint": "Optional. Tell agnts how to get past the error; the next coding run gets it with the error.",
+  "ticketSavedWork": "{count, plural, one {The stopped run left {count} changed file unfinished.} other {The stopped run left {count} changed files unfinished.}} The next run picks it up where it stopped.",
+  "@ticketSavedWork": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "ticketSavedWorkFiles": "Show files",
+  "ticketDiscardWork": "Discard the unfinished change",
+  "ticketDiscardWorkHint": "The next run starts from the last commit instead. Use it when the stopped run was going the wrong way.",
   "ticketTakeItMyself": "Take it myself",
   "ticketRateTitle": "Paused at plan limit",
   "ticketResume": "Resume run",

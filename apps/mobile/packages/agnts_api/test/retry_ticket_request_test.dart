@@ -25,5 +25,11 @@ void main() {
       // TODO
     });
 
+    // Throw away the unfinished change a stopped run left (the ticket's savedWork); the next coding run starts from the last commit instead.
+    // bool discardWork
+    test('to test the property `discardWork`', () async {
+      // TODO
+    });
+
   });
 }

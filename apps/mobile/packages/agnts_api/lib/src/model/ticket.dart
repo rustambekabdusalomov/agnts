@@ -127,6 +127,8 @@ class Ticket {
 
      this.canStartOver,
 
+     this.savedWork,
+
      this.spend,
 
      this.waitReason,
@@ -751,6 +753,19 @@ class Ticket {
 
 
 
+      /// Ticket page of a stopped (failed, rate-limited or rejected) ticket: the files of the unfinished change its last coding run left, which the next coding run picks up again (paths from /workspace). Absent when there is none.
+  @JsonKey(
+    
+    name: r'savedWork',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? savedWork;
+
+
+
   @JsonKey(
     
     name: r'spend',
@@ -916,6 +931,7 @@ class Ticket {
       other.canPreview == canPreview &&
       other.continueTo == continueTo &&
       other.canStartOver == canStartOver &&
+      other.savedWork == savedWork &&
       other.spend == spend &&
       other.waitReason == waitReason &&
       other.waitMessage == waitMessage &&
@@ -976,6 +992,7 @@ class Ticket {
         canPreview.hashCode +
         continueTo.hashCode +
         canStartOver.hashCode +
+        savedWork.hashCode +
         spend.hashCode +
         waitReason.hashCode +
         waitMessage.hashCode +

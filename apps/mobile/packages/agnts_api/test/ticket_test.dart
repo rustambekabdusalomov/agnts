@@ -276,6 +276,12 @@ void main() {
       // TODO
     });
 
+    // Ticket page of a stopped (failed, rate-limited or rejected) ticket: the files of the unfinished change its last coding run left, which the next coding run picks up again (paths from /workspace). Absent when there is none.
+    // List<String> savedWork
+    test('to test the property `savedWork`', () async {
+      // TODO
+    });
+
     // TokenSpend spend
     test('to test the property `spend`', () async {
       // TODO

@@ -824,6 +824,7 @@ func (o *Orchestrator) Continue(ctx context.Context, key, note string, files []i
 		o.event(ctx, domain.Event{TicketKey: key, Type: domain.EventTicketUpdated, Origin: origin, Level: domain.LevelWarn,
 			Message: "the earlier commits are gone from agnts's copy of the repository: agnts starts over from analysis"})
 		o.dropQuestions(ctx, t)
+		o.dropWork(ctx, t)
 	}
 	o.trackerMove(context.WithoutCancel(ctx), t, continueStatus(to))
 	o.Wake()
@@ -857,6 +858,7 @@ func (o *Orchestrator) StartOver(ctx context.Context, key string, origin domain.
 	}
 	o.dropBranch(ctx, cur) // a branch kept for a pull request it never opened
 	o.dropQuestions(ctx, t)
+	o.dropWork(ctx, t)
 	o.trackerMove(context.WithoutCancel(ctx), t, TrackerStarted)
 	o.Wake()
 	return t, nil
@@ -1445,7 +1447,11 @@ func (o *Orchestrator) DeleteTask(ctx context.Context, key string, origin domain
 	if t.Source != domain.SourceLocal || t.State != domain.StateNew || (!t.Held && o.cancelRunning(ctx, key)) {
 		return &domain.TransitionError{Key: key, From: t.State, To: domain.StateRejected}
 	}
-	return o.store.DeleteTicket(ctx, key, domain.Event{TicketKey: key, Type: domain.EventTaskChanged, Origin: origin, Message: "task deleted"})
+	if err := o.store.DeleteTicket(ctx, key, domain.Event{TicketKey: key, Type: domain.EventTaskChanged, Origin: origin, Message: "task deleted"}); err != nil {
+		return err
+	}
+	o.dropWork(ctx, t) // a new task may take the key again
+	return nil
 }
 
 func (o *Orchestrator) cancelRunning(ctx context.Context, key string) bool {
@@ -1590,6 +1596,9 @@ type TicketView struct {
 	// ("" when it cannot continue); CanStartOver says Start over is offered.
 	ContinueTo   domain.TicketState
 	CanStartOver bool
+	// SavedWork are the files of the unfinished change a stopped ticket's
+	// last coding run left, which the next one picks up (see savedWork).
+	SavedWork []string
 	// RenameBranch are the repositories whose branch can still be renamed
 	// before it is pushed (see RenameBranch).
 	RenameBranch []int64
@@ -1750,6 +1759,7 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 		v.ContinueTo = domain.ContinueState(v.Info.From, false)
 		v.CanStartOver = canStartOver(t)
 	}
+	v.SavedWork = o.savedFiles(t)
 	if _, ok := o.git.(BranchRenamer); ok {
 		for _, id := range t.RepoIDs() {
 			if r, ok := t.RepoState(id); ok && cannotRename(t, r) == nil {
