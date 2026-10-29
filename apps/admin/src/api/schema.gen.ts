@@ -3778,6 +3778,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/users/{id}/credit-limit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the most credits a person may spend on agnts's Muse key per calendar month, free and bought together (Admin); 0 is no limit */
+        put: operations["setCreditLimit"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/runs": {
         parameters: {
             query?: never;
@@ -5843,6 +5862,7 @@ export interface components {
             /** @description The workspaces they belong to (not deleted), with their role */
             workspaces: components["schemas"]["WorkspaceSummary"][];
             freeCredits?: components["schemas"]["FreeCredits"];
+            creditUsage?: components["schemas"]["CreditUsage"];
         };
         WorkspaceSummary: {
             /** Format: int64 */
@@ -7208,6 +7228,26 @@ export interface components {
             used: number;
             /** Format: int64 */
             remaining: number;
+            /** Format: date-time */
+            setAt?: string;
+        };
+        /** @description What a person spent on agnts's Muse key (free and bought credits together) and the monthly limit an Admin set (1 credit = $0.01) */
+        CreditUsage: {
+            /**
+             * Format: int64
+             * @description Credits per calendar month (UTC); 0 is no limit
+             */
+            monthLimit: number;
+            /**
+             * Format: int64
+             * @description Credits spent this calendar month
+             */
+            monthUsed: number;
+            /**
+             * Format: int64
+             * @description Credits spent ever
+             */
+            totalUsed: number;
             /** Format: date-time */
             setAt?: string;
         };
@@ -16447,6 +16487,41 @@ export interface operations {
                     "application/json": components["schemas"]["FreeCredits"];
                 };
             };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setCreditLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: int64
+                     * @description Credits per month (1 credit = $0.01 of model cost); 0 is no limit
+                     */
+                    limit: number;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreditUsage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };

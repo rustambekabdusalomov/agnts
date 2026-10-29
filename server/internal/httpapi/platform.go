@@ -270,6 +270,10 @@ func (s *Server) ListPlatformUsers(w http.ResponseWriter, r *http.Request) {
 				fc := toFreeCredits(f)
 				p.FreeCredits = &fc
 			}
+			if cu, err := s.opt.Muse.Usage(ctx, u.ID); err == nil {
+				c := toCreditUsage(cu)
+				p.CreditUsage = &c
+			}
 		}
 		out = append(out, p)
 	}

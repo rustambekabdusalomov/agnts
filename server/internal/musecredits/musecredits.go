@@ -110,8 +110,17 @@ func (s *Service) capAccount() budget.AccountID {
 	return budget.AccountID("cap:platform:" + s.now().UTC().Format("2006-01"))
 }
 
-// runKeyPrefix starts the hold keys of a run's invocations.
+// userCapAccount is the room left of a person's monthly limit.
+func (s *Service) userCapAccount(user int64) budget.AccountID {
+	return budget.AccountID("cap:user:" + strconv.FormatInt(user, 10) + ":" + s.now().UTC().Format("2006-01"))
+}
+
+// runKeyPrefix starts the hold keys of a run's invocations; the person
+// the run is spent for is in the key (after the run), so their spend can
+// be summed whatever paid it.
 func runKeyPrefix(ws, run int64) string { return fmt.Sprintf("ws:%d:run:%d:", ws, run) }
+
+func userKeyPart(user int64) string { return fmt.Sprintf("u:%d:", user) }
 
 // Budget implements runner.MuseBudgets: a ticket run on agnts's key pays
 // its member's free credits first, then the workspace's wallet, and
@@ -135,15 +144,28 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 		return nil, err
 	}
 	b := &muse.Budget{Key: runKeyPrefix(ws, req.RunID) + msp.NewCommandID(), Payers: []budget.AccountID{walletAccount(ws)}}
+	var room money.USD = -1 // what the person's monthly limit leaves (-1: no limit)
 	if acct.UserID > 0 {
+		b.Key = runKeyPrefix(ws, req.RunID) + userKeyPart(acct.UserID) + msp.NewCommandID()
 		b.Payers = []budget.AccountID{freeAccount(acct.UserID), walletAccount(ws)}
+		capAcct, left, limit, err := s.syncUserCap(sys, acct.UserID)
+		if err != nil {
+			return nil, err
+		}
+		if limit > 0 {
+			if left <= 0 {
+				return nil, fmt.Errorf("%w: this person reached their monthly limit of %d credits (set by an Admin)", muse.ErrBudget, limit)
+			}
+			b.Caps = append(b.Caps, capAcct)
+			room = left
+		}
 	}
 	if s.cfg.GlobalCapUSD > 0 {
 		capAcct := s.capAccount()
 		if _, err := s.ledger.Deposit(sys, capAcct, money.Dollars(s.cfg.GlobalCapUSD), string(capAcct)); err != nil {
 			return nil, err
 		}
-		b.Caps = []budget.AccountID{capAcct}
+		b.Caps = append(b.Caps, capAcct)
 	}
 	// The run's limit: the workspace's budget per run (Settings), else the
 	// server's cap, less what the run spent already, and never more than
@@ -175,7 +197,115 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 	if b.Limit == 0 || funds < b.Limit {
 		b.Limit = funds
 	}
+	if room >= 0 && room < b.Limit {
+		b.Limit = room
+	}
 	return b, nil
+}
+
+// syncUserCap makes a person's cap account for this month hold what their
+// monthly limit leaves: the limit less what they spent this month (spend
+// from before the limit was set counts too). It returns the account, its
+// available room and the limit in credits (0: no limit, nothing synced).
+func (s *Service) syncUserCap(ctx context.Context, user int64) (budget.AccountID, money.USD, int64, error) {
+	var limit int64
+	if err := s.db.QueryRow(ctx, `SELECT credit_limit_monthly FROM users WHERE id = $1`, user).Scan(&limit); err != nil {
+		return "", 0, 0, fmt.Errorf("read monthly limit: %w", err)
+	}
+	if limit <= 0 {
+		return "", 0, 0, nil
+	}
+	acct := s.userCapAccount(user)
+	used, err := s.spentSince(ctx, user, monthStart(s.now()))
+	if err != nil {
+		return "", 0, 0, err
+	}
+	cur, err := s.ledger.Balance(ctx, acct)
+	if err != nil {
+		return "", 0, 0, err
+	}
+	target := money.Max(money.USD(limit)*CreditUSD-used, 0)
+	if delta := target - cur.Total; delta != 0 {
+		key := fmt.Sprintf("ucap:%s:%d:%d:%d", acct, limit, int64(used), int64(cur.Total))
+		if _, err := s.ledger.Deposit(ctx, acct, delta, key); errors.Is(err, budget.ErrInsufficient) {
+			// Running holds reserve more than the lowered limit leaves:
+			// take what is free, so no new run starts.
+			if b, berr := s.ledger.Balance(ctx, acct); berr == nil && b.Available > 0 {
+				_, _ = s.ledger.Deposit(ctx, acct, -b.Available, key+":partial")
+			}
+		} else if err != nil {
+			return "", 0, 0, err
+		}
+	}
+	b, err := s.ledger.Balance(ctx, acct)
+	return acct, b.Available, limit, err
+}
+
+// spentSince is what runs on agnts's key charged for a person since t,
+// whatever paid (their free credits or a workspace's wallet). Runs from
+// before the person was in the hold key count by their free credits.
+func (s *Service) spentSince(ctx context.Context, user int64, t time.Time) (money.USD, error) {
+	var micro int64
+	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(l.charged), 0) FROM muse_hold_legs l JOIN muse_holds h ON h.id = l.hold_id
+		WHERE NOT l.is_cap AND h.created_at >= $1 AND (h.key LIKE $2 OR l.account_id = $3)`,
+		t, "ws:%:run:%:"+userKeyPart(user)+"%", string(freeAccount(user))).Scan(&micro)
+	return money.USD(micro), err
+}
+
+func monthStart(t time.Time) time.Time {
+	t = t.UTC()
+	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC)
+}
+
+// Usage is what a person spent on agnts's key and the monthly limit an
+// Admin set, in credits.
+type Usage struct {
+	MonthLimit int64 // 0: no limit
+	MonthUsed  int64
+	TotalUsed  int64
+	SetBy      *int64
+	SetAt      *time.Time
+}
+
+// Usage returns a person's spend and monthly limit.
+func (s *Service) Usage(ctx context.Context, user int64) (Usage, error) {
+	sys := domain.System(ctx)
+	var u Usage
+	if err := s.db.QueryRow(sys, `SELECT credit_limit_monthly, credit_limit_set_by, credit_limit_set_at FROM users WHERE id = $1`, user).
+		Scan(&u.MonthLimit, &u.SetBy, &u.SetAt); err != nil {
+		return u, err
+	}
+	month, err := s.spentSince(sys, user, monthStart(s.now()))
+	if err != nil {
+		return u, err
+	}
+	total, err := s.spentSince(sys, user, time.Time{})
+	if err != nil {
+		return u, err
+	}
+	u.MonthUsed, u.TotalUsed = toCredits(month), toCredits(total)
+	return u, nil
+}
+
+// SetLimit sets a person's monthly credit limit (0: no limit). It applies
+// to the next run; a running one keeps what it reserved.
+func (s *Service) SetLimit(ctx context.Context, user, limit, by int64) (Usage, error) {
+	if limit < 0 || limit > 10_000_000 {
+		return Usage{}, errors.New("the monthly limit must be between 0 and 10,000,000 credits")
+	}
+	sys := domain.System(ctx)
+	tag, err := s.db.Exec(sys, `UPDATE users SET credit_limit_monthly = $2, credit_limit_set_by = $3, credit_limit_set_at = now() WHERE id = $1`,
+		user, limit, by)
+	if err != nil {
+		return Usage{}, err
+	}
+	if tag.RowsAffected() == 0 {
+		return Usage{}, domain.ErrNotFound
+	}
+	if _, _, _, err := s.syncUserCap(sys, user); err != nil {
+		return Usage{}, err
+	}
+	return s.Usage(ctx, user)
 }
 
 // syncWallet makes the ledger's copy of a wallet match it: the wallet's
