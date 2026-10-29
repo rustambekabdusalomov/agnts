@@ -15,16 +15,16 @@ var safeKey = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]*$`)
 // Homes keeps each ticket's Claude Code config dir (a tar) on disk so a later
 // run can --resume the session, as <dir>/<workspace>/<key>.tar. Implements
 // orchestrator.Homes.
-type Homes struct{ dir string }
+type Homes struct{ dir, ext string }
 
 // NewHomes stores tars under dir.
-func NewHomes(dir string) *Homes { return &Homes{dir: dir} }
+func NewHomes(dir string) *Homes { return &Homes{dir: dir, ext: ".tar"} }
 
 func (h *Homes) path(ws int64, key string) (string, error) {
 	if !safeKey.MatchString(key) || ws <= 0 {
 		return "", fmt.Errorf("unsafe ticket key %q", key)
 	}
-	return filepath.Join(h.dir, strconv.FormatInt(ws, 10), key+".tar"), nil
+	return filepath.Join(h.dir, strconv.FormatInt(ws, 10), key+h.ext), nil
 }
 
 // Load returns the saved tar, or nil when there is none.
@@ -57,6 +57,18 @@ func (h *Homes) Save(ws int64, key string, tar []byte) error {
 		return err
 	}
 	return os.Rename(tmp, p)
+}
+
+// Drop removes a ticket's saved tar, if any.
+func (h *Homes) Drop(ws int64, key string) error {
+	p, err := h.path(ws, key)
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(p); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return nil
 }
 
 // Delete removes the saved tars of a workspace (it was deleted).

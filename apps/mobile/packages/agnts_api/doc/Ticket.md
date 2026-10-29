@@ -56,6 +56,7 @@ Name | Type | Description | Notes
 **canPreview** | **bool** | The ticket's repository has a preview command | [optional] 
 **continueTo** | [**TicketState**](TicketState.md) |  | [optional] 
 **canStartOver** | **bool** | This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note | [optional] 
+**savedWork** | **List&lt;String&gt;** | Ticket page of a stopped (failed, rate-limited or rejected) ticket: the files of the unfinished change its last coding run left, which the next coding run picks up again (paths from /workspace). Absent when there is none. | [optional] 
 **spend** | [**TokenSpend**](TokenSpend.md) |  | [optional] 
 **waitReason** | [**WaitReason**](WaitReason.md) |  | [optional] 
 **waitMessage** | **String** | Why it waits, in a sentence | [optional] 

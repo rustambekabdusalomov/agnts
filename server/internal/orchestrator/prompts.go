@@ -17,7 +17,7 @@ import (
 // Analytics page can compare the quality of the work before and after a
 // change: bump it whenever a change to the prompts or to the context runs
 // get could change what Claude does.
-const PromptVersion = "2026-10-28.1"
+const PromptVersion = "2026-10-29.1"
 
 // Files Claude Code writes for agnts to read back. stream-json output has no
 // structured result, so the contract is a file outside the repository.
@@ -749,6 +749,29 @@ Make these changes in /workspace, {{if .T.SkipChecks}}{{else}}run the checks aga
 {{template "checksrule" .}}{{end}}{{template "commitinfo" .}}
 {{end}}
 
+{{define "resume"}}Your last run on {{.T.Key}} {{if .StopReason}}failed before it finished, with this error:
+
+{{indent .StopReason}}
+
+{{else}}was stopped before it finished. {{end}}agnts kept what you had changed and put it back in /workspace. The files you changed so far:
+{{range .Restored}}
+- {{.}}{{end}}
+
+Continue the same task from where you left off:
+
+- Do not start over, and do not redo steps that are done. {{.ProgressPath}} has your plan and what was done when the run stopped; read it and the files above first.
+- The stop may have come in the middle of an edit: check the file you were changing last, and finish or fix it.{{if .StopReason}}
+- Get past the error above as part of carrying on.{{end}}
+{{template "checksrule" .}}
+
+Then finish as your first instructions said: update {{.SummaryPath}} and {{.ProgressPath}}.{{template "commitinfo" .}}
+{{end}}
+
+{{define "restored"}}An earlier run on this ticket was stopped before it finished, and agnts put its uncommitted changes back in /workspace. Build on them instead of starting over; they may be incomplete, and the file it was editing last may be half done. The files it changed:
+{{range .Restored}}
+- {{.}}{{end}}
+{{end}}
+
 {{define "checksrule"}}{{if .T.SkipChecks}}- The checks are skipped for this ticket: the run container cannot run them (it cannot fetch some private dependencies, or reach a service they need), and the reviewer checks the code instead. A build or test that fails for that reason is expected: never work around it (no replace directives, vendored copies, stubs or edits to go.mod, package.json or lock files for it). Write the change with extra care, read the code you call instead of guessing its API, and list in "notes" of {{.SummaryPath}} what you could not check.{{else}}- Before you finish, build, and run the tests you added or changed and the tests of the code you touched. agnts then runs the full checks{{if .Checks}} ({{.Checks}}){{end}} and sends failures back to you, so do not run the whole suite again and again.{{end}}{{end}}
 
 {{define "commitinfo"}}{{with .CommitTypes}} Add "commit" to {{$.SummaryPath}} for the commit message of this change: {"commit": {"type": "one of {{join . ", "}}", "scope": "the area it changes in a word or two, lowercase (deps, auth, api), or \"\" when it is broad", "subject": "what it does, imperative and lowercase, at most 72 characters, no period"}}, for example {"type": "chore", "scope": "deps", "subject": "bump protos to v1.63.0, drop local replace"}.{{end}}{{end}}
@@ -1386,6 +1409,8 @@ type promptData struct {
 	MaxSuggest        int
 	ReflectPath       string
 	Changed           []string              // checkpoint: files changed so far
+	Restored          []string              // the files a stopped run changed, put back in /workspace
+	StopReason        string                // the error the run that left them failed with, if any
 	Outside           []string              // checkpoint: of those, the ones the analysis did not predict
 	CheckSteps        []CheckStep           // its checks
 	Others            []domain.Rule         // reflect: suggestions made in other repositories

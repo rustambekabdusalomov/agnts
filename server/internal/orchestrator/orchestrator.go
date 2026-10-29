@@ -66,6 +66,7 @@ type Deps struct {
 	// A source without one gets no comments or status moves.
 	Trackers map[domain.TicketSource]Tracker
 	Homes    Homes
+	Progress Progress // nil: a stopped run's uncommitted work is lost
 	Settings SettingsSource
 	Usage    UsageGate
 	Lessons  Lessons // nil disables the learn stage
@@ -128,6 +129,7 @@ type Orchestrator struct {
 	host        Host
 	trackers    map[domain.TicketSource]Tracker
 	homes       Homes
+	progress    Progress
 	settings    SettingsSource
 	usage       UsageGate
 	lessons     Lessons
@@ -198,7 +200,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 		q, _ = d.Store.(Queue)
 	}
 	return &Orchestrator{
-		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes,
+		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes, progress: d.Progress,
 		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
@@ -1116,7 +1118,7 @@ func (o *Orchestrator) settleKind(ctx context.Context, t domain.Ticket, run *dom
 // a fix loop, and stores the diff for review. In a ticket of several
 // repositories Claude works on all of them at once; each changed one gets
 // its commit, and the run fails only when none changed.
-func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) error {
+func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Ticket, run *domain.Run) (err error) {
 	rs, err := o.reposFor(ctx, t)
 	if err != nil {
 		return err
@@ -1129,6 +1131,23 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	}
 	defer o.closeWorkspace(ctx, t, ws)
 	defer o.collectGuard(ctx, ws, t, run) // before the container goes
+	// What a stopped run left unfinished comes back; what this run leaves
+	// unfinished is kept for the next one (before the container goes).
+	saved := o.restoreWork(ctx, t, ws, rs, run)
+	committed := false
+	defer func() {
+		var stop *stopError
+		switch {
+		case committed:
+			o.dropWork(ctx, t)
+		case ctx.Err() != nil:
+			o.saveWork(ctx, t, ws, rs, run, t.State == domain.StateTesting, "")
+		case err != nil && !errors.As(err, &stop):
+			o.saveWork(ctx, t, ws, rs, run, false, err.Error())
+		default:
+			o.saveWork(ctx, t, ws, rs, run, false, "")
+		}
+	}()
 	knowledge, tracker := o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 	if m := o.methodSkills(ctx, s, ws, run, rs); m != nil {
 		knowledge = append(knowledge, *m)
@@ -1169,7 +1188,15 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	feedback := t.Feedback
 	shots := o.copyFeedbackShots(ctx, ws, t)
 	attached := o.copyAttachments(ctx, ws, t)
-	if feedback != "" && session != "" {
+	if saved != nil {
+		base.Restored, base.StopReason = saved.files(), saved.Reason
+	}
+	if saved != nil && feedback == "" && session != "" {
+		// The session remembers the task: it carries on with it.
+		d := base
+		d.Checks, d.Attached = checksOf(rs), attached
+		prompt, err = render("resume", d)
+	} else if feedback != "" && session != "" {
 		modelStage = domain.ModelRetry
 		d := base
 		d.Feedback, d.FeedbackShots, d.Attached = feedback, shots, attached
@@ -1177,6 +1204,10 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		if err == nil && visual {
 			extra, _ := render("visualcheck", base)
 			prompt += extra
+		}
+		if err == nil && saved != nil {
+			extra, _ := render("restored", base)
+			prompt += "\n" + extra
 		}
 	} else {
 		d := base
@@ -1199,7 +1230,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		if t.HeadSHA == "" {
 			d.Landed = o.landedDependencies(ctx, t)
 		}
-		if baselineDue(s, t) && len(rs) > 0 {
+		if baselineDue(s, t) && len(rs) > 0 && saved == nil {
 			d.Baseline = o.baselineChecks(ctx, ws, t, rs, run)
 		}
 		if design != nil && design.Footprint != nil {
@@ -1215,6 +1246,10 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 			extra, _ := render("feedback", d)
 			prompt += "\n" + extra
 		}
+		if err == nil && saved != nil {
+			extra, _ := render("restored", d)
+			prompt += "\n" + extra
+		}
 	}
 	if err == nil {
 		prompt, err = o.withFollowUps(ctx, s, t, base, domain.SuggestFromWork, SummaryPath, prompt)
@@ -1223,8 +1258,13 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 
-	res, err := o.codeWithCheckpoint(ctx, s, ws, &t, run, rs, modelStage, prompt, session, design)
-	if err != nil {
+	var res ClaudeResult
+	if saved != nil && saved.Checking && feedback == "" {
+		// Claude had finished before the stop: only the checks were cut short.
+		res.SessionID = session
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventTicketUpdated,
+			Message: domain.AgentName(s.ModelFor(t, modelStage)) + " had finished the change before the stop: agnts runs the checks on it again"})
+	} else if res, err = o.codeWithCheckpoint(ctx, s, ws, &t, run, rs, modelStage, prompt, session, design); err != nil {
 		return err
 	}
 	if feedback != "" {
@@ -1293,6 +1333,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 	if err != nil {
 		return err
 	}
+	committed = true
 	if len(files) == 0 {
 		run.ExitReason = "no_changes"
 		if multi {

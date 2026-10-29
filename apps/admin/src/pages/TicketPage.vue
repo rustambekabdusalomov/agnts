@@ -27,6 +27,7 @@ import ModelPicker from '../components/ticket/ModelPicker.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import SwaggerResults from '../components/swagger/SwaggerResults.vue'
 import RepoPicker from '../components/ticket/RepoPicker.vue'
+import SavedWork from '../components/ticket/SavedWork.vue'
 import RepoDiffs from '../components/ticket/RepoDiffs.vue'
 import CommitMessages from '../components/ticket/CommitMessages.vue'
 import TicketSection from '../components/ticket/TicketSection.vue'
@@ -278,6 +279,8 @@ const postReport = ref(false)
 // Coding runs go to review without the checks; retry and requested
 // changes send it, starting from the ticket's own setting.
 const skipChecks = ref(false)
+// Retry or continue without the unfinished change the stopped run left.
+const discardWork = ref(false)
 // The repository whose diffs the Changes tab shows, in a ticket of several.
 const diffRepo = ref('')
 const reviewing = computed(() => tk.value?.state === 'waiting_for_review' && opensPr.value)
@@ -291,6 +294,7 @@ watch(
     assignees.value = [...(tk.value?.assignees ?? [])]
     postReport.value = false
     skipChecks.value = !!tk.value?.skipChecks
+    discardWork.value = false
     diffRepo.value = ''
   },
   { immediate: true },
@@ -363,6 +367,7 @@ const act = useMutation({
               note: retryNote.value.trim() || undefined,
               attachments: retryFiles.value.length ? retryFiles.value : undefined,
               skipChecks: skipChecks.value,
+              discardWork: discardWork.value || undefined,
             },
           }),
         )
@@ -370,9 +375,12 @@ const act = useMutation({
         return unwrap(
           api.POST('/tickets/{key}/continue', {
             ...path,
-            body: continueTakesNote.value
-              ? { note: continueNote.value.trim() || undefined, attachments: continueFiles.value.length ? continueFiles.value : undefined }
-              : {},
+            body: {
+              ...(continueTakesNote.value
+                ? { note: continueNote.value.trim() || undefined, attachments: continueFiles.value.length ? continueFiles.value : undefined }
+                : {}),
+              discardWork: discardWork.value || undefined,
+            },
           }),
         )
       case 'start-over':
@@ -1042,6 +1050,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <textarea id="continue-note" v-model="continueNote" maxlength="4000" :placeholder="t('ticket.continueNoteHint')" />
                 <FileAttach v-model="continueFiles" v-model:busy="continueUploading" />
               </div>
+              <SavedWork v-if="tk.savedWork?.length" v-model:discard="discardWork" :files="tk.savedWork" />
               <div class="actions">
                 <button class="btn btn-p" type="button" :disabled="act.isPending.value || continueUploading" @click="act.mutate('continue')">{{ t('ticket.continue') }}</button>
                 <button v-if="tk.canStartOver" class="btn" type="button" :disabled="act.isPending.value" @click="startOver">{{ t('ticket.startOver') }}</button>
@@ -1068,6 +1077,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                 <p class="hint">{{ t('ticket.skipChecksHint') }}</p>
               </div>
             </div>
+            <SavedWork v-if="tk.savedWork?.length" v-model:discard="discardWork" :files="tk.savedWork" />
             <div class="actions">
               <button class="btn btn-p" type="button" :disabled="act.isPending.value || retryUploading || (needsRepo(tk) && !tk.repoId)" @click="act.mutate('retry')">{{ t('ticket.retry') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.takeItMyself') }}</button>
@@ -1081,6 +1091,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
               <div class="help warn"><HiIcon name="info" /><p>{{ tk.stopReason || t('ticket.rateTitle') }}</p></div>
             </div>
             <RepoPicker v-if="canChangeRepo" :ticket="tk" />
+            <SavedWork v-if="tk.savedWork?.length" v-model:discard="discardWork" :files="tk.savedWork" />
             <div class="actions">
               <button class="btn btn-p" type="button" :disabled="act.isPending.value" @click="act.mutate('retry')">{{ t('ticket.resume') }}</button>
               <button class="btn btn-d" type="button" :disabled="act.isPending.value" @click="reject">{{ t('ticket.reject') }}</button>

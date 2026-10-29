@@ -25,6 +25,8 @@ class RetryTicketRequest {
      this.attachments,
 
      this.skipChecks,
+
+     this.discardWork,
   });
 
       /// How to get past the failure. The next coding run gets it with the error, like requested changes. Not allowed when the ticket resumes at pushing, since no Claude run follows.
@@ -66,19 +68,34 @@ class RetryTicketRequest {
 
 
 
+      /// Throw away the unfinished change a stopped run left (the ticket's savedWork); the next coding run starts from the last commit instead.
+  @JsonKey(
+    
+    name: r'discardWork',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? discardWork;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is RetryTicketRequest &&
       other.note == note &&
       other.attachments == attachments &&
-      other.skipChecks == skipChecks;
+      other.skipChecks == skipChecks &&
+      other.discardWork == discardWork;
 
     @override
     int get hashCode =>
         note.hashCode +
         attachments.hashCode +
-        skipChecks.hashCode;
+        skipChecks.hashCode +
+        discardWork.hashCode;
 
   factory RetryTicketRequest.fromJson(Map<String, dynamic> json) => _$RetryTicketRequestFromJson(json);
 

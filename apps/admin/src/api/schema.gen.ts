@@ -6842,6 +6842,8 @@ export interface components {
             continueTo?: components["schemas"]["TicketState"];
             /** @description This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note */
             canStartOver?: boolean;
+            /** @description Ticket page of a stopped (failed, rate-limited or rejected) ticket: the files of the unfinished change its last coding run left, which the next coding run picks up again (paths from /workspace). Absent when there is none. */
+            savedWork?: string[];
             spend?: components["schemas"]["TokenSpend"];
             waitReason?: components["schemas"]["WaitReason"];
             /** @description Why it waits, in a sentence */
@@ -10997,6 +10999,8 @@ export interface operations {
                     note?: string;
                     /** @description Uploads that go with the note; the next coding run reads them. Same rule as note. */
                     attachments?: number[];
+                    /** @description Throw away the unfinished change a stopped run left (the ticket's savedWork); the next coding run starts from the last commit instead. */
+                    discardWork?: boolean;
                 };
             };
         };
@@ -11203,6 +11207,8 @@ export interface operations {
                     attachments?: number[];
                     /** @description Skip the build, lint and test checks (and the proof and coverage that run tests) in this and later coding runs of the ticket, going to review on the code alone; false turns them back on. Left out, the ticket keeps its setting. */
                     skipChecks?: boolean;
+                    /** @description Throw away the unfinished change a stopped run left (the ticket's savedWork); the next coding run starts from the last commit instead. */
+                    discardWork?: boolean;
                 };
             };
         };

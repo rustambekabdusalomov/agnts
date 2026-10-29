@@ -27,6 +27,7 @@ type Tickets interface {
 	Reject(ctx context.Context, key, reason string, origin domain.Origin) (domain.Ticket, error)
 	RetryWithNote(ctx context.Context, key, note string, files []int64, origin domain.Origin) (domain.Ticket, error)
 	SetSkipChecks(ctx context.Context, key string, skip bool, origin domain.Origin) (domain.Ticket, error)
+	DiscardWork(ctx context.Context, key string, origin domain.Origin) error
 	EditCommitMessage(ctx context.Context, key string, repoID int64, sha, message string, origin domain.Origin) (domain.Ticket, error)
 	SetTicketNumber(ctx context.Context, key, number string, origin domain.Origin) (domain.Ticket, error)
 	ReapplyCommitFormat(ctx context.Context, key string, number *string, dryRun bool, only []string, origin domain.Origin) ([]orchestrator.CommitChange, domain.Ticket, error)
@@ -158,6 +159,9 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	if v.ContinueTo != "" {
 		to, startOver := gen.TicketState(v.ContinueTo), v.CanStartOver
 		d.Ticket.ContinueTo, d.Ticket.CanStartOver = &to, &startOver
+	}
+	if len(v.SavedWork) > 0 {
+		d.Ticket.SavedWork = &v.SavedWork
 	}
 	if d.Ticket.Repos != nil {
 		for i, r := range *d.Ticket.Repos {
@@ -388,6 +392,9 @@ func (s *Server) RetryTicket(w http.ResponseWriter, r *http.Request, key gen.Tic
 		if err := s.skipChecks(ctx, key, req.SkipChecks, origin(r)); err != nil {
 			return domain.Ticket{}, err
 		}
+		if err := s.discardWork(ctx, key, req.DiscardWork, origin(r)); err != nil {
+			return domain.Ticket{}, err
+		}
 		return s.opt.Tickets.RetryWithNote(ctx, key, note, ids(req.Attachments), origin(r))
 	})
 }
@@ -400,6 +407,15 @@ func (s *Server) skipChecks(ctx context.Context, key string, skip *bool, o domai
 	}
 	_, err := s.opt.Tickets.SetSkipChecks(ctx, key, *skip, o)
 	return err
+}
+
+// discardWork drops a stopped ticket's unfinished change before a retry or
+// continue, when the request asks for it.
+func (s *Server) discardWork(ctx context.Context, key string, discard *bool, o domain.Origin) error {
+	if discard == nil || !*discard {
+		return nil
+	}
+	return s.opt.Tickets.DiscardWork(ctx, key, o)
 }
 
 // ContinueTicket implements gen.ServerInterface.
@@ -416,6 +432,9 @@ func (s *Server) ContinueTicket(w http.ResponseWriter, r *http.Request, key gen.
 		note = *req.Note
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		if err := s.discardWork(ctx, key, req.DiscardWork, origin(r)); err != nil {
+			return domain.Ticket{}, err
+		}
 		return s.opt.Tickets.Continue(ctx, key, note, ids(req.Attachments), origin(r))
 	})
 }

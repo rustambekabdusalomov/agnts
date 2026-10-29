@@ -103,6 +103,8 @@ abstract class _$TicketCWProxy {
 
   Ticket canStartOver(bool? canStartOver);
 
+  Ticket savedWork(List<String>? savedWork);
+
   Ticket spend(TokenSpend? spend);
 
   Ticket waitReason(WaitReason? waitReason);
@@ -176,6 +178,7 @@ abstract class _$TicketCWProxy {
     bool? canPreview,
     TicketState? continueTo,
     bool? canStartOver,
+    List<String>? savedWork,
     TokenSpend? spend,
     WaitReason? waitReason,
     String? waitMessage,
@@ -348,6 +351,9 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
   Ticket canStartOver(bool? canStartOver) => this(canStartOver: canStartOver);
 
   @override
+  Ticket savedWork(List<String>? savedWork) => this(savedWork: savedWork);
+
+  @override
   Ticket spend(TokenSpend? spend) => this(spend: spend);
 
   @override
@@ -430,6 +436,7 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
     Object? canPreview = const $CopyWithPlaceholder(),
     Object? continueTo = const $CopyWithPlaceholder(),
     Object? canStartOver = const $CopyWithPlaceholder(),
+    Object? savedWork = const $CopyWithPlaceholder(),
     Object? spend = const $CopyWithPlaceholder(),
     Object? waitReason = const $CopyWithPlaceholder(),
     Object? waitMessage = const $CopyWithPlaceholder(),
@@ -633,6 +640,10 @@ class _$TicketCWProxyImpl implements _$TicketCWProxy {
           ? _value.canStartOver
           // ignore: cast_nullable_to_non_nullable
           : canStartOver as bool?,
+      savedWork: savedWork == const $CopyWithPlaceholder()
+          ? _value.savedWork
+          // ignore: cast_nullable_to_non_nullable
+          : savedWork as List<String>?,
       spend: spend == const $CopyWithPlaceholder()
           ? _value.spend
           // ignore: cast_nullable_to_non_nullable
@@ -819,6 +830,10 @@ Ticket _$TicketFromJson(
       (v) => $enumDecodeNullable(_$TicketStateEnumMap, v),
     ),
     canStartOver: $checkedConvert('canStartOver', (v) => v as bool?),
+    savedWork: $checkedConvert(
+      'savedWork',
+      (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+    ),
     spend: $checkedConvert(
       'spend',
       (v) => v == null ? null : TokenSpend.fromJson(v as Map<String, dynamic>),
@@ -890,6 +905,7 @@ Map<String, dynamic> _$TicketToJson(Ticket instance) => <String, dynamic>{
   'canPreview': ?instance.canPreview,
   'continueTo': ?_$TicketStateEnumMap[instance.continueTo],
   'canStartOver': ?instance.canStartOver,
+  'savedWork': ?instance.savedWork,
   'spend': ?instance.spend?.toJson(),
   'waitReason': ?_$WaitReasonEnumMap[instance.waitReason],
   'waitMessage': ?instance.waitMessage,

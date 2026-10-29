@@ -1422,6 +1422,32 @@ class AppLocalizationsUz extends AppLocalizations {
       'Hozircha yo‘q. Administrator sizga agnts’ning Muse kalitidagi ishlar uchun bepul kredit berishi mumkin.';
 
   @override
+  String get billingLimitsTitle => 'Bu oydagi limitlaringiz';
+
+  @override
+  String get billingLimitsSub => 'agnts’ning Muse kalitidagi ishlar uchun administrator belgilaydi. Har oyning 1-sanasida yangilanadi.';
+
+  @override
+  String billingMonthLimit(String used, String limit) {
+    return '$limit kreditdan $used tasi ishlatildi';
+  }
+
+  @override
+  String billingFallbackLimit(String name, String used, String limit) {
+    return '$name: $limit kreditdan $used tasi ishlatildi';
+  }
+
+  @override
+  String billingFallbackNoLimit(String name, String used) {
+    return '$name: $used kredit ishlatildi, limitsiz';
+  }
+
+  @override
+  String billingFallbackHint(String name) {
+    return '$name — zaxira provayder, siz uchun bepul: o‘z Meta akkauntingiz (yoki agnts’niki) tugaganda ishlaringiz unga o‘tadi. Limit tugaganda ular kreditlar hisobidan davom etadi.';
+  }
+
+  @override
   String get briefTitle => 'Repozitoriy tavsifi';
 
   @override
@@ -9914,7 +9940,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String platformFbHelp(String name) {
-    return 'Faqat agnts’ning Meta kaliti tugaganda va ishlar ${name}da davom etganda hisoblanadi. Limit tugaganda ularning ishlari Meta’ni kutadi.';
+    return 'Ular uchun bepul: o‘z Meta akkaunti yoki agnts’niki tugaganda ishlar ${name}dan foydalanadi. Limit tugaganda ishlar kreditlar hisobidan davom etadi.';
   }
 
   @override
@@ -14350,6 +14376,27 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get ticketRetryNoteHint => 'Ixtiyoriy. Xatoni qanday chetlab oʻtishni agnts ga yozing; keyingi ish uni xato bilan birga oladi.';
+
+  @override
+  String ticketSavedWork(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Toʻxtatilgan ishdan $count ta tugallanmagan oʻzgartirilgan fayl qoldi.',
+      one: 'Toʻxtatilgan ishdan $count ta tugallanmagan oʻzgartirilgan fayl qoldi.',
+    );
+    return '$_temp0 Keyingi ish uni toʻxtagan joyidan davom ettiradi.';
+  }
+
+  @override
+  String get ticketSavedWorkFiles => 'Fayllarni koʻrsatish';
+
+  @override
+  String get ticketDiscardWork => 'Tugallanmagan oʻzgarishlarni bekor qilish';
+
+  @override
+  String get ticketDiscardWorkHint =>
+      'Shunda keyingi ish oxirgi commitdan boshlanadi. Toʻxtatilgan ish notoʻgʻri yoʻldan ketgan boʻlsa foydalaning.';
 
   @override
   String get ticketTakeItMyself => 'Oʻzim qilaman';

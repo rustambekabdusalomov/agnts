@@ -43,6 +43,8 @@ type fakeRunner struct {
 	closed   int
 	lastHome []byte
 	onClaude func(orchestrator.ClaudeRequest)
+	onExec   func(cmd string)  // called for every command, with the lock held
+	head     string            // what git rev-parse HEAD prints, when set
 	written  map[string]string // every file agnts put into a workspace, last write wins
 	// stream, when set, sends more events during every invocation.
 	stream func(on func(orchestrator.ClaudeEvent))
@@ -116,6 +118,15 @@ func (w *fakeWS) Exec(_ context.Context, cmd string, _ time.Duration) (orchestra
 	w.r.mu.Lock()
 	defer w.r.mu.Unlock()
 	w.r.ran = append(w.r.ran, cmd)
+	if w.r.onExec != nil {
+		w.r.onExec(cmd)
+	}
+	if cmd == "git rev-parse HEAD" && w.r.head != "" {
+		return orchestrator.ExecResult{Output: w.r.head + "\n"}, nil
+	}
+	if strings.HasPrefix(cmd, "git apply ") {
+		w.edits = append(w.edits, "restored") // a saved change put back is in the tree
+	}
 	rs := w.r.execs[cmd]
 	if len(rs) == 0 {
 		return orchestrator.ExecResult{ExitCode: 0, Output: "ok"}, nil
@@ -388,6 +399,13 @@ func (h *memHomes) Load(_ int64, k string) ([]byte, error) {
 }
 func (h *memHomes) Save(_ int64, k string, b []byte) error { h.m.Store(k, b); return nil }
 
+// memProgress keeps saved work in memory.
+type memProgress struct{ memHomes }
+
+func (p *memProgress) Drop(_ int64, k string) error { p.m.Delete(k); return nil }
+
+func (p *memProgress) has(k string) bool { _, ok := p.m.Load(k); return ok }
+
 // ---- harness ----
 
 type harness struct {
@@ -404,6 +422,7 @@ type harness struct {
 	settings *fakeSettings
 	usage    *fakeUsage
 	shots    *memShots
+	progress *memProgress
 }
 
 func newHarness(t *testing.T) *harness {
@@ -421,7 +440,7 @@ func newHarness(t *testing.T) *harness {
 	}
 	h := &harness{t: t, ctx: ctx, store: store, pool: pool,
 		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{}, plane: &fakeTracker{},
-		shots: &memShots{m: map[string][]byte{}}}
+		shots: &memShots{m: map[string][]byte{}}, progress: &memProgress{}}
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.settings = &fakeSettings{s: domain.DefaultSettings()}
@@ -431,7 +450,7 @@ func newHarness(t *testing.T) *harness {
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
 		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker, domain.SourcePlane: h.plane},
-		Homes: &memHomes{}, Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
+		Homes: &memHomes{}, Progress: h.progress, Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
 		Shots: h.shots, PreviewEnvs: fakeEnvs{},
 	}, log)
 	return h

@@ -2667,6 +2667,42 @@ abstract class AppLocalizations {
   /// **'None yet. An Admin can give you free credits for runs on agnts\'s Muse key.'**
   String get billingFreeCreditsNone;
 
+  /// No description provided for @billingLimitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your limits this month'**
+  String get billingLimitsTitle;
+
+  /// No description provided for @billingLimitsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Set by an Admin for runs on agnts\'s Muse key. They reset on the 1st of each month.'**
+  String get billingLimitsSub;
+
+  /// No description provided for @billingMonthLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {limit} credits used'**
+  String billingMonthLimit(String used, String limit);
+
+  /// No description provided for @billingFallbackLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {used} of {limit} credits used'**
+  String billingFallbackLimit(String name, String used, String limit);
+
+  /// No description provided for @billingFallbackNoLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {used} credits used, no limit'**
+  String billingFallbackNoLimit(String name, String used);
+
+  /// No description provided for @billingFallbackHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is the backup provider, free for you: your runs move there when your own Meta account (or agnts\'s) is at its limit. When this allowance is used up, they continue on credits.'**
+  String billingFallbackHint(String name);
+
   /// No description provided for @briefTitle.
   ///
   /// In en, this message translates to:
@@ -17730,7 +17766,7 @@ abstract class AppLocalizations {
   /// No description provided for @platformFbHelp.
   ///
   /// In en, this message translates to:
-  /// **'Counted only while agnts\'s Meta key is out and runs continue on {name}. When it is used up, their runs wait for Meta instead.'**
+  /// **'Free for them: runs use {name} when their own Meta account or agnts\'s is at its limit. When it is used up, their runs continue on credits.'**
   String platformFbHelp(String name);
 
   /// No description provided for @platformUsageTotals.
@@ -25592,6 +25628,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Optional. Tell agnts how to get past the error; the next coding run gets it with the error.'**
   String get ticketRetryNoteHint;
+
+  /// No description provided for @ticketSavedWork.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {The stopped run left {count} changed file unfinished.} other {The stopped run left {count} changed files unfinished.}} The next run picks it up where it stopped.'**
+  String ticketSavedWork(num count);
+
+  /// No description provided for @ticketSavedWorkFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Show files'**
+  String get ticketSavedWorkFiles;
+
+  /// No description provided for @ticketDiscardWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard the unfinished change'**
+  String get ticketDiscardWork;
+
+  /// No description provided for @ticketDiscardWorkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The next run starts from the last commit instead. Use it when the stopped run was going the wrong way.'**
+  String get ticketDiscardWorkHint;
 
   /// No description provided for @ticketTakeItMyself.
   ///

@@ -387,6 +387,9 @@ paths:
                   maxItems: 10
                   description: Uploads that go with the note; the next coding run reads them. Same rule as note.
                   items: { type: integer, format: int64 }
+                discardWork:
+                  type: boolean
+                  description: Throw away the unfinished change a stopped run left (the ticket's savedWork); the next coding run starts from the last commit instead.
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -599,6 +602,9 @@ paths:
                 skipChecks:
                   type: boolean
                   description: Skip the build, lint and test checks (and the proof and coverage that run tests) in this and later coding runs of the ticket, going to review on the code alone; false turns them back on. Left out, the ticket keeps its setting.
+                discardWork:
+                  type: boolean
+                  description: Throw away the unfinished change a stopped run left (the ticket's savedWork); the next coding run starts from the last commit instead.
       responses:
         '200': { $ref: '#/components/responses/TicketOK' }
         '401': { $ref: '#/components/responses/Unauthorized' }
@@ -8492,6 +8498,10 @@ components:
         canPreview: { type: boolean, description: The ticket's repository has a preview command }
         continueTo: { $ref: '#/components/schemas/TicketState' }
         canStartOver: { type: boolean, description: "This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note" }
+        savedWork:
+          type: array
+          items: { type: string }
+          description: "Ticket page of a stopped (failed, rate-limited or rejected) ticket: the files of the unfinished change its last coding run left, which the next coding run picks up again (paths from /workspace). Absent when there is none."
         spend: { $ref: '#/components/schemas/TokenSpend' }
         waitReason: { $ref: '#/components/schemas/WaitReason' }
         waitMessage: { type: string, description: "Why it waits, in a sentence" }
