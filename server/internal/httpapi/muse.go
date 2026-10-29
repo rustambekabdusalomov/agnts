@@ -17,6 +17,8 @@ type MuseService interface {
 	LoginStatus(id string, ws, user int64) (musecredits.Login, bool)
 	Free(ctx context.Context, user int64) (musecredits.FreeCredits, error)
 	SetFree(ctx context.Context, user, limit, by int64) (musecredits.FreeCredits, error)
+	Usage(ctx context.Context, user int64) (musecredits.Usage, error)
+	SetLimit(ctx context.Context, user, limit, by int64) (musecredits.Usage, error)
 }
 
 // ModelInfo describes a model listModels offers.
@@ -51,6 +53,10 @@ func toMuseLogin(l musecredits.Login) gen.MuseLogin {
 
 func toFreeCredits(f musecredits.FreeCredits) gen.FreeCredits {
 	return gen.FreeCredits{Limit: f.Limit, Used: f.Used, Remaining: f.Remaining, SetAt: f.SetAt}
+}
+
+func toCreditUsage(u musecredits.Usage) gen.CreditUsage {
+	return gen.CreditUsage{MonthLimit: u.MonthLimit, MonthUsed: u.MonthUsed, TotalUsed: u.TotalUsed, SetAt: u.SetAt}
 }
 
 // StartMyMuseLogin implements gen.ServerInterface.
@@ -149,6 +155,31 @@ func (s *Server) SetFreeCredits(w http.ResponseWriter, r *http.Request, id int64
 		return
 	}
 	writeJSON(w, http.StatusOK, toFreeCredits(f))
+}
+
+// SetCreditLimit implements gen.ServerInterface.
+func (s *Server) SetCreditLimit(w http.ResponseWriter, r *http.Request, id int64) {
+	if s.museOff(w) {
+		return
+	}
+	var req struct {
+		Limit int64 `json:"limit"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	admin, _ := userFrom(r.Context())
+	u, err := s.opt.Muse.SetLimit(domain.System(r.Context()), id, req.Limit, admin.ID)
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		writeError(w, http.StatusNotFound, "not_found", "no such user")
+		return
+	case err != nil:
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, toCreditUsage(u))
 }
 
 // ListModels implements gen.ServerInterface.

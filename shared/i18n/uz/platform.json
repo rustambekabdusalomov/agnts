@@ -112,6 +112,18 @@
     "freeCreditsUsed": "Hozircha {limit} dan {used} sarflangan.",
     "freeCreditsLimit": "Kreditlar (1 kredit = $0.01; 0 — kreditsiz)",
     "freeCreditsWorth": "Bu agnts’ning Muse kaliti orqali {amount} lik model chaqiruvlari.",
-    "freeCreditsInvalid": "0 dan 10 000 000 gacha butun son kiriting."
+    "freeCreditsInvalid": "0 dan 10 000 000 gacha butun son kiriting.",
+    "creditUsage": "Shu oydagi sarf",
+    "creditUsageTotal": "jami {n}",
+    "setLimit": "Limit belgilash",
+    "limitTitle": "Oylik kredit limiti",
+    "limitSet": "{name} oyiga {n} kreditgacha ({amount}) sarflashi mumkin",
+    "limitRemoved": "{name} uchun oylik limit olib tashlandi",
+    "limitUsed": "Shu oy {used} kredit ({amount}) sarflangan, jami {total}.",
+    "limitField": "Oyiga kreditlar (1 kredit = $0.01; 0 — limitsiz)",
+    "limitHelp": "Bepul va ish maydoni kreditlari birgalikda. Limit tugagach, ishga tushirishlar keyingi oygacha yoki siz uni oshirguningizcha to'xtaydi.",
+    "limitWorth": "Oyiga {amount} gacha model chaqiruvlari.",
+    "limitNone": "Limitsiz: sarfni faqat ularning kreditlari cheklaydi.",
+    "usageTotals": "Shu oy: hammada {used} kredit ({amount}); {limited} kishida limit bor."
   }
 }

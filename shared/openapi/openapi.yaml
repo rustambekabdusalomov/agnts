@@ -4674,6 +4674,35 @@ paths:
               schema: { $ref: '#/components/schemas/FreeCredits' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /platform/users/{id}/credit-limit:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: setCreditLimit
+      summary: Set the most credits a person may spend on agnts's Muse key per calendar month, free and bought together (Admin); 0 is no limit
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [limit]
+              properties:
+                limit: { type: integer, format: int64, minimum: 0, maximum: 10000000, description: 'Credits per month (1 credit = $0.01 of model cost); 0 is no limit' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreditUsage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /platform/runs:
     get:
       operationId: listPlatformRuns
@@ -7410,6 +7439,7 @@ components:
           description: The workspaces they belong to (not deleted), with their role
           items: { $ref: '#/components/schemas/WorkspaceSummary' }
         freeCredits: { $ref: '#/components/schemas/FreeCredits' }
+        creditUsage: { $ref: '#/components/schemas/CreditUsage' }
 
     WorkspaceSummary:
       type: object
@@ -8904,6 +8934,16 @@ components:
         limit: { type: integer, format: int64 }
         used: { type: integer, format: int64 }
         remaining: { type: integer, format: int64 }
+        setAt: { type: string, format: date-time }
+
+    CreditUsage:
+      type: object
+      description: What a person spent on agnts's Muse key (free and bought credits together) and the monthly limit an Admin set (1 credit = $0.01)
+      required: [monthLimit, monthUsed, totalUsed]
+      properties:
+        monthLimit: { type: integer, format: int64, description: 'Credits per calendar month (UTC); 0 is no limit' }
+        monthUsed: { type: integer, format: int64, description: Credits spent this calendar month }
+        totalUsed: { type: integer, format: int64, description: Credits spent ever }
         setAt: { type: string, format: date-time }
 
     StageModels:

@@ -188,3 +188,69 @@ func TestWorkspaceBudgetPerRun(t *testing.T) {
 		t.Fatalf("no setting: limit %v, want the $10 the wallet has", b.Limit)
 	}
 }
+
+// TestMonthlyLimitStopsSpend: an Admin limits a person to 30 credits a
+// month; a run may hold only what is left of it, whatever pays, and once
+// it is spent no new run starts until the Admin raises it.
+func TestMonthlyLimitStopsSpend(t *testing.T) {
+	pool := pgtest.Open(t)
+	pgtest.Reset(t, pool)
+	pgtest.Exec(t, pool, `DROP TABLE IF EXISTS muse_entries, muse_hold_legs, muse_holds, muse_accounts`)
+	ctx, ws := pgtest.Workspace(t, pool, "muse-limit")
+	sys := domain.System(ctx)
+	dev := pgtest.User(t, pool, "dev")
+	admin := pgtest.User(t, pool, "admin")
+	pgtest.Exec(t, pool, `UPDATE workspaces SET credits_balance = 0 WHERE id = $1`, ws)
+	credits := postgres.NewCredits(pool)
+	svc := musecredits.New(musecredits.Config{RunCap: 2500}, pool, credits)
+	if err := svc.Migrate(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := credits.Add(sys, postgres.LedgerEntry{WorkspaceID: ws, Amount: 1000, Reason: postgres.CreditGrant}); err != nil {
+		t.Fatal(err)
+	}
+	u, err := svc.SetLimit(ctx, dev, 30, admin)
+	if err != nil || u.MonthLimit != 30 || u.MonthUsed != 0 || u.SetBy == nil || *u.SetBy != admin {
+		t.Fatalf("set limit = %+v, %v", u, err)
+	}
+
+	rctx := domain.WithClaude(ctx, domain.ClaudeAccount{Credits: true, UserID: dev})
+	b, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9101, WorkspaceID: ws})
+	if err != nil || b.Limit != 30*money.Cent || len(b.Caps) != 1 {
+		t.Fatalf("budget = %+v, %v; want a 30¢ limit under the person's cap", b, err)
+	}
+	l := svc.Ledger()
+	h, err := l.Hold(ctx, budget.HoldRequest{Key: b.Key, Payers: b.Payers, Caps: b.Caps, Amount: 30 * money.Cent})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := l.Extend(ctx, h.ID, money.Cent); err == nil {
+		t.Fatal("a hold went past the monthly limit")
+	}
+	if _, err := l.Commit(ctx, h.ID, 30*money.Cent); err != nil {
+		t.Fatal(err)
+	}
+	if u, _ = svc.Usage(ctx, dev); u.MonthUsed != 30 || u.TotalUsed != 30 {
+		t.Fatalf("usage = %+v, want 30 used", u)
+	}
+	if _, err := svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9102, WorkspaceID: ws}); err == nil {
+		t.Fatal("a run started past the monthly limit")
+	}
+	// Raising the limit gives the difference; spend this month still counts.
+	if _, err := svc.SetLimit(ctx, dev, 50, admin); err != nil {
+		t.Fatal(err)
+	}
+	if b, err = svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9102, WorkspaceID: ws}); err != nil || b.Limit != 20*money.Cent {
+		t.Fatalf("raised budget = %+v, %v; want 20¢ left", b, err)
+	}
+	// No limit: only the wallet bounds the run.
+	if _, err := svc.SetLimit(ctx, dev, 0, admin); err != nil {
+		t.Fatal(err)
+	}
+	if b, err = svc.Budget(rctx, orchestrator.ClaudeRequest{RunID: 9103, WorkspaceID: ws}); err != nil || len(b.Caps) != 0 {
+		t.Fatalf("unlimited budget = %+v, %v", b, err)
+	}
+	if _, err := svc.SetLimit(ctx, dev, -5, admin); err == nil {
+		t.Fatal("negative limit accepted")
+	}
+}

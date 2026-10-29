@@ -58,6 +58,37 @@ const setCredits = useMutation({
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
 const creditOpen = computed({ get: () => !!crediting.value, set: (v: boolean) => { if (!v) crediting.value = null } })
+
+// Usage and the monthly limit: what a person spent this month on agnts's
+// Muse key, free and workspace credits together; runs stop at the limit.
+const totals = computed(() => {
+  const all = people.value
+  return { used: all.reduce((n, u) => n + (u.creditUsage?.monthUsed ?? 0), 0), limited: all.filter((u) => u.creditUsage?.monthLimit).length }
+})
+// The bar shows what is spent: amber from four fifths, red at the limit.
+const usedPct = (u: PlatformUser) => {
+  const c = u.creditUsage
+  return c?.monthLimit ? Math.min(100, Math.round((c.monthUsed / c.monthLimit) * 100)) : 0
+}
+const usedLevel = (u: PlatformUser) => (usedPct(u) >= 100 ? 'bad' : usedPct(u) >= 80 ? 'warn' : '')
+const LIMIT_PRESETS = [0, 1000, 5000, 20000]
+const limiting = ref<PlatformUser | null>(null)
+const monthLimit = ref(0)
+function editLimit(u: PlatformUser) {
+  limiting.value = u
+  monthLimit.value = u.creditUsage?.monthLimit ?? 0
+}
+const limitOk = computed(() => Number.isInteger(monthLimit.value) && monthLimit.value >= 0 && monthLimit.value <= 10_000_000)
+const setLimit = useMutation({
+  mutationFn: (u: PlatformUser) => unwrap(api.PUT('/platform/users/{id}/credit-limit', { params: { path: { id: u.user.id } }, body: { limit: monthLimit.value } })),
+  onSuccess: (cu, u) => {
+    ui.notify(cu.monthLimit ? t('platform.limitSet', { name: nameOf(u.user), n: cu.monthLimit, amount: usd(cu.monthLimit) }) : t('platform.limitRemoved', { name: nameOf(u.user) }))
+    limiting.value = null
+    void qc.invalidateQueries({ queryKey: ['platform', 'users'] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
+const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => { if (!v) limiting.value = null } })
 </script>
 
 <template>
@@ -75,6 +106,9 @@ const creditOpen = computed({ get: () => !!crediting.value, set: (v: boolean) =>
         <input v-model="q" type="search" :placeholder="t('platform.searchUsers')" :aria-label="t('platform.searchUsers')">
       </label>
     </div>
+    <p v-if="!users.isPending.value && people.length" class="hint">
+      {{ t('platform.usageTotals', { used: totals.used, amount: usd(totals.used), limited: totals.limited }) }}
+    </p>
     <p v-if="users.isPending.value" class="hint">{{ t('common.loading') }}</p>
     <p v-else-if="!list.length" class="empty">{{ t('platform.noUsers') }}</p>
     <div v-else class="tw">
@@ -82,7 +116,7 @@ const creditOpen = computed({ get: () => !!crediting.value, set: (v: boolean) =>
         <thead>
           <tr>
             <th>{{ t('platform.user') }}</th><th>{{ t('platform.signIn') }}</th><th>{{ t('platform.workspaces') }}</th>
-            <th>{{ t('platform.freeCredits') }}</th><th>{{ t('platform.joined') }}</th><th>{{ t('platform.lastSeen') }}</th><th />
+            <th>{{ t('platform.freeCredits') }}</th><th>{{ t('platform.creditUsage') }}</th><th>{{ t('platform.joined') }}</th><th>{{ t('platform.lastSeen') }}</th><th />
           </tr>
         </thead>
         <tbody>
@@ -111,9 +145,23 @@ const creditOpen = computed({ get: () => !!crediting.value, set: (v: boolean) =>
               </template>
               <span v-else class="muted">—</span>
             </td>
+            <td style="min-width: 150px">
+              <template v-if="u.creditUsage">
+                <span class="mono">{{ u.creditUsage.monthUsed }}<template v-if="u.creditUsage.monthLimit"> / {{ u.creditUsage.monthLimit }}</template></span>
+                <small class="muted"> · {{ usd(u.creditUsage.monthUsed) }}</small>
+                <span v-if="u.creditUsage.monthLimit" class="bar me-bar" :class="usedLevel(u)" aria-hidden="true"><span :style="{ width: usedPct(u) + '%' }" /></span>
+                <small class="muted" style="display: block">
+                  <template v-if="!u.creditUsage.monthLimit">{{ t('platform.noLimit') }} · </template>{{ t('platform.creditUsageTotal', { n: u.creditUsage.totalUsed }) }}
+                </small>
+              </template>
+              <span v-else class="muted">—</span>
+            </td>
             <td class="hint">{{ ago(u.user.createdAt) }}</td>
             <td class="hint">{{ ago(u.lastSignInAt) }}</td>
-            <td style="text-align: right"><button class="btn btn-s" @click="editCredits(u)">{{ t('platform.setFreeCredits') }}</button></td>
+            <td style="text-align: right; white-space: nowrap">
+              <button class="btn btn-s" @click="editCredits(u)">{{ t('platform.setFreeCredits') }}</button>
+              <button class="btn btn-s" style="margin-left: 6px" @click="editLimit(u)">{{ t('platform.setLimit') }}</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -142,6 +190,34 @@ const creditOpen = computed({ get: () => !!crediting.value, set: (v: boolean) =>
           {{ n }} <span class="muted">{{ usd(n) }}</span>
         </button>
       </div>
+    </div>
+  </ConfirmDialog>
+
+  <ConfirmDialog
+    v-model="limitOpen"
+    :title="t('platform.limitTitle')"
+    :message="limiting ? nameOf(limiting.user) : ''"
+    :confirm-label="t('platform.setLimit')"
+    :busy="setLimit.isPending.value"
+    @confirm="limiting && limitOk && setLimit.mutate(limiting)"
+  >
+    <div class="stack" style="gap: 10px; width: 100%; margin-top: 12px">
+      <p v-if="limiting?.creditUsage" class="hint">
+        {{ t('platform.limitUsed', { used: limiting.creditUsage.monthUsed, amount: usd(limiting.creditUsage.monthUsed), total: limiting.creditUsage.totalUsed }) }}
+      </p>
+      <label class="field">
+        <span class="flbl">{{ t('platform.limitField') }}</span>
+        <input v-model.number="monthLimit" class="cfg-in" type="number" min="0" max="10000000" step="100">
+      </label>
+      <p class="hint">
+        {{ !limitOk ? t('platform.freeCreditsInvalid') : monthLimit ? t('platform.limitWorth', { amount: usd(monthLimit) }) : t('platform.limitNone') }}
+      </p>
+      <div class="seg" role="group" :aria-label="t('platform.limitField')">
+        <button v-for="n in LIMIT_PRESETS" :key="n" type="button" class="seg-b" :aria-pressed="monthLimit === n" @click="monthLimit = n">
+          {{ n || t('platform.noLimit') }} <span v-if="n" class="muted">{{ usd(n) }}</span>
+        </button>
+      </div>
+      <p class="hint">{{ t('platform.limitHelp') }}</p>
     </div>
   </ConfirmDialog>
 </template>
