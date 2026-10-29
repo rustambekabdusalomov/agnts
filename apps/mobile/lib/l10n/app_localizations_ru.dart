@@ -10206,6 +10206,122 @@ class AppLocalizationsRu extends AppLocalizations {
   String get platformFreeCreditsInvalid => 'Введите целое число от 0 до 10 000 000.';
 
   @override
+  String get platformCreditUsage => 'Расход за месяц';
+
+  @override
+  String platformCreditUsageTotal(String n) {
+    return 'всего $n';
+  }
+
+  @override
+  String get platformSetLimit => 'Задать лимит';
+
+  @override
+  String get platformLimitTitle => 'Месячный лимит кредитов';
+
+  @override
+  String platformLimitSet(String name, String n, String amount) {
+    return '$name может тратить до $n кредитов ($amount) в месяц';
+  }
+
+  @override
+  String get platformMuseProvider => 'Провайдер Muse';
+
+  @override
+  String get platformMuseProviderSub => 'Куда идут запуски за кредиты agnts. Собственные аккаунты Meta пользователей не затрагиваются.';
+
+  @override
+  String get platformMp_auto => 'Авто';
+
+  @override
+  String get platformMp_primary => 'Только Meta';
+
+  @override
+  String get platformMp_fallback => 'Только резервный';
+
+  @override
+  String platformMpNote_auto(String name) {
+    return 'Ключ Meta от agnts. Когда он исчерпан, запуски продолжают свою сессию на $name.';
+  }
+
+  @override
+  String get platformMpNote_primary => 'Только ключ Meta от agnts. Запуски останавливаются, когда он исчерпан.';
+
+  @override
+  String platformMpNote_fallback(String name) {
+    return 'Все запуски за кредиты идут на $name.';
+  }
+
+  @override
+  String get platformMpFallback => 'Резервный';
+
+  @override
+  String get platformMpNone => 'На этом сервере нет резервного провайдера (AGNTS_MUSE_FALLBACK_KEY).';
+
+  @override
+  String platformMpOut(String time) {
+    return 'Meta недоступна до $time';
+  }
+
+  @override
+  String platformMpSet(String mode) {
+    return 'Запуски за кредиты: $mode';
+  }
+
+  @override
+  String platformLimitRemoved(String name) {
+    return 'У $name больше нет месячного лимита';
+  }
+
+  @override
+  String platformLimitUsed(String used, String amount, String total) {
+    return 'В этом месяце потрачено $used кредитов ($amount), всего $total.';
+  }
+
+  @override
+  String get platformLimitField => 'Кредитов в месяц (1 кредит = \$0,01; 0 — без лимита)';
+
+  @override
+  String get platformLimitHelp =>
+      'Бесплатные кредиты и кредиты пространства вместе. Когда лимит исчерпан, запуски останавливаются до следующего месяца или пока вы его не увеличите.';
+
+  @override
+  String platformLimitWorth(String amount) {
+    return 'До $amount на вызовы моделей в месяц.';
+  }
+
+  @override
+  String get platformLimitNone => 'Без лимита: расход ограничен только их кредитами.';
+
+  @override
+  String platformFbUsage(String name, String used) {
+    return '$name: $used';
+  }
+
+  @override
+  String platformFbUsed(String name, String used, String amount) {
+    return 'Потрачено на $name в этом месяце: $used кредитов ($amount).';
+  }
+
+  @override
+  String get platformFbUseDefault => 'Лимит сервера по умолчанию';
+
+  @override
+  String platformFbField(String name) {
+    return 'Кредитов в месяц на $name (0 — без лимита)';
+  }
+
+  @override
+  String platformFbHelp(String name) {
+    return 'Считается только пока ключ Meta от agnts исчерпан и запуски продолжаются на $name. Когда лимит исчерпан, их запуски ждут Meta.';
+  }
+
+  @override
+  String platformUsageTotals(String used, String amount, String limited) {
+    return 'В этом месяце: $used кредитов ($amount) у всех; лимит есть у $limited.';
+  }
+
+  @override
   String get previewTab => 'Превью';
 
   @override

@@ -11,28 +11,33 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(List<Widget> children) => ProviderScope(
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: ListView(padding: const EdgeInsets.symmetric(horizontal: 16), children: children)),
-      ),
-    );
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(
+      body: ListView(padding: const EdgeInsets.symmetric(horizontal: 16), children: children),
+    ),
+  ),
+);
 
-String _long(String name, int n) => 'diff --git a/$name b/$name\n@@ -1,1 +1,$n @@\n${[for (var i = 0; i < n; i++) '+line $i'].join('\n')}\n';
+String _long(String name, int n) =>
+    'diff --git a/$name b/$name\n@@ -1,1 +1,$n @@\n${[for (var i = 0; i < n; i++) '+line $i'].join('\n')}\n';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets('tapping a section\'s title closes it, and it stays closed on the next ticket', (tester) async {
-    await tester.pumpWidget(_app([
-      const TicketSection(id: 'notes', title: 'Notes', hint: '2', children: [Text('first note'), Text('second note')]),
-    ]));
+    await tester.pumpWidget(
+      _app([
+        const TicketSection(id: 'notes', title: 'Notes', hint: '2', children: [Text('first note'), Text('second note')]),
+      ]),
+    );
     expect(find.text('first note'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     await tester.tap(find.text('Notes'));
@@ -43,9 +48,11 @@ void main() {
 
     // Another ticket page (a new scope reads the saved choice).
     await tester.pumpWidget(const SizedBox());
-    await tester.pumpWidget(_app([
-      const TicketSection(id: 'notes', title: 'Notes', children: [Text('other note')]),
-    ]));
+    await tester.pumpWidget(
+      _app([
+        const TicketSection(id: 'notes', title: 'Notes', children: [Text('other note')]),
+      ]),
+    );
     await tester.pumpAndSettle();
     expect(find.text('other note'), findsNothing);
     await tester.tap(find.text('Notes'));
@@ -58,10 +65,16 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final f = FileChange(path: 'notes/a.txt', add: 80, del: 0, diff: _long('notes/a.txt', 80));
-    await tester.pumpWidget(_app([
-      const SizedBox(height: 100),
-      TicketSection(id: 'diff', title: 'Diff', children: [FileDiff(file: f, initiallyOpen: true)]),
-    ]));
+    await tester.pumpWidget(
+      _app([
+        const SizedBox(height: 100),
+        TicketSection(
+          id: 'diff',
+          title: 'Diff',
+          children: [FileDiff(file: f, initiallyOpen: true)],
+        ),
+      ]),
+    );
     await tester.pumpAndSettle();
     final list = tester.getTopLeft(find.byType(ListView)).dy;
     await tester.drag(find.byType(ListView), const Offset(0, -600));

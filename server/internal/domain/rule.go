@@ -53,8 +53,8 @@ const (
 	DeliverSkill  = "skill"  // a skill Claude loads when its description matches the work
 )
 
-// Lesson tags: what kind of lesson a learned rule is, for counting which
-// kinds agnts keeps getting wrong.
+// LessonTags are the kinds of lesson a learned rule can be, for counting
+// which kinds agnts keeps getting wrong.
 var LessonTags = []string{"reuse", "layer", "tests", "style", "logic", "other"}
 
 // CleanLessonTag returns tag when it is one of LessonTags, else "".

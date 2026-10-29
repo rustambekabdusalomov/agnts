@@ -32,12 +32,22 @@ class FormField2 extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(label, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2)),
-        const SizedBox(height: 6),
-        child,
-        if (help != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(help!, style: TextStyle(fontSize: 13, color: c.ink3, height: 1.35))),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2),
+          ),
+          const SizedBox(height: 6),
+          child,
+          if (help != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(help!, style: TextStyle(fontSize: 13, color: c.ink3, height: 1.35)),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -54,16 +64,22 @@ class SheetHead extends StatelessWidget {
     final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            if (sub != null) ...[const SizedBox(height: 2), Text(sub!, style: TextStyle(color: c.ink3, fontSize: 14))],
-          ]),
-        ),
-        const SizedBox(width: 12),
-        RoundIconButton('close', tooltip: l.navClose, onTap: () => Navigator.pop(context)),
-      ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                if (sub != null) ...[const SizedBox(height: 2), Text(sub!, style: TextStyle(color: c.ink3, fontSize: 14))],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          RoundIconButton('close', tooltip: l.navClose, onTap: () => Navigator.pop(context)),
+        ],
+      ),
     );
   }
 }
@@ -134,7 +150,9 @@ class _RuleSheetState extends ConsumerState<RuleSheet> {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
     try {
-      final res = await _api.tryEnforce(tryEnforceInput: TryEnforceInput(enforce: _enforce(), repoId: _repoId));
+      final res = await _api.tryEnforce(
+        tryEnforceInput: TryEnforceInput(enforce: _enforce(), repoId: _repoId),
+      );
       setState(() {
         _tried = res.data;
         _error = null;
@@ -185,83 +203,101 @@ class _RuleSheetState extends ConsumerState<RuleSheet> {
     final repos = widget.repos.where((x) => x.archivedAt == null || x.id == r?.repoId).toList();
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        SheetHead(title: r?.title ?? l.rulesAdd, sub: l.rulesDrawerSub),
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              FormField2(
-                label: l.rulesRuleTitle,
-                child: TextField(controller: _title, maxLength: 200, decoration: InputDecoration(hintText: l.rulesTitlePlaceholder, counterText: '')),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHead(title: r?.title ?? l.rulesAdd, sub: l.rulesDrawerSub),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FormField2(
+                    label: l.rulesRuleTitle,
+                    child: TextField(
+                      controller: _title,
+                      maxLength: 200,
+                      decoration: InputDecoration(hintText: l.rulesTitlePlaceholder, counterText: ''),
+                    ),
+                  ),
+                  FormField2(
+                    label: l.rulesKind,
+                    help: _kind == RuleKind.context ? l.rulesKindContextHelp : l.rulesKindRuleHelp,
+                    child: Segmented<RuleKind>(
+                      full: true,
+                      options: [
+                        (RuleKind.rule, l.rulesKindRule),
+                        (RuleKind.context, l.rulesKindContext),
+                        if (_kind == RuleKind.tip) (RuleKind.tip, l.harnessRulesBadgeTip),
+                      ],
+                      value: _kind,
+                      onChanged: (v) => setState(() => _kind = v),
+                    ),
+                  ),
+                  FormField2(
+                    label: l.rulesScope,
+                    help: l.rulesScopeHelp,
+                    child: DropdownButtonFormField<int?>(
+                      initialValue: _repoId,
+                      isExpanded: true,
+                      items: [
+                        DropdownMenuItem<int?>(value: null, child: Text('${l.rulesGlobal} · ${l.rulesGlobalHint}')),
+                        for (final x in repos) DropdownMenuItem<int?>(value: x.id, child: Text(x.name)),
+                      ],
+                      onChanged: (v) => setState(() => _repoId = v),
+                    ),
+                  ),
+                  FormField2(
+                    label: l.rulesBody,
+                    help: l.rulesBodyHelp,
+                    child: TextField(
+                      controller: _body,
+                      minLines: 5,
+                      maxLines: 12,
+                      maxLength: 10000,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(hintText: l.rulesBodyPlaceholder, counterText: ''),
+                    ),
+                  ),
+                  FormField2(
+                    label: l.harnessRulesDelivery,
+                    help: _delivery == RuleDeliveryEnum.skill ? l.harnessRulesDeliveryHelp_skill : l.harnessRulesDeliveryHelp_prompt,
+                    child: Segmented<RuleDeliveryEnum>(
+                      full: true,
+                      options: [
+                        (RuleDeliveryEnum.prompt, l.harnessRulesDelivery_prompt),
+                        (RuleDeliveryEnum.skill, l.harnessRulesDelivery_skill),
+                      ],
+                      value: _delivery,
+                      onChanged: (v) => setState(() => _delivery = v),
+                    ),
+                  ),
+                  if (_kind == RuleKind.rule) _enforceBox(l, c, hint),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l.rulesEnabled),
+                    value: _enabled,
+                    onChanged: (v) => setState(() => _enabled = v),
+                  ),
+                  if (_rereview) Padding(padding: const EdgeInsets.only(top: 6), child: HelpBox(l.rulesRereviewHelp)),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: HelpBox(_error!, tone: Tone.bad),
+                    ),
+                  const SizedBox(height: 14),
+                  FilledButton(
+                    onPressed: _busy || _title.text.trim().isEmpty || _body.text.trim().isEmpty ? null : _save,
+                    child: Text(r != null ? l.formSave : l.rulesAddSubmit),
+                  ),
+                ],
               ),
-              FormField2(
-                label: l.rulesKind,
-                help: _kind == RuleKind.context ? l.rulesKindContextHelp : l.rulesKindRuleHelp,
-                child: Segmented<RuleKind>(
-                  full: true,
-                  options: [
-                    (RuleKind.rule, l.rulesKindRule),
-                    (RuleKind.context, l.rulesKindContext),
-                    if (_kind == RuleKind.tip) (RuleKind.tip, l.harnessRulesBadgeTip),
-                  ],
-                  value: _kind,
-                  onChanged: (v) => setState(() => _kind = v),
-                ),
-              ),
-              FormField2(
-                label: l.rulesScope,
-                help: l.rulesScopeHelp,
-                child: DropdownButtonFormField<int?>(
-                  initialValue: _repoId,
-                  isExpanded: true,
-                  items: [
-                    DropdownMenuItem<int?>(value: null, child: Text('${l.rulesGlobal} · ${l.rulesGlobalHint}')),
-                    for (final x in repos) DropdownMenuItem<int?>(value: x.id, child: Text(x.name)),
-                  ],
-                  onChanged: (v) => setState(() => _repoId = v),
-                ),
-              ),
-              FormField2(
-                label: l.rulesBody,
-                help: l.rulesBodyHelp,
-                child: TextField(
-                  controller: _body,
-                  minLines: 5,
-                  maxLines: 12,
-                  maxLength: 10000,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(hintText: l.rulesBodyPlaceholder, counterText: ''),
-                ),
-              ),
-              FormField2(
-                label: l.harnessRulesDelivery,
-                help: _delivery == RuleDeliveryEnum.skill ? l.harnessRulesDeliveryHelp_skill : l.harnessRulesDeliveryHelp_prompt,
-                child: Segmented<RuleDeliveryEnum>(
-                  full: true,
-                  options: [(RuleDeliveryEnum.prompt, l.harnessRulesDelivery_prompt), (RuleDeliveryEnum.skill, l.harnessRulesDelivery_skill)],
-                  value: _delivery,
-                  onChanged: (v) => setState(() => _delivery = v),
-                ),
-              ),
-              if (_kind == RuleKind.rule) _enforceBox(l, c, hint),
-              SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l.rulesEnabled),
-                value: _enabled,
-                onChanged: (v) => setState(() => _enabled = v),
-              ),
-              if (_rereview) Padding(padding: const EdgeInsets.only(top: 6), child: HelpBox(l.rulesRereviewHelp)),
-              if (_error != null) Padding(padding: const EdgeInsets.only(top: 10), child: HelpBox(_error!, tone: Tone.bad)),
-              const SizedBox(height: 14),
-              FilledButton(
-                onPressed: _busy || _title.text.trim().isEmpty || _body.text.trim().isEmpty ? null : _save,
-                child: Text(r != null ? l.formSave : l.rulesAddSubmit),
-              ),
-            ]),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -275,90 +311,121 @@ class _RuleSheetState extends ConsumerState<RuleSheet> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(border: Border.all(color: c.line2), borderRadius: BorderRadius.circular(12)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(children: [
-          Expanded(child: Text(l.harnessRulesEnforce, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2))),
-          Switch.adaptive(value: _enforceOn, onChanged: (v) => setState(() => _enforceOn = v)),
-        ]),
-        Text(l.harnessRulesEnforceHelp, style: hint),
-        if (_enforceOn) ...[
-          const SizedBox(height: 12),
-          FormField2(
-            label: l.harnessRulesOn,
-            help: onHelp,
-            child: Segmented<RuleEnforceOn_Enum>(
-              full: true,
-              options: [
-                (RuleEnforceOn_Enum.file, l.harnessRulesOn_file),
-                (RuleEnforceOn_Enum.bash, l.harnessRulesOn_bash),
-                (RuleEnforceOn_Enum.diff, l.harnessRulesOn_diff),
-              ],
-              value: _on,
-              onChanged: (v) => setState(() => _on = v),
-            ),
+      decoration: BoxDecoration(
+        border: Border.all(color: c.line2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l.harnessRulesEnforce,
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2),
+                ),
+              ),
+              Switch.adaptive(value: _enforceOn, onChanged: (v) => setState(() => _enforceOn = v)),
+            ],
           ),
-          if (_on != RuleEnforceOn_Enum.bash)
+          Text(l.harnessRulesEnforceHelp, style: hint),
+          if (_enforceOn) ...[
+            const SizedBox(height: 12),
             FormField2(
-              label: l.harnessRulesPaths,
-              child: TextField(
-                controller: _paths,
-                minLines: 1,
-                maxLines: 5,
-                style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13),
-                decoration: InputDecoration(hintText: l.harnessRulesPathsPlaceholder),
+              label: l.harnessRulesOn,
+              help: onHelp,
+              child: Segmented<RuleEnforceOn_Enum>(
+                full: true,
+                options: [
+                  (RuleEnforceOn_Enum.file, l.harnessRulesOn_file),
+                  (RuleEnforceOn_Enum.bash, l.harnessRulesOn_bash),
+                  (RuleEnforceOn_Enum.diff, l.harnessRulesOn_diff),
+                ],
+                value: _on,
+                onChanged: (v) => setState(() => _on = v),
               ),
             ),
-          FormField2(
-            label: l.harnessRulesPattern,
-            child: TextField(
-              controller: _pattern,
-              maxLength: 500,
-              style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13),
-              decoration: const InputDecoration(hintText: r'(?i)\bselect\b.+\bfrom\b', counterText: ''),
+            if (_on != RuleEnforceOn_Enum.bash)
+              FormField2(
+                label: l.harnessRulesPaths,
+                child: TextField(
+                  controller: _paths,
+                  minLines: 1,
+                  maxLines: 5,
+                  style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13),
+                  decoration: InputDecoration(hintText: l.harnessRulesPathsPlaceholder),
+                ),
+              ),
+            FormField2(
+              label: l.harnessRulesPattern,
+              child: TextField(
+                controller: _pattern,
+                maxLength: 500,
+                style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13),
+                decoration: const InputDecoration(hintText: r'(?i)\bselect\b.+\bfrom\b', counterText: ''),
+              ),
             ),
-          ),
-          FormField2(
-            label: l.harnessRulesAction,
-            child: Segmented<RuleEnforceActionEnum>(
-              full: true,
-              options: [(RuleEnforceActionEnum.block, l.harnessRulesAction_block), (RuleEnforceActionEnum.warn, l.harnessRulesAction_warn)],
-              value: _action,
-              onChanged: (v) => setState(() => _action = v),
+            FormField2(
+              label: l.harnessRulesAction,
+              child: Segmented<RuleEnforceActionEnum>(
+                full: true,
+                options: [
+                  (RuleEnforceActionEnum.block, l.harnessRulesAction_block),
+                  (RuleEnforceActionEnum.warn, l.harnessRulesAction_warn),
+                ],
+                value: _action,
+                onChanged: (v) => setState(() => _action = v),
+              ),
             ),
-          ),
-          FormField2(
-            label: l.harnessRulesMessage,
-            child: TextField(controller: _message, maxLength: 1000, decoration: InputDecoration(hintText: l.harnessRulesMessagePlaceholder, counterText: '')),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton(onPressed: _busy ? null : _try, child: Text(_busy ? l.harnessRulesTrying : l.harnessRulesTry)),
-          ),
-          if (t != null) ...[
-            const SizedBox(height: 10),
-            HelpBox(
-              t.note ?? '${l.harnessRulesTryChecked(t.checked)} ${t.hits.isEmpty ? l.harnessRulesTryNone : l.harnessRulesTryHits(t.tickets.length)}',
-              child: t.note != null || t.hits.isEmpty
-                  ? null
-                  : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      for (final h in t.hits)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text.rich(TextSpan(children: [
-                            TextSpan(text: '${h.ticket} ', style: const TextStyle(fontWeight: FontWeight.w700)),
-                            TextSpan(
-                              text: h.line != null ? '${h.path}:${h.line} ' : '${h.path} ',
-                              style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12),
+            FormField2(
+              label: l.harnessRulesMessage,
+              child: TextField(
+                controller: _message,
+                maxLength: 1000,
+                decoration: InputDecoration(hintText: l.harnessRulesMessagePlaceholder, counterText: ''),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton(onPressed: _busy ? null : _try, child: Text(_busy ? l.harnessRulesTrying : l.harnessRulesTry)),
+            ),
+            if (t != null) ...[
+              const SizedBox(height: 10),
+              HelpBox(
+                t.note ??
+                    '${l.harnessRulesTryChecked(t.checked)} ${t.hits.isEmpty ? l.harnessRulesTryNone : l.harnessRulesTryHits(t.tickets.length)}',
+                child: t.note != null || t.hits.isEmpty
+                    ? null
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final h in t.hits)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '${h.ticket} ',
+                                      style: const TextStyle(fontWeight: FontWeight.w700),
+                                    ),
+                                    TextSpan(
+                                      text: h.line != null ? '${h.path}:${h.line} ' : '${h.path} ',
+                                      style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12),
+                                    ),
+                                    TextSpan(text: h.text),
+                                  ],
+                                ),
+                              ),
                             ),
-                            TextSpan(text: h.text),
-                          ])),
-                        ),
-                    ]),
-            ),
+                        ],
+                      ),
+              ),
+            ],
           ],
         ],
-      ]),
+      ),
     );
   }
 }

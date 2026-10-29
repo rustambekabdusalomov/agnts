@@ -30,7 +30,13 @@ String prettyBody(String? s) {
 }
 
 /// A response status's tone: none is bad, 2xx ok, 3xx/4xx warn, 5xx bad.
-Tone statusTone(int s) => s == 0 ? Tone.bad : s < 300 ? Tone.ok : s < 500 ? Tone.warn : Tone.bad;
+Tone statusTone(int s) => s == 0
+    ? Tone.bad
+    : s < 300
+    ? Tone.ok
+    : s < 500
+    ? Tone.warn
+    : Tone.bad;
 
 String opKey(SwaggerOperation o) => '${o.method} ${o.path}';
 

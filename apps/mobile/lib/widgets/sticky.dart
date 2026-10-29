@@ -167,7 +167,11 @@ class _RenderStickyLayout extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     for (final child in [firstChild!, childAfter(firstChild!)!]) {
       final offset = (child.parentData! as _StickyParentData).offset;
-      final hit = result.addWithPaintOffset(offset: offset, position: position, hitTest: (r, p) => child.hitTest(r, position: p));
+      final hit = result.addWithPaintOffset(
+        offset: offset,
+        position: position,
+        hitTest: (r, p) => child.hitTest(r, position: p),
+      );
       if (hit) return true;
     }
     return false;

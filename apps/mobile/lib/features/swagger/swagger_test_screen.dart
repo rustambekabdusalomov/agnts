@@ -100,15 +100,21 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
       _error = null;
     });
     try {
-      final s = (await ref.read(apiProvider)!.getSwaggerApi().readSwaggerSpec(
-                swaggerSpecInput: SwaggerSpecInput(
-                  url: file == null ? (url ?? _specUrl.text).trim() : null,
-                  spec: file,
-                  auth: auth,
-                  login: usingLogin && file == null ? SwaggerSpecInputLogin(username: _specUser.text.trim(), password: _specPass.text) : null,
-                ),
-              ))
-          .data!;
+      final s =
+          (await ref
+                  .read(apiProvider)!
+                  .getSwaggerApi()
+                  .readSwaggerSpec(
+                    swaggerSpecInput: SwaggerSpecInput(
+                      url: file == null ? (url ?? _specUrl.text).trim() : null,
+                      spec: file,
+                      auth: auth,
+                      login: usingLogin && file == null
+                          ? SwaggerSpecInputLogin(username: _specUser.text.trim(), password: _specPass.text)
+                          : null,
+                    ),
+                  ))
+              .data!;
       setState(() {
         _spec = s;
         if (s.choices.isNotEmpty) return;
@@ -189,27 +195,31 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
       _error = null;
     });
     try {
-      final t = (await ref.read(apiProvider)!.getSwaggerApi().createSwaggerTest(
-                swaggerTestCreate: SwaggerTestCreate(
-                  specUrl: s!.specRef != null ? null : s.url,
-                  specRef: s.specRef,
-                  baseUrl: _baseUrl.text.trim(),
-                  operations: _ticked.isEmpty ? null : _ticked.toList(),
-                  writeEnabled: _write,
-                  notProduction: _write && _notProduction,
-                  auth: SwaggerAuthInput(
-                    kind: _authKind,
-                    name: _named ? _authName.text.trim() : null,
-                    value: _token.text.isEmpty ? null : _token.text,
-                  ),
-                  repoId: _repoId,
-                  notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
-                  rateLimit: _rate.round(),
-                  maxRequests: _maxRequests.round(),
-                  start: _start,
-                ),
-              ))
-          .data!;
+      final t =
+          (await ref
+                  .read(apiProvider)!
+                  .getSwaggerApi()
+                  .createSwaggerTest(
+                    swaggerTestCreate: SwaggerTestCreate(
+                      specUrl: s!.specRef != null ? null : s.url,
+                      specRef: s.specRef,
+                      baseUrl: _baseUrl.text.trim(),
+                      operations: _ticked.isEmpty ? null : _ticked.toList(),
+                      writeEnabled: _write,
+                      notProduction: _write && _notProduction,
+                      auth: SwaggerAuthInput(
+                        kind: _authKind,
+                        name: _named ? _authName.text.trim() : null,
+                        value: _token.text.isEmpty ? null : _token.text,
+                      ),
+                      repoId: _repoId,
+                      notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+                      rateLimit: _rate.round(),
+                      maxRequests: _maxRequests.round(),
+                      start: _start,
+                    ),
+                  ))
+              .data!;
       if (!mounted) return;
       showSnack(context, l.swaggerCreated(t.key));
       Navigator.pop(context, t.key);
@@ -231,14 +241,16 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
     return Scaffold(
       backgroundColor: c.bg,
       appBar: DetailBar(backLabel: l.navBack, title: l.mqualityNewTest),
-      bottomNavigationBar: ActionBar(children: [
-        Expanded(
-          child: FilledButton(
-            onPressed: _creating || _reading || !ready ? null : _create,
-            child: Text(_start == SwaggerTestCreateStartEnum.code ? l.swaggerCreateStart : l.swaggerCreate),
+      bottomNavigationBar: ActionBar(
+        children: [
+          Expanded(
+            child: FilledButton(
+              onPressed: _creating || _reading || !ready ? null : _create,
+              child: Text(_start == SwaggerTestCreateStartEnum.code ? l.swaggerCreateStart : l.swaggerCreate),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
@@ -247,46 +259,56 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
           FormField2(
             label: l.swaggerSpecUrl,
             help: _reading ? l.swaggerSpecReading : (_specFile != null ? l.mqualitySpecFile(_specFile!) : l.swaggerSpecHint),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              TextField(
-                controller: _specUrl,
-                keyboardType: TextInputType.url,
-                autocorrect: false,
-                style: mono,
-                textInputAction: TextInputAction.go,
-                onSubmitted: (_) => _specUrl.text.trim().isEmpty ? null : _read(),
-                decoration: InputDecoration(hintText: l.swaggerSpecUrlPh),
-              ),
-              const SizedBox(height: 8),
-              Row(children: [
-                FilledButton.tonal(onPressed: _reading || _specUrl.text.trim().isEmpty ? null : () => _read(), child: Text(l.swaggerSpecRead)),
-                const SizedBox(width: 8),
-                OutlinedButton(onPressed: _reading ? null : _upload, child: Text(l.swaggerSpecUpload)),
-              ]),
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _specAuthOpen,
-                title: Text(l.swaggerSpecAuth, style: const TextStyle(fontSize: 14)),
-                onChanged: (v) => setState(() => _specAuthOpen = v ?? false),
-              ),
-              if (_specAuthOpen) _specAuthBox(l, c, hint, mono),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _specUrl,
+                  keyboardType: TextInputType.url,
+                  autocorrect: false,
+                  style: mono,
+                  textInputAction: TextInputAction.go,
+                  onSubmitted: (_) => _specUrl.text.trim().isEmpty ? null : _read(),
+                  decoration: InputDecoration(hintText: l.swaggerSpecUrlPh),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    FilledButton.tonal(
+                      onPressed: _reading || _specUrl.text.trim().isEmpty ? null : () => _read(),
+                      child: Text(l.swaggerSpecRead),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton(onPressed: _reading ? null : _upload, child: Text(l.swaggerSpecUpload)),
+                  ],
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: _specAuthOpen,
+                  title: Text(l.swaggerSpecAuth, style: const TextStyle(fontSize: 14)),
+                  onChanged: (v) => setState(() => _specAuthOpen = v ?? false),
+                ),
+                if (_specAuthOpen) _specAuthBox(l, c, hint, mono),
+              ],
+            ),
           ),
           if (s != null && s.choices.isNotEmpty)
             FormField2(
               label: l.swaggerSpecChoose,
-              child: ListGroup(children: [
-                for (final ch in s.choices)
-                  ListRow(
-                    title: ch.name?.isNotEmpty == true ? ch.name! : ch.url,
-                    subtitle: ch.url,
-                    onTap: () {
-                      _specUrl.text = ch.url;
-                      _read(url: ch.url);
-                    },
-                  ),
-              ]),
+              child: ListGroup(
+                children: [
+                  for (final ch in s.choices)
+                    ListRow(
+                      title: ch.name?.isNotEmpty == true ? ch.name! : ch.url,
+                      subtitle: ch.url,
+                      onTap: () {
+                        _specUrl.text = ch.url;
+                        _read(url: ch.url);
+                      },
+                    ),
+                ],
+              ),
             ),
           if (ready) ..._form(l, c, s, hint, mono),
           if (_error != null) HelpBox(_error!, tone: Tone.bad),
@@ -299,46 +321,68 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
     final named = _specAuthKind == ApiAuthKind.header || _specAuthKind == ApiAuthKind.query;
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(12)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Segmented<_SpecAuthMode>(
-          full: true,
-          options: [(_SpecAuthMode.login, l.swaggerSpecAuthLogin), (_SpecAuthMode.token, l.swaggerSpecAuthToken)],
-          value: _specAuthMode,
-          onChanged: (v) => setState(() => _specAuthMode = v),
-        ),
-        const SizedBox(height: 10),
-        if (_specAuthMode == _SpecAuthMode.login) ...[
-          TextField(controller: _specUser, autocorrect: false, decoration: InputDecoration(hintText: l.swaggerSpecLogin)),
-          const SizedBox(height: 8),
-          TextField(controller: _specPass, obscureText: true, autocorrect: false, decoration: InputDecoration(hintText: l.swaggerSpecPassword)),
-          const SizedBox(height: 6),
-          Text(l.swaggerSpecLoginHint, style: hint),
-        ] else ...[
-          DropdownButtonFormField<ApiAuthKind>(
-            initialValue: _specAuthKind,
-            isExpanded: true,
-            items: [
-              for (final k in ApiAuthKind.values.where((k) => k != ApiAuthKind.none)) DropdownMenuItem(value: k, child: Text(authKindLabel(l, k))),
-            ],
-            onChanged: (v) => setState(() => _specAuthKind = v ?? _specAuthKind),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Segmented<_SpecAuthMode>(
+            full: true,
+            options: [(_SpecAuthMode.login, l.swaggerSpecAuthLogin), (_SpecAuthMode.token, l.swaggerSpecAuthToken)],
+            value: _specAuthMode,
+            onChanged: (v) => setState(() => _specAuthMode = v),
           ),
-          if (named) ...[
+          const SizedBox(height: 10),
+          if (_specAuthMode == _SpecAuthMode.login) ...[
+            TextField(
+              controller: _specUser,
+              autocorrect: false,
+              decoration: InputDecoration(hintText: l.swaggerSpecLogin),
+            ),
             const SizedBox(height: 8),
-            TextField(controller: _specAuthName, style: mono, autocorrect: false, decoration: InputDecoration(hintText: l.swaggerAuthName)),
+            TextField(
+              controller: _specPass,
+              obscureText: true,
+              autocorrect: false,
+              decoration: InputDecoration(hintText: l.swaggerSpecPassword),
+            ),
+            const SizedBox(height: 6),
+            Text(l.swaggerSpecLoginHint, style: hint),
+          ] else ...[
+            DropdownButtonFormField<ApiAuthKind>(
+              initialValue: _specAuthKind,
+              isExpanded: true,
+              items: [
+                for (final k in ApiAuthKind.values.where((k) => k != ApiAuthKind.none))
+                  DropdownMenuItem(value: k, child: Text(authKindLabel(l, k))),
+              ],
+              onChanged: (v) => setState(() => _specAuthKind = v ?? _specAuthKind),
+            ),
+            if (named) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _specAuthName,
+                style: mono,
+                autocorrect: false,
+                decoration: InputDecoration(hintText: l.swaggerAuthName),
+              ),
+            ],
+            const SizedBox(height: 8),
+            TextField(
+              controller: _specToken,
+              obscureText: true,
+              autocorrect: false,
+              style: mono,
+              decoration: InputDecoration(hintText: _specAuthKind == ApiAuthKind.basic ? l.swaggerAuthValueBasic : l.swaggerAuthValue),
+            ),
+            const SizedBox(height: 6),
+            Text(l.swaggerSpecAuthHint, style: hint),
           ],
-          const SizedBox(height: 8),
-          TextField(
-            controller: _specToken,
-            obscureText: true,
-            autocorrect: false,
-            style: mono,
-            decoration: InputDecoration(hintText: _specAuthKind == ApiAuthKind.basic ? l.swaggerAuthValueBasic : l.swaggerAuthValue),
-          ),
-          const SizedBox(height: 6),
-          Text(l.swaggerSpecAuthHint, style: hint),
         ],
-      ]),
+      ),
     );
   }
 
@@ -348,14 +392,14 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
     final schemes = s.securitySchemes.map((x) => x.name).join(', ');
     final repos = (ref.watch(reposProvider).value ?? const <Repository>[]).where((r) => r.archivedAt == null).toList();
     void setAll(bool on) => setState(() {
-          final next = {..._ticked};
-          for (final (_, list) in groups) {
-            for (final o in list) {
-              on ? next.add(opKey(o)) : next.remove(opKey(o));
-            }
-          }
-          _ticked = next;
-        });
+      final next = {..._ticked};
+      for (final (_, list) in groups) {
+        for (final o in list) {
+          on ? next.add(opKey(o)) : next.remove(opKey(o));
+        }
+      }
+      _ticked = next;
+    });
     return [
       Padding(
         padding: const EdgeInsets.only(bottom: 14),
@@ -367,21 +411,43 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
       FormField2(
         label: l.swaggerBaseUrl,
         help: l.swaggerBaseUrlHint,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          TextField(controller: _baseUrl, keyboardType: TextInputType.url, autocorrect: false, style: mono.copyWith(fontWeight: FontWeight.w600)),
-          if (s.servers.length > 1) ...[
-            const SizedBox(height: 6),
-            Wrap(spacing: 6, runSpacing: 6, children: [
-              for (final sv in s.servers)
-                FilterChipH(label: sv.description?.isNotEmpty == true ? sv.description! : sv.url, selected: _baseUrl.text == sv.url, onTap: () => _baseUrl.text = sv.url),
-            ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _baseUrl,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              style: mono.copyWith(fontWeight: FontWeight.w600),
+            ),
+            if (s.servers.length > 1) ...[
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final sv in s.servers)
+                    FilterChipH(
+                      label: sv.description?.isNotEmpty == true ? sv.description! : sv.url,
+                      selected: _baseUrl.text == sv.url,
+                      onTap: () => _baseUrl.text = sv.url,
+                    ),
+                ],
+              ),
+            ],
           ],
-        ]),
+        ),
       ),
       FormField2(
         label: l.swaggerWhatToTest,
         help: l.swaggerWhatToTestHint,
-        child: TextField(controller: _notes, minLines: 3, maxLines: 8, maxLength: 20000, decoration: InputDecoration(hintText: l.swaggerWhatToTestPh, counterText: '')),
+        child: TextField(
+          controller: _notes,
+          minLines: 3,
+          maxLines: 8,
+          maxLength: 20000,
+          decoration: InputDecoration(hintText: l.swaggerWhatToTestPh, counterText: ''),
+        ),
       ),
       Padding(
         padding: const EdgeInsets.only(bottom: 16),
@@ -389,69 +455,105 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
           title: l.swaggerEndpointsOptional,
           hint: _ticked.isEmpty ? null : l.swaggerEndpointsCount('${_ticked.length}', '${ops.length}'),
           initiallyOpen: _ticked.isNotEmpty,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(_ticked.isEmpty ? l.swaggerNoneTicked : l.swaggerEndpointsOptionalHint, style: hint),
-            const SizedBox(height: 8),
-            TextField(controller: _search, decoration: InputDecoration(hintText: l.swaggerSearch, isDense: true)),
-            const SizedBox(height: 6),
-            Wrap(spacing: 6, children: [
-              TextButton(
-                onPressed: () => setState(() {
-                  _ticked = {
-                    ..._ticked,
-                    for (final (_, list) in groups)
-                      for (final o in list)
-                        if (o.default_) opKey(o),
-                  };
-                }),
-                child: Text(l.swaggerSuggested),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(_ticked.isEmpty ? l.swaggerNoneTicked : l.swaggerEndpointsOptionalHint, style: hint),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _search,
+                decoration: InputDecoration(hintText: l.swaggerSearch, isDense: true),
               ),
-              TextButton(onPressed: () => setAll(true), child: Text(l.swaggerAll)),
-              TextButton(onPressed: () => setAll(false), child: Text(l.swaggerNone)),
-            ]),
-            for (final (tag, list) in groups) ...[
-              if (tag.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 2),
-                  child: Text(tag.toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c.ink3)),
-                ),
-              for (final o in list) _OpTile(o, ticked: _ticked.contains(opKey(o)), onChanged: (on) => setState(() {
-                    final next = {..._ticked};
-                    on ? next.add(opKey(o)) : next.remove(opKey(o));
-                    _ticked = next;
-                  })),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                children: [
+                  TextButton(
+                    onPressed: () => setState(() {
+                      _ticked = {
+                        ..._ticked,
+                        for (final (_, list) in groups)
+                          for (final o in list)
+                            if (o.default_) opKey(o),
+                      };
+                    }),
+                    child: Text(l.swaggerSuggested),
+                  ),
+                  TextButton(onPressed: () => setAll(true), child: Text(l.swaggerAll)),
+                  TextButton(onPressed: () => setAll(false), child: Text(l.swaggerNone)),
+                ],
+              ),
+              for (final (tag, list) in groups) ...[
+                if (tag.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 2),
+                    child: Text(
+                      tag.toUpperCase(),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c.ink3),
+                    ),
+                  ),
+                for (final o in list)
+                  _OpTile(
+                    o,
+                    ticked: _ticked.contains(opKey(o)),
+                    onChanged: (on) => setState(() {
+                      final next = {..._ticked};
+                      on ? next.add(opKey(o)) : next.remove(opKey(o));
+                      _ticked = next;
+                    }),
+                  ),
+              ],
             ],
-          ]),
+          ),
         ),
       ),
       FormField2(
         label: l.swaggerAuth,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          DropdownButtonFormField<ApiAuthKind>(
-            key: ValueKey(_authKind),
-            initialValue: _authKind,
-            isExpanded: true,
-            items: [for (final k in ApiAuthKind.values) DropdownMenuItem(value: k, child: Text(authKindLabel(l, k)))],
-            onChanged: (v) => setState(() => _authKind = v ?? _authKind),
-          ),
-          if (schemes.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(l.swaggerAuthFromSpec(schemes), style: hint)),
-          if (_named) ...[
-            const SizedBox(height: 8),
-            TextField(controller: _authName, style: mono, autocorrect: false, decoration: InputDecoration(hintText: l.swaggerAuthName)),
-          ],
-          if (_authKind != ApiAuthKind.none) ...[
-            const SizedBox(height: 8),
-            TextField(
-              controller: _token,
-              obscureText: true,
-              autocorrect: false,
-              style: mono,
-              decoration: InputDecoration(hintText: _authKind == ApiAuthKind.basic ? l.swaggerAuthValueBasic : l.swaggerAuthValue),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DropdownButtonFormField<ApiAuthKind>(
+              key: ValueKey(_authKind),
+              initialValue: _authKind,
+              isExpanded: true,
+              items: [for (final k in ApiAuthKind.values) DropdownMenuItem(value: k, child: Text(authKindLabel(l, k)))],
+              onChanged: (v) => setState(() => _authKind = v ?? _authKind),
             ),
-            if (_reusedSpecAuth) Padding(padding: const EdgeInsets.only(top: 6), child: Text(l.swaggerSpecAuthReused, style: hint)),
-            Padding(padding: const EdgeInsets.only(top: 6), child: Text(l.swaggerAuthHint, style: hint)),
+            if (schemes.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(l.swaggerAuthFromSpec(schemes), style: hint),
+              ),
+            if (_named) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _authName,
+                style: mono,
+                autocorrect: false,
+                decoration: InputDecoration(hintText: l.swaggerAuthName),
+              ),
+            ],
+            if (_authKind != ApiAuthKind.none) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _token,
+                obscureText: true,
+                autocorrect: false,
+                style: mono,
+                decoration: InputDecoration(hintText: _authKind == ApiAuthKind.basic ? l.swaggerAuthValueBasic : l.swaggerAuthValue),
+              ),
+              if (_reusedSpecAuth)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(l.swaggerSpecAuthReused, style: hint),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(l.swaggerAuthHint, style: hint),
+              ),
+            ],
           ],
-        ]),
+        ),
       ),
       FormField2(
         label: l.swaggerWrite,
@@ -466,24 +568,33 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
       if (_write)
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(_baseUrl.text, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: c.badInk)),
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              value: _notProduction,
-              title: Text(l.swaggerWriteConfirm(_baseUrl.text), style: const TextStyle(fontSize: 14)),
-              onChanged: (v) => setState(() => _notProduction = v ?? false),
-            ),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                _baseUrl.text,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: c.badInk),
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _notProduction,
+                title: Text(l.swaggerWriteConfirm(_baseUrl.text), style: const TextStyle(fontSize: 14)),
+                onChanged: (v) => setState(() => _notProduction = v ?? false),
+              ),
+            ],
+          ),
         ),
       Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(l.swaggerReadOnlyNote, style: hint),
-          const SizedBox(height: 6),
-          Text(l.swaggerLockoutNote, style: hint),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l.swaggerReadOnlyNote, style: hint),
+            const SizedBox(height: 6),
+            Text(l.swaggerLockoutNote, style: hint),
+          ],
+        ),
       ),
       FormField2(
         label: l.swaggerRepository,
@@ -502,12 +613,15 @@ class _SwaggerTestScreenState extends ConsumerState<SwaggerTestScreen> {
         padding: const EdgeInsets.only(bottom: 16),
         child: Fold(
           title: l.swaggerLimits,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text('${l.swaggerRate}: ${_rate.round()}', style: hint),
-            Slider(value: _rate, min: 1, max: 20, divisions: 19, onChanged: (v) => setState(() => _rate = v)),
-            Text('${l.swaggerMaxRequests}: ${_maxRequests.round()}', style: hint),
-            Slider(value: _maxRequests, min: 10, max: 1000, divisions: 99, onChanged: (v) => setState(() => _maxRequests = v)),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('${l.swaggerRate}: ${_rate.round()}', style: hint),
+              Slider(value: _rate, min: 1, max: 20, divisions: 19, onChanged: (v) => setState(() => _rate = v)),
+              Text('${l.swaggerMaxRequests}: ${_maxRequests.round()}', style: hint),
+              Slider(value: _maxRequests, min: 10, max: 1000, divisions: 99, onChanged: (v) => setState(() => _maxRequests = v)),
+            ],
+          ),
         ),
       ),
       FormField2(
@@ -535,34 +649,54 @@ class _OpTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    final why = o.sideEffect != null ? l.swaggerUntickedSideEffect(o.sideEffect!) : (o.deprecated == true ? l.swaggerUntickedDeprecated : null);
+    final why = o.sideEffect != null
+        ? l.swaggerUntickedSideEffect(o.sideEffect!)
+        : (o.deprecated == true ? l.swaggerUntickedDeprecated : null);
     return InkWell(
       onTap: () => onChanged(!ticked),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Checkbox(value: ticked, visualDensity: VisualDensity.compact, onChanged: (v) => onChanged(v ?? false)),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text.rich(TextSpan(children: [
-                  TextSpan(text: '${o.method} ', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 11.5, fontWeight: FontWeight.w700, color: methodColor(c, o.method))),
-                  TextSpan(
-                    text: o.path,
-                    style: TextStyle(
-                      fontFamily: AgntsFonts.mono,
-                      fontSize: 12.5,
-                      decoration: o.deprecated == true ? TextDecoration.lineThrough : null,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Checkbox(value: ticked, visualDensity: VisualDensity.compact, onChanged: (v) => onChanged(v ?? false)),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${o.method} ',
+                            style: TextStyle(
+                              fontFamily: AgntsFonts.mono,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: methodColor(c, o.method),
+                            ),
+                          ),
+                          TextSpan(
+                            text: o.path,
+                            style: TextStyle(
+                              fontFamily: AgntsFonts.mono,
+                              fontSize: 12.5,
+                              decoration: o.deprecated == true ? TextDecoration.lineThrough : null,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ])),
-                if (o.summary != null && o.summary!.isNotEmpty) Text(o.summary!, style: TextStyle(fontSize: 13, color: c.ink3)),
-                if (why != null) Text(why, style: TextStyle(fontSize: 12.5, color: c.ink3)),
-              ]),
+                    if (o.summary != null && o.summary!.isNotEmpty) Text(o.summary!, style: TextStyle(fontSize: 13, color: c.ink3)),
+                    if (why != null) Text(why, style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }

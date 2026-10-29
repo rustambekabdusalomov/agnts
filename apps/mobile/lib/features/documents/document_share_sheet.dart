@@ -15,12 +15,12 @@ import 'documents_logic.dart';
 /// Who can open a document (its owner only): private or public with its
 /// link, what everyone in the workspace gets, and each member's access.
 Future<void> showDocumentShareSheet(BuildContext context, int id) => showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.92),
-      builder: (_) => DocumentShareSheet(id: id),
-    );
+  context: context,
+  isScrollControlled: true,
+  useSafeArea: true,
+  constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.92),
+  builder: (_) => DocumentShareSheet(id: id),
+);
 
 class DocumentShareSheet extends ConsumerStatefulWidget {
   const DocumentShareSheet({super.key, required this.id});
@@ -122,7 +122,11 @@ class _DocumentShareSheetState extends ConsumerState<DocumentShareSheet> {
     final c = Agnts.of(context);
     final s = _loaded;
     final members = ref.watch(membersProvider).value ?? const <Member>[];
-    String accessLabel(String v) => switch (v) { 'view' => l.mdocumentsAccessView, 'edit' => l.mdocumentsAccessEdit, _ => l.mdocumentsAccessNone };
+    String accessLabel(String v) => switch (v) {
+      'view' => l.mdocumentsAccessView,
+      'edit' => l.mdocumentsAccessEdit,
+      _ => l.mdocumentsAccessNone,
+    };
     return Material(
       color: c.bg,
       child: s == null
@@ -133,32 +137,44 @@ class _DocumentShareSheetState extends ConsumerState<DocumentShareSheet> {
           : ListView(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.viewInsetsOf(context).bottom),
               children: [
-                Text(l.mdocumentsSharing, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: c.ink)),
+                Text(
+                  l.mdocumentsSharing,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: c.ink),
+                ),
                 const SizedBox(height: 14),
-                ListGroup(children: [
-                  SwitchListTile(
-                    title: Text(l.mdocumentsPublicLink),
-                    subtitle: Text(s.publicAllowed ? l.mdocumentsPublicHint : l.mdocumentsPublicOff),
-                    value: _public,
-                    onChanged: _busy || (!s.publicAllowed && !_public) ? null : (v) => setState(() => _public = v),
-                  ),
-                  if (s.publicUrl != null && _public)
-                    ListRow(
-                      title: s.publicUrl!,
-                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                        CopyButton(s.publicUrl!),
-                        TextButton(onPressed: _busy ? null : _reset, child: Text(l.mdocumentsResetLink)),
-                      ]),
+                ListGroup(
+                  children: [
+                    SwitchListTile(
+                      title: Text(l.mdocumentsPublicLink),
+                      subtitle: Text(s.publicAllowed ? l.mdocumentsPublicHint : l.mdocumentsPublicOff),
+                      value: _public,
+                      onChanged: _busy || (!s.publicAllowed && !_public) ? null : (v) => setState(() => _public = v),
                     ),
-                ]),
+                    if (s.publicUrl != null && _public)
+                      ListRow(
+                        title: s.publicUrl!,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CopyButton(s.publicUrl!),
+                            TextButton(onPressed: _busy ? null : _reset, child: Text(l.mdocumentsResetLink)),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
                 if (_secrets.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   HelpBox(
                     l.mdocumentsSecrets,
                     tone: Tone.bad,
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      for (final (line, ex) in _secrets) Text(l.mdocumentsSecretLine('$line', ex), style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5)),
-                    ]),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final (line, ex) in _secrets)
+                          Text(l.mdocumentsSecretLine('$line', ex), style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5)),
+                      ],
+                    ),
                   ),
                 ],
                 SectionHeader(l.mdocumentsWorkspaceAccess, padding: const EdgeInsets.fromLTRB(4, 18, 4, 8)),
@@ -169,30 +185,36 @@ class _DocumentShareSheetState extends ConsumerState<DocumentShareSheet> {
                   onChanged: (v) => setState(() => _ws = v),
                 ),
                 SectionHeader(l.mdocumentsPeople, padding: const EdgeInsets.fromLTRB(4, 18, 4, 8)),
-                ListGroup(children: [
-                  for (final m in members)
-                    if (m.userId != s.ownerId)
-                      ListRow(
-                        title: m.displayName?.isNotEmpty == true ? m.displayName! : m.username,
-                        subtitle: m.role == WorkspaceRole.viewer ? l.mdocumentsViewerOnlyView : null,
-                        trailing: DropdownButton<String>(
-                          value: _grants[m.userId]?.value ?? 'none',
-                          underline: const SizedBox.shrink(),
-                          items: [
-                            for (final v in ['none', 'view', if (m.role != WorkspaceRole.viewer) 'edit'])
-                              DropdownMenuItem(value: v, child: Text(accessLabel(v))),
-                          ],
-                          onChanged: (v) => setState(() {
-                            if (v == null || v == 'none') {
-                              _grants.remove(m.userId);
-                            } else {
-                              _grants[m.userId] = grantLevelFor(m.role, _Level.values.firstWhere((x) => x.value == v));
-                            }
-                          }),
+                ListGroup(
+                  children: [
+                    for (final m in members)
+                      if (m.userId != s.ownerId)
+                        ListRow(
+                          title: m.displayName?.isNotEmpty == true ? m.displayName! : m.username,
+                          subtitle: m.role == WorkspaceRole.viewer ? l.mdocumentsViewerOnlyView : null,
+                          trailing: DropdownButton<String>(
+                            value: _grants[m.userId]?.value ?? 'none',
+                            underline: const SizedBox.shrink(),
+                            items: [
+                              for (final v in ['none', 'view', if (m.role != WorkspaceRole.viewer) 'edit'])
+                                DropdownMenuItem(value: v, child: Text(accessLabel(v))),
+                            ],
+                            onChanged: (v) => setState(() {
+                              if (v == null || v == 'none') {
+                                _grants.remove(m.userId);
+                              } else {
+                                _grants[m.userId] = grantLevelFor(m.role, _Level.values.firstWhere((x) => x.value == v));
+                              }
+                            }),
+                          ),
                         ),
-                      ),
-                ]),
-                if (_error != null) Padding(padding: const EdgeInsets.only(top: 10), child: Text(_error!, style: TextStyle(color: c.badInk))),
+                  ],
+                ),
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(_error!, style: TextStyle(color: c.badInk)),
+                  ),
                 const SizedBox(height: 16),
                 FilledButton(onPressed: _busy ? null : _save, child: Text(l.mdocumentsSave)),
               ],

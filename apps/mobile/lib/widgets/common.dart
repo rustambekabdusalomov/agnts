@@ -32,10 +32,16 @@ class Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(title, trailing: trailing),
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: HCard(child: child)),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title, trailing: trailing),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: HCard(child: child),
+        ),
+      ],
+    );
   }
 }
 
@@ -53,9 +59,14 @@ class AsyncBody<T> extends StatelessWidget {
       onRefresh: onRefresh,
       child: switch (value) {
         AsyncData(:final value) => builder(value),
-        AsyncError(:final error) => ListView(children: [
-            Padding(padding: const EdgeInsets.all(24), child: Text(errorMessage(error, l.mobileOffline), textAlign: TextAlign.center)),
-          ]),
+        AsyncError(:final error) => ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(errorMessage(error, l.mobileOffline), textAlign: TextAlign.center),
+            ),
+          ],
+        ),
         _ => const Center(child: CircularProgressIndicator()),
       },
     );
@@ -75,23 +86,54 @@ class UsageBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     final u = utilization;
-    final tone = u == null ? Tone.gray : u >= 1 ? Tone.bad : u >= 0.8 ? Tone.warn : Tone.info;
-    final pctColor = tone == Tone.bad ? c.badInk : tone == Tone.warn ? c.warnInk : c.ink;
+    final tone = u == null
+        ? Tone.gray
+        : u >= 1
+        ? Tone.bad
+        : u >= 0.8
+        ? Tone.warn
+        : Tone.info;
+    final pctColor = tone == Tone.bad
+        ? c.badInk
+        : tone == Tone.warn
+        ? c.warnInk
+        : c.ink;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Expanded(child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink2))),
-          Text(u == null ? '—' : '${(u * 100).round().clamp(0, 100)}%',
-              style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: pctColor)),
-        ]),
-        Padding(padding: const EdgeInsets.only(top: 8, bottom: 6), child: Bar(value: u ?? 0, tone: tone)),
-        if (note != null || noteRight != null)
-          DefaultTextStyle.merge(
-            style: TextStyle(fontSize: 13, color: c.ink3),
-            child: Row(children: [Expanded(child: Text(note ?? '')), if (noteRight != null) Text(noteRight!)]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.ink2),
+                ),
+              ),
+              Text(
+                u == null ? '—' : '${(u * 100).round().clamp(0, 100)}%',
+                style: TextStyle(fontFamily: AgntsFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: pctColor),
+              ),
+            ],
           ),
-      ]),
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 6),
+            child: Bar(value: u ?? 0, tone: tone),
+          ),
+          if (note != null || noteRight != null)
+            DefaultTextStyle.merge(
+              style: TextStyle(fontSize: 13, color: c.ink3),
+              child: Row(
+                children: [
+                  Expanded(child: Text(note ?? '')),
+                  if (noteRight != null) Text(noteRight!),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

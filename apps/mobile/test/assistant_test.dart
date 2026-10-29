@@ -13,28 +13,31 @@ import 'package:agnts_mobile/theme.dart';
 
 final _at = DateTime.now().subtract(const Duration(seconds: 5));
 
-AssistantMessage _m(int id, AssistantMessageRoleEnum role, String text,
-        {AssistantMessageStatusEnum status = AssistantMessageStatusEnum.done,
-        List<AssistantLink> links = const [],
-        String? error,
-        List<AssistantAction>? actions,
-        List<String>? actionErrors}) =>
-    AssistantMessage(
-      id: id,
-      role: role,
-      text: text,
-      speech: '',
-      links: links,
-      status: status,
-      error: error,
-      lang: AssistantLanguage.en,
-      rating: AssistantMessageRatingEnum.number0,
-      shared: false,
-      createdAt: _at,
-      actions: actions,
-      actionErrors: actionErrors,
-      durationMs: status == AssistantMessageStatusEnum.done && role == AssistantMessageRoleEnum.assistant ? 12000 : null,
-    );
+AssistantMessage _m(
+  int id,
+  AssistantMessageRoleEnum role,
+  String text, {
+  AssistantMessageStatusEnum status = AssistantMessageStatusEnum.done,
+  List<AssistantLink> links = const [],
+  String? error,
+  List<AssistantAction>? actions,
+  List<String>? actionErrors,
+}) => AssistantMessage(
+  id: id,
+  role: role,
+  text: text,
+  speech: '',
+  links: links,
+  status: status,
+  error: error,
+  lang: AssistantLanguage.en,
+  rating: AssistantMessageRatingEnum.number0,
+  shared: false,
+  createdAt: _at,
+  actions: actions,
+  actionErrors: actionErrors,
+  durationMs: status == AssistantMessageStatusEnum.done && role == AssistantMessageRoleEnum.assistant ? 12000 : null,
+);
 
 const _q = AssistantMessageRoleEnum.user;
 const _a = AssistantMessageRoleEnum.assistant;
@@ -52,36 +55,59 @@ void main() {
     final c = ProviderContainer();
     addTearDown(c.dispose);
     final n = c.read(assistantLiveProvider.notifier);
-    n.apply({'type': 'assistant_progress', 'data': {'message_id': 2, 'conversation_id': 1, 'file': 'ci.json'}});
-    n.apply({'type': 'assistant_partial', 'data': {'message_id': 2, 'conversation_id': 1, 'text': 'Looking at CI'}});
+    n.apply({
+      'type': 'assistant_progress',
+      'data': {'message_id': 2, 'conversation_id': 1, 'file': 'ci.json'},
+    });
+    n.apply({
+      'type': 'assistant_partial',
+      'data': {'message_id': 2, 'conversation_id': 1, 'text': 'Looking at CI'},
+    });
     expect(c.read(assistantLiveProvider)[2]?.file, 'ci.json');
     expect(c.read(assistantLiveProvider)[2]?.text, 'Looking at CI');
-    n.apply({'type': 'assistant_answered', 'data': {'message_id': 2, 'conversation_id': 1}});
+    n.apply({
+      'type': 'assistant_answered',
+      'data': {'message_id': 2, 'conversation_id': 1},
+    });
     expect(c.read(assistantLiveProvider)[2], isNull);
   });
 
   testWidgets('a conversation shows answers with links, failures and a thinking bubble', (tester) async {
-    final conv = AssistantConversation(id: 7, title: 'What waits on me?', mode: ChatMode.chat, createdAt: _at, updatedAt: _at, messages: [
-      _m(1, _q, 'What waits on me?'),
-      _m(2, _a, '**PAY-214** waits for your review.', links: [
-        AssistantLink(kind: AssistantLinkKindEnum.ticket, key: 'PAY-214'),
-        AssistantLink(kind: AssistantLinkKindEnum.ci, id: 12),
-      ]),
-      _m(3, _q, 'Why is CI red?'),
-      _m(4, _a, '', status: AssistantMessageStatusEnum.failed, error: 'Claude plan limit reached; ask again after it resets.'),
-      _m(5, _q, 'And now?'),
-      _m(6, _a, '', status: AssistantMessageStatusEnum.answering),
-    ]);
-    await tester.pumpWidget(ProviderScope(
-      overrides: [assistantConversationProvider(7).overrideWith((ref) async => conv)],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: const Locale('en'),
-        localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const AssistantScreen(conversationId: 7),
+    final conv = AssistantConversation(
+      id: 7,
+      title: 'What waits on me?',
+      mode: ChatMode.chat,
+      createdAt: _at,
+      updatedAt: _at,
+      messages: [
+        _m(1, _q, 'What waits on me?'),
+        _m(
+          2,
+          _a,
+          '**PAY-214** waits for your review.',
+          links: [
+            AssistantLink(kind: AssistantLinkKindEnum.ticket, key: 'PAY-214'),
+            AssistantLink(kind: AssistantLinkKindEnum.ci, id: 12),
+          ],
+        ),
+        _m(3, _q, 'Why is CI red?'),
+        _m(4, _a, '', status: AssistantMessageStatusEnum.failed, error: 'Claude plan limit reached; ask again after it resets.'),
+        _m(5, _q, 'And now?'),
+        _m(6, _a, '', status: AssistantMessageStatusEnum.answering),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [assistantConversationProvider(7).overrideWith((ref) async => conv)],
+        child: MaterialApp(
+          theme: agntsTheme(Brightness.light),
+          locale: const Locale('en'),
+          localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AssistantScreen(conversationId: 7),
+        ),
       ),
-    ));
+    );
     await tester.pump();
     await tester.pump();
 
@@ -100,56 +126,96 @@ void main() {
   });
 
   testWidgets('a new conversation offers questions to tap', (tester) async {
-    await tester.pumpWidget(ProviderScope(
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: const Locale('ru'),
-        localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const AssistantScreen(),
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: agntsTheme(Brightness.light),
+          locale: const Locale('ru'),
+          localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AssistantScreen(),
+        ),
       ),
-    ));
+    );
     await tester.pump();
     expect(find.text('Что ждёт меня?'), findsOneWidget);
     expect(find.text('Почему CI красный?'), findsOneWidget);
   });
 
   testWidgets('an answer shows the actions it proposes, and approve asks once more', (tester) async {
-    AssistantAction act(String id, AssistantActionToolEnum tool, String summary, AssistantActionStatusEnum status,
-            {bool destructive = false, String? result, String? key, Duration expires = const Duration(minutes: 20)}) =>
-        AssistantAction(
-          id: id,
-          messageId: 2,
-          conversationId: 7,
-          tool: tool,
-          summary: summary,
-          destructive: destructive,
-          status: status,
-          result: result,
-          ticketKey: key,
-          expiresAt: DateTime.now().add(expires),
-        );
-    final answer = _m(2, _a, 'PAY-214 passed review.',
+    AssistantAction act(
+      String id,
+      AssistantActionToolEnum tool,
+      String summary,
+      AssistantActionStatusEnum status, {
+      bool destructive = false,
+      String? result,
+      String? key,
+      Duration expires = const Duration(minutes: 20),
+    }) => AssistantAction(
+      id: id,
+      messageId: 2,
+      conversationId: 7,
+      tool: tool,
+      summary: summary,
+      destructive: destructive,
+      status: status,
+      result: result,
+      ticketKey: key,
+      expiresAt: DateTime.now().add(expires),
+    );
+    final answer = _m(
+      2,
+      _a,
+      'PAY-214 passed review.',
       actions: [
-        act('a1', AssistantActionToolEnum.approveTicket, 'Approve PAY-214 (Fix rounding): agnts will push it.', AssistantActionStatusEnum.proposed,
-            destructive: true, key: 'PAY-214'),
-        act('a2', AssistantActionToolEnum.rejectTicket, 'Reject PAY-1 (Old) and stop all work on it.', AssistantActionStatusEnum.done,
-            destructive: true, result: 'PAY-1 is now rejected.', key: 'PAY-1'),
-        act('a3', AssistantActionToolEnum.startRun, 'Start PAY-9 now.', AssistantActionStatusEnum.proposed, expires: const Duration(minutes: -1)),
+        act(
+          'a1',
+          AssistantActionToolEnum.approveTicket,
+          'Approve PAY-214 (Fix rounding): agnts will push it.',
+          AssistantActionStatusEnum.proposed,
+          destructive: true,
+          key: 'PAY-214',
+        ),
+        act(
+          'a2',
+          AssistantActionToolEnum.rejectTicket,
+          'Reject PAY-1 (Old) and stop all work on it.',
+          AssistantActionStatusEnum.done,
+          destructive: true,
+          result: 'PAY-1 is now rejected.',
+          key: 'PAY-1',
+        ),
+        act(
+          'a3',
+          AssistantActionToolEnum.startRun,
+          'Start PAY-9 now.',
+          AssistantActionStatusEnum.proposed,
+          expires: const Duration(minutes: -1),
+        ),
       ],
       actionErrors: ['start_run: no ticket "PAY-404"'],
     );
-    final conv = AssistantConversation(id: 7, title: 'Approve', mode: ChatMode.chat, createdAt: _at, updatedAt: _at, messages: [_m(1, _q, 'Approve PAY-214'), answer]);
-    await tester.pumpWidget(ProviderScope(
-      overrides: [assistantConversationProvider(7).overrideWith((ref) async => conv)],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: const Locale('en'),
-        localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const AssistantScreen(conversationId: 7),
+    final conv = AssistantConversation(
+      id: 7,
+      title: 'Approve',
+      mode: ChatMode.chat,
+      createdAt: _at,
+      updatedAt: _at,
+      messages: [_m(1, _q, 'Approve PAY-214'), answer],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [assistantConversationProvider(7).overrideWith((ref) async => conv)],
+        child: MaterialApp(
+          theme: agntsTheme(Brightness.light),
+          locale: const Locale('en'),
+          localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AssistantScreen(conversationId: 7),
+        ),
       ),
-    ));
+    );
     await tester.pump();
     await tester.pump();
 
@@ -193,19 +259,31 @@ void main() {
       costUsd: 0.4,
       actions: AssistantStatsActions(proposed: 4, done: 3, failed: 0, cancelled: 1, expired: 0, notOffered: 2),
       versions: [
-        AssistantStatsVersionsInner(promptVersion: '2026-10-19.1', answered: 9, failed: 1, up: 3, down: 1, medianMs: 12000, tokens: 12000, proposed: 4, done: 3),
+        AssistantStatsVersionsInner(
+          promptVersion: '2026-10-19.1',
+          answered: 9,
+          failed: 1,
+          up: 3,
+          down: 1,
+          medianMs: 12000,
+          tokens: 12000,
+          proposed: 4,
+          done: 3,
+        ),
       ],
     );
-    await tester.pumpWidget(ProviderScope(
-      overrides: [assistantStatsProvider(7).overrideWith((ref) async => st)],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        locale: const Locale('en'),
-        localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const Scaffold(body: SingleChildScrollView(child: AssistantStatsSection(days: 7))),
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [assistantStatsProvider(7).overrideWith((ref) async => st)],
+        child: MaterialApp(
+          theme: agntsTheme(Brightness.light),
+          locale: const Locale('en'),
+          localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(body: SingleChildScrollView(child: AssistantStatsSection(days: 7))),
+        ),
       ),
-    ));
+    );
     await tester.pump();
     await tester.pump();
     expect(find.text('Actions confirmed: 75%'), findsOneWidget);

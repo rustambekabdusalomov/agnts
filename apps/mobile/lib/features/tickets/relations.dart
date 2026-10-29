@@ -41,10 +41,12 @@ class _RelationsFoldState extends ConsumerState<RelationsFold> {
     final all = await ref.read(ticketsProvider('all').future).catchError((_) => const <Ticket>[]);
     if (!mounted) return;
     final options = all
-        .where((x) =>
-            x.key != _t.key &&
-            x.state != TicketState.rejected &&
-            !(x.state == TicketState.done && (x.mergedAt != null || x.kind != TicketKind.code)))
+        .where(
+          (x) =>
+              x.key != _t.key &&
+              x.state != TicketState.rejected &&
+              !(x.state == TicketState.done && (x.mergedAt != null || x.kind != TicketKind.code)),
+        )
         .toList();
     final picked = await showModalBottomSheet<Ticket>(
       context: context,
@@ -61,7 +63,10 @@ class _RelationsFoldState extends ConsumerState<RelationsFold> {
     if (other == null) return;
     setState(() => _busy = true);
     try {
-      await _api.addRelation(key: _t.key, relationInput: RelationInput(otherKey: other.key, type: _newType));
+      await _api.addRelation(
+        key: _t.key,
+        relationInput: RelationInput(otherKey: other.key, type: _newType),
+      );
       ref.invalidate(ticketProvider(_t.key));
       ref.invalidate(ticketsProvider);
       if (mounted) {
@@ -74,6 +79,7 @@ class _RelationsFoldState extends ConsumerState<RelationsFold> {
       if (mounted) setState(() => _busy = false);
     }
   }
+
   TicketsApi get _api => ref.read(apiProvider)!.getTicketsApi();
 
   Future<void> _decide(Relation r, bool accept) async {
@@ -108,19 +114,19 @@ class _RelationsFoldState extends ConsumerState<RelationsFold> {
   }
 
   String _direction(AppLocalizations l, Relation r) => switch (r.direction) {
-        RelationDirectionEnum.waitsFor => l.relationsWaitsFor,
-        RelationDirectionEnum.waitedBy => l.relationsWaitedBy,
-        RelationDirectionEnum.conflicts => l.relationsConflicts,
-      };
+    RelationDirectionEnum.waitsFor => l.relationsWaitsFor,
+    RelationDirectionEnum.waitedBy => l.relationsWaitedBy,
+    RelationDirectionEnum.conflicts => l.relationsConflicts,
+  };
 
   String _source(AppLocalizations l, Relation r) => switch (r.source_) {
-        RelationSource_Enum.jira => l.relationsSource_jira,
-        RelationSource_Enum.plane => l.relationsSource_plane,
-        RelationSource_Enum.user => l.relationsSource_user,
-        RelationSource_Enum.agnts => l.relationsSource_agnts,
-        RelationSource_Enum.rule => l.relationsSource_rule,
-        RelationSource_Enum.git => l.relationsSource_git,
-      };
+    RelationSource_Enum.jira => l.relationsSource_jira,
+    RelationSource_Enum.plane => l.relationsSource_plane,
+    RelationSource_Enum.user => l.relationsSource_user,
+    RelationSource_Enum.agnts => l.relationsSource_agnts,
+    RelationSource_Enum.rule => l.relationsSource_rule,
+    RelationSource_Enum.git => l.relationsSource_git,
+  };
 
   String? _basis(AppLocalizations l, Relation r) {
     final files = r.files.take(4).join(', ') + (r.files.length > 4 ? ' +${r.files.length - 4}' : '');
@@ -146,50 +152,81 @@ class _RelationsFoldState extends ConsumerState<RelationsFold> {
     final footprint = widget.detail.analysis?.footprint;
 
     Widget heading(String text) => Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 6),
-          child: Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3)),
-        );
+      padding: const EdgeInsets.only(top: 12, bottom: 6),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
+      ),
+    );
 
     Widget card(Relation r) {
       final basis = _basis(l, r);
       return Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(border: Border.all(color: c.line), borderRadius: BorderRadius.circular(12)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            ToneBadge(_direction(l, r), r.direction == RelationDirectionEnum.conflicts ? Tone.warn : Tone.info, small: true),
-            GestureDetector(
-              onTap: () => context.push('/tickets/${r.other.key}'),
-              child: Text(r.other.key, style: TextStyle(fontWeight: FontWeight.w700, color: c.primary)),
+        decoration: BoxDecoration(
+          border: Border.all(color: c.line),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ToneBadge(_direction(l, r), r.direction == RelationDirectionEnum.conflicts ? Tone.warn : Tone.info, small: true),
+                GestureDetector(
+                  onTap: () => context.push('/tickets/${r.other.key}'),
+                  child: Text(
+                    r.other.key,
+                    style: TextStyle(fontWeight: FontWeight.w700, color: c.primary),
+                  ),
+                ),
+                StateBadge(r.other.state),
+                if (r.other.landed) ToneBadge(l.relationsLanded, Tone.ok, small: true),
+              ],
             ),
-            StateBadge(r.other.state),
-            if (r.other.landed) ToneBadge(l.relationsLanded, Tone.ok, small: true),
-          ]),
-          Padding(padding: const EdgeInsets.only(top: 6), child: Text(r.other.title, style: const TextStyle(fontWeight: FontWeight.w600))),
-          if (basis != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(basis, style: const TextStyle(fontSize: 14))),
-          if (r.reason.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(r.reason, style: const TextStyle(fontSize: 14))),
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              [
-                _source(l, r),
-                if (r.status == RelationStatusEnum.proposed) l.relationsConfidence('${(r.confidence * 100).round()}'),
-                if (r.confirmedAt != null) l.relationsConfirmed,
-              ].join(' · '),
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: c.ink3),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(r.other.title, style: const TextStyle(fontWeight: FontWeight.w600)),
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            if (r.status == RelationStatusEnum.proposed) ...[
-              OutlinedButton(onPressed: _busy ? null : () => _decide(r, false), child: Text(l.relationsDismiss)),
-              const SizedBox(width: 8),
-              FilledButton(onPressed: _busy ? null : () => _decide(r, true), child: Text(l.relationsAccept)),
-            ] else
-              OutlinedButton(onPressed: _busy ? null : () => _decide(r, false), child: Text(l.relationsRemove)),
-          ]),
-        ]),
+            if (basis != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(basis, style: const TextStyle(fontSize: 14)),
+              ),
+            if (r.reason.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(r.reason, style: const TextStyle(fontSize: 14)),
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                [
+                  _source(l, r),
+                  if (r.status == RelationStatusEnum.proposed) l.relationsConfidence('${(r.confidence * 100).round()}'),
+                  if (r.confirmedAt != null) l.relationsConfirmed,
+                ].join(' · '),
+                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: c.ink3),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (r.status == RelationStatusEnum.proposed) ...[
+                  OutlinedButton(onPressed: _busy ? null : () => _decide(r, false), child: Text(l.relationsDismiss)),
+                  const SizedBox(width: 8),
+                  FilledButton(onPressed: _busy ? null : () => _decide(r, true), child: Text(l.relationsAccept)),
+                ] else
+                  OutlinedButton(onPressed: _busy ? null : () => _decide(r, false), child: Text(l.relationsRemove)),
+              ],
+            ),
+          ],
+        ),
       );
     }
 
@@ -197,63 +234,86 @@ class _RelationsFoldState extends ConsumerState<RelationsFold> {
       title: l.relationsTitle,
       hint: proposed.isEmpty ? null : '${proposed.length}',
       initiallyOpen: proposed.isNotEmpty,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.relationsSub, style: TextStyle(fontSize: 14, height: 1.45, color: c.ink3)),
-        if (proposed.isNotEmpty) ...[
-          heading(l.relationsProposedTitle),
-          Text(l.relationsProposedSub, style: TextStyle(fontSize: 13, color: c.ink3)),
-          const SizedBox(height: 8),
-          for (final r in proposed) card(r),
-        ],
-        heading(l.relationsActiveTitle),
-        if (active.isEmpty) Text(l.relationsEmpty, style: TextStyle(fontSize: 14, color: c.ink3)),
-        for (final r in active) card(r),
-        if (dismissed > 0)
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(l.relationsDismissedCount(dismissed), style: TextStyle(fontSize: 13, color: c.ink3)),
-          ),
-        if (ref.watch(canEditProvider)) ...[
-          heading(l.relationsAddTitle),
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            FilterChipH(
-              label: l.relationsWaitsFor,
-              selected: _newType == RelationType.dependsOn,
-              onTap: () => setState(() => _newType = RelationType.dependsOn),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.relationsSub, style: TextStyle(fontSize: 14, height: 1.45, color: c.ink3)),
+          if (proposed.isNotEmpty) ...[
+            heading(l.relationsProposedTitle),
+            Text(l.relationsProposedSub, style: TextStyle(fontSize: 13, color: c.ink3)),
+            const SizedBox(height: 8),
+            for (final r in proposed) card(r),
+          ],
+          heading(l.relationsActiveTitle),
+          if (active.isEmpty) Text(l.relationsEmpty, style: TextStyle(fontSize: 14, color: c.ink3)),
+          for (final r in active) card(r),
+          if (dismissed > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(l.relationsDismissedCount(dismissed), style: TextStyle(fontSize: 13, color: c.ink3)),
             ),
-            FilterChipH(
-              label: l.relationsConflicts,
-              selected: _newType == RelationType.conflicts,
-              onTap: () => setState(() => _newType = RelationType.conflicts),
+          if (ref.watch(canEditProvider)) ...[
+            heading(l.relationsAddTitle),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilterChipH(
+                  label: l.relationsWaitsFor,
+                  selected: _newType == RelationType.dependsOn,
+                  onTap: () => setState(() => _newType = RelationType.dependsOn),
+                ),
+                FilterChipH(
+                  label: l.relationsConflicts,
+                  selected: _newType == RelationType.conflicts,
+                  onTap: () => setState(() => _newType = RelationType.conflicts),
+                ),
+              ],
             ),
-          ]),
-          const SizedBox(height: 8),
-          Row(children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _busy ? null : _pickOther,
-                child: Text(_newOther == null ? l.relationsAddOther : '${_newOther!.key} · ${_newOther!.title}', maxLines: 1, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _busy ? null : _pickOther,
+                    child: Text(
+                      _newOther == null ? l.relationsAddOther : '${_newOther!.key} · ${_newOther!.title}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(onPressed: _busy || _newOther == null ? null : _add, child: Text(l.relationsAdd)),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(l.relationsAddHint, style: TextStyle(fontSize: 13, height: 1.4, color: c.ink3)),
+            ),
+          ],
+          if (footprint != null && footprint.files.isNotEmpty) ...[
+            heading(l.relationsFootprintTitle),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final f in footprint.files)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: c.hover, borderRadius: BorderRadius.circular(6)),
+                    child: Text(f, style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12)),
+                  ),
+              ],
+            ),
+            if (footprint.migrations == true)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(l.relationsFootprintMigrations, style: const TextStyle(fontSize: 14)),
               ),
-            ),
-            const SizedBox(width: 8),
-            FilledButton(onPressed: _busy || _newOther == null ? null : _add, child: Text(l.relationsAdd)),
-          ]),
-          Padding(padding: const EdgeInsets.only(top: 6), child: Text(l.relationsAddHint, style: TextStyle(fontSize: 13, height: 1.4, color: c.ink3))),
+          ],
         ],
-        if (footprint != null && footprint.files.isNotEmpty) ...[
-          heading(l.relationsFootprintTitle),
-          Wrap(spacing: 6, runSpacing: 6, children: [
-            for (final f in footprint.files)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: c.hover, borderRadius: BorderRadius.circular(6)),
-                child: Text(f, style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12)),
-              ),
-          ]),
-          if (footprint.migrations == true)
-            Padding(padding: const EdgeInsets.only(top: 6), child: Text(l.relationsFootprintMigrations, style: const TextStyle(fontSize: 14))),
-        ],
-      ]),
+      ),
     );
   }
 }
@@ -276,36 +336,48 @@ class _TicketPickSheetState extends State<_TicketPickSheet> {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
     final q = _q.trim().toLowerCase();
-    final shown = q.isEmpty ? widget.tickets : widget.tickets.where((t) => t.key.toLowerCase().contains(q) || t.title.toLowerCase().contains(q)).toList();
+    final shown = q.isEmpty
+        ? widget.tickets
+        : widget.tickets.where((t) => t.key.toLowerCase().contains(q) || t.title.toLowerCase().contains(q)).toList();
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height * 0.75,
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Text(widget.title, style: Theme.of(context).textTheme.titleLarge)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(hintText: l.relationsAddOtherPh, prefixIcon: const Icon(Icons.search_rounded)),
-                onChanged: (v) => setState(() => _q = v),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
               ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: shown.isEmpty
-                  ? Center(child: Text(l.mobileNoEvents, style: TextStyle(color: c.ink3)))
-                  : ListView(children: [
-                      for (final t in shown)
-                        ListTile(
-                          title: Text('${t.key} · ${t.title}', maxLines: 2, overflow: TextOverflow.ellipsis),
-                          subtitle: Text(stateLabel(l, t.state, t.kind)),
-                          onTap: () => Navigator.pop(context, t),
-                        ),
-                    ]),
-            ),
-          ]),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  autofocus: true,
+                  decoration: InputDecoration(hintText: l.relationsAddOtherPh, prefixIcon: const Icon(Icons.search_rounded)),
+                  onChanged: (v) => setState(() => _q = v),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: shown.isEmpty
+                    ? Center(
+                        child: Text(l.mobileNoEvents, style: TextStyle(color: c.ink3)),
+                      )
+                    : ListView(
+                        children: [
+                          for (final t in shown)
+                            ListTile(
+                              title: Text('${t.key} · ${t.title}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                              subtitle: Text(stateLabel(l, t.state, t.kind)),
+                              onTap: () => Navigator.pop(context, t),
+                            ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -322,24 +394,34 @@ class WaitingBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      for (final b in blockers)
-        InkWell(
-          onTap: () => context.push('/tickets/${b.key}'),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(children: [
-              ToneBadge(b.type == RelationType.conflicts ? l.relationsConflicts : l.relationsWaitsFor,
-                  b.type == RelationType.conflicts ? Tone.warn : Tone.info,
-                  small: true),
-              const SizedBox(width: 8),
-              Text(b.key, style: TextStyle(fontWeight: FontWeight.w700, color: c.primary)),
-              const SizedBox(width: 8),
-              Expanded(child: Text(b.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
-              StateBadge(b.state),
-            ]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final b in blockers)
+          InkWell(
+            onTap: () => context.push('/tickets/${b.key}'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                children: [
+                  ToneBadge(
+                    b.type == RelationType.conflicts ? l.relationsConflicts : l.relationsWaitsFor,
+                    b.type == RelationType.conflicts ? Tone.warn : Tone.info,
+                    small: true,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    b.key,
+                    style: TextStyle(fontWeight: FontWeight.w700, color: c.primary),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(b.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  StateBadge(b.state),
+                ],
+              ),
+            ),
           ),
-        ),
-    ]);
+      ],
+    );
   }
 }

@@ -22,25 +22,27 @@ Future<void> showWorkspaceSheet(BuildContext context, WidgetRef ref) async {
     builder: (ctx) {
       final c = Agnts.of(ctx);
       return SafeArea(
-        child: ListView(shrinkWrap: true, padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
-            child: Text(l.wsSwitcher, style: Theme.of(ctx).textTheme.titleMedium),
-          ),
-          ListGroup(children: [
-            for (final w in list)
-              ListRow(
-                title: w.name,
-                subtitle: [
-                  roleLabel(l, w.role),
-                  l.mwsMembers(w.members),
-                  if (w.suspended == true) l.mwsSuspended,
-                ].join(' · '),
-                trailing: w.slug == current?.slug ? Icon(Icons.check_rounded, color: c.primary) : null,
-                onTap: () => Navigator.pop(ctx, w),
-              ),
-          ]),
-        ]),
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+              child: Text(l.wsSwitcher, style: Theme.of(ctx).textTheme.titleMedium),
+            ),
+            ListGroup(
+              children: [
+                for (final w in list)
+                  ListRow(
+                    title: w.name,
+                    subtitle: [roleLabel(l, w.role), l.mwsMembers(w.members), if (w.suspended == true) l.mwsSuspended].join(' · '),
+                    trailing: w.slug == current?.slug ? Icon(Icons.check_rounded, color: c.primary) : null,
+                    onTap: () => Navigator.pop(ctx, w),
+                  ),
+              ],
+            ),
+          ],
+        ),
       );
     },
   );
@@ -70,14 +72,26 @@ class WorkspaceChip extends ConsumerWidget {
         child: Container(
           constraints: const BoxConstraints(maxWidth: 160, minHeight: 36),
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(18)),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Flexible(
-              child: Text(ws.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink)),
-            ),
-            const SizedBox(width: 4),
-            Icon(Icons.unfold_more_rounded, size: 16, color: c.ink3),
-          ]),
+          decoration: BoxDecoration(
+            color: c.surface,
+            border: Border.all(color: c.line),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  ws.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(Icons.unfold_more_rounded, size: 16, color: c.ink3),
+            ],
+          ),
         ),
       ),
     );
@@ -86,18 +100,18 @@ class WorkspaceChip extends ConsumerWidget {
 
 /// A workspace role's name.
 String roleLabel(AppLocalizations l, WorkspaceRole r) => switch (r) {
-      WorkspaceRole.owner => l.wsRole_owner,
-      WorkspaceRole.viewer => l.wsRole_viewer,
-      _ => l.wsRole_user,
-    };
+  WorkspaceRole.owner => l.wsRole_owner,
+  WorkspaceRole.viewer => l.wsRole_viewer,
+  _ => l.wsRole_user,
+};
 
 /// Why a ticket waits for a worker, as a short badge label and its tone.
 (String, Tone) waitBadge(AppLocalizations l, WaitReason r) => switch (r) {
-      WaitReason.blocked => (l.queueBadge_blocked, Tone.gray),
-      WaitReason.slots => (l.queueBadge_slots, Tone.info),
-      WaitReason.server => (l.queueBadge_server, Tone.info),
-      WaitReason.claude => (l.queueBadge_claude, Tone.warn),
-    };
+  WaitReason.blocked => (l.queueBadge_blocked, Tone.gray),
+  WaitReason.slots => (l.queueBadge_slots, Tone.info),
+  WaitReason.server => (l.queueBadge_server, Tone.info),
+  WaitReason.claude => (l.queueBadge_claude, Tone.warn),
+};
 
 /// Says why a queued ticket has not started, and when it may (the web's
 /// WaitBanner): its place in the server queue, or the slots in use.

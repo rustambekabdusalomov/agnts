@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:dio/dio.dart' show DioException;
@@ -140,10 +139,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   }
 
   AttachmentsController _filesFor(Question q) => _answerFiles.putIfAbsent(
-      q.id,
-      () => AttachmentsController()
-        ..addListener(_filesChanged)
-        ..addListener(_draftChanged));
+    q.id,
+    () => AttachmentsController()
+      ..addListener(_filesChanged)
+      ..addListener(_draftChanged),
+  );
 
   /// The question's text field, started from its unsent draft when it has
   /// no answer yet, else from its answer.
@@ -161,7 +161,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     if (q.multiple) {
       // One option per line; lines that are not options are the own text.
       final lines = (a ?? '').split('\n').where((x) => x.trim().isNotEmpty).toList();
-      _chosen[q.id] = {for (final x in lines) if (q.options.contains(x)) x};
+      _chosen[q.id] = {
+        for (final x in lines)
+          if (q.options.contains(x)) x,
+      };
       c = TextEditingController(text: [...lines.where((x) => !q.options.contains(x)), ?draftNote].join('\n'));
     } else if (a != null && q.options.contains(a)) {
       _picked[q.id] = a;
@@ -197,18 +200,23 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   /// request is built before the first await: dispose may follow at once.
   Future<void> _saveDrafts(String key, List<Question> qs) async {
     final api = _draftApi;
-    final changed = [for (final q in qs) if (_notes.containsKey(q.id) && _draftKey(q) != _savedDraft[q.id]) q];
+    final changed = [
+      for (final q in qs)
+        if (_notes.containsKey(q.id) && _draftKey(q) != _savedDraft[q.id]) q,
+    ];
     if (api == null || changed.isEmpty) return;
     final sent = {for (final q in changed) q.id: _draftKey(q)};
-    final req = AnswerDraftRequest(answers: [
-      for (final q in changed)
-        AnswerDraftRequestAnswersInner(
-          questionId: q.id,
-          answer: _answerOf(q),
-          note: _noteOf(q),
-          attachments: _fileIds(q).isEmpty ? null : _fileIds(q),
-        ),
-    ]);
+    final req = AnswerDraftRequest(
+      answers: [
+        for (final q in changed)
+          AnswerDraftRequestAnswersInner(
+            questionId: q.id,
+            answer: _answerOf(q),
+            note: _noteOf(q),
+            attachments: _fileIds(q).isEmpty ? null : _fileIds(q),
+          ),
+      ],
+    );
     _savedDraft.addAll(sent);
     _setDraftState(_DraftState.saving);
     try {
@@ -237,7 +245,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final note = _noteFor(q).text.trim();
     if (q.multiple) {
       final chosen = _chosen[q.id] ?? const {};
-      return [for (final o in q.options) if (chosen.contains(o)) o, if (note.isNotEmpty) note].join('\n');
+      return [
+        for (final o in q.options)
+          if (chosen.contains(o)) o,
+        if (note.isNotEmpty) note,
+      ].join('\n');
     }
     return _picked[q.id] ?? note;
   }
@@ -246,13 +258,13 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   /// "Q1.", not "1.": chat editors read "1." as a list and restart it at 1
   /// after each question's options.
   String _questionsText(Ticket t, List<Question> qs, AppLocalizations l) => [
-        '${t.key}: ${_tr(t.title)}',
-        '',
-        for (final (i, q) in qs.indexed) ...[
-          'Q${i + 1}. ${_tr(q.text)}${q.multiple ? ' (${l.ticketPickAny})' : ''}',
-          for (final o in q.options) '   - ${_tr(o)}',
-        ],
-      ].join('\n');
+    '${t.key}: ${_tr(t.title)}',
+    '',
+    for (final (i, q) in qs.indexed) ...[
+      'Q${i + 1}. ${_tr(q.text)}${q.multiple ? ' (${l.ticketPickAny})' : ''}',
+      for (final o in q.options) '   - ${_tr(o)}',
+    ],
+  ].join('\n');
 
   /// The details sent with a picked option (null when the text is the answer).
   String? _noteOf(Question q) {
@@ -262,14 +274,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   }
 
   void _toggle(Question q, String o) => setState(() {
-        if (q.multiple) {
-          final chosen = _chosen.putIfAbsent(q.id, () => {});
-          if (!chosen.remove(o)) chosen.add(o);
-        } else {
-          _picked[q.id] = _picked[q.id] == o ? null : o;
-        }
-        _draftChanged();
-      });
+    if (q.multiple) {
+      final chosen = _chosen.putIfAbsent(q.id, () => {});
+      if (!chosen.remove(o)) chosen.add(o);
+    } else {
+      _picked[q.id] = _picked[q.id] == o ? null : o;
+    }
+    _draftChanged();
+  });
 
   /// Retries a stopped run, with the note and files when it can take them.
   Future<void> _retry(Ticket t) async {
@@ -277,12 +289,18 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final ids = _retryFiles.ids;
     final extra = _takesRetryNote(t) && (note.isNotEmpty || ids.isNotEmpty);
     final skip = _takesRetryNote(t) ? _skipChecks : null;
-    final ok = await _run(() => _tickets.retryTicket(
-          key: t.key,
-          retryTicketRequest: extra || skip != null
-              ? RetryTicketRequest(note: extra && note.isNotEmpty ? note : null, attachments: extra && ids.isNotEmpty ? ids : null, skipChecks: skip)
-              : null,
-        ));
+    final ok = await _run(
+      () => _tickets.retryTicket(
+        key: t.key,
+        retryTicketRequest: extra || skip != null
+            ? RetryTicketRequest(
+                note: extra && note.isNotEmpty ? note : null,
+                attachments: extra && ids.isNotEmpty ? ids : null,
+                skipChecks: skip,
+              )
+            : null,
+      ),
+    );
     if (!ok) return;
     _retryNote.clear();
     _retryFiles.clear();
@@ -295,10 +313,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final note = _continueNote.text.trim();
     final ids = _continueFiles.ids;
     final extra = _takesContinueNote(t) && (note.isNotEmpty || ids.isNotEmpty);
-    final ok = await _run(() => _tickets.continueTicket(
-          key: t.key,
-          continueTicketRequest: extra ? ContinueTicketRequest(note: note.isEmpty ? null : note, attachments: ids.isEmpty ? null : ids) : null,
-        ));
+    final ok = await _run(
+      () => _tickets.continueTicket(
+        key: t.key,
+        continueTicketRequest: extra
+            ? ContinueTicketRequest(note: note.isEmpty ? null : note, attachments: ids.isEmpty ? null : ids)
+            : null,
+      ),
+    );
     if (!ok) return;
     _continueNote.clear();
     _continueFiles.clear();
@@ -317,29 +339,35 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       showDragHandle: true,
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(ctx).viewInsets.bottom),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          TextField(
-            controller: text,
-            autofocus: true,
-            maxLength: 200,
-            autocorrect: false,
-            enableSuggestions: false,
-            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
-            decoration: InputDecoration(labelText: l.ticketBranch),
-            onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
-          ),
-          Text(l.ticketBranchRenameHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
-          const SizedBox(height: 10),
-          FilledButton(onPressed: () => Navigator.pop(ctx, text.text.trim()), child: Text(l.formSave)),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: text,
+              autofocus: true,
+              maxLength: 200,
+              autocorrect: false,
+              enableSuggestions: false,
+              style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
+              decoration: InputDecoration(labelText: l.ticketBranch),
+              onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+            ),
+            Text(l.ticketBranchRenameHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
+            const SizedBox(height: 10),
+            FilledButton(onPressed: () => Navigator.pop(ctx, text.text.trim()), child: Text(l.formSave)),
+          ],
+        ),
       ),
     );
     text.dispose();
     if (name == null || name.isEmpty || name == r.branch) return;
-    await _run(() => _tickets.renameTicketBranch(
-          key: key,
-          renameTicketBranchRequest: RenameTicketBranchRequest(branch: name, repoId: r.repoId),
-        ));
+    await _run(
+      () => _tickets.renameTicketBranch(
+        key: key,
+        renameTicketBranchRequest: RenameTicketBranchRequest(branch: name, repoId: r.repoId),
+      ),
+    );
   }
 
   /// Changes the team's number for the work ({number} in branch and commit
@@ -353,26 +381,35 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       showDragHandle: true,
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(ctx).viewInsets.bottom),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          TextField(
-            controller: text,
-            autofocus: true,
-            maxLength: 64,
-            autocorrect: false,
-            enableSuggestions: false,
-            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
-            decoration: InputDecoration(labelText: l.tasksTicketNumber, hintText: t.key),
-            onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
-          ),
-          Text(l.ticketNumberHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
-          const SizedBox(height: 10),
-          FilledButton(onPressed: () => Navigator.pop(ctx, text.text.trim()), child: Text(l.formSave)),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: text,
+              autofocus: true,
+              maxLength: 64,
+              autocorrect: false,
+              enableSuggestions: false,
+              style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
+              decoration: InputDecoration(labelText: l.tasksTicketNumber, hintText: t.key),
+              onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+            ),
+            Text(l.ticketNumberHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
+            const SizedBox(height: 10),
+            FilledButton(onPressed: () => Navigator.pop(ctx, text.text.trim()), child: Text(l.formSave)),
+          ],
+        ),
       ),
     );
     text.dispose();
     if (number == null || number == (t.ticketNumber ?? '')) return;
-    await _run(() => _tickets.setTicketNumber(key: t.key, setTicketNumberRequest: SetTicketNumberRequest(number: number)));
+    await _run(
+      () => _tickets.setTicketNumber(
+        key: t.key,
+        setTicketNumberRequest: SetTicketNumberRequest(number: number),
+      ),
+    );
   }
 
   /// Re-applies the commit format to the unpushed commits: a preview with
@@ -409,34 +446,40 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       showDragHandle: true,
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(ctx).viewInsets.bottom),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(l.ticketCommitEdit, style: Theme.of(ctx).textTheme.titleLarge),
-          const SizedBox(height: 10),
-          TextField(
-            controller: text,
-            autofocus: true,
-            minLines: 4,
-            maxLines: 10,
-            inputFormatters: [LengthLimitingTextInputFormatter(10000)],
-            autocorrect: false,
-            enableSuggestions: false,
-            keyboardType: TextInputType.multiline,
-            style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13.5, height: 1.4),
-            decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 11)),
-          ),
-          const SizedBox(height: 6),
-          Text(l.ticketCommitEditHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
-          const SizedBox(height: 10),
-          FilledButton(onPressed: () => Navigator.pop(ctx, text.text), child: Text(l.formSave)),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l.ticketCommitEdit, style: Theme.of(ctx).textTheme.titleLarge),
+            const SizedBox(height: 10),
+            TextField(
+              controller: text,
+              autofocus: true,
+              minLines: 4,
+              maxLines: 10,
+              inputFormatters: [LengthLimitingTextInputFormatter(10000)],
+              autocorrect: false,
+              enableSuggestions: false,
+              keyboardType: TextInputType.multiline,
+              style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13.5, height: 1.4),
+              decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 11)),
+            ),
+            const SizedBox(height: 6),
+            Text(l.ticketCommitEditHint, style: TextStyle(fontSize: 12.5, color: Agnts.of(ctx).ink3)),
+            const SizedBox(height: 10),
+            FilledButton(onPressed: () => Navigator.pop(ctx, text.text), child: Text(l.formSave)),
+          ],
+        ),
       ),
     );
     text.dispose();
     if (message == null || message.trim().isEmpty || message.trim() == commit.message.trim()) return;
-    await _run(() => _tickets.editCommitMessage(
-          key: t.key,
-          editCommitMessageRequest: EditCommitMessageRequest(sha: commit.sha, message: message, repoId: isMultiRepo(t) ? r.repoId : null),
-        ));
+    await _run(
+      () => _tickets.editCommitMessage(
+        key: t.key,
+        editCommitMessageRequest: EditCommitMessageRequest(sha: commit.sha, message: message, repoId: isMultiRepo(t) ? r.repoId : null),
+      ),
+    );
   }
 
   Future<void> _startOver(BuildContext context, String key) async {
@@ -465,15 +508,15 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
   /// agnts's code review card; queues a (re-)review like the other actions.
   Widget _codeReview(TicketDetail d) => CodeReviewCard(
-        detail: d,
-        feedback: _feedback,
-        busy: _busy,
-        onRun: () => _run(() => _tickets.reviewTicket(key: d.ticket.key)),
-        onFollowUp: (i) => _run(() async {
-          await _tickets.followUpFromFinding(key: d.ticket.key, index: i);
-          if (mounted) showSnack(context, AppLocalizations.of(context).followUpsFromFindingDone);
-        }),
-      );
+    detail: d,
+    feedback: _feedback,
+    busy: _busy,
+    onRun: () => _run(() => _tickets.reviewTicket(key: d.ticket.key)),
+    onFollowUp: (i) => _run(() async {
+      await _tickets.followUpFromFinding(key: d.ticket.key, index: i);
+      if (mounted) showSnack(context, AppLocalizations.of(context).followUpsFromFindingDone);
+    }),
+  );
 
   /// agnts's preview card (screenshots of the running app), for tickets
   /// whose repository can be previewed or that already have a preview.
@@ -486,7 +529,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       feedback: _feedback,
       shots: _feedbackShots,
       busy: _busy,
-      onRun: (compare) => _run(() => _tickets.previewTicket(key: t.key, previewInput: PreviewInput(compare: compare))),
+      onRun: (compare) => _run(
+        () => _tickets.previewTicket(
+          key: t.key,
+          previewInput: PreviewInput(compare: compare),
+        ),
+      ),
     );
   }
 
@@ -538,21 +586,22 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _answering = answering ? d.questions : const [];
           _draftApi = answering ? ref.read(apiProvider)?.getTicketsApi() : null;
           return ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 24),
-          children: [
-            _header(context, d),
-            TranslationStatus(translation.state),
-            if (t.replayOf != null && t.replayOf!.isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: ReplayBanner(t.replayOf!)),
-            if (t.trackerUpdate != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: TrackerUpdateCard(t)),
-            TicketCICard(d.ticket),
-            if (d.ticket.waitReason != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: WaitBanner(d.ticket)),
-            _Track(ticket: d.ticket, history: d.history ?? const []),
-            // A viewer reads the stage (questions, the result to review) but cannot act on it.
-            IgnorePointer(ignoring: !ref.watch(canEditProvider), child: _stage(context, d)),
-            _folds(context, d),
-          ],
-        );
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              _header(context, d),
+              TranslationStatus(translation.state),
+              if (t.replayOf != null && t.replayOf!.isNotEmpty)
+                Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: ReplayBanner(t.replayOf!)),
+              if (t.trackerUpdate != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: TrackerUpdateCard(t)),
+              TicketCICard(d.ticket),
+              if (d.ticket.waitReason != null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: WaitBanner(d.ticket)),
+              _Track(ticket: d.ticket, history: d.history ?? const []),
+              // A viewer reads the stage (questions, the result to review) but cannot act on it.
+              IgnorePointer(ignoring: !ref.watch(canEditProvider), child: _stage(context, d)),
+              _folds(context, d),
+            ],
+          );
         },
       ),
       bottomNavigationBar: detail.value == null || !ref.watch(canEditProvider) ? null : _actionBar(context, detail.value!),
@@ -568,86 +617,112 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final isTask = t.source_ == TicketSource_Enum.local;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        DefaultTextStyle.merge(
-          style: TextStyle(fontSize: 13, color: c.ink3),
-          child: Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            StateBadge(t.state, kind: t.kind),
-            SourceChip(sourceLabel(l, t.source_), task: isTask),
-            KindChip(t),
-            if (t.repoName != null && t.repoName!.isNotEmpty) Text(repoLabel(t)!),
-            if (t.group != null) Text(l.mgroupsGroup(t.group!.name)),
-            if (t.partlyMerged == true) ToneBadge(l.mgroupsPartlyMerged, Tone.warn, small: true),
-            if (t.priority.isNotEmpty) Text(t.priority),
-            if (t.revision > 0) Text(l.ticketRevision(t.revision.toString())),
-          ]),
-        ),
-        const SizedBox(height: 8),
-        Text(_tr(t.title), style: Theme.of(context).textTheme.headlineSmall?.copyWith(height: 1.15)),
-        if (t.description.isNotEmpty) ...[
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DefaultTextStyle.merge(
+            style: TextStyle(fontSize: 13, color: c.ink3),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                StateBadge(t.state, kind: t.kind),
+                SourceChip(sourceLabel(l, t.source_), task: isTask),
+                KindChip(t),
+                if (t.repoName != null && t.repoName!.isNotEmpty) Text(repoLabel(t)!),
+                if (t.group != null) Text(l.mgroupsGroup(t.group!.name)),
+                if (t.partlyMerged == true) ToneBadge(l.mgroupsPartlyMerged, Tone.warn, small: true),
+                if (t.priority.isNotEmpty) Text(t.priority),
+                if (t.revision > 0) Text(l.ticketRevision(t.revision.toString())),
+              ],
+            ),
+          ),
           const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => setState(() => _descOpen = !_descOpen),
-            child: Text(
-              _tr(t.description),
-              maxLines: _descOpen ? null : 6,
-              overflow: _descOpen ? null : TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 15, color: c.ink2, height: 1.45),
-            ),
-          ),
-        ],
-        TicketMemberRow(t),
-        AttachmentList(d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.ticket).toList()),
-        // A multi-repo ticket lists each repository's branch and pull request.
-        TicketRepos(t, onRename: _canRename(t.repos?.firstOrNull) ? (r) => _renameBranch(t.key, r) : null),
-        if (t.branch.isNotEmpty && !isMultiRepo(t))
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(children: [
-              Expanded(child: Text('${l.ticketBranch}: ${t.branch}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3))),
-              if (_canRename(t.repos?.firstOrNull))
-                TextButton(
-                  onPressed: _busy ? null : () => _renameBranch(t.key, t.repos!.first),
-                  child: Text(l.ticketBranchRename),
-                ),
-            ]),
-          ),
-        if (t.source_ != TicketSource_Enum.git)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(children: [
-              Expanded(
-                child: Text('${l.tasksTicketNumber}: ${ticketNo(t)}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
+          Text(_tr(t.title), style: Theme.of(context).textTheme.headlineSmall?.copyWith(height: 1.15)),
+          if (t.description.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => setState(() => _descOpen = !_descOpen),
+              child: Text(
+                _tr(t.description),
+                maxLines: _descOpen ? null : 6,
+                overflow: _descOpen ? null : TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 15, color: c.ink2, height: 1.45),
               ),
-              if (ref.watch(canEditProvider) && t.state != TicketState.done && t.state != TicketState.rejected)
-                TextButton(
-                  onPressed: _busy ? null : () => _setNumber(t),
-                  child: Text(t.ticketNumber == null ? l.ticketNumberSet : l.ticketNumberEdit),
+            ),
+          ],
+          TicketMemberRow(t),
+          AttachmentList(d.attachments.where((a) => a.purpose == AttachmentPurposeEnum.ticket).toList()),
+          // A multi-repo ticket lists each repository's branch and pull request.
+          TicketRepos(t, onRename: _canRename(t.repos?.firstOrNull) ? (r) => _renameBranch(t.key, r) : null),
+          if (t.branch.isNotEmpty && !isMultiRepo(t))
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${l.ticketBranch}: ${t.branch}',
+                      style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+                    ),
+                  ),
+                  if (_canRename(t.repos?.firstOrNull))
+                    TextButton(onPressed: _busy ? null : () => _renameBranch(t.key, t.repos!.first), child: Text(l.ticketBranchRename)),
+                ],
+              ),
+            ),
+          if (t.source_ != TicketSource_Enum.git)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${l.tasksTicketNumber}: ${ticketNo(t)}',
+                      style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+                    ),
+                  ),
+                  if (ref.watch(canEditProvider) && t.state != TicketState.done && t.state != TicketState.rejected)
+                    TextButton(
+                      onPressed: _busy ? null : () => _setNumber(t),
+                      child: Text(t.ticketNumber == null ? l.ticketNumberSet : l.ticketNumberEdit),
+                    ),
+                ],
+              ),
+            ),
+          if (t.prUrl.isNotEmpty && !isMultiRepo(t))
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: SelectableText(
+                t.prUrl,
+                style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.primary),
+              ),
+            ),
+          if (t.parentKey != null && t.parentKey!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: GestureDetector(
+                onTap: () => context.push('/tickets/${t.parentKey}'),
+                child: Text(
+                  '${l.implementImplements} ${t.parentKey}',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary),
                 ),
-            ]),
-          ),
-        if (t.prUrl.isNotEmpty && !isMultiRepo(t))
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: SelectableText(t.prUrl, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.primary)),
-          ),
-        if (t.parentKey != null && t.parentKey!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: GestureDetector(
-              onTap: () => context.push('/tickets/${t.parentKey}'),
-              child: Text('${l.implementImplements} ${t.parentKey}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary)),
+              ),
             ),
-          ),
-        if (t.followUpOf != null && t.followUpOf!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: GestureDetector(
-              onTap: () => context.push('/tickets/${t.followUpOf}'),
-              child: Text('${l.followUpsFollowUpOf} ${t.followUpOf}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary)),
+          if (t.followUpOf != null && t.followUpOf!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: GestureDetector(
+                onTap: () => context.push('/tickets/${t.followUpOf}'),
+                child: Text(
+                  '${l.followUpsFollowUpOf} ${t.followUpOf}',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.primary),
+                ),
+              ),
             ),
-          ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -667,7 +742,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           _H2(l.ticketQueuedTitle),
           _Sub(t.held == true ? l.ticketHeldSub : (report ? l.ticketQueuedSubReport : l.ticketQueuedSub)),
           KindPicker(t),
-          if (!pull) ...[RepoPicker(t), ModelPicker(t, stages: const [ModelStage.analyze, ModelStage.coding])],
+          if (!pull) ...[
+            RepoPicker(t),
+            ModelPicker(t, stages: const [ModelStage.analyze, ModelStage.coding]),
+          ],
         ]);
       case TicketState.analyzing:
         children.addAll([
@@ -706,7 +784,15 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       case TicketState.coding:
       case TicketState.testing:
         children.addAll([
-          _H2(rev(report ? l.ticketWritingTitle : t.state == TicketState.coding ? l.ticketCodingTitle : l.ticketTestingTitle)),
+          _H2(
+            rev(
+              report
+                  ? l.ticketWritingTitle
+                  : t.state == TicketState.coding
+                  ? l.ticketCodingTitle
+                  : l.ticketTestingTitle,
+            ),
+          ),
           _Sub(report ? l.ticketWritingSub : l.ticketCodingSub(t.branch)),
           const SizedBox(height: 8),
           _runFacts(context, d),
@@ -728,21 +814,24 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           const SizedBox(height: 8),
           HelpBox(t.postReport == true ? l.ticketDoneReportPosted(t.key) : l.ticketDoneReport, tone: Tone.ok),
           if (t.kind == TicketKind.plan || t.kind == TicketKind.bug) ImplementReport(t, childKey: d.childKey),
-          if (d.result?.report != null) TicketSection(id: 'report', title: l.ticketReport, children: [ReportMarkdown(_tr(d.result!.report!))]),
+          if (d.result?.report != null)
+            TicketSection(id: 'report', title: l.ticketReport, children: [ReportMarkdown(_tr(d.result!.report!))]),
         ]);
       case TicketState.done:
         final toMain = t.afterApprove == TicketAfterApproveEnum.main && t.source_ == TicketSource_Enum.local;
         final text = toMain
             ? l.ticketDoneMain(t.repoName ?? '')
             : t.prNumber != null
-                ? l.ticketDonePr(t.prNumber.toString(), t.branch)
-                : l.ticketDoneTitle;
+            ? l.ticketDonePr(t.prNumber.toString(), t.branch)
+            : l.ticketDoneTitle;
         children.add(HelpBox(text, tone: Tone.ok));
         if (t.mergedAt != null) {
-          children.add(Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Text(l.ticketMergedAt(_when(context, t.mergedAt!)), style: TextStyle(fontSize: 14, color: c.ink3)),
-          ));
+          children.add(
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(l.ticketMergedAt(_when(context, t.mergedAt!)), style: TextStyle(fontSize: 14, color: c.ink3)),
+            ),
+          );
         } else if (t.prUrl.isNotEmpty) {
           children.addAll([
             const SizedBox(height: 10),
@@ -781,7 +870,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             const SizedBox(height: 10),
             AttachmentPicker(controller: _continueFiles, enabled: !_busy),
           ],
-          if (whereTo != null) Padding(padding: const EdgeInsets.only(top: 10), child: Text(whereTo, style: TextStyle(fontSize: 13, color: c.ink3))),
+          if (whereTo != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(whereTo, style: TextStyle(fontSize: 13, color: c.ink3)),
+            ),
         ]);
       case TicketState.failed:
         children.addAll([
@@ -845,7 +938,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           : Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton(
-                onPressed: _busy ? null : () => _run(() => _tickets.setTicketKind(key: t.key, ticketKindInput: TicketKindInput(kind: to))),
+                onPressed: _busy
+                    ? null
+                    : () => _run(
+                        () => _tickets.setTicketKind(
+                          key: t.key,
+                          ticketKindInput: TicketKindInput(kind: to),
+                        ),
+                      ),
                 child: Text(l.kindSwitchTo(kindChoiceLabel(l, to))),
               ),
             ),
@@ -862,13 +962,21 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final tracked = plane || t.source_ == TicketSource_Enum.jira;
     return [
       _Sub(tracked ? (plane ? l.ticketReviewReportSubPlane : l.ticketReviewReportSubJira) : l.ticketReviewReportSub),
-      if (r != null && r.summary.isNotEmpty) ...[const SizedBox(height: 8), Text(_tr(r.summary), style: const TextStyle(fontSize: 15, height: 1.45))],
-      if (r != null && r.notes.isNotEmpty) TicketSection(id: 'notes', title: l.ticketNotes, hint: '${r.notes.length}', children: _noteList(r.notes)),
+      if (r != null && r.summary.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text(_tr(r.summary), style: const TextStyle(fontSize: 15, height: 1.45)),
+      ],
+      if (r != null && r.notes.isNotEmpty)
+        TicketSection(id: 'notes', title: l.ticketNotes, hint: '${r.notes.length}', children: _noteList(r.notes)),
       ModelPicker(t, stages: const [ModelStage.retry, ModelStage.review]),
       _codeReview(d),
-      TicketSection(id: 'report', title: l.ticketReport, children: [
-        if (r?.report != null) ReportMarkdown(_tr(r!.report!)) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
-      ]),
+      TicketSection(
+        id: 'report',
+        title: l.ticketReport,
+        children: [
+          if (r?.report != null) ReportMarkdown(_tr(r!.report!)) else Text(l.ticketReportMissing, style: TextStyle(color: c.ink3)),
+        ],
+      ),
       if (tracked)
         Padding(
           padding: const EdgeInsets.only(top: 12),
@@ -890,12 +998,15 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final models = d.effectiveModels;
     final model = models == null ? null : (t.revision > 0 ? models.retry : models.coding);
     final u = ref.watch(usageProvider).value?.fiveHour.utilization;
-    return Grid2(gap: 8, children: [
-      if (model != null) Fact(l.ticketFactModel, _modelName(model)),
-      Fact(l.ticketFactTurns, '${t.turns}'),
-      if (d.maxTurns != null) Fact(l.ticketFactTurnLimit, '${d.maxTurns}'),
-      if (u != null) Fact(l.ticketFactSession, '${(u * 100).round()}%'),
-    ]);
+    return Grid2(
+      gap: 8,
+      children: [
+        if (model != null) Fact(l.ticketFactModel, _modelName(model)),
+        Fact(l.ticketFactTurns, '${t.turns}'),
+        if (d.maxTurns != null) Fact(l.ticketFactTurnLimit, '${d.maxTurns}'),
+        if (u != null) Fact(l.ticketFactSession, '${(u * 100).round()}%'),
+      ],
+    );
   }
 
   List<Widget> _review(BuildContext context, TicketDetail d) {
@@ -905,10 +1016,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final sub = toMain
         ? l.ticketReviewSubMain
         : t.source_ == TicketSource_Enum.jira
-            ? l.ticketReviewSubJira(t.branch)
-            : t.source_ == TicketSource_Enum.plane
-                ? l.ticketReviewSubPlane(t.branch)
-                : l.ticketReviewSubPr(t.branch);
+        ? l.ticketReviewSubJira(t.branch)
+        : t.source_ == TicketSource_Enum.plane
+        ? l.ticketReviewSubPlane(t.branch)
+        : l.ticketReviewSubPr(t.branch);
     final r = d.result;
     final pull = isPullReview(t);
     final controls = <Widget>[
@@ -936,28 +1047,39 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     return [
       _Sub(sub),
       const SizedBox(height: 8),
-      Grid2(gap: 8, children: [
-        if (t.skipChecks && r.checks.isEmpty)
-          Fact(l.ticketFactTests, l.ticketChecksSkipped)
-        else
-          Fact(l.ticketFactTests, r.checks.isEmpty ? l.ticketNoChecks : l.ticketChecksPassed(passed),
-              tone: r.checks.isEmpty ? null : (allOk ? Tone.ok : Tone.bad)),
-        Fact(l.ticketFactChanged, _changed(l, r)),
-        if (time != null) Fact(l.mdetailFactTime, shortDuration(time)),
-        Fact(l.ticketFactTurns, '${t.turns}'),
-      ]),
+      Grid2(
+        gap: 8,
+        children: [
+          if (t.skipChecks && r.checks.isEmpty)
+            Fact(l.ticketFactTests, l.ticketChecksSkipped)
+          else
+            Fact(
+              l.ticketFactTests,
+              r.checks.isEmpty ? l.ticketNoChecks : l.ticketChecksPassed(passed),
+              tone: r.checks.isEmpty ? null : (allOk ? Tone.ok : Tone.bad),
+            ),
+          Fact(l.ticketFactChanged, _changed(l, r)),
+          if (time != null) Fact(l.mdetailFactTime, shortDuration(time)),
+          Fact(l.ticketFactTurns, '${t.turns}'),
+        ],
+      ),
       ..._resultBody(context, r, checking: false),
       if (hasEditableCommits(t))
-        TicketSection(id: 'commits', title: l.ticketCommitsTitle, hint: '${commitCount(t)}', children: [
-          _Sub(l.ticketCommitsSub),
-          if (ref.watch(canEditProvider))
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(onPressed: _busy ? null : () => _reapplyFormat(t), child: Text(l.ticketCommitsReapply)),
-            ),
-          const SizedBox(height: 8),
-          CommitMessages(t, onEdit: ref.watch(canEditProvider) && !_busy ? (r, c) => _editCommit(t, r, c) : null),
-        ]),
+        TicketSection(
+          id: 'commits',
+          title: l.ticketCommitsTitle,
+          hint: '${commitCount(t)}',
+          children: [
+            _Sub(l.ticketCommitsSub),
+            if (ref.watch(canEditProvider))
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(onPressed: _busy ? null : () => _reapplyFormat(t), child: Text(l.ticketCommitsReapply)),
+              ),
+            const SizedBox(height: 8),
+            CommitMessages(t, onEdit: ref.watch(canEditProvider) && !_busy ? (r, c) => _editCommit(t, r, c) : null),
+          ],
+        ),
       ...checks,
       ..._resultBody(context, r, reading: false),
       _codeReview(d),
@@ -976,30 +1098,64 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final passed = r.checks.where((x) => x.exitCode == 0).length;
     return [
       if (reading && paras.isNotEmpty)
-        TicketSection(id: 'summary', title: l.ticketWhatAgntsDid, children: [
-          for (final p in paras) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(p, style: const TextStyle(fontSize: 15, height: 1.45))),
-        ]),
-      if (reading && r.notes.isNotEmpty) TicketSection(id: 'notes', title: l.ticketNotes, hint: '${r.notes.length}', children: _noteList(r.notes)),
+        TicketSection(
+          id: 'summary',
+          title: l.ticketWhatAgntsDid,
+          children: [
+            for (final p in paras)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(p, style: const TextStyle(fontSize: 15, height: 1.45)),
+              ),
+          ],
+        ),
+      if (reading && r.notes.isNotEmpty)
+        TicketSection(id: 'notes', title: l.ticketNotes, hint: '${r.notes.length}', children: _noteList(r.notes)),
       if (checking && r.checks.isNotEmpty)
-        TicketSection(id: 'checks', title: l.ticketChecks, hint: '$passed/${r.checks.length}', children: [
-          ListGroup(children: [
-          for (final x in r.checks)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Row(children: [
-                HIcon(x.exitCode == 0 ? 'check' : 'close', size: 16, stroke: 2.6, color: x.exitCode == 0 ? c.okInk : c.badInk),
-                const SizedBox(width: 10),
-                Expanded(child: Text(x.command, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink))),
-                Text(x.exitCode == 0 ? l.ticketPassed : l.ticketFailedCheck,
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: x.exitCode == 0 ? c.okInk : c.badInk)),
-              ]),
+        TicketSection(
+          id: 'checks',
+          title: l.ticketChecks,
+          hint: '$passed/${r.checks.length}',
+          children: [
+            ListGroup(
+              children: [
+                for (final x in r.checks)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Row(
+                      children: [
+                        HIcon(x.exitCode == 0 ? 'check' : 'close', size: 16, stroke: 2.6, color: x.exitCode == 0 ? c.okInk : c.badInk),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            x.command,
+                            style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink),
+                          ),
+                        ),
+                        Text(
+                          x.exitCode == 0 ? l.ticketPassed : l.ticketFailedCheck,
+                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: x.exitCode == 0 ? c.okInk : c.badInk),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
-          ]),
-        ]),
+          ],
+        ),
       if (checking && r.files.isNotEmpty)
-        TicketSection(id: 'diff', title: l.ticketDiff, hint: '${r.files.length}', children: [
-          RepoDiffs(files: r.files, openFirst: true, file: (f, open) => FileDiff(file: f, initiallyOpen: open)),
-        ]),
+        TicketSection(
+          id: 'diff',
+          title: l.ticketDiff,
+          hint: '${r.files.length}',
+          children: [
+            RepoDiffs(
+              files: r.files,
+              openFirst: true,
+              file: (f, open) => FileDiff(file: f, initiallyOpen: open),
+            ),
+          ],
+        ),
     ];
   }
 
@@ -1010,10 +1166,13 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       for (final n in notes)
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('•  ', style: TextStyle(color: c.ink3)),
-            Expanded(child: Text(_tr(n), style: const TextStyle(fontSize: 15, height: 1.4))),
-          ]),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('•  ', style: TextStyle(color: c.ink3)),
+              Expanded(child: Text(_tr(n), style: const TextStyle(fontSize: 15, height: 1.4))),
+            ],
+          ),
         ),
     ];
   }
@@ -1046,45 +1205,59 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(16)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(_tr(q.text), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.4, color: c.ink)),
-        if (q.multiple && q.options.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(l.ticketPickAny, style: TextStyle(fontSize: 13, color: c.ink3)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _tr(q.text),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.4, color: c.ink),
           ),
-        const SizedBox(height: 10),
-        if (q.options.isNotEmpty) ...[
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final o in q.options)
-              _OptionPill(
-                label: _tr(o),
-                selected: q.multiple ? (_chosen[q.id]?.contains(o) ?? false) : _picked[q.id] == o,
-                onTap: enabled ? () => _toggle(q, o) : null,
-              ),
-          ]),
+          if (q.multiple && q.options.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(l.ticketPickAny, style: TextStyle(fontSize: 13, color: c.ink3)),
+            ),
           const SizedBox(height: 10),
-        ],
-        TextField(
-          controller: note,
-          enabled: enabled,
-          minLines: 2,
-          maxLines: 6,
-          style: const TextStyle(fontSize: 16, height: 1.4),
-          decoration: InputDecoration(
-            hintText: q.options.isEmpty
-                ? l.ticketYourAnswer
-                : q.multiple
-                    ? l.ticketOtherAnswer
-                    : l.ticketAddDetails,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          if (q.options.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final o in q.options)
+                  _OptionPill(
+                    label: _tr(o),
+                    selected: q.multiple ? (_chosen[q.id]?.contains(o) ?? false) : _picked[q.id] == o,
+                    onTap: enabled ? () => _toggle(q, o) : null,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+          TextField(
+            controller: note,
+            enabled: enabled,
+            minLines: 2,
+            maxLines: 6,
+            style: const TextStyle(fontSize: 16, height: 1.4),
+            decoration: InputDecoration(
+              hintText: q.options.isEmpty
+                  ? l.ticketYourAnswer
+                  : q.multiple
+                  ? l.ticketOtherAnswer
+                  : l.ticketAddDetails,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            ),
+            onChanged: (_) => setState(() {}),
           ),
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 10),
-        AttachmentPicker(controller: _filesFor(q), enabled: enabled),
-      ]),
+          const SizedBox(height: 10),
+          AttachmentPicker(controller: _filesFor(q), enabled: enabled),
+        ],
+      ),
     );
   }
 
@@ -1096,20 +1269,29 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       child: Fold(
         title: a.summary.isEmpty ? l.ticketPlan : l.ticketAnalysis,
         hint: a.plan.isEmpty ? null : '${a.plan.length}',
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (a.summary.isNotEmpty) Text(_tr(a.summary), style: const TextStyle(fontSize: 15, height: 1.45)),
-          if (a.plan.isNotEmpty) ...[
-            if (a.summary.isNotEmpty) _H3(l.ticketPlan),
-            for (final (i, p) in a.plan.indexed)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  SizedBox(width: 22, child: Text('${i + 1}.', style: TextStyle(color: c.ink3, fontSize: 15))),
-                  Expanded(child: Text(_tr(p), style: const TextStyle(fontSize: 15, height: 1.4))),
-                ]),
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (a.summary.isNotEmpty) Text(_tr(a.summary), style: const TextStyle(fontSize: 15, height: 1.45)),
+            if (a.plan.isNotEmpty) ...[
+              if (a.summary.isNotEmpty) _H3(l.ticketPlan),
+              for (final (i, p) in a.plan.indexed)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 22,
+                        child: Text('${i + 1}.', style: TextStyle(color: c.ink3, fontSize: 15)),
+                      ),
+                      Expanded(child: Text(_tr(p), style: const TextStyle(fontSize: 15, height: 1.4))),
+                    ],
+                  ),
+                ),
+            ],
           ],
-        ]),
+        ),
       ),
     );
   }
@@ -1152,36 +1334,53 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         Fold(
           title: l.ticketAnswersTitle,
           hint: '${answered.length}',
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            for (final q in answered)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text.rich(TextSpan(style: const TextStyle(fontSize: 15, height: 1.4), children: [
-                    TextSpan(text: '${q.text}\n', style: TextStyle(color: c.ink3)),
-                    TextSpan(
-                      // A multiple-choice answer is one choice per line.
-                      text: q.multiple ? q.answer!.split('\n').where((x) => x.trim().isNotEmpty).join(', ') : q.answer,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    if (q.note.isNotEmpty) TextSpan(text: '. ${q.note}'),
-                  ])),
-                  AttachmentList([
-                    for (final a in d.attachments)
-                      if (a.purpose == AttachmentPurposeEnum.answer && a.questionId == q.id) a,
-                  ]),
-                ]),
-              ),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final q in answered)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          style: const TextStyle(fontSize: 15, height: 1.4),
+                          children: [
+                            TextSpan(
+                              text: '${q.text}\n',
+                              style: TextStyle(color: c.ink3),
+                            ),
+                            TextSpan(
+                              // A multiple-choice answer is one choice per line.
+                              text: q.multiple ? q.answer!.split('\n').where((x) => x.trim().isNotEmpty).join(', ') : q.answer,
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            if (q.note.isNotEmpty) TextSpan(text: '. ${q.note}'),
+                          ],
+                        ),
+                      ),
+                      AttachmentList([
+                        for (final a in d.attachments)
+                          if (a.purpose == AttachmentPurposeEnum.answer && a.questionId == q.id) a,
+                      ]),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       if (retryFiles.isNotEmpty || feedbackFiles.isNotEmpty)
         Fold(
           title: l.filesTitle,
           hint: '${retryFiles.length + feedbackFiles.length}',
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            AttachmentList(feedbackFiles, label: l.filesFromFeedback),
-            AttachmentList(retryFiles, label: l.filesFromRetry),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AttachmentList(feedbackFiles, label: l.filesFromFeedback),
+              AttachmentList(retryFiles, label: l.filesFromRetry),
+            ],
+          ),
         ),
       if (t.kind == TicketKind.swaggertest) ApiResultsFold(ticketKey: t.key),
       if (d.analysis != null && t.state != TicketState.waitingForAnswers) _analysisFold(context, d.analysis!),
@@ -1203,33 +1402,48 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         hint: '${history.length}',
         child: history.isEmpty
             ? Text(l.ticketHistoryEmpty, style: TextStyle(color: c.ink3))
-            : Column(children: [
-                for (final (i, h) in history.indexed)
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 7),
-                    decoration: BoxDecoration(border: i == history.length - 1 ? null : Border(bottom: BorderSide(color: c.line2))),
-                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      SizedBox(
-                        width: 56,
-                        child: Text(_when(context, h.at), style: TextStyle(fontSize: 13, color: c.ink3, fontFeatures: const [FontFeature.tabularFigures()])),
+            : Column(
+                children: [
+                  for (final (i, h) in history.indexed)
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 7),
+                      decoration: BoxDecoration(
+                        border: i == history.length - 1 ? null : Border(bottom: BorderSide(color: c.line2)),
                       ),
-                      Container(
-                        width: 9,
-                        height: 9,
-                        margin: const EdgeInsets.only(top: 6, right: 10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: h.state == TicketState.done
-                              ? c.ok
-                              : h.origin == 'user'
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 56,
+                            child: Text(
+                              _when(context, h.at),
+                              style: TextStyle(fontSize: 13, color: c.ink3, fontFeatures: const [FontFeature.tabularFigures()]),
+                            ),
+                          ),
+                          Container(
+                            width: 9,
+                            height: 9,
+                            margin: const EdgeInsets.only(top: 6, right: 10),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: h.state == TicketState.done
+                                  ? c.ok
+                                  : h.origin == 'user'
                                   ? c.warn
                                   : c.line3,
-                        ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              h.message.isEmpty ? stateLabel(l, h.state, t.kind) : h.message,
+                              style: const TextStyle(fontSize: 14, height: 1.4),
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(child: Text(h.message.isEmpty ? stateLabel(l, h.state, t.kind) : h.message, style: const TextStyle(fontSize: 14, height: 1.4))),
-                    ]),
-                  ),
-              ]),
+                    ),
+                ],
+              ),
       ),
       Fold(
         title: l.ticketRunLog,
@@ -1238,30 +1452,39 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           data: (evs) {
             final shown = _shown(evs).reversed.take(40).toList();
             if (shown.isEmpty) return Text(l.ticketLogEmpty, style: TextStyle(color: c.ink3));
-            return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              for (final e in shown)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    SizedBox(width: 48, child: Text(_clock(context, e.createdAt), style: TextStyle(fontSize: 12.5, color: c.ink3))),
-                    Expanded(
-                      child: Text(
-                        e.message,
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.4,
-                          fontFamily: e.type == 'claude_tool' ? AgntsFonts.mono : null,
-                          color: e.level == EventLevelEnum.error
-                              ? c.badInk
-                              : e.level == EventLevelEnum.warn
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final e in shown)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 48,
+                          child: Text(_clock(context, e.createdAt), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+                        ),
+                        Expanded(
+                          child: Text(
+                            e.message,
+                            style: TextStyle(
+                              fontSize: 13,
+                              height: 1.4,
+                              fontFamily: e.type == 'claude_tool' ? AgntsFonts.mono : null,
+                              color: e.level == EventLevelEnum.error
+                                  ? c.badInk
+                                  : e.level == EventLevelEnum.warn
                                   ? c.warnInk
                                   : c.ink,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ]),
-                ),
-            ]);
+                  ),
+              ],
+            );
           },
           error: (_, _) => Text(l.commonError, style: TextStyle(color: c.badInk)),
           loading: () => const LinearProgressIndicator(),
@@ -1270,10 +1493,19 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     ];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        // A section keeps its own space above.
-        for (final (i, f) in folds.indexed) f is TicketSection ? f : Padding(padding: EdgeInsets.only(top: i == 0 ? 0 : 10), child: f),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // A section keeps its own space above.
+          for (final (i, f) in folds.indexed)
+            f is TicketSection
+                ? f
+                : Padding(
+                    padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
+                    child: f,
+                  ),
+        ],
+      ),
     );
   }
 
@@ -1295,7 +1527,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final t = d.ticket;
     final key = t.key;
     final danger = OutlinedButton.styleFrom(foregroundColor: c.badInk);
-    Widget hint(String text) => Expanded(child: Text(text, style: TextStyle(fontSize: 13, color: c.ink3)));
+    Widget hint(String text) => Expanded(
+      child: Text(text, style: TextStyle(fontSize: 13, color: c.ink3)),
+    );
     // A ticket can be rejected at any stage before it is done.
     final reject = Tooltip(
       message: l.ticketReject,
@@ -1315,19 +1549,21 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         final uploading = d.questions.any((q) => _filesFor(q).uploading);
         buttons = [
           reject,
-          hint([
-            uploading
-                ? l.filesWait
-                : left > 0
-                    ? l.ticketQuestionsLeft(left)
-                    : l.ticketAllAnswered,
-            if (_draftState != null)
-              switch (_draftState!) {
-                _DraftState.saving => l.ticketDraftSaving,
-                _DraftState.saved => l.ticketDraftSaved,
-                _DraftState.failed => l.ticketDraftFailed,
-              },
-          ].join('\n')),
+          hint(
+            [
+              uploading
+                  ? l.filesWait
+                  : left > 0
+                  ? l.ticketQuestionsLeft(left)
+                  : l.ticketAllAnswered,
+              if (_draftState != null)
+                switch (_draftState!) {
+                  _DraftState.saving => l.ticketDraftSaving,
+                  _DraftState.saved => l.ticketDraftSaved,
+                  _DraftState.failed => l.ticketDraftFailed,
+                },
+            ].join('\n'),
+          ),
           FilledButton(
             onPressed: _busy || left > 0 || uploading
                 ? null
@@ -1335,9 +1571,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                     // Sending the answers clears their drafts.
                     _draftTimer?.cancel();
                     _draftTimer = null;
-                    final ok = await _run(() => _tickets.answerQuestions(
-                          key: key,
-                          answersRequest: AnswersRequest(answers: [
+                    final ok = await _run(
+                      () => _tickets.answerQuestions(
+                        key: key,
+                        answersRequest: AnswersRequest(
+                          answers: [
                             for (final q in d.questions)
                               AnswersRequestAnswersInner(
                                 questionId: q.id,
@@ -1345,8 +1583,10 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                                 note: _noteOf(q),
                                 attachments: _filesFor(q).ids.isEmpty ? null : _filesFor(q).ids,
                               ),
-                          ]),
-                        ));
+                          ],
+                        ),
+                      ),
+                    );
                     if (ok) {
                       for (final f in _answerFiles.values) {
                         f.clear();
@@ -1367,9 +1607,11 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
         final confirm = finish
             ? l.draftsFinishConfirm('${t.pull?.number ?? t.prNumber ?? ''}')
             : report
-                ? (post ? (plane ? l.ticketApproveReportPostConfirmPlane(key) : l.ticketApproveReportPostConfirm(key)) : l.ticketApproveReportConfirm)
-                : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch)) +
-                    (assign.isEmpty ? '' : '\n\n${l.ticketApproveAssignees(assign.join(', '))}');
+            ? (post
+                  ? (plane ? l.ticketApproveReportPostConfirmPlane(key) : l.ticketApproveReportPostConfirm(key))
+                  : l.ticketApproveReportConfirm)
+            : (toMain ? l.ticketApproveMainConfirm : l.ticketApproveConfirm(t.branch)) +
+                  (assign.isEmpty ? '' : '\n\n${l.ticketApproveAssignees(assign.join(', '))}');
         buttons = [
           reject,
           Expanded(
@@ -1384,17 +1626,27 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
                   ? null
                   : () async {
                       if (await _confirm(confirm)) {
-                        await _run(() => _tickets.approveTicket(
-                              key: key,
-                              approveTicketRequest: report
-                                  ? ApproveTicketRequest(postReport: post)
-                                  : opensPr(t)
-                                      ? ApproveTicketRequest(assignees: assign)
-                                      : null,
-                            ));
+                        await _run(
+                          () => _tickets.approveTicket(
+                            key: key,
+                            approveTicketRequest: report
+                                ? ApproveTicketRequest(postReport: post)
+                                : opensPr(t)
+                                ? ApproveTicketRequest(assignees: assign)
+                                : null,
+                          ),
+                        );
                       }
                     },
-              child: Text(finish ? l.draftsFinishBtn : report ? l.ticketApproveReport : l.mdetailApprove, maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(
+                finish
+                    ? l.draftsFinishBtn
+                    : report
+                    ? l.ticketApproveReport
+                    : l.mdetailApprove,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ];
@@ -1413,7 +1665,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
             child: Tooltip(
               message: _retryFiles.uploading ? l.filesWait : '',
               child: FilledButton(
-                onPressed: _busy || (_takesRetryNote(t) && _retryFiles.uploading) || (failed && needsRepo(t) && t.repoId == null) ? null : () => _retry(t),
+                onPressed: _busy || (_takesRetryNote(t) && _retryFiles.uploading) || (failed && needsRepo(t) && t.repoId == null)
+                    ? null
+                    : () => _retry(t),
                 child: Text(failed ? l.mobileRetry : l.ticketResume, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
             ),
@@ -1460,7 +1714,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       case TicketState.new_ when t.held == true:
         buttons = [
           reject,
-          Expanded(child: FilledButton(onPressed: _busy ? null : () => _run(() => _tickets.startTicket(key: key)), child: Text(l.ticketStart))),
+          Expanded(
+            child: FilledButton(
+              onPressed: _busy ? null : () => _run(() => _tickets.startTicket(key: key)),
+              child: Text(l.ticketStart),
+            ),
+          ),
         ];
       case TicketState.new_:
         buttons = [reject, hint(l.ticketStartHint)];
@@ -1483,7 +1742,12 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
     final l = AppLocalizations.of(context);
     final key = t.key;
     if (await _confirm(t.state == TicketState.pushing ? l.ticketRejectPushingConfirm(key) : l.ticketRejectConfirm(key))) {
-      await _run(() => _tickets.rejectTicket(key: key, rejectTicketRequest: RejectTicketRequest(reason: 'rejected from the phone')));
+      await _run(
+        () => _tickets.rejectTicket(
+          key: key,
+          rejectTicketRequest: RejectTicketRequest(reason: 'rejected from the phone'),
+        ),
+      );
       if (context.mounted) context.pop();
     }
   }
@@ -1515,48 +1779,62 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       isScrollControlled: true,
       builder: (c) => Padding(
         padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(c).viewInsets.bottom + 20),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(l.ticketRequestChanges, style: Theme.of(c).textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(l.ticketFeedbackHint, style: TextStyle(fontSize: 14, color: Agnts.of(c).ink3)),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _feedback,
-            autofocus: true,
-            maxLines: 5,
-            minLines: 3,
-            style: const TextStyle(fontSize: 16, height: 1.4),
-            decoration: InputDecoration(hintText: l.ticketFeedbackPlaceholder),
-          ),
-          FeedbackShotChips(shots: _feedbackShots),
-          const SizedBox(height: 12),
-          AttachmentPicker(controller: _feedbackFiles),
-          if (checks) StatefulBuilder(builder: (c, set) => _skipChecksBox(t, onChanged: (v) => set(() => _skipChecks = v))),
-          const SizedBox(height: 12),
-          ListenableBuilder(
-            listenable: _feedbackFiles,
-            builder: (c, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              if (_feedbackFiles.uploading)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(l.filesWait, style: TextStyle(fontSize: 13, color: Agnts.of(c).ink3)),
-                ),
-              FilledButton(
-                onPressed: _feedbackFiles.uploading ? null : () => Navigator.pop(c, _feedback.text.trim()),
-                child: Text(l.ticketSend),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l.ticketRequestChanges, style: Theme.of(c).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(l.ticketFeedbackHint, style: TextStyle(fontSize: 14, color: Agnts.of(c).ink3)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _feedback,
+              autofocus: true,
+              maxLines: 5,
+              minLines: 3,
+              style: const TextStyle(fontSize: 16, height: 1.4),
+              decoration: InputDecoration(hintText: l.ticketFeedbackPlaceholder),
+            ),
+            FeedbackShotChips(shots: _feedbackShots),
+            const SizedBox(height: 12),
+            AttachmentPicker(controller: _feedbackFiles),
+            if (checks) StatefulBuilder(builder: (c, set) => _skipChecksBox(t, onChanged: (v) => set(() => _skipChecks = v))),
+            const SizedBox(height: 12),
+            ListenableBuilder(
+              listenable: _feedbackFiles,
+              builder: (c, _) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_feedbackFiles.uploading)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(l.filesWait, style: TextStyle(fontSize: 13, color: Agnts.of(c).ink3)),
+                    ),
+                  FilledButton(
+                    onPressed: _feedbackFiles.uploading ? null : () => Navigator.pop(c, _feedback.text.trim()),
+                    child: Text(l.ticketSend),
+                  ),
+                ],
               ),
-            ]),
-          ),
-        ]),
+            ),
+          ],
+        ),
       ),
     );
     if (text == null || text.isEmpty) return;
     final shots = [for (final s in _feedbackShots.value) s.ref];
     final ids = _feedbackFiles.ids;
-    final ok = await _run(() => _tickets.requestChanges(
+    final ok = await _run(
+      () => _tickets.requestChanges(
         key: t.key,
         requestChangesRequest: RequestChangesRequest(
-            feedback: text, shots: shots.isEmpty ? null : shots, attachments: ids.isEmpty ? null : ids, skipChecks: checks ? _skipChecks : null)));
+          feedback: text,
+          shots: shots.isEmpty ? null : shots,
+          attachments: ids.isEmpty ? null : ids,
+          skipChecks: checks ? _skipChecks : null,
+        ),
+      ),
+    );
     if (!ok) return;
     _skipChecks = null;
     _feedback.clear();
@@ -1575,14 +1853,14 @@ bool _takesContinueNote(Ticket t) =>
 
 /// Where Continue sends a rejected ticket, in a sentence.
 String? _continueHint(AppLocalizations l, TicketState? to) => switch (to) {
-      TicketState.new_ => l.ticketContinueToNew,
-      TicketState.waitingForAnswers => l.ticketContinueToAnswers,
-      TicketState.coding => l.ticketContinueToCoding,
-      TicketState.waitingForReview => l.ticketContinueToReview,
-      TicketState.failed => l.ticketContinueToFailed,
-      TicketState.rateLimited => l.ticketContinueToRateLimited,
-      _ => null,
-    };
+  TicketState.new_ => l.ticketContinueToNew,
+  TicketState.waitingForAnswers => l.ticketContinueToAnswers,
+  TicketState.coding => l.ticketContinueToCoding,
+  TicketState.waitingForReview => l.ticketContinueToReview,
+  TicketState.failed => l.ticketContinueToFailed,
+  TicketState.rateLimited => l.ticketContinueToRateLimited,
+  _ => null,
+};
 
 /// A model's name: Haiku, Sonnet, Opus, or "Codex" and the model for a
 /// run on Codex CLI ("codex:" and the model).
@@ -1614,9 +1892,12 @@ class _H2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Agnts.of(context).ink)),
-      );
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Text(
+      text,
+      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Agnts.of(context).ink),
+    ),
+  );
 }
 
 /// .block .sub
@@ -1626,9 +1907,9 @@ class _Sub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text, style: TextStyle(fontSize: 14, height: 1.45, color: Agnts.of(context).ink3)),
-      );
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Text(text, style: TextStyle(fontSize: 14, height: 1.45, color: Agnts.of(context).ink3)),
+  );
 }
 
 /// .h3: a small grey heading inside a block.
@@ -1638,9 +1919,12 @@ class _H3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 18, bottom: 8),
-        child: Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Agnts.of(context).ink3)),
-      );
+    padding: const EdgeInsets.only(top: 18, bottom: 8),
+    child: Text(
+      text,
+      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Agnts.of(context).ink3),
+    ),
+  );
 }
 
 /// Where saving the unsent answers is.
@@ -1670,7 +1954,10 @@ class _OptionPill extends StatelessWidget {
         child: Container(
           constraints: const BoxConstraints(minHeight: 38),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.3, color: selected ? c.surface : c.ink2)),
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.3, color: selected ? c.surface : c.ink2),
+          ),
         ),
       ),
     );
@@ -1699,17 +1986,17 @@ class _Track extends StatelessWidget {
   }
 
   static int? _index(TicketState s) => switch (s) {
-        TicketState.new_ => -1,
-        TicketState.analyzing => 0,
-        TicketState.waitingForAnswers => 1,
-        TicketState.coding => 2,
-        TicketState.testing => 3,
-        TicketState.waitingForReview => 4,
-        TicketState.pushing => 5,
-        TicketState.done => 6,
-        TicketState.rejected => -2,
-        TicketState.failed || TicketState.rateLimited => null,
-      };
+    TicketState.new_ => -1,
+    TicketState.analyzing => 0,
+    TicketState.waitingForAnswers => 1,
+    TicketState.coding => 2,
+    TicketState.testing => 3,
+    TicketState.waitingForReview => 4,
+    TicketState.pushing => 5,
+    TicketState.done => 6,
+    TicketState.rejected => -2,
+    TicketState.failed || TicketState.rateLimited => null,
+  };
 
   /// Where a stopped run stopped: its resume state, else the last state it reached.
   int _failedAt() {
@@ -1753,45 +2040,61 @@ class _Track extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 18, 16, 4),
         padding: const EdgeInsets.fromLTRB(6, 14, 6, 12),
-        decoration: BoxDecoration(color: c.surface, border: Border.all(color: c.line), borderRadius: BorderRadius.circular(18)),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          for (var i = 0; i < n; i++)
-            Expanded(
-              child: Column(children: [
-                SizedBox(
-                  height: 22,
-                  child: Stack(alignment: Alignment.center, children: [
-                    // The connector: left half belongs to this stop, right half to the next.
-                    Positioned(
-                      top: 10,
-                      left: 0,
-                      right: 0,
-                      child: Row(children: [
-                        Expanded(child: Container(height: 2, color: i == 0 ? Colors.transparent : (lit(i) ? c.primary : c.line))),
-                        Expanded(child: Container(height: 2, color: i == n - 1 ? Colors.transparent : (lit(i + 1) ? c.primary : c.line))),
-                      ]),
+        decoration: BoxDecoration(
+          color: c.surface,
+          border: Border.all(color: c.line),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < n; i++)
+              Expanded(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 22,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // The connector: left half belongs to this stop, right half to the next.
+                          Positioned(
+                            top: 10,
+                            left: 0,
+                            right: 0,
+                            child: Row(
+                              children: [
+                                Expanded(child: Container(height: 2, color: i == 0 ? Colors.transparent : (lit(i) ? c.primary : c.line))),
+                                Expanded(
+                                  child: Container(height: 2, color: i == n - 1 ? Colors.transparent : (lit(i + 1) ? c.primary : c.line)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          _Mark(kind: kinds[i], gate: gates[i]),
+                        ],
+                      ),
                     ),
-                    _Mark(kind: kinds[i], gate: gates[i]),
-                  ]),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  labels[i],
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    height: 1.15,
-                    fontWeight: FontWeight.w700,
-                    color: kinds[i] == _Stop.active && gates[i]
-                        ? c.warnInk
-                        : (kinds[i] == _Stop.active || kinds[i] == _Stop.error)
+                    const SizedBox(height: 6),
+                    Text(
+                      labels[i],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        height: 1.15,
+                        fontWeight: FontWeight.w700,
+                        color: kinds[i] == _Stop.active && gates[i]
+                            ? c.warnInk
+                            : (kinds[i] == _Stop.active || kinds[i] == _Stop.error)
                             ? c.ink
                             : c.ink3,
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-              ]),
-            ),
-        ]),
+              ),
+          ],
+        ),
       ),
     );
   }

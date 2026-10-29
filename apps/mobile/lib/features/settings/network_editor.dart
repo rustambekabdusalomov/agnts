@@ -107,10 +107,11 @@ class _NetworkEditorState extends ConsumerState<NetworkEditor> {
     try {
       final api = ref.read(apiProvider)!.getNetworkApi();
       final id = _current?.id;
-      final r = (id == null
-              ? await api.createPrivateNetwork(privateNetworkInput: body)
-              : await api.updatePrivateNetwork(networkId: id, privateNetworkInput: body))
-          .data!;
+      final r =
+          (id == null
+                  ? await api.createPrivateNetwork(privateNetworkInput: body)
+                  : await api.updatePrivateNetwork(networkId: id, privateNetworkInput: body))
+              .data!;
       ref.invalidate(networksProvider);
       ref.invalidate(networkActivityProvider);
       if (!mounted) return;
@@ -146,10 +147,10 @@ class _NetworkEditorState extends ConsumerState<NetworkEditor> {
   }
 
   String _kindHelp(AppLocalizations l) => switch (_kind) {
-        PrivateNetworkInputKindEnum.connector => l.networkKindHelp_connector,
-        PrivateNetworkInputKindEnum.wireguard => l.networkKindHelp_wireguard,
-        PrivateNetworkInputKindEnum.openvpn => l.networkKindHelp_openvpn,
-      };
+    PrivateNetworkInputKindEnum.connector => l.networkKindHelp_connector,
+    PrivateNetworkInputKindEnum.wireguard => l.networkKindHelp_wireguard,
+    PrivateNetworkInputKindEnum.openvpn => l.networkKindHelp_openvpn,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -158,166 +159,215 @@ class _NetworkEditorState extends ConsumerState<NetworkEditor> {
     final wg = _kind == PrivateNetworkInputKindEnum.wireguard;
     final cur = _current;
     final mono = TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink);
-    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SheetTitle(cur?.name ?? l.networkAddTitle, sub: l.networkEditorSub),
-      Flexible(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            ManageField(
-              label: l.networkName,
-              help: l.networkNameHelp,
-              child: ManageInput(controller: _name, hint: l.networkNamePlaceholder, maxLength: 60),
-            ),
-            ManageField(
-              label: l.networkKind,
-              help: _kindHelp(l),
-              child: Segmented<PrivateNetworkInputKindEnum>(
-                full: true,
-                options: [
-                  (PrivateNetworkInputKindEnum.connector, 'agnts-link'),
-                  (PrivateNetworkInputKindEnum.wireguard, 'WireGuard'),
-                  (PrivateNetworkInputKindEnum.openvpn, 'OpenVPN'),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SheetTitle(cur?.name ?? l.networkAddTitle, sub: l.networkEditorSub),
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ManageField(
+                  label: l.networkName,
+                  help: l.networkNameHelp,
+                  child: ManageInput(controller: _name, hint: l.networkNamePlaceholder, maxLength: 60),
+                ),
+                ManageField(
+                  label: l.networkKind,
+                  help: _kindHelp(l),
+                  child: Segmented<PrivateNetworkInputKindEnum>(
+                    full: true,
+                    options: [
+                      (PrivateNetworkInputKindEnum.connector, 'agnts-link'),
+                      (PrivateNetworkInputKindEnum.wireguard, 'WireGuard'),
+                      (PrivateNetworkInputKindEnum.openvpn, 'OpenVPN'),
+                    ],
+                    value: _kind,
+                    onChanged: (k) => setState(() => _kind = k),
+                  ),
+                ),
+                SwitchLine(title: l.networkEnabled, value: _enabled, onChanged: (v) => setState(() => _enabled = v)),
+                const SizedBox(height: 10),
+                if (_kind != PrivateNetworkInputKindEnum.connector)
+                  ManageField(
+                    label: wg ? l.networkConfigWg : l.networkConfigOvpn,
+                    help: [
+                      if (_keepsConfig && cur?.summary != null) l.networkSavedConfig(cur!.summary!),
+                      wg ? l.networkConfigWgHelp : l.networkConfigOvpnHelp,
+                    ].join('\n'),
+                    child: ManageInput(
+                      controller: _config,
+                      mono: true,
+                      minLines: 6,
+                      maxLines: 12,
+                      hint: wg
+                          ? '[Interface]\nPrivateKey = …\nAddress = 10.8.0.2/32\n\n[Peer]\nPublicKey = …\nEndpoint = vpn.example.com:51820'
+                          : 'client\ndev tun\nremote vpn.example.com 1194',
+                    ),
+                  ),
+                if (_kind == PrivateNetworkInputKindEnum.openvpn) ...[
+                  ManageField(
+                    label: l.networkUsername,
+                    child: ManageInput(controller: _username, maxLength: 256),
+                  ),
+                  ManageField(
+                    label: l.networkPassword,
+                    child: ManageInput(
+                      controller: _password,
+                      obscure: true,
+                      hint: _keepsConfig ? l.networkPasswordKeep : null,
+                      maxLength: 256,
+                    ),
+                  ),
                 ],
-                value: _kind,
-                onChanged: (k) => setState(() => _kind = k),
-              ),
+                ManageField(
+                  label: l.networkRoutes,
+                  help: l.networkRoutesHelp,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < _targets.length; i++)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: ManageInput(controller: _targets[i], mono: true, hint: l.networkRouteTarget),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: ManageInput(controller: _ports[i], mono: true, hint: '80, 443'),
+                              ),
+                              IconButton(
+                                tooltip: l.networkRemoveRoute,
+                                icon: const Icon(Icons.close_rounded),
+                                onPressed: () => setState(() {
+                                  _targets.removeAt(i).dispose();
+                                  _ports.removeAt(i).dispose();
+                                }),
+                              ),
+                            ],
+                          ),
+                        ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton(
+                          onPressed: () => setState(() {
+                            _targets.add(TextEditingController());
+                            _ports.add(TextEditingController());
+                          }),
+                          child: Text(l.networkAddRoute),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      HelpBox(l.networkBlastRadius, tone: Tone.warn),
+                    ],
+                  ),
+                ),
+                ManageField(
+                  label: l.networkCa,
+                  help: l.networkCaHelp,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (cur?.ca != null && !_caTouched)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l.networkCaSaved(
+                                  cur!.ca!.subjects.join(', '),
+                                  MaterialLocalizations.of(context).formatShortDate(cur.ca!.notAfter.toLocal()),
+                                ),
+                                style: TextStyle(fontSize: 13, color: c.ink3),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => setState(() {
+                                _caTouched = true;
+                                _ca.clear();
+                              }),
+                              child: Text(l.networkCaRemove),
+                            ),
+                          ],
+                        ),
+                      ManageInput(
+                        controller: _ca,
+                        mono: true,
+                        minLines: 3,
+                        maxLines: 8,
+                        hint: '-----BEGIN CERTIFICATE-----',
+                        onChanged: (_) => _caTouched = true,
+                      ),
+                    ],
+                  ),
+                ),
+                if (_kind == PrivateNetworkInputKindEnum.connector && cur?.kind == PrivateNetworkKindEnum.connector)
+                  ManageField(
+                    label: l.networkLinkTitle,
+                    help: l.networkLinkHooks,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(l.networkLinkHelp, style: TextStyle(fontSize: 13, color: c.ink3)),
+                        const SizedBox(height: 8),
+                        if (_token.isNotEmpty) ...[
+                          CopyLine(l.networkToken, _token),
+                          Text(l.networkTokenOnce, style: TextStyle(fontSize: 13, color: c.warnInk)),
+                          const SizedBox(height: 8),
+                        ],
+                        Builder(
+                          builder: (_) {
+                            final cmd = linkCommand(name: cur!.name, linkUrl: widget.linkUrl, token: _token, routes: _routes);
+                            return Container(
+                              padding: const EdgeInsets.fromLTRB(12, 8, 2, 8),
+                              decoration: BoxDecoration(color: c.hover, borderRadius: BorderRadius.circular(10)),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: SelectableText(cmd, style: mono)),
+                                  CopyButton(cmd),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: OutlinedButton(onPressed: _rotate, child: Text(l.networkRotate)),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (_error.isNotEmpty) ErrorLine(_error),
+              ],
             ),
-            SwitchLine(title: l.networkEnabled, value: _enabled, onChanged: (v) => setState(() => _enabled = v)),
-            const SizedBox(height: 10),
-            if (_kind != PrivateNetworkInputKindEnum.connector)
-              ManageField(
-                label: wg ? l.networkConfigWg : l.networkConfigOvpn,
-                help: [
-                  if (_keepsConfig && cur?.summary != null) l.networkSavedConfig(cur!.summary!),
-                  wg ? l.networkConfigWgHelp : l.networkConfigOvpnHelp,
-                ].join('\n'),
-                child: ManageInput(
-                  controller: _config,
-                  mono: true,
-                  minLines: 6,
-                  maxLines: 12,
-                  hint: wg ? '[Interface]\nPrivateKey = …\nAddress = 10.8.0.2/32\n\n[Peer]\nPublicKey = …\nEndpoint = vpn.example.com:51820' : 'client\ndev tun\nremote vpn.example.com 1194',
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(_token.isNotEmpty ? l.networkDone : l.formCancel),
                 ),
               ),
-            if (_kind == PrivateNetworkInputKindEnum.openvpn) ...[
-              ManageField(label: l.networkUsername, child: ManageInput(controller: _username, maxLength: 256)),
-              ManageField(
-                label: l.networkPassword,
-                child: ManageInput(controller: _password, obscure: true, hint: _keepsConfig ? l.networkPasswordKeep : null, maxLength: 256),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton(onPressed: _busy ? null : _save, child: Text(cur != null ? l.formSave : l.networkAddSubmit)),
               ),
             ],
-            ManageField(
-              label: l.networkRoutes,
-              help: l.networkRoutesHelp,
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                for (var i = 0; i < _targets.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(children: [
-                      Expanded(flex: 3, child: ManageInput(controller: _targets[i], mono: true, hint: l.networkRouteTarget)),
-                      const SizedBox(width: 8),
-                      Expanded(flex: 2, child: ManageInput(controller: _ports[i], mono: true, hint: '80, 443')),
-                      IconButton(
-                        tooltip: l.networkRemoveRoute,
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () => setState(() {
-                          _targets.removeAt(i).dispose();
-                          _ports.removeAt(i).dispose();
-                        }),
-                      ),
-                    ]),
-                  ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: OutlinedButton(
-                    onPressed: () => setState(() {
-                      _targets.add(TextEditingController());
-                      _ports.add(TextEditingController());
-                    }),
-                    child: Text(l.networkAddRoute),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                HelpBox(l.networkBlastRadius, tone: Tone.warn),
-              ]),
-            ),
-            ManageField(
-              label: l.networkCa,
-              help: l.networkCaHelp,
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                if (cur?.ca != null && !_caTouched)
-                  Row(children: [
-                    Expanded(
-                      child: Text(
-                        l.networkCaSaved(cur!.ca!.subjects.join(', '), MaterialLocalizations.of(context).formatShortDate(cur.ca!.notAfter.toLocal())),
-                        style: TextStyle(fontSize: 13, color: c.ink3),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => setState(() {
-                        _caTouched = true;
-                        _ca.clear();
-                      }),
-                      child: Text(l.networkCaRemove),
-                    ),
-                  ]),
-                ManageInput(
-                  controller: _ca,
-                  mono: true,
-                  minLines: 3,
-                  maxLines: 8,
-                  hint: '-----BEGIN CERTIFICATE-----',
-                  onChanged: (_) => _caTouched = true,
-                ),
-              ]),
-            ),
-            if (_kind == PrivateNetworkInputKindEnum.connector && cur?.kind == PrivateNetworkKindEnum.connector)
-              ManageField(
-                label: l.networkLinkTitle,
-                help: l.networkLinkHooks,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Text(l.networkLinkHelp, style: TextStyle(fontSize: 13, color: c.ink3)),
-                  const SizedBox(height: 8),
-                  if (_token.isNotEmpty) ...[
-                    CopyLine(l.networkToken, _token),
-                    Text(l.networkTokenOnce, style: TextStyle(fontSize: 13, color: c.warnInk)),
-                    const SizedBox(height: 8),
-                  ],
-                  Builder(builder: (_) {
-                    final cmd = linkCommand(name: cur!.name, linkUrl: widget.linkUrl, token: _token, routes: _routes);
-                    return Container(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 2, 8),
-                      decoration: BoxDecoration(color: c.hover, borderRadius: BorderRadius.circular(10)),
-                      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Expanded(child: SelectableText(cmd, style: mono)),
-                        CopyButton(cmd),
-                      ]),
-                    );
-                  }),
-                  const SizedBox(height: 8),
-                  Align(alignment: Alignment.centerLeft, child: OutlinedButton(onPressed: _rotate, child: Text(l.networkRotate))),
-                ]),
-              ),
-            if (_error.isNotEmpty) ErrorLine(_error),
-          ]),
+          ),
         ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-        child: Row(children: [
-          Expanded(
-            child: OutlinedButton(onPressed: () => Navigator.pop(context), child: Text(_token.isNotEmpty ? l.networkDone : l.formCancel)),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: FilledButton(
-              onPressed: _busy ? null : _save,
-              child: Text(cur != null ? l.formSave : l.networkAddSubmit),
-            ),
-          ),
-        ]),
-      ),
-    ]);
+      ],
+    );
   }
 }

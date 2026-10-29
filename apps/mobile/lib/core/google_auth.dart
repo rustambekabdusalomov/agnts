@@ -32,8 +32,8 @@ class GoogleAuth {
     } on GoogleSignInException catch (e) {
       return switch (e.code) {
         GoogleSignInExceptionCode.canceled || GoogleSignInExceptionCode.interrupted => null,
-        GoogleSignInExceptionCode.clientConfigurationError || GoogleSignInExceptionCode.providerConfigurationError =>
-          throw SignInError('googleSetup'),
+        GoogleSignInExceptionCode.clientConfigurationError ||
+        GoogleSignInExceptionCode.providerConfigurationError => throw SignInError('googleSetup'),
         _ => throw SignInError('googleFailed'),
       };
     } catch (e) {

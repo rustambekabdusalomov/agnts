@@ -8,30 +8,34 @@ import 'session.dart';
 final apiProvider = Provider<AgntsApi?>((ref) {
   final s = ref.watch(sessionProvider).value;
   if (s == null) return null;
-  final dio = Dio(BaseOptions(
-    baseUrl: '${s.server}/api',
-    connectTimeout: const Duration(seconds: 15),
-    receiveTimeout: const Duration(seconds: 30),
-    // Array query parameters are comma-separated (?state=a,b), as the spec
-    // declares them (explode: false); Dio repeats them by default.
-    listFormat: ListFormat.csv,
-  ));
-  dio.interceptors.add(InterceptorsWrapper(
-    onRequest: (o, h) {
-      o.headers['Authorization'] = 'Bearer ${s.token}';
-      // Workspace routes act in this workspace; account routes ignore it.
-      if (s.workspace != null) o.headers['X-Workspace'] = s.workspace;
-      h.next(o);
-    },
-    onError: (e, h) {
-      // Calls finishing after sign-out (see signOut) belong to a client
-      // that is gone; only a live one signs out.
-      if (e.response?.statusCode == 401 && ref.mounted) {
-        ref.read(sessionProvider.notifier).signedOut();
-      }
-      h.next(e);
-    },
-  ));
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: '${s.server}/api',
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+      // Array query parameters are comma-separated (?state=a,b), as the spec
+      // declares them (explode: false); Dio repeats them by default.
+      listFormat: ListFormat.csv,
+    ),
+  );
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (o, h) {
+        o.headers['Authorization'] = 'Bearer ${s.token}';
+        // Workspace routes act in this workspace; account routes ignore it.
+        if (s.workspace != null) o.headers['X-Workspace'] = s.workspace;
+        h.next(o);
+      },
+      onError: (e, h) {
+        // Calls finishing after sign-out (see signOut) belong to a client
+        // that is gone; only a live one signs out.
+        if (e.response?.statusCode == 401 && ref.mounted) {
+          ref.read(sessionProvider.notifier).signedOut();
+        }
+        h.next(e);
+      },
+    ),
+  );
   return AgntsApi(dio: dio, interceptors: []);
 });
 

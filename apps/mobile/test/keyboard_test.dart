@@ -9,16 +9,20 @@ void main() {
     testWidgets('a tap outside a text field closes the keyboard on ${platform.name}', (tester) async {
       debugDefaultTargetPlatformOverride = platform;
       var retried = 0;
-      await tester.pumpWidget(MaterialApp(
-        builder: (context, child) => Actions(actions: tapOutsideUnfocuses, child: child!),
-        home: Scaffold(
-          body: Column(children: [
-            const TextField(key: Key('note')),
-            const SizedBox(height: 200, width: 300),
-            ElevatedButton(onPressed: () => retried++, child: const Text('Retry')),
-          ]),
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => Actions(actions: tapOutsideUnfocuses, child: child!),
+          home: Scaffold(
+            body: Column(
+              children: [
+                const TextField(key: Key('note')),
+                const SizedBox(height: 200, width: 300),
+                ElevatedButton(onPressed: () => retried++, child: const Text('Retry')),
+              ],
+            ),
+          ),
         ),
-      ));
+      );
       await tester.tap(find.byKey(const Key('note')));
       await tester.pump();
       expect(tester.testTextInput.isVisible, isTrue);

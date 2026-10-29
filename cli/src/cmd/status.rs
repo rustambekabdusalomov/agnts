@@ -100,9 +100,14 @@ pub fn run(s: &Session) -> Result<i32> {
     }
     let vols = run_volumes(s);
     if let Some((_, size)) = vols.iter().find(|(n, _)| n == "agnts-toolchains") {
-        ui::info(&format!("  Toolchains:  {size} (installed on first use, shared by runs)"));
+        ui::info(&format!(
+            "  Toolchains:  {size} (installed on first use, shared by runs)"
+        ));
     }
-    let caches: Vec<_> = vols.iter().filter(|(n, _)| n.starts_with("agnts-cache-")).collect();
+    let caches: Vec<_> = vols
+        .iter()
+        .filter(|(n, _)| n.starts_with("agnts-cache-"))
+        .collect();
     if !caches.is_empty() {
         let list: Vec<String> = caches
             .iter()

@@ -19,9 +19,14 @@ final documentProvider = FutureProvider.autoDispose.family<Document, int>((ref, 
 });
 
 /// A document's version [version] translated into [lang].
-final documentTranslationProvider =
-    FutureProvider.family<DocumentTranslation, ({int id, TranslationLanguage lang, int version})>((ref, a) async {
-  final res = await requireApi(ref).getDocumentsApi().translateDocument(id: a.id, translateInput: TranslateInput(lang: a.lang));
+final documentTranslationProvider = FutureProvider.family<DocumentTranslation, ({int id, TranslationLanguage lang, int version})>((
+  ref,
+  a,
+) async {
+  final res = await requireApi(ref).getDocumentsApi().translateDocument(
+    id: a.id,
+    translateInput: TranslateInput(lang: a.lang),
+  );
   return res.data!;
 });
 

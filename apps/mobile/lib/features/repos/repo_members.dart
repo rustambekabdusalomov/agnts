@@ -37,31 +37,49 @@ class _RepoMembersTabState extends ConsumerState<RepoMembersTab> {
     final c = Agnts.of(context);
     final members = ref.watch(_membersProvider(widget.repo.id));
     final sub = widget.repo.provider == RepositoryProviderEnum.gitlab ? l.repoMembersSub_gitlab : l.repoMembersSub_github;
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 10), child: Text(sub, style: TextStyle(fontSize: 13.5, color: c.ink3))),
-      ...switch (members) {
-        AsyncData(:final value) => [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+          child: Text(sub, style: TextStyle(fontSize: 13.5, color: c.ink3)),
+        ),
+        ...switch (members) {
+          AsyncData(:final value) => [
             if (value.length > 8) SearchBox(hint: l.repoMembersSearch, onChanged: (v) => setState(() => _q = v)),
             if (filterMembers(value, _q) case final rows when rows.isEmpty)
               EmptyState(title: _q.isNotEmpty ? l.reposNoMatch : l.repoMembersNone)
             else
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListGroup(children: [
-                  for (final m in filterMembers(value, _q))
-                    ListRow(
-                      leading: _MemberAvatar(m),
-                      title: m.name?.isNotEmpty == true ? m.name! : m.username,
-                      subtitle: m.name?.isNotEmpty == true ? '@${m.username}' : null,
-                      trailing: ToneBadge(m.role, Tone.gray, small: true),
-                    ),
-                ]),
+                child: ListGroup(
+                  children: [
+                    for (final m in filterMembers(value, _q))
+                      ListRow(
+                        leading: _MemberAvatar(m),
+                        title: m.name?.isNotEmpty == true ? m.name! : m.username,
+                        subtitle: m.name?.isNotEmpty == true ? '@${m.username}' : null,
+                        trailing: ToneBadge(m.role, Tone.gray, small: true),
+                      ),
+                  ],
+                ),
               ),
           ],
-        AsyncError(:final error) => [Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: HelpBox(errorMessage(error, l.commonError), tone: Tone.bad))],
-        _ => [const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()))],
-      },
-    ]);
+          AsyncError(:final error) => [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: HelpBox(errorMessage(error, l.commonError), tone: Tone.bad),
+            ),
+          ],
+          _ => [
+            const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ],
+        },
+      ],
+    );
   }
 }
 
@@ -77,7 +95,10 @@ class _MemberAvatar extends StatelessWidget {
       height: 34,
       alignment: Alignment.center,
       decoration: BoxDecoration(color: c.graySoft, shape: BoxShape.circle),
-      child: Text(m.username.isEmpty ? '?' : m.username[0].toUpperCase(), style: TextStyle(fontWeight: FontWeight.w700, color: c.grayInk)),
+      child: Text(
+        m.username.isEmpty ? '?' : m.username[0].toUpperCase(),
+        style: TextStyle(fontWeight: FontWeight.w700, color: c.grayInk),
+      ),
     );
     final url = m.avatarUrl;
     if (url == null || url.isEmpty) return letter;

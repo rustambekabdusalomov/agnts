@@ -70,9 +70,14 @@ class TicketLangNotifier extends Notifier<TranslationLanguage?> {
 final ticketLangProvider = NotifierProvider.family<TicketLangNotifier, TranslationLanguage?, String>(TicketLangNotifier.new);
 
 /// A ticket's texts in [lang], for the ticket as of [version] (its updatedAt).
-final ticketTranslationProvider =
-    FutureProvider.family<Map<String, String>, ({String key, TranslationLanguage lang, DateTime version})>((ref, a) async {
-  final r = await requireApi(ref).getTicketsApi().translateTicket(key: a.key, translateInput: TranslateInput(lang: a.lang));
+final ticketTranslationProvider = FutureProvider.family<Map<String, String>, ({String key, TranslationLanguage lang, DateTime version})>((
+  ref,
+  a,
+) async {
+  final r = await requireApi(ref).getTicketsApi().translateTicket(
+    key: a.key,
+    translateInput: TranslateInput(lang: a.lang),
+  );
   return {for (final i in r.data?.items ?? const <TranslationItemsInner>[]) i.source_: i.text};
 });
 
@@ -98,10 +103,7 @@ class TranslateButton extends ConsumerWidget {
     final c = Agnts.of(context);
     final ui = Localizations.localeOf(context).languageCode;
     // The UI language first, then the rest.
-    final langs = [
-      ...translationLanguages.where((x) => x.$1.value == ui),
-      ...translationLanguages.where((x) => x.$1.value != ui),
-    ];
+    final langs = [...translationLanguages.where((x) => x.$1.value == ui), ...translationLanguages.where((x) => x.$1.value != ui)];
     final picked = await showModalBottomSheet<(TranslationLanguage?,)>(
       context: context,
       showDragHandle: true,
@@ -109,15 +111,22 @@ class TranslateButton extends ConsumerWidget {
       builder: (ctx) => SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.75),
-          child: ListView(shrinkWrap: true, padding: const EdgeInsets.only(bottom: 12), children: [
-            Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Text(l.ticketTranslate, style: Theme.of(ctx).textTheme.titleLarge)),
-            for (final (lang, name) in [(null, l.ticketTranslateOriginal), ...langs])
-              ListTile(
-                title: Text(name),
-                trailing: lang == current ? Icon(Icons.check_rounded, color: c.primary) : null,
-                onTap: () => Navigator.pop(ctx, (lang,)),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(bottom: 12),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Text(l.ticketTranslate, style: Theme.of(ctx).textTheme.titleLarge),
               ),
-          ]),
+              for (final (lang, name) in [(null, l.ticketTranslateOriginal), ...langs])
+                ListTile(
+                  title: Text(name),
+                  trailing: lang == current ? Icon(Icons.check_rounded, color: c.primary) : null,
+                  onTap: () => Navigator.pop(ctx, (lang,)),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -135,7 +144,10 @@ class TranslateButton extends ConsumerWidget {
       onPressed: () => _pick(context, ref, lang),
       style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(40, 40)),
       icon: Icon(Icons.translate_rounded, size: 19, color: c.primary),
-      label: Text(name ?? l.ticketTranslate, style: TextStyle(color: c.primary, fontSize: 14, fontWeight: FontWeight.w700)),
+      label: Text(
+        name ?? l.ticketTranslate,
+        style: TextStyle(color: c.primary, fontSize: 14, fontWeight: FontWeight.w700),
+      ),
     );
   }
 }
@@ -154,11 +166,15 @@ class TranslationStatus extends StatelessWidget {
     if (s.isLoading) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-        child: Row(children: [
-          SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: c.primary)),
-          const SizedBox(width: 8),
-          Expanded(child: Text(l.ticketTranslating, style: TextStyle(fontSize: 13, color: c.ink3))),
-        ]),
+        child: Row(
+          children: [
+            SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: c.primary)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(l.ticketTranslating, style: TextStyle(fontSize: 13, color: c.ink3)),
+            ),
+          ],
+        ),
       );
     }
     if (s.hasError) {

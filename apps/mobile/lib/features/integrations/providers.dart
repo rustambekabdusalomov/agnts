@@ -28,39 +28,41 @@ bool telegramTokenLooksValid(String token) => RegExp(r'^\d+:[\w-]{20,}$').hasMat
 
 /// Where to get the provider's token, or null.
 String? tokenPage(String provider, {String gitlabUrl = '', String token = ''}) => switch (provider) {
-      'github' => 'https://github.com/settings/personal-access-tokens/new',
-      'gitlab' => '${RegExp(r'^https://[^\s/]+').hasMatch(gitlabUrl.trim()) ? gitlabUrl.trim().replaceAll(RegExp(r'/+$'), '') : 'https://gitlab.com'}'
-          '/-/user_settings/personal_access_tokens',
-      'jira' => 'https://id.atlassian.com/manage-profile/security/api-tokens',
-      'plane' => 'https://developers.plane.so/api-reference/introduction',
-      'openai' => 'https://platform.openai.com/api-keys',
-      'telegram' => 'https://t.me/BotFather',
-      _ => null,
-    };
+  'github' => 'https://github.com/settings/personal-access-tokens/new',
+  'gitlab' =>
+    '${RegExp(r'^https://[^\s/]+').hasMatch(gitlabUrl.trim()) ? gitlabUrl.trim().replaceAll(RegExp(r'/+$'), '') : 'https://gitlab.com'}'
+        '/-/user_settings/personal_access_tokens',
+  'jira' => 'https://id.atlassian.com/manage-profile/security/api-tokens',
+  'plane' => 'https://developers.plane.so/api-reference/introduction',
+  'openai' => 'https://platform.openai.com/api-keys',
+  'telegram' => 'https://t.me/BotFather',
+  _ => null,
+};
 
 String providerName(AppLocalizations l, String p) => switch (p) {
-      'jira' => l.integrationsName_jira,
-      'plane' => l.integrationsName_plane,
-      'github' => l.integrationsName_github,
-      'gitlab' => l.integrationsName_gitlab,
-      'claude' => l.integrationsName_claude,
-      'telegram' => l.integrationsName_telegram,
-      'openai' => l.integrationsName_openai,
-      _ => p.isEmpty ? p : p[0].toUpperCase() + p.substring(1),
-    };
+  'jira' => l.integrationsName_jira,
+  'plane' => l.integrationsName_plane,
+  'github' => l.integrationsName_github,
+  'gitlab' => l.integrationsName_gitlab,
+  'claude' => l.integrationsName_claude,
+  'telegram' => l.integrationsName_telegram,
+  'openai' => l.integrationsName_openai,
+  _ => p.isEmpty ? p : p[0].toUpperCase() + p.substring(1),
+};
 
 String providerDesc(AppLocalizations l, String p) => switch (p) {
-      'jira' => l.integrationsDesc_jira,
-      'plane' => l.integrationsDesc_plane,
-      'github' => l.integrationsDesc_github,
-      'gitlab' => l.integrationsDesc_gitlab,
-      'claude' => l.integrationsDesc_claude,
-      'telegram' => l.integrationsDesc_telegram,
-      'openai' => l.integrationsDesc_openai,
-      _ => '',
-    };
+  'jira' => l.integrationsDesc_jira,
+  'plane' => l.integrationsDesc_plane,
+  'github' => l.integrationsDesc_github,
+  'gitlab' => l.integrationsDesc_gitlab,
+  'claude' => l.integrationsDesc_claude,
+  'telegram' => l.integrationsDesc_telegram,
+  'openai' => l.integrationsDesc_openai,
+  _ => '',
+};
 
-const _gitIcon = '<circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="7" r="2.2"/>'
+const _gitIcon =
+    '<circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="7" r="2.2"/>'
     '<path d="M6 7.2v9.6M18 9.2c0 4-6 3.5-11.2 8"/>';
 const _trackerIcon = '<rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/>';
 const _planeIcon = '<path d="M4 4h8v8H4zM12 12h8v8h-8zM12 4h8v8"/>';

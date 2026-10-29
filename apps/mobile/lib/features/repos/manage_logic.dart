@@ -20,9 +20,9 @@ List<Toolchain> withToolchain(List<Toolchain> list, Toolchain t) => [...list.whe
 
 /// Non-empty trimmed lines.
 List<String> lines(String v) => [
-      for (final x in v.split('\n'))
-        if (x.trim().isNotEmpty) x.trim(),
-    ];
+  for (final x in v.split('\n'))
+    if (x.trim().isNotEmpty) x.trim(),
+];
 
 /// The branch name format's default.
 const branchDefault = '{prefix}{key}';
@@ -66,14 +66,14 @@ bool isGitHubUrl(String url) => RegExp(r'^https://github\.com/', caseSensitive: 
 
 /// What people remember a repository by, for the search box.
 String repoHaystack(Repository r) => [
-      r.name,
-      r.cloneUrl,
-      r.stack ?? '',
-      r.jiraProject,
-      r.planeProject ?? '',
-      r.provider.value,
-      for (final g in r.groups ?? const <RepoGroupRef>[]) g.name,
-    ].join(' ').toLowerCase();
+  r.name,
+  r.cloneUrl,
+  r.stack ?? '',
+  r.jiraProject,
+  r.planeProject ?? '',
+  r.provider.value,
+  for (final g in r.groups ?? const <RepoGroupRef>[]) g.name,
+].join(' ').toLowerCase();
 
 /// "4 GB", or null for the server default (0).
 String? memoryGb(int mb) => mb == 0 ? null : '${(mb / 1024).toStringAsFixed(mb % 1024 == 0 ? 0 : 1)} GB';

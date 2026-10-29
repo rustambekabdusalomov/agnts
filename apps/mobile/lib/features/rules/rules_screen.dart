@@ -83,30 +83,48 @@ class _RulesScreenState extends ConsumerState<RulesScreen> {
             padding: const EdgeInsets.only(bottom: 96),
             children: [
               PageHeader(title: l.rulesTitle, sub: l.rulesLede),
-              if (waiting > 0) Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 10), child: HelpBox(l.rulesWaitingHelp(waiting), tone: Tone.warn)),
-              if (suggested > 0) Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 10), child: HelpBox(l.rulesSuggestedHelp(suggested))),
+              if (waiting > 0)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: HelpBox(l.rulesWaitingHelp(waiting), tone: Tone.warn),
+                ),
+              if (suggested > 0)
+                Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 10), child: HelpBox(l.rulesSuggestedHelp(suggested))),
               if (canEdit)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                  child: ListGroup(children: [
-                    ListRow(
-                      leading: HIcon('learn', size: 22, color: c.primary),
-                      title: l.harnessRepoStarterTitle,
-                      subtitle: l.harnessRepoStarterSub,
-                      onTap: () async {
-                        await showStarterRulesSheet(context, repos: repos.where((r) => r.archivedAt == null).toList(), initialRepo: _scope);
-                        ref.invalidate(rulesProvider);
-                      },
-                    ),
-                  ]),
+                  child: ListGroup(
+                    children: [
+                      ListRow(
+                        leading: HIcon('learn', size: 22, color: c.primary),
+                        title: l.harnessRepoStarterTitle,
+                        subtitle: l.harnessRepoStarterSub,
+                        onTap: () async {
+                          await showStarterRulesSheet(
+                            context,
+                            repos: repos.where((r) => r.archivedAt == null).toList(),
+                            initialRepo: _scope,
+                          );
+                          ref.invalidate(rulesProvider);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               if (all.isNotEmpty) ...[
-                ChipRow(children: [
-                  FilterChipH(label: l.rulesTitle, count: all.length, selected: _scope == null, onTap: () => setState(() => _scope = null)),
-                  FilterChipH(label: l.rulesGlobal, count: count(0), selected: _scope == 0, onTap: () => setState(() => _scope = 0)),
-                  for (final r in repos)
-                    FilterChipH(label: r.name, count: count(r.id), selected: _scope == r.id, onTap: () => setState(() => _scope = r.id)),
-                ]),
+                ChipRow(
+                  children: [
+                    FilterChipH(
+                      label: l.rulesTitle,
+                      count: all.length,
+                      selected: _scope == null,
+                      onTap: () => setState(() => _scope = null),
+                    ),
+                    FilterChipH(label: l.rulesGlobal, count: count(0), selected: _scope == 0, onTap: () => setState(() => _scope = 0)),
+                    for (final r in repos)
+                      FilterChipH(label: r.name, count: count(r.id), selected: _scope == r.id, onTap: () => setState(() => _scope = r.id)),
+                  ],
+                ),
                 const SizedBox(height: 10),
                 SearchBox(hint: l.mqualitySearchRules, onChanged: (v) => setState(() => _query = v)),
               ],
@@ -125,12 +143,18 @@ class _RulesScreenState extends ConsumerState<RulesScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
                   child: Fold(
                     title: l.harnessRulesWatching('${watching.length}'),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      Text(l.harnessRulesWatchingHelp, style: TextStyle(fontSize: 13, color: c.ink3, height: 1.4)),
-                      const SizedBox(height: 10),
-                      for (final r in watching)
-                        Padding(padding: const EdgeInsets.only(bottom: 10), child: RuleCard(rule: r, canEdit: canEdit, onEdit: () => _edit(r))),
-                    ]),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(l.harnessRulesWatchingHelp, style: TextStyle(fontSize: 13, color: c.ink3, height: 1.4)),
+                        const SizedBox(height: 10),
+                        for (final r in watching)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: RuleCard(rule: r, canEdit: canEdit, onEdit: () => _edit(r)),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
             ],

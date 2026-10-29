@@ -47,23 +47,29 @@ class _TicketLessonsState extends ConsumerState<TicketLessons> {
       TicketLearnStateEnum.failed => l.learnTicketFailed,
       TicketLearnStateEnum.none => l.learnTicketIdle,
     };
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Padding(
-        padding: const EdgeInsets.only(top: 18, bottom: 8),
-        child: Text(l.learnTicketTitle, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3)),
-      ),
-      if (items.isNotEmpty)
-        for (final x in items) LessonTile(x, compact: true)
-      else
-        Text(text, style: TextStyle(fontSize: 14, height: 1.45, color: state == TicketLearnStateEnum.failed ? c.badInk : c.ink3)),
-      if (state != TicketLearnStateEnum.pending && ref.watch(canEditProvider))
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: _busy ? null : _learn,
-            child: Text(state == TicketLearnStateEnum.none ? l.learnLearnNow : l.learnLearnAgain),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 18, bottom: 8),
+          child: Text(
+            l.learnTicketTitle,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
           ),
         ),
-    ]);
+        if (items.isNotEmpty)
+          for (final x in items) LessonTile(x, compact: true)
+        else
+          Text(text, style: TextStyle(fontSize: 14, height: 1.45, color: state == TicketLearnStateEnum.failed ? c.badInk : c.ink3)),
+        if (state != TicketLearnStateEnum.pending && ref.watch(canEditProvider))
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: _busy ? null : _learn,
+              child: Text(state == TicketLearnStateEnum.none ? l.learnLearnNow : l.learnLearnAgain),
+            ),
+          ),
+      ],
+    );
   }
 }

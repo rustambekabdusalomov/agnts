@@ -28,86 +28,125 @@ class AssistantStatsSection extends ConsumerWidget {
     // Not on this server, or not loaded: no section rather than an error.
     if (st == null) return const SizedBox.shrink();
     final pad = const EdgeInsets.symmetric(horizontal: 16);
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SectionHeader(l.massistantStatsTitle, trailing: st.questions == 0 ? null : Text(l.massistantStatsPeople(st.people))),
-      if (st.questions == 0)
-        Padding(padding: pad, child: HCard(child: Text(l.massistantStatsNone, style: TextStyle(color: c.ink3))))
-      else ...[
-        Padding(
-          padding: pad,
-          child: Grid2(children: [
-            KpiCard(label: l.massistantStatsQuestions, value: '${st.questions}'),
-            KpiCard(
-              label: l.massistantStatsAnswered,
-              value: '${(st.answered * 100 / st.questions).round()}%',
-              note: '${st.answered} / ${st.questions}',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l.massistantStatsTitle, trailing: st.questions == 0 ? null : Text(l.massistantStatsPeople(st.people))),
+        if (st.questions == 0)
+          Padding(
+            padding: pad,
+            child: HCard(
+              child: Text(l.massistantStatsNone, style: TextStyle(color: c.ink3)),
             ),
-            KpiCard(label: l.massistantStatsMedian, value: _secs(st.medianMs), note: 'p90 ${_secs(st.p90Ms)}'),
-            KpiCard(
-              label: l.massistantStatsHelpful,
-              value: st.up + st.down == 0 ? '—' : '${(st.up * 100 / (st.up + st.down)).round()}%',
-              note: '${st.up} 👍  ${st.down} 👎',
-            ),
-          ]),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: pad,
-          child: HCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(l.massistantStatsParts(_secs(st.medianStartMs), _secs(st.medianSnapshotMs), _secs(st.medianClaudeMs)),
-                  style: TextStyle(fontSize: 14, color: c.ink2)),
-              const SizedBox(height: 4),
-              Text(l.massistantStatsWarm('${st.warm}', '${st.answered}'), style: TextStyle(fontSize: 13, color: c.ink3)),
-              const SizedBox(height: 4),
-              Text('${l.massistantStatsTokens}: ${st.tokens} · \$${st.costUsd.toStringAsFixed(2)}', style: TextStyle(fontSize: 13, color: c.ink3)),
-              if (st.actions.proposed + st.actions.notOffered > 0) ...[
-                const SizedBox(height: 12),
-                Text(
-                  '${l.massistantStatsActions}: '
-                  '${st.actions.proposed == 0 ? '—' : '${(st.actions.done * 100 / st.actions.proposed).round()}%'}',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2),
+          )
+        else ...[
+          Padding(
+            padding: pad,
+            child: Grid2(
+              children: [
+                KpiCard(label: l.massistantStatsQuestions, value: '${st.questions}'),
+                KpiCard(
+                  label: l.massistantStatsAnswered,
+                  value: '${(st.answered * 100 / st.questions).round()}%',
+                  note: '${st.answered} / ${st.questions}',
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  l.massistantStatsActionsLine('${st.actions.proposed}', '${st.actions.done}', '${st.actions.failed}', '${st.actions.cancelled}',
-                      '${st.actions.expired}', '${st.actions.notOffered}'),
-                  style: TextStyle(fontSize: 13, color: c.ink3),
+                KpiCard(label: l.massistantStatsMedian, value: _secs(st.medianMs), note: 'p90 ${_secs(st.p90Ms)}'),
+                KpiCard(
+                  label: l.massistantStatsHelpful,
+                  value: st.up + st.down == 0 ? '—' : '${(st.up * 100 / (st.up + st.down)).round()}%',
+                  note: '${st.up} 👍  ${st.down} 👎',
                 ),
               ],
-              if (st.versions.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(l.massistantStatsVersions, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink3)),
-                for (final v in st.versions)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(v.promptVersion.isEmpty ? '—' : v.promptVersion,
-                          style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2)),
-                      Text(l.massistantStatsVersionRow('${v.answered}', '${v.failed}', '${v.up}', '${v.down}', _secs(v.medianMs)),
-                          style: TextStyle(fontSize: 13, color: c.ink3)),
-                      if (v.proposed > 0)
-                        Text(l.massistantStatsVersionActions('${v.proposed}', '${v.done}'), style: TextStyle(fontSize: 13, color: c.ink3)),
-                    ]),
-                  ),
-              ],
-            ]),
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: pad,
-          child: ListGroup(children: [
-            ListRow(
-              leading: HIcon('feedback', size: 22, color: c.primary),
-              title: l.massistantStatsSeeRated,
-              value: '${st.up + st.down}',
-              onTap: () => context.push('/assistant-rated'),
+          const SizedBox(height: 10),
+          Padding(
+            padding: pad,
+            child: HCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.massistantStatsParts(_secs(st.medianStartMs), _secs(st.medianSnapshotMs), _secs(st.medianClaudeMs)),
+                    style: TextStyle(fontSize: 14, color: c.ink2),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(l.massistantStatsWarm('${st.warm}', '${st.answered}'), style: TextStyle(fontSize: 13, color: c.ink3)),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${l.massistantStatsTokens}: ${st.tokens} · \$${st.costUsd.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: 13, color: c.ink3),
+                  ),
+                  if (st.actions.proposed + st.actions.notOffered > 0) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '${l.massistantStatsActions}: '
+                      '${st.actions.proposed == 0 ? '—' : '${(st.actions.done * 100 / st.actions.proposed).round()}%'}',
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l.massistantStatsActionsLine(
+                        '${st.actions.proposed}',
+                        '${st.actions.done}',
+                        '${st.actions.failed}',
+                        '${st.actions.cancelled}',
+                        '${st.actions.expired}',
+                        '${st.actions.notOffered}',
+                      ),
+                      style: TextStyle(fontSize: 13, color: c.ink3),
+                    ),
+                  ],
+                  if (st.versions.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      l.massistantStatsVersions,
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink3),
+                    ),
+                    for (final v in st.versions)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              v.promptVersion.isEmpty ? '—' : v.promptVersion,
+                              style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink2),
+                            ),
+                            Text(
+                              l.massistantStatsVersionRow('${v.answered}', '${v.failed}', '${v.up}', '${v.down}', _secs(v.medianMs)),
+                              style: TextStyle(fontSize: 13, color: c.ink3),
+                            ),
+                            if (v.proposed > 0)
+                              Text(
+                                l.massistantStatsVersionActions('${v.proposed}', '${v.done}'),
+                                style: TextStyle(fontSize: 13, color: c.ink3),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ],
+              ),
             ),
-          ]),
-        ),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: pad,
+            child: ListGroup(
+              children: [
+                ListRow(
+                  leading: HIcon('feedback', size: 22, color: c.primary),
+                  title: l.massistantStatsSeeRated,
+                  value: '${st.up + st.down}',
+                  onTap: () => context.push('/assistant-rated'),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
-    ]);
+    );
   }
 }
 
@@ -135,28 +174,47 @@ class AssistantRatedScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                 child: HCard(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Row(children: [
-                      Icon(r.rating == AssistantRatedRatingEnum.number1 ? Icons.thumb_up_alt : Icons.thumb_down_alt,
-                          size: 18, color: r.rating == AssistantRatedRatingEnum.number1 ? c.okInk : c.badInk),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text(r.user, style: TextStyle(fontWeight: FontWeight.w700, color: c.ink))),
-                      Text(r.promptVersion, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
-                    ]),
-                    const SizedBox(height: 8),
-                    Text(r.question, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink)),
-                    const SizedBox(height: 6),
-                    ReportMarkdown(r.answer),
-                    for (final a in r.actions ?? const <AssistantAction>[]) _RatedAction(a),
-                    if (r.comment.isNotEmpty) ...[
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            r.rating == AssistantRatedRatingEnum.number1 ? Icons.thumb_up_alt : Icons.thumb_down_alt,
+                            size: 18,
+                            color: r.rating == AssistantRatedRatingEnum.number1 ? c.okInk : c.badInk,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              r.user,
+                              style: TextStyle(fontWeight: FontWeight.w700, color: c.ink),
+                            ),
+                          ),
+                          Text(
+                            r.promptVersion,
+                            style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 8),
-                      Text('“${r.comment}”', style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: c.ink2)),
-                    ],
-                    if (r.shared) ...[
+                      Text(
+                        r.question,
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
+                      ),
                       const SizedBox(height: 6),
-                      ToneBadge(l.massistantRatedShared, Tone.info, small: true),
+                      ReportMarkdown(r.answer),
+                      for (final a in r.actions ?? const <AssistantAction>[]) _RatedAction(a),
+                      if (r.comment.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          '“${r.comment}”',
+                          style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: c.ink2),
+                        ),
+                      ],
+                      if (r.shared) ...[const SizedBox(height: 6), ToneBadge(l.massistantRatedShared, Tone.info, small: true)],
                     ],
-                  ]),
+                  ),
                 ),
               ),
           ],
@@ -187,15 +245,34 @@ class _RatedAction extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(color: c.bg, borderRadius: BorderRadius.circular(10), border: Border.all(color: c.line)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(a.summary, style: TextStyle(fontSize: 13.5, color: c.ink)),
-        const SizedBox(height: 4),
-        Text.rich(TextSpan(children: [
-          TextSpan(text: label, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
-          if (a.result != null && a.result!.isNotEmpty) TextSpan(text: ' · ${a.result}', style: TextStyle(color: c.ink2)),
-        ]), style: const TextStyle(fontSize: 13)),
-      ]),
+      decoration: BoxDecoration(
+        color: c.bg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: c.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(a.summary, style: TextStyle(fontSize: 13.5, color: c.ink)),
+          const SizedBox(height: 4),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: label,
+                  style: TextStyle(fontWeight: FontWeight.w700, color: color),
+                ),
+                if (a.result != null && a.result!.isNotEmpty)
+                  TextSpan(
+                    text: ' · ${a.result}',
+                    style: TextStyle(color: c.ink2),
+                  ),
+              ],
+            ),
+            style: const TextStyle(fontSize: 13),
+          ),
+        ],
+      ),
     );
   }
 }

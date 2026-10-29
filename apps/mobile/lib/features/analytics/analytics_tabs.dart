@@ -380,7 +380,10 @@ class _View {
         const SizedBox(height: 12),
         BarChart(series: prSeries, labels: dLabels, maxLabels: maxLabels, height: 170),
         ChartLegend([for (final s in prSeries) (s.color, s.label)]),
-        if (cur.mergeMin.p90 != null) ...[const SizedBox(height: 10), _sub(context, l.analyticsMergeSpread(_p50(l, cur.mergeMin), _min(l, cur.mergeMin.p90!)))],
+        if (cur.mergeMin.p90 != null) ...[
+          const SizedBox(height: 10),
+          _sub(context, l.analyticsMergeSpread(_p50(l, cur.mergeMin), _min(l, cur.mergeMin.p90!))),
+        ],
       ]),
       ..._list(context, l.analyticsStale, sub: l.analyticsStaleSub, empty: l.analyticsNoStale, [
         for (final p in d.stale)
@@ -403,12 +406,18 @@ class _View {
         ),
         ChartLegend([(c.primary, l.analyticsCyclePushed), (_softBlue, l.analyticsCycleMerged)]),
         const SizedBox(height: 10),
-        _sub(context, l.analyticsCycleSpread(_p50(l, cur.pushedMin), _p90(l, cur.pushedMin), _p50(l, cur.mergedMin), _p90(l, cur.mergedMin))),
+        _sub(
+          context,
+          l.analyticsCycleSpread(_p50(l, cur.pushedMin), _p90(l, cur.pushedMin), _p50(l, cur.mergedMin), _p90(l, cur.mergedMin)),
+        ),
       ]),
       ..._section(context, l.analyticsQuestions, l.analyticsQuestionsSub, [
         Grid2(
           gap: 8,
-          children: [Fact(l.analyticsQuestionsAsked, '${cur.questions}'), Fact(l.analyticsQuestionsShare, '${_pct(cur.askedTickets, cur.analyzedTickets)}%')],
+          children: [
+            Fact(l.analyticsQuestionsAsked, '${cur.questions}'),
+            Fact(l.analyticsQuestionsShare, '${_pct(cur.askedTickets, cur.analyzedTickets)}%'),
+          ],
         ),
         const SizedBox(height: 6),
         _MiniKv(l.analyticsAnswerTypical, _p50(l, cur.answerMin)),
@@ -526,7 +535,9 @@ class _View {
           fmt: (v) => '${v.round()}',
         ),
       ]),
-      ..._section(context, l.analyticsStops, l.analyticsStopsSub(stopsTotal), [if (stopsTotal == 0) _hint(context, l.manalyticsStopped(0)) else _HBars(stops)]),
+      ..._section(context, l.analyticsStops, l.analyticsStopsSub(stopsTotal), [
+        if (stopsTotal == 0) _hint(context, l.manalyticsStopped(0)) else _HBars(stops),
+      ]),
       ..._list(context, l.analyticsQuality, sub: l.analyticsQualitySub, empty: l.analyticsNoQuality, [
         for (final v in a.quality)
           ListRow(
@@ -603,7 +614,9 @@ class _View {
           ),
           ChartLegend([(c.bad, l.analyticsCiNew), (c.ok, l.analyticsCiFixed)]),
         ], trailing: TextButton(onPressed: () => context.push('/ci'), child: Text(l.analyticsCiOpen))),
-        ..._section(context, l.analyticsCiClasses, l.analyticsCiClassesSub, [if (classes.isEmpty) _hint(context, l.analyticsCiNone) else _HBars(classes)]),
+        ..._section(context, l.analyticsCiClasses, l.analyticsCiClassesSub, [
+          if (classes.isEmpty) _hint(context, l.analyticsCiNone) else _HBars(classes),
+        ]),
         ..._list(context, l.analyticsCiFlakiest, sub: l.analyticsCiFlakiestSub, empty: l.analyticsCiNoFlaky, [
           for (final j in ci.flakiest)
             ListRow(
@@ -733,7 +746,9 @@ class _View {
         else ...[
           BarChart(
             series: [
-              ChartSeries(l.analyticsSession, [for (final d in a.perDay) d.peakUsage == null ? 0 : (d.peakUsage! * 100).round()], c.primary),
+              ChartSeries(l.analyticsSession, [
+                for (final d in a.perDay) d.peakUsage == null ? 0 : (d.peakUsage! * 100).round(),
+              ], c.primary),
             ],
             labels: labels,
             maxLabels: maxLabels,
@@ -816,11 +831,17 @@ class _Learning {
               note: l.analyticsKpiRulesLearnedNote('${cur.rulesSuggested}'),
             ),
             KpiCard(label: l.analyticsKpiRulesManual, value: '${cur.rulesManual}', note: l.analyticsKpiRulesManualNote),
-            KpiCard(label: l.analyticsKpiReflections, value: '${cur.reflections}', note: l.analyticsKpiReflectionsNote('${cur.reflectionRules}')),
+            KpiCard(
+              label: l.analyticsKpiReflections,
+              value: '${cur.reflections}',
+              note: l.analyticsKpiReflectionsNote('${cur.reflectionRules}'),
+            ),
             KpiCard(
               label: l.analyticsKpiFollowUps,
               value: cur.accepted + cur.dismissed == 0 ? '—' : '${rate(cur.accepted, cur.dismissed)}%',
-              delta: cur.accepted + cur.dismissed == 0 ? null : _delta(rate(cur.accepted, cur.dismissed), rate(prev.accepted, prev.dismissed), upIsGood: true),
+              delta: cur.accepted + cur.dismissed == 0
+                  ? null
+                  : _delta(rate(cur.accepted, cur.dismissed), rate(prev.accepted, prev.dismissed), upIsGood: true),
               note: l.analyticsKpiFollowUpsNote('${cur.followUps}'),
             ),
             KpiCard(
@@ -864,7 +885,10 @@ class _Learning {
           _HBars([for (final s in x.followUpSources) _HRow(_followUpSource(l, s.name), s.suggested)]),
       ]),
       ..._section(context, l.analyticsLessons, l.analyticsLessonsSub('${cur.lessonsLearned}'), [
-        if (x.lessons.isEmpty) _hint(context, l.analyticsNoLessons) else _HBars([for (final s in x.lessons) _HRow(_lessonCategory(l, s.category), s.created)]),
+        if (x.lessons.isEmpty)
+          _hint(context, l.analyticsNoLessons)
+        else
+          _HBars([for (final s in x.lessons) _HRow(_lessonCategory(l, s.category), s.created)]),
       ], trailing: TextButton(onPressed: () => context.push('/learn'), child: Text(l.analyticsOpenLearn))),
       ..._list(
         context,
@@ -955,7 +979,10 @@ class _SlowRow extends StatelessWidget {
                           ),
                       // The rest of the bar when the parts add up to less than the total.
                       if (parts.fold<num>(0, (a, b) => a + b) < total)
-                        Flexible(flex: math.max(1, (1000 * (total - parts.fold<num>(0, (a, b) => a + b)) / total).round()), child: const SizedBox.expand()),
+                        Flexible(
+                          flex: math.max(1, (1000 * (total - parts.fold<num>(0, (a, b) => a + b)) / total).round()),
+                          child: const SizedBox.expand(),
+                        ),
                     ],
                   ),
                 ),
@@ -970,7 +997,8 @@ class _SlowRow extends StatelessWidget {
 
 // ---- CSV exports, one table per tab (as the admin panel exports them) ----
 
-String _date(DateTime d) => '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+String _date(DateTime d) =>
+    '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 /// Overview and Cost: one row per day.
 List<List<Object?>>? daysCsv(Analytics? a) => a == null

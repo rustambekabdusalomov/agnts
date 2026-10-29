@@ -109,9 +109,7 @@ class _AgntsAppState extends ConsumerState<AgntsApp> {
 /// Every text field asks its ancestors first, so this covers all screens,
 /// sheets and dialogs.
 final tapOutsideUnfocuses = <Type, Action<Intent>>{
-  EditableTextTapOutsideIntent: CallbackAction<EditableTextTapOutsideIntent>(
-    onInvoke: (intent) => intent.focusNode.unfocus(),
-  ),
+  EditableTextTapOutsideIntent: CallbackAction<EditableTextTapOutsideIntent>(onInvoke: (intent) => intent.focusNode.unfocus()),
 };
 
 /// Opens a notification's screen, first switching to the workspace its

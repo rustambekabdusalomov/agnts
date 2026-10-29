@@ -60,12 +60,15 @@ Future<bool> _confirm(BuildContext context, String text, String action) async {
   return ok ?? false;
 }
 
-Widget _title(Agnts c, String text) => Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3));
+Widget _title(Agnts c, String text) => Text(
+  text,
+  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
+);
 
 Widget _hint(Agnts c, String text) => Padding(
-      padding: const EdgeInsets.only(top: 2, bottom: 8),
-      child: Text(text, style: TextStyle(fontSize: 13, height: 1.4, color: c.ink3)),
-    );
+  padding: const EdgeInsets.only(top: 2, bottom: 8),
+  child: Text(text, style: TextStyle(fontSize: 13, height: 1.4, color: c.ink3)),
+);
 
 // ---- Models ----
 
@@ -90,12 +93,12 @@ class _ModelPickerState extends ConsumerState<ModelPicker> {
   bool _busy = false;
 
   String _label(AppLocalizations l, ModelStage s) => switch (s) {
-        ModelStage.analyze => l.ticketStageAnalyze,
-        ModelStage.coding => l.ticketStageCoding,
-        ModelStage.retry => l.ticketStageRetry,
-        ModelStage.review => l.ticketStageReview,
-        ModelStage.preview => l.ticketStagePreview,
-      };
+    ModelStage.analyze => l.ticketStageAnalyze,
+    ModelStage.coding => l.ticketStageCoding,
+    ModelStage.retry => l.ticketStageRetry,
+    ModelStage.review => l.ticketStageReview,
+    ModelStage.preview => l.ticketStagePreview,
+  };
 
   /// The Settings model of [s], as "Default (Sonnet)".
   String _defaultLabel(AppLocalizations l, StageModels? m, ModelStage s) {
@@ -121,18 +124,24 @@ class _ModelPickerState extends ConsumerState<ModelPicker> {
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(_label(l, s), style: Theme.of(ctx).textTheme.titleLarge),
-            const SizedBox(height: 10),
-            ListGroup(children: [
-              for (final (v, name) in [(null, defaultLabel), for (final m in _models) (m, _modelName(m))])
-                ListRow(
-                  title: name,
-                  trailing: v == current ? HIcon('check', size: 20, color: c.primary, stroke: 2.4) : const SizedBox(width: 20),
-                  onTap: () => Navigator.pop(ctx, (v,)),
-                ),
-            ]),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(_label(l, s), style: Theme.of(ctx).textTheme.titleLarge),
+              const SizedBox(height: 10),
+              ListGroup(
+                children: [
+                  for (final (v, name) in [(null, defaultLabel), for (final m in _models) (m, _modelName(m))])
+                    ListRow(
+                      title: name,
+                      trailing: v == current ? HIcon('check', size: 20, color: c.primary, stroke: 2.4) : const SizedBox(width: 20),
+                      onTap: () => Navigator.pop(ctx, (v,)),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -144,8 +153,12 @@ class _ModelPickerState extends ConsumerState<ModelPicker> {
       next[s.name] = picked.$1;
     }
     setState(() => _busy = true);
-    await _act(context, ref, widget.ticket.key,
-        () => ref.read(apiProvider)!.getTicketsApi().setTicketModels(key: widget.ticket.key, modelOverrides: ModelOverrides.fromJson(next)));
+    await _act(
+      context,
+      ref,
+      widget.ticket.key,
+      () => ref.read(apiProvider)!.getTicketsApi().setTicketModels(key: widget.ticket.key, modelOverrides: ModelOverrides.fromJson(next)),
+    );
     if (mounted) setState(() => _busy = false);
   }
 
@@ -155,17 +168,23 @@ class _ModelPickerState extends ConsumerState<ModelPicker> {
     final c = Agnts.of(context);
     final settings = ref.watch(settingsProvider).value?.models;
     final overrides = widget.ticket.models?.toJson() ?? const <String, dynamic>{};
-    return TicketSection(id: 'models', title: l.ticketModelsTitle, children: [
-      _hint(c, l.ticketModelsHint),
-      ListGroup(children: [
-        for (final s in widget.stages)
-          ListRow(
-            title: _label(l, s),
-            value: overrides[s.name] is String ? _modelName(overrides[s.name] as String) : _defaultLabel(l, settings, s),
-            onTap: _busy || !ref.watch(canEditProvider) ? null : () => _pick(s, _defaultLabel(l, settings, s)),
-          ),
-      ]),
-    ]);
+    return TicketSection(
+      id: 'models',
+      title: l.ticketModelsTitle,
+      children: [
+        _hint(c, l.ticketModelsHint),
+        ListGroup(
+          children: [
+            for (final s in widget.stages)
+              ListRow(
+                title: _label(l, s),
+                value: overrides[s.name] is String ? _modelName(overrides[s.name] as String) : _defaultLabel(l, settings, s),
+                onTap: _busy || !ref.watch(canEditProvider) ? null : () => _pick(s, _defaultLabel(l, settings, s)),
+              ),
+          ],
+        ),
+      ],
+    );
   }
 }
 
@@ -217,12 +236,20 @@ class _RepoPickerState extends ConsumerState<RepoPicker> {
     final whole = picked.wholeGroup;
     final same = whole?.id == _t.group?.id && picked.ids.join(',') == current.ids.join(',');
     if (same) return;
-    if (_restarts && !await _confirm(context, l.ticketRepoRestart(_names(current.ids, repos), _names(picked.ids, repos)), l.ticketRepoChange)) return;
+    if (_restarts &&
+        !await _confirm(context, l.ticketRepoRestart(_names(current.ids, repos), _names(picked.ids, repos)), l.ticketRepoChange)) {
+      return;
+    }
     if (!mounted) return;
     setState(() => _busy = true);
     final input = whole != null ? TicketReposInput(groupId: whole.id) : TicketReposInput(repoIds: picked.ids);
-    await _act(context, ref, _t.key, () => ref.read(apiProvider)!.getTicketsApi().setTicketRepos(key: _t.key, ticketReposInput: input),
-        done: l.ticketRepoChanged(_names(picked.ids, repos)));
+    await _act(
+      context,
+      ref,
+      _t.key,
+      () => ref.read(apiProvider)!.getTicketsApi().setTicketRepos(key: _t.key, ticketReposInput: input),
+      done: l.ticketRepoChanged(_names(picked.ids, repos)),
+    );
     if (mounted) setState(() => _busy = false);
   }
 
@@ -234,20 +261,29 @@ class _RepoPickerState extends ConsumerState<RepoPicker> {
     final names = rs.isNotEmpty ? rs.map((r) => r.repoName).join(', ') : (_t.repoName ?? '');
     return Padding(
       padding: const EdgeInsets.only(top: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        _title(c, l.ticketRepoTitle),
-        _hint(c, l.ticketRepoHint),
-        if (_t.repoId == null) Padding(padding: const EdgeInsets.only(bottom: 8), child: HelpBox(l.ticketRepoMissing, tone: Tone.warn)),
-        ListGroup(children: [
-          ListRow(
-            leading: HIcon('repos', size: 20, color: c.primary),
-            title: names.isEmpty ? '—' : names,
-            subtitle: _t.group == null ? null : l.mgroupsGroup(_t.group!.name),
-            value: l.ticketRepoChange,
-            onTap: _busy || !ref.watch(canEditProvider) ? null : _open,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _title(c, l.ticketRepoTitle),
+          _hint(c, l.ticketRepoHint),
+          if (_t.repoId == null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: HelpBox(l.ticketRepoMissing, tone: Tone.warn),
+            ),
+          ListGroup(
+            children: [
+              ListRow(
+                leading: HIcon('repos', size: 20, color: c.primary),
+                title: names.isEmpty ? '—' : names,
+                subtitle: _t.group == null ? null : l.mgroupsGroup(_t.group!.name),
+                value: l.ticketRepoChange,
+                onTap: _busy || !ref.watch(canEditProvider) ? null : _open,
+              ),
+            ],
           ),
-        ]),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -279,39 +315,58 @@ class _RepoSheetState extends State<_RepoSheet> {
         constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.8),
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(l.ticketRepoTitle, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            if (groups.isNotEmpty) ...[
-              Text(l.mgroupsGroups, style: sub),
-              const SizedBox(height: 6),
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                for (final g in groups)
-                  FilterChipH(
-                    label: g.name,
-                    count: RepoPick.members(g).length,
-                    selected: _pick.wholeGroup?.id == g.id,
-                    onTap: () => setState(() => _pick = _pick.wholeGroup?.id == g.id ? const RepoPick() : _pick.pickGroup(g)),
-                  ),
-              ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l.ticketRepoTitle, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 12),
-              Text(l.mgroupsRepos, style: sub),
-              const SizedBox(height: 6),
+              if (groups.isNotEmpty) ...[
+                Text(l.mgroupsGroups, style: sub),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final g in groups)
+                      FilterChipH(
+                        label: g.name,
+                        count: RepoPick.members(g).length,
+                        selected: _pick.wholeGroup?.id == g.id,
+                        onTap: () => setState(() => _pick = _pick.wholeGroup?.id == g.id ? const RepoPick() : _pick.pickGroup(g)),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(l.mgroupsRepos, style: sub),
+                const SizedBox(height: 6),
+              ],
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final r in widget.repos)
+                    FilterChipH(label: r.name, selected: _pick.contains(r.id), onTap: () => setState(() => _pick = _pick.toggle(r.id))),
+                ],
+              ),
+              if (widget.repos.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(l.mgroupsPickHint, style: TextStyle(fontSize: 13, color: c.ink3)),
+                ),
+              if (_pick.ids.length > 1) ...[
+                const SizedBox(height: 12),
+                Text(l.mgroupsInTask, style: sub),
+                const SizedBox(height: 4),
+                Text(
+                  [for (final (i, id) in _pick.ids.indexed) i == 0 ? '${_name(id)} (${l.mgroupsPrimary})' : _name(id)].join(', '),
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+              const SizedBox(height: 16),
+              FilledButton(onPressed: _pick.isEmpty ? null : () => Navigator.pop(context, _pick), child: Text(l.ticketRepoChange)),
             ],
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final r in widget.repos) FilterChipH(label: r.name, selected: _pick.contains(r.id), onTap: () => setState(() => _pick = _pick.toggle(r.id))),
-            ]),
-            if (widget.repos.length > 1) Padding(padding: const EdgeInsets.only(top: 6), child: Text(l.mgroupsPickHint, style: TextStyle(fontSize: 13, color: c.ink3))),
-            if (_pick.ids.length > 1) ...[
-              const SizedBox(height: 12),
-              Text(l.mgroupsInTask, style: sub),
-              const SizedBox(height: 4),
-              Text([for (final (i, id) in _pick.ids.indexed) i == 0 ? '${_name(id)} (${l.mgroupsPrimary})' : _name(id)].join(', '),
-                  style: const TextStyle(fontSize: 14)),
-            ],
-            const SizedBox(height: 16),
-            FilledButton(onPressed: _pick.isEmpty ? null : () => Navigator.pop(context, _pick), child: Text(l.ticketRepoChange)),
-          ]),
+          ),
         ),
       ),
     );
@@ -345,14 +400,18 @@ class AssigneePicker extends ConsumerWidget {
         members.when(
           data: (ms) => ms.isEmpty
               ? Text(l.ticketAssignNone, style: TextStyle(fontSize: 13.5, color: c.ink3))
-              : Wrap(spacing: 8, runSpacing: 8, children: [
-                  for (final m in ms)
-                    FilterChipH(
-                      label: (m.name ?? '').isEmpty ? m.username : m.name!,
-                      selected: selected.contains(m.username),
-                      onTap: () => onToggle(m.username),
-                    ),
-                ]),
+              : Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final m in ms)
+                      FilterChipH(
+                        label: (m.name ?? '').isEmpty ? m.username : m.name!,
+                        selected: selected.contains(m.username),
+                        onTap: () => onToggle(m.username),
+                      ),
+                  ],
+                ),
           error: (e, _) => Text(l.ticketAssignError(errorMessage(e, l.commonError)), style: TextStyle(fontSize: 13.5, color: c.ink3)),
           loading: () => const LinearProgressIndicator(),
         ),
@@ -379,9 +438,16 @@ class _TicketMemberRowState extends ConsumerState<TicketMemberRow> {
   Future<void> _takeOver() async {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
-    await _act(context, ref, widget.ticket.key,
-        () => ref.read(apiProvider)!.getTicketsApi().setTicketMember(key: widget.ticket.key, setTicketMemberRequest: SetTicketMemberRequest(userId: 0)),
-        done: l.queueTakenOver);
+    await _act(
+      context,
+      ref,
+      widget.ticket.key,
+      () => ref
+          .read(apiProvider)!
+          .getTicketsApi()
+          .setTicketMember(key: widget.ticket.key, setTicketMemberRequest: SetTicketMemberRequest(userId: 0)),
+      done: l.queueTakenOver,
+    );
     if (mounted) setState(() => _busy = false);
   }
 
@@ -396,16 +462,20 @@ class _TicketMemberRowState extends ConsumerState<TicketMemberRow> {
     if (t.member == null && !canTake && t.createdBy == null) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 6),
-      child: Wrap(spacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        Text('${l.queueMember}: ${t.member ?? '—'}', style: TextStyle(fontSize: 13, color: c.ink3)),
-        if (t.createdBy != null) Text(l.queueCreatedBy(t.createdBy!), style: TextStyle(fontSize: 13, color: c.ink3)),
-        if (canTake)
-          TextButton(
-            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 30)),
-            onPressed: _busy ? null : _takeOver,
-            child: Text(l.queueTakeOver),
-          ),
-      ]),
+      child: Wrap(
+        spacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text('${l.queueMember}: ${t.member ?? '—'}', style: TextStyle(fontSize: 13, color: c.ink3)),
+          if (t.createdBy != null) Text(l.queueCreatedBy(t.createdBy!), style: TextStyle(fontSize: 13, color: c.ink3)),
+          if (canTake)
+            TextButton(
+              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 30)),
+              onPressed: _busy ? null : _takeOver,
+              child: Text(l.queueTakeOver),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -433,8 +503,13 @@ class _TrackerUpdateCardState extends ConsumerState<TrackerUpdateCard> {
     if (!mounted) return;
     setState(() => _busy = true);
     final api = ref.read(apiProvider)!.getTicketsApi();
-    await _act(context, ref, t.key, () => restart ? api.restartWithUpdate(key: t.key) : api.keepCurrentVersion(key: t.key),
-        done: restart ? l.ticketUpdateRestarted(t.key) : l.ticketUpdateKept);
+    await _act(
+      context,
+      ref,
+      t.key,
+      () => restart ? api.restartWithUpdate(key: t.key) : api.keepCurrentVersion(key: t.key),
+      done: restart ? l.ticketUpdateRestarted(t.key) : l.ticketUpdateKept,
+    );
     if (mounted) setState(() => _busy = false);
   }
 
@@ -451,27 +526,46 @@ class _TrackerUpdateCardState extends ConsumerState<TrackerUpdateCard> {
     return HelpBox(
       l.ticketUpdateTitle(source),
       tone: Tone.warn,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.ticketUpdateSub, style: TextStyle(fontSize: 13.5, height: 1.4, color: c.ink2)),
-        const SizedBox(height: 10),
-        Text(l.ticketUpdateNow('$when $time'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3)),
-        const SizedBox(height: 4),
-        Text(u.title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.ink)),
-        const SizedBox(height: 4),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 200),
-          child: SingleChildScrollView(child: Text(u.description.isEmpty ? '—' : u.description, style: TextStyle(fontSize: 14, height: 1.4, color: c.ink))),
-        ),
-        if (t.prUrl.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(l.ticketUpdatePushed, style: TextStyle(fontSize: 13, color: c.ink3))),
-        if (ref.watch(canEditProvider))
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Wrap(spacing: 8, runSpacing: 8, children: [
-              FilledButton(onPressed: _busy || t.prUrl.isNotEmpty ? null : () => _go(true), child: Text(l.ticketUpdateRestart)),
-              OutlinedButton(onPressed: _busy ? null : () => _go(false), child: Text(l.ticketUpdateKeep)),
-            ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.ticketUpdateSub, style: TextStyle(fontSize: 13.5, height: 1.4, color: c.ink2)),
+          const SizedBox(height: 10),
+          Text(
+            l.ticketUpdateNow('$when $time'),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
           ),
-      ]),
+          const SizedBox(height: 4),
+          Text(
+            u.title,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.ink),
+          ),
+          const SizedBox(height: 4),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: SingleChildScrollView(
+              child: Text(u.description.isEmpty ? '—' : u.description, style: TextStyle(fontSize: 14, height: 1.4, color: c.ink)),
+            ),
+          ),
+          if (t.prUrl.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(l.ticketUpdatePushed, style: TextStyle(fontSize: 13, color: c.ink3)),
+            ),
+          if (ref.watch(canEditProvider))
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton(onPressed: _busy || t.prUrl.isNotEmpty ? null : () => _go(true), child: Text(l.ticketUpdateRestart)),
+                  OutlinedButton(onPressed: _busy ? null : () => _go(false), child: Text(l.ticketUpdateKeep)),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -499,8 +593,13 @@ class _SecretsAckState extends ConsumerState<SecretsAck> {
   Future<void> _ack() async {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
-    final ok = await _act(context, ref, widget.ticket.key, () => ref.read(apiProvider)!.getTicketsApi().acknowledgeSecrets(key: widget.ticket.key),
-        done: l.harnessTicketSecretsDone);
+    final ok = await _act(
+      context,
+      ref,
+      widget.ticket.key,
+      () => ref.read(apiProvider)!.getTicketsApi().acknowledgeSecrets(key: widget.ticket.key),
+      done: l.harnessTicketSecretsDone,
+    );
     if (mounted) {
       setState(() {
         _busy = false;
@@ -518,17 +617,23 @@ class _SecretsAckState extends ConsumerState<SecretsAck> {
       child: HelpBox(
         l.harnessTicketSecretsTitle,
         tone: needs ? Tone.bad : Tone.ok,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(needs ? l.harnessTicketSecretsBody(widget.count) : l.harnessTicketSecretsDone, style: const TextStyle(fontSize: 14, height: 1.4)),
-          if (needs && ref.watch(canEditProvider))
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton(onPressed: _busy ? null : _ack, child: Text(l.harnessTicketSecretsConfirm)),
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              needs ? l.harnessTicketSecretsBody(widget.count) : l.harnessTicketSecretsDone,
+              style: const TextStyle(fontSize: 14, height: 1.4),
             ),
-        ]),
+            if (needs && ref.watch(canEditProvider))
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton(onPressed: _busy ? null : _ack, child: Text(l.harnessTicketSecretsConfirm)),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -575,14 +680,17 @@ class _ReplayButtonState extends ConsumerState<ReplayButton> {
     final c = Agnts.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        _title(c, l.replayTitle),
-        _hint(c, l.replaySub),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: OutlinedButton(onPressed: _busy || !ref.watch(canEditProvider) ? null : _start, child: Text(l.replayStart)),
-        ),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _title(c, l.replayTitle),
+          _hint(c, l.replaySub),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton(onPressed: _busy || !ref.watch(canEditProvider) ? null : _start, child: Text(l.replayStart)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -602,7 +710,10 @@ class ReplayBanner extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: GestureDetector(
           onTap: () => context.push('/tickets/$original'),
-          child: Text(original, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: c.primary)),
+          child: Text(
+            original,
+            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: c.primary),
+          ),
         ),
       ),
     );

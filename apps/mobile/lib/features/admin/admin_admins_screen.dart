@@ -36,37 +36,42 @@ class AdminAdminsScreen extends ConsumerWidget {
         },
         builder: (all) {
           final admins = all.where((u) => u.user.isAdmin == true).toList();
-          return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-            PageHeader(title: l.platformAdmins, sub: l.platformAdminsLede),
-            SectionHeader(l.platformAdminsCount(admins.length)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListGroup(children: [
-                for (final u in admins)
-                  PersonRow(
-                    user: u.user,
-                    nameSuffix: u.user.id == me?.id ? l.platformYou : null,
-                    sub: [
-                      contactOf(u.user),
-                      if (u.user.hasTotp == true) '2FA',
-                      l.platformLastSeenAgo(agoText(context, u.lastSignInAt)),
-                    ].join(' · '),
-                    trailing: u.user.id == me?.id
-                        ? null
-                        : TextButton(
-                            style: TextButton.styleFrom(foregroundColor: c.badInk),
-                            onPressed: () => _delete(context, ref, u.user),
-                            child: Text(l.platformDeleteAdmin),
-                          ),
-                  ),
-              ]),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: FilledButton(onPressed: () => _add(context, ref), child: Text(l.platformAddAdmin)),
-            ),
-          ]);
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              PageHeader(title: l.platformAdmins, sub: l.platformAdminsLede),
+              SectionHeader(l.platformAdminsCount(admins.length)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ListGroup(
+                  children: [
+                    for (final u in admins)
+                      PersonRow(
+                        user: u.user,
+                        nameSuffix: u.user.id == me?.id ? l.platformYou : null,
+                        sub: [
+                          contactOf(u.user),
+                          if (u.user.hasTotp == true) '2FA',
+                          l.platformLastSeenAgo(agoText(context, u.lastSignInAt)),
+                        ].join(' · '),
+                        trailing: u.user.id == me?.id
+                            ? null
+                            : TextButton(
+                                style: TextButton.styleFrom(foregroundColor: c.badInk),
+                                onPressed: () => _delete(context, ref, u.user),
+                                child: Text(l.platformDeleteAdmin),
+                              ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: FilledButton(onPressed: () => _add(context, ref), child: Text(l.platformAddAdmin)),
+              ),
+            ],
+          );
         },
       ),
     );
@@ -87,7 +92,13 @@ class AdminAdminsScreen extends ConsumerWidget {
       ready: () => username.text.trim().length >= 2 && password.text.length >= _minPassword,
       fields: (setState) => [
         LabeledField(label: l.platformAdminName, controller: name, maxLength: 100),
-        LabeledField(label: '${l.platformAdminUsername} *', controller: username, maxLength: 32, autocorrect: false, onChanged: (_) => setState(() {})),
+        LabeledField(
+          label: '${l.platformAdminUsername} *',
+          controller: username,
+          maxLength: 32,
+          autocorrect: false,
+          onChanged: (_) => setState(() {}),
+        ),
         LabeledField(label: l.platformEmail, controller: email, maxLength: 254, autocorrect: false, keyboard: TextInputType.emailAddress),
         LabeledField(
           label: '${l.authPassword} *',
@@ -100,7 +111,10 @@ class AdminAdminsScreen extends ConsumerWidget {
       submit: () async {
         String? opt(TextEditingController t) => t.text.trim().isEmpty ? null : t.text.trim();
         try {
-          final res = await ref.read(apiProvider)!.getPlatformApi().createPlatformAdmin(
+          final res = await ref
+              .read(apiProvider)!
+              .getPlatformApi()
+              .createPlatformAdmin(
                 createPlatformAdminRequest: CreatePlatformAdminRequest(
                   username: username.text.trim(),
                   password: password.text,

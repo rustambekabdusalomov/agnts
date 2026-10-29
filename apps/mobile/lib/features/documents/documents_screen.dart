@@ -39,10 +39,16 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           padding: const EdgeInsets.only(bottom: 24),
           children: [
             PageHeader(title: l.mdocumentsTitle),
-            ChipRow(children: [
-              for (final (s, label) in [(DocScope.all, l.mdocumentsAll), (DocScope.mine, l.mdocumentsMine), (DocScope.shared, l.mdocumentsShared)])
-                FilterChipH(label: label, selected: _scope == s, onTap: () => setState(() => _scope = s)),
-            ]),
+            ChipRow(
+              children: [
+                for (final (s, label) in [
+                  (DocScope.all, l.mdocumentsAll),
+                  (DocScope.mine, l.mdocumentsMine),
+                  (DocScope.shared, l.mdocumentsShared),
+                ])
+                  FilterChipH(label: label, selected: _scope == s, onTap: () => setState(() => _scope = s)),
+              ],
+            ),
             const SizedBox(height: 10),
             if (all.isEmpty)
               EmptyState(title: l.mdocumentsEmpty, text: l.mdocumentsEmptyText)
@@ -75,18 +81,27 @@ class DocumentRow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(d.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink)),
+            Text(
+              d.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
+            ),
             const SizedBox(height: 3),
             Text(l.mdocumentsMeta(d.ownerName, ciAgo(l, d.updatedAt.toLocal())), style: TextStyle(fontSize: 13, color: c.ink3)),
             const SizedBox(height: 6),
-            Wrap(spacing: 6, runSpacing: 4, children: [
-              if (d.kind == DocumentKind.slides) ToneBadge(l.mdocumentsSlides, Tone.gray, small: true),
-              d.type == DocumentSummaryTypeEnum.public
-                  ? ToneBadge(l.mdocumentsTypePublic, Tone.info, small: true)
-                  : ToneBadge(l.mdocumentsTypePrivate, Tone.gray, small: true),
-              if (docWriting(d.generation)) ToneBadge(l.mdocumentsWriting, Tone.warn, small: true),
-              if (docFailed(d.generation)) ToneBadge(l.mdocumentsFailed, Tone.bad, small: true),
-            ]),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                if (d.kind == DocumentKind.slides) ToneBadge(l.mdocumentsSlides, Tone.gray, small: true),
+                d.type == DocumentSummaryTypeEnum.public
+                    ? ToneBadge(l.mdocumentsTypePublic, Tone.info, small: true)
+                    : ToneBadge(l.mdocumentsTypePrivate, Tone.gray, small: true),
+                if (docWriting(d.generation)) ToneBadge(l.mdocumentsWriting, Tone.warn, small: true),
+                if (docFailed(d.generation)) ToneBadge(l.mdocumentsFailed, Tone.bad, small: true),
+              ],
+            ),
           ],
         ),
       ),

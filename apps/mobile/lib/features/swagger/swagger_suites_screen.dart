@@ -56,7 +56,11 @@ class SwaggerSuitesScreen extends ConsumerWidget {
             if (list.isEmpty)
               EmptyState(title: l.swaggerSuitesEmpty)
             else
-              for (final s in list) Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 10), child: SuiteCard(s, canEdit: canEdit)),
+              for (final s in list)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: SuiteCard(s, canEdit: canEdit),
+                ),
           ],
         ),
       ),
@@ -113,7 +117,10 @@ class _SuiteCardState extends ConsumerState<SuiteCard> {
     }
   }
 
-  Future<void> _update(SwaggerSuiteInput input, {String? done}) => _run(() => _api.updateSwaggerSuite(id: s.id, swaggerSuiteInput: input), done: done);
+  Future<void> _update(SwaggerSuiteInput input, {String? done}) => _run(
+    () => _api.updateSwaggerSuite(id: s.id, swaggerSuiteInput: input),
+    done: done,
+  );
 
   Future<void> _runNow() async {
     final l = AppLocalizations.of(context);
@@ -155,14 +162,16 @@ class _SuiteCardState extends ConsumerState<SuiteCard> {
       builder: (ctx) => SafeArea(
         child: SizedBox(
           height: 320,
-          child: ListView(children: [
-            for (var i = 0; i < 24; i++)
-              ListTile(
-                title: Text(AppLocalizations.of(ctx).mqualityHourAt(i.toString().padLeft(2, '0'))),
-                trailing: i == s.hour ? const Icon(Icons.check_rounded) : null,
-                onTap: () => Navigator.pop(ctx, i),
-              ),
-          ]),
+          child: ListView(
+            children: [
+              for (var i = 0; i < 24; i++)
+                ListTile(
+                  title: Text(AppLocalizations.of(ctx).mqualityHourAt(i.toString().padLeft(2, '0'))),
+                  trailing: i == s.hour ? const Icon(Icons.check_rounded) : null,
+                  onTap: () => Navigator.pop(ctx, i),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -183,108 +192,127 @@ class _SuiteCardState extends ConsumerState<SuiteCard> {
     }
 
     return HCard(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(children: [
-          Expanded(child: Text(s.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink))),
-          if (!s.enabled) ToneBadge(l.swaggerPaused, Tone.gray, small: true),
-        ]),
-        const SizedBox(height: 4),
-        Text(s.baseUrl, style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5)),
-        Text(
-          [
-            '${s.operations}',
-            s.writeEnabled ? l.swaggerModeWrite : l.swaggerModeRead,
-            authKindLabel(l, s.authKind),
-          ].join(' · '),
-          style: hint,
-        ),
-        const SizedBox(height: 10),
-        Grid2(children: [
-          Fact(l.swaggerColSchedule, scheduleLabel(l, s.schedule.value) + (timed ? ' · $hour' : '')),
-          Fact(l.swaggerLastRun, s.lastRunAt == null ? l.swaggerNever : ago(s.lastRunAt!)),
-          if (s.enabled && s.nextRunAt != null) Fact(l.swaggerNextRun, MaterialLocalizations.of(context).formatShortDate(s.nextRunAt!.toLocal())),
-        ]),
-        if (s.lastTicketKey != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(onPressed: () => context.push('/tickets/${s.lastTicketKey}'), child: Text(s.lastTicketKey!)),
-          ),
-        if (widget.canEdit) ...[
-          const SizedBox(height: 8),
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            FilledButton(onPressed: locked ? null : _runNow, child: Text(l.swaggerRunNow)),
-            OutlinedButton(
-              onPressed: locked ? null : () => _update(SwaggerSuiteInput(enabled: !s.enabled)),
-              child: Text(s.enabled ? l.swaggerPause : l.swaggerResume),
-            ),
-            OutlinedButton(onPressed: locked ? null : _rotateHook, child: Text(s.hookSet ? l.swaggerHookRotate : l.swaggerHookCreate)),
-          ]),
-          const SizedBox(height: 12),
-          Text(l.swaggerSchedule, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2)),
-          const SizedBox(height: 6),
-          DropdownButtonFormField<SwaggerSuiteScheduleEnum>(
-            key: ValueKey(s.schedule),
-            initialValue: s.schedule,
-            isExpanded: true,
-            items: [
-              for (final v in SwaggerSuiteScheduleEnum.values) DropdownMenuItem(value: v, child: Text(scheduleLabel(l, v.value))),
-            ],
-            onChanged: locked
-                ? null
-                : (v) {
-                    if (v != null && v != s.schedule) _update(SwaggerSuiteInput(schedule: SwaggerSuiteInputScheduleEnum.values.byName(v.name)));
-                  },
-          ),
-          if (timed) ...[
-            const SizedBox(height: 8),
-            ListRow(title: l.swaggerHourUtc, value: hour, onTap: locked ? null : _pickHour),
-          ],
-          if (s.authKind != ApiAuthKind.none) ...[
-            const SizedBox(height: 8),
-            Row(children: [
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
               Expanded(
-                child: TextField(
-                  controller: _token,
-                  enabled: !locked,
-                  obscureText: true,
-                  autocorrect: false,
-                  style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13),
-                  decoration: InputDecoration(hintText: l.swaggerSuiteToken),
+                child: Text(
+                  s.name,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink),
                 ),
               ),
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: locked || _token.text.isEmpty
-                    ? null
-                    : () async {
-                        await _update(SwaggerSuiteInput(token: _token.text), done: l.mqualityTokenSaved);
-                        _token.clear();
-                      },
-                child: Text(l.swaggerSetToken),
-              ),
-            ]),
-          ],
+              if (!s.enabled) ToneBadge(l.swaggerPaused, Tone.gray, small: true),
+            ],
+          ),
           const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: locked ? null : _delete,
-              style: TextButton.styleFrom(foregroundColor: c.badInk),
-              child: Text(l.swaggerDeleteSuite),
+          Text(s.baseUrl, style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5)),
+          Text(
+            ['${s.operations}', s.writeEnabled ? l.swaggerModeWrite : l.swaggerModeRead, authKindLabel(l, s.authKind)].join(' · '),
+            style: hint,
+          ),
+          const SizedBox(height: 10),
+          Grid2(
+            children: [
+              Fact(l.swaggerColSchedule, scheduleLabel(l, s.schedule.value) + (timed ? ' · $hour' : '')),
+              Fact(l.swaggerLastRun, s.lastRunAt == null ? l.swaggerNever : ago(s.lastRunAt!)),
+              if (s.enabled && s.nextRunAt != null)
+                Fact(l.swaggerNextRun, MaterialLocalizations.of(context).formatShortDate(s.nextRunAt!.toLocal())),
+            ],
+          ),
+          if (s.lastTicketKey != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(onPressed: () => context.push('/tickets/${s.lastTicketKey}'), child: Text(s.lastTicketKey!)),
             ),
-          ),
+          if (widget.canEdit) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton(onPressed: locked ? null : _runNow, child: Text(l.swaggerRunNow)),
+                OutlinedButton(
+                  onPressed: locked ? null : () => _update(SwaggerSuiteInput(enabled: !s.enabled)),
+                  child: Text(s.enabled ? l.swaggerPause : l.swaggerResume),
+                ),
+                OutlinedButton(onPressed: locked ? null : _rotateHook, child: Text(s.hookSet ? l.swaggerHookRotate : l.swaggerHookCreate)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l.swaggerSchedule,
+              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink2),
+            ),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<SwaggerSuiteScheduleEnum>(
+              key: ValueKey(s.schedule),
+              initialValue: s.schedule,
+              isExpanded: true,
+              items: [for (final v in SwaggerSuiteScheduleEnum.values) DropdownMenuItem(value: v, child: Text(scheduleLabel(l, v.value)))],
+              onChanged: locked
+                  ? null
+                  : (v) {
+                      if (v != null && v != s.schedule) {
+                        _update(SwaggerSuiteInput(schedule: SwaggerSuiteInputScheduleEnum.values.byName(v.name)));
+                      }
+                    },
+            ),
+            if (timed) ...[const SizedBox(height: 8), ListRow(title: l.swaggerHourUtc, value: hour, onTap: locked ? null : _pickHour)],
+            if (s.authKind != ApiAuthKind.none) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _token,
+                      enabled: !locked,
+                      obscureText: true,
+                      autocorrect: false,
+                      style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 13),
+                      decoration: InputDecoration(hintText: l.swaggerSuiteToken),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton(
+                    onPressed: locked || _token.text.isEmpty
+                        ? null
+                        : () async {
+                            await _update(SwaggerSuiteInput(token: _token.text), done: l.mqualityTokenSaved);
+                            _token.clear();
+                          },
+                    child: Text(l.swaggerSetToken),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: locked ? null : _delete,
+                style: TextButton.styleFrom(foregroundColor: c.badInk),
+                child: Text(l.swaggerDeleteSuite),
+              ),
+            ),
+          ],
+          if (_hook != null) ...[
+            const SizedBox(height: 8),
+            HelpBox(
+              l.swaggerHookHint,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SelectableText(l.swaggerHookExample(_hook!), style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12)),
+                  ),
+                  CopyButton(l.swaggerHookExample(_hook!)),
+                ],
+              ),
+            ),
+          ],
         ],
-        if (_hook != null) ...[
-          const SizedBox(height: 8),
-          HelpBox(
-            l.swaggerHookHint,
-            child: Row(children: [
-              Expanded(child: SelectableText(l.swaggerHookExample(_hook!), style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12))),
-              CopyButton(l.swaggerHookExample(_hook!)),
-            ]),
-          ),
-        ],
-      ]),
+      ),
     );
   }
 }

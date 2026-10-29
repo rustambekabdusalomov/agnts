@@ -12,17 +12,37 @@ import 'package:agnts_mobile/theme.dart';
 void main() {
   testWidgets('a pushed screen swipes back from the middle of the page on iOS', (tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    final router = GoRouter(initialLocation: '/home', routes: [
-      screenRoute('/detail', (_, _) => Scaffold(body: ListView(children: [const Text('detail'), for (var i = 0; i < 40; i++) ListTile(title: Text('$i'))]))),
-      StatefulShellRoute.indexedStack(
-        builder: (_, _, shell) => Scaffold(body: shell),
-        branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/home', builder: (c, _) => Center(child: TextButton(onPressed: () => c.push('/detail'), child: const Text('open')))),
-          ]),
-        ],
-      ),
-    ]);
+    final router = GoRouter(
+      initialLocation: '/home',
+      routes: [
+        screenRoute(
+          '/detail',
+          (_, _) => Scaffold(
+            body: ListView(
+              children: [
+                const Text('detail'),
+                for (var i = 0; i < 40; i++) ListTile(title: Text('$i')),
+              ],
+            ),
+          ),
+        ),
+        StatefulShellRoute.indexedStack(
+          builder: (_, _, shell) => Scaffold(body: shell),
+          branches: [
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/home',
+                  builder: (c, _) => Center(
+                    child: TextButton(onPressed: () => c.push('/detail'), child: const Text('open')),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
     await tester.pumpWidget(MaterialApp.router(theme: agntsTheme(Brightness.light), routerConfig: router));
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();

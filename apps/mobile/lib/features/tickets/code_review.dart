@@ -32,20 +32,25 @@ class CodeReviewCard extends StatelessWidget {
     final showReview = current && state != TicketReviewStateEnum.pending && state != TicketReviewStateEnum.running;
 
     Widget status(String text, {Widget? lead, Tone? tone}) => Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (lead != null) Padding(padding: const EdgeInsets.only(top: 2, right: 8), child: lead),
-            Expanded(child: Text(text, style: TextStyle(fontSize: 14, height: 1.4, color: tone == null ? c.ink3 : tone.ink(c)))),
-          ]),
-        );
-    Widget runButton(String label) => Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 36)),
-            onPressed: busy ? null : onRun,
-            child: Text(label),
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (lead != null) Padding(padding: const EdgeInsets.only(top: 2, right: 8), child: lead),
+          Expanded(
+            child: Text(text, style: TextStyle(fontSize: 14, height: 1.4, color: tone == null ? c.ink3 : tone.ink(c))),
           ),
-        );
+        ],
+      ),
+    );
+    Widget runButton(String label) => Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton(
+        style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 36)),
+        onPressed: busy ? null : onRun,
+        child: Text(label),
+      ),
+    );
 
     final body = <Widget>[];
     if (showReview) {
@@ -55,8 +60,12 @@ class CodeReviewCard extends StatelessWidget {
         case TicketReviewStateEnum.pending:
           body.add(status(l.reviewPending));
         case TicketReviewStateEnum.running:
-          body.add(status(l.reviewRunning,
-              lead: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: c.primary))));
+          body.add(
+            status(
+              l.reviewRunning,
+              lead: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: c.primary)),
+            ),
+          );
         case TicketReviewStateEnum.failed:
           body.addAll([status(l.reviewFailed, tone: Tone.bad), runButton(l.reviewRunAgain)]);
         case TicketReviewStateEnum.none:
@@ -76,7 +85,10 @@ class CodeReviewCard extends StatelessWidget {
       hint: showReview ? _verdictLabel(l, review.verdict) : null,
       children: [
         if (showReview)
-          Align(alignment: Alignment.centerLeft, child: ToneBadge(_verdictLabel(l, review.verdict), _verdictTone(review.verdict), small: true)),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ToneBadge(_verdictLabel(l, review.verdict), _verdictTone(review.verdict), small: true),
+          ),
         Padding(
           padding: EdgeInsets.only(top: showReview ? 6 : 0),
           child: Text(l.reviewSub, style: TextStyle(fontSize: 12.5, height: 1.4, color: c.ink3)),
@@ -89,10 +101,16 @@ class CodeReviewCard extends StatelessWidget {
   List<Widget> _review(BuildContext context, CodeReview r) {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
-    final withSuggestion = [for (final f in r.findings) if (_line(f) != null) _line(f)!];
+    final withSuggestion = [
+      for (final f in r.findings)
+        if (_line(f) != null) _line(f)!,
+    ];
     return [
       if (r.summary.isNotEmpty)
-        Padding(padding: const EdgeInsets.only(top: 10), child: Text(r.summary, style: TextStyle(fontSize: 15, height: 1.45, color: c.ink))),
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Text(r.summary, style: TextStyle(fontSize: 15, height: 1.45, color: c.ink)),
+        ),
       Padding(
         padding: const EdgeInsets.only(top: 6),
         child: Text(l.reviewModel(_modelName(r.model), r.modelReason), style: TextStyle(fontSize: 12.5, height: 1.4, color: c.ink3)),
@@ -100,46 +118,68 @@ class CodeReviewCard extends StatelessWidget {
       if (r.findings.isEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 10),
-          child: Row(children: [
-            HIcon('check', size: 16, stroke: 2.6, color: c.okInk),
-            const SizedBox(width: 8),
-            Expanded(child: Text(l.reviewNoFindings, style: TextStyle(fontSize: 14, color: c.okInk, fontWeight: FontWeight.w700))),
-          ]),
+          child: Row(
+            children: [
+              HIcon('check', size: 16, stroke: 2.6, color: c.okInk),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l.reviewNoFindings,
+                  style: TextStyle(fontSize: 14, color: c.okInk, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
         )
       else ...[
         Padding(
           padding: const EdgeInsets.only(top: 14, bottom: 2),
-          child: Row(children: [
-            Expanded(child: Text(l.reviewFindings(r.findings.length), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3))),
-            if (withSuggestion.length > 1)
-              ListenableBuilder(
-                listenable: feedback,
-                builder: (context, _) {
-                  final left = withSuggestion.where((x) => !feedback.text.contains(x)).toList();
-                  if (left.isEmpty) return const SizedBox.shrink();
-                  return TextButton(
-                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
-                    onPressed: busy ? null : () => _append(left),
-                    child: Text(l.reviewAddAll),
-                  );
-                },
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l.reviewFindings(r.findings.length),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
+                ),
               ),
-          ]),
+              if (withSuggestion.length > 1)
+                ListenableBuilder(
+                  listenable: feedback,
+                  builder: (context, _) {
+                    final left = withSuggestion.where((x) => !feedback.text.contains(x)).toList();
+                    if (left.isEmpty) return const SizedBox.shrink();
+                    return TextButton(
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
+                      onPressed: busy ? null : () => _append(left),
+                      child: Text(l.reviewAddAll),
+                    );
+                  },
+                ),
+            ],
+          ),
         ),
         for (final (i, f) in r.findings.indexed) _finding(context, f, index: i),
       ],
       if (r.strengths.isNotEmpty) ...[
         Padding(
           padding: const EdgeInsets.only(top: 14, bottom: 6),
-          child: Text(l.reviewStrengths, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3)),
+          child: Text(
+            l.reviewStrengths,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.ink3),
+          ),
         ),
         for (final s in r.strengths)
           Padding(
             padding: const EdgeInsets.only(bottom: 4),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('•  ', style: TextStyle(color: c.ink3)),
-              Expanded(child: Text(s, style: TextStyle(fontSize: 14, height: 1.4, color: c.ink2))),
-            ]),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('•  ', style: TextStyle(color: c.ink3)),
+                Expanded(
+                  child: Text(s, style: TextStyle(fontSize: 14, height: 1.4, color: c.ink2)),
+                ),
+              ],
+            ),
           ),
       ],
       Align(
@@ -161,66 +201,95 @@ class CodeReviewCard extends StatelessWidget {
     final line = _line(f);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(border: first ? null : Border(top: BorderSide(color: c.line2))),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          ToneBadge(_severityLabel(l, f.severity), _severityTone(f.severity), small: true),
-          Text(_categoryLabel(l, f.category), style: TextStyle(fontSize: 12.5, color: c.ink3)),
-        ]),
-        const SizedBox(height: 6),
-        Text(f.title, style: TextStyle(fontSize: 14.5, height: 1.35, fontWeight: FontWeight.w700, color: c.ink)),
-        if (loc.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(loc, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
+      decoration: BoxDecoration(
+        border: first ? null : Border(top: BorderSide(color: c.line2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              ToneBadge(_severityLabel(l, f.severity), _severityTone(f.severity), small: true),
+              Text(_categoryLabel(l, f.category), style: TextStyle(fontSize: 12.5, color: c.ink3)),
+            ],
           ),
-        if ((f.detail ?? '').isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(f.detail!, style: TextStyle(fontSize: 14, height: 1.4, color: c.ink2)),
+          const SizedBox(height: 6),
+          Text(
+            f.title,
+            style: TextStyle(fontSize: 14.5, height: 1.35, fontWeight: FontWeight.w700, color: c.ink),
           ),
-        if ((f.suggestion ?? '').isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text.rich(TextSpan(style: TextStyle(fontSize: 14, height: 1.4, color: c.ink2), children: [
-              TextSpan(text: '${l.reviewSuggestion}: ', style: TextStyle(fontWeight: FontWeight.w700, color: c.ink)),
-              TextSpan(text: f.suggestion),
-            ])),
-          ),
-        if (line != null)
-          ListenableBuilder(
-            listenable: feedback,
-            builder: (context, _) {
-              if (feedback.text.contains(line)) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(children: [
-                    HIcon('check', size: 15, stroke: 2.6, color: c.okInk),
-                    const SizedBox(width: 6),
-                    Text(l.reviewAdded, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.okInk)),
-                  ]),
-                );
-              }
-              return Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
-                  onPressed: busy ? null : () => _append([line]),
-                  child: Text(l.reviewAddToFeedback),
-                ),
-              );
-            },
-          ),
-        if (onFollowUp != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
-              onPressed: busy ? null : () => onFollowUp!(index),
-              child: Text(l.followUpsFromFinding),
+          if (loc.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                loc,
+                style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3),
+              ),
             ),
-          ),
-      ]),
+          if ((f.detail ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(f.detail!, style: TextStyle(fontSize: 14, height: 1.4, color: c.ink2)),
+            ),
+          if ((f.suggestion ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 14, height: 1.4, color: c.ink2),
+                  children: [
+                    TextSpan(
+                      text: '${l.reviewSuggestion}: ',
+                      style: TextStyle(fontWeight: FontWeight.w700, color: c.ink),
+                    ),
+                    TextSpan(text: f.suggestion),
+                  ],
+                ),
+              ),
+            ),
+          if (line != null)
+            ListenableBuilder(
+              listenable: feedback,
+              builder: (context, _) {
+                if (feedback.text.contains(line)) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        HIcon('check', size: 15, stroke: 2.6, color: c.okInk),
+                        const SizedBox(width: 6),
+                        Text(
+                          l.reviewAdded,
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.okInk),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
+                    onPressed: busy ? null : () => _append([line]),
+                    child: Text(l.reviewAddToFeedback),
+                  ),
+                );
+              },
+            ),
+          if (onFollowUp != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
+                onPressed: busy ? null : () => onFollowUp!(index),
+                child: Text(l.followUpsFromFinding),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -232,7 +301,10 @@ class CodeReviewCard extends StatelessWidget {
       if (text.isNotEmpty && !text.endsWith('\n')) text += '\n';
       text += x;
     }
-    feedback.value = TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length));
+    feedback.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
   }
 }
 
@@ -260,41 +332,41 @@ String _modelName(String m) {
 }
 
 String _verdictLabel(AppLocalizations l, CodeReviewVerdictEnum v) => switch (v) {
-      CodeReviewVerdictEnum.looksGood => l.reviewVerdict_looks_good,
-      CodeReviewVerdictEnum.hasConcerns => l.reviewVerdict_has_concerns,
-      CodeReviewVerdictEnum.needsChanges => l.reviewVerdict_needs_changes,
-    };
+  CodeReviewVerdictEnum.looksGood => l.reviewVerdict_looks_good,
+  CodeReviewVerdictEnum.hasConcerns => l.reviewVerdict_has_concerns,
+  CodeReviewVerdictEnum.needsChanges => l.reviewVerdict_needs_changes,
+};
 
 Tone _verdictTone(CodeReviewVerdictEnum v) => switch (v) {
-      CodeReviewVerdictEnum.looksGood => Tone.ok,
-      CodeReviewVerdictEnum.hasConcerns => Tone.warn,
-      CodeReviewVerdictEnum.needsChanges => Tone.bad,
-    };
+  CodeReviewVerdictEnum.looksGood => Tone.ok,
+  CodeReviewVerdictEnum.hasConcerns => Tone.warn,
+  CodeReviewVerdictEnum.needsChanges => Tone.bad,
+};
 
 String _severityLabel(AppLocalizations l, FindingSeverityEnum s) => switch (s) {
-      FindingSeverityEnum.blocker => l.reviewSev_blocker,
-      FindingSeverityEnum.major => l.reviewSev_major,
-      FindingSeverityEnum.minor => l.reviewSev_minor,
-      FindingSeverityEnum.nit => l.reviewSev_nit,
-    };
+  FindingSeverityEnum.blocker => l.reviewSev_blocker,
+  FindingSeverityEnum.major => l.reviewSev_major,
+  FindingSeverityEnum.minor => l.reviewSev_minor,
+  FindingSeverityEnum.nit => l.reviewSev_nit,
+};
 
 Tone _severityTone(FindingSeverityEnum s) => switch (s) {
-      FindingSeverityEnum.blocker => Tone.bad,
-      FindingSeverityEnum.major => Tone.warn,
-      FindingSeverityEnum.minor => Tone.info,
-      FindingSeverityEnum.nit => Tone.gray,
-    };
+  FindingSeverityEnum.blocker => Tone.bad,
+  FindingSeverityEnum.major => Tone.warn,
+  FindingSeverityEnum.minor => Tone.info,
+  FindingSeverityEnum.nit => Tone.gray,
+};
 
 String _categoryLabel(AppLocalizations l, FindingCategoryEnum c) => switch (c) {
-      FindingCategoryEnum.correctness => l.reviewCat_correctness,
-      FindingCategoryEnum.security => l.reviewCat_security,
-      FindingCategoryEnum.performance => l.reviewCat_performance,
-      FindingCategoryEnum.tests => l.reviewCat_tests,
-      FindingCategoryEnum.rules => l.reviewCat_rules,
-      FindingCategoryEnum.architecture => l.reviewCat_architecture,
-      FindingCategoryEnum.scope => l.reviewCat_scope,
-      FindingCategoryEnum.maintainability => l.reviewCat_maintainability,
-      FindingCategoryEnum.accuracy => l.reviewCat_accuracy,
-      FindingCategoryEnum.completeness => l.reviewCat_completeness,
-      FindingCategoryEnum.other => l.reviewCat_other,
-    };
+  FindingCategoryEnum.correctness => l.reviewCat_correctness,
+  FindingCategoryEnum.security => l.reviewCat_security,
+  FindingCategoryEnum.performance => l.reviewCat_performance,
+  FindingCategoryEnum.tests => l.reviewCat_tests,
+  FindingCategoryEnum.rules => l.reviewCat_rules,
+  FindingCategoryEnum.architecture => l.reviewCat_architecture,
+  FindingCategoryEnum.scope => l.reviewCat_scope,
+  FindingCategoryEnum.maintainability => l.reviewCat_maintainability,
+  FindingCategoryEnum.accuracy => l.reviewCat_accuracy,
+  FindingCategoryEnum.completeness => l.reviewCat_completeness,
+  FindingCategoryEnum.other => l.reviewCat_other,
+};

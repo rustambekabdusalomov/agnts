@@ -10,19 +10,19 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child) => ProviderScope(
-      overrides: [integrationsProvider.overrideWith((ref) async => const <Integration>[])],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      ),
-    );
+  overrides: [integrationsProvider.overrideWith((ref) async => const <Integration>[])],
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  ),
+);
 
 FollowUpSuggestion _s(int id, String title, {bool ready = true, FollowUpSuggestionStatusEnum status = FollowUpSuggestionStatusEnum.open}) =>
     FollowUpSuggestion(
@@ -41,40 +41,56 @@ FollowUpSuggestion _s(int id, String title, {bool ready = true, FollowUpSuggesti
     );
 
 TicketDetail _detail(FollowUps f) => TicketDetail(
-      ticket: Ticket(
-        key: 'PAY-1',
-        source_: TicketSource_Enum.jira,
-        title: 'Fix refunds',
-        description: '',
-        priority: 'high',
-        state: TicketState.waitingForReview,
-        revision: 0,
-        turns: 3,
-        branch: '',
-        prUrl: '',
-        kind: TicketKind.code,
-        kindAuto: false,
-        skipChecks: false,
-        createdAt: DateTime(2026),
-        updatedAt: DateTime(2026),
-        suggestFollowUps: FollowUpsMode.on_,
-      ),
-      questions: const [],
-      attachments: const [],
-      followUps: f,
-    );
+  ticket: Ticket(
+    key: 'PAY-1',
+    source_: TicketSource_Enum.jira,
+    title: 'Fix refunds',
+    description: '',
+    priority: 'high',
+    state: TicketState.waitingForReview,
+    revision: 0,
+    turns: 3,
+    branch: '',
+    prUrl: '',
+    kind: TicketKind.code,
+    kindAuto: false,
+    skipChecks: false,
+    createdAt: DateTime(2026),
+    updatedAt: DateTime(2026),
+    suggestFollowUps: FollowUpsMode.on_,
+  ),
+  questions: const [],
+  attachments: const [],
+  followUps: f,
+);
 
 void main() {
   testWidgets('lists suggestions; only ready ones can be picked', (tester) async {
-    await tester.pumpWidget(_app(FollowUpsFold(_detail(FollowUps(
-      enabled: true,
-      suggestions: [
-        _s(1, 'Add refund_cents'),
-        _s(2, 'Test negatives', ready: false),
-        _s(3, 'Old idea', status: FollowUpSuggestionStatusEnum.dismissed),
-      ],
-      children: [FollowUpTicket(key: 'VIS-4', title: 'Earlier', state: TicketState.new_, kind: TicketKind.code, source_: FollowUpTicketSource_Enum.local)],
-    )))));
+    await tester.pumpWidget(
+      _app(
+        FollowUpsFold(
+          _detail(
+            FollowUps(
+              enabled: true,
+              suggestions: [
+                _s(1, 'Add refund_cents'),
+                _s(2, 'Test negatives', ready: false),
+                _s(3, 'Old idea', status: FollowUpSuggestionStatusEnum.dismissed),
+              ],
+              children: [
+                FollowUpTicket(
+                  key: 'VIS-4',
+                  title: 'Earlier',
+                  state: TicketState.new_,
+                  kind: TicketKind.code,
+                  source_: FollowUpTicketSource_Enum.local,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Add refund_cents'), findsOneWidget);

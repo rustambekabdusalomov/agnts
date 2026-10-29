@@ -9791,6 +9791,122 @@ class AppLocalizationsEn extends AppLocalizations {
   String get platformFreeCreditsInvalid => 'Enter a whole number from 0 to 10,000,000.';
 
   @override
+  String get platformCreditUsage => 'Usage this month';
+
+  @override
+  String platformCreditUsageTotal(String n) {
+    return '$n ever';
+  }
+
+  @override
+  String get platformSetLimit => 'Set limit';
+
+  @override
+  String get platformLimitTitle => 'Monthly credit limit';
+
+  @override
+  String platformLimitSet(String name, String n, String amount) {
+    return '$name may spend up to $n credits ($amount) a month';
+  }
+
+  @override
+  String get platformMuseProvider => 'Muse provider';
+
+  @override
+  String get platformMuseProviderSub => 'Where runs on agnts\'s credits go. People\'s own Meta accounts are not affected.';
+
+  @override
+  String get platformMp_auto => 'Auto';
+
+  @override
+  String get platformMp_primary => 'Meta only';
+
+  @override
+  String get platformMp_fallback => 'Fallback only';
+
+  @override
+  String platformMpNote_auto(String name) {
+    return 'agnts\'s Meta key. When it runs out, runs continue their session on $name.';
+  }
+
+  @override
+  String get platformMpNote_primary => 'agnts\'s Meta key only. Runs stop when it runs out.';
+
+  @override
+  String platformMpNote_fallback(String name) {
+    return 'Every run on credits goes to $name.';
+  }
+
+  @override
+  String get platformMpFallback => 'Fallback';
+
+  @override
+  String get platformMpNone => 'This server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY).';
+
+  @override
+  String platformMpOut(String time) {
+    return 'Meta is out until $time';
+  }
+
+  @override
+  String platformMpSet(String mode) {
+    return 'Runs on credits: $mode';
+  }
+
+  @override
+  String platformLimitRemoved(String name) {
+    return '$name has no monthly limit now';
+  }
+
+  @override
+  String platformLimitUsed(String used, String amount, String total) {
+    return '$used credits ($amount) spent this month, $total ever.';
+  }
+
+  @override
+  String get platformLimitField => 'Credits per month (1 credit = \$0.01; 0 is no limit)';
+
+  @override
+  String get platformLimitHelp =>
+      'Free and workspace credits together. Runs stop once it is spent and resume next month or when you raise it.';
+
+  @override
+  String platformLimitWorth(String amount) {
+    return 'Up to $amount of model calls a month.';
+  }
+
+  @override
+  String get platformLimitNone => 'No limit: only their credits bound what they spend.';
+
+  @override
+  String platformFbUsage(String name, String used) {
+    return '$name: $used';
+  }
+
+  @override
+  String platformFbUsed(String name, String used, String amount) {
+    return 'Spent on $name this month: $used credits ($amount).';
+  }
+
+  @override
+  String get platformFbUseDefault => 'Use the server\'s default limit';
+
+  @override
+  String platformFbField(String name) {
+    return 'Credits per month on $name (0 is no limit)';
+  }
+
+  @override
+  String platformFbHelp(String name) {
+    return 'Counted only while agnts\'s Meta key is out and runs continue on $name. When it is used up, their runs wait for Meta instead.';
+  }
+
+  @override
+  String platformUsageTotals(String used, String amount, String limited) {
+    return 'This month: $used credits ($amount) across everyone; $limited people have a limit.';
+  }
+
+  @override
   String get previewTab => 'Preview';
 
   @override

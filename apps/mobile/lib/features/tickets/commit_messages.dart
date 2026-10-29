@@ -25,40 +25,64 @@ class CommitMessages extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
     final multi = isMultiRepo(ticket);
-    final repos = [for (final r in ticket.repos ?? const <TicketRepoState>[]) if (r.commits?.isNotEmpty ?? false) r];
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      for (final (i, r) in repos.indexed) ...[
-        if (multi)
-          Padding(
-            padding: EdgeInsets.only(top: i == 0 ? 0 : 12, bottom: 6),
-            child: Text.rich(TextSpan(children: [
-              TextSpan(text: r.repoName, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink)),
-              TextSpan(text: '  ${r.branch}', style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3)),
-            ])),
-          ),
-        ListGroup(children: [
-          for (final x in r.commits!)
-            InkWell(
-              onTap: onEdit == null ? null : () => onEdit!(r, x),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(x.sha.length > 7 ? x.sha.substring(0, 7) : x.sha, style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      '${x.message.split('\n').first}${x.message.contains('\n') ? ' …' : ''}',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink),
+    final repos = [
+      for (final r in ticket.repos ?? const <TicketRepoState>[])
+        if (r.commits?.isNotEmpty ?? false) r,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, r) in repos.indexed) ...[
+          if (multi)
+            Padding(
+              padding: EdgeInsets.only(top: i == 0 ? 0 : 12, bottom: 6),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: r.repoName,
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.ink),
                     ),
-                  ),
-                  if (onEdit != null) ...[const SizedBox(width: 8), HIcon('chevron', size: 16, color: c.ink3)],
-                ]),
+                    TextSpan(
+                      text: '  ${r.branch}',
+                      style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12, color: c.ink3),
+                    ),
+                  ],
+                ),
               ),
             ),
-        ]),
+          ListGroup(
+            children: [
+              for (final x in r.commits!)
+                InkWell(
+                  onTap: onEdit == null ? null : () => onEdit!(r, x),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          x.sha.length > 7 ? x.sha.substring(0, 7) : x.sha,
+                          style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink3),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '${x.message.split('\n').first}${x.message.contains('\n') ? ' …' : ''}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontFamily: AgntsFonts.mono, fontSize: 12.5, color: c.ink),
+                          ),
+                        ),
+                        if (onEdit != null) ...[const SizedBox(width: 8), HIcon('chevron', size: 16, color: c.ink3)],
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ],
-    ]);
+    );
   }
 }

@@ -27,17 +27,20 @@ class _AdminFeedbackScreenState extends ConsumerState<AdminFeedbackScreen> {
   final _busy = <int>{};
 
   static bool _matches(Feedback f, _Filter filter) => switch (filter) {
-        _Filter.all => true,
-        _Filter.new_ => f.status == FeedbackStatusEnum.new_,
-        _Filter.done => f.status == FeedbackStatusEnum.done,
-      };
+    _Filter.all => true,
+    _Filter.new_ => f.status == FeedbackStatusEnum.new_,
+    _Filter.done => f.status == FeedbackStatusEnum.done,
+  };
 
   Future<void> _toggle(Feedback f) async {
     final l = AppLocalizations.of(context);
     final done = f.status == FeedbackStatusEnum.new_;
     setState(() => _busy.add(f.id));
     try {
-      await ref.read(apiProvider)!.getPlatformApi().updatePlatformFeedback(
+      await ref
+          .read(apiProvider)!
+          .getPlatformApi()
+          .updatePlatformFeedback(
             id: f.id,
             updatePlatformFeedbackRequest: UpdatePlatformFeedbackRequest(
               status: done ? UpdatePlatformFeedbackRequestStatusEnum.done : UpdatePlatformFeedbackRequestStatusEnum.new_,
@@ -68,31 +71,38 @@ class _AdminFeedbackScreenState extends ConsumerState<AdminFeedbackScreen> {
             final s = _q.trim().toLowerCase();
             final list = all
                 .where((f) => _matches(f, _filter))
-                .where((f) => s.isEmpty || [f.title, f.description, f.sender, f.email ?? '', f.workspace ?? ''].any((v) => v.toLowerCase().contains(s)))
+                .where(
+                  (f) =>
+                      s.isEmpty ||
+                      [f.title, f.description, f.sender, f.email ?? '', f.workspace ?? ''].any((v) => v.toLowerCase().contains(s)),
+                )
                 .toList();
             int count(_Filter f) => all.where((x) => _matches(x, f)).length;
-            return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-              PageHeader(title: l.feedbackAdminTitle, sub: l.feedbackAdminLede),
-              FilterBar<_Filter>(
-                filters: [
-                  (_Filter.new_, l.feedbackF_new, count(_Filter.new_)),
-                  (_Filter.done, l.feedbackF_done, count(_Filter.done)),
-                  (_Filter.all, l.feedbackF_all, count(_Filter.all)),
-                ],
-                value: _filter,
-                onChanged: (f) => setState(() => _filter = f),
-                hint: l.feedbackSearch,
-                onSearch: (v) => setState(() => _q = v),
-              ),
-              if (list.isEmpty)
-                EmptyState(title: _filter == _Filter.new_ ? l.feedbackNoneNew : l.feedbackNone)
-              else
-                for (final f in list)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                    child: _FeedbackCard(f, busy: _busy.contains(f.id), onToggle: () => _toggle(f)),
-                  ),
-            ]);
+            return ListView(
+              padding: const EdgeInsets.only(bottom: 24),
+              children: [
+                PageHeader(title: l.feedbackAdminTitle, sub: l.feedbackAdminLede),
+                FilterBar<_Filter>(
+                  filters: [
+                    (_Filter.new_, l.feedbackF_new, count(_Filter.new_)),
+                    (_Filter.done, l.feedbackF_done, count(_Filter.done)),
+                    (_Filter.all, l.feedbackF_all, count(_Filter.all)),
+                  ],
+                  value: _filter,
+                  onChanged: (f) => setState(() => _filter = f),
+                  hint: l.feedbackSearch,
+                  onSearch: (v) => setState(() => _q = v),
+                ),
+                if (list.isEmpty)
+                  EmptyState(title: _filter == _Filter.new_ ? l.feedbackNoneNew : l.feedbackNone)
+                else
+                  for (final f in list)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                      child: _FeedbackCard(f, busy: _busy.contains(f.id), onToggle: () => _toggle(f)),
+                    ),
+              ],
+            );
           },
         ),
       ),
@@ -114,29 +124,40 @@ class _FeedbackCard extends StatelessWidget {
     return Opacity(
       opacity: isNew ? 1 : 0.75,
       child: HCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Expanded(child: Text(f.title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink))),
-            const SizedBox(width: 8),
-            ToneBadge(isNew ? l.feedbackS_new : l.feedbackS_done, isNew ? Tone.warn : Tone.ok, small: true),
-          ]),
-          const SizedBox(height: 6),
-          SelectableText(f.description, style: TextStyle(fontSize: 14.5, height: 1.45, color: c.ink2)),
-          const SizedBox(height: 10),
-          Text(
-            [
-              [f.sender, if (f.email != null) f.email!, if (f.userId == null) l.feedbackAccountGone].join(' · '),
-              if (f.workspace != null) l.feedbackFrom(f.workspace!),
-              agoText(context, f.createdAt),
-            ].join('\n'),
-            style: TextStyle(fontSize: 12.5, height: 1.4, color: c.ink3),
-          ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerRight,
-            child: OutlinedButton(onPressed: busy ? null : onToggle, child: Text(isNew ? l.feedbackMarkDone : l.feedbackReopen)),
-          ),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    f.title,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ToneBadge(isNew ? l.feedbackS_new : l.feedbackS_done, isNew ? Tone.warn : Tone.ok, small: true),
+              ],
+            ),
+            const SizedBox(height: 6),
+            SelectableText(f.description, style: TextStyle(fontSize: 14.5, height: 1.45, color: c.ink2)),
+            const SizedBox(height: 10),
+            Text(
+              [
+                [f.sender, if (f.email != null) f.email!, if (f.userId == null) l.feedbackAccountGone].join(' · '),
+                if (f.workspace != null) l.feedbackFrom(f.workspace!),
+                agoText(context, f.createdAt),
+              ].join('\n'),
+              style: TextStyle(fontSize: 12.5, height: 1.4, color: c.ink3),
+            ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(onPressed: busy ? null : onToggle, child: Text(isNew ? l.feedbackMarkDone : l.feedbackReopen)),
+            ),
+          ],
+        ),
       ),
     );
   }

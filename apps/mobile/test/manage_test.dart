@@ -17,38 +17,38 @@ import 'package:agnts_mobile/l10n/app_localizations.dart';
 import 'package:agnts_mobile/theme.dart';
 
 Widget _app(Widget child, List overrides) => ProviderScope(
-      overrides: [...overrides],
-      child: MaterialApp(
-        theme: agntsTheme(Brightness.light),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: child,
-      ),
-    );
+  overrides: [...overrides],
+  child: MaterialApp(
+    theme: agntsTheme(Brightness.light),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: child,
+  ),
+);
 
 Repository _repo(int id, String name, {DateTime? archivedAt, RepositoryClaudeMdEnum claude = RepositoryClaudeMdEnum.found}) => Repository(
-      id: id,
-      name: name,
-      kind: RepositoryKindEnum.side,
-      provider: RepositoryProviderEnum.github,
-      cloneUrl: 'https://github.com/acme/$name.git',
-      defaultBranch: 'main',
-      buildCmd: '',
-      lintCmd: '',
-      testCmd: 'go test ./...',
-      branchPrefix: 'agnts/',
-      taskPrefix: 'VIS',
-      instructions: '',
-      jiraProject: 'PAY',
-      claudeMd: claude,
-      openTickets: 3,
-      archivedAt: archivedAt,
-    );
+  id: id,
+  name: name,
+  kind: RepositoryKindEnum.side,
+  provider: RepositoryProviderEnum.github,
+  cloneUrl: 'https://github.com/acme/$name.git',
+  defaultBranch: 'main',
+  buildCmd: '',
+  lintCmd: '',
+  testCmd: 'go test ./...',
+  branchPrefix: 'agnts/',
+  taskPrefix: 'VIS',
+  instructions: '',
+  jiraProject: 'PAY',
+  claudeMd: claude,
+  openTickets: 3,
+  archivedAt: archivedAt,
+);
 
 void main() {
   group('tracker labels', () {
@@ -72,7 +72,11 @@ void main() {
 
   group('network routes', () {
     test('hosts and ranges, with ports', () {
-      final r = toRoutes([(target: 'gitlab.corp.local', ports: '80, 443 x'), (target: '10.20.0.0/16', ports: ''), (target: '  ', ports: '1')]);
+      final r = toRoutes([
+        (target: 'gitlab.corp.local', ports: '80, 443 x'),
+        (target: '10.20.0.0/16', ports: ''),
+        (target: '  ', ports: '1'),
+      ]);
       expect(r, hasLength(2));
       expect(r[0].host, 'gitlab.corp.local');
       expect(r[0].ports, [80, 443]);
@@ -116,13 +120,19 @@ void main() {
   });
 
   testWidgets('repositories: active, archived and search', (tester) async {
-    await tester.pumpWidget(_app(const ReposScreen(), [
-      reposProvider.overrideWith(
-        (_) async => [_repo(1, 'api', claude: RepositoryClaudeMdEnum.missing), _repo(2, 'web'), _repo(3, 'old', archivedAt: DateTime(2026))],
-      ),
-      repoGroupsProvider.overrideWith((_) async => <RepoGroup>[]),
-      currentWorkspaceProvider.overrideWithValue(null),
-    ]));
+    await tester.pumpWidget(
+      _app(const ReposScreen(), [
+        reposProvider.overrideWith(
+          (_) async => [
+            _repo(1, 'api', claude: RepositoryClaudeMdEnum.missing),
+            _repo(2, 'web'),
+            _repo(3, 'old', archivedAt: DateTime(2026)),
+          ],
+        ),
+        repoGroupsProvider.overrideWith((_) async => <RepoGroup>[]),
+        currentWorkspaceProvider.overrideWithValue(null),
+      ]),
+    );
     await tester.pumpAndSettle();
     expect(find.text('api'), findsOneWidget);
     expect(find.text('web'), findsOneWidget);
@@ -143,11 +153,13 @@ void main() {
   });
 
   testWidgets('integrations show status and the Claude card', (tester) async {
-    await tester.pumpWidget(_app(const IntegrationsScreen(), [
-      integrationsProvider.overrideWith((_) async => [
-            Integration(provider: 'github', connected: true, account: 'octo', tokenHint: 'abcd', settings: const {}),
-          ]),
-    ]));
+    await tester.pumpWidget(
+      _app(const IntegrationsScreen(), [
+        integrationsProvider.overrideWith(
+          (_) async => [Integration(provider: 'github', connected: true, account: 'octo', tokenHint: 'abcd', settings: const {})],
+        ),
+      ]),
+    );
     await tester.pumpAndSettle();
     expect(find.text('GitHub'), findsOneWidget);
     expect(find.text('octo'), findsOneWidget);
@@ -159,9 +171,11 @@ void main() {
   });
 
   testWidgets('MCP shows the connector and token state', (tester) async {
-    await tester.pumpWidget(_app(const McpScreen(), [
-      mcpProvider.overrideWith((_) async => McpStatus(url: 'https://agnts.example/mcp', staticToken: false, connections: 2)),
-    ]));
+    await tester.pumpWidget(
+      _app(const McpScreen(), [
+        mcpProvider.overrideWith((_) async => McpStatus(url: 'https://agnts.example/mcp', staticToken: false, connections: 2)),
+      ]),
+    );
     await tester.pumpAndSettle();
     expect(find.text('https://agnts.example/mcp'), findsOneWidget);
     expect(find.text('Not set'), findsOneWidget);
@@ -169,11 +183,20 @@ void main() {
   });
 
   testWidgets('a connected Jira shows its settings and saves only when changed', (tester) async {
-    await tester.pumpWidget(_app(const IntegrationScreen(provider: 'jira'), [
-      integrationsProvider.overrideWith((_) async => [
-            Integration(provider: 'jira', connected: true, account: 'me@acme.dev', settings: const {'site': 'https://acme.atlassian.net', 'label': 'bot'}),
-          ]),
-    ]));
+    await tester.pumpWidget(
+      _app(const IntegrationScreen(provider: 'jira'), [
+        integrationsProvider.overrideWith(
+          (_) async => [
+            Integration(
+              provider: 'jira',
+              connected: true,
+              account: 'me@acme.dev',
+              settings: const {'site': 'https://acme.atlassian.net', 'label': 'bot'},
+            ),
+          ],
+        ),
+      ]),
+    );
     await tester.pumpAndSettle();
     expect(find.text('https://acme.atlassian.net'), findsOneWidget);
     expect(find.text('Sync now'), findsOneWidget);
@@ -185,18 +208,20 @@ void main() {
   });
 
   testWidgets('a disconnected provider shows the connect form', (tester) async {
-    await tester.pumpWidget(_app(const IntegrationScreen(provider: 'gitlab'), [
-      integrationsProvider.overrideWith((_) async => <Integration>[]),
-    ]));
+    await tester.pumpWidget(
+      _app(const IntegrationScreen(provider: 'gitlab'), [integrationsProvider.overrideWith((_) async => <Integration>[])]),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Connect GitLab'), findsWidgets);
     expect(find.text('read_repository'), findsOneWidget);
   });
 
   testWidgets('networks list their status and routes', (tester) async {
-    await tester.pumpWidget(_app(const NetworksScreen(), [
-      currentWorkspaceProvider.overrideWithValue(null),
-      networksProvider.overrideWith((_) async => PrivateNetworkList(
+    await tester.pumpWidget(
+      _app(const NetworksScreen(), [
+        currentWorkspaceProvider.overrideWithValue(null),
+        networksProvider.overrideWith(
+          (_) async => PrivateNetworkList(
             available: true,
             linkUrl: 'wss://x/link',
             max: 5,
@@ -206,7 +231,9 @@ void main() {
                 name: 'Office',
                 kind: PrivateNetworkKindEnum.wireguard,
                 enabled: true,
-                routes: [NetworkRoute(host: 'gitlab.corp.local', ports: const [443])],
+                routes: [
+                  NetworkRoute(host: 'gitlab.corp.local', ports: const [443]),
+                ],
                 status: PrivateNetworkStatusEnum.up,
                 tokenSet: false,
                 webhooks: PrivateNetworkWebhooksEnum.polling,
@@ -214,9 +241,11 @@ void main() {
                 updatedAt: DateTime(2026),
               ),
             ],
-          )),
-      networkActivityProvider.overrideWith((_, _) async => NetworkActivity(today: 3, refused: 1, dials: const [])),
-    ]));
+          ),
+        ),
+        networkActivityProvider.overrideWith((_, _) async => NetworkActivity(today: 3, refused: 1, dials: const [])),
+      ]),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Office'), findsOneWidget);
     expect(find.text('Connected'), findsOneWidget);

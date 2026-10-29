@@ -44,12 +44,12 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     });
     try {
       await api.getFeedbackApi().sendFeedback(
-            sendFeedbackRequest: SendFeedbackRequest(
-              title: _title.text.trim(),
-              description: _description.text.trim(),
-              workspace: ref.read(currentWorkspaceProvider)?.slug,
-            ),
-          );
+        sendFeedbackRequest: SendFeedbackRequest(
+          title: _title.text.trim(),
+          description: _description.text.trim(),
+          workspace: ref.read(currentWorkspaceProvider)?.slug,
+        ),
+      );
       if (!mounted) return;
       showSnack(context, l.feedbackSent);
       Navigator.of(context).maybePop();
@@ -66,43 +66,53 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     final c = Agnts.of(context);
     return Scaffold(
       appBar: DetailBar(backLabel: l.mobileMore),
-      body: ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-        PageHeader(title: l.feedbackTitle),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-          child: Text(l.feedbackLede, style: TextStyle(fontSize: 15, height: 1.45, color: c.ink2)),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: HCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              TextField(
-                controller: _title,
-                maxLength: 120,
-                decoration: InputDecoration(labelText: l.feedbackTitleLabel, hintText: l.feedbackTitlePlaceholder, counterText: ''),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _description,
-                maxLength: _max,
-                minLines: 6,
-                maxLines: 12,
-                decoration: InputDecoration(
-                  labelText: l.feedbackDescLabel,
-                  hintText: l.feedbackDescPlaceholder,
-                  alignLabelWithHint: true,
-                  counterText: l.maccountChars('${_description.text.length}', '$_max'),
-                ),
-                onChanged: (_) => setState(() {}),
-              ),
-              if (_error != null) Padding(padding: const EdgeInsets.only(top: 12), child: HelpBox(_error!, tone: Tone.bad)),
-              const SizedBox(height: 14),
-              FilledButton(onPressed: _ready ? _send : null, child: Text(l.feedbackSend)),
-            ]),
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 32),
+        children: [
+          PageHeader(title: l.feedbackTitle),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Text(l.feedbackLede, style: TextStyle(fontSize: 15, height: 1.45, color: c.ink2)),
           ),
-        ),
-      ]),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: HCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _title,
+                    maxLength: 120,
+                    decoration: InputDecoration(labelText: l.feedbackTitleLabel, hintText: l.feedbackTitlePlaceholder, counterText: ''),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _description,
+                    maxLength: _max,
+                    minLines: 6,
+                    maxLines: 12,
+                    decoration: InputDecoration(
+                      labelText: l.feedbackDescLabel,
+                      hintText: l.feedbackDescPlaceholder,
+                      alignLabelWithHint: true,
+                      counterText: l.maccountChars('${_description.text.length}', '$_max'),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: HelpBox(_error!, tone: Tone.bad),
+                    ),
+                  const SizedBox(height: 14),
+                  FilledButton(onPressed: _ready ? _send : null, child: Text(l.feedbackSend)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

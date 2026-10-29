@@ -25,7 +25,8 @@ Future<void> openLink(BuildContext context, String url) async {
 String fmtDate(BuildContext context, DateTime d) => DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag()).format(d.toLocal());
 
 /// A day and time, in the app's language.
-String fmtDateTime(BuildContext context, DateTime d) => DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag()).add_Hm().format(d.toLocal());
+String fmtDateTime(BuildContext context, DateTime d) =>
+    DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag()).add_Hm().format(d.toLocal());
 
 /// The 6-digit authenticator code field (digits only).
 class CodeField extends StatelessWidget {
@@ -157,7 +158,12 @@ class _ClaudeConnectState extends State<ClaudeConnect> {
     String pct(double? v) => v == null ? '' : '${(v * 100).round()}%';
     final kindName = s?.kind == ClaudeConnectionStateKindEnum.apiKey ? l.wsKindApiKey : l.wsKindSubscription;
     final steps = _kind == ClaudeConnectionInputKindEnum.subscription
-        ? [l.integrationsTokenStep1_claude, l.integrationsTokenStep2_claude, l.integrationsTokenStep3_claude, l.integrationsTokenStep4_claude]
+        ? [
+            l.integrationsTokenStep1_claude,
+            l.integrationsTokenStep2_claude,
+            l.integrationsTokenStep3_claude,
+            l.integrationsTokenStep4_claude,
+          ]
         : [l.wsKeyStep1, l.wsKeyStep2, l.wsKeyStep3, l.wsKeyStep4];
     final note = TextStyle(fontSize: 13.5, height: 1.4, color: c.ink3);
     return Column(
@@ -172,7 +178,10 @@ class _ClaudeConnectState extends State<ClaudeConnect> {
               ),
             ),
             connected
-                ? ToneBadge('$kindName${s?.tokenHint?.isNotEmpty == true ? ' · …${s!.tokenHint}' : ''}', s?.pausedUntil != null ? Tone.warn : Tone.ok)
+                ? ToneBadge(
+                    '$kindName${s?.tokenHint?.isNotEmpty == true ? ' · …${s!.tokenHint}' : ''}',
+                    s?.pausedUntil != null ? Tone.warn : Tone.ok,
+                  )
                 : ToneBadge(l.wsNotConnected, Tone.gray),
           ],
         ),
@@ -248,7 +257,10 @@ class _ClaudeConnectState extends State<ClaudeConnect> {
                     ],
                   )
                 else
-                  OutlinedButton(onPressed: () => openLink(context, 'https://console.anthropic.com/settings/keys'), child: Text('${l.wsKeyOpen} ↗')),
+                  OutlinedButton(
+                    onPressed: () => openLink(context, 'https://console.anthropic.com/settings/keys'),
+                    child: Text('${l.wsKeyOpen} ↗'),
+                  ),
               ],
             ),
           ),
@@ -259,7 +271,10 @@ class _ClaudeConnectState extends State<ClaudeConnect> {
             autocorrect: false,
             enableSuggestions: false,
             style: const TextStyle(fontFamily: AgntsFonts.mono, fontSize: 14),
-            decoration: InputDecoration(labelText: l.wsToken, hintText: _kind == ClaudeConnectionInputKindEnum.subscription ? 'sk-ant-oat…' : 'sk-ant-api…'),
+            decoration: InputDecoration(
+              labelText: l.wsToken,
+              hintText: _kind == ClaudeConnectionInputKindEnum.subscription ? 'sk-ant-oat…' : 'sk-ant-api…',
+            ),
             onChanged: (_) => setState(() {}),
             onSubmitted: (_) => _submit(),
           ),

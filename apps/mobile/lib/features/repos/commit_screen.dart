@@ -73,7 +73,11 @@ class _CommitScreenState extends ConsumerState<CommitScreen> {
     }
     return Scaffold(
       appBar: DetailBar(backLabel: l.navBack, title: _short(widget.sha)),
-      body: AsyncBody<CommitDetail>(value: commit, onRefresh: () => ref.refresh(_commitProvider(_key).future), builder: (x) => _body(context, l, c, x)),
+      body: AsyncBody<CommitDetail>(
+        value: commit,
+        onRefresh: () => ref.refresh(_commitProvider(_key).future),
+        builder: (x) => _body(context, l, c, x),
+      ),
     );
   }
 
@@ -193,7 +197,8 @@ class _CommitScreenState extends ConsumerState<CommitScreen> {
                         children: [
                           Text(x.author, style: bold),
                           if (x.authorLogin?.isNotEmpty == true) Text('@${x.authorLogin}', style: hint),
-                          if (x.authorEmail?.isNotEmpty == true) Text(x.authorEmail!, style: hint.copyWith(fontFamily: AgntsFonts.mono, fontSize: 12)),
+                          if (x.authorEmail?.isNotEmpty == true)
+                            Text(x.authorEmail!, style: hint.copyWith(fontFamily: AgntsFonts.mono, fontSize: 12)),
                         ],
                       ),
                     ),
