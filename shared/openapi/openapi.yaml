@@ -4703,6 +4703,72 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /platform/users/{id}/fallback-limit:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: setFallbackLimit
+      summary: Set the most credits a person may spend on the fallback Muse provider (Baseten) per calendar month (Admin); null is the server's default, 0 is no limit
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [limit]
+              properties:
+                limit: { type: integer, format: int64, minimum: 0, maximum: 10000000, nullable: true, description: 'Credits per month (1 credit = $0.01 of model cost); 0 is no limit; null follows the server''s default' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreditUsage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /platform/muse-provider:
+    get:
+      operationId: getMuseProvider
+      summary: Where runs on agnts's Muse credits go, the fallback provider, and whether agnts's Meta account is out (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MuseProvider' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    put:
+      operationId: setMuseProvider
+      summary: Choose where runs on agnts's Muse credits go (Admin); agnts's Meta account is tried again from the next run
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mode]
+              properties:
+                mode: { $ref: '#/components/schemas/MuseProviderMode' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MuseProvider' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
   /platform/runs:
     get:
       operationId: listPlatformRuns
@@ -8936,6 +9002,28 @@ components:
         remaining: { type: integer, format: int64 }
         setAt: { type: string, format: date-time }
 
+    MuseProviderMode:
+      type: string
+      enum: [auto, primary, fallback]
+      description: 'auto: agnts''s Meta key, and the fallback while it is out of allowance or credit; primary: the Meta key only; fallback: the fallback only'
+
+    MuseProvider:
+      type: object
+      description: Where runs on agnts's Muse credits go. People's own Meta accounts are not affected.
+      required: [mode]
+      properties:
+        mode: { $ref: '#/components/schemas/MuseProviderMode' }
+        fallback:
+          type: object
+          description: The fallback provider; absent when the server has none (AGNTS_MUSE_FALLBACK_KEY)
+          required: [name, model]
+          properties:
+            name: { type: string, description: 'The host, e.g. baseten' }
+            model: { type: string, description: The model runs use there }
+        primaryOutUntil: { type: string, format: date-time, description: 'agnts''s Meta account ran out; in auto mode runs go to the fallback until then' }
+        primaryOutReason: { type: string }
+        setAt: { type: string, format: date-time, description: When an Admin last chose the mode }
+
     CreditUsage:
       type: object
       description: What a person spent on agnts's Muse key (free and bought credits together) and the monthly limit an Admin set (1 credit = $0.01)
@@ -8944,6 +9032,18 @@ components:
         monthLimit: { type: integer, format: int64, description: 'Credits per calendar month (UTC); 0 is no limit' }
         monthUsed: { type: integer, format: int64, description: Credits spent this calendar month }
         totalUsed: { type: integer, format: int64, description: Credits spent ever }
+        setAt: { type: string, format: date-time }
+        fallback: { $ref: '#/components/schemas/FallbackUsage' }
+
+    FallbackUsage:
+      type: object
+      description: A person's spend on the fallback Muse provider this month and their limit there (counted apart, and also within their monthly credit limit); absent without a fallback
+      required: [provider, monthLimit, monthUsed, isDefault]
+      properties:
+        provider: { type: string, description: 'e.g. baseten' }
+        monthLimit: { type: integer, format: int64, description: 'Credits per calendar month (UTC); 0 is no limit' }
+        monthUsed: { type: integer, format: int64 }
+        isDefault: { type: boolean, description: The server's default limit applies; an Admin has not set one }
         setAt: { type: string, format: date-time }
 
     StageModels:

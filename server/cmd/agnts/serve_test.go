@@ -31,3 +31,15 @@ func TestOwnerAuthor(t *testing.T) {
 		}
 	}
 }
+
+func TestProviderName(t *testing.T) {
+	for in, want := range map[string]string{
+		"https://inference.baseten.co/v1": "baseten",
+		"https://api.together.xyz:443/v1": "together",
+		"https://localhost/v1":            "localhost",
+	} {
+		if got := providerName(in); got != want {
+			t.Errorf("providerName(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

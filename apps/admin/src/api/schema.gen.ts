@@ -3797,6 +3797,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/users/{id}/fallback-limit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the most credits a person may spend on the fallback Muse provider (Baseten) per calendar month (Admin); null is the server's default, 0 is no limit */
+        put: operations["setFallbackLimit"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/muse-provider": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Where runs on agnts's Muse credits go, the fallback provider, and whether agnts's Meta account is out (Admin) */
+        get: operations["getMuseProvider"];
+        /** Choose where runs on agnts's Muse credits go (Admin); agnts's Meta account is tried again from the next run */
+        put: operations["setMuseProvider"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/runs": {
         parameters: {
             query?: never;
@@ -7231,6 +7268,33 @@ export interface components {
             /** Format: date-time */
             setAt?: string;
         };
+        /**
+         * @description auto: agnts's Meta key, and the fallback while it is out of allowance or credit; primary: the Meta key only; fallback: the fallback only
+         * @enum {string}
+         */
+        MuseProviderMode: "auto" | "primary" | "fallback";
+        /** @description Where runs on agnts's Muse credits go. People's own Meta accounts are not affected. */
+        MuseProvider: {
+            mode: components["schemas"]["MuseProviderMode"];
+            /** @description The fallback provider; absent when the server has none (AGNTS_MUSE_FALLBACK_KEY) */
+            fallback?: {
+                /** @description The host, e.g. baseten */
+                name: string;
+                /** @description The model runs use there */
+                model: string;
+            };
+            /**
+             * Format: date-time
+             * @description agnts's Meta account ran out; in auto mode runs go to the fallback until then
+             */
+            primaryOutUntil?: string;
+            primaryOutReason?: string;
+            /**
+             * Format: date-time
+             * @description When an Admin last chose the mode
+             */
+            setAt?: string;
+        };
         /** @description What a person spent on agnts's Muse key (free and bought credits together) and the monthly limit an Admin set (1 credit = $0.01) */
         CreditUsage: {
             /**
@@ -7248,6 +7312,23 @@ export interface components {
              * @description Credits spent ever
              */
             totalUsed: number;
+            /** Format: date-time */
+            setAt?: string;
+            fallback?: components["schemas"]["FallbackUsage"];
+        };
+        /** @description A person's spend on the fallback Muse provider this month and their limit there (counted apart, and also within their monthly credit limit); absent without a fallback */
+        FallbackUsage: {
+            /** @description e.g. baseten */
+            provider: string;
+            /**
+             * Format: int64
+             * @description Credits per calendar month (UTC); 0 is no limit
+             */
+            monthLimit: number;
+            /** Format: int64 */
+            monthUsed: number;
+            /** @description The server's default limit applies; an Admin has not set one */
+            isDefault: boolean;
             /** Format: date-time */
             setAt?: string;
         };
@@ -16524,6 +16605,92 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    setFallbackLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: int64
+                     * @description Credits per month (1 credit = $0.01 of model cost); 0 is no limit; null follows the server's default
+                     */
+                    limit: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreditUsage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMuseProvider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuseProvider"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    setMuseProvider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    mode: components["schemas"]["MuseProviderMode"];
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MuseProvider"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            501: components["responses"]["NotImplemented"];
         };
     };
     listPlatformRuns: {
