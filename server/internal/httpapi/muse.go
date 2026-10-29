@@ -19,6 +19,12 @@ type MuseService interface {
 	SetFree(ctx context.Context, user, limit, by int64) (musecredits.FreeCredits, error)
 	Usage(ctx context.Context, user int64) (musecredits.Usage, error)
 	SetLimit(ctx context.Context, user, limit, by int64) (musecredits.Usage, error)
+	SetFallbackLimit(ctx context.Context, user int64, limit *int64, by int64) (musecredits.Usage, error)
+	// Provider is where runs on agnts's credits go; SetProvider makes an
+	// Admin's choice (auto, primary, fallback) and tries agnts's Meta
+	// account again from the next run.
+	Provider(ctx context.Context) (musecredits.ProviderStatus, error)
+	SetProvider(ctx context.Context, mode string, by int64) (musecredits.ProviderStatus, error)
 }
 
 // ModelInfo describes a model listModels offers.
@@ -56,7 +62,11 @@ func toFreeCredits(f musecredits.FreeCredits) gen.FreeCredits {
 }
 
 func toCreditUsage(u musecredits.Usage) gen.CreditUsage {
-	return gen.CreditUsage{MonthLimit: u.MonthLimit, MonthUsed: u.MonthUsed, TotalUsed: u.TotalUsed, SetAt: u.SetAt}
+	out := gen.CreditUsage{MonthLimit: u.MonthLimit, MonthUsed: u.MonthUsed, TotalUsed: u.TotalUsed, SetAt: u.SetAt}
+	if f := u.Fallback; f != nil {
+		out.Fallback = &gen.FallbackUsage{Provider: f.Provider, MonthLimit: f.MonthLimit, MonthUsed: f.MonthUsed, IsDefault: f.Default, SetAt: f.SetAt}
+	}
+	return out
 }
 
 // StartMyMuseLogin implements gen.ServerInterface.
@@ -182,6 +192,29 @@ func (s *Server) SetCreditLimit(w http.ResponseWriter, r *http.Request, id int64
 	writeJSON(w, http.StatusOK, toCreditUsage(u))
 }
 
+// SetFallbackLimit implements gen.ServerInterface.
+func (s *Server) SetFallbackLimit(w http.ResponseWriter, r *http.Request, id int64) {
+	if s.museOff(w) {
+		return
+	}
+	var req gen.SetFallbackLimitJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	admin, _ := userFrom(r.Context())
+	u, err := s.opt.Muse.SetFallbackLimit(domain.System(r.Context()), id, req.Limit, admin.ID)
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		writeError(w, http.StatusNotFound, "not_found", "no such user")
+		return
+	case err != nil:
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, toCreditUsage(u))
+}
+
 // ListModels implements gen.ServerInterface.
 func (s *Server) ListModels(w http.ResponseWriter, r *http.Request) {
 	out := gen.ModelCatalog{Primary: gen.ModelCatalogPrimary(domain.PrimaryProvider())}
@@ -223,4 +256,53 @@ func (s *Server) models() []ModelInfo {
 		}
 	}
 	return out
+}
+
+func toMuseProvider(p musecredits.ProviderStatus) gen.MuseProvider {
+	out := gen.MuseProvider{Mode: gen.MuseProviderMode(p.Mode)}
+	if p.Fallback != "" {
+		out.Fallback = &struct {
+			Model string `json:"model"`
+			Name  string `json:"name"`
+		}{Model: p.FallbackModel, Name: p.Fallback}
+	}
+	if !p.OutUntil.IsZero() {
+		out.PrimaryOutUntil, out.PrimaryOutReason = &p.OutUntil, &p.OutReason
+	}
+	if !p.SetAt.IsZero() {
+		out.SetAt = &p.SetAt
+	}
+	return out
+}
+
+// GetMuseProvider implements gen.ServerInterface.
+func (s *Server) GetMuseProvider(w http.ResponseWriter, r *http.Request) {
+	if s.museOff(w) {
+		return
+	}
+	p, err := s.opt.Muse.Provider(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, toMuseProvider(p))
+}
+
+// SetMuseProvider implements gen.ServerInterface.
+func (s *Server) SetMuseProvider(w http.ResponseWriter, r *http.Request) {
+	if s.museOff(w) {
+		return
+	}
+	var req gen.SetMuseProviderJSONRequestBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	admin, _ := userFrom(r.Context())
+	p, err := s.opt.Muse.SetProvider(r.Context(), string(req.Mode), admin.ID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, toMuseProvider(p))
 }

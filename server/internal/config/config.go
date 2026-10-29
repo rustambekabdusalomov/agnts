@@ -149,6 +149,22 @@ type Config struct {
 	MusePlatformKey  string
 	MuseGlobalCapUSD float64
 	MusePrices       string
+	// MuseFallbackKey is a key for another host serving Muse Spark Open
+	// (AGNTS_MUSE_FALLBACK_KEY; Baseten's for the hackathon). Runs on
+	// credits move there while agnts's Meta account is out, or always,
+	// as an Admin chooses; empty turns that off. MuseFallbackURL is the
+	// host's OpenAI-compatible API (AGNTS_MUSE_FALLBACK_URL), and
+	// MuseFallbackModel the model runs use there (AGNTS_MUSE_FALLBACK_MODEL).
+	MuseFallbackKey   string
+	MuseFallbackURL   string
+	MuseFallbackModel string
+	// MuseFallbackUserLimit is the credits a person may spend on the
+	// fallback a calendar month unless an Admin set their own limit
+	// (AGNTS_MUSE_FALLBACK_USER_LIMIT, 0: no limit). MuseFallbackCapUSD is
+	// what all runs together may ever spend there, such as the host's
+	// credit (AGNTS_MUSE_FALLBACK_CAP_USD, 0: no cap).
+	MuseFallbackUserLimit int64
+	MuseFallbackCapUSD    float64
 
 	// Billing and credits.
 	// AnthropicAPIKey is agnts's own key, used for runs paid with credits
@@ -411,6 +427,15 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.MuseBinary = get("AGNTS_MUSE_BINARY", "muse")
 	c.MusePlatformKey = get("AGNTS_MUSE_PLATFORM_KEY", "")
 	c.MusePrices = get("AGNTS_MUSE_PRICES", "")
+	c.MuseFallbackKey = get("AGNTS_MUSE_FALLBACK_KEY", "")
+	c.MuseFallbackURL = get("AGNTS_MUSE_FALLBACK_URL", "https://inference.baseten.co/v1")
+	c.MuseFallbackModel = get("AGNTS_MUSE_FALLBACK_MODEL", "meta-models/muse-spark-open-1026")
+	if c.MuseFallbackUserLimit, err = strconv.ParseInt(get("AGNTS_MUSE_FALLBACK_USER_LIMIT", "500"), 10, 64); err != nil || c.MuseFallbackUserLimit < 0 {
+		errs = append(errs, errors.New("AGNTS_MUSE_FALLBACK_USER_LIMIT must be credits per month, 0 for no limit"))
+	}
+	if c.MuseFallbackCapUSD, err = strconv.ParseFloat(get("AGNTS_MUSE_FALLBACK_CAP_USD", "0"), 64); err != nil || c.MuseFallbackCapUSD < 0 {
+		errs = append(errs, errors.New("AGNTS_MUSE_FALLBACK_CAP_USD must be a dollar amount, 0 for no cap"))
+	}
 	if c.MuseGlobalCapUSD, err = strconv.ParseFloat(get("AGNTS_MUSE_GLOBAL_CAP_USD", "0"), 64); err != nil || c.MuseGlobalCapUSD < 0 {
 		errs = append(errs, errors.New("AGNTS_MUSE_GLOBAL_CAP_USD must be a dollar amount, 0 for no cap"))
 	}

@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import ChartLegend from '../../components/charts/ChartLegend.vue'
 import StackedBars from '../../components/charts/StackedBars.vue'
 import PageHeader from '../../components/PageHeader.vue'
-import { initialsOf, nameOf, perDay, useAgo, usePlatform, within } from '../../composables/usePlatform'
+import { initialsOf, nameOf, perDay, useAgo, useMuseProvider, usePlatform, within, type MuseProviderMode } from '../../composables/usePlatform'
 
 // The platform at a glance: people and workspaces, how fast they grow, and
 // what the server is running.
@@ -42,6 +42,12 @@ const growth = computed(() => [
 const recent = computed(() => [...us.value].sort((a, b) => (b.user.createdAt ?? '').localeCompare(a.user.createdAt ?? '')).slice(0, 6))
 
 const cap = computed(() => overview.data.value?.capacity)
+
+// Muse provider: where runs on agnts's credits go (absent without Muse).
+const { provider, setMode } = useMuseProvider()
+const MODES: MuseProviderMode[] = ['auto', 'primary', 'fallback']
+const mp = computed(() => provider.data.value)
+const outUntil = computed(() => (mp.value?.primaryOutUntil ? new Date(mp.value.primaryOutUntil).toLocaleString(locale.value) : ''))
 const gb = (mb: number) => `${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`
 </script>
 
@@ -103,6 +109,24 @@ const gb = (mb: number) => `${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`
           <div v-if="cap.diskFreeMb !== undefined" class="mini-kv"><span>{{ t('platform.disk') }}</span><b>{{ gb(cap.diskFreeMb) }}</b></div>
         </template>
         <p v-else class="empty">{{ t('common.loading') }}</p>
+      </section>
+
+      <section v-if="mp" class="card">
+        <div class="ch">
+          <div><h2>{{ t('platform.museProvider') }}</h2><p class="sub">{{ t('platform.museProviderSub') }}</p></div>
+          <span v-if="outUntil" class="badge b-warn">{{ t('platform.mpOut', { time: outUntil }) }}</span>
+        </div>
+        <div class="seg" role="group" :aria-label="t('platform.museProvider')">
+          <button
+            v-for="m in MODES" :key="m" type="button" class="seg-b" :aria-pressed="mp.mode === m"
+            :disabled="setMode.isPending.value || (m !== 'primary' && !mp.fallback)" @click="setMode.mutate(m)"
+          >
+            {{ t(`platform.mp_${m}`) }}
+          </button>
+        </div>
+        <p class="hint">{{ t(`platform.mpNote_${mp.mode}`, { name: mp.fallback?.name ?? '' }) }}</p>
+        <div v-if="mp.fallback" class="mini-kv"><span>{{ t('platform.mpFallback') }}</span><b class="mono">{{ mp.fallback.name }} · {{ mp.fallback.model }}</b></div>
+        <p v-else class="empty">{{ t('platform.mpNone') }}</p>
       </section>
 
       <section class="card">

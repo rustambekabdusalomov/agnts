@@ -107,6 +107,7 @@ type Runner struct {
 	// muse runs Muse Code; museBudgets limits runs on credits.
 	muse        *muse.Engine
 	museBudgets MuseBudgets
+	museFail    *muse.Failover
 	keepLogin   func(ctx context.Context, file []byte) error
 
 	netOnce sync.Once
@@ -295,7 +296,7 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		}
 		return nil, err
 	}
-	ws := &workspace{docker: r.docker, id: id, token: r.token, codexKey: r.codexKey, museEng: r.muse, museBudgets: r.museBudgets, keepLogin: r.keepLogin, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer, models: r.cfg.Models}
+	ws := &workspace{docker: r.docker, id: id, token: r.token, codexKey: r.codexKey, museEng: r.muse, museBudgets: r.museBudgets, museFail: r.museFail, keepLogin: r.keepLogin, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer, models: r.cfg.Models}
 	fail := func(err error) (orchestrator.Workspace, error) {
 		_ = ws.Close(context.WithoutCancel(ctx))
 		return nil, err
@@ -379,6 +380,7 @@ type workspace struct {
 	codexKey    func(ctx context.Context) (string, error)
 	museEng     *muse.Engine
 	museBudgets MuseBudgets
+	museFail    *muse.Failover
 	keepLogin   func(ctx context.Context, file []byte) error
 	memoryMB    int64
 	// network is the run's own network ("" on the shared one), removed

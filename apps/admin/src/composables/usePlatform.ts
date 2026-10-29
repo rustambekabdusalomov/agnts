@@ -24,6 +24,34 @@ export function usePlatform() {
   return { overview, workspaces, users }
 }
 
+export type MuseProvider = components['schemas']['MuseProvider']
+export type MuseProviderMode = components['schemas']['MuseProviderMode']
+
+/** Where runs on agnts's Muse credits go, and the Admin's switch for it.
+ * The query is off (undefined) on a server without Muse. */
+export function useMuseProvider() {
+  const session = useSession()
+  const qc = useQueryClient()
+  const { t } = useI18n()
+  const ui = useUi()
+  const provider = useQuery({
+    queryKey: ['platform', 'muse-provider'],
+    queryFn: () => unwrap(api.GET('/platform/muse-provider')),
+    enabled: computed(() => !!session.user?.isAdmin),
+    refetchInterval: 30_000,
+    retry: false,
+  })
+  const setMode = useMutation({
+    mutationFn: (mode: MuseProviderMode) => unwrap(api.PUT('/platform/muse-provider', { body: { mode } })),
+    onSuccess: (p) => {
+      qc.setQueryData(['platform', 'muse-provider'], p)
+      ui.notify(t('platform.mpSet', { mode: t(`platform.mp_${p.mode}`) }))
+    },
+    onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+  })
+  return { provider, setMode }
+}
+
 /** Every workspace on the platform; the same query (and cache) as usePlatform's. */
 export function usePlatformWorkspaces() {
   const session = useSession()

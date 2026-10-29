@@ -2,6 +2,7 @@ package main
 
 import (
 	muse "github.com/rustambekabdusalomov/agnts-muse"
+	"github.com/rustambekabdusalomov/agnts-muse/credential"
 	"github.com/rustambekabdusalomov/agnts-muse/model"
 
 	gitclient "github.com/go-git/go-git/v5/plumbing/transport/client"
@@ -201,7 +202,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Claude:       a.claude,
 		Queue:        a.orch,
 		Billing:      a.billing,
-		Muse:         museAPI{a.museCredits, a.museDevice},
+		Muse:         museAPI{a.museCredits, a.museDevice, a.museFailover},
 		EventLog:     a.store,
 		Cloud:        cfg.Cloud,
 		Google:       googleSignIn(cfg, acc),
@@ -377,6 +378,7 @@ type agent struct {
 	claude       *claude.Service
 	billing      *billing.Service
 	museCredits  *musecredits.Service
+	museFailover *muse.Failover // nil without a fallback provider
 	museDevice   *musecredits.Logins
 	budget       *orchestrator.MemoryBudget
 	network      *network.Service
@@ -431,7 +433,11 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.usage = usage.New(postgres.NewUsage(pool), a.store, log.With("component", "usage"))
 	conns := postgres.NewClaudeConnections(pool, box)
 	credits := postgres.NewCredits(pool)
-	a.museCredits = musecredits.New(musecredits.Config{RunCap: cfg.RunCreditCap, GlobalCapUSD: cfg.MuseGlobalCapUSD}, pool, credits)
+	mcfg := musecredits.Config{RunCap: cfg.RunCreditCap, GlobalCapUSD: cfg.MuseGlobalCapUSD}
+	if cfg.MuseFallbackKey != "" {
+		mcfg.Fallback, mcfg.FallbackUserLimit, mcfg.FallbackCapUSD = providerName(cfg.MuseFallbackURL), cfg.MuseFallbackUserLimit, cfg.MuseFallbackCapUSD
+	}
+	a.museCredits = musecredits.New(mcfg, pool, credits)
 	if err := a.museCredits.Migrate(context.Background()); err != nil {
 		return nil, fmt.Errorf("muse ledger: %w", err)
 	}
@@ -505,8 +511,18 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		return p.URL, p.Code, p.ExpiresAt, out, nil
 	}, a.claude, log.With("component", "muse-login"))
 	run.SetMuseLoginKeeper(a.claude.KeepMuseLogin)
-	run.SetMuse(muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
-		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}}), a.museCredits)
+	museEng := muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
+		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}})
+	run.SetMuse(museEng, a.museCredits)
+	if cfg.MuseFallbackKey != "" {
+		cred, err := credential.Hosted(cfg.MuseFallbackURL, cfg.MuseFallbackKey, "")
+		if err != nil {
+			return nil, fmt.Errorf("AGNTS_MUSE_FALLBACK_KEY / _URL: %w", err)
+		}
+		a.museFailover = &muse.Failover{Engine: museEng, Mode: a.museCredits.Mode,
+			Fallback: muse.Provider{Name: providerName(cfg.MuseFallbackURL), Credential: cred, Model: model.ID(cfg.MuseFallbackModel)}}
+		run.SetMuseFailover(a.museFailover)
+	}
 	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),
@@ -1303,7 +1319,38 @@ func (h gitHooks) CIRunFinished(ctx context.Context, run domain.CIRun) error {
 // museAPI serves the Muse operations: Meta sign-in and free credits.
 type museAPI struct {
 	*musecredits.Service
-	logins *musecredits.Logins
+	logins   *musecredits.Logins
+	failover *muse.Failover // nil without a fallback provider
+}
+
+func (m museAPI) Provider(ctx context.Context) (musecredits.ProviderStatus, error) {
+	pm, err := m.ProviderMode(ctx)
+	if err != nil {
+		return musecredits.ProviderStatus{}, err
+	}
+	st := musecredits.ProviderStatus{ProviderMode: pm}
+	if f := m.failover; f != nil {
+		st.Fallback, st.FallbackModel = f.Fallback.Name, string(f.Fallback.Model)
+		st.OutUntil, st.OutReason = f.OutUntil()
+	}
+	return st, nil
+}
+
+func (m museAPI) SetProvider(ctx context.Context, mode string, by int64) (musecredits.ProviderStatus, error) {
+	md, err := muse.ParseMode(mode)
+	if err != nil {
+		return musecredits.ProviderStatus{}, err
+	}
+	if md != muse.ModePrimary && m.failover == nil {
+		return musecredits.ProviderStatus{}, errors.New("this server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY)")
+	}
+	if _, err := m.SetProviderMode(ctx, md, by); err != nil {
+		return musecredits.ProviderStatus{}, err
+	}
+	if m.failover != nil {
+		m.failover.Reset()
+	}
+	return m.Provider(ctx)
 }
 
 func (m museAPI) StartLogin(ctx context.Context, ws, user int64) (musecredits.Login, error) {
@@ -1378,4 +1425,17 @@ func (t meetingTickets) CreateTask(ctx context.Context, in orchestrator.TaskInpu
 
 func (t meetingTickets) TicketByKey(ctx context.Context, key string) (domain.Ticket, error) {
 	return t.store.TicketByKey(ctx, key)
+}
+
+// providerName names a host for people and budget keys by its domain:
+// "https://inference.baseten.co/v1" is "baseten".
+func providerName(baseURL string) string {
+	host := strings.TrimPrefix(baseURL, "https://")
+	host, _, _ = strings.Cut(host, "/")
+	host, _, _ = strings.Cut(host, ":")
+	labels := strings.Split(host, ".")
+	if len(labels) >= 2 {
+		return labels[len(labels)-2]
+	}
+	return host
 }

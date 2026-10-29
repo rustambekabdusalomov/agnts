@@ -53,6 +53,7 @@ func TestMuseEvents(t *testing.T) {
 		{Kind: muse.EventApproval, Approval: &muse.Approval{Tool: "bash", Command: "git push", Allow: false, Rule: "no-push", Reason: "no"}},
 		{Kind: muse.EventApproval, Approval: &muse.Approval{Tool: "bash", Command: "ls", Allow: true}},
 		{Kind: muse.EventSettled, Receipt: &budget.Receipt{Charged: 5 * money.Cent, Released: 10 * money.Cent}},
+		{Kind: muse.EventFailover, Model: model.SparkOpen, Reason: "the primary ran out"},
 		{Kind: muse.EventDelta, Text: "streamed"},
 	} {
 		museEvent(e, 0.5, on)
@@ -61,7 +62,7 @@ func TestMuseEvents(t *testing.T) {
 	for i, e := range got {
 		kinds[i] = string(e.Kind)
 	}
-	want := "init tool tool_result text budget budget budget budget"
+	want := "init tool tool_result text budget budget budget budget budget"
 	if strings.Join(kinds, " ") != want {
 		t.Fatalf("kinds = %v, want %s", kinds, want)
 	}
@@ -74,6 +75,9 @@ func TestMuseEvents(t *testing.T) {
 	}
 	if got[5].Data["level"] != "warn" || !strings.Contains(got[6].Text, "no-push") {
 		t.Fatalf("steer/approval = %+v %+v", got[5], got[6])
+	}
+	if f := got[8]; f.Data["kind"] != "failover" || f.Data["level"] != "warn" || f.Data["model"] != string(model.SparkOpen) {
+		t.Fatalf("failover = %+v", f)
 	}
 }
 
