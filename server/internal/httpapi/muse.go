@@ -142,6 +142,20 @@ func (s *Server) GetMyFreeCredits(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, toFreeCredits(f))
 }
 
+// GetMyCreditUsage implements gen.ServerInterface.
+func (s *Server) GetMyCreditUsage(w http.ResponseWriter, r *http.Request) {
+	if s.museOff(w) {
+		return
+	}
+	u, _ := userFrom(r.Context())
+	cu, err := s.opt.Muse.Usage(r.Context(), u.ID)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toCreditUsage(cu))
+}
+
 // SetFreeCredits implements gen.ServerInterface.
 func (s *Server) SetFreeCredits(w http.ResponseWriter, r *http.Request, id int64) {
 	if s.museOff(w) {

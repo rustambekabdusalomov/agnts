@@ -15,6 +15,7 @@ Method | HTTP request | Description
 [**deleteMyClaude**](AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
 [**disableTotp**](AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
 [**getMyClaude**](AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
+[**getMyCreditUsage**](AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
 [**getMyFreeCredits**](AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
 [**getMyMuseLogin**](AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
 [**resendVerification**](AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
@@ -265,6 +266,47 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**ClaudeConnectionState**](ClaudeConnectionState.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getMyCreditUsage**
+> CreditUsage getMyCreditUsage()
+
+What you spent on agnts's Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAccountApi();
+
+try {
+    final response = api.getMyCreditUsage();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AccountApi->getMyCreditUsage: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**CreditUsage**](CreditUsage.md)
 
 ### Authorization
 

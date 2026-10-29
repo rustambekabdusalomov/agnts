@@ -49,6 +49,13 @@ void main() {
       // TODO
     });
 
+    // What you spent on agnts's Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+    //
+    //Future<CreditUsage> getMyCreditUsage() async
+    test('test getMyCreditUsage', () async {
+      // TODO
+    });
+
     // Free credits an Admin gave you; runs on agnts's Muse key spend them before your workspace's credits
     //
     //Future<FreeCredits> getMyFreeCredits() async
