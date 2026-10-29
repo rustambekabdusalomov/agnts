@@ -850,11 +850,17 @@ func (f workspaceFiles) RemoveWorkspace(ctx context.Context, ws int64) error {
 	return errors.Join(errs...)
 }
 
-// egressAllow is every workspace's allowed hosts: run containers share
-// the egress proxy.
+// egressAllow is every workspace's allowed hosts, and the Muse fallback's
+// host when there is one: run containers share the egress proxy.
 func (a *agent) egressAllow(ctx context.Context) ([]string, error) {
 	seen := map[string]bool{}
 	var out []string
+	if f := a.museFailover; f != nil {
+		if u, err := url.Parse(f.Fallback.Credential.BaseURL); err == nil && u.Hostname() != "" {
+			seen[u.Hostname()] = true
+			out = append(out, u.Hostname())
+		}
+	}
 	var firstErr error
 	a.forEachWorkspace(domain.System(ctx), func(ctx context.Context) {
 		s, err := a.settings.Get(ctx)
