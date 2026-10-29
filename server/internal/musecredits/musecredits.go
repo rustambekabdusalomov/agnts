@@ -43,14 +43,6 @@ type Config struct {
 	// GlobalCapUSD caps every workspace's spend on agnts's key together,
 	// per calendar month (0: no cap).
 	GlobalCapUSD float64
-	// Fallback names the fallback provider runs may move to (muse.Failover;
-	// "" without one). Its spend is limited apart: FallbackUserLimit is the
-	// credits a person may spend there a calendar month unless an Admin set
-	// their own limit (0: no limit), and FallbackCapUSD what all runs
-	// together may ever spend there, such as the host's credit (0: no cap).
-	Fallback          string
-	FallbackUserLimit int64
-	FallbackCapUSD    float64
 }
 
 // Spend reads a run's model spend so far (billing's store has it).
@@ -65,7 +57,6 @@ type Service struct {
 	ledger *pgledger.Ledger
 	spend  Spend
 	now    func() time.Time
-	modes  modeCache
 }
 
 // New returns the service. Call Migrate before use.
@@ -209,9 +200,6 @@ func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*
 	if room >= 0 && room < b.Limit {
 		b.Limit = room
 	}
-	if err := s.fallbackBudget(sys, b, acct.UserID); err != nil {
-		return nil, err
-	}
 	return b, nil
 }
 
@@ -232,21 +220,13 @@ func (s *Service) syncUserCap(ctx context.Context, user int64) (budget.AccountID
 	if err != nil {
 		return "", 0, 0, err
 	}
-	room, err := s.fillCap(ctx, acct, money.USD(limit)*CreditUSD-used, fmt.Sprintf("ucap:%s:%d:%d", acct, limit, int64(used)))
-	return acct, room, limit, err
-}
-
-// fillCap makes a cap account hold target (what its limit leaves after
-// the spend so far) and returns its available room. The deposit's key is
-// tag and the balance it corrects, so a sync happens once per change.
-func (s *Service) fillCap(ctx context.Context, acct budget.AccountID, target money.USD, tag string) (money.USD, error) {
 	cur, err := s.ledger.Balance(ctx, acct)
 	if err != nil {
-		return 0, err
+		return "", 0, 0, err
 	}
-	target = money.Max(target, 0)
+	target := money.Max(money.USD(limit)*CreditUSD-used, 0)
 	if delta := target - cur.Total; delta != 0 {
-		key := fmt.Sprintf("%s:%d", tag, int64(cur.Total))
+		key := fmt.Sprintf("ucap:%s:%d:%d:%d", acct, limit, int64(used), int64(cur.Total))
 		if _, err := s.ledger.Deposit(ctx, acct, delta, key); errors.Is(err, budget.ErrInsufficient) {
 			// Running holds reserve more than the lowered limit leaves:
 			// take what is free, so no new run starts.
@@ -254,11 +234,11 @@ func (s *Service) fillCap(ctx context.Context, acct budget.AccountID, target mon
 				_, _ = s.ledger.Deposit(ctx, acct, -b.Available, key+":partial")
 			}
 		} else if err != nil {
-			return 0, err
+			return "", 0, 0, err
 		}
 	}
 	b, err := s.ledger.Balance(ctx, acct)
-	return b.Available, err
+	return acct, b.Available, limit, err
 }
 
 // spentSince is what runs on agnts's key charged for a person since t,
@@ -285,8 +265,6 @@ type Usage struct {
 	TotalUsed  int64
 	SetBy      *int64
 	SetAt      *time.Time
-	// Fallback is their spend on the fallback provider (nil without one).
-	Fallback *FallbackUsage
 }
 
 // Usage returns a person's spend and monthly limit.
@@ -306,13 +284,6 @@ func (s *Service) Usage(ctx context.Context, user int64) (Usage, error) {
 		return u, err
 	}
 	u.MonthUsed, u.TotalUsed = toCredits(month), toCredits(total)
-	if s.cfg.Fallback != "" {
-		f, err := s.fallbackUsage(sys, user)
-		if err != nil {
-			return u, err
-		}
-		u.Fallback = &f
-	}
 	return u, nil
 }
 

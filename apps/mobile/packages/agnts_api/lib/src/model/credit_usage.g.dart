@@ -15,8 +15,6 @@ abstract class _$CreditUsageCWProxy {
 
   CreditUsage setAt(DateTime? setAt);
 
-  CreditUsage fallback(FallbackUsage? fallback);
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CreditUsage(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -28,7 +26,6 @@ abstract class _$CreditUsageCWProxy {
     int monthUsed,
     int totalUsed,
     DateTime? setAt,
-    FallbackUsage? fallback,
   });
 }
 
@@ -51,9 +48,6 @@ class _$CreditUsageCWProxyImpl implements _$CreditUsageCWProxy {
   CreditUsage setAt(DateTime? setAt) => this(setAt: setAt);
 
   @override
-  CreditUsage fallback(FallbackUsage? fallback) => this(fallback: fallback);
-
-  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CreditUsage(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -65,7 +59,6 @@ class _$CreditUsageCWProxyImpl implements _$CreditUsageCWProxy {
     Object? monthUsed = const $CopyWithPlaceholder(),
     Object? totalUsed = const $CopyWithPlaceholder(),
     Object? setAt = const $CopyWithPlaceholder(),
-    Object? fallback = const $CopyWithPlaceholder(),
   }) {
     return CreditUsage(
       monthLimit: monthLimit == const $CopyWithPlaceholder()
@@ -84,10 +77,6 @@ class _$CreditUsageCWProxyImpl implements _$CreditUsageCWProxy {
           ? _value.setAt
           // ignore: cast_nullable_to_non_nullable
           : setAt as DateTime?,
-      fallback: fallback == const $CopyWithPlaceholder()
-          ? _value.fallback
-          // ignore: cast_nullable_to_non_nullable
-          : fallback as FallbackUsage?,
     );
   }
 }
@@ -116,12 +105,6 @@ CreditUsage _$CreditUsageFromJson(Map<String, dynamic> json) =>
           'setAt',
           (v) => v == null ? null : DateTime.parse(v as String),
         ),
-        fallback: $checkedConvert(
-          'fallback',
-          (v) => v == null
-              ? null
-              : FallbackUsage.fromJson(v as Map<String, dynamic>),
-        ),
       );
       return val;
     });
@@ -132,5 +115,4 @@ Map<String, dynamic> _$CreditUsageToJson(CreditUsage instance) =>
       'monthUsed': instance.monthUsed,
       'totalUsed': instance.totalUsed,
       'setAt': ?instance.setAt?.toIso8601String(),
-      'fallback': ?instance.fallback?.toJson(),
     };

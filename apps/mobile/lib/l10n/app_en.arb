@@ -854,39 +854,6 @@
       }
     }
   },
-  "billingFallbackLimit": "{name}: {used} of {limit} credits used",
-  "@billingFallbackLimit": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "used": {
-        "type": "String"
-      },
-      "limit": {
-        "type": "String"
-      }
-    }
-  },
-  "billingFallbackNoLimit": "{name}: {used} credits used, no limit",
-  "@billingFallbackNoLimit": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "used": {
-        "type": "String"
-      }
-    }
-  },
-  "billingFallbackHint": "{name} is the backup provider: your runs use it only while agnts's Meta access is out. When this is used up, they wait for Meta instead.",
-  "@billingFallbackHint": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "briefTitle": "Repository brief",
   "briefSub": "How this code base works: architecture, recipes for common changes, files to copy, conventions and pitfalls. Every run of this repository's tickets reads it, so agnts builds things the way your team does.",
   "briefSurvey": "Survey",
@@ -6029,46 +5996,6 @@
       }
     }
   },
-  "platformMuseProvider": "Muse provider",
-  "platformMuseProviderSub": "Where runs on agnts's credits go. People's own Meta accounts are not affected.",
-  "platformMp_auto": "Auto",
-  "platformMp_primary": "Meta only",
-  "platformMp_fallback": "Fallback only",
-  "platformMpNote_auto": "agnts's Meta key. When it runs out, runs continue their session on {name}.",
-  "@platformMpNote_auto": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "platformMpNote_primary": "agnts's Meta key only. Runs stop when it runs out.",
-  "platformMpNote_fallback": "Every run on credits goes to {name}.",
-  "@platformMpNote_fallback": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "platformMpFallback": "Fallback",
-  "platformMpNone": "This server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY).",
-  "platformMpOut": "Meta is out until {time}",
-  "@platformMpOut": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "platformMpSet": "Runs on credits: {mode}",
-  "@platformMpSet": {
-    "placeholders": {
-      "mode": {
-        "type": "String"
-      }
-    }
-  },
   "platformLimitRemoved": "{name} has no monthly limit now",
   "@platformLimitRemoved": {
     "placeholders": {
@@ -6102,48 +6029,6 @@
     }
   },
   "platformLimitNone": "No limit: only their credits bound what they spend.",
-  "platformFbUsage": "{name}: {used}",
-  "@platformFbUsage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "used": {
-        "type": "String"
-      }
-    }
-  },
-  "platformFbUsed": "Spent on {name} this month: {used} credits ({amount}).",
-  "@platformFbUsed": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "used": {
-        "type": "String"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "platformFbUseDefault": "Use the server's default limit",
-  "platformFbField": "Credits per month on {name} (0 is no limit)",
-  "@platformFbField": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "platformFbHelp": "Counted only while agnts's Meta key is out and runs continue on {name}. When it is used up, their runs wait for Meta instead.",
-  "@platformFbHelp": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "platformUsageTotals": "This month: {used} credits ({amount}) across everyone; {limited} people have a limit.",
   "@platformUsageTotals": {
     "placeholders": {

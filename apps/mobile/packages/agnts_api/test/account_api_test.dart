@@ -49,7 +49,7 @@ void main() {
       // TODO
     });
 
-    // What you spent on agnts's Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+    // What you spent on agnts's Muse key this month and the monthly limit an Admin set
     //
     //Future<CreditUsage> getMyCreditUsage() async
     test('test getMyCreditUsage', () async {

@@ -477,7 +477,7 @@ _responseData = rawData == null ? null : deserialize<ClaudeConnectionState, Clau
     );
   }
 
-  /// What you spent on agnts&#39;s Muse key this month and the limits an Admin set, including your allowance on the fallback provider (Baseten)
+  /// What you spent on agnts&#39;s Muse key this month and the monthly limit an Admin set
   /// 
   ///
   /// Parameters:

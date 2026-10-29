@@ -24,13 +24,7 @@ Muse's session protocol (`muse serve`) inside each run container:
   one, runs use agnts's key (`AGNTS_MUSE_PLATFORM_KEY`) and are paid with
   credits: first the person's **free credits** (set by an Admin per person,
   0 by default; Admin → Users), then the workspace's bought credits, under a
-  monthly cap for the whole server (`AGNTS_MUSE_GLOBAL_CAP_USD`). When
-  agnts's Meta account is out, those runs continue their session on a
-  fallback host serving Muse Spark Open (`AGNTS_MUSE_FALLBACK_KEY`, Baseten);
-  an Admin picks auto, Meta only or fallback only (Admin → Dashboard).
-  Spend there is limited apart: per person a month
-  (`AGNTS_MUSE_FALLBACK_USER_LIMIT`, or their own limit in Admin → Users)
-  and for the whole server (`AGNTS_MUSE_FALLBACK_CAP_USD`).
+  monthly cap for the whole server (`AGNTS_MUSE_GLOBAL_CAP_USD`).
 
 agnts-muse sits beside this repository (`../agnts-muse`, see
 `server/go.mod`); the server image builds with

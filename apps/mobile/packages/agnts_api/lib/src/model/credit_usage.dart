@@ -3,7 +3,6 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:agnts_api/src/model/fallback_usage.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -28,8 +27,6 @@ class CreditUsage {
     required  this.totalUsed,
 
      this.setAt,
-
-     this.fallback,
   });
 
       /// Credits per calendar month (UTC); 0 is no limit
@@ -83,18 +80,6 @@ class CreditUsage {
 
 
 
-  @JsonKey(
-    
-    name: r'fallback',
-    required: false,
-    includeIfNull: false,
-  )
-
-
-  final FallbackUsage? fallback;
-
-
-
 
 
     @override
@@ -102,16 +87,14 @@ class CreditUsage {
       other.monthLimit == monthLimit &&
       other.monthUsed == monthUsed &&
       other.totalUsed == totalUsed &&
-      other.setAt == setAt &&
-      other.fallback == fallback;
+      other.setAt == setAt;
 
     @override
     int get hashCode =>
         monthLimit.hashCode +
         monthUsed.hashCode +
         totalUsed.hashCode +
-        setAt.hashCode +
-        fallback.hashCode;
+        setAt.hashCode;
 
   factory CreditUsage.fromJson(Map<String, dynamic> json) => _$CreditUsageFromJson(json);
 

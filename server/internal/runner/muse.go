@@ -59,12 +59,6 @@ func (r *Runner) SetMuse(eng *muse.Engine, budgets MuseBudgets) {
 	r.muse, r.museBudgets = eng, budgets
 }
 
-// SetMuseFailover moves runs on agnts's credits to f's fallback provider
-// while agnts's Meta account is out, or as an Admin chose (nil: they stay
-// on agnts's key). Runs on a person's own Meta account never move: Meta
-// bills and limits those for them.
-func (r *Runner) SetMuseFailover(f *muse.Failover) { r.museFail = f }
-
 // SetMuseLoginKeeper sets what saves a Muse login that Muse refreshed
 // during a run (the account is in ctx).
 func (r *Runner) SetMuseLoginKeeper(fn func(ctx context.Context, file []byte) error) {
@@ -119,18 +113,12 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 		defer cancel()
 	}
 	id := museModel(req.Model)
-	run := w.museEng.Run
-	secrets := append(cred.Secrets(), envValues(req.Env)...)
-	if b != nil && w.museFail != nil { // on agnts's credits: may move to the fallback
-		run = w.museFail.Run
-		secrets = append(secrets, w.museFail.Fallback.Credential.Secrets()...)
-	}
-	onEvent = maskEvents(domain.NewSecretRedactor(secrets...), onEvent)
+	onEvent = maskEvents(domain.NewSecretRedactor(append(cred.Secrets(), envValues(req.Env)...)...), onEvent)
 	limit := 0.0
 	if b != nil {
 		limit = b.Limit.Float()
 	}
-	res, err := run(ctx, muse.Request{
+	res, err := w.museEng.Run(ctx, muse.Request{
 		Prompt: req.Prompt, Workdir: workDir, Model: id, Effort: req.Effort, SessionID: req.Resume,
 		Budget: b, AnnounceBudget: b != nil && b.Limit > 0, Credential: &cred, AuthPath: museAuthPath,
 		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns, ExtraRoots: []string{outDir}, Steer: req.Steer, Ask: ask,
@@ -144,10 +132,6 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 	if res.Model == "" {
 		out.Model = orchestrator.MusePrefix + string(id)
 	}
-	if errors.Is(err, muse.ErrFallbackLimit) {
-		onEvent(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeBudget, Text: "the fallback provider is not available to this run: " +
-			"its monthly limit there (or the server's total) is used up", Data: map[string]any{"kind": "failover", "level": "warn"}})
-	}
 	var rl *muse.RateLimitError
 	switch {
 	case err == nil:
@@ -160,7 +144,7 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 	case errors.Is(err, muse.ErrStepLimit):
 		out.IsError, out.Subtype = true, "error_max_turns"
 		return out, nil
-	case errors.Is(err, muse.ErrRunLimit), errors.Is(err, muse.ErrBudget), errors.Is(err, muse.ErrFallbackLimit):
+	case errors.Is(err, muse.ErrRunLimit), errors.Is(err, muse.ErrBudget):
 		out.IsError, out.Subtype = true, "error_budget"
 		return out, fmt.Errorf("stopped inside its credit budget: %w", err)
 	case errors.Is(err, context.DeadlineExceeded):
@@ -234,8 +218,6 @@ func museEvent(e muse.Event, limit float64, on func(orchestrator.ClaudeEvent)) {
 		budget("escalate", "moved to "+string(e.Model)+": "+e.Reason, "info", map[string]any{"model": string(e.Model)})
 	case muse.EventContinue:
 		budget("continue", e.Reason, "warn", nil)
-	case muse.EventFailover:
-		budget("failover", "continuing on the fallback provider ("+string(e.Model)+"): "+e.Reason, "warn", map[string]any{"model": string(e.Model)})
 	case muse.EventInterrupt:
 		budget("stop", "stopped: "+e.Reason, "warn", nil)
 	case muse.EventApproval:
