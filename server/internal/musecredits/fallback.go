@@ -14,19 +14,26 @@ import (
 	"agnts/internal/domain"
 )
 
-// Spend on the fallback provider is limited apart from agnts's Meta key:
-// a person's monthly allowance there (fcap:user:<id>:<YYYY-MM>) and the
-// fallback's total for the whole server (fcap:platform). Both are cap
-// accounts that muse.Failover adds to a run's caps only when it moves to
-// the fallback (muse.Budget.FallbackCaps), so spend on Meta never uses
-// them up. A fallback run's hold key ends in ":" + the provider's name,
+// Spend on the fallback provider (Baseten's prepaid hackathon credit) is
+// the platform's cost, not people's: the platform account
+// platform:fallback pays for it (muse.Budget.FallbackPayers), holding what
+// is left of AGNTS_MUSE_FALLBACK_CAP_USD, so no one's free credits or
+// wallet are charged and billing leaves it out (FreeChargedUSD). What a
+// person may use there is limited by a monthly allowance, a cap account
+// (fcap:user:<id>:<YYYY-MM>) that only spend on the fallback counts
+// against. A fallback run's hold key ends in ":" + the provider's name,
 // which is how its spend is counted.
 
 func (s *Service) userFallbackCap(user int64) budget.AccountID {
 	return budget.AccountID("fcap:user:" + strconv.FormatInt(user, 10) + ":" + s.now().UTC().Format("2006-01"))
 }
 
-const platformFallbackCap budget.AccountID = "fcap:platform"
+// platformFallback pays for every run's spend on the fallback.
+const platformFallback budget.AccountID = "platform:fallback"
+
+// unlimitedFallback is what platformFallback holds when the server sets no
+// cap: far beyond any month's runs.
+const unlimitedFallback = 1_000_000 * money.Dollar
 
 // FallbackUsage is what a person spent on the fallback provider this
 // month and their limit there, in credits.
@@ -43,56 +50,70 @@ type FallbackUsage struct {
 	spent money.USD // MonthUsed exactly
 }
 
-// fallbackBudget limits what a run may spend on the fallback: the
-// person's monthly room there and what is left of the server's total.
-// With no room left, the run may not move (muse.ErrFallbackLimit).
+// fallbackBudget makes the platform pay for a run's spend on the
+// fallback, within the person's monthly room there and what is left of
+// the server's total. With no room left, the run may not move there
+// (muse.ErrFallbackLimit).
 func (s *Service) fallbackBudget(ctx context.Context, b *muse.Budget, user int64) error {
-	if s.cfg.Fallback == "" {
-		return nil
+	room, limited, caps, err := s.fallbackRoom(ctx, user)
+	if err != nil || s.cfg.Fallback == "" {
+		return err
 	}
-	limited, room := false, money.USD(0)
-	narrow := func(left money.USD) {
-		if !limited || left < room {
-			room = left
-		}
-		limited = true
-	}
-	if user > 0 {
-		f, err := s.fallbackUsage(ctx, user)
-		if err != nil {
-			return err
-		}
-		if f.MonthLimit > 0 {
-			acct := s.userFallbackCap(user)
-			used := f.spent
-			left, err := s.fillCap(ctx, acct, money.USD(f.MonthLimit)*CreditUSD-used, fmt.Sprintf("fcap:%s:%d:%d", acct, f.MonthLimit, int64(used)))
-			if err != nil {
-				return err
-			}
-			b.FallbackCaps = append(b.FallbackCaps, acct)
-			narrow(left)
-		}
-	}
-	if s.cfg.FallbackCapUSD > 0 {
-		used, err := s.fallbackSpent(ctx, "ws:%:run:%", time.Time{})
-		if err != nil {
-			return err
-		}
-		capUSD := money.Dollars(s.cfg.FallbackCapUSD)
-		left, err := s.fillCap(ctx, platformFallbackCap, capUSD-used, fmt.Sprintf("fcap:%s:%d:%d", platformFallbackCap, int64(capUSD), int64(used)))
-		if err != nil {
-			return err
-		}
-		b.FallbackCaps = append(b.FallbackCaps, platformFallbackCap)
-		narrow(left)
-	}
+	b.FallbackPayers, b.FallbackCaps = []budget.AccountID{platformFallback}, caps
 	switch {
-	case limited && room <= 0:
+	case room <= 0:
 		b.FallbackLimit = -1
 	case limited:
 		b.FallbackLimit = room
 	}
 	return nil
+}
+
+// fallbackRoom syncs the platform's fallback account and the person's
+// allowance, and returns what they may still spend there (limited is
+// false when only the platform's account bounds it) and their caps.
+func (s *Service) fallbackRoom(ctx context.Context, user int64) (room money.USD, limited bool, caps []budget.AccountID, err error) {
+	if s.cfg.Fallback == "" {
+		return 0, false, nil, nil
+	}
+	used, err := s.fallbackSpent(ctx, "ws:%:run:%", time.Time{})
+	if err != nil {
+		return 0, false, nil, err
+	}
+	target := unlimitedFallback
+	if s.cfg.FallbackCapUSD > 0 {
+		target, limited = money.Dollars(s.cfg.FallbackCapUSD)-used, true
+	}
+	if room, err = s.fillCap(ctx, platformFallback, target, fmt.Sprintf("fpay:%d:%d", int64(target+used), int64(used))); err != nil {
+		return 0, false, nil, err
+	}
+	if user > 0 {
+		f, err := s.fallbackUsage(ctx, user)
+		if err != nil {
+			return 0, false, nil, err
+		}
+		if f.MonthLimit > 0 {
+			acct := s.userFallbackCap(user)
+			left, err := s.fillCap(ctx, acct, money.USD(f.MonthLimit)*CreditUSD-f.spent, fmt.Sprintf("fcap:%s:%d:%d", acct, f.MonthLimit, int64(f.spent)))
+			if err != nil {
+				return 0, false, nil, err
+			}
+			caps = append(caps, acct)
+			room, limited = money.Min(room, left), true
+		}
+	}
+	return room, limited, caps, nil
+}
+
+// FallbackAvailable is claude.Config.Fallback: whether a person's runs may
+// use the fallback provider now (one is configured, an Admin has not
+// chosen Meta only, and the person and the server have room left there).
+func (s *Service) FallbackAvailable(ctx context.Context, user int64) bool {
+	if s.cfg.Fallback == "" || s.Mode() == muse.ModePrimary {
+		return false
+	}
+	room, _, _, err := s.fallbackRoom(domain.System(ctx), user)
+	return err == nil && room > 0
 }
 
 // fallbackSpent is what runs whose hold key starts with prefix (a LIKE

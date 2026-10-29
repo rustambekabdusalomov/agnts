@@ -6,8 +6,8 @@ import { api, unwrap } from '../../api/client'
 
 // The person's own limits on agnts's Muse key this month: the monthly
 // limit an Admin may set, and their allowance on the fallback provider
-// (Baseten), which runs use only while agnts's Meta key is out. Shown when
-// either applies (1 credit = $0.01).
+// (Baseten), free to them, which runs use while their own Meta account or
+// agnts's is at its limit. Shown when either applies (1 credit = $0.01).
 const { t } = useI18n()
 const usage = useQuery({ queryKey: ['credit-usage'], queryFn: () => unwrap(api.GET('/account/credit-usage')) })
 const u = computed(() => usage.data.value)

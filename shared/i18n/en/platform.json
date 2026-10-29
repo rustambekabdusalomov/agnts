@@ -140,7 +140,7 @@
     "fbUsed": "Spent on {name} this month: {used} credits ({amount}).",
     "fbUseDefault": "Use the server's default limit",
     "fbField": "Credits per month on {name} (0 is no limit)",
-    "fbHelp": "Counted only while agnts's Meta key is out and runs continue on {name}. When it is used up, their runs wait for Meta instead.",
+    "fbHelp": "Free for them: runs use {name} when their own Meta account or agnts's is at its limit. When it is used up, their runs continue on credits.",
     "usageTotals": "This month: {used} credits ({amount}) across everyone; {limited} people have a limit."
   }
 }

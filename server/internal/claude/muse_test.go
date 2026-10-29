@@ -93,3 +93,39 @@ func TestCheckMuseKinds(t *testing.T) {
 		t.Fatal("an empty sign-in is refused")
 	}
 }
+
+// TestPickMusePrefersFallback starts a person's runs on the backup
+// provider when their own Meta account is at its limit and they have room
+// there, before free credits and without the workspace's credits; only an
+// account that is out moves there, not one that was never connected.
+func TestPickMusePrefersFallback(t *testing.T) {
+	withMuse(t)
+	ctx := context.Background()
+	conns := newConns()
+	paused := map[int64]bool{}
+	room := map[int64]bool{1: true}
+	s := New(Config{MuseKey: "LLM_platformkey0123456789", Free: func(context.Context, int64) bool { return true },
+		Fallback: func(_ context.Context, u int64) bool { return room[u] }},
+		conns, fakeUsage{paused: paused}, fakeSettings{}, fakeUsers{})
+	w := domain.Workspace{ID: 7, OwnerID: 1, ClaudeMode: domain.ClaudeShared}
+	conns.add(7, 0, 11, postgres.MuseLogin)
+
+	if a, _, _, _ := s.Pick(ctx, w, nil); a.Credits || a.PreferFallback {
+		t.Fatalf("own account fine: %+v", a)
+	}
+	paused[11] = true
+	if a, ok, _, _ := s.Pick(ctx, w, nil); !ok || !a.Credits || !a.PreferFallback || a.UserID != 1 {
+		t.Fatalf("own account out: %+v %v", a, ok)
+	}
+	// No room on the backup: free credits, as before.
+	room[1] = false
+	if a, _, _, _ := s.Pick(ctx, w, nil); a.PreferFallback || a.Label != "free credits" {
+		t.Fatalf("no backup room: %+v", a)
+	}
+	// Never connected: runs on credits start on Meta, as before.
+	room[1] = true
+	s.conns = newConns()
+	if a, _, _, _ := s.Pick(ctx, w, nil); a.PreferFallback {
+		t.Fatalf("not connected: %+v", a)
+	}
+}
