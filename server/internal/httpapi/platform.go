@@ -275,6 +275,12 @@ func (s *Server) ListPlatformUsers(w http.ResponseWriter, r *http.Request) {
 				p.CreditUsage = &c
 			}
 		}
+		if s.opt.Modules != nil {
+			if um, err := s.opt.Modules.User(ctx, u.ID); err == nil {
+				m := toUserModules(um)
+				p.Modules = &m
+			}
+		}
 		out = append(out, p)
 	}
 	writeJSON(w, http.StatusOK, out)

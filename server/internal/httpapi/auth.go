@@ -189,7 +189,12 @@ func toUser(u domain.User) gen.User {
 // and the one they opened last.
 func (s *Server) userView(ctx context.Context, u domain.User, withWorkspaces bool) gen.User {
 	out := toUser(u)
-	if !withWorkspaces || s.opt.Workspaces == nil {
+	if !withWorkspaces {
+		return out
+	}
+	mods := toModules(s.accessOf(ctx, u.ID).Modules)
+	out.Modules = &mods
+	if s.opt.Workspaces == nil {
 		return out
 	}
 	ws, err := s.opt.Workspaces.Of(ctx, u.ID)

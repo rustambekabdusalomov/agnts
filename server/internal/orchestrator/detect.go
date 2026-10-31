@@ -108,7 +108,7 @@ func mergeDetection(base toolchain.Detection, f detectFile) toolchain.Detection 
 		}
 		t.Source = "claude"
 		if err := t.Validate(); err != nil {
-			out.Notes = append(out.Notes, domain.ToolName()+" suggested "+t.Spec()+", which was left out: "+err.Error())
+			out.Notes = append(out.Notes, domain.ToolName(domain.DefaultAccess())+" suggested "+t.Spec()+", which was left out: "+err.Error())
 			continue
 		}
 		if have[t.Tool] || len(out.Toolchains) >= domain.MaxToolchains {

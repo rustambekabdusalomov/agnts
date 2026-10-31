@@ -65,6 +65,10 @@ func (s *Server) StartMyMuseLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u, _ := userFrom(r.Context())
+	if !s.accessOf(r.Context(), u.ID).Allows(domain.ProviderMuse) {
+		writeError(w, http.StatusForbidden, "module_disabled", "Muse is not enabled for you; ask an Admin")
+		return
+	}
 	l, err := s.opt.Muse.StartLogin(r.Context(), 0, u.ID)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "muse_login", err.Error())
@@ -93,6 +97,10 @@ func (s *Server) StartWorkspaceMuseLogin(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	m, _ := memberFrom(r.Context())
+	if !s.moduleEnabled(r.Context(), domain.ProviderMuse) {
+		writeError(w, http.StatusForbidden, "module_disabled", "Muse is not enabled on this server")
+		return
+	}
 	l, err := s.opt.Muse.StartLogin(r.Context(), m.w.ID, 0)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "muse_login", err.Error())
@@ -196,13 +204,19 @@ func (s *Server) SetCreditLimit(w http.ResponseWriter, r *http.Request, id int64
 	writeJSON(w, http.StatusOK, toCreditUsage(u))
 }
 
-// ListModels implements gen.ServerInterface.
+// ListModels implements gen.ServerInterface: the modules and models the
+// viewer may use.
 func (s *Server) ListModels(w http.ResponseWriter, r *http.Request) {
-	out := gen.ModelCatalog{Primary: gen.ModelCatalogPrimary(domain.PrimaryProvider())}
-	for _, p := range domain.EnabledProviders() {
+	a := s.viewerAccess(r.Context())
+	primary := a.Primary()
+	if primary == "" {
+		primary = domain.DefaultAccess().Primary()
+	}
+	out := gen.ModelCatalog{Primary: gen.ModelCatalogPrimary(primary), Providers: []gen.ModelCatalogProviders{}, Models: nil}
+	for _, p := range a.Modules {
 		out.Providers = append(out.Providers, gen.ModelCatalogProviders(p))
 	}
-	for _, m := range s.models() {
+	for _, m := range s.models(a) {
 		row := struct {
 			Id                  gen.Model                      `json:"id"`
 			InputPerMillionUSD  *float32                       `json:"inputPerMillionUSD,omitempty"`
@@ -220,10 +234,10 @@ func (s *Server) ListModels(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
-// models lists the models of the enabled providers.
-func (s *Server) models() []ModelInfo {
+// models lists the models of the modules a person with access a may use.
+func (s *Server) models(a domain.Access) []ModelInfo {
 	var out []ModelInfo
-	for _, p := range domain.EnabledProviders() {
+	for _, p := range a.Modules {
 		switch p {
 		case domain.ProviderMuse:
 			out = append(out,

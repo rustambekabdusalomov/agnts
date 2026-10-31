@@ -39,8 +39,9 @@ type SwaggerTests interface {
 // verdicts.
 const SwaggerTurns = 60
 
-// SwaggerModel is the model every Swagger test runs on.
-func SwaggerModel() string { return domain.LightModel() }
+// SwaggerModel is the model every Swagger test of a person with access a
+// runs on.
+func SwaggerModel(a domain.Access) string { return domain.LightModel(a) }
 
 // swaggerData is the Swagger test prompt's data.
 type swaggerData struct {
@@ -133,7 +134,7 @@ func (o *Orchestrator) swaggerRun(ctx context.Context, s domain.Settings, t doma
 	}
 	if domain.IsCodex(s.ModelFor(t, domain.ModelCoding)) {
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventGuard,
-			Message: "Swagger tests always run on " + domain.ToolName() + ": the credential and API protections depend on agnts-guard, which Codex runs do not have"})
+			Message: "Swagger tests always run on " + domain.ToolName(domain.AccessOf(ctx)) + ": the credential and API protections depend on agnts-guard, which Codex runs do not have"})
 	}
 	ws, err := o.openWorkspace(ctx, t, rs, run)
 	if err != nil {
@@ -171,7 +172,7 @@ func (o *Orchestrator) swaggerRun(ctx context.Context, s domain.Settings, t doma
 	if tc.Models == nil {
 		tc.Models = map[string]string{}
 	}
-	tc.Models[domain.ModelCoding], tc.Models[domain.ModelRetry] = SwaggerModel(), SwaggerModel()
+	tc.Models[domain.ModelCoding], tc.Models[domain.ModelRetry] = SwaggerModel(s.Access), SwaggerModel(s.Access)
 	if _, err := o.claudeTurns(ctx, s, ws, &tc, run, domain.ModelCoding, b.String(), "", SwaggerTurns); err != nil {
 		return err
 	}

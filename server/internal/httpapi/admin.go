@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"agnts/internal/admin"
@@ -75,6 +76,13 @@ func (s *Server) SetTicketModels(w http.ResponseWriter, r *http.Request, key gen
 	}
 	if req.Review != nil {
 		m[domain.ModelReview] = *req.Review
+	}
+	a := s.viewerAccess(r.Context())
+	for _, x := range m {
+		if x != "" && x != domain.ModelAuto && domain.ValidModel(x) && !a.Allows(domain.ProviderOf(x)) {
+			writeError(w, http.StatusBadRequest, "bad_request", domain.ModuleName(domain.ProviderOf(x))+" is not enabled for you: pick one of "+strings.Join(domain.AvailableModels(a), ", "))
+			return
+		}
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.SetModels(ctx, key, m, origin(r))
@@ -642,6 +650,10 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		v.CI = domain.CISettings{AutoFix: c.AutoFix, MaxAutoPerDay: c.MaxAutoPerDay, RetryFlaky: c.RetryFlaky,
 			FeedbackRounds: c.FeedbackRounds, InfraPatterns: c.InfraPatterns}
 	}
+	if err := v.CheckModels(s.viewerAccess(r.Context()), cur); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), v, origin(r))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
@@ -976,6 +988,10 @@ func (s *Server) ConnectIntegration(w http.ResponseWriter, r *http.Request, prov
 	hook := ""
 	if req.WebhookSecret != nil {
 		hook = *req.WebhookSecret
+	}
+	if provider == "openai" && !s.moduleEnabled(r.Context(), domain.ProviderCodex) {
+		writeError(w, http.StatusForbidden, "module_disabled", "Codex is not enabled on this server, so it needs no OpenAI key")
+		return
 	}
 	v, secret, err := s.opt.Admin.Integrations.Connect(r.Context(), string(provider), req.Token, settings, hook, origin(r))
 	if err != nil {

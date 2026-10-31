@@ -73,9 +73,9 @@ Class | Method | HTTP request | Description
 [*AccountApi*](doc/AccountApi.md) | [**beginTotp**](doc/AccountApi.md#begintotp) | **POST** /account/totp/setup | Start turning on two-factor sign-in (a new secret, not saved yet)
 [*AccountApi*](doc/AccountApi.md) | [**changePassword**](doc/AccountApi.md#changepassword) | **PUT** /account/password | Change the password
 [*AccountApi*](doc/AccountApi.md) | [**confirmTotp**](doc/AccountApi.md#confirmtotp) | **POST** /account/totp/confirm | Turn two-factor sign-in on with a code from the new secret
-[*AccountApi*](doc/AccountApi.md) | [**deleteMyClaude**](doc/AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
+[*AccountApi*](doc/AccountApi.md) | [**deleteMyClaude**](doc/AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude or Muse account
 [*AccountApi*](doc/AccountApi.md) | [**disableTotp**](doc/AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
-[*AccountApi*](doc/AccountApi.md) | [**getMyClaude**](doc/AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
+[*AccountApi*](doc/AccountApi.md) | [**getMyClaude**](doc/AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude or Muse connection (used by workspaces in per-member mode)
 [*AccountApi*](doc/AccountApi.md) | [**getMyCreditUsage**](doc/AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the monthly limit an Admin set
 [*AccountApi*](doc/AccountApi.md) | [**getMyFreeCredits**](doc/AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
 [*AccountApi*](doc/AccountApi.md) | [**getMyMuseLogin**](doc/AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
@@ -254,6 +254,7 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**createPlatformAdmin**](doc/PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**deletePlatformAdmin**](doc/PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**downloadPlatformRun**](doc/PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
+[*PlatformApi*](doc/PlatformApi.md) | [**getModulesSettings**](doc/PlatformApi.md#getmodulessettings) | **GET** /platform/settings/modules | Which coding modules the server offers, and the default for new users (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformOverview**](doc/PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRun**](doc/PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRunPrompt**](doc/PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
@@ -267,7 +268,9 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**listPlatformWorkspaces**](doc/PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**setCreditLimit**](doc/PlatformApi.md#setcreditlimit) | **PUT** /platform/users/{id}/credit-limit | Set the most credits a person may spend on agnts&#39;s Muse key per calendar month, free and bought together (Admin); 0 is no limit
 [*PlatformApi*](doc/PlatformApi.md) | [**setFreeCredits**](doc/PlatformApi.md#setfreecredits) | **PUT** /platform/users/{id}/free-credits | Set how many free credits a person may spend on agnts&#39;s Muse key (Admin); 0 gives none
+[*PlatformApi*](doc/PlatformApi.md) | [**setModulesSettings**](doc/PlatformApi.md#setmodulessettings) | **PUT** /platform/settings/modules | Choose which coding modules the server offers, and the default for new users (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**setRunHistorySettings**](doc/PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**setUserModules**](doc/PlatformApi.md#setusermodules) | **PUT** /platform/users/{id}/modules | Set which coding modules a person may use, the default first (Admin); null follows the general default
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformFeedback**](doc/PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformUser**](doc/PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
 [*PlatformApi*](doc/PlatformApi.md) | [**updatePlatformWorkspace**](doc/PlatformApi.md#updateplatformworkspace) | **PUT** /platform/workspaces/{id} | Change a workspace&#39;s plan, slots, member limit, or suspend it (Admin)
@@ -333,7 +336,7 @@ Class | Method | HTTP request | Description
 [*RulesApi*](doc/RulesApi.md) | [**tryEnforce**](doc/RulesApi.md#tryenforce) | **POST** /rules/try | Check an enforcement against agnts&#39;s last changes before turning it on
 [*RulesApi*](doc/RulesApi.md) | [**updateRule**](doc/RulesApi.md#updaterule) | **PUT** /rules/{id} | Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
 [*SettingsApi*](doc/SettingsApi.md) | [**getSettings**](doc/SettingsApi.md#getsettings) | **GET** /settings | 
-[*SettingsApi*](doc/SettingsApi.md) | [**listModels**](doc/SettingsApi.md#listmodels) | **GET** /models | The coding tools and models this server offers
+[*SettingsApi*](doc/SettingsApi.md) | [**listModels**](doc/SettingsApi.md#listmodels) | **GET** /models | The coding modules and models you may use
 [*SettingsApi*](doc/SettingsApi.md) | [**putSettings**](doc/SettingsApi.md#putsettings) | **PUT** /settings | 
 [*SwaggerApi*](doc/SwaggerApi.md) | [**createSwaggerSuite**](doc/SwaggerApi.md#createswaggersuite) | **POST** /swagger-suites | Keep a Swagger test ticket&#39;s test as a suite that runs again on a schedule or after each deploy
 [*SwaggerApi*](doc/SwaggerApi.md) | [**createSwaggerTest**](doc/SwaggerApi.md#createswaggertest) | **POST** /swagger-tests | Create a Swagger test ticket; it starts at once (no analysis) unless start is queue
@@ -399,10 +402,10 @@ Class | Method | HTTP request | Description
 [*UsageApi*](doc/UsageApi.md) | [**refreshUsage**](doc/UsageApi.md#refreshusage) | **POST** /usage/refresh | Start a tiny Claude run to read fresh limits; a usage_updated event follows
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**createInvite**](doc/WorkspaceApi.md#createinvite) | **POST** /workspace/invites | Invite someone by email or by a link (valid 7 days)
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**deleteWorkspace**](doc/WorkspaceApi.md#deleteworkspace) | **DELETE** /workspace | Delete the workspace (kept 7 days for undo, then purged)
-[*WorkspaceApi*](doc/WorkspaceApi.md) | [**deleteWorkspaceClaudeConnection**](doc/WorkspaceApi.md#deleteworkspaceclaudeconnection) | **DELETE** /workspace/claude/connection | Disconnect the workspace&#39;s shared Claude account
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**deleteWorkspaceClaudeConnection**](doc/WorkspaceApi.md#deleteworkspaceclaudeconnection) | **DELETE** /workspace/claude/connection | Disconnect the workspace&#39;s shared Claude or Muse account
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**getQueue**](doc/WorkspaceApi.md#getqueue) | **GET** /workspace/queue | Where the workspace&#39;s tickets stand in the queue
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**getWorkspace**](doc/WorkspaceApi.md#getworkspace) | **GET** /workspace | The current workspace and your role in it
-[*WorkspaceApi*](doc/WorkspaceApi.md) | [**getWorkspaceClaude**](doc/WorkspaceApi.md#getworkspaceclaude) | **GET** /workspace/claude | Which Claude account the workspace&#39;s runs use
+[*WorkspaceApi*](doc/WorkspaceApi.md) | [**getWorkspaceClaude**](doc/WorkspaceApi.md#getworkspaceclaude) | **GET** /workspace/claude | Which Claude or Muse account the workspace&#39;s runs use
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**leaveWorkspace**](doc/WorkspaceApi.md#leaveworkspace) | **POST** /workspace/leave | Leave the workspace
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**listInvites**](doc/WorkspaceApi.md#listinvites) | **GET** /workspace/invites | Open invites
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**listMembers**](doc/WorkspaceApi.md#listmembers) | **GET** /workspace/members | The workspace&#39;s members
@@ -658,6 +661,8 @@ Class | Method | HTTP request | Description
  - [ModelCatalog](doc/ModelCatalog.md)
  - [ModelCatalogModelsInner](doc/ModelCatalogModelsInner.md)
  - [ModelOverrides](doc/ModelOverrides.md)
+ - [Module](doc/Module.md)
+ - [ModulesSettings](doc/ModulesSettings.md)
  - [MuseLogin](doc/MuseLogin.md)
  - [NetworkActivity](doc/NetworkActivity.md)
  - [NetworkActivityDialsInner](doc/NetworkActivityDialsInner.md)
@@ -796,6 +801,7 @@ Class | Method | HTTP request | Description
  - [SetTicketBenchmarkRequest](doc/SetTicketBenchmarkRequest.md)
  - [SetTicketMemberRequest](doc/SetTicketMemberRequest.md)
  - [SetTicketNumberRequest](doc/SetTicketNumberRequest.md)
+ - [SetUserModulesRequest](doc/SetUserModulesRequest.md)
  - [Settings](doc/Settings.md)
  - [ShipNotes](doc/ShipNotes.md)
  - [ShotRef](doc/ShotRef.md)
@@ -867,6 +873,7 @@ Class | Method | HTTP request | Description
  - [Usage](doc/Usage.md)
  - [UsageWindow](doc/UsageWindow.md)
  - [User](doc/User.md)
+ - [UserModules](doc/UserModules.md)
  - [WaitReason](doc/WaitReason.md)
  - [WeekStats](doc/WeekStats.md)
  - [WorkspaceClaude](doc/WorkspaceClaude.md)

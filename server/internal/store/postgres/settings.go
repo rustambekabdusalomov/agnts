@@ -52,11 +52,8 @@ func (s *Settings) Get(ctx context.Context) (domain.Settings, error) {
 			return clone(s.defaults), err
 		}
 	}
-	// Models saved for a tool this server does not offer read as its own.
-	out.Models = out.Models.EffectiveModels()
-	if out.SecondOpinion != "" && !domain.ProviderEnabled(domain.ProviderOf(out.SecondOpinion)) {
-		out.SecondOpinion = ""
-	}
+	// Models stay as saved: a run maps them to its person's modules
+	// (domain.Settings.For).
 	s.cache[ws] = &out
 	return clone(out), nil
 }
@@ -94,6 +91,7 @@ func (s *Settings) Put(ctx context.Context, v domain.Settings, origin domain.Ori
 	}
 	s.mu.Lock()
 	c := clone(v)
+	c.Access = domain.Access{}
 	s.cache[ws] = &c
 	s.mu.Unlock()
 	return v, nil

@@ -124,6 +124,15 @@
     "limitHelp": "Bepul va ish maydoni kreditlari birgalikda. Limit tugagach, ishga tushirishlar keyingi oygacha yoki siz uni oshirguningizcha to'xtaydi.",
     "limitWorth": "Oyiga {amount} gacha model chaqiruvlari.",
     "limitNone": "Limitsiz: sarfni faqat ularning kreditlari cheklaydi.",
-    "usageTotals": "Shu oy: hammada {used} kredit ({amount}); {limited} kishida limit bor."
+    "usageTotals": "Shu oy: hammada {used} kredit ({amount}); {limited} kishida limit bor.",
+    "modules": "Modullar",
+    "setModules": "Modullarni belgilash",
+    "modulesDefault": "Standart ({list})",
+    "modulesNow": "Hozir foydalanadi: {list}.",
+    "modulesFollowDefault": "Standart bo‘yicha",
+    "modulesCustom": "Alohida ro‘yxat",
+    "modulesCustomHelp": "Birinchisi asosiy modul. Faqat yoqilgan modullarni tanlash mumkin.",
+    "modulesSet": "{name} foydalana oladi: {list}",
+    "modulesFollow": "{name} endi standart modullardan foydalanadi"
   }
 }

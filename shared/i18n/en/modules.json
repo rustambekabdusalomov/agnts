@@ -1,0 +1,23 @@
+{
+  "modules": {
+    "name_muse": "Muse Code",
+    "name_claude": "Claude Code",
+    "name_codex": "Codex",
+    "title": "Modules",
+    "sub": "Which coding modules people may use. The first in a person's list is their default module.",
+    "available": "Available on this server",
+    "availableHelp": "What this server can run (AGNTS_PROVIDERS). It cannot be changed here.",
+    "enabled": "Enabled",
+    "enabledHelp": "What people may be given. Switching a module off takes it from everyone.",
+    "defaultList": "Default for people",
+    "defaultListHelp": "What a person gets unless you set theirs on the Users page. The first is their default module.",
+    "default": "Default",
+    "moveUp": "Move {module} up",
+    "moveDown": "Move {module} down",
+    "problem_noneEnabled": "Enable at least one module.",
+    "problem_empty": "Choose at least one module.",
+    "problem_codexFirst": "Codex cannot be the default module: put Muse Code or Claude Code first.",
+    "save": "Save",
+    "saved": "Modules saved"
+  }
+}

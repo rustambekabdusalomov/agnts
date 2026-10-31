@@ -452,7 +452,7 @@ func assistantErrorText(err error) string {
 	case errors.As(err, &ae):
 		return ae.msg
 	case errors.Is(err, ErrPlanLimit):
-		return domain.ToolName() + " plan limit reached; ask again after it resets."
+		return domain.ToolName(domain.DefaultAccess()) + " plan limit reached; ask again after it resets."
 	case errors.Is(err, context.DeadlineExceeded):
 		return "The answer took too long. Ask again, or ask something narrower."
 	}
@@ -468,6 +468,7 @@ func (e *assistantError) Error() string { return e.msg }
 // It returns the snapshot it used (JSON), for replays.
 func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a domain.AssistantMessage) (domain.AssistantMessage, []byte, error) {
 	var out domain.AssistantMessage
+	ctx = o.withPerson(ctx, user)
 	s, err := o.settings.Get(ctx)
 	if err != nil {
 		return out, nil, err
@@ -587,6 +588,7 @@ func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang s
 	if len(files) == 0 {
 		return AssistantAnswer{}, ClaudeResult{}, errors.New("the snapshot is empty")
 	}
+	ctx = o.withPerson(ctx, user)
 	s, err := o.settings.Get(ctx)
 	if err != nil {
 		return AssistantAnswer{}, ClaudeResult{}, err
@@ -661,12 +663,13 @@ func (o *Orchestrator) assistantAccount(ctx context.Context, s domain.Settings, 
 	if w.ClaudeMode == domain.ClaudePerMember && user > 0 {
 		member = &user
 	}
-	acct, ok, why, _ := o.accounts.Pick(ctx, w, member)
+	provider := domain.ProviderOf(s.Models.Helper) // answers run on the helper model
+	acct, ok, why, _ := o.accounts.Pick(ctx, w, member, provider)
 	if !ok {
-		return ctx, &assistantError{msg: "The assistant cannot reach " + domain.ToolName() + ": " + why + "."}
+		return ctx, &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(provider) + ": " + why + "."}
 	}
 	if acct.Credits {
-		return ctx, &assistantError{msg: fmt.Sprintf("The assistant needs a connected %[1]s account (Workspace settings → %[1]s); it does not run on credits.", domain.ToolName())}
+		return ctx, &assistantError{msg: fmt.Sprintf("The assistant needs a connected %[1]s account (Workspace settings → %[1]s); it does not run on credits.", domain.ModuleName(provider))}
 	}
 	return domain.WithClaude(ctx, acct), nil
 }

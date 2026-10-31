@@ -28,6 +28,13 @@ void main() {
       // TODO
     });
 
+    // Which coding modules the server offers, and the default for new users (Admin)
+    //
+    //Future<ModulesSettings> getModulesSettings() async
+    test('test getModulesSettings', () async {
+      // TODO
+    });
+
     // Servers, runs and the queue across every workspace (Admin)
     //
     //Future<PlatformOverview> getPlatformOverview() async
@@ -119,10 +126,24 @@ void main() {
       // TODO
     });
 
+    // Choose which coding modules the server offers, and the default for new users (Admin)
+    //
+    //Future<ModulesSettings> setModulesSettings(ModulesSettings modulesSettings) async
+    test('test setModulesSettings', () async {
+      // TODO
+    });
+
     // Change how long run history is kept, and its size limits (Admin)
     //
     //Future<RunHistorySettings> setRunHistorySettings(RunHistorySettings runHistorySettings) async
     test('test setRunHistorySettings', () async {
+      // TODO
+    });
+
+    // Set which coding modules a person may use, the default first (Admin); null follows the general default
+    //
+    //Future<UserModules> setUserModules(int id, SetUserModulesRequest setUserModulesRequest) async
+    test('test setUserModules', () async {
       // TODO
     });
 

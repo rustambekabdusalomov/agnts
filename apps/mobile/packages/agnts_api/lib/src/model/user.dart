@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/workspace_summary.dart';
+import 'package:agnts_api/src/model/module.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -36,6 +37,8 @@ class User {
      this.hasTotp,
 
      this.lastWorkspace,
+
+     this.modules,
 
      this.workspaces,
 
@@ -141,6 +144,19 @@ class User {
 
 
 
+      /// The coding modules the user may use, the default first (on /auth/me only)
+  @JsonKey(
+    
+    name: r'modules',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<Module>? modules;
+
+
+
       /// The workspaces the user is a member of (on /auth/me only)
   @JsonKey(
     
@@ -178,6 +194,7 @@ class User {
       other.isAdmin == isAdmin &&
       other.hasTotp == hasTotp &&
       other.lastWorkspace == lastWorkspace &&
+      other.modules == modules &&
       other.workspaces == workspaces &&
       other.createdAt == createdAt;
 
@@ -191,6 +208,7 @@ class User {
         isAdmin.hashCode +
         hasTotp.hashCode +
         lastWorkspace.hashCode +
+        modules.hashCode +
         workspaces.hashCode +
         createdAt.hashCode;
 

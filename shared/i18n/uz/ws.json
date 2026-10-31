@@ -127,6 +127,14 @@
     "muse_failed": "Kirish amalga oshmadi.",
     "museTryAgain": "Qayta urinish",
     "museUseKey": "API kalitidan foydalanish",
-    "museKeyHelp": "Muse API kalitini joylang (LLM_ bilan boshlanadi). Sarfni Meta’da kalit egasi to‘laydi."
+    "museKeyHelp": "Muse API kalitini joylang (LLM_ bilan boshlanadi). Sarfni Meta’da kalit egasi to‘laydi.",
+    "claudeBoth": "Hisoblar",
+    "claudeSubBoth": "Bu ish maydonidagi ishlar qaysi Muse va Claude hisoblaridan foydalanadi.",
+    "claudeSavedBoth": "Hisob sozlamalari saqlandi",
+    "fallbackHelpBoth": "Tanlangan hisob limitga yetganda yoki ulanmaganda ishlar to‘xtab qolmaydi: agnts kaliti bilan davom etadi va kreditlarni sarflaydi.",
+    "memberAccountsSubBoth": "Kim o‘z Muse va Claude hisoblarini ulagan (Profil).",
+    "connectionMuse": "Ish maydonining Muse hisobi",
+    "connectionClaude": "Ish maydonining Claude hisobi",
+    "noAccountModules": "Modullaringiz uchun bu yerda ulanadigan hisob yo‘q: Codex ish maydonining OpenAI integratsiyasi orqali ishlaydi."
   }
 }

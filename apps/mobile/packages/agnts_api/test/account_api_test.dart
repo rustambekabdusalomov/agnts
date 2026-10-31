@@ -28,9 +28,9 @@ void main() {
       // TODO
     });
 
-    // Disconnect your Claude account
+    // Disconnect your Claude or Muse account
     //
-    //Future deleteMyClaude() async
+    //Future deleteMyClaude({ String provider }) async
     test('test deleteMyClaude', () async {
       // TODO
     });
@@ -42,9 +42,9 @@ void main() {
       // TODO
     });
 
-    // Your personal Claude connection (used by workspaces in per-member mode)
+    // Your personal Claude or Muse connection (used by workspaces in per-member mode)
     //
-    //Future<ClaudeConnectionState> getMyClaude() async
+    //Future<ClaudeConnectionState> getMyClaude({ String provider }) async
     test('test getMyClaude', () async {
       // TODO
     });

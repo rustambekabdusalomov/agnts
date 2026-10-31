@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **workspaces** | [**List&lt;WorkspaceSummary&gt;**](WorkspaceSummary.md) | The workspaces they belong to (not deleted), with their role | 
 **freeCredits** | [**FreeCredits**](FreeCredits.md) |  | [optional] 
 **creditUsage** | [**CreditUsage**](CreditUsage.md) |  | [optional] 
+**modules** | [**UserModules**](UserModules.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

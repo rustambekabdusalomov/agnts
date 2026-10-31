@@ -263,10 +263,11 @@ _responseData = rawData == null ? null : deserialize<BeginTotp200Response, Begin
     return _response;
   }
 
-  /// Disconnect your Claude account
+  /// Disconnect your Claude or Muse account
   /// 
   ///
   /// Parameters:
+  /// * [provider] - The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -277,6 +278,7 @@ _responseData = rawData == null ? null : deserialize<BeginTotp200Response, Begin
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> deleteMyClaude({ 
+    String? provider,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -308,9 +310,14 @@ _responseData = rawData == null ? null : deserialize<BeginTotp200Response, Begin
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (provider != null) r'provider': provider,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
@@ -396,10 +403,11 @@ _responseData = rawData == null ? null : deserialize<BeginTotp200Response, Begin
     return _response;
   }
 
-  /// Your personal Claude connection (used by workspaces in per-member mode)
+  /// Your personal Claude or Muse connection (used by workspaces in per-member mode)
   /// 
   ///
   /// Parameters:
+  /// * [provider] - The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -410,6 +418,7 @@ _responseData = rawData == null ? null : deserialize<BeginTotp200Response, Begin
   /// Returns a [Future] containing a [Response] with a [ClaudeConnectionState] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<ClaudeConnectionState>> getMyClaude({ 
+    String? provider,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -441,9 +450,14 @@ _responseData = rawData == null ? null : deserialize<BeginTotp200Response, Begin
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (provider != null) r'provider': provider,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,

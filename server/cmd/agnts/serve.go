@@ -43,6 +43,7 @@ import (
 	"agnts/internal/mcpserver"
 	"agnts/internal/meetings"
 	"agnts/internal/metrics"
+	"agnts/internal/modules"
 	"agnts/internal/musecredits"
 	"agnts/internal/netroute"
 	"agnts/internal/network"
@@ -202,6 +203,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Queue:        a.orch,
 		Billing:      a.billing,
 		Muse:         museAPI{a.museCredits, a.museDevice},
+		Modules:      a.modules,
 		EventLog:     a.store,
 		Cloud:        cfg.Cloud,
 		Google:       googleSignIn(cfg, acc),
@@ -356,6 +358,7 @@ type agent struct {
 	lessons      *postgres.Lessons
 	integrations *postgres.Integrations
 	settings     *postgres.Settings
+	modules      *modules.Service
 	usage        *usage.Tracker
 	refresher    *usage.Refresher
 	orch         *orchestrator.Orchestrator
@@ -414,6 +417,10 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		workspaces:   postgres.NewWorkspaces(pool),
 		users:        postgres.NewUsers(pool),
 	}
+	a.modules = modules.New(pool)
+	if err := a.modules.Ensure(context.Background()); err != nil {
+		return nil, fmt.Errorf("modules: %w", err)
+	}
 	a.settings = postgres.NewSettings(pool, defaultSettings(cfg))
 	// Private networks: the server's own calls (GitLab, Jira and Plane
 	// APIs, git) to a host on a workspace's routes go through the gateway.
@@ -437,7 +444,11 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		return nil, fmt.Errorf("muse ledger: %w", err)
 	}
 	a.claude = claude.New(claude.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud, MuseKey: cfg.MusePlatformKey,
-		Free: func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 }},
+		Free: func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 },
+		CodexReady: func(ctx context.Context) bool {
+			key, err := a.integrations.Token(ctx, "openai")
+			return err == nil && key != ""
+		}},
 		conns, a.usage, a.settings, a.users)
 	a.usage.OnPaused(a.claude.Paused)
 	a.usage.SetResolver(func(ctx context.Context) (domain.ClaudeAccount, bool) {
@@ -449,7 +460,11 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		if err != nil {
 			return domain.ClaudeAccount{}, false
 		}
-		return a.claude.Resolve(ctx, w)
+		p := domain.CurrentProvider(ctx)
+		if p == "" {
+			p = domain.AccessOf(ctx).Primary()
+		}
+		return a.claude.Resolve(ctx, w, p)
 	})
 	a.billing = billing.New(billing.Config{
 		Enabled: cfg.Cloud, WorkspaceUZS: cfg.PriceWorkspaceUZS, SlotUZS: cfg.PriceSlotUZS, MemberUZS: cfg.PriceMemberUZS,
@@ -536,7 +551,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.orch = orchestrator.New(ocfg, orchestrator.Deps{
 		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Homes: homes, Progress: a.progress,
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: a.jira, domain.SourcePlane: a.plane},
-		Settings: a.settings, Usage: a.usage, Lessons: a.lessons, Rules: postgres.NewRules(pool), Briefs: postgres.NewBriefs(pool),
+		Settings: a.settings, Access: a.modules, Usage: a.usage, Lessons: a.lessons, Rules: postgres.NewRules(pool), Briefs: postgres.NewBriefs(pool),
 		Reflections:  postgres.NewReflections(pool),
 		PullReviews:  a.store,
 		PRPosts:      a.store,

@@ -5,8 +5,12 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { api, HttpError, unwrap } from '../../api/client'
 import PageHeader from '../../components/PageHeader.vue'
+import RadioButton from '../../components/form/RadioButton.vue'
+import ModuleList from '../../components/modules/ModuleList.vue'
+import ModulesSettingsCard from '../../components/modules/ModulesSettingsCard.vue'
+import { listProblem, type Module } from '../../components/modules/modules'
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
-import { initialsOf, nameOf, useAgo, usePlatform, within, type PlatformUser } from '../../composables/usePlatform'
+import { initialsOf, nameOf, useAgo, useModulesSettings, usePlatform, within, type PlatformUser } from '../../composables/usePlatform'
 import { useUi } from '../../stores/ui'
 
 // The platform's Users (Admin accounts are on the Admins page): how they
@@ -89,12 +93,45 @@ const setLimit = useMutation({
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
 const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => { if (!v) limiting.value = null } })
+
+// Modules: which coding modules a person may use, the default first. A
+// person follows the general list (set in the Modules card) until an Admin
+// gives them their own.
+const showModules = ref(false)
+const { settings: modulesSettings } = useModulesSettings()
+const enabledModules = computed(() => modulesSettings.data.value?.enabled ?? [])
+const moduleNames = (list: readonly Module[]) => list.map((m) => t(`modules.name_${m}`)).join(', ')
+const moduling = ref<PlatformUser | null>(null)
+const followDefault = ref(true)
+const ownModules = ref<Module[]>([])
+function editModules(u: PlatformUser) {
+  moduling.value = u
+  followDefault.value = !u.modules?.own
+  ownModules.value = [...(u.modules?.own ?? u.modules?.effective ?? [])].filter((m) => enabledModules.value.includes(m))
+}
+const modulesProblem = computed(() => (followDefault.value ? '' : listProblem(ownModules.value)))
+const setModules = useMutation({
+  mutationFn: (u: PlatformUser) =>
+    unwrap(api.PUT('/platform/users/{id}/modules', { params: { path: { id: u.user.id } }, body: { modules: followDefault.value ? null : [...ownModules.value] } })),
+  onSuccess: (um, u) => {
+    ui.notify(um.own ? t('platform.modulesSet', { name: nameOf(u.user), list: moduleNames(um.effective) }) : t('platform.modulesFollow', { name: nameOf(u.user) }))
+    moduling.value = null
+    void qc.invalidateQueries({ queryKey: ['platform', 'users'] })
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
+const modulesOpen = computed({ get: () => !!moduling.value, set: (v: boolean) => { if (!v) moduling.value = null } })
 </script>
 
 <template>
   <PageHeader :title="t('platform.users')">
     <template #below><p class="sub" style="margin: 2px 0 0">{{ t('platform.usersLede') }}</p></template>
+    <div class="actions" style="margin: 0">
+      <button class="btn btn-s" type="button" :aria-expanded="showModules" @click="showModules = !showModules">{{ t('modules.title') }}</button>
+    </div>
   </PageHeader>
+
+  <ModulesSettingsCard v-if="showModules" />
 
   <section class="card">
     <div class="filters">
@@ -116,7 +153,7 @@ const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => {
         <thead>
           <tr>
             <th>{{ t('platform.user') }}</th><th>{{ t('platform.signIn') }}</th><th>{{ t('platform.workspaces') }}</th>
-            <th>{{ t('platform.freeCredits') }}</th><th>{{ t('platform.creditUsage') }}</th><th>{{ t('platform.joined') }}</th><th>{{ t('platform.lastSeen') }}</th><th />
+            <th>{{ t('platform.modules') }}</th><th>{{ t('platform.freeCredits') }}</th><th>{{ t('platform.creditUsage') }}</th><th>{{ t('platform.joined') }}</th><th>{{ t('platform.lastSeen') }}</th><th />
           </tr>
         </thead>
         <tbody>
@@ -139,6 +176,13 @@ const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => {
               <span v-for="w in u.workspaces" :key="w.id" class="adm-ws" :title="t(`ws.role_${w.role}`)">{{ w.name }}<small v-if="w.role === 'owner'"> · {{ t('ws.role_owner') }}</small></span>
             </td>
             <td>
+              <template v-if="u.modules">
+                <span v-if="u.modules.own">{{ moduleNames(u.modules.own) }}</span>
+                <span v-else class="muted">{{ t('platform.modulesDefault', { list: moduleNames(u.modules.effective) }) }}</span>
+              </template>
+              <span v-else class="muted">—</span>
+            </td>
+            <td>
               <template v-if="u.freeCredits?.limit">
                 <span class="mono">{{ u.freeCredits.remaining }} / {{ u.freeCredits.limit }}</span>
                 <small class="muted"> · {{ usd(u.freeCredits.remaining) }}</small>
@@ -159,7 +203,8 @@ const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => {
             <td class="hint">{{ ago(u.user.createdAt) }}</td>
             <td class="hint">{{ ago(u.lastSignInAt) }}</td>
             <td style="text-align: right; white-space: nowrap">
-              <button class="btn btn-s" @click="editCredits(u)">{{ t('platform.setFreeCredits') }}</button>
+              <button class="btn btn-s" @click="editModules(u)">{{ t('platform.setModules') }}</button>
+              <button class="btn btn-s" style="margin-left: 6px" @click="editCredits(u)">{{ t('platform.setFreeCredits') }}</button>
               <button class="btn btn-s" style="margin-left: 6px" @click="editLimit(u)">{{ t('platform.setLimit') }}</button>
             </td>
           </tr>
@@ -218,6 +263,28 @@ const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => {
         </button>
       </div>
       <p class="hint">{{ t('platform.limitHelp') }}</p>
+    </div>
+  </ConfirmDialog>
+
+  <ConfirmDialog
+    v-model="modulesOpen"
+    :title="t('platform.setModules')"
+    :message="moduling ? nameOf(moduling.user) : ''"
+    :confirm-label="t('platform.setModules')"
+    :busy="setModules.isPending.value"
+    :disabled="!!modulesProblem"
+    @confirm="moduling && !modulesProblem && setModules.mutate(moduling)"
+  >
+    <div class="stack" style="gap: 10px; width: 100%; margin-top: 12px">
+      <p v-if="moduling?.modules" class="hint">{{ t('platform.modulesNow', { list: moduleNames(moduling.modules.effective) }) }}</p>
+      <RadioButton v-model="followDefault" :value="true" name="user-modules">{{ t('platform.modulesFollowDefault') }}</RadioButton>
+      <RadioButton v-model="followDefault" :value="false" name="user-modules">{{ t('platform.modulesCustom') }}</RadioButton>
+      <template v-if="!followDefault">
+        <p v-if="modulesSettings.isPending.value" class="hint">{{ t('common.loading') }}</p>
+        <ModuleList v-else v-model="ownModules" :options="enabledModules" :label="t('platform.modulesCustom')" />
+        <p class="hint">{{ t('platform.modulesCustomHelp') }}</p>
+        <p v-if="modulesProblem" class="ferr">{{ t(`modules.problem_${modulesProblem}`) }}</p>
+      </template>
     </div>
   </ConfirmDialog>
 </template>

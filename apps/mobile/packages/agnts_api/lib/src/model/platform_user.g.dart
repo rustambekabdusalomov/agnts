@@ -19,6 +19,8 @@ abstract class _$PlatformUserCWProxy {
 
   PlatformUser creditUsage(CreditUsage? creditUsage);
 
+  PlatformUser modules(UserModules? modules);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PlatformUser(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -32,6 +34,7 @@ abstract class _$PlatformUserCWProxy {
     List<WorkspaceSummary> workspaces,
     FreeCredits? freeCredits,
     CreditUsage? creditUsage,
+    UserModules? modules,
   });
 }
 
@@ -64,6 +67,9 @@ class _$PlatformUserCWProxyImpl implements _$PlatformUserCWProxy {
       this(creditUsage: creditUsage);
 
   @override
+  PlatformUser modules(UserModules? modules) => this(modules: modules);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PlatformUser(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -77,6 +83,7 @@ class _$PlatformUserCWProxyImpl implements _$PlatformUserCWProxy {
     Object? workspaces = const $CopyWithPlaceholder(),
     Object? freeCredits = const $CopyWithPlaceholder(),
     Object? creditUsage = const $CopyWithPlaceholder(),
+    Object? modules = const $CopyWithPlaceholder(),
   }) {
     return PlatformUser(
       user: user == const $CopyWithPlaceholder()
@@ -103,6 +110,10 @@ class _$PlatformUserCWProxyImpl implements _$PlatformUserCWProxy {
           ? _value.creditUsage
           // ignore: cast_nullable_to_non_nullable
           : creditUsage as CreditUsage?,
+      modules: modules == const $CopyWithPlaceholder()
+          ? _value.modules
+          // ignore: cast_nullable_to_non_nullable
+          : modules as UserModules?,
     );
   }
 }
@@ -145,6 +156,10 @@ PlatformUser _$PlatformUserFromJson(
       'creditUsage',
       (v) => v == null ? null : CreditUsage.fromJson(v as Map<String, dynamic>),
     ),
+    modules: $checkedConvert(
+      'modules',
+      (v) => v == null ? null : UserModules.fromJson(v as Map<String, dynamic>),
+    ),
   );
   return val;
 });
@@ -157,4 +172,5 @@ Map<String, dynamic> _$PlatformUserToJson(PlatformUser instance) =>
       'workspaces': instance.workspaces.map((e) => e.toJson()).toList(),
       'freeCredits': ?instance.freeCredits?.toJson(),
       'creditUsage': ?instance.creditUsage?.toJson(),
+      'modules': ?instance.modules?.toJson(),
     };

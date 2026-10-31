@@ -219,6 +219,7 @@ import 'package:agnts_api/src/model/meta.dart';
 import 'package:agnts_api/src/model/model_catalog.dart';
 import 'package:agnts_api/src/model/model_catalog_models_inner.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
+import 'package:agnts_api/src/model/modules_settings.dart';
 import 'package:agnts_api/src/model/muse_login.dart';
 import 'package:agnts_api/src/model/network_activity.dart';
 import 'package:agnts_api/src/model/network_activity_dials_inner.dart';
@@ -354,6 +355,7 @@ import 'package:agnts_api/src/model/set_slots_request.dart';
 import 'package:agnts_api/src/model/set_ticket_benchmark_request.dart';
 import 'package:agnts_api/src/model/set_ticket_member_request.dart';
 import 'package:agnts_api/src/model/set_ticket_number_request.dart';
+import 'package:agnts_api/src/model/set_user_modules_request.dart';
 import 'package:agnts_api/src/model/settings.dart';
 import 'package:agnts_api/src/model/ship_notes.dart';
 import 'package:agnts_api/src/model/shot_ref.dart';
@@ -421,6 +423,7 @@ import 'package:agnts_api/src/model/update_workspace_request.dart';
 import 'package:agnts_api/src/model/usage.dart';
 import 'package:agnts_api/src/model/usage_window.dart';
 import 'package:agnts_api/src/model/user.dart';
+import 'package:agnts_api/src/model/user_modules.dart';
 import 'package:agnts_api/src/model/week_stats.dart';
 import 'package:agnts_api/src/model/workspace_claude.dart';
 import 'package:agnts_api/src/model/workspace_claude_members_inner.dart';
@@ -929,6 +932,11 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ModelCatalogModelsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ModelOverrides':
           return ModelOverrides.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'Module':
+          
+          
+        case 'ModulesSettings':
+          return ModulesSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MuseLogin':
           return MuseLogin.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'NetworkActivity':
@@ -1208,6 +1216,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SetTicketMemberRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetTicketNumberRequest':
           return SetTicketNumberRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetUserModulesRequest':
+          return SetUserModulesRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Settings':
           return Settings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ShipNotes':
@@ -1354,6 +1364,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return UsageWindow.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'User':
           return User.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'UserModules':
+          return UserModules.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WaitReason':
           
           

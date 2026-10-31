@@ -24,13 +24,13 @@ import (
 // Connections is the store of Claude accounts.
 type Connections interface {
 	ByID(ctx context.Context, id int64) (postgres.ClaudeConnection, error)
-	ForWorkspace(ctx context.Context, ws int64) (postgres.ClaudeConnection, error)
-	ForUser(ctx context.Context, userID int64) (postgres.ClaudeConnection, error)
+	ForWorkspace(ctx context.Context, ws int64, provider string) (postgres.ClaudeConnection, error)
+	ForUser(ctx context.Context, userID int64, provider string) (postgres.ClaudeConnection, error)
 	Put(ctx context.Context, ws, userID int64, kind, token, account string) (postgres.ClaudeConnection, error)
-	DeleteWorkspace(ctx context.Context, ws int64) error
-	DeleteUser(ctx context.Context, userID int64) error
+	DeleteWorkspace(ctx context.Context, ws int64, provider string) error
+	DeleteUser(ctx context.Context, userID int64, provider string) error
 	SetPaused(ctx context.Context, id int64, until *time.Time) error
-	MemberConnections(ctx context.Context, ws int64) (map[int64]*time.Time, error)
+	MemberConnections(ctx context.Context, ws int64, provider string) (map[int64]*time.Time, error)
 	Paused(ctx context.Context) ([]int64, error)
 	UpdateToken(ctx context.Context, id int64, token string) error
 }
@@ -59,13 +59,16 @@ type Config struct {
 	MinCredits int64
 	// APIBase is Anthropic's API, for checking keys (tests replace it).
 	APIBase string
-	// MuseKey is agnts's Meta Model API key for Muse runs on credits;
-	// it, not PlatformKey, enables credits when Muse is the primary tool.
+	// MuseKey is agnts's Meta Model API key for Muse runs on credits.
 	MuseKey string
 	// Free says whether a person has free credits left (an Admin gave
-	// them); a run then continues on credits even when the workspace has
-	// not turned on continuing with credits.
+	// them); a Muse run then continues on credits even when the workspace
+	// has not turned on continuing with credits. Free credits are Muse
+	// ledger money: they never pay for Claude.
 	Free func(ctx context.Context, userID int64) bool
+	// CodexReady says whether the workspace ctx acts in has an OpenAI key
+	// for Codex runs (Integrations → OpenAI); nil when Codex is not set up.
+	CodexReady func(ctx context.Context) bool
 }
 
 // Service picks accounts and manages connections.
@@ -91,72 +94,72 @@ func New(cfg Config, conns Connections, usage Usage, settings orchestrator.Setti
 	return &Service{cfg: cfg, conns: conns, usage: usage, settings: settings, users: users, hc: &http.Client{Timeout: 15 * time.Second}}
 }
 
-// CreditsEnabled reports whether runs can fall back to credits here: agnts
-// has its own key for the primary coding tool.
-func (s *Service) CreditsEnabled() bool {
-	if muse() {
+// CreditsEnabled reports whether runs of module provider can fall back to
+// credits here: agnts has its own key for it. Codex never runs on credits.
+func (s *Service) CreditsEnabled(provider string) bool {
+	switch provider {
+	case domain.ProviderMuse:
 		return s.cfg.MuseKey != ""
+	case domain.ProviderClaude:
+		return s.cfg.PlatformKey != ""
 	}
-	return s.cfg.PlatformKey != ""
+	return false
 }
 
-// muse reports whether Muse Code is the primary tool: then accounts are
-// Meta ones and Claude connections are not used.
-func muse() bool { return domain.PrimaryProvider() == domain.ProviderMuse }
+// AnyCredits reports whether any module can run on credits here.
+func (s *Service) AnyCredits() bool {
+	return s.CreditsEnabled(domain.ProviderMuse) || s.CreditsEnabled(domain.ProviderClaude)
+}
 
-// isMuseKind reports whether a connection is a Muse account.
-func isMuseKind(kind string) bool { return kind == postgres.MuseAPIKey || kind == postgres.MuseLogin }
-
-// toolName names the primary tool in messages.
-func toolName() string { return domain.ToolName() }
+// connProvider is the module whose connection a run of provider uses:
+// Codex has none.
+func connProvider(provider string) string {
+	if provider == domain.ProviderMuse {
+		return domain.ProviderMuse
+	}
+	return domain.ProviderClaude
+}
 
 // SubscriptionsAllowed reports whether subscription tokens are accepted.
 func (s *Service) SubscriptionsAllowed() bool { return s.cfg.Subscriptions }
 
-// whose returns the member whose account a ticket of member uses in
-// per-member mode: the member, else the workspace's default member, else
-// its owner.
-func whose(w domain.Workspace, member *int64) int64 {
-	switch {
-	case member != nil && *member > 0:
-		return *member
-	case w.DefaultMemberID != nil:
-		return *w.DefaultMemberID
-	default:
-		return w.OwnerID
+// Pick implements orchestrator.ClaudeAccounts: the account a run of a
+// ticket of member in w uses on module provider. Muse uses the Muse
+// connection, then free credits, then workspace credits; Claude its
+// connection, then workspace credits; Codex the workspace's OpenAI key.
+func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, provider string) (domain.ClaudeAccount, bool, string, time.Time) {
+	payer := w.RunPerson(member)
+	tool := domain.ModuleName(provider)
+	if provider == domain.ProviderCodex {
+		if s.cfg.CodexReady == nil || !s.cfg.CodexReady(ctx) {
+			return domain.ClaudeAccount{}, false, "Codex runs need an OpenAI API key: connect OpenAI under Integrations", time.Time{}
+		}
+		return domain.ClaudeAccount{Label: "the workspace's OpenAI key", UserID: payer, Provider: provider}, true, "", time.Time{}
 	}
-}
-
-// Pick implements orchestrator.ClaudeAccounts.
-func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64) (domain.ClaudeAccount, bool, string, time.Time) {
 	var conn postgres.ClaudeConnection
 	var err error
 	var who string
 	if w.ClaudeMode == domain.ClaudePerMember {
-		uid := whose(w, member)
-		conn, err = s.conns.ForUser(ctx, uid)
-		who = s.name(ctx, uid)
+		conn, err = s.conns.ForUser(ctx, payer, provider)
+		who = s.name(ctx, payer)
 	} else {
-		conn, err = s.conns.ForWorkspace(ctx, w.ID)
+		conn, err = s.conns.ForWorkspace(ctx, w.ID, provider)
 		who = "the workspace"
 	}
 	why, until := "", time.Time{}
-	if err == nil && isMuseKind(conn.Kind) != muse() {
-		err = domain.ErrNotFound // a connection for a tool this server does not run
-	}
 	switch {
 	case errors.Is(err, domain.ErrNotFound):
 		if w.ClaudeMode == domain.ClaudePerMember {
-			why = who + " has not connected a " + toolName() + " account (Profile → " + toolName() + ")"
+			why = who + " has not connected a " + tool + " account (Profile → " + tool + ")"
 		} else {
-			why = "no " + toolName() + " account is connected (Workspace settings → " + toolName() + ")"
+			why = "no " + tool + " account is connected (Workspace settings → " + tool + ")"
 		}
 	case err != nil:
-		why = "could not read the " + toolName() + " account: " + err.Error()
+		why = "could not read the " + tool + " account: " + err.Error()
 	case conn.Kind == postgres.ClaudeSubscription && !s.cfg.Subscriptions:
 		why = "this server accepts Anthropic API keys only; connect one instead of a subscription token"
 	default:
-		acct := domain.ClaudeAccount{ConnectionID: conn.ID, Label: label(conn, who)}
+		acct := domain.ClaudeAccount{ConnectionID: conn.ID, Label: label(conn, who), Provider: provider}
 		st, serr := s.settings.Get(ctx)
 		if serr != nil {
 			st = domain.DefaultSettings()
@@ -165,21 +168,20 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64) (
 		if !paused {
 			return acct, true, "", time.Time{}
 		}
-		why, until = toolName()+" limit reached on "+acct.Label, at
+		why, until = tool+" limit reached on "+acct.Label, at
 		if !at.IsZero() {
 			why += "; resumes at " + at.Format("15:04")
 		}
 	}
-	payer := whose(w, member)
-	if s.CreditsEnabled() && s.cfg.Free != nil && s.cfg.Free(ctx, payer) {
-		return domain.ClaudeAccount{Credits: true, Label: "free credits", UserID: payer}, true, "", time.Time{}
+	if provider == domain.ProviderMuse && s.CreditsEnabled(provider) && s.cfg.Free != nil && s.cfg.Free(ctx, payer) {
+		return domain.ClaudeAccount{Credits: true, Label: "free credits", UserID: payer, Provider: provider}, true, "", time.Time{}
 	}
-	if w.ClaudeFallback && s.CreditsEnabled() {
+	if w.ClaudeFallback && s.CreditsEnabled(provider) {
 		if w.CreditsBalance >= s.cfg.MinCredits {
-			return domain.ClaudeAccount{Credits: true, Label: "workspace credits", UserID: payer}, true, "", time.Time{}
+			return domain.ClaudeAccount{Credits: true, Label: "workspace credits", UserID: payer, Provider: provider}, true, "", time.Time{}
 		}
 		why += "; the workspace has no credits left to continue on"
-	} else if s.CreditsEnabled() {
+	} else if s.CreditsEnabled(provider) {
 		why += "; or turn on continuing with credits"
 	}
 	return domain.ClaudeAccount{}, false, why, until
@@ -222,11 +224,15 @@ type Credential struct {
 // and usage refresh runs outside the scheduler).
 func (s *Service) CredentialFor(ctx context.Context) (Credential, error) {
 	a, ok := domain.ClaudeOf(ctx)
+	provider := connProvider(domain.CurrentProvider(ctx))
+	if ok && a.Provider != "" {
+		provider = connProvider(a.Provider)
+	}
 	if ok && a.Credits {
-		if !s.CreditsEnabled() {
+		if !s.CreditsEnabled(provider) {
 			return Credential{}, errors.New("credits are not available on this server")
 		}
-		if muse() {
+		if provider == domain.ProviderMuse {
 			return Credential{Env: EnvMuseKey, Token: s.cfg.MuseKey}, nil
 		}
 		return Credential{Env: "ANTHROPIC_API_KEY", Token: s.cfg.PlatformKey}, nil
@@ -241,15 +247,16 @@ func (s *Service) CredentialFor(ctx context.Context) (Credential, error) {
 		if werr != nil {
 			return Credential{}, werr
 		}
-		c, err = s.conns.ForWorkspace(ctx, ws)
+		c, err = s.conns.ForWorkspace(ctx, ws, provider)
 		if errors.Is(err, domain.ErrNotFound) {
 			if actor, ok := domain.ActorOf(ctx); ok {
-				c, err = s.conns.ForUser(ctx, actor.UserID)
+				c, err = s.conns.ForUser(ctx, actor.UserID, provider)
 			}
 		}
 	}
 	if errors.Is(err, domain.ErrNotFound) {
-		return Credential{}, fmt.Errorf("%s is not connected: connect an account in Workspace settings → %s", strings.ToLower(toolName()), toolName())
+		tool := domain.ModuleName(provider)
+		return Credential{}, fmt.Errorf("%s is not connected: connect an account in Workspace settings → %s", strings.ToLower(tool), tool)
 	}
 	if err != nil {
 		return Credential{}, err
@@ -350,30 +357,33 @@ func (s *Service) Paused(ctx context.Context, conn int64, until *time.Time) {
 	_ = s.conns.SetPaused(ctx, conn, until)
 }
 
-// WorkspaceConnection returns a workspace's shared connection.
-func (s *Service) WorkspaceConnection(ctx context.Context, ws int64) (postgres.ClaudeConnection, error) {
-	return s.conns.ForWorkspace(ctx, ws)
+// WorkspaceConnection returns a workspace's shared connection for module
+// provider (muse or claude).
+func (s *Service) WorkspaceConnection(ctx context.Context, ws int64, provider string) (postgres.ClaudeConnection, error) {
+	return s.conns.ForWorkspace(ctx, ws, connProvider(provider))
 }
 
-// UserConnection returns a person's own connection.
-func (s *Service) UserConnection(ctx context.Context, userID int64) (postgres.ClaudeConnection, error) {
-	return s.conns.ForUser(ctx, userID)
+// UserConnection returns a person's own connection for module provider.
+func (s *Service) UserConnection(ctx context.Context, userID int64, provider string) (postgres.ClaudeConnection, error) {
+	return s.conns.ForUser(ctx, userID, connProvider(provider))
 }
 
-// DeleteWorkspaceConnection disconnects a workspace's shared account.
-func (s *Service) DeleteWorkspaceConnection(ctx context.Context, ws int64) error {
-	return s.conns.DeleteWorkspace(ctx, ws)
+// DeleteWorkspaceConnection disconnects a workspace's shared account for
+// module provider.
+func (s *Service) DeleteWorkspaceConnection(ctx context.Context, ws int64, provider string) error {
+	return s.conns.DeleteWorkspace(ctx, ws, connProvider(provider))
 }
 
-// DeleteUserConnection disconnects a person's own account.
-func (s *Service) DeleteUserConnection(ctx context.Context, userID int64) error {
-	return s.conns.DeleteUser(ctx, userID)
+// DeleteUserConnection disconnects a person's own account for module
+// provider.
+func (s *Service) DeleteUserConnection(ctx context.Context, userID int64, provider string) error {
+	return s.conns.DeleteUser(ctx, userID, connProvider(provider))
 }
 
 // MemberConnections returns which members of a workspace have their own
-// account, and until when each is paused.
-func (s *Service) MemberConnections(ctx context.Context, ws int64) (map[int64]*time.Time, error) {
-	return s.conns.MemberConnections(ctx, ws)
+// account for module provider, and until when each is paused.
+func (s *Service) MemberConnections(ctx context.Context, ws int64, provider string) (map[int64]*time.Time, error) {
+	return s.conns.MemberConnections(ctx, ws, connProvider(provider))
 }
 
 // UsageOf returns an account's latest usage reading.
@@ -382,23 +392,24 @@ func (s *Service) UsageOf(ctx context.Context, c postgres.ClaudeConnection) (usa
 	if err != nil {
 		st = domain.DefaultSettings()
 	}
-	return s.usage.Current(domain.WithClaude(ctx, domain.ClaudeAccount{ConnectionID: c.ID}), st)
+	return s.usage.Current(domain.WithClaude(ctx, domain.ClaudeAccount{ConnectionID: c.ID, Provider: postgres.ProviderOfKind(c.Kind)}), st)
 }
 
 // AccountFor returns the account the person in ctx sees usage for in
-// workspace w: the shared one, or their own in per-member mode.
-func (s *Service) AccountFor(ctx context.Context, w domain.Workspace, userID int64) (domain.ClaudeAccount, bool) {
+// workspace w on module provider: the shared one, or their own in
+// per-member mode.
+func (s *Service) AccountFor(ctx context.Context, w domain.Workspace, userID int64, provider string) (domain.ClaudeAccount, bool) {
 	var c postgres.ClaudeConnection
 	var err error
 	if w.ClaudeMode == domain.ClaudePerMember {
-		c, err = s.conns.ForUser(ctx, userID)
+		c, err = s.conns.ForUser(ctx, userID, connProvider(provider))
 	} else {
-		c, err = s.conns.ForWorkspace(ctx, w.ID)
+		c, err = s.conns.ForWorkspace(ctx, w.ID, connProvider(provider))
 	}
 	if err != nil {
 		return domain.ClaudeAccount{}, false
 	}
-	return domain.ClaudeAccount{ConnectionID: c.ID, Label: c.Account}, true
+	return domain.ClaudeAccount{ConnectionID: c.ID, Label: c.Account, Provider: connProvider(provider)}, true
 }
 
 // PausedAccounts returns the accounts paused at their usage limit.
@@ -416,12 +427,12 @@ func (s *Service) PausedAccounts(ctx context.Context) []domain.ClaudeAccount {
 
 // Resolve returns the account the person acting in ctx would run on in
 // its workspace (for usage pages).
-func (s *Service) Resolve(ctx context.Context, ws domain.Workspace) (domain.ClaudeAccount, bool) {
+func (s *Service) Resolve(ctx context.Context, ws domain.Workspace, provider string) (domain.ClaudeAccount, bool) {
 	uid := ws.OwnerID
 	if a, ok := domain.ActorOf(ctx); ok {
 		uid = a.UserID
 	}
-	return s.AccountFor(ctx, ws, uid)
+	return s.AccountFor(ctx, ws, uid, provider)
 }
 
 // KeepMuseLogin saves the Muse login a run ended with, when Muse refreshed

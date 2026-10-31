@@ -124,6 +124,15 @@
     "limitHelp": "Free and workspace credits together. Runs stop once it is spent and resume next month or when you raise it.",
     "limitWorth": "Up to {amount} of model calls a month.",
     "limitNone": "No limit: only their credits bound what they spend.",
-    "usageTotals": "This month: {used} credits ({amount}) across everyone; {limited} people have a limit."
+    "usageTotals": "This month: {used} credits ({amount}) across everyone; {limited} people have a limit.",
+    "modules": "Modules",
+    "setModules": "Set modules",
+    "modulesDefault": "Default ({list})",
+    "modulesNow": "Uses now: {list}.",
+    "modulesFollowDefault": "Follow the default",
+    "modulesCustom": "Their own list",
+    "modulesCustomHelp": "The first is their default module. Only enabled modules can be chosen.",
+    "modulesSet": "{name} may use {list}",
+    "modulesFollow": "{name} follows the default modules now"
   }
 }

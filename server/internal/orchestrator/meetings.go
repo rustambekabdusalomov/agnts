@@ -223,9 +223,10 @@ func (o *Orchestrator) HearMeeting(ctx context.Context, user int64, audio []byte
 		if w.ClaudeMode == domain.ClaudePerMember && user > 0 {
 			member = &user
 		}
-		acct, ok, why, _ := o.accounts.Pick(ctx, w, member)
+		// Only Muse hears audio, whatever modules the person codes with.
+		acct, ok, why, _ := o.accounts.Pick(ctx, w, member, domain.ProviderMuse)
 		if !ok {
-			return nil, fmt.Errorf("%s cannot hear the meeting: %s", domain.ToolName(), why)
+			return nil, fmt.Errorf("muse cannot hear the meeting: %s", why)
 		}
 		ctx = domain.WithClaude(ctx, acct)
 	}

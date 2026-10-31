@@ -135,8 +135,9 @@ type Config struct {
 	// (one sidecar container each) the server runs (AGNTS_OVPN_MAX).
 	PrivateNetworksMax, OVPNMax int
 
-	// Providers are the coding tools this server offers, the first being
-	// the default (AGNTS_PROVIDERS: muse, claude, codex; default "muse").
+	// Providers are the coding modules this server can run: the ceiling
+	// the Admin's choice of modules stays within (AGNTS_PROVIDERS: muse,
+	// claude, codex; default "muse").
 	Providers []string
 	// Muse Code (Meta). MuseBinary is the CLI in the run image
 	// (AGNTS_MUSE_BINARY). MusePlatformKey is agnts's own Meta Model API

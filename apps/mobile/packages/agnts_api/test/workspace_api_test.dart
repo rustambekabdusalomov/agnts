@@ -21,9 +21,9 @@ void main() {
       // TODO
     });
 
-    // Disconnect the workspace's shared Claude account
+    // Disconnect the workspace's shared Claude or Muse account
     //
-    //Future deleteWorkspaceClaudeConnection() async
+    //Future deleteWorkspaceClaudeConnection({ String provider }) async
     test('test deleteWorkspaceClaudeConnection', () async {
       // TODO
     });
@@ -42,9 +42,9 @@ void main() {
       // TODO
     });
 
-    // Which Claude account the workspace's runs use
+    // Which Claude or Muse account the workspace's runs use
     //
-    //Future<WorkspaceClaude> getWorkspaceClaude() async
+    //Future<WorkspaceClaude> getWorkspaceClaude({ String provider }) async
     test('test getWorkspaceClaude', () async {
       // TODO
     });

@@ -18,7 +18,7 @@ type ClaudeConnection struct {
 	ID          int64
 	WorkspaceID *int64
 	UserID      *int64
-	Kind        string // subscription or api_key
+	Kind        string // subscription, api_key, muse_api_key or muse_login
 	Token       string
 	Account     string
 	LastError   string
@@ -36,6 +36,14 @@ const (
 	MuseAPIKey = "muse_api_key" //nolint:gosec // a kind name, not a credential
 	MuseLogin  = "muse_login"
 )
+
+// ProviderOfKind names the module a connection kind is for: muse or claude.
+func ProviderOfKind(kind string) string {
+	if kind == MuseAPIKey || kind == MuseLogin {
+		return "muse"
+	}
+	return "claude"
+}
 
 // ClaudeConnections stores Claude accounts, sealed with the server key.
 // The table has no row-level policy: personal connections serve every
@@ -87,18 +95,20 @@ func (s *ClaudeConnections) ByID(ctx context.Context, id int64) (ClaudeConnectio
 	return s.scan(s.db.QueryRow(ctx, `SELECT `+claudeCols+` FROM claude_connections WHERE id = $1`, id))
 }
 
-// ForWorkspace returns a workspace's shared connection, or ErrNotFound.
-func (s *ClaudeConnections) ForWorkspace(ctx context.Context, ws int64) (ClaudeConnection, error) {
-	return s.scan(s.db.QueryRow(ctx, `SELECT `+claudeCols+` FROM claude_connections WHERE workspace_id = $1`, ws))
+// ForWorkspace returns a workspace's shared connection for module
+// provider (muse or claude), or ErrNotFound.
+func (s *ClaudeConnections) ForWorkspace(ctx context.Context, ws int64, provider string) (ClaudeConnection, error) {
+	return s.scan(s.db.QueryRow(ctx, `SELECT `+claudeCols+` FROM claude_connections WHERE workspace_id = $1 AND provider = $2`, ws, provider))
 }
 
-// ForUser returns a person's own connection, or ErrNotFound.
-func (s *ClaudeConnections) ForUser(ctx context.Context, userID int64) (ClaudeConnection, error) {
-	return s.scan(s.db.QueryRow(ctx, `SELECT `+claudeCols+` FROM claude_connections WHERE user_id = $1`, userID))
+// ForUser returns a person's own connection for module provider, or
+// ErrNotFound.
+func (s *ClaudeConnections) ForUser(ctx context.Context, userID int64, provider string) (ClaudeConnection, error) {
+	return s.scan(s.db.QueryRow(ctx, `SELECT `+claudeCols+` FROM claude_connections WHERE user_id = $1 AND provider = $2`, userID, provider))
 }
 
 // Put saves the connection of a workspace (ws > 0) or a person (userID > 0),
-// replacing the one there was.
+// replacing the one there was for the same module.
 func (s *ClaudeConnections) Put(ctx context.Context, ws, userID int64, kind, token, account string) (ClaudeConnection, error) {
 	c := ClaudeConnection{Kind: kind}
 	if ws > 0 {
@@ -114,9 +124,9 @@ func (s *ClaudeConnections) Put(ctx context.Context, ws, userID int64, kind, tok
 	}
 	err = pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		if c.WorkspaceID != nil {
-			_, err = tx.Exec(ctx, `DELETE FROM claude_connections WHERE workspace_id = $1`, ws)
+			_, err = tx.Exec(ctx, `DELETE FROM claude_connections WHERE workspace_id = $1 AND provider = $2`, ws, ProviderOfKind(kind))
 		} else {
-			_, err = tx.Exec(ctx, `DELETE FROM claude_connections WHERE user_id = $1`, userID)
+			_, err = tx.Exec(ctx, `DELETE FROM claude_connections WHERE user_id = $1 AND provider = $2`, userID, ProviderOfKind(kind))
 		}
 		if err != nil {
 			return err
@@ -128,15 +138,16 @@ func (s *ClaudeConnections) Put(ctx context.Context, ws, userID int64, kind, tok
 	return c, err
 }
 
-// DeleteWorkspace removes a workspace's shared connection.
-func (s *ClaudeConnections) DeleteWorkspace(ctx context.Context, ws int64) error {
-	_, err := s.db.Exec(ctx, `DELETE FROM claude_connections WHERE workspace_id = $1`, ws)
+// DeleteWorkspace removes a workspace's shared connection for module
+// provider.
+func (s *ClaudeConnections) DeleteWorkspace(ctx context.Context, ws int64, provider string) error {
+	_, err := s.db.Exec(ctx, `DELETE FROM claude_connections WHERE workspace_id = $1 AND provider = $2`, ws, provider)
 	return err
 }
 
-// DeleteUser removes a person's own connection.
-func (s *ClaudeConnections) DeleteUser(ctx context.Context, userID int64) error {
-	_, err := s.db.Exec(ctx, `DELETE FROM claude_connections WHERE user_id = $1`, userID)
+// DeleteUser removes a person's own connection for module provider.
+func (s *ClaudeConnections) DeleteUser(ctx context.Context, userID int64, provider string) error {
+	_, err := s.db.Exec(ctx, `DELETE FROM claude_connections WHERE user_id = $1 AND provider = $2`, userID, provider)
 	return err
 }
 
@@ -154,10 +165,11 @@ func (s *ClaudeConnections) SetError(ctx context.Context, id int64, msg string) 
 }
 
 // MemberConnections returns, for each member of workspace ws, whether they
-// have their own connection and until when it is paused.
-func (s *ClaudeConnections) MemberConnections(ctx context.Context, ws int64) (map[int64]*time.Time, error) {
+// have their own connection for module provider and until when it is
+// paused.
+func (s *ClaudeConnections) MemberConnections(ctx context.Context, ws int64, provider string) (map[int64]*time.Time, error) {
 	rows, err := s.db.Query(ctx, `SELECT c.user_id, c.paused_until FROM claude_connections c
-		JOIN memberships m ON m.user_id = c.user_id WHERE m.workspace_id = $1`, ws)
+		JOIN memberships m ON m.user_id = c.user_id WHERE m.workspace_id = $1 AND c.provider = $2`, ws, provider)
 	if err != nil {
 		return nil, err
 	}

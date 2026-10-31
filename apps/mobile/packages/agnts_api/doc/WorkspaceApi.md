@@ -11,10 +11,10 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**createInvite**](WorkspaceApi.md#createinvite) | **POST** /workspace/invites | Invite someone by email or by a link (valid 7 days)
 [**deleteWorkspace**](WorkspaceApi.md#deleteworkspace) | **DELETE** /workspace | Delete the workspace (kept 7 days for undo, then purged)
-[**deleteWorkspaceClaudeConnection**](WorkspaceApi.md#deleteworkspaceclaudeconnection) | **DELETE** /workspace/claude/connection | Disconnect the workspace&#39;s shared Claude account
+[**deleteWorkspaceClaudeConnection**](WorkspaceApi.md#deleteworkspaceclaudeconnection) | **DELETE** /workspace/claude/connection | Disconnect the workspace&#39;s shared Claude or Muse account
 [**getQueue**](WorkspaceApi.md#getqueue) | **GET** /workspace/queue | Where the workspace&#39;s tickets stand in the queue
 [**getWorkspace**](WorkspaceApi.md#getworkspace) | **GET** /workspace | The current workspace and your role in it
-[**getWorkspaceClaude**](WorkspaceApi.md#getworkspaceclaude) | **GET** /workspace/claude | Which Claude account the workspace&#39;s runs use
+[**getWorkspaceClaude**](WorkspaceApi.md#getworkspaceclaude) | **GET** /workspace/claude | Which Claude or Muse account the workspace&#39;s runs use
 [**leaveWorkspace**](WorkspaceApi.md#leaveworkspace) | **POST** /workspace/leave | Leave the workspace
 [**listInvites**](WorkspaceApi.md#listinvites) | **GET** /workspace/invites | Open invites
 [**listMembers**](WorkspaceApi.md#listmembers) | **GET** /workspace/members | The workspace&#39;s members
@@ -117,9 +117,9 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteWorkspaceClaudeConnection**
-> deleteWorkspaceClaudeConnection()
+> deleteWorkspaceClaudeConnection(provider)
 
-Disconnect the workspace's shared Claude account
+Disconnect the workspace's shared Claude or Muse account
 
 ### Example
 ```dart
@@ -130,16 +130,20 @@ import 'package:agnts_api/api.dart';
 //defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
 
 final api = AgntsApi().getWorkspaceApi();
+final String provider = provider_example; // String | The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
 
 try {
-    api.deleteWorkspaceClaudeConnection();
+    api.deleteWorkspaceClaudeConnection(provider);
 } on DioException catch (e) {
     print('Exception when calling WorkspaceApi->deleteWorkspaceClaudeConnection: $e\n');
 }
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **provider** | **String**| The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. | [optional] 
 
 ### Return type
 
@@ -239,9 +243,9 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getWorkspaceClaude**
-> WorkspaceClaude getWorkspaceClaude()
+> WorkspaceClaude getWorkspaceClaude(provider)
 
-Which Claude account the workspace's runs use
+Which Claude or Muse account the workspace's runs use
 
 ### Example
 ```dart
@@ -252,9 +256,10 @@ import 'package:agnts_api/api.dart';
 //defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
 
 final api = AgntsApi().getWorkspaceApi();
+final String provider = provider_example; // String | The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
 
 try {
-    final response = api.getWorkspaceClaude();
+    final response = api.getWorkspaceClaude(provider);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling WorkspaceApi->getWorkspaceClaude: $e\n');
@@ -262,7 +267,10 @@ try {
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **provider** | **String**| The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. | [optional] 
 
 ### Return type
 

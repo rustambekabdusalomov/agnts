@@ -21,9 +21,9 @@ func ValidModel(m string) bool {
 	return slices.Contains(Models, m) || codexModel.MatchString(m) || museModel.MatchString(m)
 }
 
-// AllowedModel reports whether settings may pick m on this server: a
-// valid model of an enabled provider.
-func AllowedModel(m string) bool { return ValidModel(m) && ProviderEnabled(ProviderOf(m)) }
+// AllowedModel reports whether a person with access a may pick m: a valid
+// model of a module they may use.
+func AllowedModel(a Access, m string) bool { return ValidModel(m) && a.Allows(ProviderOf(m)) }
 
 // IsCodex reports whether m runs on Codex CLI.
 func IsCodex(m string) bool { return strings.HasPrefix(m, "codex:") }
@@ -164,6 +164,10 @@ type NotifySettings struct {
 
 // Settings are the runtime settings edited on the Settings page.
 type Settings struct {
+	// Access is the person the settings were read for (For); zero for
+	// settings as stored. It is never saved.
+	Access Access `json:"-"`
+
 	Models   StageModels `json:"models"`
 	MaxTurns int         `json:"maxTurns"`
 	// RunBudget is the most one run on credits may spend, in credits
@@ -277,11 +281,11 @@ func (m MeetingSettings) Validate() error {
 	return nil
 }
 
-// defaultModels are the primary provider's models per stage. On Muse,
+// defaultModels are a's default module's models per stage. On Muse,
 // every stage starts on Spark: the review's auto choice and a stuck
 // session's escalation move hard work to Wonder.
-func defaultModels() StageModels {
-	if PrimaryProvider() == ProviderMuse {
+func defaultModels(a Access) StageModels {
+	if a.Primary() == ProviderMuse {
 		return StageModels{Analyze: MuseSpark, Coding: MuseSpark, Retry: MuseSpark, Helper: MuseSpark, Learn: MuseSpark, Review: ModelAuto, Preview: MuseSpark}
 	}
 	return StageModels{Analyze: "sonnet", Coding: "opus", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto, Preview: "sonnet"}
@@ -290,7 +294,7 @@ func defaultModels() StageModels {
 // DefaultSettings returns the settings used before any are saved.
 func DefaultSettings() Settings {
 	return Settings{
-		Models:          defaultModels(),
+		Models:          defaultModels(DefaultAccess()),
 		MaxTurns:        150,
 		TimeoutMin:      45,
 		Allow:           []string{},
@@ -353,13 +357,16 @@ func (s *Settings) Validate() error {
 	if s.MaxTicketRepos < 0 || s.MaxTicketRepos > 20 {
 		errs = append(errs, fmt.Errorf("a ticket may have 1 to 20 repositories"))
 	}
+	// Which modules a person may pick from is CheckModels: here any model
+	// agnts can run is valid, so settings saved by someone with other
+	// modules stay valid.
 	for name, m := range map[string]string{"analyze": s.Models.Analyze, "coding": s.Models.Coding, "retry": s.Models.Retry, "helper": s.Models.Helper, "learn": s.Models.Learn, "preview": s.Models.Preview} {
-		if !AllowedModel(m) {
-			errs = append(errs, fmt.Errorf("model for %s must be one of %s", name, strings.Join(AvailableModels(), ", ")))
+		if !ValidModel(m) {
+			errs = append(errs, fmt.Errorf("model for %s must be one of %s, muse:<model> or codex:<model>", name, strings.Join(Models, ", ")))
 		}
 	}
-	if s.Models.Review != ModelAuto && !AllowedModel(s.Models.Review) {
-		errs = append(errs, fmt.Errorf("model for review must be %s or one of %s", ModelAuto, strings.Join(AvailableModels(), ", ")))
+	if s.Models.Review != ModelAuto && !ValidModel(s.Models.Review) {
+		errs = append(errs, fmt.Errorf("model for review must be %s, one of %s, muse:<model> or codex:<model>", ModelAuto, strings.Join(Models, ", ")))
 	}
 	check := func(name string, v, lo, hi int) {
 		if v < lo || v > hi {
@@ -444,12 +451,76 @@ func (s Settings) FollowUpsOn(t Ticket) bool {
 	return s.SuggestFollowUps
 }
 
-// ModelFor returns the model for a stage, honouring a ticket's override.
+// ModelFor returns the model for a stage, honouring a ticket's override,
+// mapped to the modules of the person the settings were read for.
 func (s Settings) ModelFor(t Ticket, stage string) string {
 	if m := t.Models[stage]; ValidModel(m) {
-		return EffectiveModel(m)
+		return EffectiveModel(s.Access, m)
 	}
-	return EffectiveModel(s.Models.For(stage))
+	return EffectiveModel(s.Access, s.Models.For(stage))
+}
+
+// For returns the settings as they apply to runs of a person with access
+// a: models of modules they may not use map to their own (EffectiveModel).
+// A workspace that never saved its settings has the defaults of the
+// default access when the server started, mapped the same way.
+func (s Settings) For(a Access) Settings {
+	s.Access = Access{Modules: slices.Clone(a.Modules)}
+	s.Models = s.Models.EffectiveModels(a)
+	s.SecondOpinion = EffectiveModel(a, s.SecondOpinion)
+	return s
+}
+
+// Modules returns the modules runs of these settings may use for a ticket
+// with model overrides models (nil: none): every stage's, the second
+// opinion's, and the default module's, which the review's auto choice and
+// helpers use. Settings must be For a person.
+func (s Settings) Modules(models map[string]string) []string {
+	out := []string{}
+	add := func(m string) {
+		if m == "" || m == ModelAuto {
+			return
+		}
+		if p := ProviderOf(m); !slices.Contains(out, p) {
+			out = append(out, p)
+		}
+	}
+	if p := s.Access.Primary(); p != "" {
+		out = append(out, p)
+	}
+	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview} {
+		add(s.ModelFor(Ticket{Models: models}, stage))
+	}
+	add(s.SecondOpinion)
+	return out
+}
+
+// CheckModels checks the models a person with access a changed from prev:
+// each must be of a module they may use. Models they left alone are kept
+// even when they cannot use them (someone else chose them).
+func (s Settings) CheckModels(a Access, prev Settings) error {
+	var errs []error
+	allowed := strings.Join(AvailableModels(a), ", ")
+	if a.Allows(ProviderCodex) {
+		allowed += ", codex:<model>"
+	}
+	check := func(name, m, was string, auto bool) {
+		if m == was || (auto && m == ModelAuto) || AllowedModel(a, m) {
+			return
+		}
+		errs = append(errs, fmt.Errorf("model for %s must be one of %s: %s is not enabled for you", name, allowed, ModuleName(ProviderOf(m))))
+	}
+	check("analyze", s.Models.Analyze, prev.Models.Analyze, false)
+	check("coding", s.Models.Coding, prev.Models.Coding, false)
+	check("retry", s.Models.Retry, prev.Models.Retry, false)
+	check("helper", s.Models.Helper, prev.Models.Helper, false)
+	check("learn", s.Models.Learn, prev.Models.Learn, false)
+	check("review", s.Models.Review, prev.Models.Review, true)
+	check("preview", s.Models.Preview, prev.Models.Preview, false)
+	if s.SecondOpinion != "" {
+		check("second opinion", s.SecondOpinion, prev.SecondOpinion, false)
+	}
+	return errors.Join(errs...)
 }
 
 // validHost reports whether h is a host name, optionally with a leading

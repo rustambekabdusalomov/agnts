@@ -7,8 +7,10 @@ approval. See [Implementation plan.md](plans/Implementation%20plan.md) and
 
 ## Muse Code
 
-Muse Code is agnts's coding tool (`AGNTS_PROVIDERS=muse`; Claude Code and
-Codex stay available behind the same switch). agnts drives it with
+Muse Code is one of agnts's three coding modules, with Claude Code and Codex.
+`AGNTS_PROVIDERS` lists the ones this server can run; within it, the platform
+Admin chooses the modules the server offers and who may use which (Admin →
+Modules, and Set modules on Admin → Users). agnts drives Muse with
 [agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse), which speaks
 Muse's session protocol (`muse serve`) inside each run container:
 
@@ -85,7 +87,7 @@ Settings). The server commands still work for a headless first run, through
 the CLI as `agnts server -- ...`:
 
 ```sh
-agnts server -- integration set claude    # token from `claude setup-token` (only with AGNTS_PROVIDERS including claude)
+agnts server -- integration set claude    # token from `claude setup-token` (only while an Admin has Claude enabled)
 agnts server -- integration set github    # fine-grained PAT: Contents + Pull requests, read/write (+ Actions for CI watching)
 agnts server -- integration set jira      # site, email, API token, label; prints the webhook to create
 agnts server -- integration set plane     # API address, workspace, API key; prints the webhook to create in Plane

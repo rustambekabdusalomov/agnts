@@ -7,13 +7,13 @@ void main() {
   // TODO add properties to the entity
 
   group(ModelCatalog, () {
-    // The coding tools this server offers
+    // The coding modules you may use (an Admin chooses them); empty when none
     // List<String> providers
     test('to test the property `providers`', () async {
       // TODO
     });
 
-    // The default tool
+    // Your default module; settings naming a module you may not use run on its models
     // String primary
     test('to test the property `primary`', () async {
       // TODO
