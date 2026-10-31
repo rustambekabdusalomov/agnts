@@ -104,6 +104,9 @@ type Deps struct {
 	// Accounts picks each run's Claude account; nil uses Usage alone (one
 	// connection for everything).
 	Accounts ClaudeAccounts
+	// Access says which coding modules each person may use; nil gives
+	// everyone the default access.
+	Access AccessSource
 	// Capacity holds runs to the server's memory budget; nil admits runs
 	// by slots alone.
 	Capacity Capacity
@@ -121,16 +124,20 @@ type Deps struct {
 
 // Orchestrator runs tickets through their stages.
 type Orchestrator struct {
-	baselines   baselines // check results on base commits
-	cfg         Config
-	store       Store
-	runner      Runner
-	git         Git
-	host        Host
-	trackers    map[domain.TicketSource]Tracker
-	homes       Homes
-	progress    Progress
+	baselines baselines // check results on base commits
+	cfg       Config
+	store     Store
+	runner    Runner
+	git       Git
+	host      Host
+	trackers  map[domain.TicketSource]Tracker
+	homes     Homes
+	progress  Progress
+	// settings are read for the person a run is for (personSettings);
+	// stored are the workspace's settings as saved.
 	settings    SettingsSource
+	stored      SettingsSource
+	access      AccessSource
 	usage       UsageGate
 	lessons     Lessons
 	rules       Rules
@@ -201,13 +208,36 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	}
 	return &Orchestrator{
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes, progress: d.Progress,
-		settings: d.Settings, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
+		settings: personSettings{d.Settings}, stored: d.Settings, access: d.Access, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
 		swagger: d.SwaggerTests, specs: newSpecFetcher(), docs: d.Documents, docHost: d.DocumentHost,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
+}
+
+// personSettings reads a workspace's settings for the person ctx runs for
+// (the default person when none): models of modules they may not use map
+// to their own.
+type personSettings struct{ src SettingsSource }
+
+func (p personSettings) Get(ctx context.Context) (domain.Settings, error) {
+	s, err := p.src.Get(ctx)
+	return s.For(domain.AccessOf(ctx)), err
+}
+
+// withPerson returns ctx running for person user: their modules, for the
+// assistant and meeting notes, which the scheduler does not start.
+func (o *Orchestrator) withPerson(ctx context.Context, user int64) context.Context {
+	if o.access == nil || user <= 0 {
+		return ctx
+	}
+	a, err := o.access.For(ctx, user)
+	if err != nil {
+		o.log.Warn("read modules", "user", user, "err", err)
+	}
+	return domain.WithAccess(ctx, a)
 }
 
 // runKey names a ticket's active run: keys are unique per workspace.
@@ -714,6 +744,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if run.Model == "" {
 		run.Model = model
 	}
+	ctx = domain.UseProvider(ctx, domain.ProviderOf(model))
 	// A ticket in several repositories has more to read and change.
 	scale := domain.TurnScale(len(t.Repos))
 	turns := int(float64(s.MaxTurns) * scale)
@@ -792,12 +823,12 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 			// claimed once usage allows.
 			return res, &stopError{"rate limited"}
 		}
-		if err := o.transition(ctx, t, run, domain.StateRateLimited, domain.ToolName()+" plan limit reached; resumes after the limit resets", func(x *domain.Ticket) {
+		if err := o.transition(ctx, t, run, domain.StateRateLimited, domain.ToolName(domain.AccessOf(ctx))+" plan limit reached; resumes after the limit resets", func(x *domain.Ticket) {
 			x.ResumeState = resumeStateFor(run.Stage)
 		}); err != nil {
 			return res, err
 		}
-		o.trackerComment(ctx, *t, CommentStatus, "agnts paused at the "+domain.ToolName()+" plan limit and resumes after it resets.")
+		o.trackerComment(ctx, *t, CommentStatus, "agnts paused at the "+domain.ToolName(domain.AccessOf(ctx))+" plan limit and resumes after it resets.")
 		return res, &stopError{"rate limited"}
 	}
 	if res.IsError && res.Subtype == "error_max_turns" && budget > 0 {
@@ -2021,7 +2052,7 @@ func prBody(ctx context.Context, store Store, t domain.Ticket) string {
 			b.WriteString("\n\n")
 		}
 	}
-	fmt.Fprintf(&b, "Ticket: %s\n\nWritten by agnts with %s Code and reviewed before push.", t.Key, domain.ToolName())
+	fmt.Fprintf(&b, "Ticket: %s\n\nWritten by agnts with %s Code and reviewed before push.", t.Key, domain.ToolName(domain.AccessOf(ctx)))
 	return b.String()
 }
 

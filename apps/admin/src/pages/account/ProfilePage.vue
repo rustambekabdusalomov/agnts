@@ -12,6 +12,7 @@ import CreditLimitsCard from '../../components/account/CreditLimitsCard.vue'
 import FreeCreditsCard from '../../components/account/FreeCreditsCard.vue'
 import PrefsControls from '../../components/PrefsControls.vue'
 import { useModels } from '../../composables/useModels'
+import { accountModules, type AccountModule } from '../../components/modules/modules'
 import CfgRow from '../../components/form/CfgRow.vue'
 import TotpQr from '../../components/account/TotpQr.vue'
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
@@ -20,11 +21,13 @@ import { useUi } from '../../stores/ui'
 import { useWorkspace } from '../../stores/workspace'
 
 // The person's own account: name, email, password, two-factor sign-in and
-// their Claude account, or Muse account where Muse Code is the tool (for
+// their Claude and Muse accounts, one per module they may use (for
 // workspaces in per-member mode); feedback for the agnts team; signing out.
 const { t } = useI18n()
 const catalog = useModels()
-const w = (key: string) => (catalog.isMuse.value ? `${key}Muse` : key)
+const conns = computed(() => accountModules(catalog.providers.value))
+// Muse wording on the Muse card: account.myClaude → account.myClaudeMuse.
+const w = (p: AccountModule, key: string) => (p === 'muse' ? `${key}Muse` : key)
 const session = useSession()
 const ui = useUi()
 const qc = useQueryClient()
@@ -95,33 +98,48 @@ const disable = useMutation({
   onError: (e) => ui.notify(errText(e)),
 })
 
-const claude = useQuery({ queryKey: ['my-claude'], queryFn: () => unwrap(api.GET('/account/claude')) })
-const claudeError = ref('')
+const mineOf = (p: AccountModule) =>
+  useQuery({
+    queryKey: ['my-claude', p],
+    queryFn: () => unwrap(api.GET('/account/claude', { params: { query: { provider: p } } })),
+    enabled: computed(() => catalog.has(p)),
+  })
+const mine: Record<AccountModule, ReturnType<typeof mineOf>> = { muse: mineOf('muse'), claude: mineOf('claude') }
+// The server tells the module from the kind of token.
+type Kind = 'subscription' | 'api_key' | 'muse_api_key'
+const moduleOf = (kind: Kind): AccountModule => (kind === 'muse_api_key' ? 'muse' : 'claude')
+const claudeError = ref<Record<AccountModule, string>>({ muse: '', claude: '' })
 const connect = useMutation({
-  mutationFn: (v: { kind: 'subscription' | 'api_key' | 'muse_api_key'; token: string }) => unwrap(api.PUT('/account/claude', { body: v })),
-  onSuccess: (s) => {
-    claudeError.value = ''
-    qc.setQueryData(['my-claude'], s)
-    ui.notify(t(w('account.claudeSaved')))
+  mutationFn: (v: { kind: Kind; token: string }) => unwrap(api.PUT('/account/claude', { body: v })),
+  onSuccess: (s, { kind }) => {
+    const p = moduleOf(kind)
+    claudeError.value[p] = ''
+    qc.setQueryData(['my-claude', p], s)
+    ui.notify(t(w(p, 'account.claudeSaved')))
   },
-  onError: (e) => {
-    claudeError.value = errText(e)
+  onError: (e, { kind }) => {
+    claudeError.value[moduleOf(kind)] = errText(e)
   },
 })
 const disconnect = useMutation({
-  mutationFn: () => unwrap(api.DELETE('/account/claude')),
-  onSuccess: () => {
-    void qc.invalidateQueries({ queryKey: ['my-claude'] })
-    ui.notify(t(w('account.claudeRemoved')))
+  mutationFn: (p: AccountModule) => unwrap(api.DELETE('/account/claude', { params: { query: { provider: p } } })),
+  onSuccess: (_r, p) => {
+    void qc.invalidateQueries({ queryKey: ['my-claude', p] })
+    ui.notify(t(w(p, 'account.claudeRemoved')))
   },
 })
+const busy = computed(() => connect.isPending.value || disconnect.isPending.value)
 function onSignedIn() {
-  void qc.invalidateQueries({ queryKey: ['my-claude'] })
+  void qc.invalidateQueries({ queryKey: ['my-claude', 'muse'] })
   ui.notify(t('account.claudeSavedMuse'))
 }
 // Whether subscription tokens are accepted is the server's rule; the
 // workspace's Claude page knows it.
-const subscriptions = useQuery({ queryKey: ['workspace-claude'], queryFn: () => unwrap(api.GET('/workspace/claude')) })
+const subscriptions = useQuery({
+  queryKey: ['workspace-claude', 'claude'],
+  queryFn: () => unwrap(api.GET('/workspace/claude', { params: { query: { provider: 'claude' } } })),
+  enabled: computed(() => catalog.has('claude')),
+})
 
 // Feedback goes with the workspace it is sent from.
 const workspace = useWorkspace()
@@ -162,31 +180,33 @@ async function signOut() {
       </div>
     </section>
 
-    <section v-if="!session.user?.isAdmin || session.user?.workspaces?.length" class="card">
-      <div class="ch"><div><h2>{{ t(w('account.myClaude')) }}</h2><p class="sub">{{ t('account.myClaudeSub') }}</p></div></div>
-      <MuseConnect
-        v-if="catalog.isMuse.value"
-        scope="personal"
-        :state="claude.data.value"
-        :busy="connect.isPending.value || disconnect.isPending.value"
-        :error="claudeError"
-        @connect="(token) => connect.mutate({ kind: 'muse_api_key', token })"
-        @disconnect="disconnect.mutate()"
-        @signed-in="onSignedIn"
-      />
-      <ClaudeConnect
-        v-else
-        :state="claude.data.value"
-        :subscriptions="subscriptions.data.value?.subscriptionsAllowed ?? true"
-        :busy="connect.isPending.value || disconnect.isPending.value"
-        :error="claudeError"
-        @connect="(kind, token) => connect.mutate({ kind, token })"
-        @disconnect="disconnect.mutate()"
-      />
-    </section>
+    <template v-if="!session.user?.isAdmin || session.user?.workspaces?.length">
+      <section v-for="p in conns" :key="p" class="card">
+        <div class="ch"><div><h2>{{ t(w(p, 'account.myClaude')) }}</h2><p class="sub">{{ t('account.myClaudeSub') }}</p></div></div>
+        <MuseConnect
+          v-if="p === 'muse'"
+          scope="personal"
+          :state="mine.muse.data.value"
+          :busy="busy"
+          :error="claudeError.muse"
+          @connect="(token) => connect.mutate({ kind: 'muse_api_key', token })"
+          @disconnect="disconnect.mutate('muse')"
+          @signed-in="onSignedIn"
+        />
+        <ClaudeConnect
+          v-else
+          :state="mine.claude.data.value"
+          :subscriptions="subscriptions.data.value?.subscriptionsAllowed ?? true"
+          :busy="busy"
+          :error="claudeError.claude"
+          @connect="(kind, token) => connect.mutate({ kind, token })"
+          @disconnect="disconnect.mutate('claude')"
+        />
+      </section>
+    </template>
 
-    <FreeCreditsCard v-if="catalog.isMuse.value" always />
-    <CreditLimitsCard v-if="catalog.isMuse.value" />
+    <FreeCreditsCard v-if="catalog.has('muse')" always />
+    <CreditLimitsCard v-if="catalog.has('muse')" />
 
     <section class="card">
       <div class="ch"><div><h2>{{ t('settings.appearance') }}</h2><p class="sub">{{ t('settings.appearanceSub') }}</p></div></div>

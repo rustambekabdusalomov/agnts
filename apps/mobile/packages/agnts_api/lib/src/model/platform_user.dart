@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/user_modules.dart';
 import 'package:agnts_api/src/model/workspace_summary.dart';
 import 'package:agnts_api/src/model/credit_usage.dart';
 import 'package:agnts_api/src/model/user.dart';
@@ -35,6 +36,8 @@ class PlatformUser {
      this.freeCredits,
 
      this.creditUsage,
+
+     this.modules,
   });
 
   @JsonKey(
@@ -112,6 +115,18 @@ class PlatformUser {
 
 
 
+  @JsonKey(
+    
+    name: r'modules',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final UserModules? modules;
+
+
+
 
 
     @override
@@ -121,7 +136,8 @@ class PlatformUser {
       other.lastSignInAt == lastSignInAt &&
       other.workspaces == workspaces &&
       other.freeCredits == freeCredits &&
-      other.creditUsage == creditUsage;
+      other.creditUsage == creditUsage &&
+      other.modules == modules;
 
     @override
     int get hashCode =>
@@ -130,7 +146,8 @@ class PlatformUser {
         lastSignInAt.hashCode +
         workspaces.hashCode +
         freeCredits.hashCode +
-        creditUsage.hashCode;
+        creditUsage.hashCode +
+        modules.hashCode;
 
   factory PlatformUser.fromJson(Map<String, dynamic> json) => _$PlatformUserFromJson(json);
 

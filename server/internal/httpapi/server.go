@@ -86,6 +86,9 @@ type Options struct {
 	// Muse signs people in to Meta for Muse and keeps free credits; nil
 	// answers 501.
 	Muse MuseService
+	// Modules keeps which coding modules each person may use; nil gives
+	// everyone the default access and answers 501 on its Admin pages.
+	Modules ModulesService
 	// Queue reports the queue and the server's capacity; nil answers 501.
 	Queue QueueReporter
 	// Billing runs plans, slots and credits; nil answers 501.

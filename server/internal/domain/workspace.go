@@ -218,20 +218,75 @@ type ClaudeAccount struct {
 	// UserID is whose free credits a run on credits spends first (the
 	// ticket's member); 0 for none.
 	UserID int64
+	// Provider is the module the account is for: muse, claude, or codex
+	// (no connection: Codex runs on the workspace's OpenAI key).
+	Provider string
 }
 
 type claudeKey struct{}
 
-// WithClaude returns ctx running on account a.
-func WithClaude(ctx context.Context, a ClaudeAccount) context.Context {
-	return context.WithValue(ctx, claudeKey{}, a)
+// runAccounts is the accounts a run may use, one per module, and the
+// module its current model call is on.
+type runAccounts struct {
+	set     map[string]ClaudeAccount
+	primary string
+	current string
 }
 
-// ClaudeOf returns the account ctx runs on; ok is false when none was
-// picked (legacy single-connection installs).
+// WithClaude returns ctx running on account a.
+func WithClaude(ctx context.Context, a ClaudeAccount) context.Context {
+	return WithAccounts(ctx, a.Provider, map[string]ClaudeAccount{a.Provider: a})
+}
+
+// WithAccounts returns ctx running on one account per module; primary is
+// the module ClaudeOf answers for until UseProvider names another.
+func WithAccounts(ctx context.Context, primary string, set map[string]ClaudeAccount) context.Context {
+	return context.WithValue(ctx, claudeKey{}, runAccounts{set: set, primary: primary})
+}
+
+// UseProvider returns ctx making a model call on module p: ClaudeOf then
+// answers with p's account.
+func UseProvider(ctx context.Context, p string) context.Context {
+	r, ok := ctx.Value(claudeKey{}).(runAccounts)
+	if !ok || r.current == p {
+		return ctx
+	}
+	r.current = p
+	return context.WithValue(ctx, claudeKey{}, r)
+}
+
+// CurrentProvider is the module ctx's model call is on, "" when unknown.
+func CurrentProvider(ctx context.Context) string {
+	r, _ := ctx.Value(claudeKey{}).(runAccounts)
+	if r.current != "" {
+		return r.current
+	}
+	return r.primary
+}
+
+// ClaudeOf returns the account ctx runs on for its current module; ok is
+// false when none was picked for it (legacy single-connection installs, or
+// a ticket's model override on a module the run did not pick).
 func ClaudeOf(ctx context.Context) (ClaudeAccount, bool) {
-	a, ok := ctx.Value(claudeKey{}).(ClaudeAccount)
+	r, ok := ctx.Value(claudeKey{}).(runAccounts)
+	if !ok {
+		return ClaudeAccount{}, false
+	}
+	p := r.current
+	if p == "" {
+		p = r.primary
+	}
+	a, ok := r.set[p]
+	if !ok {
+		a, ok = r.set[""] // an account set without its module serves any
+	}
 	return a, ok
+}
+
+// AccountsOf returns every account ctx's run picked, by module.
+func AccountsOf(ctx context.Context) map[string]ClaudeAccount {
+	r, _ := ctx.Value(claudeKey{}).(runAccounts)
+	return r.set
 }
 
 type hookKey struct{}
@@ -261,4 +316,19 @@ func WithTicket(ctx context.Context, key string) context.Context {
 func TicketOf(ctx context.Context) string {
 	key, _ := ctx.Value(ticketKey{}).(string)
 	return key
+}
+
+// RunPerson is the person a ticket of member runs for: the member, else
+// the workspace's default member, else its owner. Their modules decide
+// what the run may use, whichever account pays for it; in per-member mode
+// it is also their account.
+func (w Workspace) RunPerson(member *int64) int64 {
+	switch {
+	case member != nil && *member > 0:
+		return *member
+	case w.DefaultMemberID != nil:
+		return *w.DefaultMemberID
+	default:
+		return w.OwnerID
+	}
 }

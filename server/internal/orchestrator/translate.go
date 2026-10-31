@@ -247,7 +247,7 @@ func (o *Orchestrator) translateMissing(ctx context.Context, sub translateSubjec
 		done += n
 	}
 	if done == 0 {
-		return errors.New(domain.ToolName() + " translated nothing")
+		return errors.New(domain.ToolName(domain.AccessOf(ctx)) + " translated nothing")
 	}
 	o.log.Info("texts translated", "subject", sub.name, "lang", lang, "texts", done, "of", len(texts))
 	return nil

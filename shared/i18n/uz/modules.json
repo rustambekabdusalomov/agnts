@@ -1,0 +1,23 @@
+{
+  "modules": {
+    "name_muse": "Muse Code",
+    "name_claude": "Claude Code",
+    "name_codex": "Codex",
+    "title": "Modullar",
+    "sub": "Odamlar qaysi kod modullaridan foydalana oladi. Odam ro‘yxatidagi birinchisi uning asosiy moduli.",
+    "available": "Bu serverda mavjud",
+    "availableHelp": "Bu server nimalarni ishga tushira oladi (AGNTS_PROVIDERS). Buni bu yerda o‘zgartirib bo‘lmaydi.",
+    "enabled": "Yoqilgan",
+    "enabledHelp": "Odamlarga nima berish mumkin. O‘chirilgan modul hammadan olinadi.",
+    "defaultList": "Odamlar uchun standart",
+    "defaultListHelp": "Agar «Foydalanuvchilar» sahifasida odamga alohida ro‘yxat belgilamagan bo‘lsangiz, u shuni oladi. Birinchisi asosiy modul.",
+    "default": "Asosiy",
+    "moveUp": "{module}ni yuqoriga surish",
+    "moveDown": "{module}ni pastga surish",
+    "problem_noneEnabled": "Kamida bitta modulni yoqing.",
+    "problem_empty": "Kamida bitta modulni tanlang.",
+    "problem_codexFirst": "Codex asosiy modul bo‘la olmaydi: birinchi o‘ringa Muse Code yoki Claude Code qo‘ying.",
+    "save": "Saqlash",
+    "saved": "Modullar saqlandi"
+  }
+}

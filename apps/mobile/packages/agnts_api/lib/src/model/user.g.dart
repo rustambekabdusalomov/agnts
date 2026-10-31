@@ -23,6 +23,8 @@ abstract class _$UserCWProxy {
 
   User lastWorkspace(String? lastWorkspace);
 
+  User modules(List<Module>? modules);
+
   User workspaces(List<WorkspaceSummary>? workspaces);
 
   User createdAt(DateTime? createdAt);
@@ -42,6 +44,7 @@ abstract class _$UserCWProxy {
     bool? isAdmin,
     bool? hasTotp,
     String? lastWorkspace,
+    List<Module>? modules,
     List<WorkspaceSummary>? workspaces,
     DateTime? createdAt,
   });
@@ -79,6 +82,9 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
       this(lastWorkspace: lastWorkspace);
 
   @override
+  User modules(List<Module>? modules) => this(modules: modules);
+
+  @override
   User workspaces(List<WorkspaceSummary>? workspaces) =>
       this(workspaces: workspaces);
 
@@ -101,6 +107,7 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
     Object? isAdmin = const $CopyWithPlaceholder(),
     Object? hasTotp = const $CopyWithPlaceholder(),
     Object? lastWorkspace = const $CopyWithPlaceholder(),
+    Object? modules = const $CopyWithPlaceholder(),
     Object? workspaces = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
@@ -137,6 +144,10 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
           ? _value.lastWorkspace
           // ignore: cast_nullable_to_non_nullable
           : lastWorkspace as String?,
+      modules: modules == const $CopyWithPlaceholder()
+          ? _value.modules
+          // ignore: cast_nullable_to_non_nullable
+          : modules as List<Module>?,
       workspaces: workspaces == const $CopyWithPlaceholder()
           ? _value.workspaces
           // ignore: cast_nullable_to_non_nullable
@@ -171,6 +182,12 @@ User _$UserFromJson(Map<String, dynamic> json) =>
         isAdmin: $checkedConvert('isAdmin', (v) => v as bool?),
         hasTotp: $checkedConvert('hasTotp', (v) => v as bool?),
         lastWorkspace: $checkedConvert('lastWorkspace', (v) => v as String?),
+        modules: $checkedConvert(
+          'modules',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$ModuleEnumMap, e))
+              .toList(),
+        ),
         workspaces: $checkedConvert(
           'workspaces',
           (v) => (v as List<dynamic>?)
@@ -194,6 +211,13 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'isAdmin': ?instance.isAdmin,
   'hasTotp': ?instance.hasTotp,
   'lastWorkspace': ?instance.lastWorkspace,
+  'modules': ?instance.modules?.map((e) => _$ModuleEnumMap[e]!).toList(),
   'workspaces': ?instance.workspaces?.map((e) => e.toJson()).toList(),
   'createdAt': ?instance.createdAt?.toIso8601String(),
+};
+
+const _$ModuleEnumMap = {
+  Module.muse: 'muse',
+  Module.claude: 'claude',
+  Module.codex: 'codex',
 };

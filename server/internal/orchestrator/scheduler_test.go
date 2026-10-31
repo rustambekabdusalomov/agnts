@@ -8,26 +8,33 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
 	"agnts/internal/store/postgres/pgtest"
 )
 
-// fakeAccounts refuses the Claude account of the workspaces in paused.
+// fakeAccounts refuses the Claude account of the workspaces in paused,
+// and every account of the modules in refuse.
 type fakeAccounts struct {
 	mu     sync.Mutex
 	paused map[int64]bool
+	refuse map[string]string
 	picked []domain.ClaudeAccount
 }
 
-func (f *fakeAccounts) Pick(_ context.Context, w domain.Workspace, member *int64) (domain.ClaudeAccount, bool, string, time.Time) {
+func (f *fakeAccounts) Pick(_ context.Context, w domain.Workspace, member *int64, provider string) (domain.ClaudeAccount, bool, string, time.Time) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.paused[w.ID] {
 		return domain.ClaudeAccount{}, false, "Claude limit reached on the workspace's account", time.Time{}
 	}
-	a := domain.ClaudeAccount{ConnectionID: w.ID * 100}
+	if why, ok := f.refuse[provider]; ok {
+		return domain.ClaudeAccount{}, false, why, time.Time{}
+	}
+	a := domain.ClaudeAccount{ConnectionID: w.ID * 100, Provider: provider}
 	f.picked = append(f.picked, a)
 	return a, true, "", time.Time{}
 }
@@ -42,9 +49,18 @@ type sched struct {
 	accounts *fakeAccounts
 	budget   *orchestrator.MemoryBudget
 	runner   *fakeRunner
+	settings *postgres.Settings
+	pool     *pgxpool.Pool
 }
 
 func newSched(t *testing.T, budgetMB int64) *sched {
+	t.Helper()
+	return newSchedAccess(t, budgetMB, nil)
+}
+
+// newSchedAccess is newSched with people's modules from access (nil: the
+// default access for everyone).
+func newSchedAccess(t *testing.T, budgetMB int64, access orchestrator.AccessSource) *sched {
 	t.Helper()
 	pool := pgtest.Open(t)
 	pgtest.Reset(t, pool)
@@ -56,10 +72,11 @@ func newSched(t *testing.T, budgetMB int64) *sched {
 		budget:   &orchestrator.MemoryBudget{BudgetMB: budgetMB, DefaultMB: 4096, MaxMB: 8192},
 		runner:   &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}}
 	settings := postgres.NewSettings(pool, domain.DefaultSettings())
+	s.settings, s.pool = settings, pool
 	s.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
 		Store: s.store, Runner: s.runner, Git: &fakeGit{}, Host: &fakeHost{}, Homes: &memHomes{},
 		Settings: settings, Usage: &fakeUsage{}, Workspaces: postgres.NewWorkspaces(pool),
-		Accounts: s.accounts, Capacity: s.budget,
+		Accounts: s.accounts, Capacity: s.budget, Access: access,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	return s
 }

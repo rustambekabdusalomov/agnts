@@ -2685,24 +2685,6 @@ abstract class AppLocalizations {
   /// **'{used} of {limit} credits used'**
   String billingMonthLimit(String used, String limit);
 
-  /// No description provided for @billingFallbackLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}: {used} of {limit} credits used'**
-  String billingFallbackLimit(String name, String used, String limit);
-
-  /// No description provided for @billingFallbackNoLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}: {used} credits used, no limit'**
-  String billingFallbackNoLimit(String name, String used);
-
-  /// No description provided for @billingFallbackHint.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} is the backup provider, free for you: your runs move there when your own Meta account (or agnts\'s) is at its limit. When this allowance is used up, they continue on credits.'**
-  String billingFallbackHint(String name);
-
   /// No description provided for @briefTitle.
   ///
   /// In en, this message translates to:
@@ -15555,6 +15537,120 @@ abstract class AppLocalizations {
   /// **'Google sign-in is not set up in this build of the app.'**
   String get mobileGoogleSetup;
 
+  /// No description provided for @modulesName_muse.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse Code'**
+  String get modulesName_muse;
+
+  /// No description provided for @modulesName_claude.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude Code'**
+  String get modulesName_claude;
+
+  /// No description provided for @modulesName_codex.
+  ///
+  /// In en, this message translates to:
+  /// **'Codex'**
+  String get modulesName_codex;
+
+  /// No description provided for @modulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules'**
+  String get modulesTitle;
+
+  /// No description provided for @modulesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Which coding modules people may use. The first in a person\'s list is their default module.'**
+  String get modulesSub;
+
+  /// No description provided for @modulesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available on this server'**
+  String get modulesAvailable;
+
+  /// No description provided for @modulesAvailableHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'What this server can run (AGNTS_PROVIDERS). It cannot be changed here.'**
+  String get modulesAvailableHelp;
+
+  /// No description provided for @modulesEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get modulesEnabled;
+
+  /// No description provided for @modulesEnabledHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'What people may be given. Switching a module off takes it from everyone.'**
+  String get modulesEnabledHelp;
+
+  /// No description provided for @modulesDefaultList.
+  ///
+  /// In en, this message translates to:
+  /// **'Default for people'**
+  String get modulesDefaultList;
+
+  /// No description provided for @modulesDefaultListHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'What a person gets unless you set theirs on the Users page. The first is their default module.'**
+  String get modulesDefaultListHelp;
+
+  /// No description provided for @modulesDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get modulesDefault;
+
+  /// No description provided for @modulesMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {module} up'**
+  String modulesMoveUp(String module);
+
+  /// No description provided for @modulesMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {module} down'**
+  String modulesMoveDown(String module);
+
+  /// No description provided for @modulesProblem_noneEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable at least one module.'**
+  String get modulesProblem_noneEnabled;
+
+  /// No description provided for @modulesProblem_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one module.'**
+  String get modulesProblem_empty;
+
+  /// No description provided for @modulesProblem_codexFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Codex cannot be the default module: put Muse Code or Claude Code first.'**
+  String get modulesProblem_codexFirst;
+
+  /// No description provided for @modulesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get modulesSave;
+
+  /// No description provided for @modulesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules saved'**
+  String get modulesSaved;
+
   /// No description provided for @mpreviewTitle.
   ///
   /// In en, this message translates to:
@@ -17631,78 +17727,6 @@ abstract class AppLocalizations {
   /// **'{name} may spend up to {n} credits ({amount}) a month'**
   String platformLimitSet(String name, String n, String amount);
 
-  /// No description provided for @platformMuseProvider.
-  ///
-  /// In en, this message translates to:
-  /// **'Muse provider'**
-  String get platformMuseProvider;
-
-  /// No description provided for @platformMuseProviderSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Where runs on agnts\'s credits go. People\'s own Meta accounts are not affected.'**
-  String get platformMuseProviderSub;
-
-  /// No description provided for @platformMp_auto.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto'**
-  String get platformMp_auto;
-
-  /// No description provided for @platformMp_primary.
-  ///
-  /// In en, this message translates to:
-  /// **'Meta only'**
-  String get platformMp_primary;
-
-  /// No description provided for @platformMp_fallback.
-  ///
-  /// In en, this message translates to:
-  /// **'Fallback only'**
-  String get platformMp_fallback;
-
-  /// No description provided for @platformMpNote_auto.
-  ///
-  /// In en, this message translates to:
-  /// **'agnts\'s Meta key. When it runs out, runs continue their session on {name}.'**
-  String platformMpNote_auto(String name);
-
-  /// No description provided for @platformMpNote_primary.
-  ///
-  /// In en, this message translates to:
-  /// **'agnts\'s Meta key only. Runs stop when it runs out.'**
-  String get platformMpNote_primary;
-
-  /// No description provided for @platformMpNote_fallback.
-  ///
-  /// In en, this message translates to:
-  /// **'Every run on credits goes to {name}.'**
-  String platformMpNote_fallback(String name);
-
-  /// No description provided for @platformMpFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'Fallback'**
-  String get platformMpFallback;
-
-  /// No description provided for @platformMpNone.
-  ///
-  /// In en, this message translates to:
-  /// **'This server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY).'**
-  String get platformMpNone;
-
-  /// No description provided for @platformMpOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Meta is out until {time}'**
-  String platformMpOut(String time);
-
-  /// No description provided for @platformMpSet.
-  ///
-  /// In en, this message translates to:
-  /// **'Runs on credits: {mode}'**
-  String platformMpSet(String mode);
-
   /// No description provided for @platformLimitRemoved.
   ///
   /// In en, this message translates to:
@@ -17739,41 +17763,65 @@ abstract class AppLocalizations {
   /// **'No limit: only their credits bound what they spend.'**
   String get platformLimitNone;
 
-  /// No description provided for @platformFbUsage.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}: {used}'**
-  String platformFbUsage(String name, String used);
-
-  /// No description provided for @platformFbUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Spent on {name} this month: {used} credits ({amount}).'**
-  String platformFbUsed(String name, String used, String amount);
-
-  /// No description provided for @platformFbUseDefault.
-  ///
-  /// In en, this message translates to:
-  /// **'Use the server\'s default limit'**
-  String get platformFbUseDefault;
-
-  /// No description provided for @platformFbField.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits per month on {name} (0 is no limit)'**
-  String platformFbField(String name);
-
-  /// No description provided for @platformFbHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Free for them: runs use {name} when their own Meta account or agnts\'s is at its limit. When it is used up, their runs continue on credits.'**
-  String platformFbHelp(String name);
-
   /// No description provided for @platformUsageTotals.
   ///
   /// In en, this message translates to:
   /// **'This month: {used} credits ({amount}) across everyone; {limited} people have a limit.'**
   String platformUsageTotals(String used, String amount, String limited);
+
+  /// No description provided for @platformModules.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules'**
+  String get platformModules;
+
+  /// No description provided for @platformSetModules.
+  ///
+  /// In en, this message translates to:
+  /// **'Set modules'**
+  String get platformSetModules;
+
+  /// No description provided for @platformModulesDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default ({list})'**
+  String platformModulesDefault(String list);
+
+  /// No description provided for @platformModulesNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses now: {list}.'**
+  String platformModulesNow(String list);
+
+  /// No description provided for @platformModulesFollowDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the default'**
+  String get platformModulesFollowDefault;
+
+  /// No description provided for @platformModulesCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Their own list'**
+  String get platformModulesCustom;
+
+  /// No description provided for @platformModulesCustomHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The first is their default module. Only enabled modules can be chosen.'**
+  String get platformModulesCustomHelp;
+
+  /// No description provided for @platformModulesSet.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} may use {list}'**
+  String platformModulesSet(String name, String list);
+
+  /// No description provided for @platformModulesFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} follows the default modules now'**
+  String platformModulesFollow(String name);
 
   /// No description provided for @previewTab.
   ///
@@ -27644,6 +27692,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner.'**
   String get wsMuseKeyHelp;
+
+  /// No description provided for @wsClaudeBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get wsClaudeBoth;
+
+  /// No description provided for @wsClaudeSubBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Which Muse and Claude accounts this workspace\'s runs use.'**
+  String get wsClaudeSubBoth;
+
+  /// No description provided for @wsClaudeSavedBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Account settings saved'**
+  String get wsClaudeSavedBoth;
+
+  /// No description provided for @wsFallbackHelpBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'When the chosen account is at its limit or missing, runs continue on agnts\'s key and spend credits instead of pausing.'**
+  String get wsFallbackHelpBoth;
+
+  /// No description provided for @wsMemberAccountsSubBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Who has connected their own Muse and Claude accounts (Profile).'**
+  String get wsMemberAccountsSubBoth;
+
+  /// No description provided for @wsConnectionMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace Muse account'**
+  String get wsConnectionMuse;
+
+  /// No description provided for @wsConnectionClaude.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace Claude account'**
+  String get wsConnectionClaude;
+
+  /// No description provided for @wsNoAccountModules.
+  ///
+  /// In en, this message translates to:
+  /// **'Your modules have no account to connect here: Codex runs on the workspace\'s OpenAI integration.'**
+  String get wsNoAccountModules;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

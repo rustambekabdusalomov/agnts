@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**createPlatformAdmin**](PlatformApi.md#createplatformadmin) | **POST** /platform/admins | Create an Admin account that signs in with a password (Admin)
 [**deletePlatformAdmin**](PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [**downloadPlatformRun**](PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
+[**getModulesSettings**](PlatformApi.md#getmodulessettings) | **GET** /platform/settings/modules | Which coding modules the server offers, and the default for new users (Admin)
 [**getPlatformOverview**](PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
 [**getPlatformRun**](PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
 [**getPlatformRunPrompt**](PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
@@ -25,7 +26,9 @@ Method | HTTP request | Description
 [**listPlatformWorkspaces**](PlatformApi.md#listplatformworkspaces) | **GET** /platform/workspaces | Every workspace, metadata only (Admin)
 [**setCreditLimit**](PlatformApi.md#setcreditlimit) | **PUT** /platform/users/{id}/credit-limit | Set the most credits a person may spend on agnts&#39;s Muse key per calendar month, free and bought together (Admin); 0 is no limit
 [**setFreeCredits**](PlatformApi.md#setfreecredits) | **PUT** /platform/users/{id}/free-credits | Set how many free credits a person may spend on agnts&#39;s Muse key (Admin); 0 gives none
+[**setModulesSettings**](PlatformApi.md#setmodulessettings) | **PUT** /platform/settings/modules | Choose which coding modules the server offers, and the default for new users (Admin)
 [**setRunHistorySettings**](PlatformApi.md#setrunhistorysettings) | **PUT** /platform/settings/run-history | Change how long run history is kept, and its size limits (Admin)
+[**setUserModules**](PlatformApi.md#setusermodules) | **PUT** /platform/users/{id}/modules | Set which coding modules a person may use, the default first (Admin); null follows the general default
 [**updatePlatformFeedback**](PlatformApi.md#updateplatformfeedback) | **PUT** /platform/feedback/{id} | Mark a feedback done, or new again (Admin)
 [**updatePlatformUser**](PlatformApi.md#updateplatformuser) | **PUT** /platform/users/{id} | Grant or remove the Admin role (Admin); refused when Admins and Users are separate accounts
 [**updatePlatformWorkspace**](PlatformApi.md#updateplatformworkspace) | **PUT** /platform/workspaces/{id} | Change a workspace&#39;s plan, slots, member limit, or suspend it (Admin)
@@ -162,6 +165,47 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: Not defined
  - **Accept**: application/x-ndjson, application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getModulesSettings**
+> ModulesSettings getModulesSettings()
+
+Which coding modules the server offers, and the default for new users (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+
+try {
+    final response = api.getModulesSettings();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->getModulesSettings: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ModulesSettings**](ModulesSettings.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -784,6 +828,51 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **setModulesSettings**
+> ModulesSettings setModulesSettings(modulesSettings)
+
+Choose which coding modules the server offers, and the default for new users (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final ModulesSettings modulesSettings = ; // ModulesSettings | 
+
+try {
+    final response = api.setModulesSettings(modulesSettings);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->setModulesSettings: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **modulesSettings** | [**ModulesSettings**](ModulesSettings.md)|  | 
+
+### Return type
+
+[**ModulesSettings**](ModulesSettings.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **setRunHistorySettings**
 > RunHistorySettings setRunHistorySettings(runHistorySettings)
 
@@ -817,6 +906,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**RunHistorySettings**](RunHistorySettings.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setUserModules**
+> UserModules setUserModules(id, setUserModulesRequest)
+
+Set which coding modules a person may use, the default first (Admin); null follows the general default
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+final int id = 789; // int | 
+final SetUserModulesRequest setUserModulesRequest = ; // SetUserModulesRequest | 
+
+try {
+    final response = api.setUserModules(id, setUserModulesRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->setUserModules: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**|  | 
+ **setUserModulesRequest** | [**SetUserModulesRequest**](SetUserModulesRequest.md)|  | 
+
+### Return type
+
+[**UserModules**](UserModules.md)
 
 ### Authorization
 

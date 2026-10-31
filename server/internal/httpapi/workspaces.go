@@ -18,16 +18,17 @@ import (
 // ClaudeService manages the Claude accounts runs use.
 type ClaudeService interface {
 	SubscriptionsAllowed() bool
-	CreditsEnabled() bool
-	WorkspaceConnection(ctx context.Context, ws int64) (postgres.ClaudeConnection, error)
-	UserConnection(ctx context.Context, userID int64) (postgres.ClaudeConnection, error)
+	CreditsEnabled(provider string) bool
+	AnyCredits() bool
+	WorkspaceConnection(ctx context.Context, ws int64, provider string) (postgres.ClaudeConnection, error)
+	UserConnection(ctx context.Context, userID int64, provider string) (postgres.ClaudeConnection, error)
 	SetWorkspace(ctx context.Context, ws int64, kind, token string) (postgres.ClaudeConnection, error)
 	SetUser(ctx context.Context, userID int64, kind, token string) (postgres.ClaudeConnection, error)
-	DeleteWorkspaceConnection(ctx context.Context, ws int64) error
-	DeleteUserConnection(ctx context.Context, userID int64) error
-	MemberConnections(ctx context.Context, ws int64) (map[int64]*time.Time, error)
+	DeleteWorkspaceConnection(ctx context.Context, ws int64, provider string) error
+	DeleteUserConnection(ctx context.Context, userID int64, provider string) error
+	MemberConnections(ctx context.Context, ws int64, provider string) (map[int64]*time.Time, error)
 	UsageOf(ctx context.Context, c postgres.ClaudeConnection) (usage.View, error)
-	AccountFor(ctx context.Context, w domain.Workspace, userID int64) (domain.ClaudeAccount, bool)
+	AccountFor(ctx context.Context, w domain.Workspace, userID int64, provider string) (domain.ClaudeAccount, bool)
 }
 
 // QueueReporter is the scheduler's view of the queue.
@@ -245,7 +246,7 @@ func (s *Server) ListMembers(w http.ResponseWriter, r *http.Request) {
 	}
 	var conns map[int64]*time.Time
 	if s.opt.Claude != nil {
-		conns, _ = s.opt.Claude.MemberConnections(r.Context(), m.w.ID)
+		conns, _ = s.opt.Claude.MemberConnections(r.Context(), m.w.ID, s.connProvider(r.Context(), nil))
 	}
 	out := make([]gen.Member, 0, len(ms))
 	for _, x := range ms {
@@ -478,15 +479,16 @@ func (s *Server) claudeOff(w http.ResponseWriter) bool {
 	return false
 }
 
-// workspaceClaude is the Claude page of Workspace settings.
-func (s *Server) workspaceClaude(ctx context.Context, wsp domain.Workspace) (gen.WorkspaceClaude, error) {
-	c, err := s.opt.Claude.WorkspaceConnection(ctx, wsp.ID)
+// workspaceClaude is the Claude (or Muse: provider) page of Workspace
+// settings.
+func (s *Server) workspaceClaude(ctx context.Context, wsp domain.Workspace, provider string) (gen.WorkspaceClaude, error) {
+	c, err := s.opt.Claude.WorkspaceConnection(ctx, wsp.ID, provider)
 	if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		return gen.WorkspaceClaude{}, err
 	}
 	out := gen.WorkspaceClaude{Mode: gen.WorkspaceClaudeMode(wsp.ClaudeMode), Fallback: wsp.ClaudeFallback, DefaultMemberId: wsp.DefaultMemberID,
 		Connection: s.connectionState(ctx, c, err), CreditsBalance: wsp.CreditsBalance, SubscriptionsAllowed: s.opt.Claude.SubscriptionsAllowed()}
-	conns, err := s.opt.Claude.MemberConnections(ctx, wsp.ID)
+	conns, err := s.opt.Claude.MemberConnections(ctx, wsp.ID, provider)
 	if err != nil {
 		return out, err
 	}
@@ -510,12 +512,12 @@ func (s *Server) workspaceClaude(ctx context.Context, wsp domain.Workspace) (gen
 }
 
 // GetWorkspaceClaude implements gen.ServerInterface.
-func (s *Server) GetWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetWorkspaceClaude(w http.ResponseWriter, r *http.Request, p gen.GetWorkspaceClaudeParams) {
 	if s.claudeOff(w) {
 		return
 	}
 	m, _ := memberFrom(r.Context())
-	out, err := s.workspaceClaude(r.Context(), m.w)
+	out, err := s.workspaceClaude(r.Context(), m.w, s.connProvider(r.Context(), (*string)(p.Provider)))
 	if err != nil {
 		s.writeInternal(w, r, err)
 		return
@@ -539,7 +541,7 @@ func (s *Server) UpdateWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
 		mode := domain.ClaudeMode(*req.Mode)
 		upd.ClaudeMode = &mode
 	}
-	if req.Fallback != nil && *req.Fallback && !s.opt.Claude.CreditsEnabled() {
+	if req.Fallback != nil && *req.Fallback && !s.opt.Claude.AnyCredits() {
 		writeError(w, http.StatusBadRequest, "bad_request", "credits are not available on this server")
 		return
 	}
@@ -552,8 +554,8 @@ func (s *Server) UpdateWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
 		s.writeInternal(w, r, err)
 		return
 	}
-	s.workspaceChanged(r.Context(), wsp.ID, domain.ToolName()+" settings changed: mode "+string(wsp.ClaudeMode))
-	out, err := s.workspaceClaude(r.Context(), wsp)
+	s.workspaceChanged(r.Context(), wsp.ID, "account settings changed: mode "+string(wsp.ClaudeMode))
+	out, err := s.workspaceClaude(r.Context(), wsp, s.connProvider(r.Context(), nil))
 	if err != nil {
 		s.writeInternal(w, r, err)
 		return
@@ -581,12 +583,17 @@ func (s *Server) SetWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
+	provider := postgres.ProviderOfKind(string(req.Kind))
+	if !s.moduleEnabled(r.Context(), provider) {
+		writeError(w, http.StatusForbidden, "module_disabled", domain.ModuleName(provider)+" is not enabled on this server")
+		return
+	}
 	if _, err := s.opt.Claude.SetWorkspace(r.Context(), m.w.ID, string(req.Kind), req.Token); err != nil {
 		s.claudeError(w, r, err)
 		return
 	}
-	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's "+domain.ToolName()+" account was connected")
-	out, err := s.workspaceClaude(r.Context(), m.w)
+	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's "+domain.ModuleName(provider)+" account was connected")
+	out, err := s.workspaceClaude(r.Context(), m.w, provider)
 	if err != nil {
 		s.writeInternal(w, r, err)
 		return
@@ -595,26 +602,27 @@ func (s *Server) SetWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Req
 }
 
 // DeleteWorkspaceClaudeConnection implements gen.ServerInterface.
-func (s *Server) DeleteWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteWorkspaceClaudeConnection(w http.ResponseWriter, r *http.Request, p gen.DeleteWorkspaceClaudeConnectionParams) {
 	if s.claudeOff(w) {
 		return
 	}
 	m, _ := memberFrom(r.Context())
-	if err := s.opt.Claude.DeleteWorkspaceConnection(r.Context(), m.w.ID); err != nil {
+	provider := s.connProvider(r.Context(), (*string)(p.Provider))
+	if err := s.opt.Claude.DeleteWorkspaceConnection(r.Context(), m.w.ID, provider); err != nil {
 		s.writeInternal(w, r, err)
 		return
 	}
-	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's "+domain.ToolName()+" account was disconnected")
+	s.workspaceChanged(r.Context(), m.w.ID, "the workspace's "+domain.ModuleName(provider)+" account was disconnected")
 	w.WriteHeader(http.StatusNoContent)
 }
 
 // GetMyClaude implements gen.ServerInterface.
-func (s *Server) GetMyClaude(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetMyClaude(w http.ResponseWriter, r *http.Request, p gen.GetMyClaudeParams) {
 	if s.claudeOff(w) {
 		return
 	}
 	u, _ := userFrom(r.Context())
-	c, err := s.opt.Claude.UserConnection(r.Context(), u.ID)
+	c, err := s.opt.Claude.UserConnection(r.Context(), u.ID, s.connProvider(r.Context(), (*string)(p.Provider)))
 	if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		s.writeInternal(w, r, err)
 		return
@@ -633,6 +641,10 @@ func (s *Server) SetMyClaude(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
+	if provider := postgres.ProviderOfKind(string(req.Kind)); !s.accessOf(r.Context(), u.ID).Allows(provider) {
+		writeError(w, http.StatusForbidden, "module_disabled", domain.ModuleName(provider)+" is not enabled for you; ask an Admin")
+		return
+	}
 	c, err := s.opt.Claude.SetUser(r.Context(), u.ID, string(req.Kind), req.Token)
 	if err != nil {
 		s.claudeError(w, r, err)
@@ -642,12 +654,12 @@ func (s *Server) SetMyClaude(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteMyClaude implements gen.ServerInterface.
-func (s *Server) DeleteMyClaude(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteMyClaude(w http.ResponseWriter, r *http.Request, p gen.DeleteMyClaudeParams) {
 	if s.claudeOff(w) {
 		return
 	}
 	u, _ := userFrom(r.Context())
-	if err := s.opt.Claude.DeleteUserConnection(r.Context(), u.ID); err != nil {
+	if err := s.opt.Claude.DeleteUserConnection(r.Context(), u.ID, s.connProvider(r.Context(), (*string)(p.Provider))); err != nil {
 		s.writeInternal(w, r, err)
 		return
 	}

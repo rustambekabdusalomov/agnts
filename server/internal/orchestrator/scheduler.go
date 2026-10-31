@@ -94,13 +94,18 @@ type Workspaces interface {
 	Active(ctx context.Context) ([]int64, error)
 }
 
-// ClaudeAccounts picks the Claude account each run uses.
+// ClaudeAccounts picks the account each run uses, per module.
 type ClaudeAccounts interface {
 	// Pick returns the account a run of a ticket of member (nil: the
-	// workspace's default member) in w uses now. ok is false when none is
-	// usable: why says so for the ticket, until when it may be (zero when
-	// unknown).
-	Pick(ctx context.Context, w domain.Workspace, member *int64) (acct domain.ClaudeAccount, ok bool, why string, until time.Time)
+	// workspace's default member) in w uses now on module provider (muse,
+	// claude or codex). ok is false when none is usable: why says so for
+	// the ticket, until when it may be (zero when unknown).
+	Pick(ctx context.Context, w domain.Workspace, member *int64, provider string) (acct domain.ClaudeAccount, ok bool, why string, until time.Time)
+}
+
+// AccessSource says which coding modules a person may use.
+type AccessSource interface {
+	For(ctx context.Context, user int64) (domain.Access, error)
 }
 
 // Credits charges runs that ran on agnts's API key to their workspace.
@@ -215,8 +220,14 @@ type wsQueue struct {
 	next    int
 	running int
 	slots   int
-	// accounts caches the account pick per member this tick.
-	accounts map[int64]accountPick
+	// accounts caches the account picks per person and module this tick.
+	accounts map[accountKey]accountPick
+}
+
+type accountKey struct {
+	member   int64 // whose account (0: the workspace's)
+	person   int64 // whose modules
+	provider string
 }
 
 type accountPick struct {
@@ -224,6 +235,17 @@ type accountPick struct {
 	ok    bool
 	why   string
 	until time.Time
+}
+
+// runPick is what a run of an item uses: its person's access and one
+// account per module its stages run on.
+type runPick struct {
+	access  domain.Access
+	primary string
+	accts   map[string]domain.ClaudeAccount
+	ok      bool
+	why     string
+	until   time.Time
 }
 
 func (q *wsQueue) full() bool { return q.running >= q.slots }
@@ -287,7 +309,7 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 			return nil
 		}
 		wctx := domain.WithWorkspace(ctx, id)
-		s, err := o.settings.Get(wctx)
+		s, err := o.stored.Get(wctx) // as saved: each item's person maps them
 		if err != nil {
 			o.log.Warn("load settings", "workspace", id, "err", err)
 			queues[id] = nil
@@ -296,7 +318,7 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 		o.sched.mu.Lock()
 		running := o.sched.running[id]
 		o.sched.mu.Unlock()
-		q := &wsQueue{w: w, ctx: wctx, s: s, running: running, slots: slotsOf(w, s), accounts: map[int64]accountPick{}}
+		q := &wsQueue{w: w, ctx: wctx, s: s, running: running, slots: slotsOf(w, s), accounts: map[accountKey]accountPick{}}
 		queues[id] = q
 		return q
 	}
@@ -382,7 +404,7 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 					wait(it, domain.WaitBlocked, "waiting for related tickets to land")
 					continue
 				}
-				pick := o.pickAccount(q, it)
+				pick := o.pickAccounts(q, it)
 				if !pick.ok {
 					wait(it, domain.WaitClaude, pick.why)
 					continue
@@ -415,7 +437,7 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 					}
 					continue
 				}
-				job.release, job.acct, job.hasAcct = release, pick.acct, o.accounts != nil
+				job.release, job.access, job.primary, job.accts, job.hasAcct = release, pick.access, pick.primary, pick.accts, o.accounts != nil
 				q.running++
 				o.sched.mu.Lock()
 				o.sched.running[q.w.ID]++
@@ -498,38 +520,79 @@ func (o *Orchestrator) Tick(ctx context.Context) int {
 	return n
 }
 
-// pickAccount returns the Claude account a run of it would use, cached per
-// member for the tick.
-func (o *Orchestrator) pickAccount(q *wsQueue, it QueueItem) accountPick {
-	var member int64
+// pickAccounts returns the access and accounts a run of it would use: the
+// modules of its person (the ticket's member, else the workspace's default
+// member, else the owner, in either account mode) and one account for
+// every module its stages run on, cached per person and module for the
+// tick. It fails with the first module that has no usable account.
+func (o *Orchestrator) pickAccounts(q *wsQueue, it QueueItem) runPick {
+	person := q.w.RunPerson(it.MemberID)
+	var member int64 // whose account: in shared mode, the workspace's
 	if q.w.ClaudeMode == domain.ClaudePerMember && it.MemberID != nil {
 		member = *it.MemberID
 	}
-	if p, ok := q.accounts[member]; ok {
+	var p runPick
+	p.access = domain.DefaultAccess()
+	if o.access != nil {
+		a, err := o.access.For(q.ctx, person)
+		if err != nil {
+			o.log.Warn("read modules", "user", person, "err", err)
+		}
+		p.access = a
+	}
+	if p.access.None() {
+		p.why = "no coding module is enabled for " + o.personName(q.ctx, person) + "; an Admin can enable one"
 		return p
 	}
-	var p accountPick
-	if o.accounts != nil {
-		var m *int64
-		if member != 0 {
-			m = &member
-		}
-		p.acct, p.ok, p.why, p.until = o.accounts.Pick(q.ctx, q.w, m)
-	} else {
+	p.primary = p.access.Primary()
+	if o.accounts == nil {
 		paused, until := o.usage.Paused(q.ctx, q.s)
 		p.ok, p.until = !paused, until
 		if paused {
-			p.why = domain.ToolName() + " limit reached"
+			p.why = domain.ToolName(p.access) + " limit reached"
 			if !until.IsZero() {
 				p.why += "; resumes at " + until.Format("15:04")
 			}
 		}
+		return p
 	}
-	q.accounts[member] = p
+	p.accts = map[string]domain.ClaudeAccount{}
+	for _, provider := range q.s.For(p.access).Modules(nil) {
+		k := accountKey{member: member, person: person, provider: provider}
+		ap, ok := q.accounts[k]
+		if !ok {
+			var m *int64
+			if member != 0 {
+				m = &member
+			}
+			ap.acct, ap.ok, ap.why, ap.until = o.accounts.Pick(q.ctx, q.w, m, provider)
+			if ap.ok && ap.acct.Provider == "" {
+				ap.acct.Provider = provider
+			}
+			q.accounts[k] = ap
+		}
+		if !ap.ok {
+			p.why, p.until = ap.why, ap.until
+			return p
+		}
+		p.accts[provider] = ap.acct
+	}
+	p.ok = true
 	return p
 }
 
-// scheduled is a claimed run ready to start.
+// personName names a person in messages.
+func (o *Orchestrator) personName(ctx context.Context, id int64) string {
+	if us, ok := o.store.(interface {
+		UserName(ctx context.Context, id int64) string
+	}); ok {
+		if n := us.UserName(ctx, id); n != "" {
+			return n
+		}
+	}
+	return "this ticket's person"
+}
+
 type scheduled struct {
 	ws      int64
 	key     string
@@ -537,7 +600,9 @@ type scheduled struct {
 	stage   domain.Stage
 	work    func(ctx context.Context)
 	release func()
-	acct    domain.ClaudeAccount
+	access  domain.Access
+	primary string
+	accts   map[string]domain.ClaudeAccount
 	hasAcct bool
 	// docRunID is the document generation it runs, 0 for anything else.
 	docRunID int64
@@ -627,34 +692,44 @@ func (o *Orchestrator) runScheduled(ctx context.Context, j scheduled) {
 		o.sched.mu.Unlock()
 	}()
 	wctx := domain.WithWorkspace(ctx, j.ws)
+	if len(j.access.Modules) > 0 {
+		wctx = domain.WithAccess(wctx, j.access)
+	}
+	// The run's main account: its default module's; each model call on
+	// another module uses that module's (callClaude).
+	acct := j.accts[j.primary]
+	onCredits := false
+	for _, a := range j.accts {
+		onCredits = onCredits || a.Credits
+	}
 	if j.hasAcct {
-		wctx = domain.WithClaude(wctx, j.acct)
+		wctx = domain.WithAccounts(wctx, j.primary, j.accts)
 		if ra, ok := o.store.(RunAccounts); ok && j.runID > 0 {
 			var conn *int64
-			if j.acct.ConnectionID > 0 {
-				conn = &j.acct.ConnectionID
+			if acct.ConnectionID > 0 {
+				conn = &acct.ConnectionID
 			}
-			if err := ra.SetRunAccount(wctx, j.runID, conn, j.acct.Credits); err != nil {
+			if err := ra.SetRunAccount(wctx, j.runID, conn, onCredits); err != nil {
 				o.log.Warn("record run account", "run_id", j.runID, "err", err)
 			}
 		}
 	}
 	if j.hasAcct && j.docRunID > 0 && o.docs != nil {
 		var conn *int64
-		if j.acct.ConnectionID > 0 {
-			conn = &j.acct.ConnectionID
+		if acct.ConnectionID > 0 {
+			conn = &acct.ConnectionID
 		}
-		if err := o.docs.SetDocumentRunAccount(wctx, j.docRunID, conn, j.acct.Credits); err != nil {
+		if err := o.docs.SetDocumentRunAccount(wctx, j.docRunID, conn, onCredits); err != nil {
 			o.log.Warn("record document run account", "document_run", j.docRunID, "err", err)
 		}
 	}
 	j.work(wctx)
-	if j.hasAcct && j.acct.Credits && o.credits != nil && j.runID > 0 {
+	if j.hasAcct && onCredits && o.credits != nil && j.runID > 0 {
 		if err := o.credits.Settle(context.WithoutCancel(wctx), j.ws, j.runID, j.key); err != nil {
 			o.log.Error("charge run to credits", "run_id", j.runID, "err", err)
 		}
 	}
-	if dc, ok := o.credits.(DocumentCredits); ok && j.hasAcct && j.acct.Credits && j.docRunID > 0 {
+	if dc, ok := o.credits.(DocumentCredits); ok && j.hasAcct && onCredits && j.docRunID > 0 {
 		if err := dc.SettleDocument(context.WithoutCancel(wctx), j.ws, j.docRunID); err != nil {
 			o.log.Error("charge document generation to credits", "document_run", j.docRunID, "err", err)
 		}

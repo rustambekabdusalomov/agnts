@@ -3867,9 +3867,11 @@ paths:
   /account/claude:
     get:
       operationId: getMyClaude
-      summary: Your personal Claude connection (used by workspaces in per-member mode)
+      summary: Your personal Claude or Muse connection (used by workspaces in per-member mode)
       tags: [account]
       x-scope: user
+      parameters:
+        - $ref: '#/components/parameters/ModuleProvider'
       responses:
         '200':
           description: OK
@@ -3893,11 +3895,14 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ClaudeConnectionState' }
         '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
     delete:
       operationId: deleteMyClaude
-      summary: Disconnect your Claude account
+      summary: Disconnect your Claude or Muse account
       tags: [account]
       x-scope: user
+      parameters:
+        - $ref: '#/components/parameters/ModuleProvider'
       responses:
         '204': { description: Disconnected }
 
@@ -3960,7 +3965,7 @@ paths:
   /models:
     get:
       operationId: listModels
-      summary: The coding tools and models this server offers
+      summary: The coding modules and models you may use
       tags: [settings]
       x-scope: user
       responses:
@@ -4329,8 +4334,10 @@ paths:
   /workspace/claude:
     get:
       operationId: getWorkspaceClaude
-      summary: Which Claude account the workspace's runs use
+      summary: Which Claude or Muse account the workspace's runs use
       tags: [workspace]
+      parameters:
+        - $ref: '#/components/parameters/ModuleProvider'
       responses:
         '200':
           description: OK
@@ -4380,9 +4387,11 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
     delete:
       operationId: deleteWorkspaceClaudeConnection
-      summary: Disconnect the workspace's shared Claude account
+      summary: Disconnect the workspace's shared Claude or Muse account
       tags: [workspace]
       x-role: owner
+      parameters:
+        - $ref: '#/components/parameters/ModuleProvider'
       responses:
         '204': { description: Disconnected }
 
@@ -4722,6 +4731,71 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /platform/users/{id}/modules:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: setUserModules
+      summary: Set which coding modules a person may use, the default first (Admin); null follows the general default
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                modules:
+                  type: array
+                  nullable: true
+                  maxItems: 3
+                  items: { $ref: '#/components/schemas/Module' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserModules' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /platform/settings/modules:
+    get:
+      operationId: getModulesSettings
+      summary: Which coding modules the server offers, and the default for new users (Admin)
+      tags: [platform]
+      x-scope: admin
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ModulesSettings' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      operationId: setModulesSettings
+      summary: Choose which coding modules the server offers, and the default for new users (Admin)
+      tags: [platform]
+      x-scope: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ModulesSettings' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ModulesSettings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
   /platform/runs:
     get:
       operationId: listPlatformRuns
@@ -7085,6 +7159,12 @@ paths:
 
 components:
   parameters:
+    ModuleProvider:
+      name: provider
+      in: query
+      required: false
+      description: 'The module whose account it is: muse or claude (Codex runs on the workspace''s OpenAI key). Defaults to your default module.'
+      schema: { type: string, enum: [muse, claude] }
     MeetingID:
       name: meetingId
       in: path
@@ -7459,6 +7539,46 @@ components:
           items: { $ref: '#/components/schemas/WorkspaceSummary' }
         freeCredits: { $ref: '#/components/schemas/FreeCredits' }
         creditUsage: { $ref: '#/components/schemas/CreditUsage' }
+        modules: { $ref: '#/components/schemas/UserModules' }
+
+    Module:
+      type: string
+      enum: [muse, claude, codex]
+      description: 'A coding module: Muse Code (Meta), Claude Code (Anthropic) or Codex (OpenAI)'
+
+    ModulesSettings:
+      type: object
+      description: Which coding modules the server offers and who gets which by default (Admin)
+      required: [available, enabled, default]
+      properties:
+        available:
+          type: array
+          readOnly: true
+          description: What this server can run (AGNTS_PROVIDERS); enabled stays within it
+          items: { $ref: '#/components/schemas/Module' }
+        enabled:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/Module' }
+        default:
+          type: array
+          description: 'What a person gets unless an Admin set theirs, the default module first; codex cannot be first'
+          items: { $ref: '#/components/schemas/Module' }
+
+    UserModules:
+      type: object
+      required: [effective]
+      properties:
+        own:
+          type: array
+          nullable: true
+          description: The list an Admin set; absent or null follows the default
+          items: { $ref: '#/components/schemas/Module' }
+        effective:
+          type: array
+          description: What the person may use now, the default module first
+          items: { $ref: '#/components/schemas/Module' }
+        setAt: { type: string, format: date-time }
 
     WorkspaceSummary:
       type: object
@@ -7753,6 +7873,10 @@ components:
         isAdmin: { type: boolean, description: The platform operator (system role Admin) }
         hasTotp: { type: boolean, description: Signs in with a second factor }
         lastWorkspace: { type: string, description: The slug of the workspace opened last }
+        modules:
+          type: array
+          description: The coding modules the user may use, the default first (on /auth/me only)
+          items: { $ref: '#/components/schemas/Module' }
         workspaces:
           type: array
           description: The workspaces the user is a member of (on /auth/me only)
@@ -8919,9 +9043,9 @@ components:
       properties:
         providers:
           type: array
-          description: The coding tools this server offers
+          description: The coding modules you may use (an Admin chooses them); empty when none
           items: { type: string, enum: [muse, claude, codex] }
-        primary: { type: string, enum: [muse, claude, codex], description: The default tool }
+        primary: { type: string, enum: [muse, claude, codex], description: 'Your default module; settings naming a module you may not use run on its models' }
         models:
           type: array
           items:

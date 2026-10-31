@@ -256,6 +256,8 @@ doc/MetaApi.md
 doc/ModelCatalog.md
 doc/ModelCatalogModelsInner.md
 doc/ModelOverrides.md
+doc/Module.md
+doc/ModulesSettings.md
 doc/MuseLogin.md
 doc/NetworkActivity.md
 doc/NetworkActivityDialsInner.md
@@ -400,6 +402,7 @@ doc/SetSlotsRequest.md
 doc/SetTicketBenchmarkRequest.md
 doc/SetTicketMemberRequest.md
 doc/SetTicketNumberRequest.md
+doc/SetUserModulesRequest.md
 doc/Settings.md
 doc/SettingsApi.md
 doc/ShipNotes.md
@@ -476,6 +479,7 @@ doc/Usage.md
 doc/UsageApi.md
 doc/UsageWindow.md
 doc/User.md
+doc/UserModules.md
 doc/WaitReason.md
 doc/WeekStats.md
 doc/WorkspaceApi.md
@@ -759,6 +763,8 @@ lib/src/model/meta.dart
 lib/src/model/model_catalog.dart
 lib/src/model/model_catalog_models_inner.dart
 lib/src/model/model_overrides.dart
+lib/src/model/module.dart
+lib/src/model/modules_settings.dart
 lib/src/model/muse_login.dart
 lib/src/model/network_activity.dart
 lib/src/model/network_activity_dials_inner.dart
@@ -897,6 +903,7 @@ lib/src/model/set_slots_request.dart
 lib/src/model/set_ticket_benchmark_request.dart
 lib/src/model/set_ticket_member_request.dart
 lib/src/model/set_ticket_number_request.dart
+lib/src/model/set_user_modules_request.dart
 lib/src/model/settings.dart
 lib/src/model/ship_notes.dart
 lib/src/model/shot_ref.dart
@@ -968,6 +975,7 @@ lib/src/model/update_workspace_request.dart
 lib/src/model/usage.dart
 lib/src/model/usage_window.dart
 lib/src/model/user.dart
+lib/src/model/user_modules.dart
 lib/src/model/wait_reason.dart
 lib/src/model/week_stats.dart
 lib/src/model/workspace_claude.dart
@@ -1229,6 +1237,8 @@ test/meta_test.dart
 test/model_catalog_models_inner_test.dart
 test/model_catalog_test.dart
 test/model_overrides_test.dart
+test/module_test.dart
+test/modules_settings_test.dart
 test/muse_login_test.dart
 test/network_activity_dials_inner_test.dart
 test/network_activity_test.dart
@@ -1373,6 +1383,7 @@ test/set_slots_request_test.dart
 test/set_ticket_benchmark_request_test.dart
 test/set_ticket_member_request_test.dart
 test/set_ticket_number_request_test.dart
+test/set_user_modules_request_test.dart
 test/settings_api_test.dart
 test/settings_test.dart
 test/ship_notes_test.dart
@@ -1448,6 +1459,7 @@ test/update_workspace_request_test.dart
 test/usage_api_test.dart
 test/usage_test.dart
 test/usage_window_test.dart
+test/user_modules_test.dart
 test/user_test.dart
 test/wait_reason_test.dart
 test/week_stats_test.dart

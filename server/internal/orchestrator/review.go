@@ -39,10 +39,10 @@ const (
 // It returns the model and why it was picked.
 func reviewModel(s domain.Settings, t domain.Ticket, a *Analysis, res domain.Result) (string, string) {
 	if m := t.Models[domain.ModelReview]; domain.ValidModel(m) {
-		return domain.EffectiveModel(m), "chosen for this ticket"
+		return domain.EffectiveModel(s.Access, m), "chosen for this ticket"
 	}
 	if m := s.Models.Review; domain.ValidModel(m) {
-		return domain.EffectiveModel(m), "set in Settings"
+		return domain.EffectiveModel(s.Access, m), "set in Settings"
 	}
 	lines := 0
 	for _, f := range res.Files {
@@ -50,15 +50,15 @@ func reviewModel(s domain.Settings, t domain.Ticket, a *Analysis, res domain.Res
 	}
 	switch {
 	case a != nil && a.Complexity == ComplexityComplex:
-		return domain.StrongModel(), "the analysis rated this ticket complex"
+		return domain.StrongModel(s.Access), "the analysis rated this ticket complex"
 	case len(res.Files) >= complexFiles || lines >= complexLines:
-		return domain.StrongModel(), fmt.Sprintf("a large change (%d %s, %d lines)", len(res.Files), plural(len(res.Files), "file", "files"), lines)
+		return domain.StrongModel(s.Access), fmt.Sprintf("a large change (%d %s, %d lines)", len(res.Files), plural(len(res.Files), "file", "files"), lines)
 	case len(res.Report) >= complexReport:
-		return domain.StrongModel(), "a long report"
+		return domain.StrongModel(s.Access), "a long report"
 	case t.Revision >= complexRevisions:
-		return domain.StrongModel(), fmt.Sprintf("changes were requested %d times", t.Revision)
+		return domain.StrongModel(s.Access), fmt.Sprintf("changes were requested %d times", t.Revision)
 	}
-	return domain.LightModel(), "a simple ticket"
+	return domain.LightModel(s.Access), "a simple ticket"
 }
 
 // parseReview reads review.json and cleans it.
@@ -216,7 +216,7 @@ func (o *Orchestrator) review(ctx context.Context, s domain.Settings, t domain.T
 			// waits for it to start reviewing the change themselves.
 			bg := context.WithoutCancel(ctx)
 			o.setReviewState(bg, t, domain.ReviewPending)
-			o.announceQuiet(bg, t.Key, run, "agnts's code review waits for the "+domain.ToolName()+" limit")
+			o.announceQuiet(bg, t.Key, run, "agnts's code review waits for the "+domain.ToolName(domain.AccessOf(ctx))+" limit")
 		}
 		return err
 	}

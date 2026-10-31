@@ -235,7 +235,7 @@ func (s *Integrations) Connect(ctx context.Context, provider, token string, sett
 		return View{}, "", err
 	}
 	if provider == "claude" {
-		return View{}, "", invalid("%[1]s is connected per workspace now: Workspace settings → %[1]s", domain.ToolName())
+		return View{}, "", invalid("%[1]s is connected per workspace now: Workspace settings → %[1]s", domain.ToolName(domain.AccessOf(ctx)))
 	}
 	check, ok := s.checkers[provider]
 	if !ok {
@@ -637,10 +637,10 @@ func (r *Repos) Detect(ctx context.Context, x domain.Repository, deep bool) (det
 	}
 	more, err := r.deep.DetectDeep(ctx, x, det)
 	if errors.Is(err, orchestrator.ErrPlanLimit) {
-		return det, false, invalid("the %s plan limit is reached; try again later", domain.ToolName())
+		return det, false, invalid("the %s plan limit is reached; try again later", domain.ToolName(domain.AccessOf(ctx)))
 	}
 	if err != nil {
-		return det, false, invalid("%s could not read the repository: %v", domain.ToolName(), err)
+		return det, false, invalid("%s could not read the repository: %v", domain.ToolName(domain.AccessOf(ctx)), err)
 	}
 	return more, true, nil
 }

@@ -39,6 +39,7 @@ type harness struct {
 	swagger    *fakeSwagger
 	runs       *fakeRunHistory
 	links      *fakeLinks
+	modules    *fakeModules
 	// hookWS and hookID are what the test webhook last saw.
 	hookWS int64
 	hookID string
@@ -94,7 +95,9 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	h.swagger = &fakeSwagger{}
 	h.runs = newFakeRunHistory()
 	h.links = &fakeLinks{}
+	h.modules = newFakeModules()
 	h.h, err = NewHandler(Options{
+		Modules:     h.modules,
 		CommitLinks: h.links,
 		Auth:        svc,
 		Tickets:     h.tickets,

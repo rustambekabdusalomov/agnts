@@ -25,13 +25,13 @@ func TestPickMuse(t *testing.T) {
 		conns, fakeUsage{paused: map[int64]bool{}}, fakeSettings{}, fakeUsers{})
 	w := domain.Workspace{ID: 7, OwnerID: 1, ClaudeMode: domain.ClaudeShared}
 
-	// A Claude connection does not count on a Muse server.
+	// A Claude connection does not count for a Muse run.
 	conns.add(7, 0, 10, postgres.ClaudeSubscription)
-	if _, ok, why, _ := s.Pick(ctx, w, nil); ok || !strings.Contains(why, "Muse account") {
+	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderMuse); ok || !strings.Contains(why, "Muse account") {
 		t.Fatalf("claude connection on muse: ok=%v %q", ok, why)
 	}
 	conns.add(7, 0, 11, postgres.MuseLogin)
-	if a, ok, _, _ := s.Pick(ctx, w, nil); !ok || a.ConnectionID != 11 || a.Credits {
+	if a, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderMuse); !ok || a.ConnectionID != 11 || a.Credits {
 		t.Fatalf("muse connection: %+v %v", a, ok)
 	}
 
@@ -41,17 +41,17 @@ func TestPickMuse(t *testing.T) {
 	s.conns = conns
 	ann := int64(2)
 	free[ann] = true
-	a, ok, _, _ := s.Pick(ctx, w, &ann)
+	a, ok, _, _ := s.Pick(ctx, w, &ann, domain.ProviderMuse)
 	if !ok || !a.Credits || a.UserID != ann || a.Label != "free credits" {
 		t.Fatalf("free credits: %+v %v", a, ok)
 	}
 	// Someone without free credits needs the workspace's credits on.
 	bob := int64(3)
-	if _, ok, why, _ := s.Pick(ctx, w, &bob); ok || !strings.Contains(why, "continuing with credits") {
+	if _, ok, why, _ := s.Pick(ctx, w, &bob, domain.ProviderMuse); ok || !strings.Contains(why, "continuing with credits") {
 		t.Fatalf("no free credits: ok=%v %q", ok, why)
 	}
 	w.ClaudeFallback, w.CreditsBalance = true, 500
-	if a, ok, _, _ := s.Pick(ctx, w, &bob); !ok || !a.Credits || a.UserID != bob || a.Label != "workspace credits" {
+	if a, ok, _, _ := s.Pick(ctx, w, &bob, domain.ProviderMuse); !ok || !a.Credits || a.UserID != bob || a.Label != "workspace credits" {
 		t.Fatalf("workspace credits: %+v %v", a, ok)
 	}
 }
@@ -60,7 +60,7 @@ func TestMuseCredentials(t *testing.T) {
 	withMuse(t)
 	conns := newConns()
 	s := New(Config{MuseKey: "LLM_platformkey0123456789"}, conns, fakeUsage{}, fakeSettings{}, fakeUsers{})
-	ctx := domain.WithClaude(context.Background(), domain.ClaudeAccount{Credits: true})
+	ctx := domain.WithClaude(context.Background(), domain.ClaudeAccount{Credits: true, Provider: domain.ProviderMuse})
 	if c, err := s.CredentialFor(ctx); err != nil || c.Env != EnvMuseKey || c.Token != "LLM_platformkey0123456789" {
 		t.Fatalf("credits credential = %+v, %v", c, err)
 	}
@@ -72,8 +72,8 @@ func TestMuseCredentials(t *testing.T) {
 			t.Errorf("connection %d: %+v, %v", id, c, err)
 		}
 	}
-	if !s.CreditsEnabled() {
-		t.Fatal("a Meta key enables credits on a Muse server")
+	if !s.CreditsEnabled(domain.ProviderMuse) || s.CreditsEnabled(domain.ProviderClaude) {
+		t.Fatal("a Meta key enables credits for Muse only")
 	}
 }
 

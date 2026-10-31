@@ -5235,6 +5235,39 @@
   "mobileGoogleContinue": "Continue with Google",
   "mobileGoogleOff": "Google sign-in is off on this server.",
   "mobileGoogleSetup": "Google sign-in is not set up in this build of the app.",
+  "modulesName_muse": "Muse Code",
+  "modulesName_claude": "Claude Code",
+  "modulesName_codex": "Codex",
+  "modulesTitle": "Modules",
+  "modulesSub": "Which coding modules people may use. The first in a person's list is their default module.",
+  "modulesAvailable": "Available on this server",
+  "modulesAvailableHelp": "What this server can run (AGNTS_PROVIDERS). It cannot be changed here.",
+  "modulesEnabled": "Enabled",
+  "modulesEnabledHelp": "What people may be given. Switching a module off takes it from everyone.",
+  "modulesDefaultList": "Default for people",
+  "modulesDefaultListHelp": "What a person gets unless you set theirs on the Users page. The first is their default module.",
+  "modulesDefault": "Default",
+  "modulesMoveUp": "Move {module} up",
+  "@modulesMoveUp": {
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "modulesMoveDown": "Move {module} down",
+  "@modulesMoveDown": {
+    "placeholders": {
+      "module": {
+        "type": "String"
+      }
+    }
+  },
+  "modulesProblem_noneEnabled": "Enable at least one module.",
+  "modulesProblem_empty": "Choose at least one module.",
+  "modulesProblem_codexFirst": "Codex cannot be the default module: put Muse Code or Claude Code first.",
+  "modulesSave": "Save",
+  "modulesSaved": "Modules saved",
   "mpreviewTitle": "agnts's preview",
   "mpreviewSub": "Screenshots of the app with this change. Advice beside your review: it never blocks approval.",
   "mpreviewPending": "Queued: agnts starts the app and takes screenshots as soon as a worker is free.",
@@ -6039,6 +6072,46 @@
         "type": "String"
       },
       "limited": {
+        "type": "String"
+      }
+    }
+  },
+  "platformModules": "Modules",
+  "platformSetModules": "Set modules",
+  "platformModulesDefault": "Default ({list})",
+  "@platformModulesDefault": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "platformModulesNow": "Uses now: {list}.",
+  "@platformModulesNow": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "platformModulesFollowDefault": "Follow the default",
+  "platformModulesCustom": "Their own list",
+  "platformModulesCustomHelp": "The first is their default module. Only enabled modules can be chosen.",
+  "platformModulesSet": "{name} may use {list}",
+  "@platformModulesSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "platformModulesFollow": "{name} follows the default modules now",
+  "@platformModulesFollow": {
+    "placeholders": {
+      "name": {
         "type": "String"
       }
     }
@@ -9534,5 +9607,13 @@
   "wsMuse_failed": "The sign-in failed.",
   "wsMuseTryAgain": "Try again",
   "wsMuseUseKey": "Use an API key",
-  "wsMuseKeyHelp": "Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner."
+  "wsMuseKeyHelp": "Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner.",
+  "wsClaudeBoth": "Accounts",
+  "wsClaudeSubBoth": "Which Muse and Claude accounts this workspace's runs use.",
+  "wsClaudeSavedBoth": "Account settings saved",
+  "wsFallbackHelpBoth": "When the chosen account is at its limit or missing, runs continue on agnts's key and spend credits instead of pausing.",
+  "wsMemberAccountsSubBoth": "Who has connected their own Muse and Claude accounts (Profile).",
+  "wsConnectionMuse": "Workspace Muse account",
+  "wsConnectionClaude": "Workspace Claude account",
+  "wsNoAccountModules": "Your modules have no account to connect here: Codex runs on the workspace's OpenAI integration."
 }

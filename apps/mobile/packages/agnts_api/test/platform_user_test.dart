@@ -40,5 +40,10 @@ void main() {
       // TODO
     });
 
+    // UserModules modules
+    test('to test the property `modules`', () async {
+      // TODO
+    });
+
   });
 }

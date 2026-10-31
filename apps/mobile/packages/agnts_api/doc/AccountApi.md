@@ -12,9 +12,9 @@ Method | HTTP request | Description
 [**beginTotp**](AccountApi.md#begintotp) | **POST** /account/totp/setup | Start turning on two-factor sign-in (a new secret, not saved yet)
 [**changePassword**](AccountApi.md#changepassword) | **PUT** /account/password | Change the password
 [**confirmTotp**](AccountApi.md#confirmtotp) | **POST** /account/totp/confirm | Turn two-factor sign-in on with a code from the new secret
-[**deleteMyClaude**](AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude account
+[**deleteMyClaude**](AccountApi.md#deletemyclaude) | **DELETE** /account/claude | Disconnect your Claude or Muse account
 [**disableTotp**](AccountApi.md#disabletotp) | **POST** /account/totp/disable | Turn two-factor sign-in off
-[**getMyClaude**](AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude connection (used by workspaces in per-member mode)
+[**getMyClaude**](AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude or Muse connection (used by workspaces in per-member mode)
 [**getMyCreditUsage**](AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the monthly limit an Admin set
 [**getMyFreeCredits**](AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
 [**getMyMuseLogin**](AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
@@ -154,9 +154,9 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteMyClaude**
-> deleteMyClaude()
+> deleteMyClaude(provider)
 
-Disconnect your Claude account
+Disconnect your Claude or Muse account
 
 ### Example
 ```dart
@@ -167,16 +167,20 @@ import 'package:agnts_api/api.dart';
 //defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
 
 final api = AgntsApi().getAccountApi();
+final String provider = provider_example; // String | The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
 
 try {
-    api.deleteMyClaude();
+    api.deleteMyClaude(provider);
 } on DioException catch (e) {
     print('Exception when calling AccountApi->deleteMyClaude: $e\n');
 }
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **provider** | **String**| The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. | [optional] 
 
 ### Return type
 
@@ -238,9 +242,9 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getMyClaude**
-> ClaudeConnectionState getMyClaude()
+> ClaudeConnectionState getMyClaude(provider)
 
-Your personal Claude connection (used by workspaces in per-member mode)
+Your personal Claude or Muse connection (used by workspaces in per-member mode)
 
 ### Example
 ```dart
@@ -251,9 +255,10 @@ import 'package:agnts_api/api.dart';
 //defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
 
 final api = AgntsApi().getAccountApi();
+final String provider = provider_example; // String | The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
 
 try {
-    final response = api.getMyClaude();
+    final response = api.getMyClaude(provider);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling AccountApi->getMyClaude: $e\n');
@@ -261,7 +266,10 @@ try {
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **provider** | **String**| The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. | [optional] 
 
 ### Return type
 

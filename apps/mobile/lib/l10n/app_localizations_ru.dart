@@ -1470,21 +1470,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String billingFallbackLimit(String name, String used, String limit) {
-    return '$name: использовано $used из $limit кредитов';
-  }
-
-  @override
-  String billingFallbackNoLimit(String name, String used) {
-    return '$name: использовано $used кредитов, без лимита';
-  }
-
-  @override
-  String billingFallbackHint(String name) {
-    return '$name — резервный провайдер, для вас бесплатный: запуски переходят на него, когда ваш аккаунт Meta (или аккаунт agnts) исчерпан. Когда лимит закончится, они продолжатся за кредиты.';
-  }
-
-  @override
   String get briefTitle => 'Описание репозитория';
 
   @override
@@ -9039,6 +9024,68 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mobileGoogleSetup => 'Вход через Google не настроен в этой сборке приложения.';
 
   @override
+  String get modulesName_muse => 'Muse Code';
+
+  @override
+  String get modulesName_claude => 'Claude Code';
+
+  @override
+  String get modulesName_codex => 'Codex';
+
+  @override
+  String get modulesTitle => 'Модули';
+
+  @override
+  String get modulesSub => 'Какими модулями для кода могут пользоваться люди. Первый в списке человека — его модуль по умолчанию.';
+
+  @override
+  String get modulesAvailable => 'Доступны на этом сервере';
+
+  @override
+  String get modulesAvailableHelp => 'Что этот сервер умеет запускать (AGNTS_PROVIDERS). Здесь это не меняется.';
+
+  @override
+  String get modulesEnabled => 'Включены';
+
+  @override
+  String get modulesEnabledHelp => 'Что можно давать людям. Выключенный модуль пропадает у всех.';
+
+  @override
+  String get modulesDefaultList => 'По умолчанию для людей';
+
+  @override
+  String get modulesDefaultListHelp =>
+      'Что получает человек, если вы не задали ему свой список на странице «Пользователи». Первый — модуль по умолчанию.';
+
+  @override
+  String get modulesDefault => 'По умолчанию';
+
+  @override
+  String modulesMoveUp(String module) {
+    return 'Поднять $module выше';
+  }
+
+  @override
+  String modulesMoveDown(String module) {
+    return 'Опустить $module ниже';
+  }
+
+  @override
+  String get modulesProblem_noneEnabled => 'Включите хотя бы один модуль.';
+
+  @override
+  String get modulesProblem_empty => 'Выберите хотя бы один модуль.';
+
+  @override
+  String get modulesProblem_codexFirst => 'Codex не может быть модулем по умолчанию: поставьте первым Muse Code или Claude Code.';
+
+  @override
+  String get modulesSave => 'Сохранить';
+
+  @override
+  String get modulesSaved => 'Модули сохранены';
+
+  @override
   String get mpreviewTitle => 'Превью agnts';
 
   @override
@@ -10251,50 +10298,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get platformMuseProvider => 'Провайдер Muse';
-
-  @override
-  String get platformMuseProviderSub => 'Куда идут запуски за кредиты agnts. Собственные аккаунты Meta пользователей не затрагиваются.';
-
-  @override
-  String get platformMp_auto => 'Авто';
-
-  @override
-  String get platformMp_primary => 'Только Meta';
-
-  @override
-  String get platformMp_fallback => 'Только резервный';
-
-  @override
-  String platformMpNote_auto(String name) {
-    return 'Ключ Meta от agnts. Когда он исчерпан, запуски продолжают свою сессию на $name.';
-  }
-
-  @override
-  String get platformMpNote_primary => 'Только ключ Meta от agnts. Запуски останавливаются, когда он исчерпан.';
-
-  @override
-  String platformMpNote_fallback(String name) {
-    return 'Все запуски за кредиты идут на $name.';
-  }
-
-  @override
-  String get platformMpFallback => 'Резервный';
-
-  @override
-  String get platformMpNone => 'На этом сервере нет резервного провайдера (AGNTS_MUSE_FALLBACK_KEY).';
-
-  @override
-  String platformMpOut(String time) {
-    return 'Meta недоступна до $time';
-  }
-
-  @override
-  String platformMpSet(String mode) {
-    return 'Запуски за кредиты: $mode';
-  }
-
-  @override
   String platformLimitRemoved(String name) {
     return 'У $name больше нет месячного лимита';
   }
@@ -10320,31 +10323,43 @@ class AppLocalizationsRu extends AppLocalizations {
   String get platformLimitNone => 'Без лимита: расход ограничен только их кредитами.';
 
   @override
-  String platformFbUsage(String name, String used) {
-    return '$name: $used';
-  }
-
-  @override
-  String platformFbUsed(String name, String used, String amount) {
-    return 'Потрачено на $name в этом месяце: $used кредитов ($amount).';
-  }
-
-  @override
-  String get platformFbUseDefault => 'Лимит сервера по умолчанию';
-
-  @override
-  String platformFbField(String name) {
-    return 'Кредитов в месяц на $name (0 — без лимита)';
-  }
-
-  @override
-  String platformFbHelp(String name) {
-    return 'Бесплатно для них: запуски используют $name, когда их аккаунт Meta или аккаунт agnts исчерпан. Когда лимит закончится, запуски продолжатся за кредиты.';
-  }
-
-  @override
   String platformUsageTotals(String used, String amount, String limited) {
     return 'В этом месяце: $used кредитов ($amount) у всех; лимит есть у $limited.';
+  }
+
+  @override
+  String get platformModules => 'Модули';
+
+  @override
+  String get platformSetModules => 'Задать модули';
+
+  @override
+  String platformModulesDefault(String list) {
+    return 'По умолчанию ($list)';
+  }
+
+  @override
+  String platformModulesNow(String list) {
+    return 'Сейчас доступны: $list.';
+  }
+
+  @override
+  String get platformModulesFollowDefault => 'Как по умолчанию';
+
+  @override
+  String get platformModulesCustom => 'Свой список';
+
+  @override
+  String get platformModulesCustomHelp => 'Первый — модуль по умолчанию. Выбрать можно только включённые модули.';
+
+  @override
+  String platformModulesSet(String name, String list) {
+    return '$name может пользоваться: $list';
+  }
+
+  @override
+  String platformModulesFollow(String name) {
+    return 'У $name теперь модули по умолчанию';
   }
 
   @override
@@ -16191,4 +16206,30 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get wsMuseKeyHelp => 'Вставьте API-ключ Muse (начинается с LLM_). Расход оплачивает владелец ключа в Meta.';
+
+  @override
+  String get wsClaudeBoth => 'Аккаунты';
+
+  @override
+  String get wsClaudeSubBoth => 'Какие аккаунты Muse и Claude используют запуски этого пространства.';
+
+  @override
+  String get wsClaudeSavedBoth => 'Настройки аккаунтов сохранены';
+
+  @override
+  String get wsFallbackHelpBoth =>
+      'Когда выбранный аккаунт упёрся в лимит или не подключён, запуски продолжаются на ключе agnts и тратят кредиты вместо паузы.';
+
+  @override
+  String get wsMemberAccountsSubBoth => 'Кто подключил свои аккаунты Muse и Claude (Профиль).';
+
+  @override
+  String get wsConnectionMuse => 'Аккаунт Muse пространства';
+
+  @override
+  String get wsConnectionClaude => 'Аккаунт Claude пространства';
+
+  @override
+  String get wsNoAccountModules =>
+      'У ваших модулей нет аккаунта для подключения здесь: Codex работает через интеграцию OpenAI пространства.';
 }

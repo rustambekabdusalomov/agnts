@@ -209,10 +209,11 @@ _responseData = rawData == null ? null : deserialize<CreateInvite201Response, Cr
     return _response;
   }
 
-  /// Disconnect the workspace&#39;s shared Claude account
+  /// Disconnect the workspace&#39;s shared Claude or Muse account
   /// 
   ///
   /// Parameters:
+  /// * [provider] - The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -223,6 +224,7 @@ _responseData = rawData == null ? null : deserialize<CreateInvite201Response, Cr
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> deleteWorkspaceClaudeConnection({ 
+    String? provider,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -254,9 +256,14 @@ _responseData = rawData == null ? null : deserialize<CreateInvite201Response, Cr
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (provider != null) r'provider': provider,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
@@ -427,10 +434,11 @@ _responseData = rawData == null ? null : deserialize<WorkspaceDetail, WorkspaceD
     );
   }
 
-  /// Which Claude account the workspace&#39;s runs use
+  /// Which Claude or Muse account the workspace&#39;s runs use
   /// 
   ///
   /// Parameters:
+  /// * [provider] - The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -441,6 +449,7 @@ _responseData = rawData == null ? null : deserialize<WorkspaceDetail, WorkspaceD
   /// Returns a [Future] containing a [Response] with a [WorkspaceClaude] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<WorkspaceClaude>> getWorkspaceClaude({ 
+    String? provider,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -472,9 +481,14 @@ _responseData = rawData == null ? null : deserialize<WorkspaceDetail, WorkspaceD
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (provider != null) r'provider': provider,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,

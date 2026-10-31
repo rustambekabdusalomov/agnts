@@ -100,7 +100,7 @@ _responseData = rawData == null ? null : deserialize<Settings, Settings>(rawData
     );
   }
 
-  /// The coding tools and models this server offers
+  /// The coding modules and models you may use
   /// 
   ///
   /// Parameters:

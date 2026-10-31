@@ -8,7 +8,8 @@ import (
 )
 
 // Providers are the coding tools agnts can run: Muse Code (Meta), Claude
-// Code (Anthropic) and Codex CLI (OpenAI).
+// Code (Anthropic) and Codex CLI (OpenAI). Which of them a person may use
+// is their Access.
 const (
 	ProviderMuse   = "muse"
 	ProviderClaude = "claude"
@@ -42,54 +43,54 @@ func ProviderOf(m string) string {
 	return ProviderClaude
 }
 
-var providers = struct {
+var ceiling = struct {
 	sync.RWMutex
 	list []string
 }{list: []string{ProviderMuse}}
 
-// SetProviders sets the providers this server offers, the first being the
-// default (AGNTS_PROVIDERS, "muse" unless set). Called once at startup.
+// SetProviders sets the modules this server can run (AGNTS_PROVIDERS, "muse"
+// unless set): the ceiling the Admin's choice stays within. It also makes
+// them the default access until the modules service loads the Admin's
+// choice. Called once at startup.
 func SetProviders(list []string) {
 	var out []string
 	for _, p := range list {
 		p = strings.TrimSpace(strings.ToLower(p))
-		if (p == ProviderMuse || p == ProviderClaude || p == ProviderCodex) && !slices.Contains(out, p) {
+		if knownModule(p) && !slices.Contains(out, p) {
 			out = append(out, p)
 		}
 	}
 	if len(out) == 0 {
 		out = []string{ProviderMuse}
 	}
-	providers.Lock()
-	providers.list = out
-	providers.Unlock()
+	ceiling.Lock()
+	ceiling.list = out
+	ceiling.Unlock()
+	SetDefaultAccess(Access{Modules: out})
 }
 
-// EnabledProviders returns the providers this server offers.
-func EnabledProviders() []string {
-	providers.RLock()
-	defer providers.RUnlock()
-	return slices.Clone(providers.list)
+// Ceiling returns the modules this server can run.
+func Ceiling() []string {
+	ceiling.RLock()
+	defer ceiling.RUnlock()
+	return slices.Clone(ceiling.list)
 }
 
-// PrimaryProvider is the default provider.
-func PrimaryProvider() string { return EnabledProviders()[0] }
-
-// ToolName names the primary tool in messages people read: "Muse" when
+// ToolName names a's default tool in messages people read: "Muse" when
 // Muse Code is the default, else "Claude".
-func ToolName() string {
-	if PrimaryProvider() == ProviderMuse {
+func ToolName(a Access) string {
+	if a.Primary() == ProviderMuse {
 		return "Muse"
 	}
 	return "Claude"
 }
 
 // AgentName names the agent that runs model in messages people read:
-// "Muse", "Codex" or "Claude"; with no model, the primary tool.
+// "Muse", "Codex" or "Claude"; with no model, the default tool.
 func AgentName(model string) string {
 	switch {
 	case model == "":
-		return ToolName()
+		return ToolName(DefaultAccess())
 	case IsMuse(model):
 		return "Muse"
 	case IsCodex(model):
@@ -98,21 +99,18 @@ func AgentName(model string) string {
 	return "Claude"
 }
 
-// ProviderEnabled reports whether p is offered here.
-func ProviderEnabled(p string) bool { return slices.Contains(EnabledProviders(), p) }
-
-// StrongModel and LightModel are the primary provider's models for hard
-// and simple work: the review's auto choice, Swagger tests, helpers.
-func StrongModel() string {
-	if PrimaryProvider() == ProviderMuse {
+// StrongModel and LightModel are a's default module's models for hard and
+// simple work: the review's auto choice, Swagger tests, helpers.
+func StrongModel(a Access) string {
+	if a.Primary() == ProviderMuse {
 		return MuseWonder
 	}
 	return "opus"
 }
 
-// LightModel is the primary provider's model for simple work.
-func LightModel() string {
-	if PrimaryProvider() == ProviderMuse {
+// LightModel is a's default module's model for simple work.
+func LightModel(a Access) string {
+	if a.Primary() == ProviderMuse {
 		return MuseSpark
 	}
 	return "sonnet"
@@ -123,10 +121,11 @@ func IsStrong(m string) bool {
 	return m == "opus" || m == MuseWonder || strings.HasPrefix(m, "muse:muse-wonder")
 }
 
-// AvailableModels lists the models settings may pick from on this server.
-func AvailableModels() []string {
+// AvailableModels lists the models settings may pick from for a. Codex
+// models are free-form (codex:<model>), so they are not listed.
+func AvailableModels(a Access) []string {
 	var out []string
-	for _, p := range EnabledProviders() {
+	for _, p := range a.Modules {
 		switch p {
 		case ProviderMuse:
 			out = append(out, MuseSpark, MuseWonder)
@@ -137,22 +136,26 @@ func AvailableModels() []string {
 	return out
 }
 
-// EffectiveModel maps a saved model whose provider is hidden on this
-// server to the primary provider's light model, so settings saved before
-// the switch keep working. Not to the strong one: Claude settings often
-// named opus for analysis and coding, and on Muse that would put every
-// run on Wonder, about three times Spark's price. Hard work still reaches
-// Wonder: the review's auto choice for complex tickets, and a stuck
-// session's escalation.
-func EffectiveModel(m string) string {
-	if m == "" || m == ModelAuto || ProviderEnabled(ProviderOf(m)) {
+// EffectiveModel maps a model of a module a may not use to a's default
+// module, so settings saved for one person keep working for another and
+// nothing is rewritten in storage. On Claude it keeps the tier (Wonder
+// becomes opus, the rest sonnet). On Muse it is always Spark: Claude
+// settings often name opus for analysis and coding, and Wonder for every
+// run would cost about three times as much; hard work still reaches Wonder
+// through the review's auto choice and a stuck session's escalation. A
+// Codex model maps to the light model.
+func EffectiveModel(a Access, m string) string {
+	if m == "" || m == ModelAuto || a.Allows(ProviderOf(m)) || a.None() {
 		return m
 	}
-	return LightModel()
+	if IsStrong(m) && a.Primary() != ProviderMuse {
+		return StrongModel(a)
+	}
+	return LightModel(a)
 }
 
 // EffectiveModels applies EffectiveModel to every stage.
-func (m StageModels) EffectiveModels() StageModels {
-	return StageModels{Analyze: EffectiveModel(m.Analyze), Coding: EffectiveModel(m.Coding), Retry: EffectiveModel(m.Retry),
-		Helper: EffectiveModel(m.Helper), Learn: EffectiveModel(m.Learn), Review: EffectiveModel(m.Review), Preview: EffectiveModel(m.Preview)}
+func (m StageModels) EffectiveModels(a Access) StageModels {
+	return StageModels{Analyze: EffectiveModel(a, m.Analyze), Coding: EffectiveModel(a, m.Coding), Retry: EffectiveModel(a, m.Retry),
+		Helper: EffectiveModel(a, m.Helper), Learn: EffectiveModel(a, m.Learn), Review: EffectiveModel(a, m.Review), Preview: EffectiveModel(a, m.Preview)}
 }

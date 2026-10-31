@@ -1433,21 +1433,6 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String billingFallbackLimit(String name, String used, String limit) {
-    return '$name: $limit kreditdan $used tasi ishlatildi';
-  }
-
-  @override
-  String billingFallbackNoLimit(String name, String used) {
-    return '$name: $used kredit ishlatildi, limitsiz';
-  }
-
-  @override
-  String billingFallbackHint(String name) {
-    return '$name — zaxira provayder, siz uchun bepul: o‘z Meta akkauntingiz (yoki agnts’niki) tugaganda ishlaringiz unga o‘tadi. Limit tugaganda ular kreditlar hisobidan davom etadi.';
-  }
-
-  @override
   String get briefTitle => 'Repozitoriy tavsifi';
 
   @override
@@ -8679,6 +8664,68 @@ class AppLocalizationsUz extends AppLocalizations {
   String get mobileGoogleSetup => 'Ilovaning bu yigʻmasida Google orqali kirish sozlanmagan.';
 
   @override
+  String get modulesName_muse => 'Muse Code';
+
+  @override
+  String get modulesName_claude => 'Claude Code';
+
+  @override
+  String get modulesName_codex => 'Codex';
+
+  @override
+  String get modulesTitle => 'Modullar';
+
+  @override
+  String get modulesSub => 'Odamlar qaysi kod modullaridan foydalana oladi. Odam ro‘yxatidagi birinchisi uning asosiy moduli.';
+
+  @override
+  String get modulesAvailable => 'Bu serverda mavjud';
+
+  @override
+  String get modulesAvailableHelp => 'Bu server nimalarni ishga tushira oladi (AGNTS_PROVIDERS). Buni bu yerda o‘zgartirib bo‘lmaydi.';
+
+  @override
+  String get modulesEnabled => 'Yoqilgan';
+
+  @override
+  String get modulesEnabledHelp => 'Odamlarga nima berish mumkin. O‘chirilgan modul hammadan olinadi.';
+
+  @override
+  String get modulesDefaultList => 'Odamlar uchun standart';
+
+  @override
+  String get modulesDefaultListHelp =>
+      'Agar «Foydalanuvchilar» sahifasida odamga alohida ro‘yxat belgilamagan bo‘lsangiz, u shuni oladi. Birinchisi asosiy modul.';
+
+  @override
+  String get modulesDefault => 'Asosiy';
+
+  @override
+  String modulesMoveUp(String module) {
+    return '${module}ni yuqoriga surish';
+  }
+
+  @override
+  String modulesMoveDown(String module) {
+    return '${module}ni pastga surish';
+  }
+
+  @override
+  String get modulesProblem_noneEnabled => 'Kamida bitta modulni yoqing.';
+
+  @override
+  String get modulesProblem_empty => 'Kamida bitta modulni tanlang.';
+
+  @override
+  String get modulesProblem_codexFirst => 'Codex asosiy modul bo‘la olmaydi: birinchi o‘ringa Muse Code yoki Claude Code qo‘ying.';
+
+  @override
+  String get modulesSave => 'Saqlash';
+
+  @override
+  String get modulesSaved => 'Modullar saqlandi';
+
+  @override
   String get mpreviewTitle => 'agnts oldindan koʻrishi';
 
   @override
@@ -9851,51 +9898,6 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get platformMuseProvider => 'Muse provayderi';
-
-  @override
-  String get platformMuseProviderSub =>
-      'agnts kreditlari hisobidan ishlar qayerga boradi. Odamlarning o‘z Meta akkauntlariga ta’sir qilmaydi.';
-
-  @override
-  String get platformMp_auto => 'Avto';
-
-  @override
-  String get platformMp_primary => 'Faqat Meta';
-
-  @override
-  String get platformMp_fallback => 'Faqat zaxira';
-
-  @override
-  String platformMpNote_auto(String name) {
-    return 'agnts’ning Meta kaliti. U tugaganda ishlar o‘z sessiyasini ${name}da davom ettiradi.';
-  }
-
-  @override
-  String get platformMpNote_primary => 'Faqat agnts’ning Meta kaliti. U tugaganda ishlar to‘xtaydi.';
-
-  @override
-  String platformMpNote_fallback(String name) {
-    return 'Kredit hisobidagi barcha ishlar ${name}ga boradi.';
-  }
-
-  @override
-  String get platformMpFallback => 'Zaxira';
-
-  @override
-  String get platformMpNone => 'Bu serverda zaxira provayder yo‘q (AGNTS_MUSE_FALLBACK_KEY).';
-
-  @override
-  String platformMpOut(String time) {
-    return 'Meta $time gacha ishlamaydi';
-  }
-
-  @override
-  String platformMpSet(String mode) {
-    return 'Kredit hisobidagi ishlar: $mode';
-  }
-
-  @override
   String platformLimitRemoved(String name) {
     return '$name uchun oylik limit olib tashlandi';
   }
@@ -9921,31 +9923,43 @@ class AppLocalizationsUz extends AppLocalizations {
   String get platformLimitNone => 'Limitsiz: sarfni faqat ularning kreditlari cheklaydi.';
 
   @override
-  String platformFbUsage(String name, String used) {
-    return '$name: $used';
-  }
-
-  @override
-  String platformFbUsed(String name, String used, String amount) {
-    return 'Bu oy ${name}ga sarflangan: $used kredit ($amount).';
-  }
-
-  @override
-  String get platformFbUseDefault => 'Serverning standart limitidan foydalanish';
-
-  @override
-  String platformFbField(String name) {
-    return '${name}da oyiga kredit (0 — limitsiz)';
-  }
-
-  @override
-  String platformFbHelp(String name) {
-    return 'Ular uchun bepul: o‘z Meta akkaunti yoki agnts’niki tugaganda ishlar ${name}dan foydalanadi. Limit tugaganda ishlar kreditlar hisobidan davom etadi.';
-  }
-
-  @override
   String platformUsageTotals(String used, String amount, String limited) {
     return 'Shu oy: hammada $used kredit ($amount); $limited kishida limit bor.';
+  }
+
+  @override
+  String get platformModules => 'Modullar';
+
+  @override
+  String get platformSetModules => 'Modullarni belgilash';
+
+  @override
+  String platformModulesDefault(String list) {
+    return 'Standart ($list)';
+  }
+
+  @override
+  String platformModulesNow(String list) {
+    return 'Hozir foydalanadi: $list.';
+  }
+
+  @override
+  String get platformModulesFollowDefault => 'Standart bo‘yicha';
+
+  @override
+  String get platformModulesCustom => 'Alohida ro‘yxat';
+
+  @override
+  String get platformModulesCustomHelp => 'Birinchisi asosiy modul. Faqat yoqilgan modullarni tanlash mumkin.';
+
+  @override
+  String platformModulesSet(String name, String list) {
+    return '$name foydalana oladi: $list';
+  }
+
+  @override
+  String platformModulesFollow(String name) {
+    return '$name endi standart modullardan foydalanadi';
   }
 
   @override
@@ -15517,4 +15531,30 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get wsMuseKeyHelp => 'Muse API kalitini joylang (LLM_ bilan boshlanadi). Sarfni Meta’da kalit egasi to‘laydi.';
+
+  @override
+  String get wsClaudeBoth => 'Hisoblar';
+
+  @override
+  String get wsClaudeSubBoth => 'Bu ish maydonidagi ishlar qaysi Muse va Claude hisoblaridan foydalanadi.';
+
+  @override
+  String get wsClaudeSavedBoth => 'Hisob sozlamalari saqlandi';
+
+  @override
+  String get wsFallbackHelpBoth =>
+      'Tanlangan hisob limitga yetganda yoki ulanmaganda ishlar to‘xtab qolmaydi: agnts kaliti bilan davom etadi va kreditlarni sarflaydi.';
+
+  @override
+  String get wsMemberAccountsSubBoth => 'Kim o‘z Muse va Claude hisoblarini ulagan (Profil).';
+
+  @override
+  String get wsConnectionMuse => 'Ish maydonining Muse hisobi';
+
+  @override
+  String get wsConnectionClaude => 'Ish maydonining Claude hisobi';
+
+  @override
+  String get wsNoAccountModules =>
+      'Modullaringiz uchun bu yerda ulanadigan hisob yo‘q: Codex ish maydonining OpenAI integratsiyasi orqali ishlaydi.';
 }

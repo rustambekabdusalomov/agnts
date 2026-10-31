@@ -3139,12 +3139,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Your personal Claude connection (used by workspaces in per-member mode) */
+        /** Your personal Claude or Muse connection (used by workspaces in per-member mode) */
         get: operations["getMyClaude"];
         /** Connect your Claude account */
         put: operations["setMyClaude"];
         post?: never;
-        /** Disconnect your Claude account */
+        /** Disconnect your Claude or Muse account */
         delete: operations["deleteMyClaude"];
         options?: never;
         head?: never;
@@ -3228,7 +3228,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The coding tools and models this server offers */
+        /** The coding modules and models you may use */
         get: operations["listModels"];
         put?: never;
         post?: never;
@@ -3516,7 +3516,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Which Claude account the workspace's runs use */
+        /** Which Claude or Muse account the workspace's runs use */
         get: operations["getWorkspaceClaude"];
         /** Choose the Claude mode, the fallback and the default member */
         put: operations["updateWorkspaceClaude"];
@@ -3538,7 +3538,7 @@ export interface paths {
         /** Connect the workspace's shared Claude account */
         put: operations["setWorkspaceClaudeConnection"];
         post?: never;
-        /** Disconnect the workspace's shared Claude account */
+        /** Disconnect the workspace's shared Claude or Muse account */
         delete: operations["deleteWorkspaceClaudeConnection"];
         options?: never;
         head?: never;
@@ -3807,6 +3807,43 @@ export interface paths {
         get?: never;
         /** Set the most credits a person may spend on agnts's Muse key per calendar month, free and bought together (Admin); 0 is no limit */
         put: operations["setCreditLimit"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/users/{id}/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Set which coding modules a person may use, the default first (Admin); null follows the general default */
+        put: operations["setUserModules"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/settings/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Which coding modules the server offers, and the default for new users (Admin) */
+        get: operations["getModulesSettings"];
+        /** Choose which coding modules the server offers, and the default for new users (Admin) */
+        put: operations["setModulesSettings"];
         post?: never;
         delete?: never;
         options?: never;
@@ -5880,6 +5917,28 @@ export interface components {
             workspaces: components["schemas"]["WorkspaceSummary"][];
             freeCredits?: components["schemas"]["FreeCredits"];
             creditUsage?: components["schemas"]["CreditUsage"];
+            modules?: components["schemas"]["UserModules"];
+        };
+        /**
+         * @description A coding module: Muse Code (Meta), Claude Code (Anthropic) or Codex (OpenAI)
+         * @enum {string}
+         */
+        Module: "muse" | "claude" | "codex";
+        /** @description Which coding modules the server offers and who gets which by default (Admin) */
+        ModulesSettings: {
+            /** @description What this server can run (AGNTS_PROVIDERS); enabled stays within it */
+            readonly available: components["schemas"]["Module"][];
+            enabled: components["schemas"]["Module"][];
+            /** @description What a person gets unless an Admin set theirs, the default module first; codex cannot be first */
+            default: components["schemas"]["Module"][];
+        };
+        UserModules: {
+            /** @description The list an Admin set; absent or null follows the default */
+            own?: components["schemas"]["Module"][] | null;
+            /** @description What the person may use now, the default module first */
+            effective: components["schemas"]["Module"][];
+            /** Format: date-time */
+            setAt?: string;
         };
         WorkspaceSummary: {
             /** Format: int64 */
@@ -6190,6 +6249,8 @@ export interface components {
             hasTotp?: boolean;
             /** @description The slug of the workspace opened last */
             lastWorkspace?: string;
+            /** @description The coding modules the user may use, the default first (on /auth/me only) */
+            modules?: components["schemas"]["Module"][];
             /** @description The workspaces the user is a member of (on /auth/me only) */
             workspaces?: components["schemas"]["WorkspaceSummary"][];
             /** Format: date-time */
@@ -7206,10 +7267,10 @@ export interface components {
         /** @description auto: the stronger model (muse:wonder, opus) for complex tickets, the lighter one otherwise */
         ReviewModel: string;
         ModelCatalog: {
-            /** @description The coding tools this server offers */
+            /** @description The coding modules you may use (an Admin chooses them); empty when none */
             providers: ("muse" | "claude" | "codex")[];
             /**
-             * @description The default tool
+             * @description Your default module; settings naming a module you may not use run on its models
              * @enum {string}
              */
             primary: "muse" | "claude" | "codex";
@@ -10471,6 +10532,8 @@ export interface components {
         };
     };
     parameters: {
+        /** @description The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. */
+        ModuleProvider: "muse" | "claude";
         MeetingID: number;
         SessionID: number;
         /** @description The meeting code, abc-defg-hij (dashes optional) */
@@ -15421,7 +15484,10 @@ export interface operations {
     };
     getMyClaude: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. */
+                provider?: components["parameters"]["ModuleProvider"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -15462,11 +15528,15 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
         };
     };
     deleteMyClaude: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. */
+                provider?: components["parameters"]["ModuleProvider"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -16060,7 +16130,10 @@ export interface operations {
     };
     getWorkspaceClaude: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. */
+                provider?: components["parameters"]["ModuleProvider"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -16140,7 +16213,10 @@ export interface operations {
     };
     deleteWorkspaceClaudeConnection: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. */
+                provider?: components["parameters"]["ModuleProvider"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -16567,6 +16643,84 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    setUserModules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    modules?: components["schemas"]["Module"][] | null;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserModules"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getModulesSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModulesSettings"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    setModulesSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModulesSettings"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModulesSettings"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
         };
     };
     listPlatformRuns: {

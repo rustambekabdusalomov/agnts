@@ -50,6 +50,12 @@ void main() {
       // TODO
     });
 
+    // The coding modules the user may use, the default first (on /auth/me only)
+    // List<Module> modules
+    test('to test the property `modules`', () async {
+      // TODO
+    });
+
     // The workspaces the user is a member of (on /auth/me only)
     // List<WorkspaceSummary> workspaces
     test('to test the property `workspaces`', () async {

@@ -28,7 +28,7 @@ class ModelCatalog {
     required  this.models,
   });
 
-      /// The coding tools this server offers
+      /// The coding modules you may use (an Admin chooses them); empty when none
   @JsonKey(
     
     name: r'providers',
@@ -41,7 +41,7 @@ class ModelCatalog {
 
 
 
-      /// The default tool
+      /// Your default module; settings naming a module you may not use run on its models
   @JsonKey(
     
     name: r'primary',
@@ -108,7 +108,7 @@ String toString() => value;
 }
 
 
-/// The default tool
+/// Your default module; settings naming a module you may not use run on its models
 enum ModelCatalogPrimaryEnum {
 @JsonValue(r'muse')
 muse(r'muse'),

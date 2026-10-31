@@ -12,7 +12,7 @@ void main() {
       // TODO
     });
 
-    // The coding tools and models this server offers
+    // The coding modules and models you may use
     //
     //Future<ModelCatalog> listModels() async
     test('test listModels', () async {

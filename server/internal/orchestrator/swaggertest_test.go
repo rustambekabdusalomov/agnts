@@ -134,7 +134,7 @@ func TestSwaggerTestRun(t *testing.T) {
 	if strings.Contains(h.runner.prompts[0], swaggerToken) || !strings.Contains(h.runner.prompts[0], "agnts-api run") {
 		t.Errorf("prompt:\n%s", h.runner.prompts[0])
 	}
-	if req.Model != orchestrator.SwaggerModel() || req.MaxTurns > orchestrator.SwaggerTurns {
+	if req.Model != orchestrator.SwaggerModel(domain.DefaultAccess()) || req.MaxTurns > orchestrator.SwaggerTurns {
 		t.Errorf("model %s, turns %d: Swagger tests run on Claude", req.Model, req.MaxTurns)
 	}
 	for _, rule := range []string{"Read(//agnts/context/api/.auth)", "Bash(curl *203.0.113.7*)"} {

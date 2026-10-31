@@ -61,6 +61,13 @@ type transcriptMeta struct {
 // transcript. Every invocation goes through here; recording problems are
 // logged and never fail the run.
 func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest, onEvent func(ClaudeEvent)) (ClaudeResult, error) {
+	// Each call runs on its own module's account, and only on a module
+	// the run's person may use.
+	p := domain.ProviderOf(req.Model)
+	if a, ok := domain.AccessIn(ctx); ok && !a.Allows(p) {
+		return ClaudeResult{}, &domain.NotAllowedError{Module: p}
+	}
+	ctx = domain.UseProvider(ctx, p)
 	req = o.fitPrompt(ctx, ws, m, req)
 	if m.Run != nil && req.RunID == 0 {
 		req.RunID = m.Run.ID

@@ -11,6 +11,8 @@ export type PlatformWorkspace = components['schemas']['PlatformWorkspace']
 export type RunTranscript = components['schemas']['RunTranscript']
 export type RunEvent = components['schemas']['RunTranscriptEvent']
 export type RunHistorySettings = components['schemas']['RunHistorySettings']
+export type Module = components['schemas']['Module']
+export type ModulesSettings = components['schemas']['ModulesSettings']
 export type AdminAuditEntry = components['schemas']['AdminAuditEntry']
 export type RunFilters = NonNullable<paths['/platform/runs/summary']['get']['parameters']['query']>
 
@@ -131,6 +133,30 @@ export function useRunHistorySettings() {
       ui.notify(t('runs.settingsSaved'))
     },
     onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+  })
+  return { settings, save }
+}
+
+/** Which coding modules the server offers and the default list for people
+ * an Admin has not set one for. */
+export function useModulesSettings() {
+  const { t } = useI18n()
+  const qc = useQueryClient()
+  const ui = useUi()
+  const session = useSession()
+  const settings = useQuery({
+    queryKey: ['platform', 'settings', 'modules'],
+    queryFn: () => unwrap(api.GET('/platform/settings/modules')),
+    enabled: computed(() => !!session.user?.isAdmin),
+  })
+  const save = useMutation({
+    mutationFn: (body: ModulesSettings) => unwrap(api.PUT('/platform/settings/modules', { body })),
+    onSuccess: (s) => {
+      qc.setQueryData(['platform', 'settings', 'modules'], s)
+      // Whoever follows the default now has other modules.
+      void qc.invalidateQueries({ queryKey: ['platform', 'users'] })
+      ui.notify(t('modules.saved'))
+    },
   })
   return { settings, save }
 }

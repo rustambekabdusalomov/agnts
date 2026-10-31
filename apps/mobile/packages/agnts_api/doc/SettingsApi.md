@@ -10,7 +10,7 @@ All URIs are relative to */api*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**getSettings**](SettingsApi.md#getsettings) | **GET** /settings | 
-[**listModels**](SettingsApi.md#listmodels) | **GET** /models | The coding tools and models this server offers
+[**listModels**](SettingsApi.md#listmodels) | **GET** /models | The coding modules and models you may use
 [**putSettings**](SettingsApi.md#putsettings) | **PUT** /settings | 
 
 
@@ -58,7 +58,7 @@ This endpoint does not need any parameter.
 # **listModels**
 > ModelCatalog listModels()
 
-The coding tools and models this server offers
+The coding modules and models you may use
 
 ### Example
 ```dart

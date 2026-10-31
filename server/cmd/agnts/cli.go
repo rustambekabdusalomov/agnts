@@ -21,6 +21,7 @@ import (
 	"agnts/internal/admin"
 	"agnts/internal/config"
 	"agnts/internal/domain"
+	"agnts/internal/modules"
 	"agnts/internal/orchestrator"
 	"agnts/internal/secret"
 	"agnts/internal/store/postgres"
@@ -228,6 +229,15 @@ func integrationCmd(ctx context.Context, cfg config.Config, pool postgresPool, a
 
 	switch args[1] {
 	case "claude":
+		// Same rule as the web page: only a module the Admin enabled.
+		domain.SetProviders(cfg.Providers)
+		mc, err := modules.New(pool).Config(ctx)
+		if err != nil {
+			return err
+		}
+		if !domain.ResolveAccess(domain.Ceiling(), mc, mc.Enabled).Allows(domain.ProviderClaude) {
+			return errors.New("claude is not enabled on this server: an Admin enables it under Admin → Modules (and AGNTS_PROVIDERS must include claude)")
+		}
 		_, _ = fmt.Fprintln(out, "Run `claude setup-token` on a machine where you are signed in to your Claude plan and paste the token.")
 		tok, err := p.secret("Token: ")
 		if err != nil {

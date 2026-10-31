@@ -1432,21 +1432,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String billingFallbackLimit(String name, String used, String limit) {
-    return '$name: $used of $limit credits used';
-  }
-
-  @override
-  String billingFallbackNoLimit(String name, String used) {
-    return '$name: $used credits used, no limit';
-  }
-
-  @override
-  String billingFallbackHint(String name) {
-    return '$name is the backup provider, free for you: your runs move there when your own Meta account (or agnts\'s) is at its limit. When this allowance is used up, they continue on credits.';
-  }
-
-  @override
   String get briefTitle => 'Repository brief';
 
   @override
@@ -8672,6 +8657,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobileGoogleSetup => 'Google sign-in is not set up in this build of the app.';
 
   @override
+  String get modulesName_muse => 'Muse Code';
+
+  @override
+  String get modulesName_claude => 'Claude Code';
+
+  @override
+  String get modulesName_codex => 'Codex';
+
+  @override
+  String get modulesTitle => 'Modules';
+
+  @override
+  String get modulesSub => 'Which coding modules people may use. The first in a person\'s list is their default module.';
+
+  @override
+  String get modulesAvailable => 'Available on this server';
+
+  @override
+  String get modulesAvailableHelp => 'What this server can run (AGNTS_PROVIDERS). It cannot be changed here.';
+
+  @override
+  String get modulesEnabled => 'Enabled';
+
+  @override
+  String get modulesEnabledHelp => 'What people may be given. Switching a module off takes it from everyone.';
+
+  @override
+  String get modulesDefaultList => 'Default for people';
+
+  @override
+  String get modulesDefaultListHelp => 'What a person gets unless you set theirs on the Users page. The first is their default module.';
+
+  @override
+  String get modulesDefault => 'Default';
+
+  @override
+  String modulesMoveUp(String module) {
+    return 'Move $module up';
+  }
+
+  @override
+  String modulesMoveDown(String module) {
+    return 'Move $module down';
+  }
+
+  @override
+  String get modulesProblem_noneEnabled => 'Enable at least one module.';
+
+  @override
+  String get modulesProblem_empty => 'Choose at least one module.';
+
+  @override
+  String get modulesProblem_codexFirst => 'Codex cannot be the default module: put Muse Code or Claude Code first.';
+
+  @override
+  String get modulesSave => 'Save';
+
+  @override
+  String get modulesSaved => 'Modules saved';
+
+  @override
   String get mpreviewTitle => 'agnts\'s preview';
 
   @override
@@ -9836,50 +9882,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get platformMuseProvider => 'Muse provider';
-
-  @override
-  String get platformMuseProviderSub => 'Where runs on agnts\'s credits go. People\'s own Meta accounts are not affected.';
-
-  @override
-  String get platformMp_auto => 'Auto';
-
-  @override
-  String get platformMp_primary => 'Meta only';
-
-  @override
-  String get platformMp_fallback => 'Fallback only';
-
-  @override
-  String platformMpNote_auto(String name) {
-    return 'agnts\'s Meta key. When it runs out, runs continue their session on $name.';
-  }
-
-  @override
-  String get platformMpNote_primary => 'agnts\'s Meta key only. Runs stop when it runs out.';
-
-  @override
-  String platformMpNote_fallback(String name) {
-    return 'Every run on credits goes to $name.';
-  }
-
-  @override
-  String get platformMpFallback => 'Fallback';
-
-  @override
-  String get platformMpNone => 'This server has no fallback provider (AGNTS_MUSE_FALLBACK_KEY).';
-
-  @override
-  String platformMpOut(String time) {
-    return 'Meta is out until $time';
-  }
-
-  @override
-  String platformMpSet(String mode) {
-    return 'Runs on credits: $mode';
-  }
-
-  @override
   String platformLimitRemoved(String name) {
     return '$name has no monthly limit now';
   }
@@ -9905,31 +9907,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get platformLimitNone => 'No limit: only their credits bound what they spend.';
 
   @override
-  String platformFbUsage(String name, String used) {
-    return '$name: $used';
-  }
-
-  @override
-  String platformFbUsed(String name, String used, String amount) {
-    return 'Spent on $name this month: $used credits ($amount).';
-  }
-
-  @override
-  String get platformFbUseDefault => 'Use the server\'s default limit';
-
-  @override
-  String platformFbField(String name) {
-    return 'Credits per month on $name (0 is no limit)';
-  }
-
-  @override
-  String platformFbHelp(String name) {
-    return 'Free for them: runs use $name when their own Meta account or agnts\'s is at its limit. When it is used up, their runs continue on credits.';
-  }
-
-  @override
   String platformUsageTotals(String used, String amount, String limited) {
     return 'This month: $used credits ($amount) across everyone; $limited people have a limit.';
+  }
+
+  @override
+  String get platformModules => 'Modules';
+
+  @override
+  String get platformSetModules => 'Set modules';
+
+  @override
+  String platformModulesDefault(String list) {
+    return 'Default ($list)';
+  }
+
+  @override
+  String platformModulesNow(String list) {
+    return 'Uses now: $list.';
+  }
+
+  @override
+  String get platformModulesFollowDefault => 'Follow the default';
+
+  @override
+  String get platformModulesCustom => 'Their own list';
+
+  @override
+  String get platformModulesCustomHelp => 'The first is their default module. Only enabled modules can be chosen.';
+
+  @override
+  String platformModulesSet(String name, String list) {
+    return '$name may use $list';
+  }
+
+  @override
+  String platformModulesFollow(String name) {
+    return '$name follows the default modules now';
   }
 
   @override
@@ -15521,4 +15535,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wsMuseKeyHelp => 'Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner.';
+
+  @override
+  String get wsClaudeBoth => 'Accounts';
+
+  @override
+  String get wsClaudeSubBoth => 'Which Muse and Claude accounts this workspace\'s runs use.';
+
+  @override
+  String get wsClaudeSavedBoth => 'Account settings saved';
+
+  @override
+  String get wsFallbackHelpBoth =>
+      'When the chosen account is at its limit or missing, runs continue on agnts\'s key and spend credits instead of pausing.';
+
+  @override
+  String get wsMemberAccountsSubBoth => 'Who has connected their own Muse and Claude accounts (Profile).';
+
+  @override
+  String get wsConnectionMuse => 'Workspace Muse account';
+
+  @override
+  String get wsConnectionClaude => 'Workspace Claude account';
+
+  @override
+  String get wsNoAccountModules => 'Your modules have no account to connect here: Codex runs on the workspace\'s OpenAI integration.';
 }

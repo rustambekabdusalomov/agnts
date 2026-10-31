@@ -127,6 +127,14 @@
     "muse_failed": "The sign-in failed.",
     "museTryAgain": "Try again",
     "museUseKey": "Use an API key",
-    "museKeyHelp": "Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner."
+    "museKeyHelp": "Paste a Muse API key (it starts with LLM_). Usage is billed by Meta to its owner.",
+    "claudeBoth": "Accounts",
+    "claudeSubBoth": "Which Muse and Claude accounts this workspace's runs use.",
+    "claudeSavedBoth": "Account settings saved",
+    "fallbackHelpBoth": "When the chosen account is at its limit or missing, runs continue on agnts's key and spend credits instead of pausing.",
+    "memberAccountsSubBoth": "Who has connected their own Muse and Claude accounts (Profile).",
+    "connectionMuse": "Workspace Muse account",
+    "connectionClaude": "Workspace Claude account",
+    "noAccountModules": "Your modules have no account to connect here: Codex runs on the workspace's OpenAI integration."
   }
 }
