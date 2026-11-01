@@ -85,7 +85,7 @@ func (l *limits) RecordLimited(_ context.Context, a domain.ClaudeAccount) {
 var all = domain.Access{Modules: []string{"claude", "muse", "codex"}}
 
 func gateway(a *accounts, l *limits, spent *[]domain.ClaudeCall) *ai.Gateway {
-	return ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{all}, Accounts: a, Workspaces: workspaces{}, Limits: l,
+	return ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{all}, Accounts: a, Workspaces: workspaces{}, Limits: l, Settings: settings{},
 		Spend: func(_ context.Context, c domain.ClaudeCall) error {
 			*spent = append(*spent, c)
 			return nil
@@ -150,7 +150,7 @@ func TestPolicyKeepsSomePurposesOffCredits(t *testing.T) {
 
 // A call on a module its person may not use never reaches the provider.
 func TestRunRefusesModulesThePersonMayNotUse(t *testing.T) {
-	g := ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{domain.Access{Modules: []string{"muse"}}}})
+	g := ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{domain.Access{Modules: []string{"muse"}}}, Settings: settings{}})
 	b := &box{}
 	_, err := g.Run(context.Background(), ai.Call{Who: ai.Who{Person: 4}, Box: b, Req: ai.Request{Model: "opus"}}, nil)
 	var na *domain.NotAllowedError
@@ -168,7 +168,7 @@ func TestRunRefusesModulesThePersonMayNotUse(t *testing.T) {
 // account.
 func TestLimits(t *testing.T) {
 	l := &limits{paused: true}
-	g := ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{all}, Limits: l})
+	g := ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{all}, Limits: l, Settings: settings{}})
 	b := &box{res: ai.Result{RateLimited: true}, events: []ai.Event{{Kind: ai.EventRateLimit, Data: map[string]any{"status": "rejected"}}}}
 	_, err := g.Run(context.Background(), ai.Call{Who: ai.Who{Person: 4}, Box: b, Req: ai.Request{Model: "opus"}}, nil)
 	if !errors.Is(err, ai.ErrLimit) || err.Error() != "Claude limit reached; resumes at 15:00" {
@@ -195,5 +195,90 @@ func TestHearing(t *testing.T) {
 	got, err := g.HearClip(domain.WithWorkspace(context.Background(), 3), ai.Who{Person: 4}, []byte("RIFF"))
 	if err != nil || got != "hello t-muse" || a.picks[0] {
 		t.Fatalf("heard %q, %v, credits %v", got, err, a.picks)
+	}
+}
+
+type settings struct{ s domain.Settings }
+
+func (s settings) Get(context.Context) (domain.Settings, error) { return s.s, nil }
+
+// A Claude limit moves a strong call to Muse Wonder for a person with
+// both modules, when the workspace switches modules; a second opinion,
+// a person with Claude alone, or a workspace that does not switch waits.
+func TestRerouting(t *testing.T) {
+	ctx := domain.WithWorkspace(context.Background(), 3)
+	on := domain.Settings{SwitchModules: true}
+	both := domain.Access{Modules: []string{"claude", "muse"}}
+	route := func(acc domain.Access, s domain.Settings, purpose ai.Purpose, model string) (ai.Route, *ai.Hold) {
+		a := &accounts{conn: map[string]int64{"muse": 9}, refuse: map[string]string{"claude": "Claude limit reached on Acme's account"}}
+		g := ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{acc}, Accounts: a, Workspaces: workspaces{}, Settings: settings{s}})
+		return g.Route(ctx, ai.Who{Person: 4}, purpose, ai.Want{Model: model})
+	}
+	r, h := route(both, on, "analyze", "opus")
+	if h != nil || r.Provider != ai.Muse || r.Model != "muse:wonder" || r.Account.ConnectionID != 9 || r.Rerouted != "Claude limit reached on Acme's account" {
+		t.Fatalf("strong: %+v %v", r, h)
+	}
+	if r, _ := route(both, on, "code", "sonnet"); r.Model != "muse:spark" {
+		t.Fatalf("light: %+v", r)
+	}
+	if _, h := route(both, on, domain.PurposeSecondOpinion, "opus"); h == nil {
+		t.Fatal("a second opinion never switches")
+	}
+	if _, h := route(domain.Access{Modules: []string{"claude"}}, on, "analyze", "opus"); h == nil || h.Why != "Claude limit reached on Acme's account" {
+		t.Fatalf("claude only: %v", h)
+	}
+	if _, h := route(both, domain.Settings{}, "analyze", "opus"); h == nil {
+		t.Fatal("switching is off")
+	}
+	// A module the person may not use moves too, when switching is on.
+	if r, h := route(domain.Access{Modules: []string{"muse"}}, on, "analyze", "opus"); h != nil || r.Provider != ai.Muse {
+		t.Fatalf("not enabled: %+v %v", r, h)
+	}
+}
+
+// An admitted run whose Claude route moved to Muse runs its Claude calls
+// on Muse at their own tier; its second opinion does not follow.
+func TestAdmissionMoves(t *testing.T) {
+	ctx := domain.WithWorkspace(context.Background(), 3)
+	both := domain.Access{Modules: []string{"claude", "muse"}}
+	a := &accounts{conn: map[string]int64{"muse": 9}, refuse: map[string]string{"claude": "Claude limit reached"}}
+	var spent []domain.ClaudeCall
+	g := ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{both}, Accounts: a, Workspaces: workspaces{},
+		Settings: settings{domain.Settings{SwitchModules: true}}, Spend: func(_ context.Context, c domain.ClaudeCall) error {
+			spent = append(spent, c)
+			return nil
+		}})
+	adm, h := g.Admit(ctx, ai.Who{Person: 4}, "code", both, []string{"claude"}, ai.AdmitCache{})
+	if h != nil || !adm.Routes["claude"].Moved() {
+		t.Fatalf("admit: %+v %v", adm, h)
+	}
+	ctx = ai.WithAdmission(ctx, adm)
+	b := &box{res: ai.Result{Turns: 1}}
+	res, err := g.Run(ctx, ai.Call{Purpose: "code", Box: b, Req: ai.Request{Model: "opus", Resume: "s1"}, RunID: 1}, nil)
+	if err != nil || res.Provider != ai.Muse || b.got[0].Model != "muse:wonder" || b.got[0].Resume != "s1" {
+		t.Fatalf("moved call: %v %+v %+v", err, res, b.got)
+	}
+	if _, err := g.Run(ctx, ai.Call{Purpose: domain.PurposeSecondOpinion, Box: b, Req: ai.Request{Model: "opus"}}, nil); err == nil {
+		t.Fatal("the second opinion followed the moved route")
+	}
+	if len(spent) != 1 || spent[0].Provider != ai.Muse || spent[0].ConnectionID != 9 {
+		t.Fatalf("spent: %+v", spent)
+	}
+}
+
+func TestMapModel(t *testing.T) {
+	reg := aitest.Providers()
+	for _, c := range []struct{ model, to, want string }{
+		{"opus", "muse", "muse:wonder"}, {"sonnet", "muse", "muse:spark"}, {"haiku", "muse", "muse:spark"},
+		{"muse:wonder", "claude", "opus"}, {"muse:spark", "claude", "sonnet"}, {"muse:muse-wonder-1.2", "claude", "opus"},
+		{"opus", "codex", "codex:gpt-5"}, {"codex:gpt-5-mini", "claude", "sonnet"}, {"opus", "claude", "opus"}, {"", "muse", ""},
+	} {
+		if got := ai.MapModel(reg, c.model, c.to); got != c.want {
+			t.Errorf("%s → %s: %q, want %q", c.model, c.to, got, c.want)
+		}
+	}
+	// Codex without models for its tiers takes no calls.
+	if got := ai.MapModel(ai.NewRegistry(aitest.Claude()), "opus", "codex"); got != "" {
+		t.Fatalf("no codex: %q", got)
 	}
 }

@@ -565,6 +565,9 @@ const (
 	// EventGuard: what agnts-guard, the hooks inside the run, refused or
 	// sent back, and what the scan of agent files found.
 	EventGuard = "guard"
+	// EventRerouted: a call ran on another module than its settings name,
+	// because that one could not run.
+	EventRerouted = "rerouted"
 	// EventBudget: a Muse run's spend against its budget, after every
 	// model call (data cost_usd, total_usd, held_usd, limit_usd), and its
 	// budget steering, escalations and stops.

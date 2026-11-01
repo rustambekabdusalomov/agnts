@@ -459,6 +459,7 @@ func newHarness(t *testing.T) *harness {
 	h.settings.s.Git.AuthorName, h.settings.s.Git.AuthorEmail = "Rustam", "r@example.com"
 	h.settings.s.AutoReview = false     // review_test.go turns it on
 	h.settings.s.RecheckComplex = false // planning_test.go turns it on
+	h.settings.s.SwitchModules = false  // these tests wait at limits; modules_test.go switches
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
 		Providers: ai.NewRegistry(h.muse, aitest.Claude(), aitest.Codex()),

@@ -178,8 +178,13 @@ type Settings struct {
 	Deny       []string `json:"deny"`
 	AskFirst   bool     `json:"askFirst"`
 	AutoResume bool     `json:"autoResume"`
-	AutoLearn  bool     `json:"autoLearn"`  // learn run after every push
-	AutoReview bool     `json:"autoReview"` // code review of every result
+	// SwitchModules lets a call whose module cannot run (no usable
+	// account, its limit reached, not enabled for the person) run on the
+	// person's next module, on the model of the same tier. Off: it waits
+	// for its own module.
+	SwitchModules bool `json:"switchModules"`
+	AutoLearn     bool `json:"autoLearn"`  // learn run after every push
+	AutoReview    bool `json:"autoReview"` // code review of every result
 	// AutoPreview takes screenshots of every UI change in a repository
 	// with a preview command.
 	AutoPreview bool `json:"autoPreview"`
@@ -301,6 +306,7 @@ func DefaultSettings() Settings {
 		Deny:            []string{},
 		AskFirst:        true,
 		AutoResume:      true,
+		SwitchModules:   true,
 		AutoLearn:       true,
 		AutoReview:      true,
 		AutoPreview:     true,

@@ -88,3 +88,16 @@ func TestClaudeModels(t *testing.T) {
 		t.Fatalf("bad value: %v", err)
 	}
 }
+
+func TestCodexModels(t *testing.T) {
+	m := map[string]string{"AGNTS_DATABASE_URL": "postgres://localhost/hiro", "AGNTS_ENC_KEY": testKey,
+		"AGNTS_CODEX_MODELS": "light=gpt-5-mini, strong=codex:gpt-5"}
+	c, err := load(env(m))
+	if err != nil || c.CodexModels["light"] != "gpt-5-mini" || c.CodexModels["strong"] != "gpt-5" {
+		t.Fatalf("parsed %v %v", c.CodexModels, err)
+	}
+	m["AGNTS_CODEX_MODELS"] = "fast=gpt-5"
+	if _, err := load(env(m)); err == nil || !strings.Contains(err.Error(), "AGNTS_CODEX_MODELS") {
+		t.Fatalf("bad tier: %v", err)
+	}
+}

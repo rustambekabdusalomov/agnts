@@ -102,20 +102,27 @@ func (g *Gateway) providerFor(model string) (Provider, error) {
 	return p, nil
 }
 
-// allowed checks that who may use provider id: the access the caller
-// read, else the admitted run's, else the person's, else the default.
+// accessOf is who's modules: the access the caller read, else the
+// admitted run's, else the person's, else the default.
+func (g *Gateway) accessOf(ctx context.Context, who Who) (domain.Access, error) {
+	if who.Access != nil {
+		return *who.Access, nil
+	}
+	if adm, ok := AdmissionOf(ctx); ok {
+		return adm.Access, nil
+	}
+	a, err := g.Access(ctx, who.Person)
+	if err != nil {
+		return a, fmt.Errorf("read modules: %w", err)
+	}
+	return a, nil
+}
+
+// allowed checks that who may use provider id.
 func (g *Gateway) allowed(ctx context.Context, who Who, id string) error {
-	var a domain.Access
-	switch adm, admitted := AdmissionOf(ctx); {
-	case who.Access != nil:
-		a = *who.Access
-	case admitted:
-		a = adm.Access
-	default:
-		var err error
-		if a, err = g.Access(ctx, who.Person); err != nil {
-			return fmt.Errorf("read modules: %w", err)
-		}
+	a, err := g.accessOf(ctx, who)
+	if err != nil {
+		return err
 	}
 	if !a.Allows(id) {
 		return &domain.NotAllowedError{Module: id}
@@ -132,11 +139,17 @@ func (g *Gateway) RouteCall(ctx context.Context, c Call) (Route, *Hold) {
 		if err != nil {
 			return Route{}, &Hold{Why: err.Error(), Err: err}
 		}
-		if r, ok := adm.Routes[p.ID()]; ok {
-			if err := g.allowed(ctx, adm.Who, p.ID()); err != nil {
+		// A route the admission moved to another module serves only
+		// purposes that may switch (not a second opinion).
+		if r, ok := adm.Routes[p.ID()]; ok && (!r.Moved() || PolicyOf(c.Purpose).Reroute) {
+			if err := g.allowed(ctx, adm.Who, r.Provider); err != nil {
 				return Route{}, &Hold{Why: err.Error(), Err: err}
 			}
 			r.Purpose = c.Purpose
+			r.Model = MapModel(g.d.Providers, c.Req.Model, r.Provider)
+			if c.Req.Model == "" && r.Provider != p.ID() {
+				r.Model = g.lightOf(r.Provider)
+			}
 			return r, nil
 		}
 		if who == (Who{}) {
@@ -164,6 +177,12 @@ func (g *Gateway) Run(ctx context.Context, c Call, on func(Event)) (Result, erro
 	p, ok := g.d.Providers.Get(r.Provider)
 	if !ok {
 		return Result{}, fmt.Errorf("%s is not available on this server", ModuleName(r.Provider))
+	}
+	if r.Model != "" {
+		c.Req.Model = r.Model // a moved call runs its route's model
+	}
+	if !r.Caps.Has(CapResume) {
+		c.Req.Resume = ""
 	}
 	cred, err := g.credential(ctx, r.Account)
 	if err != nil {
@@ -194,6 +213,14 @@ func (g *Gateway) Run(ctx context.Context, c Call, on func(Event)) (Result, erro
 	}
 	g.spend(ctx, c, acct, res)
 	return res, err
+}
+
+// lightOf is provider id's light model.
+func (g *Gateway) lightOf(id string) string {
+	if p, ok := g.d.Providers.Get(id); ok {
+		return p.Catalog().Model(Light)
+	}
+	return ""
 }
 
 // credential opens acct's secret.

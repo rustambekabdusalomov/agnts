@@ -560,7 +560,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		AutoPreview: cur.AutoPreview, VisualCheck: cur.VisualCheck, EgressAllow: cur.EgressAllow,
 		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect, PublicDocuments: cur.PublicDocuments,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
-		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
+		AskFirst: req.AskFirst, AutoResume: req.AutoResume, SwitchModules: cur.SwitchModules, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, PRComments: cur.PRComments, CI: cur.CI,
 		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns, MethodSkills: cur.MethodSkills,
 		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos, Effort: cur.Effort, RecheckComplex: cur.RecheckComplex, BaselineChecks: cur.BaselineChecks,

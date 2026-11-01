@@ -20,6 +20,11 @@ type Policy struct {
 	// Credits: it may run on agnts's key, paid with free credits (for
 	// providers that take them) or the workspace's credits.
 	Credits bool
+	// Reroute: when the module asked for cannot run (no usable account,
+	// its limit reached, not enabled for the person), it may run on the
+	// person's next module, at the same tier, when the workspace switches
+	// modules (Settings.SwitchModules).
+	Reroute bool
 }
 
 // PolicyOf is the policy of purpose p. Work the scheduler runs (ticket
@@ -27,12 +32,18 @@ type Policy struct {
 // and meeting notes may run on credits; answers, spoken questions,
 // translation, detection and the usage probe run on connected accounts
 // only, as they always have.
+// A second opinion never switches: it is another model on purpose (it is
+// skipped instead); the usage probe reads one account.
 func PolicyOf(p Purpose) Policy {
 	switch p {
-	case domain.PurposeAssistant, PurposeVoice, domain.PurposeTranslate, domain.PurposeDetect, PurposeUsageProbe:
+	case PurposeUsageProbe:
 		return Policy{}
+	case domain.PurposeSecondOpinion:
+		return Policy{Credits: true}
+	case domain.PurposeAssistant, PurposeVoice, domain.PurposeTranslate, domain.PurposeDetect:
+		return Policy{Reroute: true}
 	}
-	return Policy{Credits: true}
+	return Policy{Credits: true, Reroute: true}
 }
 
 // Who a call is for.
@@ -67,9 +78,18 @@ type Route struct {
 	Who      Who
 	Purpose  Purpose
 	Provider string
-	Account  Account
-	Caps     Caps
+	// Model is the model it runs, as stored; "" for a route decided per
+	// provider (an admission), whose calls keep their own model's tier.
+	Model   string
+	Account Account
+	Caps    Caps
+	// Rerouted says why it runs on another module than asked; "" when it
+	// runs where asked.
+	Rerouted string
 }
+
+// Moved reports whether the route runs on another module than asked.
+func (r Route) Moved() bool { return r.Rerouted != "" }
 
 // Hold says why a call cannot run now, and until when if known.
 type Hold struct {
@@ -159,63 +179,137 @@ func (g *Gateway) provider(want Want) (Provider, error) {
 	return g.providerFor(want.Model)
 }
 
-// Route decides where a call runs: the provider of its model, the
-// person may use it, and the account it runs on (the workspace's or the
+// Route decides where a call runs: the provider of its model when the
+// person may use it and it has a usable account (the workspace's or the
 // member's connection, else credits when the purpose allows them).
+// Otherwise, when the purpose and the workspace allow switching, the
+// person's next module that can run it, on the model of the same tier.
 func (g *Gateway) Route(ctx context.Context, who Who, purpose Purpose, want Want) (Route, *Hold) {
-	p, err := g.provider(want)
+	asked, err := g.provider(want)
 	if err != nil {
 		return Route{}, &Hold{Why: err.Error(), Err: err}
 	}
-	r := Route{Who: who, Purpose: purpose, Provider: p.ID(), Caps: p.Caps()}
+	base := Route{Who: who, Purpose: purpose}
 	if want.Pin != nil {
-		r.Account = *want.Pin
-		r.Account.Provider = p.ID()
+		r := base
+		r.Provider, r.Model, r.Caps, r.Account = asked.ID(), want.Model, asked.Caps(), *want.Pin
+		r.Account.Provider = asked.ID()
 		return r, nil
 	}
-	if r.Who.Workspace == 0 {
-		r.Who.Workspace = domain.WorkspaceOf(ctx)
+	if base.Who.Workspace == 0 {
+		base.Who.Workspace = domain.WorkspaceOf(ctx)
 	}
 	perAccount := g.d.Accounts != nil && g.d.Workspaces != nil
 	var w domain.Workspace
 	if perAccount {
-		var err error
-		if w, err = g.d.Workspaces.ByID(ctx, r.Who.Workspace); err != nil {
+		if w, err = g.d.Workspaces.ByID(ctx, base.Who.Workspace); err != nil {
 			return Route{}, &Hold{Why: "could not read the workspace: " + err.Error(), Err: err}
 		}
-		if r.Who.Person == 0 {
-			r.Who.Person = w.RunPerson(nil) // the workspace's default member, else its owner
+		if base.Who.Person == 0 {
+			base.Who.Person = w.RunPerson(nil) // the workspace's default member, else its owner
 		}
 	}
 	// Hearing is not coding: the person's modules do not limit it.
-	if !want.Needs.Has(CapAudio) {
-		if err := g.allowed(ctx, r.Who, p.ID()); err != nil {
+	hearing := want.Needs.Has(CapAudio)
+	var access domain.Access
+	if !hearing {
+		if access, err = g.accessOf(ctx, base.Who); err != nil {
 			return Route{}, &Hold{Why: err.Error(), Err: err}
 		}
 	}
-	if !perAccount {
-		// One account for everything (installs without per-workspace
-		// accounts): only its limit can hold a call.
-		r.Account = Account{Provider: p.ID()}
-		if g.d.Limits != nil && p.ID() != Codex {
-			if paused, until := g.d.Limits.Paused(ctx, r.Account, g.settings(ctx)); paused {
-				return Route{}, limitHold(p.ID(), until)
+	candidates := []Provider{asked}
+	if !hearing && PolicyOf(purpose).Reroute && g.settings(ctx).SwitchModules {
+		candidates = append(candidates, g.alternatives(asked, want.Model, access)...)
+	}
+	var first *Hold
+	for i, p := range candidates {
+		r := base
+		r.Provider, r.Caps = p.ID(), p.Caps()
+		r.Model = want.Model
+		if i > 0 {
+			r.Model = MapModel(g.d.Providers, want.Model, p.ID())
+		}
+		var hold *Hold
+		switch {
+		case !hearing && !access.Allows(p.ID()):
+			err := &domain.NotAllowedError{Module: p.ID()}
+			hold = &Hold{Why: err.Error(), Err: err}
+		case perAccount:
+			r.Account, hold = g.pick(ctx, w, base.Who, p.ID(), purpose)
+		default:
+			// One account for everything (installs without per-workspace
+			// accounts): only its limit can hold a call.
+			r.Account = Account{Provider: p.ID()}
+			if g.d.Limits != nil && p.ID() != Codex {
+				if paused, until := g.d.Limits.Paused(ctx, r.Account, g.settings(ctx)); paused {
+					hold = limitHold(p.ID(), until)
+				}
 			}
 		}
-		return r, nil
+		if hold == nil {
+			if i > 0 {
+				r.Rerouted = first.Why
+			}
+			return r, nil
+		}
+		if first == nil {
+			first = hold
+		}
 	}
+	return Route{}, first
+}
+
+// pick picks the account who's call on provider uses in w.
+func (g *Gateway) pick(ctx context.Context, w domain.Workspace, who Who, provider string, purpose Purpose) (Account, *Hold) {
 	member := who.Member
 	if member == nil && who.Person > 0 && w.ClaudeMode == domain.ClaudePerMember {
 		person := who.Person
 		member = &person
 	}
-	acct, ok, why, until := g.d.Accounts.Pick(ctx, w, member, p.ID(), PolicyOf(purpose).Credits)
+	acct, ok, why, until := g.d.Accounts.Pick(ctx, w, member, provider, PolicyOf(purpose).Credits)
 	if !ok {
-		return Route{}, &Hold{Why: why, Until: until}
+		return Account{}, &Hold{Why: why, Until: until}
 	}
-	acct.Provider = p.ID()
-	r.Account = acct
-	return r, nil
+	acct.Provider = provider
+	return acct, nil
+}
+
+// alternatives are the modules a call asked for on asked may switch to:
+// the person's other modules, in their order, that have a model of its
+// tier.
+func (g *Gateway) alternatives(asked Provider, model string, access domain.Access) []Provider {
+	var out []Provider
+	for _, id := range access.Modules {
+		if id == asked.ID() || g.d.Providers == nil {
+			continue
+		}
+		p, ok := g.d.Providers.Get(id)
+		if !ok || (model != "" && MapModel(g.d.Providers, model, id) == "") {
+			continue
+		}
+		out = append(out, p)
+	}
+	return out
+}
+
+// MapModel is the model of provider to with the tier of model (as
+// stored); model itself when it is to's; "" when to has no model of that
+// tier, or model is "".
+func MapModel(reg *Registry, model, to string) string {
+	from := ProviderOf(model)
+	if model == "" || from == to {
+		return model
+	}
+	tier := Light
+	if p, ok := reg.Get(from); ok {
+		ref, _ := ParseModel(model)
+		tier = p.Catalog().TierOf(ref.Name)
+	}
+	p, ok := reg.Get(to)
+	if !ok {
+		return ""
+	}
+	return p.Catalog().Model(tier)
 }
 
 // limitHold is a call held at its account's limit.

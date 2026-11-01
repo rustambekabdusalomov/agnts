@@ -535,7 +535,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.providers = ai.NewRegistry(
 		musecode.New(musecode.Config{Engine: museEngine, Budgets: a.museCredits, KeepLogin: a.claude.KeepMuseLogin, Boxes: run, Image: cfg.RunnerImage}),
 		claudecode.New(cfg.ClaudeModels),
-		codex.New(nil),
+		codex.New(map[ai.Tier]string{ai.Light: cfg.CodexModels["light"], ai.Strong: cfg.CodexModels["strong"]}),
 	)
 	a.docStore = postgres.NewDocuments(pool)
 	// Every model call goes through the gateway: it checks the person's

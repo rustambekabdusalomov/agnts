@@ -61,6 +61,32 @@ type transcriptMeta struct {
 	// Person is whose modules and account a call outside a scheduled run
 	// uses; 0: the person acting in ctx.
 	Person int64
+	// Route is where the call runs, when the caller routed it first.
+	Route *ai.Route
+}
+
+// stageName names a model stage in messages.
+func stageName(modelStage string) string {
+	switch modelStage {
+	case domain.ModelAnalyze:
+		return "analysis"
+	case domain.ModelRetry:
+		return "the fix"
+	case "second_opinion":
+		return "the second opinion"
+	}
+	return "the " + modelStage + " stage"
+}
+
+// modelName names a stored model in messages: "Muse Wonder", "Claude
+// opus", "Codex gpt-5".
+func modelName(model string) string {
+	ref, _ := ai.ParseModel(model)
+	name := ref.Name
+	if ref.Provider == ai.Muse && len(name) > 0 {
+		name = strings.ToUpper(name[:1]) + name[1:]
+	}
+	return ai.ModuleName(ref.Provider) + " " + name
 }
 
 // whoFor is who a call of m is for, outside an admitted run: m's person,
@@ -97,11 +123,19 @@ func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcrip
 	// Where it runs: the run's route for its model's module, else routed
 	// now for its person.
 	call := ai.Call{Who: o.whoFor(ctx, m), Purpose: m.Purpose, Box: ws, Req: req, ModelStage: m.ModelStage, DocumentRunID: m.DocumentRunID}
-	route, hold := o.ai.RouteCall(ctx, call)
-	if hold != nil {
-		return ClaudeResult{}, hold
+	var route ai.Route
+	if m.Route != nil {
+		route = *m.Route // the caller routed it to build the request
+	} else {
+		var hold *ai.Hold
+		if route, hold = o.ai.RouteCall(ctx, call); hold != nil {
+			return ClaudeResult{}, hold
+		}
 	}
 	call.Route = &route
+	if route.Model != "" {
+		req.Model = route.Model
+	}
 	req = o.fitPrompt(ctx, ws, m, req)
 	if m.Run != nil && req.RunID == 0 {
 		req.RunID = m.Run.ID

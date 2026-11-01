@@ -773,6 +773,21 @@ func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspa
 // result says error_max_turns, and the session can be resumed).
 func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string, budget int) (ClaudeResult, error) {
 	model := s.ModelFor(*t, modelStage)
+	// Where it runs first: the request depends on the module it lands on
+	// (a call may switch modules when its own cannot run).
+	meta := transcriptMeta{Purpose: domain.TranscriptPurpose(run.Stage), WorkspaceID: t.WorkspaceID, Run: run, TicketKey: t.Key, ModelStage: modelStage}
+	route, hold := o.ai.RouteCall(ctx, ai.Call{Who: o.whoFor(ctx, meta), Purpose: meta.Purpose, Req: ai.Request{Model: model}})
+	if hold != nil {
+		return ClaudeResult{}, hold
+	}
+	meta.Route = &route
+	if route.Model != "" {
+		model = route.Model
+	}
+	if route.Moved() && run.Model == "" { // once a run
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventRerouted, Level: domain.LevelWarn,
+			Message: fmt.Sprintf("%s ran on %s: %s", stageName(modelStage), modelName(model), route.Rerouted)})
+	}
 	if run.Model == "" {
 		run.Model = model
 	}
@@ -786,7 +801,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		turns = min(turns, budget)
 	}
 	effort := ""
-	if !domain.IsCodex(model) {
+	if route.Caps.Has(ai.CapEffort) {
 		complex := false
 		if modelStage != domain.ModelAnalyze && s.Effort.Complex != "" {
 			if a := o.latestAnalysis(ctx, *t); a != nil {
@@ -817,8 +832,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	// run as it works, and decide the tool calls it asks about.
 	steer, ask, release := o.codeLiveFor(ctx, *t, run.Stage, model, readOnly)
 	defer release()
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.TranscriptPurpose(run.Stage), WorkspaceID: t.WorkspaceID,
-		Run: run, TicketKey: t.Key, ModelStage: modelStage}, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, meta, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: turns,

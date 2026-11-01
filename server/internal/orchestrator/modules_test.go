@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres/pgtest"
 )
 
@@ -78,6 +79,7 @@ func TestSchedulerHoldsAModuleWithoutAnAccount(t *testing.T) {
 	s.accounts.refuse = map[string]string{domain.ProviderCodex: "Codex runs need an OpenAI API key: connect OpenAI under Integrations"}
 	v := domain.DefaultSettings()
 	v.Models.Coding = "codex:gpt-5"
+	v.SwitchModules = false
 	if _, err := s.settings.Put(s.a, v, domain.OriginWeb); err != nil {
 		t.Fatal(err)
 	}
@@ -133,5 +135,54 @@ func TestSchedulerWithoutModules(t *testing.T) {
 	access.set(someone, domain.ProviderClaude)
 	if n := s.o.Tick(s.a); n != 1 {
 		t.Fatalf("started %d runs after enabling", n)
+	}
+}
+
+// When a Claude account is at its limit, a workspace that switches modules
+// runs the ticket on the person's next module, at the same tier, and says
+// so on the ticket; one that does not waits for Claude.
+func TestSchedulerSwitchesModules(t *testing.T) {
+	access := &fakeAccess{own: map[int64][]string{}}
+	s := newSchedAccess(t, 0, access)
+	owner := pgtest.User(t, s.pool, "both")
+	access.set(owner, domain.ProviderClaude, domain.ProviderMuse)
+	s.accounts.refuse = map[string]string{domain.ProviderClaude: "Claude limit reached on the workspace's account"}
+	v := domain.DefaultSettings()
+	v.Models.Analyze, v.Models.Coding = "opus", "sonnet"
+	v.SwitchModules = false
+	if _, err := s.settings.Put(s.a, v, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	s.taskOf(s.a, "A-1", owner)
+	if n := s.o.Tick(s.a); n != 0 {
+		t.Fatalf("switching off: started %d runs", n)
+	}
+	if tk, _ := s.store.TicketByKey(s.a, "A-1"); tk.WaitReason != domain.WaitClaude || !strings.Contains(tk.WaitMessage, "limit") {
+		t.Fatalf("waits for %q: %q", tk.WaitReason, tk.WaitMessage)
+	}
+
+	v.SwitchModules = true
+	if _, err := s.settings.Put(s.a, v, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	var models []string
+	s.runner.onClaude = func(r orchestrator.ClaudeRequest) { models = append(models, r.Model) }
+	s.runner.scripts = []script{{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}}}
+	if n := s.o.Tick(s.a); n != 1 {
+		t.Fatalf("switching on: started %d runs", n)
+	}
+	if len(models) == 0 || models[0] != "muse:wonder" {
+		t.Fatalf("analysis ran on %v, want muse:wonder", models)
+	}
+	evs, err := s.store.Events(s.a, orchestrator.EventFilter{TicketKey: "A-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, e := range evs {
+		found = found || (e.Type == domain.EventRerouted && strings.Contains(e.Message, "Muse Wonder") && strings.Contains(e.Message, "Claude limit reached"))
+	}
+	if !found {
+		t.Fatalf("no rerouted event: %+v", evs)
 	}
 }
