@@ -114,6 +114,8 @@ const MODEL_NAMES: [RegExp, string][] = [
 export function modelLabel(id: string): string {
   const s = id.toLowerCase()
   if (s.startsWith('codex:')) return `Codex · ${id.slice('codex:'.length)}`
+  if (s === 'tier:light') return 'Light'
+  if (s === 'tier:strong') return 'Strong'
   return MODEL_NAMES.find(([re]) => re.test(s))?.[1] ?? id
 }
 

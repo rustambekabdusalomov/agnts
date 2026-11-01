@@ -61,6 +61,9 @@ function pick(stage: Stage, value: Model | 'default') {
         <button v-for="m in catalog.models.value" :key="m.id" class="seg-b" type="button" :aria-pressed="current(s) === m.id" :disabled="save.isPending.value" @click="pick(s, m.id)">
           {{ m.label }}
         </button>
+        <button v-for="m in catalog.tiers.value" :key="m.id" class="seg-b" type="button" :aria-pressed="current(s) === m.id" :disabled="save.isPending.value" @click="pick(s, m.id)">
+          {{ t(m.strong ? 'settings.modelTierStrong' : 'settings.modelTierLight') }}
+        </button>
       </div>
     </div>
   </div>

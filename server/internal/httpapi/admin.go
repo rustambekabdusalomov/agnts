@@ -79,7 +79,7 @@ func (s *Server) SetTicketModels(w http.ResponseWriter, r *http.Request, key gen
 	}
 	a := s.viewerAccess(r.Context())
 	for _, x := range m {
-		if x != "" && x != domain.ModelAuto && domain.ValidModel(x) && !a.Allows(domain.ProviderOf(x)) {
+		if x != "" && x != domain.ModelAuto && domain.ValidModel(x) && !domain.AllowedModel(a, x) {
 			writeError(w, http.StatusBadRequest, "bad_request", domain.ModuleName(domain.ProviderOf(x))+" is not enabled for you: pick one of "+strings.Join(domain.AvailableModels(a), ", "))
 			return
 		}
@@ -505,7 +505,7 @@ func toSettings(v domain.Settings) gen.Settings {
 			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect, PublicDocuments: &publicDocs,
 		MaxTurns: v.MaxTurns, RunBudget: &v.RunBudget, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
-		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
+		AskFirst: v.AskFirst, AutoResume: v.AutoResume, SwitchModules: &v.SwitchModules, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
 		AutoReview: &autoReview, SuggestFollowUps: &followUps,
 		Git: gen.GitSettings{AuthorName: v.Git.AuthorName, AuthorEmail: v.Git.AuthorEmail, CoAuthor: v.Git.CoAuthor,
 			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
@@ -570,6 +570,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.RunBudget != nil {
 		v.RunBudget = *req.RunBudget
+	}
+	if req.SwitchModules != nil {
+		v.SwitchModules = *req.SwitchModules
 	}
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,

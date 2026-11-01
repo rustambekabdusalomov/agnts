@@ -44,6 +44,8 @@ class Settings {
 
     required  this.autoResume,
 
+     this.switchModules,
+
      this.autoLearn,
 
      this.autoReview,
@@ -201,6 +203,19 @@ class Settings {
 
 
   final bool autoResume;
+
+
+
+      /// When a call's module cannot run (no usable account, its limit reached, not enabled for the person), run it on the person's next module, on the model of the same tier; off waits for the module
+  @JsonKey(
+    
+    name: r'switchModules',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? switchModules;
 
 
 
@@ -577,6 +592,7 @@ class Settings {
       other.deny == deny &&
       other.askFirst == askFirst &&
       other.autoResume == autoResume &&
+      other.switchModules == switchModules &&
       other.autoLearn == autoLearn &&
       other.autoReview == autoReview &&
       other.autoPreview == autoPreview &&
@@ -616,6 +632,7 @@ class Settings {
         deny.hashCode +
         askFirst.hashCode +
         autoResume.hashCode +
+        switchModules.hashCode +
         autoLearn.hashCode +
         autoReview.hashCode +
         autoPreview.hashCode +

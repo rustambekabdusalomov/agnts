@@ -48,6 +48,12 @@ void main() {
       // TODO
     });
 
+    // When a call's module cannot run (no usable account, its limit reached, not enabled for the person), run it on the person's next module, on the model of the same tier; off waits for the module
+    // bool switchModules
+    test('to test the property `switchModules`', () async {
+      // TODO
+    });
+
     // Learn from every pushed ticket
     // bool autoLearn
     test('to test the property `autoLearn`', () async {

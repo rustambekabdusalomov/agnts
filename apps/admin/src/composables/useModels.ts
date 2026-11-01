@@ -7,10 +7,11 @@ import { modelLabel } from '../api/types'
 
 export type ModelCatalog = components['schemas']['ModelCatalog']
 export type CatalogModel = ModelCatalog['models'][number]
+export type CatalogTier = NonNullable<ModelCatalog['tiers']>[number]
 export type ModelProvider = ModelCatalog['primary']
 
 /** A model's name: the catalog's label, else the one agnts has known it by. */
-export function catalogLabel(models: readonly CatalogModel[], id: string): string {
+export function catalogLabel(models: readonly (CatalogModel | CatalogTier)[], id: string): string {
   return models.find((m) => m.id === id)?.label ?? modelLabel(id)
 }
 
@@ -21,6 +22,9 @@ export function useModels() {
   const providers = computed(() => query.data.value?.providers ?? [])
   const primary = computed(() => query.data.value?.primary)
   const models = computed(() => query.data.value?.models ?? [])
+  /** Tiers a setting may name instead of a model: the run lands on the
+   * light or strong model of whichever module can run it. */
+  const tiers = computed(() => query.data.value?.tiers ?? [])
   /** Whether the server offers a coding tool. */
   const has = (p: ModelProvider) => providers.value.includes(p)
   /** Muse Code is the default tool: Claude's plans, windows and wording do not apply. */
@@ -31,6 +35,6 @@ export function useModels() {
   })
   /** Claude Code is not offered (known only once the catalog is in). */
   const claudeOff = computed(() => !!query.data.value && !providers.value.includes('claude'))
-  const label = (id: string) => catalogLabel(models.value, id)
-  return { query, providers, primary, models, has, isMuse, claudeOff, label }
+  const label = (id: string) => catalogLabel([...models.value, ...tiers.value], id)
+  return { query, providers, primary, models, tiers, has, isMuse, claudeOff, label }
 }

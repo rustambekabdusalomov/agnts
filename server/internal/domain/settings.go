@@ -15,15 +15,30 @@ var Models = []string{"haiku", "sonnet", "opus"}
 // codexModel matches a Codex CLI model: "codex:" and the model's name.
 var codexModel = regexp.MustCompile(`^codex:[a-z0-9][a-z0-9._-]{0,63}$`)
 
-// ValidModel reports whether m names a model of any provider: a Claude
-// alias, codex:<model> or muse:<model>.
+// Tiers a setting may name instead of a model: the run's person's default
+// module's light or strong model, whichever modules they have.
+const (
+	TierLight  = "tier:light"
+	TierStrong = "tier:strong"
+)
+
+// IsTier reports whether m names a tier, not a model.
+func IsTier(m string) bool { return m == TierLight || m == TierStrong }
+
+// ValidModel reports whether m names a model of any provider (a Claude
+// alias, codex:<model> or muse:<model>) or a tier.
 func ValidModel(m string) bool {
-	return slices.Contains(Models, m) || codexModel.MatchString(m) || museModel.MatchString(m)
+	return slices.Contains(Models, m) || codexModel.MatchString(m) || museModel.MatchString(m) || IsTier(m)
 }
 
 // AllowedModel reports whether a person with access a may pick m: a valid
-// model of a module they may use.
-func AllowedModel(a Access, m string) bool { return ValidModel(m) && a.Allows(ProviderOf(m)) }
+// model of a module they may use, or a tier (any module will do).
+func AllowedModel(a Access, m string) bool {
+	if IsTier(m) {
+		return !a.None()
+	}
+	return ValidModel(m) && a.Allows(ProviderOf(m))
+}
 
 // IsCodex reports whether m runs on Codex CLI.
 func IsCodex(m string) bool { return strings.HasPrefix(m, "codex:") }

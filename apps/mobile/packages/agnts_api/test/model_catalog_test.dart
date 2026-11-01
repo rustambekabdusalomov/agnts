@@ -24,5 +24,11 @@ void main() {
       // TODO
     });
 
+    // Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it
+    // List<ModelCatalogTiersInner> tiers
+    test('to test the property `tiers`', () async {
+      // TODO
+    });
+
   });
 }

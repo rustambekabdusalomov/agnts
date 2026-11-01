@@ -7282,7 +7282,7 @@ export interface components {
                 attachments?: number[];
             }[];
         };
-        /** @description muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers. */
+        /** @description muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers. */
         Model: string;
         /** @description auto: the stronger model (muse:wonder, opus) for complex tickets, the lighter one otherwise */
         ReviewModel: string;
@@ -7303,6 +7303,12 @@ export interface components {
                 strong: boolean;
                 inputPerMillionUSD?: number;
                 outputPerMillionUSD?: number;
+            }[];
+            /** @description Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it */
+            tiers?: {
+                id: components["schemas"]["Model"];
+                label: string;
+                strong: boolean;
             }[];
         };
         /** @description A Meta sign-in in progress (OAuth device flow, like `muse login`) */
@@ -7823,6 +7829,8 @@ export interface components {
             deny: string[];
             askFirst: boolean;
             autoResume: boolean;
+            /** @description When a call's module cannot run (no usable account, its limit reached, not enabled for the person), run it on the person's next module, on the model of the same tier; off waits for the module */
+            switchModules?: boolean;
             /** @description Learn from every pushed ticket */
             autoLearn?: boolean;
             /** @description Review every result while it waits for review */

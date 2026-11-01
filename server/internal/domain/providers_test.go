@@ -232,3 +232,33 @@ func TestOrdered(t *testing.T) {
 		t.Error("a module the person may not use was accepted")
 	}
 }
+
+// A tier is the default module's model of that tier, for whoever runs.
+func TestTiers(t *testing.T) {
+	muse := Access{Modules: []string{ProviderMuse, ProviderClaude}}
+	claude := Access{Modules: []string{ProviderClaude}}
+	for _, c := range []struct {
+		a     Access
+		m     string
+		want  string
+		allow bool
+	}{
+		{muse, TierStrong, MuseWonder, true}, {muse, TierLight, MuseSpark, true},
+		{claude, TierStrong, "opus", true}, {claude, TierLight, "sonnet", true},
+		{Access{Modules: []string{}}, TierStrong, TierStrong, false},
+	} {
+		if got := EffectiveModel(c.a, c.m); got != c.want {
+			t.Errorf("%v %s: %s, want %s", c.a.Modules, c.m, got, c.want)
+		}
+		if AllowedModel(c.a, c.m) != c.allow {
+			t.Errorf("%v %s: allowed %v", c.a.Modules, c.m, !c.allow)
+		}
+	}
+	if !ValidModel(TierLight) || ValidModel("tier:huge") {
+		t.Fatal("valid tiers")
+	}
+	s := Settings{Models: StageModels{Analyze: TierStrong, Coding: TierLight}}.For(claude)
+	if s.ModelFor(Ticket{}, ModelAnalyze) != "opus" || s.ModelFor(Ticket{Models: map[string]string{ModelCoding: TierStrong}}, ModelCoding) != "opus" {
+		t.Fatal("settings and ticket tiers")
+	}
+}

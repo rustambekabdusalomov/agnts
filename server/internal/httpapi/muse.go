@@ -231,6 +231,15 @@ func (s *Server) ListModels(w http.ResponseWriter, r *http.Request) {
 		}
 		out.Models = append(out.Models, row)
 	}
+	if !a.None() {
+		// Tiers: the light or strong model of whichever module runs.
+		tiers := []struct {
+			Id     gen.Model `json:"id"`
+			Label  string    `json:"label"`
+			Strong bool      `json:"strong"`
+		}{{Id: domain.TierLight, Label: "Light, any module"}, {Id: domain.TierStrong, Label: "Strong, any module", Strong: true}}
+		out.Tiers = &tiers
+	}
 	writeJSON(w, http.StatusOK, out)
 }
 

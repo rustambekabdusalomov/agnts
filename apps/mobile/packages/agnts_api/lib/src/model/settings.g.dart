@@ -23,6 +23,8 @@ abstract class _$SettingsCWProxy {
 
   Settings autoResume(bool autoResume);
 
+  Settings switchModules(bool? switchModules);
+
   Settings autoLearn(bool? autoLearn);
 
   Settings autoReview(bool? autoReview);
@@ -94,6 +96,7 @@ abstract class _$SettingsCWProxy {
     List<String> deny,
     bool askFirst,
     bool autoResume,
+    bool? switchModules,
     bool? autoLearn,
     bool? autoReview,
     bool? autoPreview,
@@ -154,6 +157,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
 
   @override
   Settings autoResume(bool autoResume) => this(autoResume: autoResume);
+
+  @override
+  Settings switchModules(bool? switchModules) =>
+      this(switchModules: switchModules);
 
   @override
   Settings autoLearn(bool? autoLearn) => this(autoLearn: autoLearn);
@@ -265,6 +272,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? deny = const $CopyWithPlaceholder(),
     Object? askFirst = const $CopyWithPlaceholder(),
     Object? autoResume = const $CopyWithPlaceholder(),
+    Object? switchModules = const $CopyWithPlaceholder(),
     Object? autoLearn = const $CopyWithPlaceholder(),
     Object? autoReview = const $CopyWithPlaceholder(),
     Object? autoPreview = const $CopyWithPlaceholder(),
@@ -327,6 +335,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.autoResume
           // ignore: cast_nullable_to_non_nullable
           : autoResume as bool,
+      switchModules: switchModules == const $CopyWithPlaceholder()
+          ? _value.switchModules
+          // ignore: cast_nullable_to_non_nullable
+          : switchModules as bool?,
       autoLearn: autoLearn == const $CopyWithPlaceholder()
           ? _value.autoLearn
           // ignore: cast_nullable_to_non_nullable
@@ -489,6 +501,7 @@ Settings _$SettingsFromJson(
     ),
     askFirst: $checkedConvert('askFirst', (v) => v as bool),
     autoResume: $checkedConvert('autoResume', (v) => v as bool),
+    switchModules: $checkedConvert('switchModules', (v) => v as bool?),
     autoLearn: $checkedConvert('autoLearn', (v) => v as bool?),
     autoReview: $checkedConvert('autoReview', (v) => v as bool?),
     autoPreview: $checkedConvert('autoPreview', (v) => v as bool?),
@@ -564,6 +577,7 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'deny': instance.deny,
   'askFirst': instance.askFirst,
   'autoResume': instance.autoResume,
+  'switchModules': ?instance.switchModules,
   'autoLearn': ?instance.autoLearn,
   'autoReview': ?instance.autoReview,
   'autoPreview': ?instance.autoPreview,

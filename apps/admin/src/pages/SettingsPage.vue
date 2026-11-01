@@ -77,8 +77,12 @@ const themes = computed(() => [
 ])
 const LANG_LABEL: Record<Locale, string> = { en: 'English', ru: 'Русский', uz: 'Oʻzbekcha' }
 const langs = LOCALES.map((l) => ({ value: l, label: LANG_LABEL[l] }))
-// The stage pickers offer the server's models; Codex is set by name below.
-const models = computed(() => catalog.models.value.filter((m) => m.provider !== 'codex').map((m) => ({ value: m.id as Model, label: m.label })))
+// The stage pickers offer the server's models and the tiers (the light or
+// strong model of whichever module runs); Codex is set by name below.
+const models = computed(() => [
+  ...catalog.models.value.filter((m) => m.provider !== 'codex').map((m) => ({ value: m.id as Model, label: m.label })),
+  ...catalog.tiers.value.map((m) => ({ value: m.id as Model, label: t(m.strong ? 'settings.modelTierStrong' : 'settings.modelTierLight') })),
+])
 // Without Claude Code the section is about Muse: its wording, not Claude's.
 const museWords = computed(() => catalog.claudeOff.value)
 // The budget per run is kept in credits (1 credit = $0.01) and set in
@@ -279,6 +283,9 @@ const section = computed(() => settingsSection(route.params.section))
         </CfgRow>
         <CfgRow :label="t('settings.autoResume')">
           <SwitchToggle v-model="draft.autoResume" :label="t('settings.autoResume')" />
+        </CfgRow>
+        <CfgRow v-if="draft.switchModules !== undefined && catalog.providers.value.length > 1" :label="t('settings.switchModules')" :help="t('settings.switchModulesHelp')">
+          <SwitchToggle v-model="draft.switchModules" :label="t('settings.switchModules')" />
         </CfgRow>
         <CfgRow v-if="draft.autoLearn !== undefined" :label="t('settings.autoLearn')" :help="t('settings.autoLearnHelp')">
           <SwitchToggle v-model="draft.autoLearn" :label="t('settings.autoLearn')" />
