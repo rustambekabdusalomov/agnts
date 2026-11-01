@@ -39,7 +39,6 @@ func (o *Orchestrator) secondOpinion(ctx context.Context, s domain.Settings, ws 
 			o.usage.Record(ctx, e.Data)
 		}
 	})
-	o.recordSpend(ctx, run, "second_opinion", s.SecondOpinion, res)
 	switch {
 	case err != nil:
 		out.Error = err.Error()

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -26,7 +27,8 @@ func newBriefHarness(t *testing.T) (*harness, *postgres.Briefs) {
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
 		Settings: h.settings, Usage: h.usage, Briefs: briefs,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	return h, briefs

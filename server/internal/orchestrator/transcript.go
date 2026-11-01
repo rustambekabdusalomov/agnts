@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"agnts/internal/ai"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -55,19 +56,17 @@ type transcriptMeta struct {
 	TicketKey   string
 	Subject     string // what a background call is about
 	ModelStage  string
+	// DocumentRunID is the document generation a call is charged to.
+	DocumentRunID int64
 }
 
-// callClaude runs one Claude Code or Codex invocation and records its
-// transcript. Every invocation goes through here; recording problems are
-// logged and never fail the run.
+// callClaude runs one agent invocation through the AI gateway and records
+// its transcript. Every invocation of the orchestrator goes through here;
+// recording problems are logged and never fail the run.
 func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest, onEvent func(ClaudeEvent)) (ClaudeResult, error) {
-	// Each call runs on its own module's account, and only on a module
-	// the run's person may use.
-	p := domain.ProviderOf(req.Model)
-	if a, ok := domain.AccessIn(ctx); ok && !a.Allows(p) {
-		return ClaudeResult{}, &domain.NotAllowedError{Module: p}
-	}
-	ctx = domain.UseProvider(ctx, p)
+	// The account the call runs on: its own module's (the transcript
+	// names it).
+	ctx = domain.UseProvider(ctx, domain.ProviderOf(req.Model))
 	req = o.fitPrompt(ctx, ws, m, req)
 	if m.Run != nil && req.RunID == 0 {
 		req.RunID = m.Run.ID
@@ -75,42 +74,70 @@ func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcrip
 	if req.WorkspaceID == 0 {
 		req.WorkspaceID = m.WorkspaceID
 	}
+	call := ai.Call{Purpose: m.Purpose, Box: ws, Req: req, ModelStage: m.ModelStage, DocumentRunID: m.DocumentRunID}
+	if m.Run != nil {
+		call.RunID = m.Run.ID // a ticket run's calls are charged to it
+	}
+	if rec := o.record(ctx, m, req); rec != nil {
+		call.Record = rec
+	}
+	return o.ai.Run(ctx, call, onEvent)
+}
+
+// recording keeps one invocation's transcript (ai.Recording).
+type recording struct {
+	o            *Orchestrator
+	ctx          context.Context
+	m            transcriptMeta
+	tw           *transcriptWriter
+	id           int64
+	stallsBefore int
+}
+
+// record starts the transcript of an invocation; nil when run history is
+// off or it cannot be stored.
+func (o *Orchestrator) record(ctx context.Context, m transcriptMeta, req ClaudeRequest) *recording {
 	if o.recorder == nil {
-		return ws.Claude(ctx, req, onEvent)
+		return nil
 	}
 	tw, id := o.startTranscript(ctx, m, req)
 	if tw == nil {
-		return ws.Claude(ctx, req, onEvent)
+		return nil
 	}
-	stallsBefore := 0
+	r := &recording{o: o, ctx: ctx, m: m, tw: tw, id: id}
 	if m.Run != nil {
-		stallsBefore = len(m.Run.Harness.Stalls)
+		r.stallsBefore = len(m.Run.Harness.Stalls)
 		o.transcripts.Store(m.Run.ID, tw)
-		defer o.transcripts.Delete(m.Run.ID)
 	}
-	res, err := ws.Claude(ctx, req, func(e ClaudeEvent) {
-		tw.event(e)
-		if tw.due(time.Now()) {
-			o.flushTranscript(ctx, id, tw)
-		}
-		if onEvent != nil {
-			onEvent(e)
-		}
-	})
+	return r
+}
+
+// Event implements ai.Recording.
+func (r *recording) Event(e ClaudeEvent) {
+	r.tw.event(e)
+	if r.tw.due(time.Now()) {
+		r.o.flushTranscript(r.ctx, r.id, r.tw)
+	}
+}
+
+// Finish implements ai.Recording.
+func (r *recording) Finish(ctx context.Context, res ClaudeResult, err error) int64 {
+	if r.m.Run != nil {
+		r.o.transcripts.Delete(r.m.Run.ID)
+	}
 	end := transcriptEnd(ctx, res, err)
-	if m.Run != nil {
-		end.Stalls = len(m.Run.Harness.Stalls) - stallsBefore
+	if r.m.Run != nil {
+		end.Stalls = len(r.m.Run.Harness.Stalls) - r.stallsBefore
 	}
-	chunk, counts := tw.take()
+	chunk, counts := r.tw.take()
 	end.Counts = counts
 	wctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), recordTimeout)
 	defer cancel()
-	if ferr := o.recorder.FinishTranscript(wctx, id, chunk, end); ferr != nil {
-		o.log.Error("finish transcript", "transcript", id, "err", ferr)
-	} else {
-		res.TranscriptID = id
+	if ferr := r.o.recorder.FinishTranscript(wctx, r.id, chunk, end); ferr != nil {
+		r.o.log.Error("finish transcript", "transcript", r.id, "err", ferr)
+		return 0
 	}
-	return res, err
+	return r.id
 }
 
 // startTranscript stores the running transcript; nil when it cannot be.

@@ -193,7 +193,7 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 	}
 	turns, timeout = min(s.MaxTurns, turns), min(s.TimeoutMin, timeout)
 	model := s.Models.Analyze
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDocument, WorkspaceID: run.WorkspaceID, Subject: d.Title, ModelStage: "document"},
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDocument, WorkspaceID: run.WorkspaceID, Subject: d.Title, ModelStage: "document", DocumentRunID: run.ID},
 		ClaudeRequest{
 			Prompt:   documentPrompt(d, run.Source, files, g),
 			Model:    model,
@@ -206,18 +206,6 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 				o.usage.Record(ctx, e.Data)
 			}
 		})
-	if !res.Usage.IsZero() || res.Turns > 0 {
-		m := model
-		if res.Model != "" {
-			m = res.Model
-		}
-		c := domain.ClaudeCall{ModelStage: "document", Model: m,
-			Usage: res.Usage, Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID}
-		callAccount(ctx, &c)
-		if rerr := o.docs.RecordDocumentCall(context.WithoutCancel(ctx), run.ID, c); rerr != nil {
-			o.log.Error("record document spend", "document_run", run.ID, "err", rerr)
-		}
-	}
 	if err != nil {
 		return "", nil, err
 	}

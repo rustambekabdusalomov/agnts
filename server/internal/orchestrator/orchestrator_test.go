@@ -17,6 +17,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -83,6 +85,14 @@ type fakeWS struct {
 }
 
 func (w *fakeWS) ID() string { return "ctr-1" }
+
+// The gateway's stand-in providers ask the box (aitest.Scripted); a fake
+// workspace runs no processes.
+func (w *fakeWS) Run(context.Context, ai.Cmd, io.Writer, io.Writer) (int, error) { return 0, nil }
+func (w *fakeWS) Attach(context.Context, ai.Cmd, io.Writer) (ai.Process, error) {
+	return nil, errors.New("fakeWS: no processes")
+}
+func (w *fakeWS) OOM(context.Context, int) error { return nil }
 
 func (w *fakeWS) Claude(_ context.Context, req orchestrator.ClaudeRequest, on func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
 	w.r.mu.Lock()
@@ -421,6 +431,8 @@ type harness struct {
 	plane    *fakeTracker
 	settings *fakeSettings
 	usage    *fakeUsage
+	// muse stands in for Muse: tests give it ears.
+	muse     *aitest.Provider
 	shots    *memShots
 	progress *memProgress
 }
@@ -440,7 +452,7 @@ func newHarness(t *testing.T) *harness {
 	}
 	h := &harness{t: t, ctx: ctx, store: store, pool: pool,
 		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{}, plane: &fakeTracker{},
-		shots: &memShots{m: map[string][]byte{}}, progress: &memProgress{}}
+		shots: &memShots{m: map[string][]byte{}}, progress: &memProgress{}, muse: aitest.Muse()}
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.settings = &fakeSettings{s: domain.DefaultSettings()}
@@ -449,7 +461,8 @@ func newHarness(t *testing.T) *harness {
 	h.settings.s.RecheckComplex = false // planning_test.go turns it on
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker, domain.SourcePlane: h.plane},
+		Providers: ai.NewRegistry(h.muse, aitest.Claude(), aitest.Codex()),
+		Store:     store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker, domain.SourcePlane: h.plane},
 		Homes: &memHomes{}, Progress: h.progress, Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
 		Shots: h.shots, PreviewEnvs: fakeEnvs{},
 	}, log)

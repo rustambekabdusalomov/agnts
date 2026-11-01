@@ -11,6 +11,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/apiclient"
 	"agnts/internal/domain"
 	"agnts/internal/guard"
@@ -52,7 +53,8 @@ func newSwaggerHarness(t *testing.T) *swaggerHarness {
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: h.git, Host: h.host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, SwaggerTests: tests,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	suites := postgres.NewSwaggerSuites(pool, box)

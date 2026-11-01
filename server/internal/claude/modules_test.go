@@ -62,7 +62,12 @@ func TestFreeCreditsNeverFundClaude(t *testing.T) {
 func TestPickCodex(t *testing.T) {
 	ctx := context.Background()
 	ready := false
-	s := New(Config{CodexReady: func(context.Context) bool { return ready }}, newConns(), fakeUsage{}, fakeSettings{}, fakeUsers{})
+	s := New(Config{CodexKey: func(context.Context) (string, error) {
+		if ready {
+			return "sk-openai", nil
+		}
+		return "", nil
+	}}, newConns(), fakeUsage{}, fakeSettings{}, fakeUsers{})
 	w := domain.Workspace{ID: 7, OwnerID: 1, ClaudeMode: domain.ClaudePerMember}
 	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderCodex); ok || !strings.Contains(why, "OpenAI") {
 		t.Fatalf("no key: ok=%v %q", ok, why)

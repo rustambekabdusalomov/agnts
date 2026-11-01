@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -74,7 +75,8 @@ func newSchedAccess(t *testing.T, budgetMB int64, access orchestrator.AccessSour
 	settings := postgres.NewSettings(pool, domain.DefaultSettings())
 	s.settings, s.pool = settings, pool
 	s.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
-		Store: s.store, Runner: s.runner, Git: &fakeGit{}, Host: &fakeHost{}, Homes: &memHomes{},
+		Providers: aitest.Providers(),
+		Store:     s.store, Runner: s.runner, Git: &fakeGit{}, Host: &fakeHost{}, Homes: &memHomes{},
 		Settings: settings, Usage: &fakeUsage{}, Workspaces: postgres.NewWorkspaces(pool),
 		Accounts: s.accounts, Capacity: s.budget, Access: access,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))

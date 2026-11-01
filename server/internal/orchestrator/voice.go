@@ -15,19 +15,11 @@ import (
 // hears the clip (`muse voice transcribe`, on the account the person's
 // answers run on) and the panel asks the words as it asks typed ones.
 
-// Transcriber hears a WAV clip on the Muse account in ctx.
-type Transcriber interface {
-	Transcribe(ctx context.Context, image string, wav []byte) (string, error)
-}
-
 // ErrNoSpeech says a clip had no words in it.
 var ErrNoSpeech = ai.ErrNoSpeech
 
-// SetTranscriber lets the assistant take spoken questions.
-func (o *Orchestrator) SetTranscriber(t Transcriber) { o.transcriber = t }
-
 // VoiceReady reports whether spoken questions can be heard.
-func (o *Orchestrator) VoiceReady() bool { return o.AssistantReady() && o.transcriber != nil }
+func (o *Orchestrator) VoiceReady() bool { return o.AssistantReady() && o.ai.CanHear() }
 
 // Transcribe returns the words of a spoken question (16-bit PCM WAV, at
 // most domain.AssistantMaxVoice long), heard on the account the person's
@@ -59,7 +51,7 @@ func (o *Orchestrator) Transcribe(ctx context.Context, wav []byte) (string, erro
 		}
 		return "", err
 	}
-	text, err := o.transcriber.Transcribe(ctx, o.cfg.Image, wav)
+	text, err := o.ai.HearClip(ctx, user, wav)
 	if err != nil {
 		if errors.Is(err, ErrNoSpeech) {
 			return "", fmt.Errorf("%w: %w", ErrInvalid, err)

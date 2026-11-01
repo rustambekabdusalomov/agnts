@@ -6,6 +6,7 @@
 package claude
 
 import (
+	"agnts/internal/ai"
 	"context"
 	"errors"
 	"fmt"
@@ -66,9 +67,10 @@ type Config struct {
 	// has not turned on continuing with credits. Free credits are Muse
 	// ledger money: they never pay for Claude.
 	Free func(ctx context.Context, userID int64) bool
-	// CodexReady says whether the workspace ctx acts in has an OpenAI key
-	// for Codex runs (Integrations → OpenAI); nil when Codex is not set up.
-	CodexReady func(ctx context.Context) bool
+	// CodexKey returns the OpenAI API key of the workspace ctx acts in,
+	// for Codex runs (Integrations → OpenAI; "" when none); nil when Codex
+	// is not set up.
+	CodexKey func(ctx context.Context) (string, error)
 }
 
 // Service picks accounts and manages connections.
@@ -81,7 +83,10 @@ type Service struct {
 	hc       *http.Client
 }
 
-var _ orchestrator.ClaudeAccounts = (*Service)(nil)
+var (
+	_ orchestrator.ClaudeAccounts = (*Service)(nil)
+	_ ai.Credentials              = (*Service)(nil)
+)
 
 // New returns the service.
 func New(cfg Config, conns Connections, usage Usage, settings orchestrator.SettingsSource, users Users) *Service {
@@ -131,7 +136,7 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, p
 	payer := w.RunPerson(member)
 	tool := domain.ModuleName(provider)
 	if provider == domain.ProviderCodex {
-		if s.cfg.CodexReady == nil || !s.cfg.CodexReady(ctx) {
+		if !s.codexReady(ctx) {
 			return domain.ClaudeAccount{}, false, "Codex runs need an OpenAI API key: connect OpenAI under Integrations", time.Time{}
 		}
 		return domain.ClaudeAccount{Label: "the workspace's OpenAI key", UserID: payer, Provider: provider}, true, "", time.Time{}
@@ -209,6 +214,33 @@ func (s *Service) name(ctx context.Context, id int64) string {
 		return u.DisplayName
 	}
 	return u.Username
+}
+
+// codexReady reports whether the workspace ctx acts in has an OpenAI key.
+func (s *Service) codexReady(ctx context.Context) bool {
+	if s.cfg.CodexKey == nil {
+		return false
+	}
+	key, err := s.cfg.CodexKey(ctx)
+	return err == nil && key != ""
+}
+
+// Credential implements ai.Credentials: the secret a call on module
+// provider uses, from the account ctx runs on for it. Codex runs on the
+// workspace's OpenAI key.
+func (s *Service) Credential(ctx context.Context, provider string) (ai.Credential, error) {
+	if provider == domain.ProviderCodex {
+		if s.cfg.CodexKey == nil {
+			return ai.Credential{}, errors.New("codex is not available on this server")
+		}
+		key, err := s.cfg.CodexKey(ctx)
+		if err != nil {
+			return ai.Credential{}, fmt.Errorf("openai key: %w", err)
+		}
+		return ai.Credential{Env: "OPENAI_API_KEY", Token: key}, nil
+	}
+	c, err := s.CredentialFor(domain.UseProvider(ctx, provider))
+	return ai.Credential{Env: c.Env, Token: c.Token}, err
 }
 
 // Credential is what a run container needs to reach Claude.

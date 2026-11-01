@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/orchestrator"
 )
 
@@ -20,7 +21,7 @@ type fakeEars struct {
 	inside chan struct{}
 }
 
-func (f *fakeEars) Transcribe(_ context.Context, _ string, _ []byte) (string, error) {
+func (f *fakeEars) hear(_ context.Context, _ ai.Credential, _ []byte) (string, error) {
 	f.mu.Lock()
 	f.clips++
 	f.mu.Unlock()
@@ -57,7 +58,7 @@ func TestTranscribeChecksTheClip(t *testing.T) {
 	if _, err := a.o.Transcribe(a.ask, wav(1, 1, 16)); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("without a transcriber: %v", err)
 	}
-	a.o.SetTranscriber(ears)
+	a.muse.Ears = ears.hear
 
 	for _, c := range []struct {
 		name string
@@ -100,7 +101,7 @@ func TestTranscribeChecksTheClip(t *testing.T) {
 func TestTranscribeOneClipAtATime(t *testing.T) {
 	a := newAssistantHarness(t)
 	ears := &fakeEars{text: "hi", block: make(chan struct{}), inside: make(chan struct{})}
-	a.o.SetTranscriber(ears)
+	a.muse.Ears = ears.hear
 	done := make(chan error, 1)
 	go func() {
 		_, err := a.o.Transcribe(a.ask, wav(1, 1, 16))

@@ -2,13 +2,10 @@ package runner
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
 	"agnts/internal/ai"
-	"agnts/internal/domain"
 )
 
 var _ ai.Boxes = (*Runner)(nil)
@@ -46,47 +43,4 @@ func (r *Runner) OpenBox(ctx context.Context, spec ai.BoxSpec) (ai.Box, func(), 
 		return nil, nil, err
 	}
 	return &workspace{docker: r.docker, id: id, memoryMB: spec.MemoryMB}, closeBox, nil
-}
-
-// hearer is the provider that hears audio.
-func (r *Runner) hearer() (ai.Hearer, error) {
-	if r.providers == nil {
-		return nil, errors.New("muse is not available on this server")
-	}
-	p, ok := r.providers.Get(ai.Muse)
-	h, can := p.(ai.Hearer)
-	if !ok || !can || !p.Caps().Has(ai.CapAudio) {
-		return nil, errors.New("muse does not hear audio on this server")
-	}
-	return h, nil
-}
-
-// TranscribeTimeout bounds hearing one spoken question.
-const TranscribeTimeout = 90 * time.Second
-
-// Transcribe returns the words spoken in a WAV clip, heard by Muse on the
-// Muse account in ctx.
-func (r *Runner) Transcribe(ctx context.Context, _ string, wav []byte) (string, error) {
-	h, err := r.hearer()
-	if err != nil {
-		return "", err
-	}
-	c, err := r.token(ctx)
-	if err != nil {
-		return "", fmt.Errorf("muse credential: %w", err)
-	}
-	return h.HearClip(ctx, c, wav)
-}
-
-// TranscribeMeeting hears a meeting's audio on the Muse account in ctx.
-func (r *Runner) TranscribeMeeting(ctx context.Context, _ string, audio []byte, ext string) ([]domain.MeetingSegment, error) {
-	h, err := r.hearer()
-	if err != nil {
-		return nil, err
-	}
-	c, err := r.token(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("muse credential: %w", err)
-	}
-	return h.Hear(ctx, c, audio, ext)
 }

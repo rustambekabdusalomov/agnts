@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"agnts/internal/ai"
 	"archive/tar"
 	"bytes"
 	"context"
@@ -104,6 +105,12 @@ type Deps struct {
 	// Accounts picks each run's Claude account; nil uses Usage alone (one
 	// connection for everything).
 	Accounts ClaudeAccounts
+	// AI is the gateway every model call goes through; nil builds one from
+	// Providers, Access and Credentials, recording spend in Store and
+	// Documents.
+	AI          *ai.Gateway
+	Providers   *ai.Registry
+	Credentials ai.Credentials
 	// Access says which coding modules each person may use; nil gives
 	// everyone the default access.
 	Access AccessSource
@@ -124,6 +131,8 @@ type Deps struct {
 
 // Orchestrator runs tickets through their stages.
 type Orchestrator struct {
+	// ai is the gateway every model call goes through.
+	ai        *ai.Gateway
 	baselines baselines // check results on base commits
 	cfg       Config
 	store     Store
@@ -165,7 +174,6 @@ type Orchestrator struct {
 	docHost  DocumentHost
 	docWatch DocumentWatcher
 	meetings MeetingNotesSource // nil: no meeting notes
-	meetHear MeetingTranscriber // nil: meeting audio is not heard
 
 	swagger SwaggerTests
 	suites  SwaggerSuites
@@ -191,7 +199,6 @@ type Orchestrator struct {
 	snapshots     AssistantSnapshotter
 	assistantEv   AssistantEvents
 	assistantActs AssistantActions // nil: the assistant only answers
-	transcriber   Transcriber      // nil: no spoken questions
 	asst          assistantState
 	answering     sync.WaitGroup
 
@@ -206,7 +213,12 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	if q == nil {
 		q, _ = d.Store.(Queue)
 	}
+	gw := d.AI
+	if gw == nil {
+		gw = ai.New(ai.Deps{Providers: d.Providers, Access: d.Access, Credentials: d.Credentials, Spend: spendTo(d.Store, d.Documents), Log: log})
+	}
 	return &Orchestrator{
+		ai:  gw,
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes, progress: d.Progress,
 		settings: personSettings{d.Settings}, stored: d.Settings, access: d.Access, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
@@ -214,6 +226,23 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 		swagger: d.SwaggerTests, specs: newSpecFetcher(), docs: d.Documents, docHost: d.DocumentHost,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
+	}
+}
+
+// spendTo records spend in store (ticket runs) and docs (document
+// generations).
+func spendTo(store Store, docs DocumentRuns) ai.Spend {
+	return func(ctx context.Context, c domain.ClaudeCall) error {
+		if c.DocumentRunID > 0 {
+			if docs == nil {
+				return nil
+			}
+			return docs.RecordDocumentCall(ctx, c.DocumentRunID, c)
+		}
+		if store == nil {
+			return nil
+		}
+		return store.RecordClaudeCall(ctx, c)
 	}
 }
 
@@ -805,7 +834,6 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if res.SessionID != "" {
 		run.SessionID = res.SessionID
 	}
-	o.recordSpend(ctx, run, modelStage, model, res)
 	if a, ok := domain.ClaudeOf(ctx); ok && a.Credits && o.credits != nil {
 		if within, why := o.credits.Within(ctx, t.WorkspaceID, run.ID); !within {
 			run.ExitReason = "credits"
@@ -842,36 +870,6 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		return res, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	return res, nil
-}
-
-// recordSpend stores the tokens an invocation used, failed and rate-limited
-// ones included: they were spent all the same. An invocation that never
-// reached Claude (no turns, no tokens) is not recorded.
-func (o *Orchestrator) recordSpend(ctx context.Context, run *domain.Run, modelStage, model string, res ClaudeResult) {
-	if res.Usage.IsZero() && res.Turns == 0 {
-		return
-	}
-	if res.Model != "" {
-		model = res.Model
-	}
-	// The run may have been stopped; the spend is recorded regardless.
-	c := domain.ClaudeCall{
-		RunID: run.ID, ModelStage: modelStage, Model: model, Usage: res.Usage,
-		Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID,
-	}
-	callAccount(ctx, &c)
-	if err := o.store.RecordClaudeCall(context.WithoutCancel(ctx), c); err != nil {
-		o.log.Error("record claude spend", "run_id", run.ID, "err", err)
-	}
-}
-
-// callAccount fills in the module c ran on and the account that paid for
-// it: the run's account for that module (callClaude used the same one).
-func callAccount(ctx context.Context, c *domain.ClaudeCall) {
-	c.Provider = domain.ProviderOf(c.Model)
-	if a, ok := domain.ClaudeOf(domain.UseProvider(ctx, c.Provider)); ok {
-		c.ConnectionID, c.OnCredits = a.ConnectionID, a.Credits
-	}
 }
 
 var errNoRepo = errors.New("no repository is linked to this ticket; add one on the Repositories page and retry")

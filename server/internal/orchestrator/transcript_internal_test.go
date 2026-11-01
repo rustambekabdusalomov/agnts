@@ -19,6 +19,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 )
 
@@ -227,7 +229,7 @@ func (w scriptedWS) Claude(_ context.Context, _ ClaudeRequest, on func(ClaudeEve
 
 func TestCallClaudeRecords(t *testing.T) {
 	rec := &memRecorder{bodies: map[int64][]byte{}, ends: map[int64]domain.TranscriptEnd{}}
-	o := &Orchestrator{recorder: rec, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	o := &Orchestrator{ai: ai.New(ai.Deps{Providers: aitest.Providers()}), recorder: rec, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
 	ctx := domain.WithClaude(domain.System(context.Background()), domain.ClaudeAccount{ConnectionID: 7, Label: "team"})
 	run := &domain.Run{ID: 42, Stage: domain.StageCode}
 	ws := scriptedWS{events: []ClaudeEvent{
@@ -260,7 +262,7 @@ func TestCallClaudeRecords(t *testing.T) {
 	}
 
 	// Without a workspace nothing is recorded, and the call still runs.
-	o2 := &Orchestrator{recorder: rec, log: o.log}
+	o2 := &Orchestrator{ai: o.ai, recorder: rec, log: o.log}
 	if _, err := o2.callClaude(domain.System(context.Background()), ws, transcriptMeta{Purpose: domain.PurposeDetect}, ClaudeRequest{}, nil); err != nil || len(rec.starts) != 1 {
 		t.Fatalf("no workspace: %v, %d starts", err, len(rec.starts))
 	}
@@ -272,14 +274,16 @@ func TestCallClaudeRecords(t *testing.T) {
 	}
 }
 
-// Every Claude Code or Codex invocation goes through callClaude, so it is
-// recorded. The usage refresh is the one exception: a one-turn probe in a
-// throwaway container, with no workspace.
+// Every model call of the orchestrator goes through callClaude, so it is
+// recorded, and callClaude through the gateway. The usage refresh is the
+// one exception: a one-turn probe in a throwaway container, with no
+// workspace.
 func TestEveryClaudeCallIsRecorded(t *testing.T) {
-	call := regexp.MustCompile(`\.Claude\(ctx`)
+	call := regexp.MustCompile(`\.ai\.Run\(ctx|\.Exec\(ctx, (ws|w|box), `)
 	allowed := map[string]bool{
 		filepath.Join("orchestrator", "transcript.go"): true, // callClaude itself
 		filepath.Join("usage", "usage.go"):             true, // the usage refresh probe
+		filepath.Join("ai", "gateway.go"):              true, // the gateway runs providers
 	}
 	root := ".."
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
@@ -292,7 +296,7 @@ func TestEveryClaudeCallIsRecorded(t *testing.T) {
 		}
 		rel, _ := filepath.Rel(root, p)
 		for i, line := range strings.Split(string(b), "\n") {
-			if call.MatchString(line) && !strings.Contains(line, "o.callClaude(") && !allowed[rel] {
+			if call.MatchString(line) && !strings.Contains(line, "o.callClaude(") && !allowed[rel] && !strings.HasPrefix(rel, filepath.Join("ai", "providers")) {
 				t.Errorf("%s:%d calls Claude without recording it; use o.callClaude: %s", rel, i+1, strings.TrimSpace(line))
 			}
 		}

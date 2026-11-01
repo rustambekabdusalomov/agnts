@@ -365,15 +365,18 @@ func (u *TokenUsage) Add(o TokenUsage) {
 // Partial is true when the stream ended without a result, so the tokens
 // were summed from the messages seen and the cost is unknown.
 type ClaudeCall struct {
-	ID         int64
-	RunID      int64
-	TicketID   int64
-	ModelStage string
-	Model      string
-	Usage      TokenUsage
-	Turns      int
-	Duration   time.Duration
-	Partial    bool
+	ID    int64
+	RunID int64
+	// DocumentRunID is the document generation the call belongs to,
+	// instead of a ticket's run.
+	DocumentRunID int64
+	TicketID      int64
+	ModelStage    string
+	Model         string
+	Usage         TokenUsage
+	Turns         int
+	Duration      time.Duration
+	Partial       bool
 	// TranscriptID is the invocation's run history transcript; 0 for none.
 	TranscriptID int64
 	// Provider is the module it ran on; ConnectionID the connection that

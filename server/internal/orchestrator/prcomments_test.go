@@ -11,6 +11,7 @@ import (
 	"sync"
 	"testing"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -126,7 +127,8 @@ func (c *convHost) PostReview(_ context.Context, _ domain.Repository, n int, sha
 func convOrchestrator(h *harness, host *convHost) {
 	git := &pullGit{fakeGit: h.git, host: host.reviewHost}
 	h.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: git, Host: host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: git, Host: host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
 		PullReviews: h.store, PRPosts: h.store, ReviewDrafts: h.store,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 }

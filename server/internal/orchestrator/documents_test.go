@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -66,7 +67,8 @@ func newDocHarness(t *testing.T) docHarness {
 	h := newHarness(t)
 	dh := docHarness{harness: h, docs: postgres.NewDocuments(h.pool), host: &fakeDocHost{files: map[int][]domain.FileChange{}}, watch: &watched{}}
 	h.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: h.git, Host: h.host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
 		Documents: dh.docs, DocumentHost: dh.host,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	h.o.SetDocumentWatcher(dh.watch)

@@ -385,6 +385,7 @@ type agent struct {
 	billing      *billing.Service
 	museCredits  *musecredits.Service
 	providers    *ai.Registry
+	ai           *ai.Gateway
 	museDevice   *musecredits.Logins
 	budget       *orchestrator.MemoryBudget
 	network      *network.Service
@@ -448,11 +449,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		return nil, fmt.Errorf("muse ledger: %w", err)
 	}
 	a.claude = claude.New(claude.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud, MuseKey: cfg.MusePlatformKey,
-		Free: func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 },
-		CodexReady: func(ctx context.Context) bool {
-			key, err := a.integrations.Token(ctx, "openai")
-			return err == nil && key != ""
-		}},
+		Free:     func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 },
+		CodexKey: func(ctx context.Context) (string, error) { return a.integrations.Token(ctx, "openai") }},
 		conns, a.usage, a.settings, a.users)
 	a.usage.OnPaused(a.claude.Paused)
 	a.usage.SetResolver(func(ctx context.Context) (domain.ClaudeAccount, bool) {
@@ -503,10 +501,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	} else {
 		log.Warn("agnts-guard is missing: runs work without the in-run guards (the checks after each run still apply)", "path", cfg.GuardBinary, "err", err)
 	}
-	run := runner.New(a.docker, rcfg, func(ctx context.Context) (runner.Credential, error) {
-		c, err := a.claude.CredentialFor(ctx)
-		return runner.Credential{Env: c.Env, Token: c.Token}, err
-	})
+	run := runner.New(a.docker, rcfg)
 	a.budget = &orchestrator.MemoryBudget{
 		BudgetMB: cfg.RunMemoryBudgetMB, DefaultMB: int64(cfg.RunMemoryMB), MaxMB: int64(cfg.RunMemoryMaxMB),
 		MinFreeDiskMB: cfg.MinFreeDiskMB, Available: runner.AvailableMemoryMB,
@@ -514,7 +509,6 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	}
 	a.runner = run
 	run.SetCA(a.network.CA)
-	run.SetCodexKey(func(ctx context.Context) (string, error) { return a.integrations.Token(ctx, "openai") })
 	catalog, err := model.Default.WithPrices(cfg.MusePrices)
 	if err != nil {
 		return nil, fmt.Errorf("AGNTS_MUSE_PRICES: %w", err)
@@ -544,8 +538,18 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		claudecode.New(cfg.ClaudeModels),
 		codex.New(nil),
 	)
-	run.SetProviders(a.providers)
-	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))
+	a.docStore = postgres.NewDocuments(pool)
+	// Every model call goes through the gateway: it checks the person's
+	// modules, takes the credential of the call's account, runs it through
+	// its provider and records its spend.
+	a.ai = ai.New(ai.Deps{Providers: a.providers, Access: a.modules, Credentials: a.claude,
+		Spend: func(ctx context.Context, c domain.ClaudeCall) error {
+			if c.DocumentRunID > 0 {
+				return a.docStore.RecordDocumentCall(ctx, c.DocumentRunID, c)
+			}
+			return a.store.RecordClaudeCall(ctx, c)
+		}, Log: log.With("component", "ai")})
+	a.refresher = usage.NewRefresher(a.usage, run, a.ai, cfg.RunnerImage, log.With("component", "usage"))
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),
 		func(ctx context.Context, provider string) (string, error) { return a.integrations.Token(ctx, provider) },
@@ -564,7 +568,6 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	ocfg := orchestrator.DefaultConfig()
 	ocfg.Image = cfg.RunnerImage
 	previewEnvs := postgres.NewPreviewEnvs(pool, box)
-	a.docStore = postgres.NewDocuments(pool)
 	a.orch = orchestrator.New(ocfg, orchestrator.Deps{
 		Store: a.store, Runner: run, Git: repos, Host: a.vcs, Homes: homes, Progress: a.progress,
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: a.jira, domain.SourcePlane: a.plane},
@@ -576,7 +579,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		Translations: postgres.NewTranslations(pool),
 		Shots:        a.shots, PreviewEnvs: previewEnvs,
 		BuildEnvs: previewEnvs, Workspaces: a.workspaces,
-		Accounts: a.claude, Capacity: a.budget, Credits: a.billing,
+		Accounts: a.claude, Capacity: a.budget, Credits: a.billing, AI: a.ai,
 		SwaggerTests: postgres.NewSwaggerTests(pool, box),
 		Documents:    a.docStore, DocumentHost: a.vcs,
 	}, log.With("component", "orchestrator"))
@@ -645,10 +648,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.orch.SetAssistant(a.assistant, mcpserver.NewSnapshotter(a.mcpDeps()))
 	a.orch.SetAssistantActions(&actions.Assistant{Deps: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Role: a.workspaces.Role})
 	a.orch.SetCodeChat(a.assistant, a.workspaces.Role)
-	a.orch.SetTranscriber(a.runner)
 	a.meetStore = postgres.NewMeetings(pool)
 	a.orch.SetMeetings(a.meetStore)
-	a.orch.SetMeetingTranscriber(a.runner)
 	return a, nil
 }
 

@@ -25,13 +25,12 @@ func TestTranscribeMeetingLive(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := New(NewDocker("/var/run/docker.sock"), Config{}, func(context.Context) (Credential, error) {
-		return Credential{Env: musecode.EnvKey, Token: "LLM_test-key-for-a-stand-in-muse"}, nil
-	})
-	r.SetProviders(ai.NewRegistry(musecode.New(musecode.Config{Boxes: r, Image: image})))
+	r := New(NewDocker("/var/run/docker.sock"), Config{})
+	muse := musecode.New(musecode.Config{Boxes: r, Image: image})
+	cred := ai.Credential{Env: musecode.EnvKey, Token: "LLM_test-key-for-a-stand-in-muse"}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
-	segs, err := r.TranscribeMeeting(ctx, image, data, strings.TrimPrefix(filepath.Ext(audio), "."))
+	segs, err := muse.Hear(ctx, cred, data, strings.TrimPrefix(filepath.Ext(audio), "."))
 	if err != nil {
 		t.Fatal(err)
 	}

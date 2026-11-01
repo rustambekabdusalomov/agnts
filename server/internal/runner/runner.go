@@ -68,24 +68,10 @@ func DefaultConfig() Config {
 	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024, MaxMemoryMB: 8192, ToolchainVolume: "agnts-toolchains"}
 }
 
-// Credential is how an agent reaches its provider (ai.Credential).
-type Credential = ai.Credential
-
-// TokenSource returns the credential of the account a run uses (from its
-// context) at the moment it calls Claude, so a rotated token is picked up
-// without a restart.
-type TokenSource func(ctx context.Context) (Credential, error)
-
 // Runner implements orchestrator.Runner with Docker.
 type Runner struct {
 	docker *Docker
 	cfg    Config
-	token  TokenSource
-	// codexKey returns the OpenAI API key Codex runs use, in the workspace
-	// ctx acts in ("" when none is connected).
-	codexKey func(ctx context.Context) (string, error)
-	// providers run the agents (Claude Code, Codex, Muse Code).
-	providers *ai.Registry
 
 	netOnce sync.Once
 	netErr  error
@@ -144,12 +130,6 @@ func (r *Runner) forget(ip string) {
 	delete(r.ips, ip)
 }
 
-// SetProviders sets the agents runs use.
-func (r *Runner) SetProviders(reg *ai.Registry) { r.providers = reg }
-
-// SetCodexKey sets where Codex runs get their OpenAI API key.
-func (r *Runner) SetCodexKey(fn func(ctx context.Context) (string, error)) { r.codexKey = fn }
-
 // SetCA sets where a workspace's CA bundle comes from.
 func (r *Runner) SetCA(fn func(ctx context.Context) []byte) { r.ca = fn }
 
@@ -200,8 +180,8 @@ func caArchive(pem []byte) []byte {
 var _ orchestrator.Runner = (*Runner)(nil)
 
 // New returns a Docker-backed runner.
-func New(docker *Docker, cfg Config, token TokenSource) *Runner {
-	return &Runner{docker: docker, cfg: cfg, token: token}
+func New(docker *Docker, cfg Config) *Runner {
+	return &Runner{docker: docker, cfg: cfg}
 }
 
 // Open creates a container, copies the repository (and any earlier Claude
@@ -276,7 +256,7 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 		}
 		return nil, err
 	}
-	ws := &workspace{docker: r.docker, id: id, dir: workDir, token: r.token, codexKey: r.codexKey, providers: r.providers, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer}
+	ws := &workspace{docker: r.docker, id: id, dir: workDir, memoryMB: memory, network: ownNet, proxy: r.cfg.ProxyContainer}
 	fail := func(err error) (orchestrator.Workspace, error) {
 		_ = ws.Close(context.WithoutCancel(ctx))
 		return nil, err
@@ -358,11 +338,8 @@ type workspace struct {
 	id     string
 	// dir is where commands run: /workspace in a run container, the
 	// image's own in a throwaway one.
-	dir       string
-	token     TokenSource
-	codexKey  func(ctx context.Context) (string, error)
-	providers *ai.Registry
-	memoryMB  int64
+	dir      string
+	memoryMB int64
 	// network is the run's own network ("" on the shared one), removed
 	// with the container; proxy is the egress proxy that joined it.
 	network, proxy string
@@ -436,40 +413,6 @@ func (w *workspace) OOM(ctx context.Context, code int) error {
 		return err
 	}
 	return nil
-}
-
-// Claude runs one agent invocation through the provider of its model.
-func (w *workspace) Claude(ctx context.Context, req orchestrator.ClaudeRequest, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
-	if w.providers == nil {
-		return orchestrator.ClaudeResult{}, errors.New("no coding agent is set up on this server")
-	}
-	id := ai.ProviderOf(req.Model)
-	if id == "" {
-		id = ai.Claude
-	}
-	p, ok := w.providers.Get(id)
-	if !ok {
-		return orchestrator.ClaudeResult{}, fmt.Errorf("%s is not available on this server", ai.ModuleName(id))
-	}
-	var cred ai.Credential
-	switch {
-	case id == ai.Codex:
-		if w.codexKey == nil {
-			return orchestrator.ClaudeResult{}, errors.New("codex is not available on this server")
-		}
-		key, err := w.codexKey(ctx)
-		if err != nil {
-			return orchestrator.ClaudeResult{}, fmt.Errorf("openai key: %w", err)
-		}
-		cred = ai.Credential{Env: "OPENAI_API_KEY", Token: key}
-	default:
-		c, err := w.token(ctx)
-		if err != nil {
-			return orchestrator.ClaudeResult{}, fmt.Errorf("%s credential: %w", strings.ToLower(ai.ModuleName(id)), err)
-		}
-		cred = c
-	}
-	return p.Exec(ctx, w, cred, req, onEvent)
 }
 
 func (w *workspace) Exec(ctx context.Context, cmd string, timeout time.Duration) (orchestrator.ExecResult, error) {

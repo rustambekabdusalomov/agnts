@@ -398,12 +398,10 @@ func (e *ToolchainError) Error() string {
 // using more memory than the container's limit.
 type OOMError = ai.OOMError
 
-// Workspace is a running container with the repository and Claude Code.
+// Workspace is a running container with the repository, where agents run
+// (an ai.Box: the gateway runs them through their providers).
 type Workspace interface {
-	ID() string
-	// Claude runs one `claude -p` invocation, calling onEvent for each
-	// parsed line of its stream.
-	Claude(ctx context.Context, req ClaudeRequest, onEvent func(ClaudeEvent)) (ClaudeResult, error)
+	ai.Box
 	// Exec runs a shell command in /workspace (used for checks).
 	Exec(ctx context.Context, cmd string, timeout time.Duration) (ExecResult, error)
 	// ReadFile returns a file from the container, or domain.ErrNotFound.

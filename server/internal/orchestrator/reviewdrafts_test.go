@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres/pgtest"
@@ -20,7 +21,8 @@ func draftsHarness(t *testing.T) (*harness, *convHost, *pullGit) {
 	host := newConvHost()
 	git := &pullGit{fakeGit: h.git, host: host.reviewHost}
 	h.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: git, Host: host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: git, Host: host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
 		PullReviews: h.store, PRPosts: h.store, ReviewDrafts: h.store,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	pool := pgtest.Open(t)

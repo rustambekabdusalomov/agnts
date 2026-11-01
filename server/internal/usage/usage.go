@@ -4,6 +4,7 @@
 package usage
 
 import (
+	"agnts/internal/ai"
 	"archive/tar"
 	"bytes"
 	"context"
@@ -385,6 +386,7 @@ func epoch(f float64) time.Time {
 
 // Refresher runs a tiny Claude invocation to get a fresh reading.
 type Refresher struct {
+	ai      *ai.Gateway
 	tracker *Tracker
 	runner  orchestrator.Runner
 	image   string
@@ -392,8 +394,8 @@ type Refresher struct {
 }
 
 // NewRefresher returns a refresher using the runner image.
-func NewRefresher(t *Tracker, r orchestrator.Runner, image string, log *slog.Logger) *Refresher {
-	return &Refresher{tracker: t, runner: r, image: image, log: log}
+func NewRefresher(t *Tracker, r orchestrator.Runner, gw *ai.Gateway, image string, log *slog.Logger) *Refresher {
+	return &Refresher{tracker: t, runner: r, ai: gw, image: image, log: log}
 }
 
 // ErrBusy is returned when a refresh is already running.
@@ -435,9 +437,9 @@ func (r *Refresher) run(ctx context.Context) error {
 	}
 	defer func() { _ = ws.Close(context.WithoutCancel(ctx)) }()
 	got := false
-	res, err := ws.Claude(ctx, orchestrator.ClaudeRequest{
+	res, err := r.ai.Run(ctx, ai.Call{Purpose: ai.PurposeUsageProbe, Box: ws, Req: ai.Request{
 		Prompt: "Reply with the single word OK.", Model: "haiku", MaxTurns: 1, Timeout: 2 * time.Minute,
-	}, func(e orchestrator.ClaudeEvent) {
+	}}, func(e ai.Event) {
 		if e.Kind == orchestrator.ClaudeRateLimit {
 			got = true
 			r.tracker.Record(ctx, e.Data)

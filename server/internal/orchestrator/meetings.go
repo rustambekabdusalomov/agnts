@@ -194,24 +194,15 @@ func parseOffset(s string) (int, bool) {
 	return total * 1000, true
 }
 
-// MeetingTranscriber hears a meeting's audio on the Muse account in ctx
-// (the runner implements it).
-type MeetingTranscriber interface {
-	TranscribeMeeting(ctx context.Context, image string, audio []byte, ext string) ([]domain.MeetingSegment, error)
-}
-
-// SetMeetingTranscriber lets meeting notes be heard.
-func (o *Orchestrator) SetMeetingTranscriber(t MeetingTranscriber) { o.meetHear = t }
-
 // CanHearMeetings reports whether meeting audio can be transcribed.
-func (o *Orchestrator) CanHearMeetings() bool { return o.meetHear != nil }
+func (o *Orchestrator) CanHearMeetings() bool { return o.ai.CanHear() }
 
 // HearMeeting returns what was said in a meeting's audio (ext: ogg or
 // mp4), heard by Muse on the account the workspace's runs use for user,
 // who turned the notes on. Unlike the assistant it may use the platform's
 // key: hearing is not metered, the notes it leads to are.
 func (o *Orchestrator) HearMeeting(ctx context.Context, user int64, audio []byte, ext string) ([]domain.MeetingSegment, error) {
-	if o.meetHear == nil {
+	if !o.ai.CanHear() {
 		return nil, invalid("meeting notes are not available on this server")
 	}
 	if o.accounts != nil && o.workspaces != nil {
@@ -230,7 +221,7 @@ func (o *Orchestrator) HearMeeting(ctx context.Context, user int64, audio []byte
 		}
 		ctx = domain.WithClaude(ctx, acct)
 	}
-	segs, err := o.meetHear.TranscribeMeeting(ctx, o.cfg.Image, audio, ext)
+	segs, err := o.ai.Hear(ctx, user, audio, ext)
 	if err != nil {
 		return nil, fmt.Errorf("hear the meeting: %w", err)
 	}
