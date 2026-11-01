@@ -239,17 +239,19 @@ func (l *Loki) Pull(ctx context.Context, svcs []domain.LogService, f Filter, cur
 		cut = start.Add(time.Nanosecond)
 	}
 	out := Batch{More: more}
-	var atCut []string
 	for _, g := range all {
-		if g.ts.After(cut) {
-			continue
-		}
-		if seen[g.e.Key] {
+		if g.ts.After(cut) || seen[g.e.Key] {
 			continue
 		}
 		out.Entries = append(out.Entries, g.e)
-		if g.ts.Equal(cut) {
-			atCut = append(atCut, g.e.Key)
+	}
+	// Context lines stay inside this window: the next pull reads what
+	// comes after it.
+	out.Entries = l.withContext(ctx, out.Entries, cut, seen)
+	var atCut []string
+	for _, e := range out.Entries {
+		if e.Time.Equal(cut) {
+			atCut = append(atCut, e.Key)
 		}
 	}
 	sort.SliceStable(out.Entries, func(i, j int) bool { return out.Entries[i].Time.Before(out.Entries[j].Time) })
@@ -294,4 +296,72 @@ func parseNanos(s string) (time.Time, error) {
 		return time.Time{}, err
 	}
 	return time.Unix(0, n).UTC(), nil
+}
+
+// maxContext caps the context reads one pull makes.
+const maxContext = 20
+
+// withContext adds, for each entry that starts a multi-line error, the
+// lines its stream wrote in the next two seconds: the stack frames a
+// keyword filter drops when a trace is logged line by line.
+func (l *Loki) withContext(ctx context.Context, entries []domain.LogEntry, until time.Time, seen map[string]bool) []domain.LogEntry {
+	have := map[string]bool{}
+	for k := range seen {
+		have[k] = true
+	}
+	for _, e := range entries {
+		have[e.Key] = true
+	}
+	n := 0
+	out := entries
+	for _, e := range entries {
+		if n >= maxContext || strings.Contains(e.Message, "\n") || !domain.LogErrorStart(e.Message) {
+			continue
+		}
+		n++
+		query := "{" + selectorOf(e.Stream) + "}"
+		end := e.Time.Add(2 * time.Second)
+		if end.After(until) {
+			end = until.Add(time.Nanosecond)
+		}
+		b, err := l.get(ctx, "/loki/api/v1/query_range", url.Values{"query": {query}, "start": {nanos(e.Time)},
+			"end": {nanos(end)}, "limit": {"300"}, "direction": {"forward"}})
+		if err != nil {
+			continue // the error line alone still makes a finding
+		}
+		var res lokiStreams
+		if json.Unmarshal(b, &res) != nil {
+			continue
+		}
+		for _, s := range res.Data.Result {
+			stream := labelString(s.Stream)
+			for _, v := range s.Values {
+				ts, err := parseNanos(v[0])
+				if err != nil || ts.After(until) {
+					continue
+				}
+				k := keyOf(v[0], stream, v[1])
+				if have[k] {
+					continue
+				}
+				have[k] = true
+				c := e
+				c.Time, c.Stream, c.Message, c.Key = ts, stream, v[1], k
+				out = append(out, c)
+			}
+		}
+	}
+	return out
+}
+
+// selectorOf turns labelString's "a=1,b=2," back into matchers.
+func selectorOf(stream string) string {
+	var parts []string
+	for _, kv := range strings.Split(strings.TrimSuffix(stream, ","), ",") {
+		k, v, ok := strings.Cut(kv, "=")
+		if ok && k != "" {
+			parts = append(parts, k+"="+strconv.Quote(v))
+		}
+	}
+	return strings.Join(parts, ", ")
 }

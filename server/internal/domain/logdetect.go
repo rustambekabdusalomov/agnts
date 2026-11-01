@@ -269,6 +269,14 @@ var errorStart = []*regexp.Regexp{
 	regexp.MustCompile(`^(?:[A-Z][\w$]*\.)*[A-Z][\w$]*(?:Error|Exception)(?:\s*\[[^\]]*\])?: `), // TypeError: x, ValueError: x
 }
 
+// LogErrorStart reports whether a line starts a multi-line error (a Go
+// panic, a Python traceback, a Java exception): readers fetch the lines
+// after it, which a keyword filter would drop.
+func LogErrorStart(line string) bool {
+	i, _ := startsError([]string{line})
+	return i >= 0
+}
+
 func startsError(lines []string) (int, *regexp.Regexp) {
 	for i, l := range lines {
 		for _, re := range errorStart {
