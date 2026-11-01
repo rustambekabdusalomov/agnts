@@ -11,6 +11,8 @@ abstract class _$UserModulesCWProxy {
 
   UserModules effective(List<Module> effective);
 
+  UserModules order(List<Module>? order);
+
   UserModules setAt(DateTime? setAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `UserModules(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -22,6 +24,7 @@ abstract class _$UserModulesCWProxy {
   UserModules call({
     List<Module>? own,
     List<Module> effective,
+    List<Module>? order,
     DateTime? setAt,
   });
 }
@@ -39,6 +42,9 @@ class _$UserModulesCWProxyImpl implements _$UserModulesCWProxy {
   UserModules effective(List<Module> effective) => this(effective: effective);
 
   @override
+  UserModules order(List<Module>? order) => this(order: order);
+
+  @override
   UserModules setAt(DateTime? setAt) => this(setAt: setAt);
 
   @override
@@ -51,6 +57,7 @@ class _$UserModulesCWProxyImpl implements _$UserModulesCWProxy {
   UserModules call({
     Object? own = const $CopyWithPlaceholder(),
     Object? effective = const $CopyWithPlaceholder(),
+    Object? order = const $CopyWithPlaceholder(),
     Object? setAt = const $CopyWithPlaceholder(),
   }) {
     return UserModules(
@@ -62,6 +69,10 @@ class _$UserModulesCWProxyImpl implements _$UserModulesCWProxy {
           ? _value.effective
           // ignore: cast_nullable_to_non_nullable
           : effective as List<Module>,
+      order: order == const $CopyWithPlaceholder()
+          ? _value.order
+          // ignore: cast_nullable_to_non_nullable
+          : order as List<Module>?,
       setAt: setAt == const $CopyWithPlaceholder()
           ? _value.setAt
           // ignore: cast_nullable_to_non_nullable
@@ -96,6 +107,12 @@ UserModules _$UserModulesFromJson(Map<String, dynamic> json) =>
               .map((e) => $enumDecode(_$ModuleEnumMap, e))
               .toList(),
         ),
+        order: $checkedConvert(
+          'order',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$ModuleEnumMap, e))
+              .toList(),
+        ),
         setAt: $checkedConvert(
           'setAt',
           (v) => v == null ? null : DateTime.parse(v as String),
@@ -108,6 +125,7 @@ Map<String, dynamic> _$UserModulesToJson(UserModules instance) =>
     <String, dynamic>{
       'own': ?instance.own?.map((e) => _$ModuleEnumMap[e]!).toList(),
       'effective': instance.effective.map((e) => _$ModuleEnumMap[e]!).toList(),
+      'order': ?instance.order?.map((e) => _$ModuleEnumMap[e]!).toList(),
       'setAt': ?instance.setAt?.toIso8601String(),
     };
 

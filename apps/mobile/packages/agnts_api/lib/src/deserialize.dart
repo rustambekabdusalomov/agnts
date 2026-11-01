@@ -350,6 +350,7 @@ import 'package:agnts_api/src/model/set_credit_limit_request.dart';
 import 'package:agnts_api/src/model/set_free_credits_request.dart';
 import 'package:agnts_api/src/model/set_meeting_cohosts_request.dart';
 import 'package:agnts_api/src/model/set_member_role_request.dart';
+import 'package:agnts_api/src/model/set_my_module_order_request.dart';
 import 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 import 'package:agnts_api/src/model/set_slots_request.dart';
 import 'package:agnts_api/src/model/set_ticket_benchmark_request.dart';
@@ -1206,6 +1207,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SetMeetingCohostsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMemberRoleRequest':
           return SetMemberRoleRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SetMyModuleOrderRequest':
+          return SetMyModuleOrderRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetPlaneWebhookSecretRequest':
           return SetPlaneWebhookSecretRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetSlotsRequest':

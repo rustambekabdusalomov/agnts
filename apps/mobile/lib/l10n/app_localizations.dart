@@ -15651,6 +15651,30 @@ abstract class AppLocalizations {
   /// **'Modules saved'**
   String get modulesSaved;
 
+  /// No description provided for @modulesMineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coding modules'**
+  String get modulesMineTitle;
+
+  /// No description provided for @modulesMineSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The modules an Admin lets you use. Put them in your order: the first is your default, used when a setting names a module you can\'t use.'**
+  String get modulesMineSub;
+
+  /// No description provided for @modulesMineSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your module order is saved'**
+  String get modulesMineSaved;
+
+  /// No description provided for @modulesMineReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the Admin\'s order'**
+  String get modulesMineReset;
+
   /// No description provided for @mpreviewTitle.
   ///
   /// In en, this message translates to:
@@ -17822,6 +17846,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} follows the default modules now'**
   String platformModulesFollow(String name);
+
+  /// No description provided for @platformModulesNotEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enabled yet, so not offered here: {list}. This server can run them.'**
+  String platformModulesNotEnabled(String list);
+
+  /// No description provided for @platformModulesOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Modules settings'**
+  String get platformModulesOpenSettings;
+
+  /// No description provided for @platformModulesServerOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This server can run only {list}. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image).'**
+  String platformModulesServerOnly(String list);
 
   /// No description provided for @previewTab.
   ///
@@ -27770,6 +27812,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your modules have no account to connect here: Codex runs on the workspace\'s OpenAI integration.'**
   String get wsNoAccountModules;
+
+  /// No description provided for @wsCodexSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs on the workspace\'s OpenAI API key'**
+  String get wsCodexSub;
+
+  /// No description provided for @wsCodexKey.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI API key'**
+  String get wsCodexKey;
+
+  /// No description provided for @wsCodexConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get wsCodexConnected;
+
+  /// No description provided for @wsCodexNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected: Codex runs wait until one is'**
+  String get wsCodexNotConnected;
+
+  /// No description provided for @wsCodexConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect OpenAI'**
+  String get wsCodexConnect;
+
+  /// No description provided for @wsCodexManage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI settings'**
+  String get wsCodexManage;
+
+  /// No description provided for @wsCodexCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI bills Codex runs directly, per call. They don\'t use workspace credits, and turning on continuing with credits doesn\'t apply to them.'**
+  String get wsCodexCredits;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

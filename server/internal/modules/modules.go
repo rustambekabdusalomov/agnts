@@ -30,10 +30,13 @@ const cacheFor = 15 * time.Second
 type UserModules struct {
 	// Own is the list an Admin set; nil follows the default.
 	Own []string
-	// Effective is what the person may use now.
+	// Effective is what the person may use now, in their order.
 	Effective []string
-	SetBy     *int64
-	SetAt     *time.Time
+	// Order is the order the person put their modules in; nil keeps the
+	// Admin's.
+	Order []string
+	SetBy *int64
+	SetAt *time.Time
 }
 
 // Service reads and changes module access.
@@ -158,35 +161,35 @@ func (s *Service) For(ctx context.Context, user int64) (domain.Access, error) {
 	if err != nil {
 		return domain.DefaultAccess(), err
 	}
-	own, err := s.own(ctx, user)
+	own, order, err := s.own(ctx, user)
 	if err != nil {
 		return domain.ResolveAccess(domain.Ceiling(), cfg, nil), err
 	}
-	a := domain.ResolveAccess(domain.Ceiling(), cfg, own)
+	a := domain.ResolveAccess(domain.Ceiling(), cfg, own).Ordered(order)
 	s.mu.Lock()
 	s.users[user] = cached{a: a, at: s.now()}
 	s.mu.Unlock()
 	return domain.Access{Modules: slices.Clone(a.Modules)}, nil
 }
 
-// own returns the list an Admin set for user, nil when none.
-func (s *Service) own(ctx context.Context, user int64) ([]string, error) {
+// own returns the list an Admin set for user and the order they put their
+// modules in, each nil when none.
+func (s *Service) own(ctx context.Context, user int64) (own, order []string, err error) {
 	if user <= 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
-	var own []string
-	err := s.db.QueryRow(domain.System(ctx), `SELECT modules FROM users WHERE id = $1`, user).Scan(&own)
+	err = s.db.QueryRow(domain.System(ctx), `SELECT modules, module_order FROM users WHERE id = $1`, user).Scan(&own, &order)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
+		return nil, nil, nil
 	}
-	return own, err
+	return own, order, err
 }
 
 // User returns a person's modules for the Admin cabinet.
 func (s *Service) User(ctx context.Context, user int64) (UserModules, error) {
 	var out UserModules
-	err := s.db.QueryRow(domain.System(ctx), `SELECT modules, modules_set_by, modules_set_at FROM users WHERE id = $1`, user).
-		Scan(&out.Own, &out.SetBy, &out.SetAt)
+	err := s.db.QueryRow(domain.System(ctx), `SELECT modules, modules_set_by, modules_set_at, module_order FROM users WHERE id = $1`, user).
+		Scan(&out.Own, &out.SetBy, &out.SetAt, &out.Order)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return out, domain.ErrNotFound
 	}
@@ -197,8 +200,37 @@ func (s *Service) User(ctx context.Context, user int64) (UserModules, error) {
 	if err != nil {
 		return out, err
 	}
-	out.Effective = domain.ResolveAccess(domain.Ceiling(), cfg, out.Own).Modules
+	out.Effective = domain.ResolveAccess(domain.Ceiling(), cfg, out.Own).Ordered(out.Order).Modules
 	return out, nil
+}
+
+// SetOrder sets the order a person puts their modules in (nil: the
+// Admin's order). It only orders what they may use.
+func (s *Service) SetOrder(ctx context.Context, user int64, order []string) (UserModules, error) {
+	if order != nil {
+		cfg, err := s.Config(ctx)
+		if err != nil {
+			return UserModules{}, err
+		}
+		own, _, err := s.own(ctx, user)
+		if err != nil {
+			return UserModules{}, err
+		}
+		if err := domain.ValidateOrder(domain.ResolveAccess(domain.Ceiling(), cfg, own), order); err != nil {
+			return UserModules{}, &InvalidError{err.Error()}
+		}
+	}
+	tag, err := s.db.Exec(domain.System(ctx), `UPDATE users SET module_order = $2 WHERE id = $1`, user, order)
+	if err != nil {
+		return UserModules{}, err
+	}
+	if tag.RowsAffected() == 0 {
+		return UserModules{}, domain.ErrNotFound
+	}
+	s.mu.Lock()
+	delete(s.users, user)
+	s.mu.Unlock()
+	return s.User(ctx, user)
 }
 
 // SetUser sets a person's own modules (nil: follow the default), recording

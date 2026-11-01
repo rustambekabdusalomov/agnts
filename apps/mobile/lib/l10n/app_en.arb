@@ -5268,6 +5268,10 @@
   "modulesProblem_codexFirst": "Codex cannot be the default module: put Muse Code or Claude Code first.",
   "modulesSave": "Save",
   "modulesSaved": "Modules saved",
+  "modulesMineTitle": "Your coding modules",
+  "modulesMineSub": "The modules an Admin lets you use. Put them in your order: the first is your default, used when a setting names a module you can't use.",
+  "modulesMineSaved": "Your module order is saved",
+  "modulesMineReset": "Use the Admin's order",
   "mpreviewTitle": "agnts's preview",
   "mpreviewSub": "Screenshots of the app with this change. Advice beside your review: it never blocks approval.",
   "mpreviewPending": "Queued: agnts starts the app and takes screenshots as soon as a worker is free.",
@@ -6112,6 +6116,23 @@
   "@platformModulesFollow": {
     "placeholders": {
       "name": {
+        "type": "String"
+      }
+    }
+  },
+  "platformModulesNotEnabled": "Not enabled yet, so not offered here: {list}. This server can run them.",
+  "@platformModulesNotEnabled": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "platformModulesOpenSettings": "Open Modules settings",
+  "platformModulesServerOnly": "This server can run only {list}. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image).",
+  "@platformModulesServerOnly": {
+    "placeholders": {
+      "list": {
         "type": "String"
       }
     }
@@ -9634,5 +9655,12 @@
   "wsMemberAccountsSubBoth": "Who has connected their own Muse and Claude accounts (Profile).",
   "wsConnectionMuse": "Workspace Muse account",
   "wsConnectionClaude": "Workspace Claude account",
-  "wsNoAccountModules": "Your modules have no account to connect here: Codex runs on the workspace's OpenAI integration."
+  "wsNoAccountModules": "Your modules have no account to connect here: Codex runs on the workspace's OpenAI integration.",
+  "wsCodexSub": "Runs on the workspace's OpenAI API key",
+  "wsCodexKey": "OpenAI API key",
+  "wsCodexConnected": "Connected",
+  "wsCodexNotConnected": "Not connected: Codex runs wait until one is",
+  "wsCodexConnect": "Connect OpenAI",
+  "wsCodexManage": "OpenAI settings",
+  "wsCodexCredits": "OpenAI bills Codex runs directly, per call. They don't use workspace credits, and turning on continuing with credits doesn't apply to them."
 }

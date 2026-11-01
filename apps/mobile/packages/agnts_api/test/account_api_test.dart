@@ -63,6 +63,13 @@ void main() {
       // TODO
     });
 
+    // The coding modules you may use, in your order (the first is your default module)
+    //
+    //Future<UserModules> getMyModules() async
+    test('test getMyModules', () async {
+      // TODO
+    });
+
     // How your Meta sign-in is going
     //
     //Future<MuseLogin> getMyMuseLogin(String id) async
@@ -81,6 +88,13 @@ void main() {
     //
     //Future<ClaudeConnectionState> setMyClaude(ClaudeConnectionInput claudeConnectionInput) async
     test('test setMyClaude', () async {
+      // TODO
+    });
+
+    // Put the modules you may use in your own order; the first is your default module and cannot be codex. Null goes back to the Admin's order
+    //
+    //Future<UserModules> setMyModuleOrder(SetMyModuleOrderRequest setMyModuleOrderRequest) async
+    test('test setMyModuleOrder', () async {
       // TODO
     });
 

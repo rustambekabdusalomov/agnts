@@ -411,6 +411,7 @@ export 'package:agnts_api/src/model/set_credit_limit_request.dart';
 export 'package:agnts_api/src/model/set_free_credits_request.dart';
 export 'package:agnts_api/src/model/set_meeting_cohosts_request.dart';
 export 'package:agnts_api/src/model/set_member_role_request.dart';
+export 'package:agnts_api/src/model/set_my_module_order_request.dart';
 export 'package:agnts_api/src/model/set_plane_webhook_secret_request.dart';
 export 'package:agnts_api/src/model/set_slots_request.dart';
 export 'package:agnts_api/src/model/set_ticket_benchmark_request.dart';

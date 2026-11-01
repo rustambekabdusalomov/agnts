@@ -55,6 +55,54 @@ func ResolveAccess(ceiling []string, cfg ModulesConfig, override []string) Acces
 	return Access{Modules: out}
 }
 
+// Ordered returns a's modules in the person's own order: the ones named in
+// order first, as they come there, then the rest in a's order. Modules a
+// does not allow are ignored, so a person can only reorder what an Admin
+// gave them. Codex never ends up first: it moves behind the first other
+// module (it has no light and strong models to stand in for the others).
+func (a Access) Ordered(order []string) Access {
+	out := []string{}
+	for _, p := range order {
+		if a.Allows(p) && !slices.Contains(out, p) {
+			out = append(out, p)
+		}
+	}
+	for _, p := range a.Modules {
+		if !slices.Contains(out, p) {
+			out = append(out, p)
+		}
+	}
+	if len(out) > 1 && out[0] == ProviderCodex {
+		for i, p := range out {
+			if p != ProviderCodex {
+				out[0], out[i] = p, ProviderCodex
+				break
+			}
+		}
+	}
+	return Access{Modules: out}
+}
+
+// ValidateOrder checks the order a person puts their modules in: modules
+// they may use, no repeats, and not Codex first.
+func ValidateOrder(a Access, order []string) error {
+	seen := map[string]bool{}
+	for i, p := range order {
+		switch {
+		case !knownModule(p):
+			return fmt.Errorf("unknown module %q (want muse, claude or codex)", p)
+		case seen[p]:
+			return fmt.Errorf("module %q is listed twice", p)
+		case !a.Allows(p):
+			return fmt.Errorf("%s is not enabled for you", ModuleName(p))
+		case i == 0 && p == ProviderCodex:
+			return errors.New("codex cannot be your default module: put another one first")
+		}
+		seen[p] = true
+	}
+	return nil
+}
+
 // knownModule reports whether p names a module agnts can run.
 func knownModule(p string) bool {
 	return p == ProviderMuse || p == ProviderClaude || p == ProviderCodex

@@ -135,6 +135,13 @@
     "memberAccountsSubBoth": "Кто подключил свои аккаунты Muse и Claude (Профиль).",
     "connectionMuse": "Аккаунт Muse пространства",
     "connectionClaude": "Аккаунт Claude пространства",
-    "noAccountModules": "У ваших модулей нет аккаунта для подключения здесь: Codex работает через интеграцию OpenAI пространства."
+    "noAccountModules": "У ваших модулей нет аккаунта для подключения здесь: Codex работает через интеграцию OpenAI пространства.",
+    "codexSub": "Работает на API-ключе OpenAI рабочего пространства",
+    "codexKey": "API-ключ OpenAI",
+    "codexConnected": "Подключён",
+    "codexNotConnected": "Не подключён: запуски Codex ждут, пока его не подключат",
+    "codexConnect": "Подключить OpenAI",
+    "codexManage": "Настройки OpenAI",
+    "codexCredits": "OpenAI выставляет счёт за запуски Codex напрямую, за каждый вызов. Кредиты рабочего пространства на них не тратятся, и продолжение на кредитах к ним не относится."
   }
 }

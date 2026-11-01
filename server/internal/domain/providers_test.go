@@ -222,3 +222,38 @@ func TestAccountsInContext(t *testing.T) {
 		t.Fatal("RunPerson default member")
 	}
 }
+
+func TestOrdered(t *testing.T) {
+	all := Access{Modules: []string{ProviderClaude, ProviderCodex, ProviderMuse}}
+	cases := []struct {
+		order []string
+		want  []string
+	}{
+		{nil, []string{ProviderClaude, ProviderCodex, ProviderMuse}},
+		{[]string{ProviderMuse}, []string{ProviderMuse, ProviderClaude, ProviderCodex}},
+		{[]string{ProviderMuse, ProviderCodex, ProviderClaude}, []string{ProviderMuse, ProviderCodex, ProviderClaude}},
+		// A module the Admin took away is skipped; one added later goes last.
+		{[]string{"gemini", ProviderClaude}, []string{ProviderClaude, ProviderCodex, ProviderMuse}},
+		// Codex never ends up first, even when a stale order puts it there.
+		{[]string{ProviderCodex, ProviderMuse}, []string{ProviderMuse, ProviderCodex, ProviderClaude}},
+	}
+	for _, c := range cases {
+		if got := all.Ordered(c.order).Modules; !slices.Equal(got, c.want) {
+			t.Errorf("Ordered(%v) = %v, want %v", c.order, got, c.want)
+		}
+	}
+	if got := museOnly.Ordered([]string{ProviderClaude}).Modules; !slices.Equal(got, []string{ProviderMuse}) {
+		t.Fatalf("an order cannot add a module: %v", got)
+	}
+	if err := ValidateOrder(all, []string{ProviderMuse, ProviderClaude}); err != nil {
+		t.Fatal(err)
+	}
+	for _, bad := range [][]string{{ProviderCodex, ProviderClaude}, {ProviderMuse, ProviderMuse}, {"gemini"}} {
+		if ValidateOrder(all, bad) == nil {
+			t.Errorf("%v accepted", bad)
+		}
+	}
+	if ValidateOrder(claudeCodex, []string{ProviderMuse}) == nil {
+		t.Error("a module the person may not use was accepted")
+	}
+}

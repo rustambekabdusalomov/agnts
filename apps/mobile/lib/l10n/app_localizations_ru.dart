@@ -9086,6 +9086,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get modulesSaved => 'Модули сохранены';
 
   @override
+  String get modulesMineTitle => 'Ваши модули для кода';
+
+  @override
+  String get modulesMineSub =>
+      'Модули, которые вам разрешил администратор. Расставьте их в своём порядке: первый — модуль по умолчанию, он используется, когда в настройках указан модуль, недоступный вам.';
+
+  @override
+  String get modulesMineSaved => 'Порядок модулей сохранён';
+
+  @override
+  String get modulesMineReset => 'Порядок администратора';
+
+  @override
   String get mpreviewTitle => 'Превью agnts';
 
   @override
@@ -10360,6 +10373,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String platformModulesFollow(String name) {
     return 'У $name теперь модули по умолчанию';
+  }
+
+  @override
+  String platformModulesNotEnabled(String list) {
+    return 'Ещё не включены, поэтому здесь их нет: $list. Этот сервер может их запускать.';
+  }
+
+  @override
+  String get platformModulesOpenSettings => 'Открыть настройки модулей';
+
+  @override
+  String platformModulesServerOnly(String list) {
+    return 'Этот сервер может запускать только $list. Чтобы предложить больше, модуль нужно добавить в AGNTS_PROVIDERS на сервере (и в образ запусков).';
   }
 
   @override
@@ -16253,4 +16279,26 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get wsNoAccountModules =>
       'У ваших модулей нет аккаунта для подключения здесь: Codex работает через интеграцию OpenAI пространства.';
+
+  @override
+  String get wsCodexSub => 'Работает на API-ключе OpenAI рабочего пространства';
+
+  @override
+  String get wsCodexKey => 'API-ключ OpenAI';
+
+  @override
+  String get wsCodexConnected => 'Подключён';
+
+  @override
+  String get wsCodexNotConnected => 'Не подключён: запуски Codex ждут, пока его не подключат';
+
+  @override
+  String get wsCodexConnect => 'Подключить OpenAI';
+
+  @override
+  String get wsCodexManage => 'Настройки OpenAI';
+
+  @override
+  String get wsCodexCredits =>
+      'OpenAI выставляет счёт за запуски Codex напрямую, за каждый вызов. Кредиты рабочего пространства на них не тратятся, и продолжение на кредитах к ним не относится.';
 }

@@ -8726,6 +8726,19 @@ class AppLocalizationsUz extends AppLocalizations {
   String get modulesSaved => 'Modullar saqlandi';
 
   @override
+  String get modulesMineTitle => 'Kod modullaringiz';
+
+  @override
+  String get modulesMineSub =>
+      'Administrator sizga ruxsat bergan modullar. Ularni o‘z tartibingizga qo‘ying: birinchisi standart modulingiz, sozlamalarda sizga mavjud bo‘lmagan modul ko‘rsatilganda shu ishlatiladi.';
+
+  @override
+  String get modulesMineSaved => 'Modullar tartibi saqlandi';
+
+  @override
+  String get modulesMineReset => 'Administrator tartibi';
+
+  @override
   String get mpreviewTitle => 'agnts oldindan koʻrishi';
 
   @override
@@ -9960,6 +9973,19 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String platformModulesFollow(String name) {
     return '$name endi standart modullardan foydalanadi';
+  }
+
+  @override
+  String platformModulesNotEnabled(String list) {
+    return 'Hali yoqilmagan, shuning uchun bu yerda yo‘q: $list. Bu server ularni ishga tushira oladi.';
+  }
+
+  @override
+  String get platformModulesOpenSettings => 'Modullar sozlamalarini ochish';
+
+  @override
+  String platformModulesServerOnly(String list) {
+    return 'Bu server faqat $list ni ishga tushira oladi. Ko‘proq taklif qilish uchun modul serverdagi AGNTS_PROVIDERS ga (va ishga tushirish obraziga) qo‘shilishi kerak.';
   }
 
   @override
@@ -15578,4 +15604,26 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get wsNoAccountModules =>
       'Modullaringiz uchun bu yerda ulanadigan hisob yo‘q: Codex ish maydonining OpenAI integratsiyasi orqali ishlaydi.';
+
+  @override
+  String get wsCodexSub => 'Ish maydonining OpenAI API kalitida ishlaydi';
+
+  @override
+  String get wsCodexKey => 'OpenAI API kaliti';
+
+  @override
+  String get wsCodexConnected => 'Ulangan';
+
+  @override
+  String get wsCodexNotConnected => 'Ulanmagan: Codex ishga tushirishlari u ulanguncha kutadi';
+
+  @override
+  String get wsCodexConnect => 'OpenAI ni ulash';
+
+  @override
+  String get wsCodexManage => 'OpenAI sozlamalari';
+
+  @override
+  String get wsCodexCredits =>
+      'OpenAI Codex ishga tushirishlari uchun to‘g‘ridan-to‘g‘ri, har bir chaqiruv uchun haq oladi. Ular ish maydoni kreditlarini sarflamaydi, kreditlar bilan davom ettirish ularga taalluqli emas.';
 }

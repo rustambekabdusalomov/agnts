@@ -25,6 +25,8 @@ class UserModules {
 
     required  this.effective,
 
+     this.order,
+
      this.setAt,
   });
 
@@ -41,7 +43,7 @@ class UserModules {
 
 
 
-      /// What the person may use now, the default module first
+      /// What the person may use now, in their order, the default module first
   @JsonKey(
     
     name: r'effective',
@@ -51,6 +53,19 @@ class UserModules {
 
 
   final List<Module> effective;
+
+
+
+      /// The order the person put their modules in themselves; absent or null keeps the Admin's
+  @JsonKey(
+    
+    name: r'order',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<Module>? order;
 
 
 
@@ -72,12 +87,14 @@ class UserModules {
     bool operator ==(Object other) => identical(this, other) || other is UserModules &&
       other.own == own &&
       other.effective == effective &&
+      other.order == order &&
       other.setAt == setAt;
 
     @override
     int get hashCode =>
         (own == null ? 0 : own.hashCode) +
         effective.hashCode +
+        (order == null ? 0 : order.hashCode) +
         setAt.hashCode;
 
   factory UserModules.fromJson(Map<String, dynamic> json) => _$UserModulesFromJson(json);

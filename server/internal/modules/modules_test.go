@@ -70,6 +70,28 @@ func TestModules(t *testing.T) {
 		t.Fatalf("unknown module: %v", err)
 	}
 
+	// A person orders what they were given; the Admin's list still decides
+	// what that is.
+	if um, err := s.SetOrder(ctx, other, []string{domain.ProviderCodex}); !errors.As(err, &inv) {
+		t.Fatalf("codex first: %+v, %v", um, err)
+	}
+	if um, err := s.SetOrder(ctx, other, []string{domain.ProviderMuse}); !errors.As(err, &inv) {
+		t.Fatalf("a module not given: %+v, %v", um, err)
+	}
+	if _, err := s.SetConfig(ctx, domain.ModulesConfig{Enabled: domain.Ceiling(), Default: []string{domain.ProviderClaude, domain.ProviderCodex, domain.ProviderMuse}}); err != nil {
+		t.Fatal(err)
+	}
+	if um, err := s.SetOrder(ctx, other, []string{domain.ProviderMuse, domain.ProviderClaude}); err != nil ||
+		!slices.Equal(um.Effective, []string{domain.ProviderMuse, domain.ProviderClaude, domain.ProviderCodex}) {
+		t.Fatalf("order = %+v, %v", um, err)
+	}
+	if a, _ := s.For(ctx, other); a.Primary() != domain.ProviderMuse {
+		t.Fatalf("ordered access = %v", a.Modules)
+	}
+	if um, err := s.SetOrder(ctx, other, nil); err != nil || um.Order != nil || um.Effective[0] != domain.ProviderClaude {
+		t.Fatalf("reset order = %+v, %v", um, err)
+	}
+
 	// Disabling Muse server-wide leaves the judge with nothing, at once.
 	if _, err := s.SetConfig(ctx, domain.ModulesConfig{Enabled: []string{domain.ProviderClaude, domain.ProviderCodex}, Default: []string{domain.ProviderClaude}}); err != nil {
 		t.Fatal(err)
