@@ -10,7 +10,7 @@ All URIs are relative to */api*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**getTicketSpend**](UsageApi.md#getticketspend) | **GET** /usage/tickets | Tickets that used the most of the plan in a period, by Claude Code&#39;s cost estimate
-[**getUsage**](UsageApi.md#getusage) | **GET** /usage | Plan usage from Claude Code&#39;s rate limit events
+[**getUsage**](UsageApi.md#getusage) | **GET** /usage | Plan usage of one module&#39;s account (Claude or Muse), from the limit events its runs report
 [**refreshUsage**](UsageApi.md#refreshusage) | **POST** /usage/refresh | Start a tiny Claude run to read fresh limits; a usage_updated event follows
 
 
@@ -62,9 +62,9 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getUsage**
-> Usage getUsage()
+> Usage getUsage(provider)
 
-Plan usage from Claude Code's rate limit events
+Plan usage of one module's account (Claude or Muse), from the limit events its runs report
 
 ### Example
 ```dart
@@ -75,9 +75,10 @@ import 'package:agnts_api/api.dart';
 //defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
 
 final api = AgntsApi().getUsageApi();
+final String provider = provider_example; // String | The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
 
 try {
-    final response = api.getUsage();
+    final response = api.getUsage(provider);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling UsageApi->getUsage: $e\n');
@@ -85,7 +86,10 @@ try {
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **provider** | **String**| The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. | [optional] 
 
 ### Return type
 

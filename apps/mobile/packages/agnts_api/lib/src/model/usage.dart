@@ -36,6 +36,12 @@ class Usage {
     required  this.pauseAbove,
 
     required  this.refreshing,
+
+     this.provider,
+
+     this.connected,
+
+     this.account,
   });
 
   @JsonKey(
@@ -135,6 +141,45 @@ class Usage {
 
 
 
+      /// The module whose account this is
+  @JsonKey(
+    
+    name: r'provider',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final UsageProviderEnum? provider;
+
+
+
+      /// An account of this module is connected for you (in per-member mode, your own; else the workspace's). False: nothing to read.
+  @JsonKey(
+    
+    name: r'connected',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? connected;
+
+
+
+      /// The account's label
+  @JsonKey(
+    
+    name: r'account',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? account;
+
+
+
 
 
     @override
@@ -146,7 +191,10 @@ class Usage {
       other.paused == paused &&
       other.pausedUntil == pausedUntil &&
       other.pauseAbove == pauseAbove &&
-      other.refreshing == refreshing;
+      other.refreshing == refreshing &&
+      other.provider == provider &&
+      other.connected == connected &&
+      other.account == account;
 
     @override
     int get hashCode =>
@@ -157,7 +205,10 @@ class Usage {
         paused.hashCode +
         pausedUntil.hashCode +
         pauseAbove.hashCode +
-        refreshing.hashCode;
+        refreshing.hashCode +
+        provider.hashCode +
+        connected.hashCode +
+        account.hashCode;
 
   factory Usage.fromJson(Map<String, dynamic> json) => _$UsageFromJson(json);
 
@@ -181,6 +232,22 @@ rejected(r'rejected'),
 unknown(r'unknown');
 
 const UsageStatusEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+/// The module whose account this is
+enum UsageProviderEnum {
+@JsonValue(r'muse')
+muse(r'muse'),
+@JsonValue(r'claude')
+claude(r'claude');
+
+const UsageProviderEnum(this.value);
 
 final String value;
 

@@ -15761,6 +15761,27 @@ class AppLocalizationsRu extends AppLocalizations {
       'Данные берутся из событий лимитов, которые Muse отправляет во время каждого запуска. Когда agnts простаивает, небольшой запуск обновляет их.';
 
   @override
+  String usageCardFor(String name) {
+    return 'Использование плана $name';
+  }
+
+  @override
+  String usageNotConnected(String name) {
+    return 'У вас не подключён аккаунт $name, поэтому читать нечего. Подключите его в профиле (или аккаунт рабочего пространства в его настройках).';
+  }
+
+  @override
+  String get usageMuseSource =>
+      'По лимитам, которые Muse сообщает после каждого запуска (5-часовое и недельное окна подписки Meta). У API-ключей и кредитов окон нет.';
+
+  @override
+  String get usageCodexSub => 'API-ключ OpenAI';
+
+  @override
+  String get usageCodexBody =>
+      'Codex работает на API-ключе OpenAI рабочего пространства, и OpenAI списывает оплату за каждый вызов, поэтому окон плана нет. Сколько стоили его запуски — ниже, в «Тикеты по расходу».';
+
+  @override
   String get wsTitle => 'Рабочее пространство';
 
   @override

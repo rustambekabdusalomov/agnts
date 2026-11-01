@@ -460,9 +460,17 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		if err != nil {
 			return domain.ClaudeAccount{}, false
 		}
+		// The module of the call in ctx, else the default module of the
+		// person asking (pages), else the server's default.
 		p := domain.CurrentProvider(ctx)
 		if p == "" {
-			p = domain.AccessOf(ctx).Primary()
+			acc := domain.AccessOf(ctx)
+			if actor, ok := domain.ActorOf(ctx); ok {
+				if own, err := a.modules.For(ctx, actor.UserID); err == nil {
+					acc = own
+				}
+			}
+			p = acc.Primary()
 		}
 		return a.claude.Resolve(ctx, w, p)
 	})

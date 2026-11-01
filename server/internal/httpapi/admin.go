@@ -386,25 +386,55 @@ func toUsage(v usage.View) gen.Usage {
 	}
 }
 
-// GetUsage implements gen.ServerInterface.
-func (s *Server) GetUsage(w http.ResponseWriter, r *http.Request) {
+// GetUsage implements gen.ServerInterface: the plan usage of the viewer's
+// account for one module (their default module unless asked).
+func (s *Server) GetUsage(w http.ResponseWriter, r *http.Request, p gen.GetUsageParams) {
 	if !s.adminReady(w) {
 		return
 	}
-	st, err := s.opt.Admin.Settings.Get(r.Context())
+	v, err := s.usageOf(r.Context(), s.connProvider(r.Context(), (*string)(p.Provider)))
 	if err != nil {
 		s.writeInternal(w, r, err)
 		return
 	}
-	v, err := s.opt.Admin.Usage.Current(r.Context(), st)
-	if err != nil {
-		s.writeInternal(w, r, err)
-		return
-	}
-	writeJSON(w, http.StatusOK, toUsage(v))
+	writeJSON(w, http.StatusOK, v)
 }
 
-// RefreshUsage implements gen.ServerInterface.
+// usageOf reads the usage of the account the viewer's runs use on module
+// provider (muse or claude): their own in per-member mode, else the
+// workspace's.
+func (s *Server) usageOf(ctx context.Context, provider string) (gen.Usage, error) {
+	st, err := s.opt.Admin.Settings.Get(ctx)
+	if err != nil {
+		return gen.Usage{}, err
+	}
+	p := gen.UsageProvider(provider)
+	m, isMember := memberFrom(ctx)
+	u, _ := userFrom(ctx)
+	if s.opt.Claude == nil || !isMember {
+		v, err := s.opt.Admin.Usage.Current(ctx, st) // one account for everything
+		out := toUsage(v)
+		connected := true
+		out.Provider, out.Connected = &p, &connected
+		return out, err
+	}
+	acct, ok := s.opt.Claude.AccountFor(ctx, m.w, u.ID, provider)
+	if !ok {
+		connected := false
+		return gen.Usage{Status: gen.UsageStatusUnknown, PauseAbove: st.PauseAbove, Provider: &p, Connected: &connected}, nil
+	}
+	v, err := s.opt.Admin.Usage.Current(domain.WithClaude(ctx, acct), st)
+	out := toUsage(v)
+	connected := true
+	out.Provider, out.Connected = &p, &connected
+	if acct.Label != "" {
+		out.Account = &acct.Label
+	}
+	return out, err
+}
+
+// RefreshUsage implements gen.ServerInterface: a tiny Claude run reads
+// Claude's limits (Muse reports its own after every run).
 func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
 	if !s.adminReady(w) {
 		return
@@ -413,20 +443,29 @@ func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusConflict, "conflict", "the agent loop is off, so usage cannot be refreshed")
 		return
 	}
-	if err := s.opt.Admin.Refresher.Refresh(r.Context()); errors.Is(err, usage.ErrBusy) {
+	ctx := r.Context()
+	if m, ok := memberFrom(ctx); ok && s.opt.Claude != nil {
+		u, _ := userFrom(ctx)
+		acct, ok := s.opt.Claude.AccountFor(ctx, m.w, u.ID, domain.ProviderClaude)
+		if !ok {
+			writeError(w, http.StatusConflict, "conflict", "no Claude account is connected to read limits from")
+			return
+		}
+		ctx = domain.WithClaude(ctx, acct)
+	}
+	if err := s.opt.Admin.Refresher.Refresh(ctx); errors.Is(err, usage.ErrBusy) {
 		writeError(w, http.StatusConflict, "conflict", err.Error())
 		return
 	} else if err != nil {
 		s.writeInternal(w, r, err)
 		return
 	}
-	st, _ := s.opt.Admin.Settings.Get(r.Context())
-	v, err := s.opt.Admin.Usage.Current(r.Context(), st)
+	v, err := s.usageOf(r.Context(), domain.ProviderClaude)
 	if err != nil {
 		s.writeInternal(w, r, err)
 		return
 	}
-	writeJSON(w, http.StatusAccepted, toUsage(v))
+	writeJSON(w, http.StatusAccepted, v)
 }
 
 // ---- settings ----

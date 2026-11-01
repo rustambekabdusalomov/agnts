@@ -35,6 +35,11 @@
     "resumeManual": "Siz davom ettirishingizni kutish",
     "idle": "Boʻsh vaqtda yangilash",
     "idleDo": "Har 30 daqiqada",
-    "help": "Raqamlar {agent} har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi."
+    "help": "Raqamlar {agent} har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi.",
+    "cardFor": "{name} tarifidan foydalanish",
+    "notConnected": "Sizda {name} hisobi ulanmagan, shuning uchun o‘qiladigan ma’lumot yo‘q. Uni Profilda (yoki ish maydonining hisobini ish maydoni sozlamalarida) ulang.",
+    "museSource": "Muse har bir ishga tushirishdan keyin xabar beradigan limitlardan (Meta obunasining 5 soatlik va haftalik oynalari). API kalitlari va kreditlarda oyna yo‘q.",
+    "codexSub": "OpenAI API kaliti",
+    "codexBody": "Codex ish maydonining OpenAI API kalitida ishlaydi va OpenAI har bir chaqiruv uchun haq oladi, shuning uchun kuzatiladigan tarif oynalari yo‘q. Uning ishga tushirishlari qancha turgani quyida, «Sarf boʻyicha tiketlar»da."
   }
 }

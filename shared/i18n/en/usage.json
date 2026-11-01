@@ -35,6 +35,11 @@
     "resumeManual": "Wait for you to resume",
     "idle": "Idle refresh",
     "idleDo": "Every 30 min",
-    "help": "Numbers come from the rate limit events {agent} emits during each run. When agnts is idle, a tiny refresh run keeps them current."
+    "help": "Numbers come from the rate limit events {agent} emits during each run. When agnts is idle, a tiny refresh run keeps them current.",
+    "cardFor": "{name} plan usage",
+    "notConnected": "No {name} account is connected for you, so there is nothing to read. Connect one on your Profile (or the workspace's in Workspace settings).",
+    "museSource": "Read from the allowance Muse reports after every run (a Meta subscription's 5-hour and weekly windows). API keys and credits have no windows.",
+    "codexSub": "OpenAI API key",
+    "codexBody": "Codex runs on the workspace's OpenAI API key and OpenAI bills each call, so there are no plan windows to watch. What its runs cost is in Tickets by spend below."
   }
 }

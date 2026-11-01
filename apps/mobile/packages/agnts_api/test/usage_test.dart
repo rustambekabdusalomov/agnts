@@ -48,5 +48,23 @@ void main() {
       // TODO
     });
 
+    // The module whose account this is
+    // String provider
+    test('to test the property `provider`', () async {
+      // TODO
+    });
+
+    // An account of this module is connected for you (in per-member mode, your own; else the workspace's). False: nothing to read.
+    // bool connected
+    test('to test the property `connected`', () async {
+      // TODO
+    });
+
+    // The account's label
+    // String account
+    test('to test the property `account`', () async {
+      // TODO
+    });
+
   });
 }

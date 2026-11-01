@@ -14,9 +14,9 @@ void main() {
       // TODO
     });
 
-    // Plan usage from Claude Code's rate limit events
+    // Plan usage of one module's account (Claude or Muse), from the limit events its runs report
     //
-    //Future<Usage> getUsage() async
+    //Future<Usage> getUsage({ String provider }) async
     test('test getUsage', () async {
       // TODO
     });

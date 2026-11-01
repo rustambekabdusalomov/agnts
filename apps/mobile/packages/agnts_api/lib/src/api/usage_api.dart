@@ -110,10 +110,11 @@ _responseData = rawData == null ? null : deserialize<TicketSpendList, TicketSpen
     );
   }
 
-  /// Plan usage from Claude Code&#39;s rate limit events
+  /// Plan usage of one module&#39;s account (Claude or Muse), from the limit events its runs report
   /// 
   ///
   /// Parameters:
+  /// * [provider] - The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module.
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -124,6 +125,7 @@ _responseData = rawData == null ? null : deserialize<TicketSpendList, TicketSpen
   /// Returns a [Future] containing a [Response] with a [Usage] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<Usage>> getUsage({ 
+    String? provider,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -155,9 +157,14 @@ _responseData = rawData == null ? null : deserialize<TicketSpendList, TicketSpen
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (provider != null) r'provider': provider,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
