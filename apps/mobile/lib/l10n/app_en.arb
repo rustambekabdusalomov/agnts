@@ -6556,7 +6556,7 @@
     }
   },
   "queueAddSlot": "Add a slot",
-  "queueClaudeHint": "Connect an account or turn on credits in Workspace settings → Muse.",
+  "queueClaudeHint": "Connect an account or turn on credits in Workspace settings → AI accounts.",
   "queueMember": "Member",
   "queueTakeOver": "Take over",
   "queueTakenOver": "The ticket is yours: it runs on your Muse account in per-member mode.",
@@ -8036,7 +8036,7 @@
   },
   "settingsParallelSlotsHelp": "The workspace's slots. Change them in Workspace → Billing.",
   "settingsClaudeMoved": "Claude is connected per workspace now.",
-  "settingsClaudeOpen": "Workspace → Claude",
+  "settingsClaudeOpen": "Workspace → AI accounts",
   "settingsSelfReview": "Fix review findings first",
   "settingsSelfReviewHelp": "When agnts's own code review finds a blocker or major problem, agnts sends it back to the coder once before you review. Needs the code review above.",
   "settingsAutoBrief": "Survey repositories",
@@ -8046,7 +8046,7 @@
   "settingsCiRed": "When a watched branch goes red",
   "settingsClaudeMuse": "Muse Code",
   "settingsClaudeMovedMuse": "Muse is connected per workspace.",
-  "settingsClaudeOpenMuse": "Workspace → Muse",
+  "settingsClaudeOpenMuse": "Workspace → AI accounts",
   "settingsModelsHelpMuse": "Pick which model runs each step. Muse Spark costs the least; Muse Wonder is stronger and costs more.",
   "settingsStageCodingHelpMuse": "The main run. Spends the most.",
   "settingsStageReviewHelpMuse": "Reviews each result while you review it. Auto uses Muse Wonder for complex tickets and Muse Spark for the rest.",
@@ -9386,7 +9386,7 @@
   "wsRole_user": "Member",
   "wsTabGeneral": "General",
   "wsTabMembers": "Members",
-  "wsTabClaude": "Claude",
+  "wsTabAi": "AI accounts",
   "wsTabBilling": "Billing",
   "wsGeneral": "Workspace",
   "wsGeneralSub": "Its name and the address in links.",
@@ -9618,7 +9618,6 @@
       }
     }
   },
-  "wsTabMuse": "Muse",
   "wsClaudeMuse": "Muse",
   "wsClaudeSubMuse": "Which Muse account this workspace's runs use.",
   "wsClaudeSavedMuse": "Muse settings saved",

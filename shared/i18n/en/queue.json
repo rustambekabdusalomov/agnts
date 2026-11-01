@@ -17,7 +17,7 @@
     "serverFull": "The server is at capacity ({runs} runs, {reserved} of {budget} reserved).",
     "slotsHint": "{running} of {slots} runs in use. It starts when one ends.",
     "addSlot": "Add a slot",
-    "claudeHint": "Connect an account or turn on credits in Workspace settings → {agent}.",
+    "claudeHint": "Connect an account or turn on credits in Workspace settings → AI accounts.",
     "member": "Member",
     "takeOver": "Take over",
     "takenOver": "The ticket is yours: it runs on your {agent} account in per-member mode.",

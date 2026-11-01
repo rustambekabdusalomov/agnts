@@ -67,7 +67,7 @@ const test = useMutation({
       </div>
       <p class="sub" style="margin: 10px 0 8px">{{ t('settings.claudeMovedMuse') }}</p>
       <div class="actions">
-        <RouterLink class="btn" :to="{ name: 'workspace', query: { tab: 'claude' } }">{{ t('settings.claudeOpenMuse') }}</RouterLink>
+        <RouterLink class="btn" :to="{ name: 'workspace', query: { tab: 'ai' } }">{{ t('settings.claudeOpenMuse') }}</RouterLink>
       </div>
     </section>
     <section v-if="catalog.has('claude')" class="card integ-card">
@@ -77,7 +77,7 @@ const test = useMutation({
       </div>
       <p class="sub" style="margin: 10px 0 8px">{{ t('settings.claudeMoved') }}</p>
       <div class="actions">
-        <RouterLink class="btn" :to="{ name: 'workspace', query: { tab: 'claude' } }">{{ t('settings.claudeOpen') }}</RouterLink>
+        <RouterLink class="btn" :to="{ name: 'workspace', query: { tab: 'ai' } }">{{ t('settings.claudeOpen') }}</RouterLink>
       </div>
     </section>
   </div>

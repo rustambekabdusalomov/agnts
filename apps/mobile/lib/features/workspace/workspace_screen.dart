@@ -16,7 +16,7 @@ import '../account/account_data.dart';
 import '../account/account_widgets.dart';
 import '../admin/admin_widgets.dart' show confirmAction;
 
-enum WorkspaceTab { general, members, claude, billing }
+enum WorkspaceTab { general, members, ai, billing }
 
 /// Workspace settings: General, Members, Claude and (for the owner)
 /// Billing; [tab] opens one of them (?tab=members).
@@ -29,7 +29,9 @@ class WorkspaceScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
-  late WorkspaceTab _tab = WorkspaceTab.values.where((t) => t.name == widget.tab).firstOrNull ?? WorkspaceTab.general;
+  // AI accounts was the Claude tab (?tab=claude): old links still open it.
+  late WorkspaceTab _tab =
+      WorkspaceTab.values.where((t) => t.name == (widget.tab == 'claude' ? 'ai' : widget.tab)).firstOrNull ?? WorkspaceTab.general;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     final ws = ref.watch(currentWorkspaceProvider);
     final owner = ref.watch(isOwnerProvider);
     final detail = ref.watch(workspaceDetailProvider).value;
-    final tabs = [WorkspaceTab.general, WorkspaceTab.members, WorkspaceTab.claude, if (owner) WorkspaceTab.billing];
+    final tabs = [WorkspaceTab.general, WorkspaceTab.members, WorkspaceTab.ai, if (owner) WorkspaceTab.billing];
     final tab = tabs.contains(_tab) ? _tab : WorkspaceTab.general;
     if (ws == null) {
       return Scaffold(
@@ -75,7 +77,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                       switch (t) {
                         WorkspaceTab.general => l.wsTabGeneral,
                         WorkspaceTab.members => l.wsTabMembers,
-                        WorkspaceTab.claude => l.wsTabClaude,
+                        WorkspaceTab.ai => l.wsTabAi,
                         WorkspaceTab.billing => l.wsTabBilling,
                       },
                     ),
@@ -87,7 +89,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
             switch (tab) {
               WorkspaceTab.general => const _GeneralTab(),
               WorkspaceTab.members => const _MembersTab(),
-              WorkspaceTab.claude => const _ClaudeTab(),
+              WorkspaceTab.ai => const _ClaudeTab(),
               WorkspaceTab.billing => const _BillingTab(),
             },
           ],

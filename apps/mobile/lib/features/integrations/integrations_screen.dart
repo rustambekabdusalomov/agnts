@@ -83,7 +83,7 @@ class _IntegrationsScreenState extends ConsumerState<IntegrationsScreen> {
                     const SizedBox(height: 10),
                     Text(l.settingsClaudeMoved, style: TextStyle(fontSize: 13.5, color: c.ink3)),
                     const SizedBox(height: 10),
-                    OutlinedButton(onPressed: () => context.push('/workspace?tab=claude'), child: Text(l.settingsClaudeOpen)),
+                    OutlinedButton(onPressed: () => context.push('/workspace?tab=ai'), child: Text(l.settingsClaudeOpen)),
                   ],
                 ),
               ),

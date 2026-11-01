@@ -17,7 +17,7 @@
     "serverFull": "Server band ({runs} ta ish, {budget} dan {reserved} band).",
     "slotsHint": "{slots} ta slotdan {running} tasi band. Bittasi bo‘shashi bilan boshlanadi.",
     "addSlot": "Slot qo‘shish",
-    "claudeHint": "Ish maydoni sozlamalari → {agent} bo‘limida hisob ulang yoki kreditlarni yoqing.",
+    "claudeHint": "Ish maydoni sozlamalari → AI hisoblari bo‘limida hisob ulang yoki kreditlarni yoqing.",
     "member": "A’zo",
     "takeOver": "O‘zimga olish",
     "takenOver": "Tiket sizniki: «har kimniki o‘zi» rejimida u sizning {agent} hisobingizda bajariladi.",

@@ -205,7 +205,7 @@ const section = computed(() => settingsSection(route.params.section))
       <section v-else-if="section === 'muse'" id="s-muse" class="card">
         <div class="ch">
           <div><h2>{{ t(w('settings.claude')) }}</h2><p class="sub">{{ t('settings.claudeSub') }}</p></div>
-          <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'claude' } }" :title="t(w('settings.claudeMoved'))">{{ t(w('settings.claudeOpen')) }}</RouterLink>
+          <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'ai' } }" :title="t(w('settings.claudeMoved'))">{{ t(w('settings.claudeOpen')) }}</RouterLink>
         </div>
         <div class="cfg-row" style="display: block">
           <div class="cfg-lbl">{{ t('settings.models') }}</div>

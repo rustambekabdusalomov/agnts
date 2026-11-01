@@ -43,7 +43,7 @@ const gb = (mb: number) => `${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`
         <RouterLink v-if="workspace.isOwner" :to="{ name: 'workspace', query: { tab: 'billing' } }">{{ t('queue.addSlot') }}</RouterLink>
       </p>
       <p v-else-if="reason === 'claude'">
-        <RouterLink :to="{ name: 'workspace', query: { tab: 'claude' } }">{{ t('queue.claudeHint') }}</RouterLink>
+        <RouterLink :to="{ name: 'workspace', query: { tab: 'ai' } }">{{ t('queue.claudeHint') }}</RouterLink>
       </p>
     </div>
   </div>

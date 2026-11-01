@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '../../components/PageHeader.vue'
@@ -7,7 +7,6 @@ import BillingTab from '../../components/workspace/BillingTab.vue'
 import ClaudeTab from '../../components/workspace/ClaudeTab.vue'
 import GeneralTab from '../../components/workspace/GeneralTab.vue'
 import MembersTab from '../../components/workspace/MembersTab.vue'
-import { useModels } from '../../composables/useModels'
 import { useWorkspace } from '../../stores/workspace'
 
 // Workspace settings: General, Members, Claude and (for the owner) Billing.
@@ -15,16 +14,17 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const workspace = useWorkspace()
-const catalog = useModels()
 
-type Tab = 'general' | 'members' | 'claude' | 'billing'
-const tabs = computed<Tab[]>(() => (workspace.isOwner ? ['general', 'members', 'claude', 'billing'] : ['general', 'members', 'claude']))
+type Tab = 'general' | 'members' | 'ai' | 'billing'
+const tabs = computed<Tab[]>(() => (workspace.isOwner ? ['general', 'members', 'ai', 'billing'] : ['general', 'members', 'ai']))
+// AI accounts was the Claude tab (?tab=claude): old links still open it.
 const tab = computed<Tab>(() => {
-  const q = String(route.query.tab ?? 'general') as Tab
+  const raw = String(route.query.tab ?? 'general')
+  const q = (raw === 'claude' ? 'ai' : raw) as Tab
   return tabs.value.includes(q) ? q : 'general'
 })
-// The Claude tab connects Muse where Muse Code is the tool (same tab, same address).
-const label = computed<Record<Tab, string>>(() => ({ general: 'ws.tabGeneral', members: 'ws.tabMembers', claude: catalog.isMuse.value ? 'ws.tabMuse' : 'ws.tabClaude', billing: 'ws.tabBilling' }))
+watch(() => route.query.tab, (q) => { if (q === 'claude') void router.replace({ query: { ...route.query, tab: 'ai' } }) }, { immediate: true })
+const label: Record<Tab, string> = { general: 'ws.tabGeneral', members: 'ws.tabMembers', ai: 'ws.tabAi', billing: 'ws.tabBilling' }
 function open(t: Tab) {
   void router.replace({ query: { ...route.query, tab: t } })
 }
@@ -44,6 +44,6 @@ function open(t: Tab) {
   </div>
   <GeneralTab v-if="tab === 'general'" />
   <MembersTab v-else-if="tab === 'members'" />
-  <ClaudeTab v-else-if="tab === 'claude'" />
+  <ClaudeTab v-else-if="tab === 'ai'" />
   <BillingTab v-else-if="tab === 'billing'" />
 </template>
