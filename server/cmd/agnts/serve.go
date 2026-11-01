@@ -411,7 +411,7 @@ type agent struct {
 // snapshot reads.
 func (a *agent) mcpDeps() mcpserver.Deps {
 	return mcpserver.Deps{
-		Orch: a.orch, Store: a.store, Usage: a.usage, Viewer: a.viewerAccount, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci,
+		Orch: a.orch, Store: a.store, Usage: a.usage, Viewer: a.viewerAccount, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci, Logs: a.logs,
 		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
 		Role:      a.workspaces.Role,
 		Meetings:  func() *meetings.Service { return a.meet },

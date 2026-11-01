@@ -192,7 +192,9 @@ func NewHandler(opt Options) (http.Handler, error) {
 		// Log shippers push with a token, without a session.
 		push := r.With(middleware.NoCache)
 		push.Post("/webhooks/logs", s.logsPush)
+		push.Post("/webhooks/logs/loki/api/v1/push", s.logsPush)
 		push.Post("/webhooks/logs/{token}", s.logsPush)
+		push.Post("/webhooks/logs/{token}/loki/api/v1/push", s.logsPush)
 	}
 	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)

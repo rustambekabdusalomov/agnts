@@ -23,5 +23,6 @@ describe('pushSnippets', () => {
     expect(s.fluentbit).toContain('Host         agnts.example.com')
     expect(s.fluentbit).toContain('Port         443')
     expect(s.fluentbit).toContain('Header       Authorization Bearer agl_x')
+    expect(s.promtail).toContain('url: https://agnts.example.com/webhooks/logs/loki/api/v1/push')
   })
 })

@@ -99,5 +99,8 @@ compression = "gzip"`
     Header       Authorization Bearer ${token}
     Compress     gzip
     tls          ${u.protocol === 'https:' ? 'On' : 'Off'}`
-  return { vector, fluentbit }
+  const promtail = `clients:
+  - url: ${u.href}/loki/api/v1/push
+    bearer_token: ${token}`
+  return { vector, fluentbit, promtail }
 }

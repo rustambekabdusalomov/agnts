@@ -89,6 +89,8 @@ const watched = (s: LogSource) => s.services.filter((v) => v.enabled).length
     <pre class="lw-snip">{{ snippets.vector }}</pre>
     <h3 class="lw-h3">Fluent Bit</h3>
     <pre class="lw-snip">{{ snippets.fluentbit }}</pre>
+    <h3 class="lw-h3">Promtail / Grafana Alloy</h3>
+    <pre class="lw-snip">{{ snippets.promtail }}</pre>
     <button type="button" class="btn btn-s" @click="token = null">{{ t('logwatch.tokenDone') }}</button>
   </section>
 

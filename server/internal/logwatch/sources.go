@@ -253,8 +253,14 @@ func hashToken(t string) []byte {
 // ErrUnknownToken is a push with a token no source has.
 var ErrUnknownToken = errors.New("unknown push token")
 
+// Push formats.
+const (
+	PushPlain = ""     // NDJSON, a JSON array or text lines
+	PushLoki  = "loki" // Loki's push API (Promtail, Grafana Alloy)
+)
+
 // Push takes a batch a log shipper sent with a token.
-func (s *Service) Push(ctx context.Context, token string, body io.Reader, contentType, contentEncoding string) (IngestResult, error) {
+func (s *Service) Push(ctx context.Context, token string, body io.Reader, contentType, contentEncoding, format string) (IngestResult, error) {
 	if !strings.HasPrefix(token, "agl_") {
 		return IngestResult{}, ErrUnknownToken
 	}
@@ -267,7 +273,12 @@ func (s *Service) Push(ctx context.Context, token string, body io.Reader, conten
 	}
 	ctx = domain.WithWorkspace(ctx, src.WorkspaceID)
 	now := s.now()
-	entries, err := logsource.ParsePush(body, contentType, contentEncoding, src.Name, now)
+	var entries []domain.LogEntry
+	if format == PushLoki {
+		entries, err = logsource.ParseLokiPush(body, contentType, contentEncoding, src.Name)
+	} else {
+		entries, err = logsource.ParsePush(body, contentType, contentEncoding, src.Name, now)
+	}
 	if err != nil {
 		return IngestResult{}, invalid("%v", err)
 	}

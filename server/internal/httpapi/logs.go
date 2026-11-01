@@ -27,7 +27,7 @@ type Logs interface {
 	Discover(ctx context.Context, id int64) ([]domain.LogService, error)
 	SetServices(ctx context.Context, sourceID int64, svcs []domain.LogService) ([]domain.LogService, error)
 	PushToken(ctx context.Context, id int64) (string, error)
-	Push(ctx context.Context, token string, body io.Reader, contentType, contentEncoding string) (logwatch.IngestResult, error)
+	Push(ctx context.Context, token string, body io.Reader, contentType, contentEncoding, format string) (logwatch.IngestResult, error)
 	RotateKey(ctx context.Context) error
 	Findings(ctx context.Context, q domain.LogFindingFilter) ([]domain.LogFinding, error)
 	Finding(ctx context.Context, id int64) (domain.LogFinding, error)
@@ -457,7 +457,8 @@ func (s *Server) NotifyLogFinding(w http.ResponseWriter, r *http.Request, id gen
 
 // logsPush takes what a log shipper sends: POST /webhooks/logs with
 // "Authorization: Bearer <token>", or /webhooks/logs/{token} for shippers
-// that can't set headers. 202 on accept, 429 with Retry-After when over
+// that can't set headers; under .../loki/api/v1/push it speaks Loki's
+// push API, so Promtail and Grafana Alloy can send to agnts. 202 on accept, 429 with Retry-After when over
 // the rate, so shippers buffer and retry.
 func (s *Server) logsPush(w http.ResponseWriter, r *http.Request) {
 	if s.opt.Logs == nil {
@@ -467,6 +468,13 @@ func (s *Server) logsPush(w http.ResponseWriter, r *http.Request) {
 	token := chi.URLParam(r, "token")
 	if token == "" {
 		token = strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+	}
+	if _, pass, ok := r.BasicAuth(); ok {
+		token = pass // Promtail's basic_auth: any user, the token as the password
+	}
+	format := logwatch.PushPlain
+	if strings.HasSuffix(r.URL.Path, "/loki/api/v1/push") {
+		format = logwatch.PushLoki
 	}
 	if token == "" {
 		writeError(w, http.StatusUnauthorized, "unauthorized", "send the push token as Authorization: Bearer <token>")
@@ -483,7 +491,7 @@ func (s *Server) logsPush(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
-	res, err := s.opt.Logs.Push(ctx, token, http.MaxBytesReader(w, r.Body, logsource.MaxPushBody+1), r.Header.Get("Content-Type"), r.Header.Get("Content-Encoding"))
+	res, err := s.opt.Logs.Push(ctx, token, http.MaxBytesReader(w, r.Body, logsource.MaxPushBody+1), r.Header.Get("Content-Type"), r.Header.Get("Content-Encoding"), format)
 	switch {
 	case errors.Is(err, logwatch.ErrUnknownToken):
 		writeError(w, http.StatusUnauthorized, "unauthorized", "unknown or revoked push token")

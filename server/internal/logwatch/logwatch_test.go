@@ -488,11 +488,11 @@ func TestPush(t *testing.T) {
 		t.Fatal(tok, err)
 	}
 	body := strings.NewReader(`{"service":"api","message":"panic: boom"}` + "\n")
-	r, err := f.svc.Push(context.Background(), tok, body, "application/x-ndjson", "")
+	r, err := f.svc.Push(context.Background(), tok, body, "application/x-ndjson", "", PushPlain)
 	if err != nil || r.Findings != 1 {
 		t.Fatalf("push %+v %v", r, err)
 	}
-	if _, err := f.svc.Push(context.Background(), "agl_nope", strings.NewReader("x"), "text/plain", ""); err != ErrUnknownToken {
+	if _, err := f.svc.Push(context.Background(), "agl_nope", strings.NewReader("x"), "text/plain", "", PushPlain); err != ErrUnknownToken {
 		t.Fatalf("unknown token: %v", err)
 	}
 }
