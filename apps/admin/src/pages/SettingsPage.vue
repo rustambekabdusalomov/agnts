@@ -82,7 +82,7 @@ const langs = LOCALES.map((l) => ({ value: l, label: LANG_LABEL[l] }))
 type Module = 'muse' | 'claude' | 'codex'
 const moduleOfModel = (id: string): Module => (id.startsWith('muse:') ? 'muse' : id.startsWith('codex:') ? 'codex' : 'claude')
 // Every stage model, review included (its auto choice stays as it is).
-const modelKeys = ['analyze', 'coding', 'retry', 'helper', 'learn', 'preview', 'review'] as const
+const modelKeys = ['analyze', 'coding', 'retry', 'helper', 'learn', 'chat', 'documents', 'preview', 'review'] as const
 const stageModules = computed(() => {
   const m = draft.value?.models
   if (!m) return []
@@ -143,13 +143,15 @@ const runBudgetUsd = computed({
 const budgetLabel = (n: number) => (n === 0 ? t('settings.runBudgetServer') : '$' + n)
 const w = (key: string) => (museWords.value ? `${key}Muse` : key)
 const wm = (key: string) => (moduleTab.value === 'codex' ? `${key}Codex` : w(key))
-const stages = ['analyze', 'coding', 'retry', 'helper', 'learn'] as const
+const stages = ['analyze', 'coding', 'retry', 'helper', 'learn', 'chat', 'documents'] as const
 const stageKey: Record<(typeof stages)[number], string> = {
   analyze: 'Analyze',
   coding: 'Coding',
   retry: 'Retry',
   helper: 'Helper',
   learn: 'Learn',
+  chat: 'Chat',
+  documents: 'Documents',
 }
 const integ = (p: string) => integrations.data.value?.find((i) => i.provider === p)
 const minutes = (n: number) => t('settings.minutes', { n })
@@ -303,6 +305,7 @@ const section = computed(() => settingsSection(route.params.section))
           </span>
         </CfgRow>
         <p v-if="codexMissing" class="ferr">{{ t('settings.codexModelNeeded') }}</p>
+        <p v-if="moduleTab !== 'muse'" class="hint">{{ t('settings.meetingAudioMuse') }}</p>
         <CfgRow v-if="draft.models.review !== undefined" :label="t('settings.stageReview')" :help="t(wm('settings.stageReviewHelp'))">
           <SegButtons v-model="draft.models.review" :options="reviewModels" :label="t('settings.stageReview')" />
         </CfgRow>

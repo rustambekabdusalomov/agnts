@@ -491,6 +491,9 @@ func toSettings(v domain.Settings) gen.Settings {
 	stalls, deep, prove, learnRuns, second, methods := v.Stalls, v.DeepReview, v.ProveFixes, v.LearnFromRuns, v.SecondOpinion, v.MethodSkills
 	maxRepos := v.TicketRepoLimit()
 	recheck, baseline := v.RecheckComplex, v.BaselineChecks
+	// Chat and documents show the model they run on: until set, the
+	// helper's and the analysis's.
+	chat, docModel := v.Models.For(domain.ModelChat), v.Models.For(domain.ModelDocuments)
 	effort := gen.EffortSettings{Analyze: gen.EffortSettingsAnalyze(v.Effort.Analyze), Coding: gen.EffortSettingsCoding(v.Effort.Coding),
 		Review: gen.EffortSettingsReview(v.Effort.Review), Complex: gen.EffortSettingsComplex(v.Effort.Complex)}
 	return gen.Settings{
@@ -502,7 +505,7 @@ func toSettings(v domain.Settings) gen.Settings {
 			ResolveFixed: v.PRComments.ResolveFixed, AutoAddress: v.PRComments.AutoAddress},
 		Ci: &ci,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
-			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview},
+			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview, Chat: &chat, Documents: &docModel},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect, PublicDocuments: &publicDocs,
 		MaxTurns: v.MaxTurns, RunBudget: &v.RunBudget, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
 		AskFirst: v.AskFirst, AutoResume: v.AutoResume, SwitchModules: &v.SwitchModules, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
@@ -617,6 +620,12 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.MaxTicketRepos != nil {
 		v.MaxTicketRepos = *req.MaxTicketRepos
+	}
+	if req.Models.Chat != nil {
+		v.Models.Chat = *req.Models.Chat
+	}
+	if req.Models.Documents != nil {
+		v.Models.Documents = *req.Models.Documents
 	}
 	if req.Models.Preview != nil {
 		v.Models.Preview = *req.Models.Preview

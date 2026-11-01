@@ -262,3 +262,24 @@ func TestTiers(t *testing.T) {
 		t.Fatal("settings and ticket tiers")
 	}
 }
+
+// Chat and documents follow the helper and analysis models until set.
+func TestChatAndDocumentModels(t *testing.T) {
+	m := StageModels{Analyze: "opus", Helper: "haiku"}
+	if m.For(ModelChat) != "haiku" || m.For(ModelDocuments) != "opus" {
+		t.Fatalf("unset: %s %s", m.For(ModelChat), m.For(ModelDocuments))
+	}
+	m.Chat, m.Documents = "muse:spark", "sonnet"
+	if m.For(ModelChat) != "muse:spark" || m.For(ModelDocuments) != "sonnet" {
+		t.Fatal("set")
+	}
+	s := Settings{Models: StageModels{Analyze: "sonnet", Coding: "sonnet", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto,
+		Preview: "sonnet", Chat: "gpt"}, MaxTurns: 150, TimeoutMin: 45, PauseAbove: 90, Parallel: 1}
+	if err := s.Validate(); err == nil || !strings.Contains(err.Error(), "chat") {
+		t.Fatalf("invalid chat model: %v", err)
+	}
+	// A person with Muse alone gets Muse for chat too.
+	if got := (StageModels{Chat: "opus"}).EffectiveModels(Access{Modules: []string{ProviderMuse}}).Chat; got != MuseSpark {
+		t.Fatalf("mapped chat: %s", got)
+	}
+}

@@ -650,10 +650,10 @@ func assistantConversationFiles(question string, history []domain.AssistantMessa
 // mode. agnts's own key (credits) is not used: an answer is not a run that
 // credits can pay for (ai.PolicyOf).
 func (o *Orchestrator) assistantReady(ctx context.Context, s domain.Settings, user int64) error {
-	err := o.hold(ctx, transcriptMeta{Purpose: domain.PurposeAssistant, Person: user}, s.Models.Helper) // answers run on the helper model
+	err := o.hold(ctx, transcriptMeta{Purpose: domain.PurposeAssistant, Person: user}, s.Models.For(domain.ModelChat)) // answers run on the chat model
 	var h *ai.Hold
 	if errors.As(err, &h) && !h.Limited && h.Err == nil {
-		return &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(domain.ProviderOf(s.Models.Helper)) + ": " + h.Why + "."}
+		return &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(domain.ProviderOf(s.Models.For(domain.ModelChat))) + ": " + h.Why + "."}
 	}
 	return err
 }
@@ -741,7 +741,7 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeAssistant, WorkspaceID: wsID, Person: user,
 		Subject: "message " + strconv.FormatInt(a.ID, 10)}, ai.Request{
 		Prompt:   prompt,
-		Model:    s.Models.Helper,
+		Model:    s.Models.For(domain.ModelChat),
 		MaxTurns: assistantMaxTurns,
 		Timeout:  assistantTimeout,
 		Settings: AssistantPermissions(),

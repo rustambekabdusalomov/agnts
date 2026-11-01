@@ -10,7 +10,8 @@ const get = vi.hoisted(() => vi.fn())
 vi.mock('../api/client', () => ({ api: { GET: get, PUT: vi.fn() }, unwrap: async (p: Promise<unknown>) => p, HttpError: class extends Error {} }))
 
 const settings = {
-  models: { analyze: 'muse:spark', coding: 'muse:wonder', retry: 'muse:spark', helper: 'muse:spark', learn: 'muse:spark', preview: 'muse:spark', review: 'auto' },
+  models: { analyze: 'muse:spark', coding: 'muse:wonder', retry: 'muse:spark', helper: 'muse:spark', learn: 'muse:spark', preview: 'muse:spark', review: 'auto',
+    chat: 'muse:spark', documents: 'muse:spark' },
   maxTurns: 150, timeoutMin: 45, allow: [], deny: [], askFirst: true, autoResume: true, pauseAbove: 90, parallel: 1,
   git: { authorName: '', authorEmail: '', coAuthor: false, prTitle: '', draft: false },
 }
@@ -70,19 +71,21 @@ describe('SettingsPage models', () => {
     expect(w.find('[role="tab"][aria-selected="true"]').text()).toBe('Claude')
     expect(w.text()).toContain('Claude Opus')
     expect(w.text()).not.toContain('Muse Wonder')
-    // Coding was Wonder (strong) and becomes Opus; the light stages Sonnet.
+    // Coding was Wonder (strong) and becomes Opus; the light stages
+    // (chat and documents included) Sonnet.
     const on = pressed(w)
     expect(on.filter((x) => x === 'Claude Opus')).toHaveLength(1)
-    expect(on.filter((x) => x === 'Claude Sonnet')).toHaveLength(4)
+    expect(on.filter((x) => x === 'Claude Sonnet')).toHaveLength(6)
+    expect(w.text()).toContain('Documents and meeting notes')
   })
 
   it('asks for Codex model names when Codex has none of its own', async () => {
     const w = await setup()
     await tabs(w)[2].trigger('click')
     const inputs = w.findAll('input.cfg-in.mono')
-    expect(inputs.length).toBeGreaterThanOrEqual(5)
+    expect(inputs).toHaveLength(7)
     expect(w.text()).toContain(needed())
-    for (const i of inputs.slice(0, 5)) {
+    for (const i of inputs) {
       await i.setValue('gpt-5')
       await i.trigger('change')
     }

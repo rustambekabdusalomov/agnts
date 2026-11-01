@@ -165,5 +165,6 @@ func EffectiveModel(a Access, m string) string {
 // EffectiveModels applies EffectiveModel to every stage.
 func (m StageModels) EffectiveModels(a Access) StageModels {
 	return StageModels{Analyze: EffectiveModel(a, m.Analyze), Coding: EffectiveModel(a, m.Coding), Retry: EffectiveModel(a, m.Retry),
-		Helper: EffectiveModel(a, m.Helper), Learn: EffectiveModel(a, m.Learn), Review: EffectiveModel(a, m.Review), Preview: EffectiveModel(a, m.Preview)}
+		Helper: EffectiveModel(a, m.Helper), Learn: EffectiveModel(a, m.Learn), Review: EffectiveModel(a, m.Review), Preview: EffectiveModel(a, m.Preview),
+		Chat: EffectiveModel(a, m.Chat), Documents: EffectiveModel(a, m.Documents)}
 }

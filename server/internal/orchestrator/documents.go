@@ -193,7 +193,7 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 		turns, timeout = docRepoMaxTurns, docRepoTimeout
 	}
 	turns, timeout = min(s.MaxTurns, turns), min(s.TimeoutMin, timeout)
-	model := s.Models.Analyze
+	model := s.Models.For(domain.ModelDocuments)
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDocument, WorkspaceID: run.WorkspaceID, Subject: d.Title, ModelStage: "document", DocumentRunID: run.ID},
 		ai.Request{
 			Prompt:   documentPrompt(d, run.Source, files, g),

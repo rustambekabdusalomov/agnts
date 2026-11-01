@@ -21,6 +21,10 @@ abstract class _$StageModelsCWProxy {
 
   StageModels preview(String? preview);
 
+  StageModels chat(String? chat);
+
+  StageModels documents(String? documents);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +39,8 @@ abstract class _$StageModelsCWProxy {
     String? learn,
     String? review,
     String? preview,
+    String? chat,
+    String? documents,
   });
 }
 
@@ -66,6 +72,12 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
   StageModels preview(String? preview) => this(preview: preview);
 
   @override
+  StageModels chat(String? chat) => this(chat: chat);
+
+  @override
+  StageModels documents(String? documents) => this(documents: documents);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -80,6 +92,8 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
     Object? learn = const $CopyWithPlaceholder(),
     Object? review = const $CopyWithPlaceholder(),
     Object? preview = const $CopyWithPlaceholder(),
+    Object? chat = const $CopyWithPlaceholder(),
+    Object? documents = const $CopyWithPlaceholder(),
   }) {
     return StageModels(
       analyze: analyze == const $CopyWithPlaceholder()
@@ -110,6 +124,14 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
           ? _value.preview
           // ignore: cast_nullable_to_non_nullable
           : preview as String?,
+      chat: chat == const $CopyWithPlaceholder()
+          ? _value.chat
+          // ignore: cast_nullable_to_non_nullable
+          : chat as String?,
+      documents: documents == const $CopyWithPlaceholder()
+          ? _value.documents
+          // ignore: cast_nullable_to_non_nullable
+          : documents as String?,
     );
   }
 }
@@ -138,6 +160,8 @@ StageModels _$StageModelsFromJson(Map<String, dynamic> json) =>
         learn: $checkedConvert('learn', (v) => v as String?),
         review: $checkedConvert('review', (v) => v as String?),
         preview: $checkedConvert('preview', (v) => v as String?),
+        chat: $checkedConvert('chat', (v) => v as String?),
+        documents: $checkedConvert('documents', (v) => v as String?),
       );
       return val;
     });
@@ -151,4 +175,6 @@ Map<String, dynamic> _$StageModelsToJson(StageModels instance) =>
       'learn': ?instance.learn,
       'review': ?instance.review,
       'preview': ?instance.preview,
+      'chat': ?instance.chat,
+      'documents': ?instance.documents,
     };

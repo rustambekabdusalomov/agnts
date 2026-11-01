@@ -52,6 +52,12 @@ const (
 	ModelLearn   = "learn"   // lessons from finished tickets
 	ModelReview  = "review"  // code review while a ticket waits for review
 	ModelPreview = "preview" // screenshots while a ticket waits for review
+	// ModelChat answers the assistant chat (and decides when a spoken
+	// question can be heard); unset, the helper's model.
+	ModelChat = "chat"
+	// ModelDocuments writes documents and meeting notes; unset, the
+	// analysis model.
+	ModelDocuments = "documents"
 	// ModelRecheck re-checks a complex ticket's analysis; it is the
 	// coding model, so nobody picks it on its own.
 	ModelRecheck = "recheck"
@@ -124,6 +130,9 @@ type StageModels struct {
 	Learn   string `json:"learn"`
 	Review  string `json:"review"` // a model or ModelAuto
 	Preview string `json:"preview"`
+	// Chat and Documents are "" until set: they follow Helper and Analyze.
+	Chat      string `json:"chat,omitempty"`
+	Documents string `json:"documents,omitempty"`
 }
 
 // For returns the model for a stage name.
@@ -141,6 +150,16 @@ func (m StageModels) For(stage string) string {
 		return m.Review
 	case ModelPreview:
 		return m.Preview
+	case ModelChat:
+		if m.Chat != "" {
+			return m.Chat
+		}
+		return m.Helper
+	case ModelDocuments:
+		if m.Documents != "" {
+			return m.Documents
+		}
+		return m.Analyze
 	default:
 		return m.Coding
 	}
@@ -386,6 +405,11 @@ func (s *Settings) Validate() error {
 			errs = append(errs, fmt.Errorf("model for %s must be one of %s, muse:<model> or codex:<model>", name, strings.Join(Models, ", ")))
 		}
 	}
+	for name, m := range map[string]string{"chat": s.Models.Chat, "documents": s.Models.Documents} {
+		if m != "" && !ValidModel(m) {
+			errs = append(errs, fmt.Errorf("model for %s must be one of %s, muse:<model> or codex:<model>", name, strings.Join(Models, ", ")))
+		}
+	}
 	if s.Models.Review != ModelAuto && !ValidModel(s.Models.Review) {
 		errs = append(errs, fmt.Errorf("model for review must be %s, one of %s, muse:<model> or codex:<model>", ModelAuto, strings.Join(Models, ", ")))
 	}
@@ -509,7 +533,7 @@ func (s Settings) Modules(models map[string]string) []string {
 	if p := s.Access.Primary(); p != "" {
 		out = append(out, p)
 	}
-	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview} {
+	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview, ModelChat, ModelDocuments} {
 		add(s.ModelFor(Ticket{Models: models}, stage))
 	}
 	add(s.SecondOpinion)
@@ -538,6 +562,12 @@ func (s Settings) CheckModels(a Access, prev Settings) error {
 	check("learn", s.Models.Learn, prev.Models.Learn, false)
 	check("review", s.Models.Review, prev.Models.Review, true)
 	check("preview", s.Models.Preview, prev.Models.Preview, false)
+	if s.Models.Chat != "" {
+		check("chat", s.Models.Chat, prev.Models.Chat, false)
+	}
+	if s.Models.Documents != "" {
+		check("documents", s.Models.Documents, prev.Models.Documents, false)
+	}
 	if s.SecondOpinion != "" {
 		check("second opinion", s.SecondOpinion, prev.SecondOpinion, false)
 	}

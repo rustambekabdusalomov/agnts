@@ -7373,6 +7373,8 @@ export interface components {
             learn?: components["schemas"]["Model"];
             review?: components["schemas"]["ReviewModel"];
             preview?: components["schemas"]["Model"];
+            chat?: components["schemas"]["Model"];
+            documents?: components["schemas"]["Model"];
         };
         TicketRepo: {
             /** Format: int64 */

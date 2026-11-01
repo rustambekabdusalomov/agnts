@@ -33,6 +33,10 @@ class StageModels {
      this.review,
 
      this.preview,
+
+     this.chat,
+
+     this.documents,
   });
 
       /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers.
@@ -126,6 +130,32 @@ class StageModels {
 
 
 
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers.
+  @JsonKey(
+    
+    name: r'chat',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? chat;
+
+
+
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers.
+  @JsonKey(
+    
+    name: r'documents',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? documents;
+
+
+
 
 
     @override
@@ -136,7 +166,9 @@ class StageModels {
       other.helper == helper &&
       other.learn == learn &&
       other.review == review &&
-      other.preview == preview;
+      other.preview == preview &&
+      other.chat == chat &&
+      other.documents == documents;
 
     @override
     int get hashCode =>
@@ -146,7 +178,9 @@ class StageModels {
         helper.hashCode +
         learn.hashCode +
         review.hashCode +
-        preview.hashCode;
+        preview.hashCode +
+        chat.hashCode +
+        documents.hashCode;
 
   factory StageModels.fromJson(Map<String, dynamic> json) => _$StageModelsFromJson(json);
 

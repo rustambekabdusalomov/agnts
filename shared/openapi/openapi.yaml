@@ -9169,6 +9169,8 @@ components:
         learn: { $ref: '#/components/schemas/Model' }
         review: { $ref: '#/components/schemas/ReviewModel' }
         preview: { $ref: '#/components/schemas/Model' }
+        chat: { $ref: '#/components/schemas/Model' }
+        documents: { $ref: '#/components/schemas/Model' }
 
     TicketRepo:
       type: object
