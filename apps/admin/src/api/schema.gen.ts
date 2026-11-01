@@ -1455,7 +1455,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Plan usage from Claude Code's rate limit events */
+        /** Plan usage of one module's account (Claude or Muse), from the limit events its runs report */
         get: operations["getUsage"];
         put?: never;
         post?: never;
@@ -7771,6 +7771,15 @@ export interface components {
             pausedUntil?: string;
             pauseAbove: number;
             refreshing: boolean;
+            /**
+             * @description The module whose account this is
+             * @enum {string}
+             */
+            provider?: "muse" | "claude";
+            /** @description An account of this module is connected for you (in per-member mode, your own; else the workspace's). False: nothing to read. */
+            connected?: boolean;
+            /** @description The account's label */
+            account?: string;
         };
         GitSettings: {
             authorName: string;
@@ -12606,7 +12615,10 @@ export interface operations {
     };
     getUsage: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. */
+                provider?: components["parameters"]["ModuleProvider"];
+            };
             header?: never;
             path?: never;
             cookie?: never;

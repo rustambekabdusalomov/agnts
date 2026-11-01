@@ -1727,8 +1727,10 @@ paths:
   /usage:
     get:
       operationId: getUsage
-      summary: Plan usage from Claude Code's rate limit events
+      summary: Plan usage of one module's account (Claude or Muse), from the limit events its runs report
       tags: [usage]
+      parameters:
+        - $ref: '#/components/parameters/ModuleProvider'
       responses:
         '200':
           description: OK
@@ -9576,6 +9578,9 @@ components:
         pausedUntil: { type: string, format: date-time }
         pauseAbove: { type: integer }
         refreshing: { type: boolean }
+        provider: { type: string, enum: [muse, claude], description: The module whose account this is }
+        connected: { type: boolean, description: 'An account of this module is connected for you (in per-member mode, your own; else the workspace''s). False: nothing to read.' }
+        account: { type: string, description: The account's label }
 
     GitSettings:
       type: object

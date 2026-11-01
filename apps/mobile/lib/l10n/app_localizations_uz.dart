@@ -15102,6 +15102,27 @@ class AppLocalizationsUz extends AppLocalizations {
       'Raqamlar Muse har bir ish davomida yuboradigan limit hodisalaridan olinadi. agnts boʻsh turganda kichik yangilash ishi ularni dolzarb saqlaydi.';
 
   @override
+  String usageCardFor(String name) {
+    return '$name tarifidan foydalanish';
+  }
+
+  @override
+  String usageNotConnected(String name) {
+    return 'Sizda $name hisobi ulanmagan, shuning uchun o‘qiladigan ma’lumot yo‘q. Uni Profilda (yoki ish maydonining hisobini ish maydoni sozlamalarida) ulang.';
+  }
+
+  @override
+  String get usageMuseSource =>
+      'Muse har bir ishga tushirishdan keyin xabar beradigan limitlardan (Meta obunasining 5 soatlik va haftalik oynalari). API kalitlari va kreditlarda oyna yo‘q.';
+
+  @override
+  String get usageCodexSub => 'OpenAI API kaliti';
+
+  @override
+  String get usageCodexBody =>
+      'Codex ish maydonining OpenAI API kalitida ishlaydi va OpenAI har bir chaqiruv uchun haq oladi, shuning uchun kuzatiladigan tarif oynalari yo‘q. Uning ishga tushirishlari qancha turgani quyida, «Sarf boʻyicha tiketlar»da.';
+
+  @override
   String get wsTitle => 'Ish maydoni';
 
   @override

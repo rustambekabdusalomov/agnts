@@ -15109,6 +15109,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Numbers come from the rate limit events Muse emits during each run. When agnts is idle, a tiny refresh run keeps them current.';
 
   @override
+  String usageCardFor(String name) {
+    return '$name plan usage';
+  }
+
+  @override
+  String usageNotConnected(String name) {
+    return 'No $name account is connected for you, so there is nothing to read. Connect one on your Profile (or the workspace\'s in Workspace settings).';
+  }
+
+  @override
+  String get usageMuseSource =>
+      'Read from the allowance Muse reports after every run (a Meta subscription\'s 5-hour and weekly windows). API keys and credits have no windows.';
+
+  @override
+  String get usageCodexSub => 'OpenAI API key';
+
+  @override
+  String get usageCodexBody =>
+      'Codex runs on the workspace\'s OpenAI API key and OpenAI bills each call, so there are no plan windows to watch. What its runs cost is in Tickets by spend below.';
+
+  @override
   String get wsTitle => 'Workspace';
 
   @override

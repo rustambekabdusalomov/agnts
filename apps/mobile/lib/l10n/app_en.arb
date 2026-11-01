@@ -9338,6 +9338,25 @@
   "usageIdle": "Idle refresh",
   "usageIdleDo": "Every 30 min",
   "usageHelp": "Numbers come from the rate limit events Muse emits during each run. When agnts is idle, a tiny refresh run keeps them current.",
+  "usageCardFor": "{name} plan usage",
+  "@usageCardFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usageNotConnected": "No {name} account is connected for you, so there is nothing to read. Connect one on your Profile (or the workspace's in Workspace settings).",
+  "@usageNotConnected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "usageMuseSource": "Read from the allowance Muse reports after every run (a Meta subscription's 5-hour and weekly windows). API keys and credits have no windows.",
+  "usageCodexSub": "OpenAI API key",
+  "usageCodexBody": "Codex runs on the workspace's OpenAI API key and OpenAI bills each call, so there are no plan windows to watch. What its runs cost is in Tickets by spend below.",
   "wsTitle": "Workspace",
   "wsSwitcher": "Switch workspace",
   "wsAll": "All workspaces",

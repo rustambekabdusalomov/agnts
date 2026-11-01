@@ -23,6 +23,12 @@ abstract class _$UsageCWProxy {
 
   Usage refreshing(bool refreshing);
 
+  Usage provider(UsageProviderEnum? provider);
+
+  Usage connected(bool? connected);
+
+  Usage account(String? account);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Usage(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -38,6 +44,9 @@ abstract class _$UsageCWProxy {
     DateTime? pausedUntil,
     int pauseAbove,
     bool refreshing,
+    UsageProviderEnum? provider,
+    bool? connected,
+    String? account,
   });
 }
 
@@ -72,6 +81,15 @@ class _$UsageCWProxyImpl implements _$UsageCWProxy {
   Usage refreshing(bool refreshing) => this(refreshing: refreshing);
 
   @override
+  Usage provider(UsageProviderEnum? provider) => this(provider: provider);
+
+  @override
+  Usage connected(bool? connected) => this(connected: connected);
+
+  @override
+  Usage account(String? account) => this(account: account);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Usage(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -87,6 +105,9 @@ class _$UsageCWProxyImpl implements _$UsageCWProxy {
     Object? pausedUntil = const $CopyWithPlaceholder(),
     Object? pauseAbove = const $CopyWithPlaceholder(),
     Object? refreshing = const $CopyWithPlaceholder(),
+    Object? provider = const $CopyWithPlaceholder(),
+    Object? connected = const $CopyWithPlaceholder(),
+    Object? account = const $CopyWithPlaceholder(),
   }) {
     return Usage(
       fiveHour: fiveHour == const $CopyWithPlaceholder()
@@ -121,6 +142,18 @@ class _$UsageCWProxyImpl implements _$UsageCWProxy {
           ? _value.refreshing
           // ignore: cast_nullable_to_non_nullable
           : refreshing as bool,
+      provider: provider == const $CopyWithPlaceholder()
+          ? _value.provider
+          // ignore: cast_nullable_to_non_nullable
+          : provider as UsageProviderEnum?,
+      connected: connected == const $CopyWithPlaceholder()
+          ? _value.connected
+          // ignore: cast_nullable_to_non_nullable
+          : connected as bool?,
+      account: account == const $CopyWithPlaceholder()
+          ? _value.account
+          // ignore: cast_nullable_to_non_nullable
+          : account as String?,
     );
   }
 }
@@ -172,6 +205,12 @@ Usage _$UsageFromJson(Map<String, dynamic> json) =>
         ),
         pauseAbove: $checkedConvert('pauseAbove', (v) => (v as num).toInt()),
         refreshing: $checkedConvert('refreshing', (v) => v as bool),
+        provider: $checkedConvert(
+          'provider',
+          (v) => $enumDecodeNullable(_$UsageProviderEnumEnumMap, v),
+        ),
+        connected: $checkedConvert('connected', (v) => v as bool?),
+        account: $checkedConvert('account', (v) => v as String?),
       );
       return val;
     });
@@ -185,6 +224,9 @@ Map<String, dynamic> _$UsageToJson(Usage instance) => <String, dynamic>{
   'pausedUntil': ?instance.pausedUntil?.toIso8601String(),
   'pauseAbove': instance.pauseAbove,
   'refreshing': instance.refreshing,
+  'provider': ?_$UsageProviderEnumEnumMap[instance.provider],
+  'connected': ?instance.connected,
+  'account': ?instance.account,
 };
 
 const _$UsageStatusEnumEnumMap = {
@@ -192,4 +234,9 @@ const _$UsageStatusEnumEnumMap = {
   UsageStatusEnum.allowedWarning: 'allowed_warning',
   UsageStatusEnum.rejected: 'rejected',
   UsageStatusEnum.unknown: 'unknown',
+};
+
+const _$UsageProviderEnumEnumMap = {
+  UsageProviderEnum.muse: 'muse',
+  UsageProviderEnum.claude: 'claude',
 };

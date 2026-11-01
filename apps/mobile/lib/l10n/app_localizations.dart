@@ -26925,6 +26925,36 @@ abstract class AppLocalizations {
   /// **'Numbers come from the rate limit events Muse emits during each run. When agnts is idle, a tiny refresh run keeps them current.'**
   String get usageHelp;
 
+  /// No description provided for @usageCardFor.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} plan usage'**
+  String usageCardFor(String name);
+
+  /// No description provided for @usageNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'No {name} account is connected for you, so there is nothing to read. Connect one on your Profile (or the workspace\'s in Workspace settings).'**
+  String usageNotConnected(String name);
+
+  /// No description provided for @usageMuseSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Read from the allowance Muse reports after every run (a Meta subscription\'s 5-hour and weekly windows). API keys and credits have no windows.'**
+  String get usageMuseSource;
+
+  /// No description provided for @usageCodexSub.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI API key'**
+  String get usageCodexSub;
+
+  /// No description provided for @usageCodexBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Codex runs on the workspace\'s OpenAI API key and OpenAI bills each call, so there are no plan windows to watch. What its runs cost is in Tickets by spend below.'**
+  String get usageCodexBody;
+
   /// No description provided for @wsTitle.
   ///
   /// In en, this message translates to:

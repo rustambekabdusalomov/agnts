@@ -398,7 +398,7 @@ Class | Method | HTTP request | Description
 [*TicketsApi*](doc/TicketsApi.md) | [**stopTicket**](doc/TicketsApi.md#stopticket) | **POST** /tickets/{key}/stop | Stop the running stage; the ticket moves to failed and can be retried
 [*TicketsApi*](doc/TicketsApi.md) | [**translateTicket**](doc/TicketsApi.md#translateticket) | **POST** /tickets/{key}/translate | Translate a ticket&#39;s texts (its own and what agnts wrote) into a language
 [*UsageApi*](doc/UsageApi.md) | [**getTicketSpend**](doc/UsageApi.md#getticketspend) | **GET** /usage/tickets | Tickets that used the most of the plan in a period, by Claude Code&#39;s cost estimate
-[*UsageApi*](doc/UsageApi.md) | [**getUsage**](doc/UsageApi.md#getusage) | **GET** /usage | Plan usage from Claude Code&#39;s rate limit events
+[*UsageApi*](doc/UsageApi.md) | [**getUsage**](doc/UsageApi.md#getusage) | **GET** /usage | Plan usage of one module&#39;s account (Claude or Muse), from the limit events its runs report
 [*UsageApi*](doc/UsageApi.md) | [**refreshUsage**](doc/UsageApi.md#refreshusage) | **POST** /usage/refresh | Start a tiny Claude run to read fresh limits; a usage_updated event follows
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**createInvite**](doc/WorkspaceApi.md#createinvite) | **POST** /workspace/invites | Invite someone by email or by a link (valid 7 days)
 [*WorkspaceApi*](doc/WorkspaceApi.md) | [**deleteWorkspace**](doc/WorkspaceApi.md#deleteworkspace) | **DELETE** /workspace | Delete the workspace (kept 7 days for undo, then purged)
