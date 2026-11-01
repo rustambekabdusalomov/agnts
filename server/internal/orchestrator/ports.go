@@ -5,8 +5,8 @@
 package orchestrator
 
 import (
+	"agnts/internal/ai"
 	"context"
-	"fmt"
 	"io"
 	"time"
 
@@ -396,18 +396,7 @@ func (e *ToolchainError) Error() string {
 
 // OOMError is returned by a workspace whose process the kernel killed for
 // using more memory than the container's limit.
-type OOMError struct{ LimitMB int64 }
-
-func (e *OOMError) Error() string {
-	return fmt.Sprintf("ran out of memory at %s: raise the repository's memory (Repository → Advanced) and retry", gbOf(e.LimitMB))
-}
-
-func gbOf(mb int64) string {
-	if mb%1024 == 0 {
-		return fmt.Sprintf("%d GB", mb/1024)
-	}
-	return fmt.Sprintf("%.1f GB", float64(mb)/1024)
-}
+type OOMError = ai.OOMError
 
 // Workspace is a running container with the repository and Claude Code.
 type Workspace interface {
@@ -429,99 +418,39 @@ type Workspace interface {
 	Close(ctx context.Context) error
 }
 
-// ClaudeRequest is one Claude Code invocation.
-type ClaudeRequest struct {
-	Prompt   string
-	Model    string
-	MaxTurns int
-	Resume   string // session id to continue, or empty
-	Timeout  time.Duration
-	Settings string // JSON for --settings (permission rules from Settings)
-	// Env is extra KEY=value environment for Claude Code; its hooks
-	// inherit it (agnts-guard reads its config from there).
-	Env []string
-	// ReadOnly: the run must not change /workspace (Codex runs enforce it
-	// with their sandbox; Claude Code with the permission rules).
-	ReadOnly bool
-	// Effort is how hard Claude Code thinks (--effort); "" leaves its
-	// default. Codex runs ignore it.
-	Effort string
-	// RunID and WorkspaceID say whose invocation this is (0: not a
-	// ticket run); Muse runs on credits budget by them.
-	RunID       int64
-	WorkspaceID int64
-	// Budget is the workspace's most a run on credits may spend, in
-	// credits (0: the server's cap).
-	Budget int64
-	// Steer brings messages from the people following the run in a chat
-	// into its running turn; Ask asks them about a tool call the guard
-	// leaves to a person (installing a dependency) and gives their
-	// answer. Muse runs take both; other engines ignore them.
-	Steer <-chan string
-	Ask   func(ToolQuestion) <-chan bool
-}
+// ClaudeRequest is one agent invocation (ai.Request).
+type ClaudeRequest = ai.Request
 
 // ToolQuestion is a tool call a run asks the people following it about.
-type ToolQuestion struct {
-	Tool, Command, Path string
-	Reason              string // why a rule asks
-}
+type ToolQuestion = ai.ToolQuestion
 
 // CodexPrefix marks a model as one Codex CLI runs ("codex:<model>"),
 // MusePrefix one Muse Code runs ("muse:<model>"); any other model is
 // Claude Code's.
 const (
-	CodexPrefix = "codex:"
-	MusePrefix  = domain.MusePrefix
+	CodexPrefix = ai.CodexPrefix
+	MusePrefix  = ai.MusePrefix
 )
 
 // ClaudeEventKind classifies stream lines.
-type ClaudeEventKind string
+type ClaudeEventKind = ai.EventKind
 
 // Claude event kinds.
 const (
-	ClaudeInit ClaudeEventKind = "init"
-	ClaudeText ClaudeEventKind = "text"
-	ClaudeTool ClaudeEventKind = "tool"
-	// ClaudeToolResult: a tool call finished (Data: id, is_error, and
-	// output: the text it returned).
-	ClaudeToolResult ClaudeEventKind = "tool_result"
-	ClaudeRateLimit  ClaudeEventKind = "rate_limit"
-	// ClaudeBudget: a Muse run's spend or budget decision (Text: what
-	// happened; Data: cost_usd, total_usd, held_usd, limit_usd, level).
-	ClaudeBudget   ClaudeEventKind = "budget"
-	ClaudeResultEv ClaudeEventKind = "result"
+	ClaudeInit       = ai.EventInit
+	ClaudeText       = ai.EventText
+	ClaudeTool       = ai.EventTool
+	ClaudeToolResult = ai.EventToolResult
+	ClaudeRateLimit  = ai.EventRateLimit
+	ClaudeBudget     = ai.EventBudget
+	ClaudeResultEv   = ai.EventResult
 )
 
-// ClaudeEvent is one parsed line of Claude Code's stream-json output.
-type ClaudeEvent struct {
-	Kind ClaudeEventKind
-	Text string
-	Tool string
-	Data map[string]any
-}
+// ClaudeEvent is one parsed step of an agent's stream.
+type ClaudeEvent = ai.Event
 
 // ClaudeResult summarises a finished invocation.
-type ClaudeResult struct {
-	SessionID   string
-	Turns       int
-	Subtype     string
-	IsError     bool
-	RateLimited bool
-	Text        string
-	Duration    time.Duration
-	// Model is the model Claude Code reported at start, which may differ
-	// from the one requested (an alias, or a fallback).
-	Model string
-	// Usage is the invocation's token spend. Partial means the stream had
-	// no result line (killed or timed out) and Usage was summed from the
-	// assistant messages seen, without a cost.
-	Usage   domain.TokenUsage
-	Partial bool
-	// TranscriptID is the run history transcript the invocation was
-	// recorded in (0: not recorded).
-	TranscriptID int64
-}
+type ClaudeResult = ai.Result
 
 // ExecResult is the outcome of Workspace.Exec.
 type ExecResult struct {

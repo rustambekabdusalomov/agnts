@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"agnts/internal/ai"
 	"context"
 	"encoding/binary"
 	"errors"
@@ -20,7 +21,7 @@ type Transcriber interface {
 }
 
 // ErrNoSpeech says a clip had no words in it.
-var ErrNoSpeech = errors.New("no words were heard in the recording; try again closer to the microphone")
+var ErrNoSpeech = ai.ErrNoSpeech
 
 // SetTranscriber lets the assistant take spoken questions.
 func (o *Orchestrator) SetTranscriber(t Transcriber) { o.transcriber = t }
