@@ -1024,7 +1024,9 @@ local(r'local'),
 @JsonValue(r'git')
 git(r'git'),
 @JsonValue(r'ci')
-ci(r'ci');
+ci(r'ci'),
+@JsonValue(r'logs')
+logs(r'logs');
 
 const TicketSource_Enum(this.value);
 

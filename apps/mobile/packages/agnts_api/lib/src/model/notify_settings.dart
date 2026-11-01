@@ -43,6 +43,8 @@ class NotifySettings {
      this.followUps,
 
      this.ci,
+
+     this.logs,
   });
 
   @JsonKey(
@@ -196,6 +198,19 @@ class NotifySettings {
 
 
 
+      /// The log watcher found something, or a log source stopped
+  @JsonKey(
+    
+    name: r'logs',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? logs;
+
+
+
 
 
     @override
@@ -211,7 +226,8 @@ class NotifySettings {
       other.preview == preview &&
       other.previewPhotos == previewPhotos &&
       other.followUps == followUps &&
-      other.ci == ci;
+      other.ci == ci &&
+      other.logs == logs;
 
     @override
     int get hashCode =>
@@ -226,7 +242,8 @@ class NotifySettings {
         preview.hashCode +
         previewPhotos.hashCode +
         followUps.hashCode +
-        ci.hashCode;
+        ci.hashCode +
+        logs.hashCode;
 
   factory NotifySettings.fromJson(Map<String, dynamic> json) => _$NotifySettingsFromJson(json);
 

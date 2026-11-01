@@ -148,7 +148,9 @@ local(r'local'),
 @JsonValue(r'git')
 git(r'git'),
 @JsonValue(r'ci')
-ci(r'ci');
+ci(r'ci'),
+@JsonValue(r'logs')
+logs(r'logs');
 
 const FollowUpTicketSource_Enum(this.value);
 

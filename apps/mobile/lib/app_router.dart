@@ -31,6 +31,8 @@ import 'features/auth/signup_screen.dart';
 import 'features/auth/verify_screen.dart';
 import 'features/ci/ci_failure_screen.dart';
 import 'features/ci/ci_screen.dart';
+import 'features/logwatch/log_finding_screen.dart';
+import 'features/logwatch/log_watcher_screen.dart';
 import 'features/documents/document_screen.dart';
 import 'features/documents/documents_screen.dart';
 import 'features/home/home_screen.dart';
@@ -198,6 +200,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         screenRoute('/assistant/:id', (_, s) => AssistantScreen(conversationId: int.tryParse(s.pathParameters['id']!))),
         screenRoute('/ci', (_, _) => const CIFailuresScreen()),
         screenRoute('/ci/:id', (_, s) => CIFailureScreen(id: int.tryParse(s.pathParameters['id']!) ?? 0)),
+        screenRoute('/log-watcher', (_, _) => const LogWatcherScreen()),
+        screenRoute('/log-watcher/:id', (_, s) => LogFindingScreen(id: int.tryParse(s.pathParameters['id']!) ?? 0)),
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _Shell(shell: shell),
           branches: [

@@ -10496,7 +10496,7 @@ components:
         labels:
           type: array
           items: { type: string }
-        sample: { type: string, description: The newest entry, redacted }
+        sample: { type: string, description: 'The newest entry, redacted' }
         newest: { type: string, format: date-time }
         network: { type: string, description: 'The private network used, or empty for a direct connection' }
         latencyMs: { type: integer, format: int64 }
@@ -10560,7 +10560,7 @@ components:
       required: [name, pattern, category, severity]
       properties:
         name: { type: string, maxLength: 80 }
-        pattern: { type: string, maxLength: 500, description: A regular expression (RE2, case-insensitive) }
+        pattern: { type: string, maxLength: 500, description: 'A regular expression (RE2, case-insensitive)' }
         category: { type: string, enum: [error, security] }
         severity: { $ref: '#/components/schemas/LogSeverity' }
 
@@ -10904,7 +10904,7 @@ components:
         previewPhotos: { type: boolean, description: Send phone screenshots to Telegram with the message }
         followUps: { type: boolean, description: Follow-up tickets were suggested }
         ci: { type: boolean, description: A watched branch went red }
-        logs: { type: boolean, description: The log watcher found something, or a log source stopped }
+        logs: { type: boolean, description: 'The log watcher found something, or a log source stopped' }
 
     Repository:
       type: object

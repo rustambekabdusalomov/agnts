@@ -31,6 +31,8 @@ abstract class _$NotifySettingsCWProxy {
 
   NotifySettings ci(bool? ci);
 
+  NotifySettings logs(bool? logs);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `NotifySettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -50,6 +52,7 @@ abstract class _$NotifySettingsCWProxy {
     bool? previewPhotos,
     bool? followUps,
     bool? ci,
+    bool? logs,
   });
 }
 
@@ -97,6 +100,9 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
   NotifySettings ci(bool? ci) => this(ci: ci);
 
   @override
+  NotifySettings logs(bool? logs) => this(logs: logs);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `NotifySettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -116,6 +122,7 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
     Object? previewPhotos = const $CopyWithPlaceholder(),
     Object? followUps = const $CopyWithPlaceholder(),
     Object? ci = const $CopyWithPlaceholder(),
+    Object? logs = const $CopyWithPlaceholder(),
   }) {
     return NotifySettings(
       push: push == const $CopyWithPlaceholder()
@@ -166,6 +173,10 @@ class _$NotifySettingsCWProxyImpl implements _$NotifySettingsCWProxy {
           ? _value.ci
           // ignore: cast_nullable_to_non_nullable
           : ci as bool?,
+      logs: logs == const $CopyWithPlaceholder()
+          ? _value.logs
+          // ignore: cast_nullable_to_non_nullable
+          : logs as bool?,
     );
   }
 }
@@ -199,6 +210,7 @@ NotifySettings _$NotifySettingsFromJson(Map<String, dynamic> json) =>
         previewPhotos: $checkedConvert('previewPhotos', (v) => v as bool?),
         followUps: $checkedConvert('followUps', (v) => v as bool?),
         ci: $checkedConvert('ci', (v) => v as bool?),
+        logs: $checkedConvert('logs', (v) => v as bool?),
       );
       return val;
     });
@@ -217,4 +229,5 @@ Map<String, dynamic> _$NotifySettingsToJson(NotifySettings instance) =>
       'previewPhotos': ?instance.previewPhotos,
       'followUps': ?instance.followUps,
       'ci': ?instance.ci,
+      'logs': ?instance.logs,
     };

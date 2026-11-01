@@ -137,6 +137,18 @@ final ciFailureProvider = FutureProvider.family<CIFailure, int>((ref, id) async 
   return (await requireApi(ref).getCiApi().getCIFailure(failureId: id)).data!;
 });
 
+/// Log watcher findings of a category (error, security) that need
+/// attention.
+final logFindingsProvider = FutureProvider.family<List<LogFinding>, String>((ref, category) async {
+  final res = await requireApi(ref).getLogsApi().listLogFindings(category: category, active: true);
+  return res.data ?? const [];
+});
+
+/// One log finding with its redacted excerpt.
+final logFindingProvider = FutureProvider.family<LogFinding, int>((ref, id) async {
+  return (await requireApi(ref).getLogsApi().getLogFinding(findingId: id)).data!;
+});
+
 /// The CI failure a ticket fixes; null when it has none (404).
 final ticketCIProvider = FutureProvider.family<CIFailure?, String>((ref, key) async {
   try {

@@ -8540,7 +8540,7 @@ export interface components {
             version: string;
             fields: components["schemas"]["LogFields"];
             labels: string[];
-            /** @description The newest entry */
+            /** @description The newest entry, redacted */
             sample: string;
             /** Format: date-time */
             newest?: string;
@@ -8603,7 +8603,7 @@ export interface components {
         };
         LogPattern: {
             name: string;
-            /** @description A regular expression (RE2 */
+            /** @description A regular expression (RE2, case-insensitive) */
             pattern: string;
             /** @enum {string} */
             category: "error" | "security";
@@ -8971,7 +8971,7 @@ export interface components {
             followUps?: boolean;
             /** @description A watched branch went red */
             ci?: boolean;
-            /** @description The log watcher found something */
+            /** @description The log watcher found something, or a log source stopped */
             logs?: boolean;
         };
         Repository: {

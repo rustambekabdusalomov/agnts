@@ -6393,6 +6393,800 @@ class AppLocalizationsUz extends AppLocalizations {
   String get logsTypeBudget => 'Sarf';
 
   @override
+  String get logwatchTitle => 'Loglarni kuzatish';
+
+  @override
+  String get logwatchLede =>
+      'agnts loyihalaringiz loglarida topgan xatolar va xavfsizlik kamchiliklari, xato bo‘yicha guruhlangan. Sozlamalarga ko‘ra u xabar beradi yoki tuzatish uchun tiket ochadi.';
+
+  @override
+  String get logwatchBack => 'Loglarni kuzatish';
+
+  @override
+  String get logwatchSources => 'Log manbalari';
+
+  @override
+  String get logwatchSettings => 'Sozlamalar';
+
+  @override
+  String get logwatchCategoryLabel => 'Turkum';
+
+  @override
+  String get logwatchFilterLabel => 'Ko‘rsatish';
+
+  @override
+  String get logwatchCat_error => 'Xatolar';
+
+  @override
+  String get logwatchCat_security => 'Xavfsizlik';
+
+  @override
+  String get logwatchFilter_active => 'E’tibor kerak';
+
+  @override
+  String get logwatchFilter_fixed => 'Tuzatilgan';
+
+  @override
+  String get logwatchFilter_muted => 'O‘chirilgan';
+
+  @override
+  String get logwatchFilter_all => 'Hammasi';
+
+  @override
+  String get logwatchRepo => 'Repozitoriy';
+
+  @override
+  String get logwatchAllRepos => 'Barcha repozitoriylar';
+
+  @override
+  String get logwatchEmptyActive => 'E’tibor talab qiladigan narsa yo‘q: loglarda yangi xato yoki xavfsizlik muammosi yo‘q.';
+
+  @override
+  String get logwatchEmptyFilter => 'Bu yerda hech narsa yo‘q.';
+
+  @override
+  String get logwatchHowTitle => 'Loglarni kuzatish qanday ishlaydi';
+
+  @override
+  String get logwatchHowSources =>
+      'Log manbasini qo‘shing: Loki, Elasticsearch, OpenSearch yoki Graylog manzili yoki Vector va Fluent Bit uchun push-token. So‘ng kuzatiladigan servislar va ular ishlaydigan repozitoriylarni tanlang.';
+
+  @override
+  String get logwatchHowModes =>
+      'Nima qilishni Sozlamalar → Loglarni kuzatish belgilaydi: Xabar berish (bu yerda ko‘rsatish va bildirish) yoki Tiket ochish. Avtomatik tiketlar siz yoqmaguningizcha o‘chiq.';
+
+  @override
+  String get logwatchColStatus => 'Holat';
+
+  @override
+  String get logwatchColFinding => 'Topilma';
+
+  @override
+  String get logwatchColCount => 'Ko‘rilgan';
+
+  @override
+  String get logwatchColLastSeen => 'Oxirgi marta';
+
+  @override
+  String get logwatchColTicket => 'Tiket';
+
+  @override
+  String get logwatchColTime => 'Vaqt';
+
+  @override
+  String get logwatchColService => 'Servis';
+
+  @override
+  String get logwatchColRevision => 'Reviziya';
+
+  @override
+  String get logwatchColSource => 'Manba';
+
+  @override
+  String get logwatchColHealth => 'Holati';
+
+  @override
+  String get logwatchColServices => 'Servislar';
+
+  @override
+  String get logwatchColLastRead => 'Oxirgi o‘qish';
+
+  @override
+  String logwatchTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n marta', one: '$n marta');
+    return '$_temp0';
+  }
+
+  @override
+  String logwatchMasked(String mask) {
+    return 'Qiymat: $mask (yashirilgan; agnts uni saqlamaydi)';
+  }
+
+  @override
+  String get logwatchReportOnly => 'Faqat xabar';
+
+  @override
+  String get logwatchFix => 'Tuzatish';
+
+  @override
+  String logwatchFixStarted(String key) {
+    return '$key ochildi: agnts ishga kirishdi. Hech narsa yuborilishidan oldin tuzatishni siz ko‘rib chiqasiz.';
+  }
+
+  @override
+  String get logwatchMute => 'O‘chirish';
+
+  @override
+  String get logwatchUnmute => 'Yoqish';
+
+  @override
+  String get logwatchMuted => 'O‘chirildi: endi bildirishnoma ham, tiket ham bo‘lmaydi.';
+
+  @override
+  String get logwatchUnmuted => 'Yana kuzatilmoqda.';
+
+  @override
+  String get logwatchNotify => 'Hozir bildirish';
+
+  @override
+  String get logwatchNotified => 'Bildirishnoma yuborildi.';
+
+  @override
+  String get logwatchStatus_open => 'Ko‘rildi';
+
+  @override
+  String get logwatchStatus_reported => 'Xabar berildi';
+
+  @override
+  String get logwatchStatus_fixing => 'Tuzatilmoqda';
+
+  @override
+  String get logwatchStatus_fixed => 'Tuzatildi';
+
+  @override
+  String get logwatchStatus_resolved => 'Yo‘qoldi';
+
+  @override
+  String get logwatchStatus_muted => 'O‘chirilgan';
+
+  @override
+  String get logwatchStatus_regression => 'Qaytdi';
+
+  @override
+  String get logwatchStatusHelp_open => 'Loglarda ko‘rildi; chegaradan past yoki turkum o‘chiq';
+
+  @override
+  String get logwatchStatusHelp_reported => 'Bu yerda ko‘rsatildi va bildirildi';
+
+  @override
+  String get logwatchStatusHelp_fixing => 'Uning ustida tiket ishlamoqda';
+
+  @override
+  String get logwatchStatusHelp_fixed => 'Tuzatish birlashtirildi; loglardan yo‘qolishini kutamiz';
+
+  @override
+  String get logwatchStatusHelp_resolved => 'Tuzatishdan beri jim';
+
+  @override
+  String get logwatchStatusHelp_muted => 'E’tiborsiz: tiket ham, bildirishnoma ham yo‘q';
+
+  @override
+  String get logwatchStatusHelp_regression => 'Tuzatishdan keyin yana loglarda';
+
+  @override
+  String get logwatchSev_low => 'Past';
+
+  @override
+  String get logwatchSev_medium => 'O‘rta';
+
+  @override
+  String get logwatchSev_high => 'Yuqori';
+
+  @override
+  String get logwatchSev_critical => 'Jiddiy';
+
+  @override
+  String get logwatchClass_code => 'Koddagi xato';
+
+  @override
+  String get logwatchClass_config => 'Sozlama';
+
+  @override
+  String get logwatchClass_infra => 'Infratuzilma';
+
+  @override
+  String get logwatchClass_dependency => 'Bog‘liqlik';
+
+  @override
+  String get logwatchClass_leak => 'Sizib chiqish';
+
+  @override
+  String get logwatchClass_exposure => 'Ochilib qolish';
+
+  @override
+  String get logwatchClass_weakness => 'Zaiflik';
+
+  @override
+  String get logwatchClass_attack => 'Hujum';
+
+  @override
+  String get logwatchClass_noise => 'Shovqin';
+
+  @override
+  String get logwatchClass_ => 'Noma’lum';
+
+  @override
+  String get logwatchNotFound => 'Bunday topilma yo‘q.';
+
+  @override
+  String logwatchOpenTicket(String key) {
+    return '$key ni ochish';
+  }
+
+  @override
+  String get logwatchRegressionNote => 'Bu tuzatish birlashtirilgandan keyin qaytdi.';
+
+  @override
+  String get logwatchNoReposNote =>
+      'Bu servis uchun repozitoriy tanlanmagan, shuning uchun faqat xabar beriladi. agnts tuzatishi uchun repozitoriylarni tanlang:';
+
+  @override
+  String get logwatchRemediation => 'Qanday tuzatish kerak';
+
+  @override
+  String get logwatchExcerpt => 'Log parchasi';
+
+  @override
+  String get logwatchExcerptSub => 'Tozalangan: sirlar va shaxsiy ma’lumotlar saqlashdan oldin yashiriladi.';
+
+  @override
+  String get logwatchNoExcerpt => 'Parcha saqlanmagan (topilma yopilgandan 30 kun o‘tib o‘chiriladi).';
+
+  @override
+  String get logwatchOccurrences => 'Ko‘rinishlar';
+
+  @override
+  String get logwatchOccurrencesSub => 'U ko‘rilgan oxirgi 20 ta to‘plam.';
+
+  @override
+  String get logwatchNoOccurrences => 'Saqlangan ko‘rinish yo‘q.';
+
+  @override
+  String get logwatchFacts => 'Ma’lumotlar';
+
+  @override
+  String get logwatchCount => 'Ko‘rilgan';
+
+  @override
+  String get logwatchLastHour => 'Oxirgi soatda';
+
+  @override
+  String get logwatchFirstSeen => 'Birinchi marta';
+
+  @override
+  String get logwatchLastSeen => 'Oxirgi marta';
+
+  @override
+  String get logwatchDetector => 'Detektor';
+
+  @override
+  String get logwatchRoute => 'Yo‘nalish';
+
+  @override
+  String get logwatchRevision => 'Reviziya';
+
+  @override
+  String get logwatchFixedSha => 'Tuzatilgan';
+
+  @override
+  String get logwatchTicket => 'Tiket';
+
+  @override
+  String get logwatchCardTitle => 'Loglarda topilgan';
+
+  @override
+  String get logwatchGoneNow => 'Loglardan yo‘qoldi';
+
+  @override
+  String get logwatchWaitingQuiet => 'Birlashtirildi; loglar kuzatilmoqda';
+
+  @override
+  String get logwatchBackAgain => 'Yana loglarda';
+
+  @override
+  String get logwatchOpenFinding => 'Topilmani ochish';
+
+  @override
+  String get logwatchSourcesLede =>
+      'agnts o‘qiydigan log tizimlari manzili bo‘yicha (manzil xususiy tarmoqda bo‘lsa, u orqali) va log jo‘natuvchilaringiz foydalanadigan push-tokenlar.';
+
+  @override
+  String get logwatchAddSource => 'Manba qo‘shish';
+
+  @override
+  String get logwatchSourceDrawerSub => 'agnts saqlashdan oldin ulanishni tekshiradi.';
+
+  @override
+  String get logwatchKind => 'Log tizimi';
+
+  @override
+  String get logwatchKind_loki => 'Grafana Loki';
+
+  @override
+  String get logwatchKind_elasticsearch => 'Elasticsearch';
+
+  @override
+  String get logwatchKind_opensearch => 'OpenSearch';
+
+  @override
+  String get logwatchKind_graylog => 'Graylog';
+
+  @override
+  String get logwatchKind_push => 'Push (Vector, Fluent Bit…)';
+
+  @override
+  String get logwatchName => 'Nomi';
+
+  @override
+  String get logwatchNamePh => 'prod-loki';
+
+  @override
+  String get logwatchEnvironment => 'Muhit';
+
+  @override
+  String get logwatchEnvironmentHelp => 'Debug rejimi faqat prodakshenda muammo hisoblanadi.';
+
+  @override
+  String get logwatchEnv_production => 'Prodakshen';
+
+  @override
+  String get logwatchEnv_staging => 'Steyjing';
+
+  @override
+  String get logwatchEnv_development => 'Ishlab chiqish';
+
+  @override
+  String get logwatchAddress => 'Manzil';
+
+  @override
+  String get logwatchAddressHelp =>
+      'Ommaviy manzil https bo‘lishi kerak. Xususiy tarmog‘ingizdagi manzilga (10.x, *.local) u orqali ulaniladi; avval tarmoqni ish maydoni sozlamalariga qo‘shing.';
+
+  @override
+  String get logwatchAuth => 'Kirish ma’lumotlari';
+
+  @override
+  String get logwatchAuth_none => 'Yo‘q';
+
+  @override
+  String get logwatchAuth_basic => 'Login va parol';
+
+  @override
+  String get logwatchAuth_bearer => 'Token';
+
+  @override
+  String get logwatchAuth_apikey => 'API kalit';
+
+  @override
+  String logwatchAuthSaved(String kind) {
+    return 'Saqlangan ($kind); o‘zgartirmaguningizcha qoladi.';
+  }
+
+  @override
+  String get logwatchAuthChange => 'O‘zgartirish';
+
+  @override
+  String get logwatchUser => 'Foydalanuvchi';
+
+  @override
+  String get logwatchPassword => 'Parol';
+
+  @override
+  String get logwatchToken => 'Token';
+
+  @override
+  String get logwatchTokenPh_loki => 'Bearer token';
+
+  @override
+  String get logwatchTokenPh_elasticsearch => 'API kalit (base64 id:key)';
+
+  @override
+  String get logwatchTokenPh_opensearch => 'Token';
+
+  @override
+  String get logwatchTokenPh_graylog => 'Graylog kirish tokeni';
+
+  @override
+  String get logwatchTokenPh_push => '';
+
+  @override
+  String get logwatchAuthHelp_loki => 'Faqat o‘qish uchun token ishlating. Ko‘p ijarachili Loki uchun tenant (X-Scope-OrgID) ham kerak.';
+
+  @override
+  String get logwatchAuthHelp_elasticsearch => 'Faqat indeks shabloniga o‘qish huquqi bor kalitdan foydalaning.';
+
+  @override
+  String get logwatchAuthHelp_opensearch => 'Faqat indeks shabloniga o‘qish huquqi bor foydalanuvchidan foydalaning.';
+
+  @override
+  String get logwatchAuthHelp_graylog => 'Reader roli bor foydalanuvchi uchun kirish tokeni yarating.';
+
+  @override
+  String get logwatchAuthHelp_push => '';
+
+  @override
+  String get logwatchTenant => 'Tenant';
+
+  @override
+  String get logwatchTenantPh => 'Tenant (X-Scope-OrgID), ixtiyoriy';
+
+  @override
+  String get logwatchSelector => 'Asosiy selektor';
+
+  @override
+  String get logwatchSelectorHelp => 'Ixtiyoriy: barcha servislar uchun umumiy narsa, masalan muhit yorlig‘i.';
+
+  @override
+  String get logwatchPollEvery => 'Har … o‘qish';
+
+  @override
+  String get logwatchPollHelp => '15 soniya topilmalarni bir daqiqa ichida beradi; katta umumiy klaster uchun 60 bo‘lishi mumkin.';
+
+  @override
+  String logwatchSeconds(String n) {
+    return '$n s';
+  }
+
+  @override
+  String get logwatchAdvanced => 'Maydon nomlari va CA sertifikati';
+
+  @override
+  String get logwatchField_service => 'Servis maydoni yoki yorlig‘i';
+
+  @override
+  String get logwatchField_level => 'Daraja maydoni';
+
+  @override
+  String get logwatchField_message => 'Xabar maydoni';
+
+  @override
+  String get logwatchField_timestamp => 'Vaqt maydoni';
+
+  @override
+  String get logwatchField_revision => 'Reviziya maydoni (joylangan kommit)';
+
+  @override
+  String get logwatchFieldsHelp => 'Ulanishni tekshirish ularni to‘ldiradi; faqat noto‘g‘ri topsa o‘zgartiring.';
+
+  @override
+  String get logwatchCa => 'Xususiy CA uchun CA sertifikati (PEM)';
+
+  @override
+  String get logwatchPushHelp =>
+      'Log jo‘natuvchingiz agnts ga token bilan yuboradi. Manba qo‘shilgach, agnts token va tayyor Vector hamda Fluent Bit sozlamalarini ko‘rsatadi.';
+
+  @override
+  String get logwatchEnabled => 'Bu manbani o‘qish';
+
+  @override
+  String get logwatchTest => 'Ulanishni tekshirish';
+
+  @override
+  String get logwatchTesting => 'Tekshirilmoqda…';
+
+  @override
+  String logwatchTestOk(String version, String ms) {
+    return 'Ulandi: versiya $version, $ms ms';
+  }
+
+  @override
+  String logwatchViaNetwork(String name) {
+    return '$name xususiy tarmog‘i orqali.';
+  }
+
+  @override
+  String get logwatchDirect => 'To‘g‘ridan-to‘g‘ri, internet orqali.';
+
+  @override
+  String logwatchServicesOf(String name) {
+    return '$name servislari';
+  }
+
+  @override
+  String get logwatchServicesSub =>
+      'Kuzatiladigan servislarni belgilang va har biri ishlaydigan repozitoriylarni tanlang (shlyuz uchun bir nechta). Repozitoriysiz servis haqida faqat xabar beriladi.';
+
+  @override
+  String get logwatchDiscovering => 'Loglarda servislar qidirilmoqda…';
+
+  @override
+  String logwatchSelectorOf(String name) {
+    return '$name selektori';
+  }
+
+  @override
+  String get logwatchNoReposYet => 'Repozitoriy yo‘q: faqat xabar';
+
+  @override
+  String get logwatchAddRepo => 'Repozitoriy qo‘shish';
+
+  @override
+  String get logwatchNoServices => 'Hozircha servis topilmadi. Quyida nomi bilan qo‘shing.';
+
+  @override
+  String get logwatchAddService => 'Nomi bo‘yicha servis qo‘shish';
+
+  @override
+  String get logwatchAddServicePh => 'api';
+
+  @override
+  String get logwatchAdd => 'Qo‘shish';
+
+  @override
+  String logwatchTokenTitle(String name) {
+    return '$name uchun push-token';
+  }
+
+  @override
+  String get logwatchTokenSub => 'Bir marta ko‘rsatiladi: hozir log jo‘natuvchi sozlamalariga nusxalang. Yangisi eskisini to‘xtatadi.';
+
+  @override
+  String get logwatchPushUrl => 'Yuborish manzili';
+
+  @override
+  String get logwatchPushToken => 'Token';
+
+  @override
+  String get logwatchTokenDone => 'Nusxaladim';
+
+  @override
+  String get logwatchPrivateNetwork => 'Xususiy tarmoq orqali';
+
+  @override
+  String get logwatchSource_new => 'Hali o‘qilmagan';
+
+  @override
+  String get logwatchSource_ok => 'O‘qilmoqda';
+
+  @override
+  String get logwatchSource_behind => 'Orqada qolmoqda';
+
+  @override
+  String get logwatchSource_failing => 'Xato';
+
+  @override
+  String get logwatchSource_auth_failed => 'Kirish rad etildi';
+
+  @override
+  String logwatchDropped(String n) {
+    return 'Limitdan ortiq o‘tkazib yuborilgan yozuvlar: $n';
+  }
+
+  @override
+  String logwatchGap(String from, String to) {
+    return 'O‘qilmagan: $from dan $to gacha';
+  }
+
+  @override
+  String get logwatchDisabled => 'O‘chirilgan';
+
+  @override
+  String get logwatchHasToken => 'Token bor';
+
+  @override
+  String get logwatchNoToken => 'Hali token yo‘q';
+
+  @override
+  String logwatchWatching(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n servis', one: '$n servis', zero: 'Servis tanlanmagan');
+    return '$_temp0';
+  }
+
+  @override
+  String get logwatchServices => 'Servislar';
+
+  @override
+  String get logwatchMakeToken => 'Token yaratish';
+
+  @override
+  String get logwatchNewToken => 'Yangi token';
+
+  @override
+  String get logwatchEdit => 'Tahrirlash';
+
+  @override
+  String get logwatchDelete => 'O‘chirish';
+
+  @override
+  String logwatchDeleteTitle(String name) {
+    return '$name o‘chirilsinmi?';
+  }
+
+  @override
+  String get logwatchDeleteBody => 'agnts uni o‘qishni to‘xtatadi. Topilmalar qoladi.';
+
+  @override
+  String get logwatchNoSources => 'Hozircha log manbasi yo‘q.';
+
+  @override
+  String get logwatchHowPull =>
+      'Loki, Elasticsearch, OpenSearch yoki Graylog: manzil va faqat o‘qish uchun ma’lumotlarni kiriting. agnts har 15 soniyada detektorlari qidiradigan yangi yozuvlarni o‘qiydi.';
+
+  @override
+  String get logwatchHowPrivate =>
+      'O‘z tarmog‘ingizdami? Uni xususiy tarmoq sifatida qo‘shing (WireGuard, OpenVPN yoki agnts-link) va ichki manzilni kiriting.';
+
+  @override
+  String get logwatchHowPush => 'API li log tizimi yo‘qmi? Push manba qo‘shing va Vector yoki Fluent Bit ni agnts ga yo‘naltiring.';
+
+  @override
+  String get logwatchSettingsTitle => 'Loglarni kuzatish';
+
+  @override
+  String get logwatchSettingsSub => 'agnts loglaringizda topgan xatolar va xavfsizlik muammolari bilan nima qiladi.';
+
+  @override
+  String get logwatchErrorsMode => 'Xatolar';
+
+  @override
+  String get logwatchErrorsModeHelp => 'Istisnolar, paniklar va server xatolari to‘lqinlari.';
+
+  @override
+  String get logwatchSecurityMode => 'Xavfsizlik';
+
+  @override
+  String get logwatchSecurityModeHelp =>
+      'Loglardagi sirlar va shaxsiy ma’lumotlar, mijozga yuborilgan stek-treyslar, debug rejimi, hujumlar.';
+
+  @override
+  String get logwatchMode_off => 'O‘chiq';
+
+  @override
+  String get logwatchMode_report => 'Xabar berish';
+
+  @override
+  String get logwatchMode_ticket => 'Tiket ochish';
+
+  @override
+  String get logwatchAlwaysLeaks => 'Sir sizib chiqishini doim bildirish';
+
+  @override
+  String get logwatchAlwaysLeaksHelp => 'Logga yozilgan sir — jonli hodisa: Xavfsizlik o‘chiq bo‘lsa ham bildirish.';
+
+  @override
+  String get logwatchMinSeverity => 'Eng past jiddiylik';
+
+  @override
+  String get logwatchMinSeverityHelp => 'Undan pastdagi topilmalar yoziladi, lekin xabar berilmaydi va tiket ochilmaydi.';
+
+  @override
+  String get logwatchThreshold => 'Harakatdan oldin soatiga xatolar';
+
+  @override
+  String get logwatchThresholdHelp =>
+      'Oddiy xato soatiga shuncha marta bo‘lganda ishlaydi; paniklar, sizib chiqishlar va hujumlar birinchisidayoq.';
+
+  @override
+  String get logwatchMaxAutoPerDay => 'Kuniga avtomatik tiketlar';
+
+  @override
+  String get logwatchMaxAutoPerDayHelp => '«Tuzatish» uchun cheklov yo‘q.';
+
+  @override
+  String get logwatchAttackAfter => 'Himoya tiketidan oldingi hujumlar';
+
+  @override
+  String get logwatchAttackAfterHelp =>
+      'Bir yo‘nalishga 7 kunda shuncha marta bir xil hujum tezlikni cheklash yoki bloklash tiketini ochadi; 0 — hech qachon.';
+
+  @override
+  String get logwatchResolveAfter => 'Yopilishdan oldingi jim kunlar';
+
+  @override
+  String get logwatchResolveAfterHelp => 'Reviziyasiz loglar uchun: tuzatilgan topilma shuncha jim kundan keyin yopiladi.';
+
+  @override
+  String get logwatchDigest => 'Kunlik xulosa';
+
+  @override
+  String get logwatchDigestHelp => 'Har bir topilma uchun emas, kuniga bitta xabar (jiddiy sizib chiqishlar darhol keladi).';
+
+  @override
+  String get logwatchTriage => 'Model tahlili';
+
+  @override
+  String get logwatchTriageHelp =>
+      'Yengil model yangi topilmalarni tushuntiradi (ish maydoni kreditlari hisobidan); 0 — qoidalar sarlavhalari.';
+
+  @override
+  String get logwatchPatterns => 'Maxsus detektorlar';
+
+  @override
+  String get logwatchPatternsHelp => 'Har qatorda bittadan: turkum:jiddiylik nom=regex, masalan security:high billing-token=\\S+';
+
+  @override
+  String get logwatchOverridesHelp => 'Servisda repozitoriy bo‘lmaguncha faqat xabar beriladi: ularni bu yerda tanlang:';
+
+  @override
+  String get logwatchNotifyLabel => 'Loglarni kuzatish nimadir topdi';
+
+  @override
+  String get logwatchAgentTitle => 'agnts-watch (log tizimisiz)';
+
+  @override
+  String get logwatchAgentHelp =>
+      'Log tizimi bo‘lmagan serverda: buni servislaringiz yonida ishga tushiring. U agnts.watch=logs yorlig‘li konteynerlarni kuzatadi, yiqilishlar, OOM va sog‘liq tekshiruvi xatolarini bildiradi va o‘zi agnts ga ulanadi.';
+
+  @override
+  String get logwatchKind_datadog => 'Datadog';
+
+  @override
+  String get logwatchKind_cloudwatch => 'Amazon CloudWatch Logs';
+
+  @override
+  String get logwatchKind_splunk => 'Splunk';
+
+  @override
+  String get logwatchAuth_aws => 'AWS kirish kaliti';
+
+  @override
+  String get logwatchAwsKeyId => 'Kirish kaliti ID';
+
+  @override
+  String get logwatchAwsSecret => 'Maxfiy kalit';
+
+  @override
+  String get logwatchAwsSession => 'Sessiya tokeni (ixtiyoriy)';
+
+  @override
+  String get logwatchDdApiKey => 'API kalit';
+
+  @override
+  String get logwatchDdAppKey => 'Application key';
+
+  @override
+  String get logwatchTokenPh_datadog => 'API kalit';
+
+  @override
+  String get logwatchTokenPh_cloudwatch => '';
+
+  @override
+  String get logwatchTokenPh_splunk => 'Splunk autentifikatsiya tokeni';
+
+  @override
+  String get logwatchAuthHelp_datadog => 'logs_read_data huquqli application key yetarli.';
+
+  @override
+  String get logwatchAuthHelp_cloudwatch => 'Faqat logs:DescribeLogGroups va logs:FilterLogEvents huquqli IAM foydalanuvchi yoki rol.';
+
+  @override
+  String get logwatchAuthHelp_splunk => 'Boshqaruv API (8089-port); indeksda qidira oladigan foydalanuvchi tokeni.';
+
+  @override
+  String get logwatchIndex_elasticsearch => 'Indeks shabloni';
+
+  @override
+  String get logwatchIndex_opensearch => 'Indeks shabloni';
+
+  @override
+  String get logwatchIndex_splunk => 'Indeks';
+
+  @override
+  String get logwatchIndex_cloudwatch => 'Log guruhi prefiksi';
+
+  @override
+  String get logwatchIndexHelp_elasticsearch => 'Bo‘sh bo‘lsa logs-*, filebeat-* va logstash-* o‘qiladi.';
+
+  @override
+  String get logwatchIndexHelp_opensearch => 'Bo‘sh bo‘lsa logs-*, filebeat-* va logstash-* o‘qiladi.';
+
+  @override
+  String get logwatchIndexHelp_splunk => 'Bo‘sh bo‘lsa token o‘qiy oladigan barcha indekslarda qidiriladi.';
+
+  @override
+  String get logwatchIndexHelp_cloudwatch => 'Servislar — log guruhlari; prefiks ro‘yxatni toraytiradi (/ecs/, /aws/lambda/).';
+
+  @override
   String get maccountPasswordInstead => 'Parol bilan kirish';
 
   @override
@@ -8339,6 +9133,104 @@ class AppLocalizationsUz extends AppLocalizations {
   String get minsightsTaskActions => 'Vazifa amallari';
 
   @override
+  String get mlogsTitle => 'Loglarni kuzatish';
+
+  @override
+  String get mlogsLede => 'agnts loyihalaringiz loglarida topgan va hali e’tibor talab qiladigan narsalar.';
+
+  @override
+  String get mlogsErrors => 'Xatolar';
+
+  @override
+  String get mlogsSecurity => 'Xavfsizlik';
+
+  @override
+  String get mlogsEmpty => 'E’tibor talab qiladigan narsa yo‘q.';
+
+  @override
+  String mlogsLastSeen(String when) {
+    return 'ko‘rildi $when';
+  }
+
+  @override
+  String get mlogsReportOnly => 'faqat xabar';
+
+  @override
+  String get mlogsStatusOpen => 'Ko‘rildi';
+
+  @override
+  String get mlogsStatusReported => 'Xabar berildi';
+
+  @override
+  String get mlogsStatusFixing => 'Tuzatilmoqda';
+
+  @override
+  String get mlogsStatusFixed => 'Tuzatildi';
+
+  @override
+  String get mlogsStatusResolved => 'Yo‘qoldi';
+
+  @override
+  String get mlogsStatusMuted => 'O‘chirilgan';
+
+  @override
+  String get mlogsStatusRegression => 'Qaytdi';
+
+  @override
+  String get mlogsCardTitle => 'Loglarda topilgan';
+
+  @override
+  String get mlogsFix => 'Tuzatish';
+
+  @override
+  String get mlogsFixConfirm => 'Tuzatish uchun tiket ochilsinmi? Hech narsa yuborilishidan oldin siz ko‘rib chiqasiz.';
+
+  @override
+  String get mlogsMute => 'O‘chirish';
+
+  @override
+  String get mlogsUnmute => 'Yoqish';
+
+  @override
+  String get mlogsMutedDone => 'O‘chirildi';
+
+  @override
+  String get mlogsUnmutedDone => 'Yana kuzatilmoqda';
+
+  @override
+  String mlogsMasked(String mask) {
+    return 'qiymat: $mask (yashirilgan)';
+  }
+
+  @override
+  String get mlogsNoRepos =>
+      'Bu servis uchun repozitoriy tanlanmagan, shuning uchun faqat xabar beriladi. Ularni admin panelidagi «Log manbalari» bo‘limida tanlang.';
+
+  @override
+  String get mlogsTicket => 'Tiket';
+
+  @override
+  String get mlogsFactCount => 'Ko‘rilgan';
+
+  @override
+  String get mlogsFactLastHour => 'Oxirgi soat';
+
+  @override
+  String get mlogsFactFirstSeen => 'Birinchi marta';
+
+  @override
+  String get mlogsFactLastSeen => 'Oxirgi marta';
+
+  @override
+  String get mlogsRemediation => 'Qanday tuzatish kerak';
+
+  @override
+  String get mlogsExcerpt => 'Log parchasi (tozalangan)';
+
+  @override
+  String get mlogsNoExcerpt => 'Parcha saqlanmagan.';
+
+  @override
   String get mmanageFillAll => 'Majburiy maydonlarni toʻldiring.';
 
   @override
@@ -9178,6 +10070,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get navMeetings => 'Uchrashuvlar';
+
+  @override
+  String get navLogWatcher => 'Loglarni kuzatish';
 
   @override
   String get networkTitle => 'Xususiy tarmoqlar';
@@ -12863,7 +13758,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsNotConnected => 'Ulanmagan';
 
   @override
-  String get settingsClaude => 'Claude Code';
+  String get settingsAiModels => 'AI modellari';
 
   @override
   String get settingsClaudeSub => 'Kod yozadigan mexanizm';
@@ -12873,6 +13768,31 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsModelsHelp => 'Har bir qadam uchun modelni tanlang. Haiku tarif limitidan eng kam, Opus esa eng koʻp foydalanadi.';
+
+  @override
+  String get settingsModuleTabs => 'Kod uchun modul';
+
+  @override
+  String get settingsModuleTabsHelp =>
+      'Barcha bosqichlar siz tanlagan modulda, uning oʻz modellarida ishlaydi. Faqat administrator siz uchun yoqqan modullar koʻrsatiladi.';
+
+  @override
+  String get settingsModulesMixed =>
+      'Hozir bosqichlar bir nechta moduldan foydalanadi. Modul tanlansa, hammasi unga xuddi shu darajada oʻtadi (Opus Muse Wonder boʻladi).';
+
+  @override
+  String get settingsModelsHelpCodex =>
+      'Har bir bosqich uchun Codex modelini tanlang: OpenAI kalitingiz ishlata oladigan istalgan model boʻladi.';
+
+  @override
+  String get settingsStageReviewHelpCodex =>
+      'Siz koʻrayotganda har bir natijani tekshiradi. «Avto» murakkab vazifalar uchun asosiy modulingizning kuchliroq modelini, qolganlari uchun yengilrogʻini oladi.';
+
+  @override
+  String get settingsCodexModelNeeded => 'Har bir bosqich uchun Codex modelini kiriting.';
+
+  @override
+  String get settingsCodexModelLabel => 'Codex modeli';
 
   @override
   String get settingsStageAnalyze => 'Tiketni oʻqish va savol berish';
@@ -12905,6 +13825,23 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsStageLearnHelp => 'Har bir yuborilgan oʻzgarishni oʻqiydi va repozitoriy uchun yangi narsalar haqida dars yozadi.';
 
   @override
+  String get settingsStageChat => 'Chat';
+
+  @override
+  String get settingsStageChatHelp =>
+      'Yordamchi chatidagi javoblar va ovozli savollar. Hech qachon kreditlar hisobiga ishlamaydi: ulangan hisob kerak.';
+
+  @override
+  String get settingsStageDocuments => 'Hujjatlar va uchrashuv qaydlari';
+
+  @override
+  String get settingsStageDocumentsHelp => 'Hujjatlarni, shuningdek uchrashuv qaydlari va vazifalarini yozadi.';
+
+  @override
+  String get settingsMeetingAudioMuse =>
+      'Uchrashuv ovozini doim Muse eshitadi — audioni eshitadigan yagona modul; qaydlarni yuqoridagi model yozadi.';
+
+  @override
   String get settingsStageReview => 'Kod sharhi';
 
   @override
@@ -12913,6 +13850,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsModelAuto => 'Avto';
+
+  @override
+  String get settingsModelTierLight => 'Yengil, istalgan modul';
+
+  @override
+  String get settingsModelTierStrong => 'Kuchli, istalgan modul';
 
   @override
   String get settingsMaxTurns => 'Har bir ish uchun qadamlar limiti';
@@ -12999,6 +13942,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsAutoResume => 'Limit yangilangach toʻxtatilgan ishlarni davom ettirish';
+
+  @override
+  String get settingsSwitchModules => 'Modul ishlay olmasa, boshqasiga oʻtish';
+
+  @override
+  String get settingsSwitchModulesHelp =>
+      'Modul hisobining limiti tugasa, hisob boʻlmasa yoki modul shu odam uchun yoqilmagan boʻlsa, ish uning keyingi modulida xuddi shu darajada bajariladi (opus Muse Wonder boʻladi). Oʻchiq: ish oʻz modulini kutadi.';
 
   @override
   String get settingsAutoLearn => 'Har bir yuborilgan oʻzgarishdan oʻrganish';
@@ -13112,9 +14062,6 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get settingsCiRed => 'Kuzatiladigan branch qizarganda';
-
-  @override
-  String get settingsClaudeMuse => 'Muse Code';
 
   @override
   String get settingsClaudeMovedMuse => 'Muse har bir ish maydoni uchun alohida ulanadi.';
@@ -14881,6 +15828,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String ticketMuseEscalated(String model) {
     return '$model ga o‘tkazildi';
   }
+
+  @override
+  String get ticketSrcLogs => 'Loglarda topilgan';
 
   @override
   String get ticketsTabsLabel => 'Tiket roʻyxatlari';

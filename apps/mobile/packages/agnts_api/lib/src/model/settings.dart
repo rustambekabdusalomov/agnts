@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:agnts_api/src/model/log_watch_settings.dart';
 import 'package:agnts_api/src/model/notify_settings.dart';
 import 'package:agnts_api/src/model/pr_comment_settings.dart';
 import 'package:agnts_api/src/model/ci_settings.dart';
@@ -73,6 +74,8 @@ class Settings {
      this.prComments,
 
      this.ci,
+
+     this.logWatch,
 
      this.guard,
 
@@ -402,6 +405,18 @@ class Settings {
 
   @JsonKey(
     
+    name: r'logWatch',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final LogWatchSettings? logWatch;
+
+
+
+  @JsonKey(
+    
     name: r'guard',
     required: false,
     includeIfNull: false,
@@ -607,6 +622,7 @@ class Settings {
       other.pullReviews == pullReviews &&
       other.prComments == prComments &&
       other.ci == ci &&
+      other.logWatch == logWatch &&
       other.guard == guard &&
       other.stalls == stalls &&
       other.proveFixes == proveFixes &&
@@ -647,6 +663,7 @@ class Settings {
         pullReviews.hashCode +
         prComments.hashCode +
         ci.hashCode +
+        logWatch.hashCode +
         guard.hashCode +
         stalls.hashCode +
         proveFixes.hashCode +

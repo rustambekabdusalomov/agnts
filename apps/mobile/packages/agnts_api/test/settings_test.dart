@@ -135,6 +135,11 @@ void main() {
       // TODO
     });
 
+    // LogWatchSettings logWatch
+    test('to test the property `logWatch`', () async {
+      // TODO
+    });
+
     // GuardSettings guard
     test('to test the property `guard`', () async {
       // TODO

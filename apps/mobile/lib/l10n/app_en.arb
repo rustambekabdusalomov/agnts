@@ -3876,6 +3876,366 @@
   "logsTypeError": "Error",
   "logsTypeEvent": "Event",
   "logsTypeBudget": "Spend",
+  "logwatchTitle": "Log watcher",
+  "logwatchLede": "Errors and security mistakes agnts found in your projects' logs, grouped by error. It reports them, or opens a ticket to fix them, as Settings say.",
+  "logwatchBack": "Log watcher",
+  "logwatchSources": "Log sources",
+  "logwatchSettings": "Settings",
+  "logwatchCategoryLabel": "Category",
+  "logwatchFilterLabel": "Show",
+  "logwatchCat_error": "Errors",
+  "logwatchCat_security": "Security",
+  "logwatchFilter_active": "Needs attention",
+  "logwatchFilter_fixed": "Fixed",
+  "logwatchFilter_muted": "Muted",
+  "logwatchFilter_all": "All",
+  "logwatchRepo": "Repository",
+  "logwatchAllRepos": "All repositories",
+  "logwatchEmptyActive": "Nothing needs your attention: no new errors or security problems in the logs.",
+  "logwatchEmptyFilter": "No findings here.",
+  "logwatchHowTitle": "How the log watcher works",
+  "logwatchHowSources": "Add a log source: the address of your Loki, Elasticsearch, OpenSearch or Graylog, or a push token for Vector or Fluent Bit. Then pick the services to watch and the repositories each runs on.",
+  "logwatchHowModes": "Settings → Log watcher decides what happens: Report (shown here and notified) or Open ticket. Automatic tickets are off until you turn them on.",
+  "logwatchColStatus": "Status",
+  "logwatchColFinding": "Finding",
+  "logwatchColCount": "Seen",
+  "logwatchColLastSeen": "Last seen",
+  "logwatchColTicket": "Ticket",
+  "logwatchColTime": "Time",
+  "logwatchColService": "Service",
+  "logwatchColRevision": "Revision",
+  "logwatchColSource": "Source",
+  "logwatchColHealth": "Health",
+  "logwatchColServices": "Services",
+  "logwatchColLastRead": "Last read",
+  "logwatchTimes": "{n, plural, one {{n} time} other {{n} times}}",
+  "@logwatchTimes": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "logwatchMasked": "Value: {mask} (masked; agnts never stores it)",
+  "@logwatchMasked": {
+    "placeholders": {
+      "mask": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchReportOnly": "Report only",
+  "logwatchFix": "Fix it",
+  "logwatchFixStarted": "{key} opened: agnts is on it. You review the fix before anything is pushed.",
+  "@logwatchFixStarted": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchMute": "Mute",
+  "logwatchUnmute": "Unmute",
+  "logwatchMuted": "Muted: no more notifications or tickets for it.",
+  "logwatchUnmuted": "Watching it again.",
+  "logwatchNotify": "Notify now",
+  "logwatchNotified": "Notification sent.",
+  "logwatchStatus_open": "Seen",
+  "logwatchStatus_reported": "Reported",
+  "logwatchStatus_fixing": "Fixing",
+  "logwatchStatus_fixed": "Fixed",
+  "logwatchStatus_resolved": "Gone",
+  "logwatchStatus_muted": "Muted",
+  "logwatchStatus_regression": "Back",
+  "logwatchStatusHelp_open": "Seen in the logs; below the threshold, or its category is off",
+  "logwatchStatusHelp_reported": "Shown here and notified",
+  "logwatchStatusHelp_fixing": "A ticket works on it",
+  "logwatchStatusHelp_fixed": "The fix merged; waiting to see it gone from the logs",
+  "logwatchStatusHelp_resolved": "Quiet since the fix",
+  "logwatchStatusHelp_muted": "Ignored: no tickets, no notifications",
+  "logwatchStatusHelp_regression": "In the logs again after the fix",
+  "logwatchSev_low": "Low",
+  "logwatchSev_medium": "Medium",
+  "logwatchSev_high": "High",
+  "logwatchSev_critical": "Critical",
+  "logwatchClass_code": "Code bug",
+  "logwatchClass_config": "Configuration",
+  "logwatchClass_infra": "Infrastructure",
+  "logwatchClass_dependency": "Dependency",
+  "logwatchClass_leak": "Leak",
+  "logwatchClass_exposure": "Exposure",
+  "logwatchClass_weakness": "Weakness",
+  "logwatchClass_attack": "Attack",
+  "logwatchClass_noise": "Noise",
+  "logwatchClass_": "Unknown",
+  "logwatchNotFound": "No such finding.",
+  "logwatchOpenTicket": "Open {key}",
+  "@logwatchOpenTicket": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchRegressionNote": "This came back after its fix merged.",
+  "logwatchNoReposNote": "No repository is selected for this service, so it is only reported. Select its repositories to let agnts fix it:",
+  "logwatchRemediation": "How to fix it",
+  "logwatchExcerpt": "Log excerpt",
+  "logwatchExcerptSub": "Redacted: secrets and personal data are hidden before anything is stored.",
+  "logwatchNoExcerpt": "No excerpt kept (it is dropped 30 days after the finding is over).",
+  "logwatchOccurrences": "Sightings",
+  "logwatchOccurrencesSub": "The last 20 batches it was seen in.",
+  "logwatchNoOccurrences": "No sightings kept.",
+  "logwatchFacts": "Facts",
+  "logwatchCount": "Seen",
+  "logwatchLastHour": "In the last hour",
+  "logwatchFirstSeen": "First seen",
+  "logwatchLastSeen": "Last seen",
+  "logwatchDetector": "Detector",
+  "logwatchRoute": "Route",
+  "logwatchRevision": "Revision",
+  "logwatchFixedSha": "Fixed in",
+  "logwatchTicket": "Ticket",
+  "logwatchCardTitle": "Found in the logs",
+  "logwatchGoneNow": "Gone from the logs",
+  "logwatchWaitingQuiet": "Merged; watching the logs",
+  "logwatchBackAgain": "Back in the logs",
+  "logwatchOpenFinding": "Open the finding",
+  "logwatchSourcesLede": "The logging systems agnts reads, by address (through your private network when the address is on one), and the push tokens your log shippers send with.",
+  "logwatchAddSource": "Add source",
+  "logwatchSourceDrawerSub": "agnts tests the connection before it saves.",
+  "logwatchKind": "Logging system",
+  "logwatchKind_loki": "Grafana Loki",
+  "logwatchKind_elasticsearch": "Elasticsearch",
+  "logwatchKind_opensearch": "OpenSearch",
+  "logwatchKind_graylog": "Graylog",
+  "logwatchKind_push": "Push (Vector, Fluent Bit…)",
+  "logwatchName": "Name",
+  "logwatchNamePh": "prod-loki",
+  "logwatchEnvironment": "Environment",
+  "logwatchEnvironmentHelp": "Debug mode counts as a problem in production only.",
+  "logwatchEnv_production": "Production",
+  "logwatchEnv_staging": "Staging",
+  "logwatchEnv_development": "Development",
+  "logwatchAddress": "Address",
+  "logwatchAddressHelp": "A public address must use https. An address on your private network (10.x, *.local) is reached through it; add the network in Workspace settings first.",
+  "logwatchAuth": "Credentials",
+  "logwatchAuth_none": "None",
+  "logwatchAuth_basic": "User and password",
+  "logwatchAuth_bearer": "Token",
+  "logwatchAuth_apikey": "API key",
+  "logwatchAuthSaved": "Saved ({kind}); kept unless you change them.",
+  "@logwatchAuthSaved": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchAuthChange": "Change credentials",
+  "logwatchUser": "User",
+  "logwatchPassword": "Password",
+  "logwatchToken": "Token",
+  "logwatchTokenPh_loki": "Bearer token",
+  "logwatchTokenPh_elasticsearch": "API key (base64 id:key)",
+  "logwatchTokenPh_opensearch": "Token",
+  "logwatchTokenPh_graylog": "Graylog access token",
+  "logwatchTokenPh_push": "",
+  "logwatchAuthHelp_loki": "Use a read-only token. A multi-tenant Loki also needs the tenant (X-Scope-OrgID).",
+  "logwatchAuthHelp_elasticsearch": "Use a key with read access to the index pattern only.",
+  "logwatchAuthHelp_opensearch": "Use a user with read access to the index pattern only.",
+  "logwatchAuthHelp_graylog": "Create an access token for a user with the Reader role.",
+  "logwatchAuthHelp_push": "",
+  "logwatchTenant": "Tenant",
+  "logwatchTenantPh": "Tenant (X-Scope-OrgID), optional",
+  "logwatchSelector": "Base selector",
+  "logwatchSelectorHelp": "Optional: what all services share, such as the environment label.",
+  "logwatchPollEvery": "Read every",
+  "logwatchPollHelp": "15 seconds keeps findings within a minute; a large shared cluster may want 60.",
+  "logwatchSeconds": "{n} s",
+  "@logwatchSeconds": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchAdvanced": "Field names and CA certificate",
+  "logwatchField_service": "Service field or label",
+  "logwatchField_level": "Level field",
+  "logwatchField_message": "Message field",
+  "logwatchField_timestamp": "Time field",
+  "logwatchField_revision": "Revision field (deployed commit)",
+  "logwatchFieldsHelp": "Test connection fills these in; change them only if it guessed wrong.",
+  "logwatchCa": "CA certificate (PEM), for a private CA",
+  "logwatchPushHelp": "Your shipper sends to agnts with a token. agnts shows the token and ready Vector and Fluent Bit configuration once you add the source.",
+  "logwatchEnabled": "Read this source",
+  "logwatchTest": "Test connection",
+  "logwatchTesting": "Testing…",
+  "logwatchTestOk": "Connected: version {version}, {ms} ms",
+  "@logwatchTestOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchViaNetwork": "Through the private network {name}.",
+  "@logwatchViaNetwork": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchDirect": "Directly, over the internet.",
+  "logwatchServicesOf": "Services of {name}",
+  "@logwatchServicesOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchServicesSub": "Tick the services to watch and pick the repositories each runs on (several for a gateway). Without a repository a service is only reported.",
+  "logwatchDiscovering": "Looking for services in the logs…",
+  "logwatchSelectorOf": "Selector of {name}",
+  "@logwatchSelectorOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchNoReposYet": "No repository: report only",
+  "logwatchAddRepo": "Add a repository",
+  "logwatchNoServices": "No services found yet. Add one by name below.",
+  "logwatchAddService": "Add a service by name",
+  "logwatchAddServicePh": "api",
+  "logwatchAdd": "Add",
+  "logwatchTokenTitle": "Push token for {name}",
+  "@logwatchTokenTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchTokenSub": "Shown once: copy it into your shipper's configuration now. Making a new one stops the old one.",
+  "logwatchPushUrl": "Push address",
+  "logwatchPushToken": "Token",
+  "logwatchTokenDone": "I copied it",
+  "logwatchPrivateNetwork": "Through a private network",
+  "logwatchSource_new": "Not read yet",
+  "logwatchSource_ok": "Reading",
+  "logwatchSource_behind": "Falling behind",
+  "logwatchSource_failing": "Failing",
+  "logwatchSource_auth_failed": "Credentials refused",
+  "logwatchDropped": "{n} entries skipped over the limit",
+  "@logwatchDropped": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchGap": "Not read: {from} to {to}",
+  "@logwatchGap": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchDisabled": "Turned off",
+  "logwatchHasToken": "Token set",
+  "logwatchNoToken": "No token yet",
+  "logwatchWatching": "{n, plural, =0 {No services watched} one {{n} service} other {{n} services}}",
+  "@logwatchWatching": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "logwatchServices": "Services",
+  "logwatchMakeToken": "Make token",
+  "logwatchNewToken": "New token",
+  "logwatchEdit": "Edit",
+  "logwatchDelete": "Delete",
+  "logwatchDeleteTitle": "Delete {name}?",
+  "@logwatchDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchDeleteBody": "agnts stops reading it. Its findings stay.",
+  "logwatchNoSources": "No log sources yet.",
+  "logwatchHowPull": "Loki, Elasticsearch, OpenSearch or Graylog: enter the address and read-only credentials. agnts reads new entries every 15 seconds, filtered to what its detectors look for.",
+  "logwatchHowPrivate": "On your own network? Add it as a private network (WireGuard, OpenVPN or agnts-link) and enter the internal address.",
+  "logwatchHowPush": "No logging system with an API? Add a push source and point Vector or Fluent Bit at agnts.",
+  "logwatchSettingsTitle": "Log watcher",
+  "logwatchSettingsSub": "What agnts does with the errors and security problems it finds in your logs.",
+  "logwatchErrorsMode": "Errors",
+  "logwatchErrorsModeHelp": "Exceptions, panics and bursts of server errors.",
+  "logwatchSecurityMode": "Security",
+  "logwatchSecurityModeHelp": "Secrets and personal data in logs, stack traces sent to clients, debug mode, attacks.",
+  "logwatchMode_off": "Off",
+  "logwatchMode_report": "Report",
+  "logwatchMode_ticket": "Open ticket",
+  "logwatchAlwaysLeaks": "Always notify secret leaks",
+  "logwatchAlwaysLeaksHelp": "A secret written to the logs is a live incident: notify it even when Security is off.",
+  "logwatchMinSeverity": "Lowest severity",
+  "logwatchMinSeverityHelp": "Findings below it are recorded, not reported or ticketed.",
+  "logwatchThreshold": "Errors per hour before acting",
+  "logwatchThresholdHelp": "A plain error acts after this many in an hour; panics, leaks and attacks act on the first one.",
+  "logwatchMaxAutoPerDay": "Automatic tickets a day",
+  "logwatchMaxAutoPerDayHelp": "Fix it is not capped.",
+  "logwatchAttackAfter": "Attacks before a hardening ticket",
+  "logwatchAttackAfterHelp": "The same attack on one route this many times in 7 days opens a ticket to add rate limiting or lockout; 0 never.",
+  "logwatchResolveAfter": "Quiet days before resolved",
+  "logwatchResolveAfterHelp": "For logs without a deployed revision: a fixed finding is resolved after this many quiet days.",
+  "logwatchDigest": "Daily digest",
+  "logwatchDigestHelp": "One message a day instead of one per finding (high-severity leaks still come at once).",
+  "logwatchTriage": "Model triage",
+  "logwatchTriageHelp": "A light model explains new findings (on the workspace's credits); 0 keeps the rules' titles.",
+  "logwatchPatterns": "Custom detectors",
+  "logwatchPatternsHelp": "One a line: category:severity name=regex, such as security:high billing-token=\\S+",
+  "logwatchOverridesHelp": "A service is reported only until it has repositories: select them under",
+  "logwatchNotifyLabel": "The log watcher found something",
+  "logwatchAgentTitle": "agnts-watch (no logging system)",
+  "logwatchAgentHelp": "On a server without a logging system: run this next to your services. It follows the containers labelled agnts.watch=logs, reports crashes, OOM kills and failed health checks, and connects out to agnts only.",
+  "logwatchKind_datadog": "Datadog",
+  "logwatchKind_cloudwatch": "Amazon CloudWatch Logs",
+  "logwatchKind_splunk": "Splunk",
+  "logwatchAuth_aws": "AWS access key",
+  "logwatchAwsKeyId": "Access key id",
+  "logwatchAwsSecret": "Secret access key",
+  "logwatchAwsSession": "Session token (optional)",
+  "logwatchDdApiKey": "API key",
+  "logwatchDdAppKey": "Application key",
+  "logwatchTokenPh_datadog": "API key",
+  "logwatchTokenPh_cloudwatch": "",
+  "logwatchTokenPh_splunk": "Splunk authentication token",
+  "logwatchAuthHelp_datadog": "An application key with the logs_read_data scope is enough.",
+  "logwatchAuthHelp_cloudwatch": "An IAM user or role with logs:DescribeLogGroups and logs:FilterLogEvents only.",
+  "logwatchAuthHelp_splunk": "The management API (port 8089); a token of a user who can search the index.",
+  "logwatchIndex_elasticsearch": "Index pattern",
+  "logwatchIndex_opensearch": "Index pattern",
+  "logwatchIndex_splunk": "Index",
+  "logwatchIndex_cloudwatch": "Log group prefix",
+  "logwatchIndexHelp_elasticsearch": "Empty reads logs-*, filebeat-* and logstash-*.",
+  "logwatchIndexHelp_opensearch": "Empty reads logs-*, filebeat-* and logstash-*.",
+  "logwatchIndexHelp_splunk": "Empty searches every index the token may read.",
+  "logwatchIndexHelp_cloudwatch": "Services are log groups; this narrows the list (/ecs/, /aws/lambda/).",
   "maccountPasswordInstead": "Sign in with a password",
   "maccountGoogleInstead": "Continue with Google instead",
   "maccountSetupLede": "Admins sign in with two factors. Add this account to an authenticator app with the secret below (or open the setup link on this phone), then enter the 6-digit code it shows.",
@@ -5064,6 +5424,51 @@
     }
   },
   "minsightsTaskActions": "Task actions",
+  "mlogsTitle": "Log watcher",
+  "mlogsLede": "What agnts found in your projects' logs and still needs attention.",
+  "mlogsErrors": "Errors",
+  "mlogsSecurity": "Security",
+  "mlogsEmpty": "Nothing needs your attention.",
+  "mlogsLastSeen": "seen {when}",
+  "@mlogsLastSeen": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "mlogsReportOnly": "report only",
+  "mlogsStatusOpen": "Seen",
+  "mlogsStatusReported": "Reported",
+  "mlogsStatusFixing": "Fixing",
+  "mlogsStatusFixed": "Fixed",
+  "mlogsStatusResolved": "Gone",
+  "mlogsStatusMuted": "Muted",
+  "mlogsStatusRegression": "Back",
+  "mlogsCardTitle": "Found in the logs",
+  "mlogsFix": "Fix it",
+  "mlogsFixConfirm": "Open a ticket to fix this? You review the fix before anything is pushed.",
+  "mlogsMute": "Mute",
+  "mlogsUnmute": "Unmute",
+  "mlogsMutedDone": "Muted",
+  "mlogsUnmutedDone": "Watching it again",
+  "mlogsMasked": "value: {mask} (masked)",
+  "@mlogsMasked": {
+    "placeholders": {
+      "mask": {
+        "type": "String"
+      }
+    }
+  },
+  "mlogsNoRepos": "No repository is selected for this service, so it is only reported. Select them in the admin panel under Log sources.",
+  "mlogsTicket": "Ticket",
+  "mlogsFactCount": "Seen",
+  "mlogsFactLastHour": "Last hour",
+  "mlogsFactFirstSeen": "First seen",
+  "mlogsFactLastSeen": "Last seen",
+  "mlogsRemediation": "How to fix it",
+  "mlogsExcerpt": "Log excerpt (redacted)",
+  "mlogsNoExcerpt": "No excerpt kept.",
   "mmanageFillAll": "Fill in the required fields.",
   "mmoreAgo": "{time} ago",
   "@mmoreAgo": {
@@ -5540,6 +5945,7 @@
   "navAssistantConversations": "Conversations",
   "navDocuments": "Documents",
   "navMeetings": "Meetings",
+  "navLogWatcher": "Log watcher",
   "networkTitle": "Private networks",
   "networkSub": "Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.",
   "networkUnavailable": "Private networks are not set up on this server: the operator runs the gateway service and sets AGNTS_GATEWAY.",
@@ -9236,6 +9642,7 @@
       }
     }
   },
+  "ticketSrcLogs": "Found in logs",
   "ticketsTabsLabel": "Ticket lists",
   "ticketsTitle": "Tickets",
   "ticketsNeedsYou": "Needs you",
