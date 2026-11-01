@@ -164,7 +164,7 @@ func (w *workspace) muse(ctx context.Context, req orchestrator.ClaudeRequest, on
 func museCredential(c Credential) (credential.Credential, error) {
 	switch {
 	case c.Token == "":
-		return credential.Credential{}, errors.New("muse is not connected: connect your Meta account in Workspace settings → Muse")
+		return credential.Credential{}, errors.New("muse is not connected: connect your Meta account in Workspace settings → AI accounts")
 	case c.Env == MuseLoginEnv:
 		return credential.LoginFile([]byte(c.Token), "")
 	case c.Env == MuseKeyEnv:

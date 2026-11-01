@@ -10564,7 +10564,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueAddSlot => 'Add a slot';
 
   @override
-  String get queueClaudeHint => 'Connect an account or turn on credits in Workspace settings → Muse.';
+  String get queueClaudeHint => 'Connect an account or turn on credits in Workspace settings → AI accounts.';
 
   @override
   String get queueMember => 'Member';
@@ -13086,7 +13086,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsClaudeMoved => 'Claude is connected per workspace now.';
 
   @override
-  String get settingsClaudeOpen => 'Workspace → Claude';
+  String get settingsClaudeOpen => 'Workspace → AI accounts';
 
   @override
   String get settingsSelfReview => 'Fix review findings first';
@@ -13119,7 +13119,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsClaudeMovedMuse => 'Muse is connected per workspace.';
 
   @override
-  String get settingsClaudeOpenMuse => 'Workspace → Muse';
+  String get settingsClaudeOpenMuse => 'Workspace → AI accounts';
 
   @override
   String get settingsModelsHelpMuse =>
@@ -15180,7 +15180,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wsTabMembers => 'Members';
 
   @override
-  String get wsTabClaude => 'Claude';
+  String get wsTabAi => 'AI accounts';
 
   @override
   String get wsTabBilling => 'Billing';
@@ -15510,9 +15510,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String wsRoleLabel(String name) {
     return 'Role of $name';
   }
-
-  @override
-  String get wsTabMuse => 'Muse';
 
   @override
   String get wsClaudeMuse => 'Muse';

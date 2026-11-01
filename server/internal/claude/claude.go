@@ -152,7 +152,7 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, p
 		if w.ClaudeMode == domain.ClaudePerMember {
 			why = who + " has not connected a " + tool + " account (Profile → " + tool + ")"
 		} else {
-			why = "no " + tool + " account is connected (Workspace settings → " + tool + ")"
+			why = "no " + tool + " account is connected (Workspace settings → AI accounts)"
 		}
 	case err != nil:
 		why = "could not read the " + tool + " account: " + err.Error()
@@ -256,7 +256,7 @@ func (s *Service) CredentialFor(ctx context.Context) (Credential, error) {
 	}
 	if errors.Is(err, domain.ErrNotFound) {
 		tool := domain.ModuleName(provider)
-		return Credential{}, fmt.Errorf("%s is not connected: connect an account in Workspace settings → %s", strings.ToLower(tool), tool)
+		return Credential{}, fmt.Errorf("%s is not connected: connect an account in Workspace settings → AI accounts", strings.ToLower(tool))
 	}
 	if err != nil {
 		return Credential{}, err

@@ -18852,7 +18852,7 @@ abstract class AppLocalizations {
   /// No description provided for @queueClaudeHint.
   ///
   /// In en, this message translates to:
-  /// **'Connect an account or turn on credits in Workspace settings → Muse.'**
+  /// **'Connect an account or turn on credits in Workspace settings → AI accounts.'**
   String get queueClaudeHint;
 
   /// No description provided for @queueMember.
@@ -23370,7 +23370,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsClaudeOpen.
   ///
   /// In en, this message translates to:
-  /// **'Workspace → Claude'**
+  /// **'Workspace → AI accounts'**
   String get settingsClaudeOpen;
 
   /// No description provided for @settingsSelfReview.
@@ -23430,7 +23430,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsClaudeOpenMuse.
   ///
   /// In en, this message translates to:
-  /// **'Workspace → Muse'**
+  /// **'Workspace → AI accounts'**
   String get settingsClaudeOpenMuse;
 
   /// No description provided for @settingsModelsHelpMuse.
@@ -27045,11 +27045,11 @@ abstract class AppLocalizations {
   /// **'Members'**
   String get wsTabMembers;
 
-  /// No description provided for @wsTabClaude.
+  /// No description provided for @wsTabAi.
   ///
   /// In en, this message translates to:
-  /// **'Claude'**
-  String get wsTabClaude;
+  /// **'AI accounts'**
+  String get wsTabAi;
 
   /// No description provided for @wsTabBilling.
   ///
@@ -27626,12 +27626,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Role of {name}'**
   String wsRoleLabel(String name);
-
-  /// No description provided for @wsTabMuse.
-  ///
-  /// In en, this message translates to:
-  /// **'Muse'**
-  String get wsTabMuse;
 
   /// No description provided for @wsClaudeMuse.
   ///

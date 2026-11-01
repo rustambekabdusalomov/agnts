@@ -11041,7 +11041,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get queueAddSlot => 'Добавить слот';
 
   @override
-  String get queueClaudeHint => 'Подключите аккаунт или включите кредиты в настройках пространства → Muse.';
+  String get queueClaudeHint => 'Подключите аккаунт или включите кредиты в настройках пространства → AI-аккаунты.';
 
   @override
   String get queueMember => 'Участник';
@@ -13665,7 +13665,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsClaudeMoved => 'Claude теперь подключается для каждого пространства отдельно.';
 
   @override
-  String get settingsClaudeOpen => 'Пространство → Claude';
+  String get settingsClaudeOpen => 'Пространство → AI-аккаунты';
 
   @override
   String get settingsSelfReview => 'Сначала исправлять замечания ревью';
@@ -13698,7 +13698,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsClaudeMovedMuse => 'Muse подключается для каждого пространства.';
 
   @override
-  String get settingsClaudeOpenMuse => 'Пространство → Muse';
+  String get settingsClaudeOpenMuse => 'Пространство → AI-аккаунты';
 
   @override
   String get settingsModelsHelpMuse => 'Выберите модель для каждого шага. Muse Spark дешевле всего; Muse Wonder сильнее и дороже.';
@@ -15832,7 +15832,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get wsTabMembers => 'Участники';
 
   @override
-  String get wsTabClaude => 'Claude';
+  String get wsTabAi => 'AI-аккаунты';
 
   @override
   String get wsTabBilling => 'Оплата';
@@ -16180,9 +16180,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String wsRoleLabel(String name) {
     return 'Роль: $name';
   }
-
-  @override
-  String get wsTabMuse => 'Muse';
 
   @override
   String get wsClaudeMuse => 'Muse';

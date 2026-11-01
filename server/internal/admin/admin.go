@@ -235,7 +235,7 @@ func (s *Integrations) Connect(ctx context.Context, provider, token string, sett
 		return View{}, "", err
 	}
 	if provider == "claude" {
-		return View{}, "", invalid("%[1]s is connected per workspace now: Workspace settings → %[1]s", domain.ToolName(domain.AccessOf(ctx)))
+		return View{}, "", invalid("%s is connected per workspace now: Workspace settings → AI accounts", domain.ToolName(domain.AccessOf(ctx)))
 	}
 	check, ok := s.checkers[provider]
 	if !ok {

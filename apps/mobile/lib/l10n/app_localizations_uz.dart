@@ -10581,7 +10581,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get queueAddSlot => 'Slot qo‘shish';
 
   @override
-  String get queueClaudeHint => 'Ish maydoni sozlamalari → Muse bo‘limida hisob ulang yoki kreditlarni yoqing.';
+  String get queueClaudeHint => 'Ish maydoni sozlamalari → AI hisoblari bo‘limida hisob ulang yoki kreditlarni yoqing.';
 
   @override
   String get queueMember => 'A’zo';
@@ -13087,7 +13087,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsClaudeMoved => 'Claude endi har bir ish maydoni uchun alohida ulanadi.';
 
   @override
-  String get settingsClaudeOpen => 'Ish maydoni → Claude';
+  String get settingsClaudeOpen => 'Ish maydoni → AI hisoblari';
 
   @override
   String get settingsSelfReview => 'Avval ko‘rib chiqish kamchiliklarini tuzatish';
@@ -13120,7 +13120,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsClaudeMovedMuse => 'Muse har bir ish maydoni uchun alohida ulanadi.';
 
   @override
-  String get settingsClaudeOpenMuse => 'Ish maydoni → Muse';
+  String get settingsClaudeOpenMuse => 'Ish maydoni → AI hisoblari';
 
   @override
   String get settingsModelsHelpMuse => 'Har bir bosqich uchun modelni tanlang. Muse Spark eng arzoni; Muse Wonder kuchliroq va qimmatroq.';
@@ -15173,7 +15173,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get wsTabMembers => 'A’zolar';
 
   @override
-  String get wsTabClaude => 'Claude';
+  String get wsTabAi => 'AI hisoblari';
 
   @override
   String get wsTabBilling => 'To‘lov';
@@ -15505,9 +15505,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String wsRoleLabel(String name) {
     return '$name roli';
   }
-
-  @override
-  String get wsTabMuse => 'Muse';
 
   @override
   String get wsClaudeMuse => 'Muse';

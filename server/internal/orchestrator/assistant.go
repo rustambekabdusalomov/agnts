@@ -669,7 +669,7 @@ func (o *Orchestrator) assistantAccount(ctx context.Context, s domain.Settings, 
 		return ctx, &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(provider) + ": " + why + "."}
 	}
 	if acct.Credits {
-		return ctx, &assistantError{msg: fmt.Sprintf("The assistant needs a connected %[1]s account (Workspace settings → %[1]s); it does not run on credits.", domain.ModuleName(provider))}
+		return ctx, &assistantError{msg: fmt.Sprintf("The assistant needs a connected %s account (Workspace settings → AI accounts); it does not run on credits.", domain.ModuleName(provider))}
 	}
 	return domain.WithClaude(ctx, acct), nil
 }
