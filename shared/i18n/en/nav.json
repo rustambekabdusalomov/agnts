@@ -65,6 +65,7 @@
     "assistantCode": "Code",
     "assistantConversations": "Conversations",
     "documents": "Documents",
-    "meetings": "Meetings"
+    "meetings": "Meetings",
+    "logWatcher": "Log watcher"
   }
 }

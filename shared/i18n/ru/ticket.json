@@ -256,6 +256,7 @@
     "museCharged": "списано {amount}",
     "museSteered": "Бюджет на исходе: попросили завершать",
     "museStopped": "Остановлен: бюджет исчерпан",
-    "museEscalated": "Переведён на {model}"
+    "museEscalated": "Переведён на {model}",
+    "srcLogs": "Найдено в логах"
   }
 }

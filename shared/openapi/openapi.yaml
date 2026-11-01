@@ -8420,7 +8420,7 @@ components:
         title: { type: string }
         state: { $ref: '#/components/schemas/TicketState' }
         kind: { $ref: '#/components/schemas/TicketKind' }
-        source: { type: string, enum: [jira, plane, local, git, ci] }
+        source: { type: string, enum: [jira, plane, local, git, ci, logs] }
         held: { type: boolean }
 
     FollowUps:
@@ -8836,7 +8836,7 @@ components:
       properties:
         key: { type: string }
         ticketNumber: { type: string, description: "The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key" }
-        source: { type: string, enum: [jira, plane, local, git, ci] }
+        source: { type: string, enum: [jira, plane, local, git, ci, logs] }
         repoId: { type: integer, format: int64, description: 'The primary repository; repos lists all of them' }
         repos:
           type: array

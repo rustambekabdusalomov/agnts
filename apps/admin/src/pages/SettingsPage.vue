@@ -178,6 +178,22 @@ function setInfra(v: string) {
   if (draft.value?.ci) draft.value.ci.infraPatterns = lines(v)
 }
 const perDay = (n: number) => t('ci.perDay', { n })
+const logModes = computed(() => (['off', 'report', 'ticket'] as const).map((m) => ({ value: m, label: t(`logwatch.mode_${m}`) })))
+const severities = computed(() => (['low', 'medium', 'high', 'critical'] as const).map((v) => ({ value: v, label: t(`logwatch.sev_${v}`) })))
+// Custom detectors, one a line: "category:severity name=regex", e.g.
+// "security:high billing-token=\S+"; a bare line is "error:medium <it>=<it>".
+const logPatterns = computed<string>({
+  get: () =>
+    (draft.value?.logWatch?.patterns ?? []).map((p) => `${p.category}:${p.severity} ${p.name}=${p.pattern}`).join('\n'),
+  set: (v) => {
+    if (!draft.value?.logWatch) return
+    draft.value.logWatch.patterns = lines(v).map((l) => {
+      const m = /^(error|security):(low|medium|high|critical)\s+([^=]+)=(.+)$/.exec(l)
+      if (m) return { category: m[1] as 'error' | 'security', severity: m[2] as 'low' | 'medium' | 'high' | 'critical', name: m[3].trim(), pattern: m[4] }
+      return { category: 'error' as const, severity: 'medium' as const, name: l.slice(0, 40), pattern: l }
+    })
+  },
+})
 
 // Guardrails: agnts-guard, the hooks inside every run, and the checks
 // around it.
@@ -455,6 +471,50 @@ const section = computed(() => settingsSection(route.params.section))
         </CfgRow>
       </section>
 
+      <section v-else-if="section === 'logs' && draft.logWatch" id="s-logs" class="card">
+        <div class="ch"><div><h2>{{ t('logwatch.settingsTitle') }}</h2><p class="sub">{{ t('logwatch.settingsSub') }}</p></div></div>
+        <CfgRow :label="t('logwatch.errorsMode')" :help="t('logwatch.errorsModeHelp')">
+          <SegButtons v-model="draft.logWatch.errors" :options="logModes" :label="t('logwatch.errorsMode')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.securityMode')" :help="t('logwatch.securityModeHelp')">
+          <SegButtons v-model="draft.logWatch.security" :options="logModes" :label="t('logwatch.securityMode')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.alwaysLeaks')" :help="t('logwatch.alwaysLeaksHelp')">
+          <SwitchToggle v-model="draft.logWatch.alwaysNotifyLeaks" :label="t('logwatch.alwaysLeaks')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.minSeverity')" :help="t('logwatch.minSeverityHelp')">
+          <SegButtons v-model="draft.logWatch.minSeverity" :options="severities" :label="t('logwatch.minSeverity')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.threshold')" :help="t('logwatch.thresholdHelp')">
+          <NumberStepper v-model="draft.logWatch.threshold" :min="1" :max="1000" :step="1" :label="t('logwatch.threshold')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.maxAutoPerDay')" :help="t('logwatch.maxAutoPerDayHelp')">
+          <NumberStepper v-model="draft.logWatch.maxAutoPerDay" :min="0" :max="50" :step="1" :label="t('logwatch.maxAutoPerDay')" :format="perDay" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.attackAfter')" :help="t('logwatch.attackAfterHelp')">
+          <NumberStepper v-model="draft.logWatch.attackTicketAfter" :min="0" :max="50" :step="1" :label="t('logwatch.attackAfter')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.resolveAfter')" :help="t('logwatch.resolveAfterHelp')">
+          <NumberStepper v-model="draft.logWatch.resolveAfterDays" :min="1" :max="30" :step="1" :label="t('logwatch.resolveAfter')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.digest')" :help="t('logwatch.digestHelp')">
+          <SwitchToggle v-model="draft.logWatch.digest" :label="t('logwatch.digest')" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.triage')" :help="t('logwatch.triageHelp')">
+          <NumberStepper v-model="draft.logWatch.triagePerDay" :min="0" :max="500" :step="10" :label="t('logwatch.triage')" :format="perDay" />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.patterns')" :help="t('logwatch.patternsHelp')">
+          <textarea
+            v-model="logPatterns"
+            class="ci-infra"
+            maxlength="25000"
+            spellcheck="false"
+            placeholder="security:high billing-token=\S+"
+            :aria-label="t('logwatch.patterns')"
+          />
+        </CfgRow>
+        <div class="help"><HiIcon name="info" /><p>{{ t('logwatch.overridesHelp') }} <RouterLink :to="{ name: 'logSources' }">{{ t('logwatch.sources') }}</RouterLink></p></div>
+      </section>
       <section v-else-if="section === 'ci' && draft.ci" id="s-ci" class="card">
         <div class="ch"><div><h2>{{ t('ci.settingsTitle') }}</h2><p class="sub">{{ t('ci.settingsSub') }}</p></div></div>
         <CfgRow :label="t('ci.autoFix')" :help="t('ci.autoFixHelp')">
@@ -520,6 +580,9 @@ const section = computed(() => settingsSection(route.params.section))
         </CfgRow>
         <CfgRow v-if="draft.notify.ci !== undefined" :label="t('settings.ciRed')">
           <SwitchToggle v-model="draft.notify.ci" :label="t('settings.ciRed')" />
+        </CfgRow>
+        <CfgRow v-if="draft.notify.logs !== undefined" :label="t('logwatch.notifyLabel')">
+          <SwitchToggle v-model="draft.notify.logs" :label="t('logwatch.notifyLabel')" />
         </CfgRow>
       </section>
       <McpCard v-else-if="section === 'mcp' && !catalog.claudeOff.value" />

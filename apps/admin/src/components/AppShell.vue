@@ -70,6 +70,13 @@ const ciRed = useQuery({
   refetchInterval: () => livePoll(120_000),
 })
 const redPipelines = computed(() => (ciRed.data.value ?? []).filter((f) => !f.ticketKey).length)
+// Log findings reported and waiting for someone: no ticket works on them.
+const logFindings = useQuery({
+  queryKey: ['logwatch', 'nav'],
+  queryFn: () => unwrap(api.GET('/log-findings', { params: { query: { status: 'reported' } } })),
+  refetchInterval: () => livePoll(120_000),
+})
+const reportedLogs = computed(() => (logFindings.data.value ?? []).filter((f) => !f.ticketKey).length)
 // Lessons not marked learned yet (one row is enough: the list carries the counts).
 const lessons = useQuery({
   queryKey: ['lessons', 'counts'],
@@ -138,7 +145,15 @@ const menus = computed<NavMenu[]>(() => [
     ],
   },
   { key: 'knowledge', icon: 'learn', items: [page('learn', 'learn', { cnt: unlearned.value }), page('learnQueue', 'learnQueue', { cnt: learning.value, dim: true })] },
-  { key: 'monitor', icon: 'usage', items: [page('logs', 'logs'), page('usage', 'usage')] },
+  {
+    key: 'monitor',
+    icon: 'usage',
+    items: [
+      page('logWatcher', 'shield', { cnt: reportedLogs.value, on: ['logWatcher', 'logFinding', 'logSources'].includes(String(route.name)) }),
+      page('logs', 'logs'),
+      page('usage', 'usage'),
+    ],
+  },
   {
     key: 'setup',
     icon: 'tool',
