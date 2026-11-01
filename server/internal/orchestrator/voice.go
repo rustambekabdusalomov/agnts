@@ -44,14 +44,14 @@ func (o *Orchestrator) Transcribe(ctx context.Context, wav []byte) (string, erro
 	if err != nil {
 		return "", err
 	}
-	if ctx, err = o.assistantAccount(ctx, s, user); err != nil {
+	if err = o.assistantReady(ctx, s, user); err != nil {
 		var ae *assistantError
 		if errors.As(err, &ae) {
 			return "", invalid("%s", strings.Replace(ae.msg, "The assistant", "Voice", 1))
 		}
 		return "", err
 	}
-	text, err := o.ai.HearClip(ctx, user, wav)
+	text, err := o.ai.HearClip(ctx, ai.Who{Person: user}, wav)
 	if err != nil {
 		if errors.Is(err, ErrNoSpeech) {
 			return "", fmt.Errorf("%w: %w", ErrInvalid, err)

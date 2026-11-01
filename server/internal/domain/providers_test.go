@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"context"
 	"slices"
 	"strings"
 	"testing"
@@ -186,31 +185,7 @@ func TestCheckModels(t *testing.T) {
 	}
 }
 
-func TestAccountsInContext(t *testing.T) {
-	ctx := context.Background()
-	if _, ok := ClaudeOf(ctx); ok {
-		t.Fatal("no account was set")
-	}
-	set := map[string]ClaudeAccount{
-		ProviderClaude: {ConnectionID: 1, Provider: ProviderClaude},
-		ProviderCodex:  {Provider: ProviderCodex},
-	}
-	ctx = WithAccounts(ctx, ProviderClaude, set)
-	if a, _ := ClaudeOf(ctx); a.ConnectionID != 1 {
-		t.Fatal("primary")
-	}
-	cx := UseProvider(ctx, ProviderCodex)
-	if a, ok := ClaudeOf(cx); !ok || a.Provider != ProviderCodex || CurrentProvider(cx) != ProviderCodex {
-		t.Fatal("codex call")
-	}
-	if _, ok := ClaudeOf(UseProvider(ctx, ProviderMuse)); ok {
-		t.Fatal("a module the run did not pick has no account")
-	}
-	// An account set without its module serves any call (legacy).
-	legacy := WithClaude(context.Background(), ClaudeAccount{ConnectionID: 7})
-	if a, ok := ClaudeOf(UseProvider(legacy, ProviderClaude)); !ok || a.ConnectionID != 7 {
-		t.Fatal("legacy account")
-	}
+func TestRunPerson(t *testing.T) {
 	w := Workspace{OwnerID: 1}
 	m := int64(5)
 	if w.RunPerson(&m) != 5 || w.RunPerson(nil) != 1 {

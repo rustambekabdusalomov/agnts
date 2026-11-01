@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"agnts/internal/ai"
 	"archive/tar"
 	"bytes"
 	"context"
@@ -473,7 +474,7 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 	if err != nil {
 		return out, nil, err
 	}
-	if ctx, err = o.assistantAccount(ctx, s, user); err != nil {
+	if err = o.assistantReady(ctx, s, user); err != nil {
 		return out, nil, err
 	}
 
@@ -593,7 +594,7 @@ func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang s
 	if err != nil {
 		return AssistantAnswer{}, ClaudeResult{}, err
 	}
-	if ctx, err = o.assistantAccount(ctx, s, user); err != nil {
+	if err = o.assistantReady(ctx, s, user); err != nil {
 		return AssistantAnswer{}, ClaudeResult{}, err
 	}
 	box, _, err := o.assistantWorkspace(ctx, "replay", 0)
@@ -644,34 +645,17 @@ func assistantConversationFiles(question string, history []domain.AssistantMessa
 	return []AssistantFile{{Name: "conversation.json", Content: string(b)}, {Name: "question.txt", Content: question}}
 }
 
-// assistantAccount puts the Claude account the asker's answers run on into
-// ctx: the workspace's, or the asker's own in per-member mode. agnts's own
-// key (credits) is not used: an answer is not a run that credits can pay
-// for.
-func (o *Orchestrator) assistantAccount(ctx context.Context, s domain.Settings, user int64) (context.Context, error) {
-	if o.accounts == nil || o.workspaces == nil {
-		if paused, _ := o.usage.Paused(ctx, s); paused {
-			return ctx, ErrPlanLimit
-		}
-		return ctx, nil
+// assistantReady says why the asker's answers cannot run now, nil when
+// they can: on the workspace's account, or the asker's own in per-member
+// mode. agnts's own key (credits) is not used: an answer is not a run that
+// credits can pay for (ai.PolicyOf).
+func (o *Orchestrator) assistantReady(ctx context.Context, s domain.Settings, user int64) error {
+	err := o.hold(ctx, transcriptMeta{Purpose: domain.PurposeAssistant, Person: user}, s.Models.Helper) // answers run on the helper model
+	var h *ai.Hold
+	if errors.As(err, &h) && !h.Limited && h.Err == nil {
+		return &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(domain.ProviderOf(s.Models.Helper)) + ": " + h.Why + "."}
 	}
-	w, err := o.workspaces.ByID(ctx, domain.WorkspaceOf(ctx))
-	if err != nil {
-		return ctx, err
-	}
-	var member *int64
-	if w.ClaudeMode == domain.ClaudePerMember && user > 0 {
-		member = &user
-	}
-	provider := domain.ProviderOf(s.Models.Helper) // answers run on the helper model
-	acct, ok, why, _ := o.accounts.Pick(ctx, w, member, provider)
-	if !ok {
-		return ctx, &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(provider) + ": " + why + "."}
-	}
-	if acct.Credits {
-		return ctx, &assistantError{msg: fmt.Sprintf("The assistant needs a connected %s account (Workspace settings → AI accounts); it does not run on credits.", domain.ModuleName(provider))}
-	}
-	return domain.WithClaude(ctx, acct), nil
+	return err
 }
 
 // assistantWorkspace returns the person's warm container, or a new one.
@@ -754,7 +738,7 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 	if err != nil {
 		return ClaudeResult{}, err
 	}
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeAssistant, WorkspaceID: wsID,
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeAssistant, WorkspaceID: wsID, Person: user,
 		Subject: "message " + strconv.FormatInt(a.ID, 10)}, ClaudeRequest{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
@@ -764,8 +748,6 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 		ReadOnly: true,
 	}, func(e ClaudeEvent) {
 		switch e.Kind {
-		case ClaudeRateLimit:
-			o.usage.Record(ctx, e.Data)
 		case ClaudeTool:
 			if f := readFileOf(e.Tool, dir); f != "" {
 				o.publish(wsID, user, EventAssistantProgress, a, map[string]any{"file": f})
@@ -780,7 +762,6 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 		return res, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return res, ErrPlanLimit
 	}
 	return res, nil

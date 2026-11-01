@@ -374,19 +374,19 @@ type fakeUsage struct {
 	records int
 }
 
-func (f *fakeUsage) Paused(context.Context, domain.Settings) (bool, time.Time) {
+func (f *fakeUsage) Paused(context.Context, domain.ClaudeAccount, domain.Settings) (bool, time.Time) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return f.paused, time.Time{}
 }
 
-func (f *fakeUsage) Record(context.Context, map[string]any) {
+func (f *fakeUsage) Record(context.Context, domain.ClaudeAccount, map[string]any) {
 	f.mu.Lock()
 	f.records++
 	f.mu.Unlock()
 }
 
-func (f *fakeUsage) RecordLimited(context.Context) {
+func (f *fakeUsage) RecordLimited(context.Context, domain.ClaudeAccount) {
 	f.mu.Lock()
 	f.paused = true
 	f.mu.Unlock()

@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"agnts/internal/ai"
 	"archive/tar"
 	"bytes"
 	"context"
@@ -25,7 +26,7 @@ const (
 )
 
 // ErrPlanLimit means the tool cannot be asked now: the plan limit is reached.
-var ErrPlanLimit = errors.New("the plan limit is reached; try again after it resets")
+var ErrPlanLimit = ai.ErrLimit
 
 // TranslatedText is a text of the ticket page and its translation.
 type TranslatedText struct {
@@ -219,8 +220,8 @@ func (o *Orchestrator) translateMissing(ctx context.Context, sub translateSubjec
 	if err != nil {
 		return err
 	}
-	if paused, _ := o.usage.Paused(ctx, s); paused {
-		return ErrPlanLimit
+	if err := o.hold(ctx, transcriptMeta{Purpose: domain.PurposeTranslate}, s.Models.Helper); err != nil {
+		return err
 	}
 	prompt, err := render("translate", promptData{Language: domain.Languages[lang]})
 	if err != nil {
@@ -283,16 +284,11 @@ func (o *Orchestrator) translateBatch(ctx context.Context, ws Workspace, s domai
 		MaxTurns: min(s.MaxTurns, translateMaxTurns),
 		Timeout:  time.Duration(min(s.TimeoutMin, translateTimeoutMin)) * time.Minute,
 		Settings: permissionSettings(s, true),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	if err != nil {
 		return 0, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return 0, ErrPlanLimit
 	}
 	if res.IsError {

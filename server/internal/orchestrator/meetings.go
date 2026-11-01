@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"agnts/internal/ai"
 	"context"
 	"encoding/json"
 	"errors"
@@ -205,23 +206,12 @@ func (o *Orchestrator) HearMeeting(ctx context.Context, user int64, audio []byte
 	if !o.ai.CanHear() {
 		return nil, invalid("meeting notes are not available on this server")
 	}
-	if o.accounts != nil && o.workspaces != nil {
-		w, err := o.workspaces.ByID(ctx, domain.WorkspaceOf(ctx))
-		if err != nil {
-			return nil, err
-		}
-		var member *int64
-		if w.ClaudeMode == domain.ClaudePerMember && user > 0 {
-			member = &user
-		}
-		// Only Muse hears audio, whatever modules the person codes with.
-		acct, ok, why, _ := o.accounts.Pick(ctx, w, member, domain.ProviderMuse)
-		if !ok {
-			return nil, fmt.Errorf("muse cannot hear the meeting: %s", why)
-		}
-		ctx = domain.WithClaude(ctx, acct)
+	// Only Muse hears audio, whatever modules the person codes with.
+	segs, err := o.ai.Hear(ctx, ai.Who{Person: user}, audio, ext)
+	var h *ai.Hold
+	if errors.As(err, &h) {
+		return nil, fmt.Errorf("muse cannot hear the meeting: %s", h.Why)
 	}
-	segs, err := o.ai.Hear(ctx, user, audio, ext)
 	if err != nil {
 		return nil, fmt.Errorf("hear the meeting: %w", err)
 	}

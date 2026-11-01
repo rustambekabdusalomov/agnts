@@ -532,16 +532,11 @@ func (o *Orchestrator) runRuleReview(ctx context.Context, r domain.Rule) (RuleRe
 		MaxTurns: min(s.MaxTurns, ruleMaxTurns),
 		Timeout:  time.Duration(min(s.TimeoutMin, ruleTimeoutMin)) * time.Minute,
 		Settings: permissionSettings(s, false),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	if err != nil {
 		return rv, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return rv, &stopError{"rate limited"}
 	}
 	if res.IsError {

@@ -34,11 +34,7 @@ func (o *Orchestrator) secondOpinion(ctx context.Context, s domain.Settings, ws 
 		Prompt: prompt, Model: s.SecondOpinion, MaxTurns: min(s.MaxTurns, 30), ReadOnly: true,
 		Timeout:  time.Duration(min(s.TimeoutMin, 15)) * time.Minute,
 		Settings: permissionSettings(s, true),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	switch {
 	case err != nil:
 		out.Error = err.Error()

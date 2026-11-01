@@ -241,16 +241,11 @@ func (o *Orchestrator) runReflect(ctx context.Context, r domain.Reflection) ([]d
 		MaxTurns: min(s.MaxTurns, reflectMaxTurns),
 		Timeout:  time.Duration(min(s.TimeoutMin, reflectTimeoutMin)) * time.Minute,
 		Settings: permissionSettings(s, true),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	if err != nil {
 		return nil, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return nil, &stopError{"rate limited"}
 	}
 	if res.IsError {

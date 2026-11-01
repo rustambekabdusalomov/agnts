@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai"
 	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
@@ -26,7 +27,11 @@ type fakeAccounts struct {
 	picked []domain.ClaudeAccount
 }
 
-func (f *fakeAccounts) Pick(_ context.Context, w domain.Workspace, member *int64, provider string) (domain.ClaudeAccount, bool, string, time.Time) {
+func (f *fakeAccounts) Credential(_ context.Context, a domain.ClaudeAccount) (ai.Credential, error) {
+	return ai.Credential{Token: "test"}, nil
+}
+
+func (f *fakeAccounts) Pick(_ context.Context, w domain.Workspace, member *int64, provider string, _ bool) (domain.ClaudeAccount, bool, string, time.Time) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.paused[w.ID] {

@@ -201,7 +201,7 @@ func (p *Provider) HearClip(ctx context.Context, c ai.Credential, wav []byte) (s
 		}
 		return "", err
 	}
-	keepLogin(ctx, ctx, h.box, p.cfg.KeepLogin, h.files)
+	keepLogin(ctx, ctx, h.box, p.cfg.KeepLogin, c.Account, h.files)
 	said := domain.NewSecretRedactor(cred.Secrets()...).String(strings.TrimSpace(errOut))
 	return voiceResult(code, out, said)
 }
@@ -271,7 +271,7 @@ func (p *Provider) Hear(ctx context.Context, c ai.Credential, audio []byte, ext 
 	}
 	close(next)
 	wg.Wait()
-	keepLogin(ctx, ctx, h.box, p.cfg.KeepLogin, h.files)
+	keepLogin(ctx, ctx, h.box, p.cfg.KeepLogin, c.Account, h.files)
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
 	}

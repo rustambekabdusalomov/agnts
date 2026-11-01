@@ -230,7 +230,8 @@ func (w scriptedWS) Claude(_ context.Context, _ ClaudeRequest, on func(ClaudeEve
 func TestCallClaudeRecords(t *testing.T) {
 	rec := &memRecorder{bodies: map[int64][]byte{}, ends: map[int64]domain.TranscriptEnd{}}
 	o := &Orchestrator{ai: ai.New(ai.Deps{Providers: aitest.Providers()}), recorder: rec, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
-	ctx := domain.WithClaude(domain.System(context.Background()), domain.ClaudeAccount{ConnectionID: 7, Label: "team"})
+	ctx := ai.WithAdmission(domain.System(context.Background()), ai.Admission{Access: domain.DefaultAccess(), Primary: ai.Claude,
+		Routes: map[string]ai.Route{ai.Claude: {Provider: ai.Claude, Account: domain.ClaudeAccount{ConnectionID: 7, Label: "team"}}}})
 	run := &domain.Run{ID: 42, Stage: domain.StageCode}
 	ws := scriptedWS{events: []ClaudeEvent{
 		{Kind: ClaudeTool, Tool: "Bash: go test", Data: map[string]any{"tool": "Bash", "id": "t1"}},

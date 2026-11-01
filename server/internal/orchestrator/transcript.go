@@ -58,15 +58,50 @@ type transcriptMeta struct {
 	ModelStage  string
 	// DocumentRunID is the document generation a call is charged to.
 	DocumentRunID int64
+	// Person is whose modules and account a call outside a scheduled run
+	// uses; 0: the person acting in ctx.
+	Person int64
+}
+
+// whoFor is who a call of m is for, outside an admitted run: m's person,
+// else the person acting in ctx (their modules when ctx carries them).
+func (o *Orchestrator) whoFor(ctx context.Context, m transcriptMeta) ai.Who {
+	w := ai.Who{Workspace: m.WorkspaceID, Person: m.Person}
+	if w.Workspace == 0 {
+		w.Workspace = domain.WorkspaceOf(ctx)
+	}
+	if w.Person == 0 {
+		if a, ok := domain.ActorOf(ctx); ok {
+			w.Person = a.UserID
+		}
+	}
+	if a, ok := domain.AccessIn(ctx); ok {
+		w.Access = &a
+	}
+	return w
+}
+
+// hold says why a call of m on model cannot run now (callClaude would
+// refuse it), before the work for it is prepared; nil when it can.
+func (o *Orchestrator) hold(ctx context.Context, m transcriptMeta, model string) error {
+	if _, h := o.ai.RouteCall(ctx, ai.Call{Who: o.whoFor(ctx, m), Purpose: m.Purpose, Req: ai.Request{Model: model}}); h != nil {
+		return h
+	}
+	return nil
 }
 
 // callClaude runs one agent invocation through the AI gateway and records
 // its transcript. Every invocation of the orchestrator goes through here;
 // recording problems are logged and never fail the run.
 func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest, onEvent func(ClaudeEvent)) (ClaudeResult, error) {
-	// The account the call runs on: its own module's (the transcript
-	// names it).
-	ctx = domain.UseProvider(ctx, domain.ProviderOf(req.Model))
+	// Where it runs: the run's route for its model's module, else routed
+	// now for its person.
+	call := ai.Call{Who: o.whoFor(ctx, m), Purpose: m.Purpose, Box: ws, Req: req, ModelStage: m.ModelStage, DocumentRunID: m.DocumentRunID}
+	route, hold := o.ai.RouteCall(ctx, call)
+	if hold != nil {
+		return ClaudeResult{}, hold
+	}
+	call.Route = &route
 	req = o.fitPrompt(ctx, ws, m, req)
 	if m.Run != nil && req.RunID == 0 {
 		req.RunID = m.Run.ID
@@ -74,11 +109,11 @@ func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcrip
 	if req.WorkspaceID == 0 {
 		req.WorkspaceID = m.WorkspaceID
 	}
-	call := ai.Call{Purpose: m.Purpose, Box: ws, Req: req, ModelStage: m.ModelStage, DocumentRunID: m.DocumentRunID}
+	call.Req = req
 	if m.Run != nil {
 		call.RunID = m.Run.ID // a ticket run's calls are charged to it
 	}
-	if rec := o.record(ctx, m, req); rec != nil {
+	if rec := o.record(ctx, m, req, route); rec != nil {
 		call.Record = rec
 	}
 	return o.ai.Run(ctx, call, onEvent)
@@ -96,11 +131,11 @@ type recording struct {
 
 // record starts the transcript of an invocation; nil when run history is
 // off or it cannot be stored.
-func (o *Orchestrator) record(ctx context.Context, m transcriptMeta, req ClaudeRequest) *recording {
+func (o *Orchestrator) record(ctx context.Context, m transcriptMeta, req ClaudeRequest, route ai.Route) *recording {
 	if o.recorder == nil {
 		return nil
 	}
-	tw, id := o.startTranscript(ctx, m, req)
+	tw, id := o.startTranscript(ctx, m, req, route.Account)
 	if tw == nil {
 		return nil
 	}
@@ -141,7 +176,7 @@ func (r *recording) Finish(ctx context.Context, res ClaudeResult, err error) int
 }
 
 // startTranscript stores the running transcript; nil when it cannot be.
-func (o *Orchestrator) startTranscript(ctx context.Context, m transcriptMeta, req ClaudeRequest) (*transcriptWriter, int64) {
+func (o *Orchestrator) startTranscript(ctx context.Context, m transcriptMeta, req ClaudeRequest, acct domain.ClaudeAccount) (*transcriptWriter, int64) {
 	wsID := m.WorkspaceID
 	if wsID == 0 {
 		wsID = domain.WorkspaceOf(ctx)
@@ -177,11 +212,11 @@ func (o *Orchestrator) startTranscript(ctx context.Context, m transcriptMeta, re
 	if m.Run != nil {
 		s.RunID = &m.Run.ID
 	}
-	if a, ok := domain.ClaudeOf(ctx); ok && s.Engine == "claude" {
-		if a.ConnectionID > 0 {
-			s.ConnectionID = &a.ConnectionID
+	if s.Engine == "claude" {
+		if acct.ConnectionID > 0 {
+			s.ConnectionID = &acct.ConnectionID
 		}
-		s.ClaudeLabel = a.Label
+		s.ClaudeLabel = acct.Label
 	}
 	id, err := o.recorder.StartTranscript(wctx, s)
 	if err != nil {

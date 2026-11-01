@@ -412,7 +412,7 @@ func (s *Server) usageOf(ctx context.Context, provider string) (gen.Usage, error
 	m, isMember := memberFrom(ctx)
 	u, _ := userFrom(ctx)
 	if s.opt.Claude == nil || !isMember {
-		v, err := s.opt.Admin.Usage.Current(ctx, st) // one account for everything
+		v, err := s.opt.Admin.Usage.Current(ctx, domain.ClaudeAccount{}, st) // one account for everything
 		out := toUsage(v)
 		connected := true
 		out.Provider, out.Connected = &p, &connected
@@ -423,7 +423,7 @@ func (s *Server) usageOf(ctx context.Context, provider string) (gen.Usage, error
 		connected := false
 		return gen.Usage{Status: gen.UsageStatusUnknown, PauseAbove: st.PauseAbove, Provider: &p, Connected: &connected}, nil
 	}
-	v, err := s.opt.Admin.Usage.Current(domain.WithClaude(ctx, acct), st)
+	v, err := s.opt.Admin.Usage.Current(ctx, acct, st)
 	out := toUsage(v)
 	connected := true
 	out.Provider, out.Connected = &p, &connected
@@ -444,16 +444,15 @@ func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
+	var acct domain.ClaudeAccount // the install's one account
 	if m, ok := memberFrom(ctx); ok && s.opt.Claude != nil {
 		u, _ := userFrom(ctx)
-		acct, ok := s.opt.Claude.AccountFor(ctx, m.w, u.ID, domain.ProviderClaude)
-		if !ok {
+		if acct, ok = s.opt.Claude.AccountFor(ctx, m.w, u.ID, domain.ProviderClaude); !ok {
 			writeError(w, http.StatusConflict, "conflict", "no Claude account is connected to read limits from")
 			return
 		}
-		ctx = domain.WithClaude(ctx, acct)
 	}
-	if err := s.opt.Admin.Refresher.Refresh(ctx); errors.Is(err, usage.ErrBusy) {
+	if err := s.opt.Admin.Refresher.Refresh(ctx, acct); errors.Is(err, usage.ErrBusy) {
 		writeError(w, http.StatusConflict, "conflict", err.Error())
 		return
 	} else if err != nil {

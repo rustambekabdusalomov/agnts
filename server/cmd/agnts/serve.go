@@ -386,22 +386,24 @@ type agent struct {
 	museCredits  *musecredits.Service
 	providers    *ai.Registry
 	ai           *ai.Gateway
-	museDevice   *musecredits.Logins
-	budget       *orchestrator.MemoryBudget
-	network      *network.Service
-	ci           *ciwatch.Service
-	links        *commitlink.Service
-	assistant    *postgres.Assistant
-	docStore     *postgres.Documents
-	meetStore    *postgres.Meetings
-	meet         *meetings.Service // set once the server is built
+	// viewerAccount is the account whose usage a page shows its viewer.
+	viewerAccount func(ctx context.Context) (domain.ClaudeAccount, bool)
+	museDevice    *musecredits.Logins
+	budget        *orchestrator.MemoryBudget
+	network       *network.Service
+	ci            *ciwatch.Service
+	links         *commitlink.Service
+	assistant     *postgres.Assistant
+	docStore      *postgres.Documents
+	meetStore     *postgres.Meetings
+	meet          *meetings.Service // set once the server is built
 }
 
 // mcpDeps are the use cases the MCP tools call, and the assistant's
 // snapshot reads.
 func (a *agent) mcpDeps() mcpserver.Deps {
 	return mcpserver.Deps{
-		Orch: a.orch, Store: a.store, Usage: a.usage, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci,
+		Orch: a.orch, Store: a.store, Usage: a.usage, Viewer: a.viewerAccount, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci,
 		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
 		Role:      a.workspaces.Role,
 		Meetings:  func() *meetings.Service { return a.meet },
@@ -453,7 +455,9 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		CodexKey: func(ctx context.Context) (string, error) { return a.integrations.Token(ctx, "openai") }},
 		conns, a.usage, a.settings, a.users)
 	a.usage.OnPaused(a.claude.Paused)
-	a.usage.SetResolver(func(ctx context.Context) (domain.ClaudeAccount, bool) {
+	// viewerAccount is the account whose usage the person viewing a page
+	// sees: their default module's, in the workspace ctx acts in.
+	a.viewerAccount = func(ctx context.Context) (domain.ClaudeAccount, bool) {
 		ws, err := domain.MustWorkspace(ctx)
 		if err != nil {
 			return domain.ClaudeAccount{}, false
@@ -462,20 +466,15 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		if err != nil {
 			return domain.ClaudeAccount{}, false
 		}
-		// The module of the call in ctx, else the default module of the
-		// person asking (pages), else the server's default.
-		p := domain.CurrentProvider(ctx)
-		if p == "" {
-			acc := domain.AccessOf(ctx)
-			if actor, ok := domain.ActorOf(ctx); ok {
-				if own, err := a.modules.For(ctx, actor.UserID); err == nil {
-					acc = own
-				}
+		acc, _ := a.modules.Default(ctx)
+		if actor, ok := domain.ActorOf(ctx); ok {
+			if own, err := a.modules.For(ctx, actor.UserID); err == nil {
+				acc = own
 			}
-			p = acc.Primary()
 		}
-		return a.claude.Resolve(ctx, w, p)
-	})
+		return a.claude.Resolve(ctx, w, acc.Primary())
+	}
+
 	a.billing = billing.New(billing.Config{
 		Enabled: cfg.Cloud, WorkspaceUZS: cfg.PriceWorkspaceUZS, SlotUZS: cfg.PriceSlotUZS, MemberUZS: cfg.PriceMemberUZS,
 		CreditUZS: cfg.PriceCreditUZS, IncludedMembers: cfg.IncludedMembers, MaxSlots: cfg.MaxSlots, Markup: cfg.CreditMarkup,
@@ -542,7 +541,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	// Every model call goes through the gateway: it checks the person's
 	// modules, takes the credential of the call's account, runs it through
 	// its provider and records its spend.
-	a.ai = ai.New(ai.Deps{Providers: a.providers, Access: a.modules, Credentials: a.claude,
+	a.ai = ai.New(ai.Deps{Providers: a.providers, Access: a.modules, Accounts: a.claude, Workspaces: a.workspaces, Limits: a.usage, Settings: a.settings,
 		Spend: func(ctx context.Context, c domain.ClaudeCall) error {
 			if c.DocumentRunID > 0 {
 				return a.docStore.RecordDocumentCall(ctx, c.DocumentRunID, c)
@@ -620,6 +619,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		a.repos.SetDeepDetector(a.orch)
 	}
 	a.dashboard = admin.NewDashboard(a.store, a.orch, a.repos, a.usage, a.settings, cfg.TimeZone)
+	a.dashboard.SetViewerAccount(a.viewerAccount)
 	a.adminInteg = admin.NewIntegrations(a.integrations, a.store, map[string]admin.Checker{
 		"jira":     admin.JiraCheck,
 		"plane":    admin.PlaneCheck,

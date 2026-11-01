@@ -54,7 +54,7 @@ const (
 // Budgets decides what a Muse run on agnts's key may spend. It returns
 // nil when the run is on the person's own Muse account (Meta bills them).
 type Budgets interface {
-	Budget(ctx context.Context, req ai.Request) (*muse.Budget, error)
+	Budget(ctx context.Context, acct ai.Account, req ai.Request) (*muse.Budget, error)
 }
 
 // Config sets up Muse Code.
@@ -63,9 +63,9 @@ type Config struct {
 	// Budgets limits runs on credits; nil enforces no budget in the run
 	// (spend is still metered and settled afterwards).
 	Budgets Budgets
-	// KeepLogin saves a Meta sign-in Muse refreshed while it ran (the
-	// account is in ctx); nil drops it.
-	KeepLogin func(ctx context.Context, file []byte) error
+	// KeepLogin saves a Meta sign-in Muse refreshed while it ran on acct;
+	// nil drops it.
+	KeepLogin func(ctx context.Context, acct ai.Account, file []byte) error
 	// Boxes and Image open the throwaway containers audio is heard in;
 	// nil Boxes: Muse does not hear audio here.
 	Boxes ai.Boxes
@@ -152,7 +152,7 @@ func (p *Provider) Exec(ctx context.Context, box ai.Box, c ai.Credential, req ai
 	}
 	var b *muse.Budget
 	if p.cfg.Budgets != nil {
-		if b, err = p.cfg.Budgets.Budget(ctx, req); err != nil {
+		if b, err = p.cfg.Budgets.Budget(ctx, c.Account, req); err != nil {
 			return ai.Result{}, fmt.Errorf("muse budget: %w", err)
 		}
 	}
@@ -186,7 +186,7 @@ func (p *Provider) Exec(ctx context.Context, box ai.Box, c ai.Credential, req ai
 		Prompt: req.Prompt, Workdir: ai.WorkDir, Model: id, Effort: req.Effort, SessionID: req.Resume,
 		Budget: b, AnnounceBudget: b != nil && b.Limit > 0, Credential: &cred, AuthPath: authPath,
 		Env: req.Env, Guard: g, MaxCalls: req.MaxTurns, ExtraRoots: []string{ai.OutDir}, Steer: req.Steer, Ask: ask,
-	}, &boxExecutor{box: box, keep: p.cfg.KeepLogin, ctx: ctx}, func(e muse.Event) { museEvent(e, limit, onEvent) })
+	}, &boxExecutor{box: box, keep: p.cfg.KeepLogin, acct: c.Account, ctx: ctx}, func(e muse.Event) { museEvent(e, limit, onEvent) })
 	out := ai.Result{
 		SessionID: res.SessionID, Turns: res.Usage.Calls, Text: res.Text, Duration: res.Duration,
 		Model: ai.MusePrefix + string(res.Model),
@@ -227,8 +227,9 @@ func (p *Provider) Exec(ctx context.Context, box ai.Box, c ai.Credential, req ai
 // boxExecutor runs `muse serve` in the box.
 type boxExecutor struct {
 	box  ai.Box
-	keep func(ctx context.Context, file []byte) error
-	ctx  context.Context // the run's: whose account a refreshed login is kept for
+	keep func(ctx context.Context, acct ai.Account, file []byte) error
+	acct ai.Account      // whose refreshed login is kept
+	ctx  context.Context // the run's
 }
 
 // Start implements muse.Executor.
@@ -247,13 +248,14 @@ func (d *boxExecutor) Start(ctx context.Context, cmd muse.Command) (muse.Process
 	if err != nil {
 		return nil, err
 	}
-	return &museProcess{p: a, box: d.box, keep: d.keep, files: cmd.Files, stderr: &stderr, ctx: d.ctx}, nil
+	return &museProcess{p: a, box: d.box, keep: d.keep, acct: d.acct, files: cmd.Files, stderr: &stderr, ctx: d.ctx}, nil
 }
 
 type museProcess struct {
 	p      ai.Process
 	box    ai.Box
-	keep   func(ctx context.Context, file []byte) error
+	keep   func(ctx context.Context, acct ai.Account, file []byte) error
+	acct   ai.Account
 	files  []credential.File
 	stderr *ai.TailBuffer
 	ctx    context.Context
@@ -273,7 +275,7 @@ func (p *museProcess) Wait() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 		code, err := p.p.Wait(ctx)
-		keepLogin(ctx, p.ctx, p.box, p.keep, p.files)
+		keepLogin(ctx, p.ctx, p.box, p.keep, p.acct, p.files)
 		for _, f := range p.files {
 			_, _ = p.box.Run(ctx, ai.Cmd{Argv: []string{"rm", "-f", f.Path}}, io.Discard, io.Discard)
 		}
@@ -294,9 +296,9 @@ func (p *museProcess) Wait() error {
 }
 
 // keepLogin saves the credential file back when Muse refreshed it while
-// it ran (it rewrites the file it was given). runCtx is the run's, which
-// says whose account it is.
-func keepLogin(ctx, runCtx context.Context, box ai.Box, keep func(ctx context.Context, file []byte) error, files []credential.File) {
+// it ran (it rewrites the file it was given), for acct. runCtx is the
+// run's.
+func keepLogin(ctx, runCtx context.Context, box ai.Box, keep func(ctx context.Context, acct ai.Account, file []byte) error, acct ai.Account, files []credential.File) {
 	if keep == nil || runCtx == nil {
 		return
 	}
@@ -308,6 +310,6 @@ func keepLogin(ctx, runCtx context.Context, box ai.Box, keep func(ctx context.Co
 		if err != nil || len(now) == 0 || slices.Equal(now, f.Data) {
 			return
 		}
-		_ = keep(context.WithoutCancel(runCtx), now)
+		_ = keep(context.WithoutCancel(runCtx), acct, now)
 	}
 }

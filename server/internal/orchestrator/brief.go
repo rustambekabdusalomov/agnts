@@ -571,16 +571,11 @@ func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (strin
 		MaxTurns: min(s.MaxTurns, surveyMaxTurns),
 		Timeout:  time.Duration(min(s.TimeoutMin, surveyTimeoutMin)) * time.Minute,
 		Settings: permissionSettings(s, true),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	if err != nil {
 		return "", "", nil, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return "", "", nil, &stopError{"rate limited"}
 	}
 	if res.IsError {

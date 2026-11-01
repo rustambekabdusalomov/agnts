@@ -48,14 +48,7 @@ type SettingsSource interface {
 
 // UsageGate tracks plan usage: whether new runs may start, and readings
 // taken from Claude Code's rate limit events.
-type UsageGate interface {
-	// Paused reports whether new runs must wait, and until when if known.
-	Paused(ctx context.Context, s domain.Settings) (bool, time.Time)
-	// Record stores a rate-limit reading (data is the raw stream line).
-	Record(ctx context.Context, data map[string]any)
-	// RecordLimited notes that a run was refused at the plan limit.
-	RecordLimited(ctx context.Context)
-}
+type UsageGate = ai.Limits
 
 // Deps are the orchestrator's collaborators.
 type Deps struct {
@@ -106,11 +99,10 @@ type Deps struct {
 	// connection for everything).
 	Accounts ClaudeAccounts
 	// AI is the gateway every model call goes through; nil builds one from
-	// Providers, Access and Credentials, recording spend in Store and
-	// Documents.
-	AI          *ai.Gateway
-	Providers   *ai.Registry
-	Credentials ai.Credentials
+	// Providers, Access, Accounts, Workspaces and Usage, recording spend in
+	// Store and Documents.
+	AI        *ai.Gateway
+	Providers *ai.Registry
 	// Access says which coding modules each person may use; nil gives
 	// everyone the default access.
 	Access AccessSource
@@ -215,7 +207,8 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	}
 	gw := d.AI
 	if gw == nil {
-		gw = ai.New(ai.Deps{Providers: d.Providers, Access: d.Access, Credentials: d.Credentials, Spend: spendTo(d.Store, d.Documents), Log: log})
+		gw = ai.New(ai.Deps{Providers: d.Providers, Access: d.Access, Accounts: d.Accounts, Workspaces: d.Workspaces, Limits: d.Usage,
+			Settings: d.Settings, Spend: spendTo(d.Store, d.Documents), Log: log})
 	}
 	return &Orchestrator{
 		ai:  gw,
@@ -267,6 +260,17 @@ func (o *Orchestrator) withPerson(ctx context.Context, user int64) context.Conte
 		o.log.Warn("read modules", "user", user, "err", err)
 	}
 	return domain.WithAccess(ctx, a)
+}
+
+// runAccount is the main account of the run ctx belongs to: its default
+// module's (the account the run row records).
+func runAccount(ctx context.Context) domain.ClaudeAccount {
+	if a, ok := ai.AdmissionOf(ctx); ok {
+		if r, ok := a.Main(); ok {
+			return r.Account
+		}
+	}
+	return domain.ClaudeAccount{}
 }
 
 // runKey names a ticket's active run: keys are unique per workspace.
@@ -669,7 +673,6 @@ func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domai
 				ev.Message = e.Tool + " · " + target
 			}
 		case ClaudeRateLimit:
-			o.usage.Record(ctx, e.Data)
 			ev.Type, ev.Message = domain.EventRateLimit, "plan usage update"
 			if st := rateStatus(e.Data); st != "" && st != "allowed" {
 				ev.Level, ev.Message = domain.LevelWarn, "plan usage: "+strings.ReplaceAll(st, "_", " ")
@@ -773,7 +776,6 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if run.Model == "" {
 		run.Model = model
 	}
-	ctx = domain.UseProvider(ctx, domain.ProviderOf(model))
 	// A ticket in several repositories has more to read and change.
 	scale := domain.TurnScale(len(t.Repos))
 	turns := int(float64(s.MaxTurns) * scale)
@@ -834,7 +836,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if res.SessionID != "" {
 		run.SessionID = res.SessionID
 	}
-	if a, ok := domain.ClaudeOf(ctx); ok && a.Credits && o.credits != nil {
+	if res.Account.Credits && o.credits != nil {
 		if within, why := o.credits.Within(ctx, t.WorkspaceID, run.ID); !within {
 			run.ExitReason = "credits"
 			return res, fmt.Errorf("%s; buy credits in Billing and retry", why)
@@ -844,7 +846,6 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		return res, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		run.ExitReason = "rate_limited"
 		if run.Stage.Side() {
 			// A side run never moves the ticket; it is queued again and
@@ -1193,8 +1194,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		knowledge = append(knowledge, *m)
 	}
 
-	acct, _ := domain.ClaudeOf(ctx)
-	session, err := o.store.LastSessionID(ctx, t.ID, acct)
+	session, err := o.store.LastSessionID(ctx, t.ID, runAccount(ctx))
 	if err != nil {
 		return err
 	}
@@ -1601,8 +1601,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 	defer o.closeWorkspace(ctx, t, ws)
 	d.Context, d.Tracker = o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 
-	acct, _ := domain.ClaudeOf(ctx)
-	session, err := o.store.LastSessionID(ctx, t.ID, acct)
+	session, err := o.store.LastSessionID(ctx, t.ID, runAccount(ctx))
 	if err != nil {
 		return err
 	}

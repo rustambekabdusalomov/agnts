@@ -201,16 +201,11 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 			Timeout:  time.Duration(timeout) * time.Minute,
 			Settings: permissionSettings(s, true),
 			ReadOnly: true,
-		}, func(e ClaudeEvent) {
-			if e.Kind == ClaudeRateLimit {
-				o.usage.Record(ctx, e.Data)
-			}
-		})
+		}, nil)
 	if err != nil {
 		return "", nil, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return "", nil, &stopError{"rate limited"}
 	}
 	if res.IsError {

@@ -33,9 +33,12 @@ const ConfirmTTL = 10 * time.Minute
 
 // Deps are the use cases the tools call: the same ones the REST API uses.
 type Deps struct {
-	Orch      *orchestrator.Orchestrator
-	Store     *postgres.Agent
-	Usage     *usage.Tracker
+	Orch  *orchestrator.Orchestrator
+	Store *postgres.Agent
+	Usage *usage.Tracker
+	// Viewer is the account whose usage the person asking sees; nil: the
+	// install's one account.
+	Viewer    func(ctx context.Context) (domain.ClaudeAccount, bool)
 	Settings  orchestrator.SettingsSource
 	Dashboard *admin.Dashboard
 	Repos     *admin.Repos
@@ -528,7 +531,11 @@ func (t *tools) getUsage(ctx context.Context, _ *mcp.CallToolRequest, _ noInput)
 	if err != nil {
 		return nil, UsageOut{}, err
 	}
-	v, err := t.d.Usage.Current(ctx, s)
+	var acct domain.ClaudeAccount
+	if t.d.Viewer != nil {
+		acct, _ = t.d.Viewer(ctx)
+	}
+	v, err := t.d.Usage.Current(ctx, acct, s)
 	if err != nil {
 		return nil, UsageOut{}, err
 	}

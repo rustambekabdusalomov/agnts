@@ -103,6 +103,9 @@ type Result struct {
 	// TranscriptID is the run history transcript the invocation was
 	// recorded in (0: not recorded).
 	TranscriptID int64
+	// Provider and Account are where the gateway ran it.
+	Provider string
+	Account  Account
 }
 
 // Credential is how an agent reaches its provider: Env names what it is
@@ -111,7 +114,15 @@ type Result struct {
 type Credential struct {
 	Env   string
 	Token string
+	// Account is the account it belongs to: Muse budgets runs on credits
+	// by it, and keeps a refreshed sign-in for it.
+	Account Account
 }
+
+// Account is the account a call runs on: a connection (the workspace's
+// or a member's), agnts's key paid with credits, or for Codex the
+// workspace's OpenAI key.
+type Account = domain.ClaudeAccount
 
 // OOMError is returned for a process the kernel killed for using more
 // memory than its container's limit.

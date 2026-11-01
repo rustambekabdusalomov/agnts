@@ -197,6 +197,10 @@ func TestReviewFailureAndRateLimit(t *testing.T) {
 	if tk := h.expect("PAY-6", domain.StateWaitingForReview); tk.ReviewState != domain.ReviewPending {
 		t.Fatalf("rate-limited review state: %q", tk.ReviewState)
 	}
+	if !h.usage.paused {
+		t.Fatal("the gateway records the refusal on the account")
+	}
+	h.usage.paused = false // the limit reset
 
 	h.runner.scripts = []script{{result: ok("r7")}} // writes no review.json
 	h.step()
