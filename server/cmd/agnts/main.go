@@ -33,6 +33,7 @@ import (
 	"agnts/internal/privnet"
 	"agnts/internal/secret"
 	"agnts/internal/store/postgres"
+	"agnts/internal/watch"
 )
 
 // Set at build time with -ldflags "-X main.version=... -X main.commit=...".
@@ -77,6 +78,8 @@ install's default workspace:
   agnts version [--json]         print the version
   agnts healthcheck              exit 0 if the local server is healthy (for Docker)
   agnts egress-proxy             run the allowlist proxy for run containers (AGNTS_EGRESS_ALLOW)
+  agnts watch                    run agnts-watch on a project server: push Docker and file logs to the
+                                 log watcher (AGNTS_URL, AGNTS_WATCH_TOKEN, AGNTS_WATCH_DOCKER, AGNTS_WATCH_FILES)
   agnts gateway                  run the private network gateway (WireGuard, OpenVPN, agnts-link)
   agnts ovpn-sidecar             run a workspace's OpenVPN client (inside its sidecar container)
 
@@ -115,6 +118,12 @@ func run(ctx context.Context, args []string) error {
 		return healthcheck(ctx)
 	case "egress-proxy":
 		return egressProxy(ctx)
+	case "watch":
+		cfg, err := watch.FromEnv(os.Getenv)
+		if err != nil {
+			return err
+		}
+		return watch.New(cfg, logging.New(os.Stdout, os.Getenv("AGNTS_LOG_FORMAT"), os.Getenv("AGNTS_LOG_LEVEL"))).Run(ctx)
 	case "gateway":
 		return gatewayCmd(ctx)
 	case "ovpn-sidecar":

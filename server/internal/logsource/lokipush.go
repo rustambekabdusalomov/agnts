@@ -54,7 +54,7 @@ func ParseLokiPush(body io.Reader, contentType, contentEncoding, defService stri
 func lokiPushJSON(raw []byte, defService string) ([]domain.LogEntry, error) {
 	var req struct {
 		Streams []struct {
-			Stream map[string]string `json:"stream"`
+			Stream map[string]string   `json:"stream"`
 			Values [][]json.RawMessage `json:"values"`
 		} `json:"streams"`
 	}

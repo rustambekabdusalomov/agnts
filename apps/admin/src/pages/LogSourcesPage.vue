@@ -91,6 +91,9 @@ const watched = (s: LogSource) => s.services.filter((v) => v.enabled).length
     <pre class="lw-snip">{{ snippets.fluentbit }}</pre>
     <h3 class="lw-h3">Promtail / Grafana Alloy</h3>
     <pre class="lw-snip">{{ snippets.promtail }}</pre>
+    <h3 class="lw-h3">{{ t('logwatch.agentTitle') }}</h3>
+    <p class="hint" style="margin: 0 0 6px">{{ t('logwatch.agentHelp') }}</p>
+    <pre class="lw-snip">{{ snippets.watch }}</pre>
     <button type="button" class="btn btn-s" @click="token = null">{{ t('logwatch.tokenDone') }}</button>
   </section>
 

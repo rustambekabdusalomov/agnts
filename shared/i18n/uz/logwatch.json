@@ -225,6 +225,8 @@
     "patterns": "Maxsus detektorlar",
     "patternsHelp": "Har qatorda bittadan: turkum:jiddiylik nom=regex, masalan security:high billing-token=\\S+",
     "overridesHelp": "Servisda repozitoriy bo‘lmaguncha faqat xabar beriladi: ularni bu yerda tanlang:",
-    "notifyLabel": "Loglarni kuzatish nimadir topdi"
+    "notifyLabel": "Loglarni kuzatish nimadir topdi",
+    "agentTitle": "agnts-watch (log tizimisiz)",
+    "agentHelp": "Log tizimi bo‘lmagan serverda: buni servislaringiz yonida ishga tushiring. U agnts.watch=logs yorlig‘li konteynerlarni kuzatadi, yiqilishlar, OOM va sog‘liq tekshiruvi xatolarini bildiradi va o‘zi agnts ga ulanadi."
   }
 }

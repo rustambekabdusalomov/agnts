@@ -39,7 +39,9 @@ func (m *memStore) LogSources(context.Context) ([]domain.LogSource, error) {
 	}
 	return out, nil
 }
-func (m *memStore) PullSources(ctx context.Context) ([]domain.LogSource, error) { return m.LogSources(ctx) }
+func (m *memStore) PullSources(ctx context.Context) ([]domain.LogSource, error) {
+	return m.LogSources(ctx)
+}
 func (m *memStore) LogSource(_ context.Context, id int64, _ bool) (domain.LogSource, error) {
 	s, ok := m.sources[id]
 	if !ok {
@@ -62,7 +64,10 @@ func (m *memStore) SaveLogSource(_ context.Context, x domain.LogSource, _ bool) 
 	m.sources[x.ID] = x
 	return x, nil
 }
-func (m *memStore) DeleteLogSource(_ context.Context, id int64) error { delete(m.sources, id); return nil }
+func (m *memStore) DeleteLogSource(_ context.Context, id int64) error {
+	delete(m.sources, id)
+	return nil
+}
 func (m *memStore) SetLogPushToken(_ context.Context, id int64, hash []byte) error {
 	m.tokens[string(hash)] = id
 	return nil
@@ -157,7 +162,7 @@ func (m *memStore) MergeLogScope(_ context.Context, from, to string, repos []int
 	return nil
 }
 func (m *memStore) AutoLogTickets(context.Context, time.Time) (int, error) { return m.autos, nil }
-func (m *memStore) PruneLogSamples(context.Context) (int64, error)          { return 0, nil }
+func (m *memStore) PruneLogSamples(context.Context) (int64, error)         { return 0, nil }
 
 type memTickets struct {
 	mu      sync.Mutex
@@ -516,7 +521,9 @@ type fakePuller struct {
 	err     error
 }
 
-func (p *fakePuller) Test(context.Context) (logsource.TestResult, error) { return logsource.TestResult{}, p.err }
+func (p *fakePuller) Test(context.Context) (logsource.TestResult, error) {
+	return logsource.TestResult{}, p.err
+}
 func (p *fakePuller) Discover(context.Context) ([]domain.LogService, error) {
 	return []domain.LogService{{Name: "api"}, {Name: "web"}}, nil
 }

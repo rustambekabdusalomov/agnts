@@ -102,5 +102,26 @@ compression = "gzip"`
   const promtail = `clients:
   - url: ${u.href}/loki/api/v1/push
     bearer_token: ${token}`
-  return { vector, fluentbit, promtail }
+  // agnts-watch: for a server with no logging system. It follows the
+  // containers labelled agnts.watch=logs through a read-only socket proxy.
+  const watch = `services:
+  agnts-watch:
+    image: registry.agnts.uz/agnts:latest
+    command: ["watch"]
+    restart: unless-stopped
+    environment:
+      AGNTS_URL: ${u.origin}
+      AGNTS_WATCH_TOKEN: ${token}
+      AGNTS_WATCH_DOCKER: tcp://socket-proxy:2375
+      # AGNTS_WATCH_FILES: nginx=/logs/nginx/*.log
+    # volumes: ["/var/log/nginx:/logs/nginx:ro"]
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    restart: unless-stopped
+    environment: { EVENTS: 1, CONTAINERS: 1, POST: 0 }
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock:ro"]
+
+# and on each service to watch:
+#   labels: { agnts.watch: "logs" }`
+  return { vector, fluentbit, promtail, watch }
 }

@@ -11,9 +11,9 @@ import (
 
 // Reader limits.
 const (
-	pullLimit     = 5000          // entries per service per pull
-	minuteCap     = 50000         // entries per source per minute, then "behind"
-	catchUpWindow = time.Hour     // after a longer outage the cursor jumps
+	pullLimit     = 5000      // entries per service per pull
+	minuteCap     = 50000     // entries per source per minute, then "behind"
+	catchUpWindow = time.Hour // after a longer outage the cursor jumps
 	reloadEvery   = 5 * time.Minute
 	backoffMin    = 15 * time.Second
 	backoffMax    = 5 * time.Minute

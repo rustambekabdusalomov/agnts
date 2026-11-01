@@ -225,6 +225,8 @@
     "patterns": "Custom detectors",
     "patternsHelp": "One a line: category:severity name=regex, such as security:high billing-token=\\S+",
     "overridesHelp": "A service is reported only until it has repositories: select them under",
-    "notifyLabel": "The log watcher found something"
+    "notifyLabel": "The log watcher found something",
+    "agentTitle": "agnts-watch (no logging system)",
+    "agentHelp": "On a server without a logging system: run this next to your services. It follows the containers labelled agnts.watch=logs, reports crashes, OOM kills and failed health checks, and connects out to agnts only."
   }
 }

@@ -217,6 +217,15 @@ func ParseLogEntry(e LogEntry, f LogFields) LogEvent {
 		if len(ev.Lines) == 0 {
 			ev.Lines = []string{trimmed}
 		}
+		// A shipper's wrapper ({"log": "ERROR ..."}) carries a text line:
+		// read its level and access fields as for plain text.
+		if ev.Level == "" && text != "" {
+			ev.Level = textLevel(ev.Lines[0])
+		}
+		if a := accessLine.FindStringSubmatch(ev.Lines[0]); a != nil {
+			st, _ := strconv.Atoi(a[4])
+			ev.Access = &LogAccess{IP: a[1], Method: a[2], Path: a[3], Status: st}
+		}
 		if p := lookupString(m, jsonPathKeys, ""); p != "" {
 			if st, err := strconv.Atoi(lookupString(m, jsonStatusKeys, "")); err == nil && st >= 100 && st < 600 {
 				ev.Access = &LogAccess{Method: strings.ToUpper(lookupString(m, jsonMethodKeys, "")), Path: p, Status: st, IP: lookupString(m, jsonIPKeys, "")}
@@ -807,7 +816,7 @@ func (s foundSecret) hit(ev LogEvent, red, values []string) LogHit {
 
 var (
 	logEmail = regexp.MustCompile(`\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b`)
-	cardRe  = regexp.MustCompile(`\b(?:\d[ -]?){12,18}\d\b`)
+	cardRe   = regexp.MustCompile(`\b(?:\d[ -]?){12,18}\d\b`)
 )
 
 func luhn(s string) bool {
