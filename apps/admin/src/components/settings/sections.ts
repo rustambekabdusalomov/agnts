@@ -3,7 +3,7 @@
 export const SETTINGS_SECTIONS = [
   { key: 'appearance', label: 'settings.appearance', icon: 'palette' },
   { key: 'integrations', label: 'settings.integrations', icon: 'plug' },
-  { key: 'muse', label: 'settings.claude', museLabel: 'settings.claudeMuse', icon: 'assistant', museIcon: 'meta' },
+  { key: 'muse', label: 'settings.aiModels', icon: 'assistant', museIcon: 'meta' },
   { key: 'commits', label: 'settings.commits', icon: 'commit' },
   { key: 'runs', label: 'settings.runs', icon: 'running' },
   { key: 'guardrails', label: 'harnessSettings.title', icon: 'shield' },
@@ -22,9 +22,9 @@ export function visibleSections(claudeOff: boolean) {
   return SETTINGS_SECTIONS.filter((s) => !(claudeOff && 'claudeOnly' in s && s.claudeOnly))
 }
 
-/** A section's label key; the coding model's reads Muse where Claude Code is not offered. */
-export function sectionLabel(s: (typeof SETTINGS_SECTIONS)[number], claudeOff: boolean): string {
-  return claudeOff && 'museLabel' in s ? s.museLabel : s.label
+/** A section's label key. */
+export function sectionLabel(s: (typeof SETTINGS_SECTIONS)[number]): string {
+  return s.label
 }
 
 /** A section's icon; the coding model's is Meta's where Muse is the tool. */
