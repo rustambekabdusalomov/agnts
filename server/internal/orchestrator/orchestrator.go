@@ -684,6 +684,9 @@ func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domai
 			if lvl, _ := e.Data["level"].(string); lvl == "warn" {
 				ev.Level = domain.LevelWarn
 			}
+		case ai.EventRetry:
+			// The gateway ran the call again elsewhere after an early failure.
+			ev.Type, ev.Level, ev.Message = domain.EventRerouted, domain.LevelWarn, e.Text
 		default:
 			return
 		}

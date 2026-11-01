@@ -3,6 +3,7 @@ package ai_test
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
@@ -37,12 +38,13 @@ type accounts struct {
 	opened  []domain.ClaudeAccount
 }
 
-func (a *accounts) Pick(_ context.Context, w domain.Workspace, member *int64, provider string, credits bool) (domain.ClaudeAccount, bool, string, time.Time) {
+func (a *accounts) Pick(_ context.Context, w domain.Workspace, member *int64, provider string, opts ai.PickOpts) (domain.ClaudeAccount, bool, string, time.Time) {
+	credits := opts.Credits
 	a.picks = append(a.picks, credits)
 	if why, ok := a.refuse[provider]; ok {
 		return domain.ClaudeAccount{}, false, why, time.Time{}
 	}
-	if a.credits[provider] {
+	if a.credits[provider] || slices.Contains(opts.Skip, a.conn[provider]) {
 		if !credits {
 			return domain.ClaudeAccount{}, false, "no " + provider + " account is connected", time.Time{}
 		}
@@ -280,5 +282,112 @@ func TestMapModel(t *testing.T) {
 	// Codex without models for its tiers takes no calls.
 	if got := ai.MapModel(ai.NewRegistry(aitest.Claude()), "opus", "codex"); got != "" {
 		t.Fatalf("no codex: %q", got)
+	}
+}
+
+// seqBox answers each call with the next of its scripted answers.
+type seqBox struct {
+	ai.Box
+	answers []answer
+	got     []ai.Request
+}
+
+type answer struct {
+	res   ai.Result
+	err   error
+	tools int
+}
+
+func (b *seqBox) Claude(_ context.Context, req ai.Request, on func(ai.Event)) (ai.Result, error) {
+	a := b.answers[len(b.got)]
+	b.got = append(b.got, req)
+	for range a.tools {
+		on(ai.Event{Kind: ai.EventTool, Tool: "Edit: main.go"})
+	}
+	return a.res, a.err
+}
+
+func failover(t *testing.T, a *accounts, l *limits, s domain.Settings) (*ai.Gateway, *[]domain.ClaudeCall) {
+	t.Helper()
+	var spent []domain.ClaudeCall
+	g := ai.New(ai.Deps{Providers: aitest.Providers(), Access: access{domain.Access{Modules: []string{"claude", "muse"}}}, Accounts: a,
+		Workspaces: workspaces{}, Limits: l, Settings: settings{s}, Spend: func(_ context.Context, c domain.ClaudeCall) error {
+			spent = append(spent, c)
+			return nil
+		}})
+	return g, &spent
+}
+
+// A call refused at its account's limit runs again at once on the
+// module's next account (credits); the run's later calls go there.
+func TestFailoverToCredits(t *testing.T) {
+	a := &accounts{conn: map[string]int64{"claude": 7}, credits: map[string]bool{}}
+	g, spent := failover(t, a, &limits{}, domain.Settings{})
+	ctx := domain.WithWorkspace(context.Background(), 3)
+	both := domain.Access{Modules: []string{"claude", "muse"}}
+	adm, h := g.Admit(ctx, ai.Who{Person: 4}, "code", both, []string{"claude"}, ai.AdmitCache{})
+	if h != nil {
+		t.Fatal(h)
+	}
+	ctx = ai.WithAdmission(ctx, adm)
+	// After the first failure the connection is skipped: the fake then
+	// gives credits.
+	b := &seqBox{answers: []answer{{res: ai.Result{RateLimited: true, IsError: true, Turns: 1}}, {res: ai.Result{Turns: 3}}, {res: ai.Result{Turns: 2}}}}
+	var events []ai.Event
+	res, err := g.Run(ctx, ai.Call{Purpose: "code", Box: b, Req: ai.Request{Model: "opus", Resume: "s1"}, RunID: 1}, func(e ai.Event) { events = append(events, e) })
+	if err != nil || res.RateLimited || !res.Account.Credits || len(b.got) != 2 || b.got[1].Model != "opus" || b.got[1].Resume != "s1" {
+		t.Fatalf("res %+v err %v calls %+v", res, err, b.got)
+	}
+	if len(events) != 1 || events[0].Kind != ai.EventRetry {
+		t.Fatalf("events: %+v", events)
+	}
+	if len(*spent) != 2 || (*spent)[0].ConnectionID != 7 || !(*spent)[1].OnCredits {
+		t.Fatalf("spent: %+v", *spent)
+	}
+	// The run's next call goes straight to credits.
+	if _, err := g.Run(ctx, ai.Call{Purpose: "code", Box: b, Req: ai.Request{Model: "opus"}, RunID: 1}, nil); err != nil || !(*spent)[2].OnCredits {
+		t.Fatalf("next call: %v %+v", err, *spent)
+	}
+}
+
+// Without another account of its module, a call refused by its
+// credential moves to the next module when the workspace switches, on a
+// fresh session; without switching, the failure stands.
+func TestFailoverToTheNextModule(t *testing.T) {
+	ctx := domain.WithWorkspace(context.Background(), 3)
+	refused := answer{err: errors.New("claude exited: Invalid API key · Please run /login")}
+	for _, switching := range []bool{true, false} {
+		a := &accounts{conn: map[string]int64{"claude": 7, "muse": 9}, credits: map[string]bool{}}
+		g, _ := failover(t, a, &limits{}, domain.Settings{SwitchModules: switching})
+		// Skipping Claude's connection leaves no Claude account: answers
+		// never run on credits.
+		b := &seqBox{answers: []answer{refused, {res: ai.Result{Turns: 1}}}}
+		res, err := g.Run(ctx, ai.Call{Who: ai.Who{Person: 4}, Purpose: domain.PurposeAssistant, Box: b,
+			Req: ai.Request{Model: "sonnet", Resume: "s1", ReadOnly: true}}, nil)
+		if switching && (err != nil || res.Provider != ai.Muse || b.got[1].Model != "muse:spark" || b.got[1].Resume != "") {
+			t.Fatalf("switching: %v %+v %+v", err, res, b.got)
+		}
+		if !switching && (err == nil || len(b.got) != 1) {
+			t.Fatalf("not switching: %v %d calls", err, len(b.got))
+		}
+	}
+}
+
+// A call that already changed files is never run again, and a call runs
+// at most three times.
+func TestNoFailoverAfterWork(t *testing.T) {
+	ctx := domain.WithWorkspace(context.Background(), 3)
+	a := &accounts{conn: map[string]int64{"claude": 7}, credits: map[string]bool{}}
+	g, _ := failover(t, a, &limits{}, domain.Settings{SwitchModules: true})
+	limited := answer{res: ai.Result{RateLimited: true, IsError: true}, tools: 2}
+	b := &seqBox{answers: []answer{limited}}
+	if res, _ := g.Run(ctx, ai.Call{Who: ai.Who{Person: 4}, Purpose: "code", Box: b, Req: ai.Request{Model: "opus"}}, nil); !res.RateLimited || len(b.got) != 1 {
+		t.Fatalf("after work: %+v, %d calls", res, len(b.got))
+	}
+	early := answer{res: ai.Result{RateLimited: true, IsError: true}}
+	b = &seqBox{answers: []answer{early, early, early, early}}
+	_, _ = g.Run(ctx, ai.Call{Who: ai.Who{Person: 4}, Purpose: "code", Box: b, Req: ai.Request{Model: "opus"}}, nil)
+	if len(b.got) > 3 {
+		t.Fatalf("%d attempts", len(b.got))
 	}
 }

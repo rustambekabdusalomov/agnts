@@ -73,6 +73,9 @@ const (
 	// happened; Data: cost_usd, total_usd, held_usd, limit_usd, level).
 	EventBudget EventKind = "budget"
 	EventResult EventKind = "result"
+	// EventRetry: the gateway ran the call again elsewhere after it failed
+	// early (Text: what and why; Data: from, to, why).
+	EventRetry EventKind = "retry"
 )
 
 // Event is one parsed step of an agent's stream.

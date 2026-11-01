@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"regexp"
 
 	"agnts/internal/domain"
 )
@@ -141,7 +142,7 @@ func (g *Gateway) RouteCall(ctx context.Context, c Call) (Route, *Hold) {
 		}
 		// A route the admission moved to another module serves only
 		// purposes that may switch (not a second opinion).
-		if r, ok := adm.Routes[p.ID()]; ok && (!r.Moved() || PolicyOf(c.Purpose).Reroute) {
+		if r, ok := adm.route(p.ID()); ok && (!r.Moved() || PolicyOf(c.Purpose).Reroute) {
 			if err := g.allowed(ctx, adm.Who, r.Provider); err != nil {
 				return Route{}, &Hold{Why: err.Error(), Err: err}
 			}
@@ -160,10 +161,20 @@ func (g *Gateway) RouteCall(ctx context.Context, c Call) (Route, *Hold) {
 	return g.Route(ctx, who, c.Purpose, Want{Model: c.Req.Model})
 }
 
+// maxAttempts is how often a call runs at most: once, and again on the
+// next route after each early failure.
+const maxAttempts = 3
+
 // Run makes one call: it routes it (or takes its route), opens the
 // credential of the route's account, runs it through the provider,
 // records its usage readings and its spend. A call that cannot run
 // returns the *Hold.
+//
+// A call that fails early (its account at its limit or refusing its
+// credential, before it changed anything) runs again at once on the next
+// route: another account of its module (credits, when its purpose may use
+// them), then, when the workspace switches modules, the person's next
+// module. An admitted run's later calls go straight to the new route.
 func (g *Gateway) Run(ctx context.Context, c Call, on func(Event)) (Result, error) {
 	var r Route
 	if c.Route != nil {
@@ -174,9 +185,61 @@ func (g *Gateway) Run(ctx context.Context, c Call, on func(Event)) (Result, erro
 			return Result{}, h
 		}
 	}
+	model, resume := c.Req.Model, c.Req.Resume
+	var avoid []Account
+	var res Result
+	var err error
+	var spent []Result // each attempt's, recorded once the transcript is closed
+	for attempt := 1; ; attempt++ {
+		var why string
+		var tools int
+		res, tools, err = g.attempt(ctx, c, r, on)
+		spent = append(spent, res)
+		if attempt >= maxAttempts || c.Purpose == PurposeUsageProbe || ctx.Err() != nil {
+			break
+		}
+		if why = earlyFailure(res, err, tools, c.Req.ReadOnly); why == "" {
+			break
+		}
+		avoid = append(avoid, r.Account)
+		who := r.Who
+		next, hold := g.Route(ctx, who, c.Purpose, Want{Model: model, Avoid: avoid})
+		if hold != nil {
+			break // nowhere else to go: the failure stands
+		}
+		from := describe(r)
+		next.Rerouted = why
+		if next.Provider != r.Provider {
+			c.Req.Resume = "" // sessions do not move between tools
+		} else {
+			c.Req.Resume = resume
+		}
+		if on != nil {
+			on(Event{Kind: EventRetry, Text: fmt.Sprintf("%s failed (%s); running again on %s", from, why, describe(next)),
+				Data: map[string]any{"from": from, "to": describe(next), "why": why}})
+		}
+		if adm, ok := AdmissionOf(ctx); ok {
+			adm.move(r.Asked, next)
+		}
+		r = next
+	}
+	if c.Record != nil {
+		if id := c.Record.Finish(ctx, res, err); id > 0 {
+			res.TranscriptID = id
+		}
+	}
+	for _, s := range spent {
+		s.TranscriptID = res.TranscriptID // every attempt is in the one transcript
+		g.spend(ctx, c, s.Account, s)
+	}
+	return res, err
+}
+
+// attempt runs c once on r. tools counts the tool calls it made.
+func (g *Gateway) attempt(ctx context.Context, c Call, r Route, on func(Event)) (Result, int, error) {
 	p, ok := g.d.Providers.Get(r.Provider)
 	if !ok {
-		return Result{}, fmt.Errorf("%s is not available on this server", ModuleName(r.Provider))
+		return Result{}, 0, fmt.Errorf("%s is not available on this server", ModuleName(r.Provider))
 	}
 	if r.Model != "" {
 		c.Req.Model = r.Model // a moved call runs its route's model
@@ -186,33 +249,78 @@ func (g *Gateway) Run(ctx context.Context, c Call, on func(Event)) (Result, erro
 	}
 	cred, err := g.credential(ctx, r.Account)
 	if err != nil {
-		return Result{}, err
+		return Result{Provider: r.Provider, Account: r.Account}, 0, &credentialError{err}
 	}
 	acct := r.Account
-	inner := on
-	on = func(e Event) {
-		if e.Kind == EventRateLimit && g.d.Limits != nil {
-			g.d.Limits.Record(ctx, acct, e.Data)
+	tools := 0
+	wrapped := func(e Event) {
+		switch e.Kind {
+		case EventRateLimit:
+			if g.d.Limits != nil {
+				g.d.Limits.Record(ctx, acct, e.Data)
+			}
+		case EventTool:
+			tools++
 		}
 		if c.Record != nil {
 			c.Record.Event(e)
 		}
-		if inner != nil {
-			inner(e)
+		if on != nil {
+			on(e)
 		}
 	}
-	res, err := p.Exec(ctx, c.Box, cred, c.Req, on)
+	res, err := p.Exec(ctx, c.Box, cred, c.Req, wrapped)
 	res.Provider, res.Account = r.Provider, acct
 	if res.RateLimited && g.d.Limits != nil {
 		g.d.Limits.RecordLimited(ctx, acct)
 	}
-	if c.Record != nil {
-		if id := c.Record.Finish(ctx, res, err); id > 0 {
-			res.TranscriptID = id
-		}
+	return res, tools, err
+}
+
+// credentialError is an account whose secret could not be opened.
+type credentialError struct{ err error }
+
+func (e *credentialError) Error() string { return e.err.Error() }
+func (e *credentialError) Unwrap() error { return e.err }
+
+// authText matches a provider refusing a credential.
+var authText = regexp.MustCompile(`(?i)(invalid (x-)?api[ _-]?key|authentication[ _](error|failed)|unauthori[sz]ed|\b401\b|oauth token (has )?expired|token (has )?expired|invalid bearer token|permission_error|not connected)`)
+
+// earlyFailure says why a call failed before it did anything worth
+// keeping (its account at its limit, or refusing its credential), or ""
+// when it did not fail so, or its work could have changed files.
+func earlyFailure(res Result, err error, tools int, readOnly bool) string {
+	if !readOnly && tools > 0 {
+		return "" // it already worked on the code
 	}
-	g.spend(ctx, c, acct, res)
-	return res, err
+	var ce *credentialError
+	switch {
+	case errors.As(err, &ce):
+		return "its credential could not be opened: " + ce.err.Error()
+	case res.RateLimited:
+		return ModuleName(res.Provider) + " limit reached on " + accountName(res.Account)
+	case err != nil && authText.MatchString(err.Error()):
+		return ModuleName(res.Provider) + " refused " + accountName(res.Account)
+	case res.IsError && authText.MatchString(res.Text):
+		return ModuleName(res.Provider) + " refused " + accountName(res.Account)
+	}
+	return ""
+}
+
+// accountName names an account in messages.
+func accountName(a Account) string {
+	switch {
+	case a.Label != "":
+		return a.Label
+	case a.Credits:
+		return "credits"
+	}
+	return "its account"
+}
+
+// describe names where a route runs: "Claude (Acme's account)".
+func describe(r Route) string {
+	return ModuleName(r.Provider) + " (" + accountName(r.Account) + ")"
 }
 
 // lightOf is provider id's light model.

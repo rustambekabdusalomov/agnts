@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"agnts/internal/domain"
@@ -71,6 +72,9 @@ type Want struct {
 	Needs Caps
 	// Pin runs on exactly this account (the usage probe).
 	Pin *Account
+	// Avoid are accounts that just failed this call: the route takes
+	// another.
+	Avoid []Account
 }
 
 // Route is where a call runs.
@@ -83,6 +87,8 @@ type Route struct {
 	Model   string
 	Account Account
 	Caps    Caps
+	// Asked is the module the call asked for (its model's).
+	Asked string
 	// Rerouted says why it runs on another module than asked; "" when it
 	// runs where asked.
 	Rerouted string
@@ -114,13 +120,21 @@ func (h *Hold) Unwrap() error { return h.Err }
 // Is makes a hold at a usage limit ErrLimit.
 func (h *Hold) Is(target error) bool { return target == ErrLimit && h.Limited }
 
+// PickOpts narrows which account Pick may return.
+type PickOpts struct {
+	// Credits: it may run on agnts's key.
+	Credits bool
+	// Skip are connections that just refused a call: Pick goes on to
+	// credits as if they were missing.
+	Skip []int64
+}
+
 // Accounts picks and opens the accounts calls run on.
 type Accounts interface {
 	// Pick returns the account a call of member (nil: the workspace's
-	// default member) in w uses now on provider; credits says whether it
-	// may run on agnts's key. ok is false when none is usable: why says
-	// so, until when it may be (zero when unknown).
-	Pick(ctx context.Context, w domain.Workspace, member *int64, provider string, credits bool) (acct Account, ok bool, why string, until time.Time)
+	// default member) in w uses now on provider. ok is false when none is
+	// usable: why says so, until when it may be (zero when unknown).
+	Pick(ctx context.Context, w domain.Workspace, member *int64, provider string, opts PickOpts) (acct Account, ok bool, why string, until time.Time)
 	// Credential returns acct's secret.
 	Credential(ctx context.Context, acct Account) (Credential, error)
 }
@@ -189,7 +203,7 @@ func (g *Gateway) Route(ctx context.Context, who Who, purpose Purpose, want Want
 	if err != nil {
 		return Route{}, &Hold{Why: err.Error(), Err: err}
 	}
-	base := Route{Who: who, Purpose: purpose}
+	base := Route{Who: who, Purpose: purpose, Asked: asked.ID()}
 	if want.Pin != nil {
 		r := base
 		r.Provider, r.Model, r.Caps, r.Account = asked.ID(), want.Model, asked.Caps(), *want.Pin
@@ -235,7 +249,9 @@ func (g *Gateway) Route(ctx context.Context, who Who, purpose Purpose, want Want
 			err := &domain.NotAllowedError{Module: p.ID()}
 			hold = &Hold{Why: err.Error(), Err: err}
 		case perAccount:
-			r.Account, hold = g.pick(ctx, w, base.Who, p.ID(), purpose)
+			r.Account, hold = g.pick(ctx, w, base.Who, p.ID(), purpose, want.Avoid)
+		case avoided(want.Avoid, Account{Provider: p.ID()}):
+			hold = &Hold{Why: ModuleName(p.ID()) + " just failed this call"}
 		default:
 			// One account for everything (installs without per-workspace
 			// accounts): only its limit can hold a call.
@@ -260,18 +276,37 @@ func (g *Gateway) Route(ctx context.Context, who Who, purpose Purpose, want Want
 }
 
 // pick picks the account who's call on provider uses in w.
-func (g *Gateway) pick(ctx context.Context, w domain.Workspace, who Who, provider string, purpose Purpose) (Account, *Hold) {
+func (g *Gateway) pick(ctx context.Context, w domain.Workspace, who Who, provider string, purpose Purpose, avoid []Account) (Account, *Hold) {
 	member := who.Member
 	if member == nil && who.Person > 0 && w.ClaudeMode == domain.ClaudePerMember {
 		person := who.Person
 		member = &person
 	}
-	acct, ok, why, until := g.d.Accounts.Pick(ctx, w, member, provider, PolicyOf(purpose).Credits)
+	opts := PickOpts{Credits: PolicyOf(purpose).Credits}
+	for _, a := range avoid {
+		if a.Provider == provider && a.ConnectionID > 0 {
+			opts.Skip = append(opts.Skip, a.ConnectionID)
+		}
+	}
+	acct, ok, why, until := g.d.Accounts.Pick(ctx, w, member, provider, opts)
 	if !ok {
 		return Account{}, &Hold{Why: why, Until: until}
 	}
 	acct.Provider = provider
+	if avoided(avoid, acct) {
+		return Account{}, &Hold{Why: ModuleName(provider) + " (" + acct.Label + ") just failed this call"}
+	}
 	return acct, nil
+}
+
+// avoided reports whether a is one of the accounts that just failed.
+func avoided(avoid []Account, a Account) bool {
+	for _, x := range avoid {
+		if x.Provider == a.Provider && x.ConnectionID == a.ConnectionID && x.Credits == a.Credits {
+			return true
+		}
+	}
+	return false
 }
 
 // alternatives are the modules a call asked for on asked may switch to:
@@ -335,6 +370,9 @@ func (g *Gateway) settings(ctx context.Context) domain.Settings {
 // Admission is where a run's calls go: one route per provider its stages
 // use, decided before it starts.
 type Admission struct {
+	// mu guards Routes: a call that failed over moves its module's route
+	// for the run's later calls.
+	mu      *sync.Mutex
 	Who     Who
 	Purpose Purpose
 	Access  domain.Access
@@ -346,12 +384,37 @@ type Admission struct {
 
 // Main is the route of the run's default module.
 func (a Admission) Main() (Route, bool) {
-	r, ok := a.Routes[a.Primary]
+	return a.route(a.Primary)
+}
+
+// route is the run's route for module id.
+func (a Admission) route(id string) (Route, bool) {
+	if a.mu != nil {
+		a.mu.Lock()
+		defer a.mu.Unlock()
+	}
+	r, ok := a.Routes[id]
 	return r, ok
+}
+
+// move makes r the run's route for module id: its later calls go there.
+func (a Admission) move(id string, r Route) {
+	if a.mu == nil {
+		return
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if _, ok := a.Routes[id]; ok {
+		a.Routes[id] = r
+	}
 }
 
 // OnCredits reports whether any of the run's routes runs on credits.
 func (a Admission) OnCredits() bool {
+	if a.mu != nil {
+		a.mu.Lock()
+		defer a.mu.Unlock()
+	}
 	for _, r := range a.Routes {
 		if r.Account.Credits {
 			return true
@@ -383,7 +446,7 @@ func (g *Gateway) Admit(ctx context.Context, who Who, purpose Purpose, access do
 	if who.Workspace == 0 {
 		who.Workspace = domain.WorkspaceOf(ctx)
 	}
-	a := Admission{Who: who, Purpose: purpose, Access: access, Primary: access.Primary(), Routes: map[string]Route{}}
+	a := Admission{mu: &sync.Mutex{}, Who: who, Purpose: purpose, Access: access, Primary: access.Primary(), Routes: map[string]Route{}}
 	var member int64
 	if who.Member != nil {
 		member = *who.Member
