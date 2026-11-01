@@ -344,7 +344,7 @@ func TestDocumentsTicketsRunsAndExports(t *testing.T) {
 	claimed, _, _ = f.s.ClaimDocumentRun(f.ctx)
 	// Spend has no ticket.
 	if err := f.s.RecordDocumentCall(f.ctx, claimed.ID, domain.ClaudeCall{ModelStage: "document", Model: "sonnet",
-		Usage: domain.TokenUsage{Input: 10, Output: 5, CostUSD: 0.42}, Turns: 3}); err != nil {
+		Usage: domain.TokenUsage{Input: 10, Output: 5, CostUSD: 0.42}, Turns: 3, OnCredits: true}); err != nil {
 		t.Fatal(err)
 	}
 	if usd, err := f.s.DocumentRunCostUSD(f.ctx, claimed.ID); err != nil || usd < 0.41 || usd > 0.43 {

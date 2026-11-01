@@ -104,7 +104,7 @@ func TestRunPaysFreeCreditsFirst(t *testing.T) {
 
 	// Billing charges the wallet the paid part only.
 	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelCoding, Model: "muse:muse-spark-1.3",
-		Usage: domain.TokenUsage{Input: 1, CostUSD: 0.27}}); err != nil {
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 0.27}, OnCredits: true}); err != nil {
 		t.Fatal(err)
 	}
 	bill := billing.New(billing.Config{Enabled: true, RunCap: 2500, Markup: 1.4}, credits, postgres.NewWorkspaces(pool), store,

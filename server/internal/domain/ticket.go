@@ -376,6 +376,12 @@ type ClaudeCall struct {
 	Partial    bool
 	// TranscriptID is the invocation's run history transcript; 0 for none.
 	TranscriptID int64
+	// Provider is the module it ran on; ConnectionID the connection that
+	// paid (0 for none), OnCredits whether agnts's key did, charged to the
+	// workspace.
+	Provider     string
+	ConnectionID int64
+	OnCredits    bool
 	CreatedAt    time.Time
 }
 

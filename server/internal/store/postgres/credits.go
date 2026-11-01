@@ -94,18 +94,19 @@ func (s *Credits) Ledger(ctx context.Context, ws int64, limit int) ([]LedgerEntr
 	return out, rows.Err()
 }
 
-// DocumentRunCostUSD returns what a document generation's Claude calls
-// cost on the API.
+// DocumentRunCostUSD returns what a document generation's calls on
+// credits cost on the API.
 func (s *Credits) DocumentRunCostUSD(ctx context.Context, runID int64) (float64, error) {
 	var usd float64
-	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE document_run_id = $1`, runID).Scan(&usd)
+	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE document_run_id = $1 AND on_credits`, runID).Scan(&usd)
 	return usd, err
 }
 
-// RunCostUSD returns what a run's Claude calls cost on the API.
+// RunCostUSD returns what a run's calls on credits cost on the API: calls
+// on a connection are paid by its owner, not the workspace's credits.
 func (s *Credits) RunCostUSD(ctx context.Context, runID int64) (float64, error) {
 	var usd float64
-	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE run_id = $1`, runID).Scan(&usd)
+	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE run_id = $1 AND on_credits`, runID).Scan(&usd)
 	return usd, err
 }
 

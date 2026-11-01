@@ -211,8 +211,10 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 		if res.Model != "" {
 			m = res.Model
 		}
-		if rerr := o.docs.RecordDocumentCall(context.WithoutCancel(ctx), run.ID, domain.ClaudeCall{ModelStage: "document", Model: m,
-			Usage: res.Usage, Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID}); rerr != nil {
+		c := domain.ClaudeCall{ModelStage: "document", Model: m,
+			Usage: res.Usage, Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID}
+		callAccount(ctx, &c)
+		if rerr := o.docs.RecordDocumentCall(context.WithoutCancel(ctx), run.ID, c); rerr != nil {
 			o.log.Error("record document spend", "document_run", run.ID, "err", rerr)
 		}
 	}

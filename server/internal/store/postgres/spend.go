@@ -17,10 +17,11 @@ func (s *Agent) RecordClaudeCall(ctx context.Context, c domain.ClaudeCall) error
 		transcript = &c.TranscriptID
 	}
 	tag, err := s.db.Exec(ctx, `INSERT INTO claude_calls (run_id, ticket_id, model_stage, model,
-			input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, turns, duration_ms, partial, transcript_id)
-		SELECT id, ticket_id, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 FROM runs WHERE id = $1`,
+			input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, turns, duration_ms, partial, transcript_id,
+			provider, connection_id, on_credits)
+		SELECT id, ticket_id, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15 FROM runs WHERE id = $1`,
 		c.RunID, c.ModelStage, c.Model, u.Input, u.Output, u.CacheRead, u.CacheWrite, u.CostUSD,
-		c.Turns, c.Duration.Milliseconds(), c.Partial, transcript)
+		c.Turns, c.Duration.Milliseconds(), c.Partial, transcript, callProvider(c), nullID(c.ConnectionID), c.OnCredits)
 	if err != nil {
 		return err
 	}
@@ -28,6 +29,22 @@ func (s *Agent) RecordClaudeCall(ctx context.Context, c domain.ClaudeCall) error
 		return fmt.Errorf("record claude call: run %d: %w", c.RunID, domain.ErrNotFound)
 	}
 	return nil
+}
+
+// callProvider is the module a call ran on: as recorded, else its model's.
+func callProvider(c domain.ClaudeCall) string {
+	if c.Provider != "" {
+		return c.Provider
+	}
+	return domain.ProviderOf(c.Model)
+}
+
+// nullID is id, or NULL for 0.
+func nullID(id int64) *int64 {
+	if id <= 0 {
+		return nil
+	}
+	return &id
 }
 
 // TicketUsage returns a ticket's spend by model stage and model, in the

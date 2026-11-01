@@ -855,11 +855,22 @@ func (o *Orchestrator) recordSpend(ctx context.Context, run *domain.Run, modelSt
 		model = res.Model
 	}
 	// The run may have been stopped; the spend is recorded regardless.
-	if err := o.store.RecordClaudeCall(context.WithoutCancel(ctx), domain.ClaudeCall{
+	c := domain.ClaudeCall{
 		RunID: run.ID, ModelStage: modelStage, Model: model, Usage: res.Usage,
 		Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID,
-	}); err != nil {
+	}
+	callAccount(ctx, &c)
+	if err := o.store.RecordClaudeCall(context.WithoutCancel(ctx), c); err != nil {
 		o.log.Error("record claude spend", "run_id", run.ID, "err", err)
+	}
+}
+
+// callAccount fills in the module c ran on and the account that paid for
+// it: the run's account for that module (callClaude used the same one).
+func callAccount(ctx context.Context, c *domain.ClaudeCall) {
+	c.Provider = domain.ProviderOf(c.Model)
+	if a, ok := domain.ClaudeOf(domain.UseProvider(ctx, c.Provider)); ok {
+		c.ConnectionID, c.OnCredits = a.ConnectionID, a.Credits
 	}
 }
 
