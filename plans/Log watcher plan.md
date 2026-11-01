@@ -1,5 +1,25 @@
 # agnts Log watcher (logs → findings → report or ticket) — Plan
 
+> **Status (2026-11-02): implemented, all phases** (branch `log-watcher`). Where the build differs from the plan below:
+>
+> - **The agent is a push source.** `agnts watch` sends to `/webhooks/logs` with a push source's token, so on the
+>   server it is a push source like Vector. It has no heartbeat, no remote config, and no "send me more lines" round
+>   trip; it buffers up to 20,000 entries in memory (no disk spool) while agnts is unreachable.
+> - **Stack traces from Loki are read whole.** A trace written line by line reaches Loki's keyword filter as one
+>   matching line, so the reader fetches the next two seconds of that stream (within the read window). This replaces
+>   the round trip.
+> - **Private loggers next to agnts:** `AGNTS_LOGS_PRIVATE_ALLOW` (hosts and CIDRs, set by the server's operator) lets a
+>   Loki in agnts's own network be read directly, over http too. Other private addresses still need a private network.
+> - **Personal data is best effort:** it is found in the lines agnts reads (errors, secrets, access lines), not in
+>   every line a service logs.
+> - **Model triage is off by default** (`triagePerDay` 0). Turned on, it runs one light-tier call per new finding
+>   through the AI gateway (`domain.PurposeLogTriage`).
+> - **Overrides and custom detectors** are edited as lines of text in Settings → Log watcher.
+> - **Hosted services shipped too:** Datadog (Logs Search API), CloudWatch Logs (FilterLogEvents, SigV4), Splunk
+>   (search export). Loki's push API (Promtail, Alloy) is at `/webhooks/logs/loki/api/v1/push`.
+> - **Not built:** deep links back to Grafana, Kibana or Graylog; the Rust CLI's `agnts watch install --host` (the admin
+>   shows a compose snippet instead). A source shows that it went through a private network, not which one.
+
 Nov 2, 2026 · draft, revised: v1 connects to the user's logging systems · supersedes `Incidents plan.md` (never
 implemented; its on-host Docker watcher becomes phase 3) · copies the shape of `ciwatch` · reaches private loggers
 through `Multi VPN plan.md`'s private networks
