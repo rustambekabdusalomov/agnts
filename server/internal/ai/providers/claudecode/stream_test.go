@@ -1,22 +1,22 @@
-package runner
+package claudecode
 
 import (
 	"os"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
-	"agnts/internal/orchestrator"
 )
 
-func parseFile(t *testing.T, name string) (orchestrator.ClaudeResult, []orchestrator.ClaudeEvent, error) {
+func parseFile(t *testing.T, name string) (ai.Result, []ai.Event, error) {
 	t.Helper()
 	f, err := os.Open("testdata/" + name)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer func() { _ = f.Close() }()
-	var evs []orchestrator.ClaudeEvent
-	res, err := ParseStream(f, func(e orchestrator.ClaudeEvent) { evs = append(evs, e) })
+	var evs []ai.Event
+	res, err := ParseStream(f, func(e ai.Event) { evs = append(evs, e) })
 	return res, evs, err
 }
 
@@ -28,11 +28,11 @@ func TestParseSuccess(t *testing.T) {
 	if res.SessionID != "sess-1" || res.Turns != 4 || res.IsError || res.RateLimited || res.Text != "Done: fixed the nil check." {
 		t.Fatalf("result: %+v", res)
 	}
-	var kinds []orchestrator.ClaudeEventKind
+	var kinds []ai.EventKind
 	for _, e := range evs {
 		kinds = append(kinds, e.Kind)
 	}
-	want := []orchestrator.ClaudeEventKind{"init", "text", "tool", "tool_result", "tool", "rate_limit", "result"}
+	want := []ai.EventKind{"init", "text", "tool", "tool_result", "tool", "rate_limit", "result"}
 	if len(kinds) != len(want) {
 		t.Fatalf("events %v, want %v", kinds, want)
 	}
@@ -58,7 +58,7 @@ func TestParseErrors(t *testing.T) {
 	if err != nil || !res.RateLimited {
 		t.Fatalf("usage limit text: %+v %v", res, err)
 	}
-	if evs[1].Kind != orchestrator.ClaudeText || evs[1].Text != "Starting." {
+	if evs[1].Kind != ai.EventText || evs[1].Text != "Starting." {
 		t.Fatalf("top-level content not parsed: %+v", evs[1])
 	}
 	if res, _, err = parseFile(t, "rate_event_rejected.jsonl"); err != nil || !res.RateLimited {
@@ -99,17 +99,5 @@ func TestParseUsageCutOff(t *testing.T) {
 	}
 	if res, _, _ = parseFile(t, "truncated.jsonl"); res.Partial {
 		t.Fatal("a cut-off stream with no usage is not partial spend")
-	}
-}
-
-func TestToolSummaryNamesTheSkill(t *testing.T) {
-	for in, want := range map[string]string{
-		`{"skill":"agnts-method-house-style"}`:   "Skill: agnts-method-house-style",
-		`{"command":"agnts-method-reuse-first"}`: "Skill: agnts-method-reuse-first", // older Claude Code versions
-		`{}`:                                     "Skill",
-	} {
-		if got := toolSummary("Skill", []byte(in)); got != want {
-			t.Errorf("%s: %q, want %q", in, got, want)
-		}
 	}
 }

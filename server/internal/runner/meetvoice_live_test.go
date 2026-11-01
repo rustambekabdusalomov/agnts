@@ -7,6 +7,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"agnts/internal/ai"
+	"agnts/internal/ai/providers/musecode"
 )
 
 // TestTranscribeMeetingLive runs TranscribeMeeting in a real container when
@@ -23,8 +26,9 @@ func TestTranscribeMeetingLive(t *testing.T) {
 		t.Fatal(err)
 	}
 	r := New(NewDocker("/var/run/docker.sock"), Config{}, func(context.Context) (Credential, error) {
-		return Credential{Env: MuseKeyEnv, Token: "LLM_test-key-for-a-stand-in-muse"}, nil
+		return Credential{Env: musecode.EnvKey, Token: "LLM_test-key-for-a-stand-in-muse"}, nil
 	})
+	r.SetProviders(ai.NewRegistry(musecode.New(musecode.Config{Boxes: r, Image: image})))
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	segs, err := r.TranscribeMeeting(ctx, image, data, strings.TrimPrefix(filepath.Ext(audio), "."))

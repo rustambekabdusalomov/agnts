@@ -3,6 +3,8 @@ package ai
 import (
 	"context"
 	"io"
+	"strconv"
+	"time"
 
 	"agnts/internal/domain"
 )
@@ -54,9 +56,14 @@ type Process interface {
 // BoxSpec describes a throwaway box: no repository, a network to reach
 // the provider's API, small limits.
 type BoxSpec struct {
-	Image    string
-	Label    string // what it is for (the "agnts" label)
+	Image string
+	Label string // what it is for (the "agnts" label)
+	// MemoryMB, CPUs and TmpMB (the /tmp tmpfs) are its limits; Life is
+	// how long it may live at most.
 	MemoryMB int64
+	CPUs     float64
+	TmpMB    int
+	Life     time.Duration
 }
 
 // Boxes opens throwaway boxes, for work that has no run container
@@ -67,3 +74,13 @@ type Boxes interface {
 
 // Segment is a stretch of speech heard in a recording.
 type Segment = domain.MeetingSegment
+
+// TimeoutArgv wraps argv in coreutils timeout so the process inside the
+// box is killed too, not just its stream.
+func TimeoutArgv(d time.Duration, argv ...string) []string {
+	if d <= 0 {
+		return argv
+	}
+	secs := strconv.Itoa(int(d.Seconds()))
+	return append([]string{"timeout", "--kill-after=15", secs}, argv...)
+}

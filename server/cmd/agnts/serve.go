@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -27,6 +26,10 @@ import (
 	"agnts/internal/accounts"
 	"agnts/internal/actions"
 	"agnts/internal/admin"
+	"agnts/internal/ai"
+	"agnts/internal/ai/providers/claudecode"
+	"agnts/internal/ai/providers/codex"
+	"agnts/internal/ai/providers/musecode"
 	"agnts/internal/billing"
 	"agnts/internal/ciwatch"
 	"agnts/internal/claude"
@@ -381,6 +384,7 @@ type agent struct {
 	claude       *claude.Service
 	billing      *billing.Service
 	museCredits  *musecredits.Service
+	providers    *ai.Registry
 	museDevice   *musecredits.Logins
 	budget       *orchestrator.MemoryBudget
 	network      *network.Service
@@ -494,7 +498,6 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	rcfg.MemoryMB, rcfg.MaxMemoryMB = int64(cfg.RunMemoryMB), int64(cfg.RunMemoryMaxMB)
 	rcfg.Runtime, rcfg.NetworkPerRun, rcfg.ProxyContainer = cfg.RunRuntime, cfg.RunNetworkPerRun, cfg.EgressContainer
 	rcfg.StampDir = filepath.Join(cfg.DataDir, "cache-stamps")
-	maps.Copy(rcfg.Models, cfg.ClaudeModels)
 	if b, err := os.ReadFile(cfg.GuardBinary); err == nil {
 		rcfg.GuardBinary = b
 	} else {
@@ -528,14 +531,20 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		}()
 		return p.URL, p.Code, p.ExpiresAt, out, nil
 	}, a.claude, log.With("component", "muse-login"))
-	run.SetMuseLoginKeeper(a.claude.KeepMuseLogin)
 	// Runs are in their own container behind the egress proxy, and Muse's
 	// own shell sandbox cannot start there (bwrap needs user namespaces the
 	// container does not allow): with it on, the first try of every shell
 	// command fails. A turn that ends without any answer (the model's last
 	// step was reasoning only) is continued twice.
-	run.SetMuse(muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
-		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}, ServeArgs: []string{"--disable-sandbox"}, Continues: 2}), a.museCredits)
+	museEngine := muse.New(muse.Config{Binary: cfg.MuseBinary, Catalog: catalog, Ledger: a.museCredits.Ledger(),
+		Observer: muse.SlogObserver{Logger: log.With("component", "muse")}, ServeArgs: []string{"--disable-sandbox"}, Continues: 2})
+	// The coding agents, behind the AI gateway.
+	a.providers = ai.NewRegistry(
+		musecode.New(musecode.Config{Engine: museEngine, Budgets: a.museCredits, KeepLogin: a.claude.KeepMuseLogin, Boxes: run, Image: cfg.RunnerImage}),
+		claudecode.New(cfg.ClaudeModels),
+		codex.New(nil),
+	)
+	run.SetProviders(a.providers)
 	a.refresher = usage.NewRefresher(a.usage, run, cfg.RunnerImage, log.With("component", "usage"))
 
 	repos := gitrepo.New(filepath.Join(cfg.DataDir, "repos"),

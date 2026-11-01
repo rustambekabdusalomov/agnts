@@ -1,15 +1,14 @@
-package runner
+package ai
 
 import (
 	"encoding/json"
 	"strings"
 
 	"agnts/internal/domain"
-	"agnts/internal/orchestrator"
 )
 
-// envValues returns the values of KEY=value pairs.
-func envValues(env []string) []string {
+// EnvValues returns the values of KEY=value pairs.
+func EnvValues(env []string) []string {
 	out := make([]string, 0, len(env))
 	for _, kv := range env {
 		if _, v, ok := strings.Cut(kv, "="); ok {
@@ -19,19 +18,19 @@ func envValues(env []string) []string {
 	return out
 }
 
-// maskEvents wraps an event handler so the secrets r knows never reach it:
+// MaskEvents wraps an event handler so the secrets r knows never reach it:
 // in the text, the tool summary, and anywhere in the data (tool inputs and
 // outputs included).
-func maskEvents(r domain.Redactor, onEvent func(orchestrator.ClaudeEvent)) func(orchestrator.ClaudeEvent) {
+func MaskEvents(r domain.Redactor, onEvent func(Event)) func(Event) {
 	if onEvent == nil || r.Empty() {
 		return onEvent
 	}
-	return func(e orchestrator.ClaudeEvent) {
+	return func(e Event) {
 		onEvent(maskEvent(r, e))
 	}
 }
 
-func maskEvent(r domain.Redactor, e orchestrator.ClaudeEvent) orchestrator.ClaudeEvent {
+func maskEvent(r domain.Redactor, e Event) Event {
 	e.Text = r.String(e.Text)
 	e.Tool = r.String(e.Tool)
 	if len(e.Data) == 0 {
