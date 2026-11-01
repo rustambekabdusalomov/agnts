@@ -1,7 +1,6 @@
 package orchestrator
 
 import (
-	"agnts/internal/ai"
 	"archive/tar"
 	"bytes"
 	"context"
@@ -16,6 +15,7 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -97,7 +97,7 @@ type Deps struct {
 	Workspaces Workspaces
 	// Accounts picks each run's Claude account; nil uses Usage alone (one
 	// connection for everything).
-	Accounts ClaudeAccounts
+	Accounts ai.Accounts
 	// AI is the gateway every model call goes through; nil builds one from
 	// Providers, Access, Accounts, Workspaces and Usage, recording spend in
 	// Store and Documents.
@@ -157,7 +157,7 @@ type Orchestrator struct {
 
 	queue      Queue
 	workspaces Workspaces
-	accounts   ClaudeAccounts
+	accounts   ai.Accounts
 	capacity   Capacity
 	credits    Credits
 	sched      *schedState
@@ -640,12 +640,12 @@ func (o *Orchestrator) transition(ctx context.Context, t *domain.Ticket, run *do
 
 // watch adds stall detection to a stream handler, in the stages that do
 // the ticket's work.
-func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, next func(ClaudeEvent)) func(ClaudeEvent) {
+func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, next func(ai.Event)) func(ai.Event) {
 	if s.Stalls == domain.StallsOff || (run.Stage != domain.StageCode && run.Stage != domain.StageAnalyze) {
 		return next
 	}
 	d := newStallDetector(run.Stage == domain.StageCode && !t.Kind.Report())
-	return func(e ClaudeEvent) {
+	return func(e ai.Event) {
 		next(e)
 		if st := d.observe(e); st != nil {
 			o.onStall(ctx, s, ws, t, run, *st)
@@ -655,31 +655,31 @@ func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspac
 
 // streamTo returns a Claude event handler that logs to the ticket and
 // feeds rate-limit readings to the usage tracker.
-func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domain.Run) func(ClaudeEvent) {
-	return func(e ClaudeEvent) {
+func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domain.Run) func(ai.Event) {
+	return func(e ai.Event) {
 		noteSkill(run, e)
 		ev := domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Data: eventData(e.Data)}
 		switch e.Kind {
-		case ClaudeInit:
+		case ai.EventInit:
 			if id, _ := e.Data["session_id"].(string); id != "" {
 				run.SessionID = id
 			}
 			return
-		case ClaudeText:
+		case ai.EventText:
 			ev.Type, ev.Message = domain.EventClaudeText, truncate(e.Text, 4000)
-		case ClaudeTool:
+		case ai.EventTool:
 			ev.Type, ev.Message = domain.EventClaudeTool, e.Tool
 			if target, _ := e.Data["target"].(string); target != "" {
 				ev.Message = e.Tool + " · " + target
 			}
-		case ClaudeRateLimit:
+		case ai.EventRateLimit:
 			ev.Type, ev.Message = domain.EventRateLimit, "plan usage update"
 			if st := rateStatus(e.Data); st != "" && st != "allowed" {
 				ev.Level, ev.Message = domain.LevelWarn, "plan usage: "+strings.ReplaceAll(st, "_", " ")
 			}
-		case ClaudeResultEv:
+		case ai.EventResult:
 			ev.Type, ev.Message = domain.EventClaudeResult, truncate(e.Text, 4000)
-		case ClaudeBudget:
+		case ai.EventBudget:
 			ev.Type, ev.Message = domain.EventBudget, e.Text
 			if lvl, _ := e.Data["level"].(string); lvl == "warn" {
 				ev.Level = domain.LevelWarn
@@ -764,21 +764,21 @@ func bashRule(c string) string {
 
 // claude runs one invocation with the model for modelStage, and turns rate
 // limits and errors into states.
-func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string) (ClaudeResult, error) {
+func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string) (ai.Result, error) {
 	return o.claudeTurns(ctx, s, ws, t, run, modelStage, prompt, resume, 0)
 }
 
 // claudeTurns is claude with a turn budget: above zero, the invocation may
 // take at most that many turns, and reaching them is not an error (the
 // result says error_max_turns, and the session can be resumed).
-func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string, budget int) (ClaudeResult, error) {
+func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string, budget int) (ai.Result, error) {
 	model := s.ModelFor(*t, modelStage)
 	// Where it runs first: the request depends on the module it lands on
 	// (a call may switch modules when its own cannot run).
 	meta := transcriptMeta{Purpose: domain.TranscriptPurpose(run.Stage), WorkspaceID: t.WorkspaceID, Run: run, TicketKey: t.Key, ModelStage: modelStage}
 	route, hold := o.ai.RouteCall(ctx, ai.Call{Who: o.whoFor(ctx, meta), Purpose: meta.Purpose, Req: ai.Request{Model: model}})
 	if hold != nil {
-		return ClaudeResult{}, hold
+		return ai.Result{}, hold
 	}
 	meta.Route = &route
 	if route.Model != "" {
@@ -832,7 +832,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	// run as it works, and decide the tool calls it asks about.
 	steer, ask, release := o.codeLiveFor(ctx, *t, run.Stage, model, readOnly)
 	defer release()
-	res, err := o.callClaude(ctx, ws, meta, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, meta, ai.Request{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: turns,
@@ -1312,7 +1312,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 
-	var res ClaudeResult
+	var res ai.Result
 	if saved != nil && saved.Checking && feedback == "" {
 		// Claude had finished before the stop: only the checks were cut short.
 		res.SessionID = session
@@ -1519,7 +1519,7 @@ func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Wo
 
 // checkAndFix runs the checks, sending failures back to Claude up to the
 // configured number of fix attempts.
-func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, res *ClaudeResult) (checkReport, error) {
+func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, res *ai.Result) (checkReport, error) {
 	var checks checkReport
 	for attempt := 0; ; attempt++ {
 		checks = o.runChecks(ctx, ws, *t, rs, run)

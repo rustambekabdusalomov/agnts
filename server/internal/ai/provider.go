@@ -11,18 +11,19 @@ import (
 type Cap string
 
 const (
-	// CapEffort: it takes Request.Effort.
+	// CapEffort means it takes Request.Effort.
 	CapEffort Cap = "effort"
-	// CapResume: it continues a session (Request.Resume).
+	// CapResume means it continues a session (Request.Resume).
 	CapResume Cap = "resume"
-	// CapInRunGuard: agnts-guard's hooks check its tool calls during the
-	// run (agnts's checks after a run apply to every provider).
+	// CapInRunGuard means agnts-guard's hooks check its tool calls during
+	// the run (agnts's checks after a run apply to every provider).
 	CapInRunGuard Cap = "in_run_guard"
-	// CapSteer and CapAsk: it takes messages and answers from the people
-	// following a run (Request.Steer, Request.Ask).
+	// CapSteer means it takes messages from the people following a run
+	// (Request.Steer).
 	CapSteer Cap = "steer"
-	CapAsk   Cap = "ask"
-	// CapAudio: it hears audio (Hearer).
+	// CapAsk means it asks them about tool calls (Request.Ask).
+	CapAsk Cap = "ask"
+	// CapAudio means it hears audio (Hearer).
 	CapAudio Cap = "audio"
 )
 

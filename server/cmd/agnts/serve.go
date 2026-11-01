@@ -27,12 +27,12 @@ import (
 	"agnts/internal/actions"
 	"agnts/internal/admin"
 	"agnts/internal/ai"
+	"agnts/internal/ai/connections"
 	"agnts/internal/ai/providers/claudecode"
 	"agnts/internal/ai/providers/codex"
 	"agnts/internal/ai/providers/musecode"
 	"agnts/internal/billing"
 	"agnts/internal/ciwatch"
-	"agnts/internal/claude"
 	"agnts/internal/commitlink"
 	"agnts/internal/config"
 	"agnts/internal/docs"
@@ -381,7 +381,7 @@ type agent struct {
 	progress     *gitrepo.Progress
 	shots        *gitrepo.Shots
 	users        *postgres.Users
-	claude       *claude.Service
+	claude       *connections.Service
 	billing      *billing.Service
 	museCredits  *musecredits.Service
 	providers    *ai.Registry
@@ -450,7 +450,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	if err := a.museCredits.Migrate(context.Background()); err != nil {
 		return nil, fmt.Errorf("muse ledger: %w", err)
 	}
-	a.claude = claude.New(claude.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud, MuseKey: cfg.MusePlatformKey,
+	a.claude = connections.New(connections.Config{PlatformKey: cfg.AnthropicAPIKey, Subscriptions: !cfg.Cloud, MuseKey: cfg.MusePlatformKey,
 		Free:     func(ctx context.Context, user int64) bool { return a.museCredits.FreeAvailable(ctx, user) > 0 },
 		CodexKey: func(ctx context.Context) (string, error) { return a.integrations.Token(ctx, "openai") }},
 		conns, a.usage, a.settings, a.users)

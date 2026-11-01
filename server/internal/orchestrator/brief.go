@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -565,7 +566,7 @@ func (o *Orchestrator) runSurvey(ctx context.Context, b domain.RepoBrief) (strin
 	if err != nil {
 		return "", "", nil, err
 	}
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeBrief, WorkspaceID: repo.WorkspaceID, Subject: repo.Name}, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeBrief, WorkspaceID: repo.WorkspaceID, Subject: repo.Name}, ai.Request{
 		Prompt:   prompt,
 		Model:    s.Models.Analyze,
 		MaxTurns: min(s.MaxTurns, surveyMaxTurns),

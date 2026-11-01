@@ -1,7 +1,6 @@
 package orchestrator
 
 import (
-	"agnts/internal/ai"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 

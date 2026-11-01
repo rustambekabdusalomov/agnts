@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -526,7 +527,7 @@ func (o *Orchestrator) runRuleReview(ctx context.Context, r domain.Rule) (RuleRe
 		}
 	}()
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeRules, WorkspaceID: r.WorkspaceID,
-		Subject: fmt.Sprintf("rule %d: %s", r.ID, truncate(r.Title, 80))}, ClaudeRequest{
+		Subject: fmt.Sprintf("rule %d: %s", r.ID, truncate(r.Title, 80))}, ai.Request{
 		Prompt:   prompt,
 		Model:    s.Models.Analyze,
 		MaxTurns: min(s.MaxTurns, ruleMaxTurns),

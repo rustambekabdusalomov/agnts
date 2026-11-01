@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
@@ -172,7 +173,7 @@ func TestRuleScopeAndEnabled(t *testing.T) {
 func TestRuleEditDuringReviewDropsResult(t *testing.T) {
 	h := newRulesHarness(t)
 	r := h.addRule("Logs", "Log errors.", nil)
-	h.runner.onClaude = func(orchestrator.ClaudeRequest) {
+	h.runner.onClaude = func(ai.Request) {
 		h.runner.onClaude = nil
 		if _, err := h.o.UpdateRule(h.ctx, r.ID, orchestrator.RuleInput{Title: "Logs", Body: "Log errors with slog.", Enabled: true}, domain.OriginWeb); err != nil {
 			t.Error(err)
@@ -222,7 +223,7 @@ func TestRuleFailureAcceptAndReview(t *testing.T) {
 func TestRuleRateLimitedRequeues(t *testing.T) {
 	h := newRulesHarness(t)
 	r := h.addRule("Small", "Keep functions under 50 lines.", nil)
-	h.runner.scripts = []script{{result: orchestrator.ClaudeResult{RateLimited: true}}}
+	h.runner.scripts = []script{{result: ai.Result{RateLimited: true}}}
 	h.step()
 	if got := h.rule(r.ID); got.Status != domain.RulePending {
 		t.Fatalf("rate limited review: %s", got.Status)

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"agnts/internal/claude"
+	"agnts/internal/ai/connections"
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
 	"agnts/internal/orchestrator"
@@ -564,7 +564,7 @@ func (s *Server) UpdateWorkspaceClaude(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) claudeError(w http.ResponseWriter, r *http.Request, err error) {
-	var inv *claude.InvalidError
+	var inv *connections.InvalidError
 	if errors.As(err, &inv) {
 		writeError(w, http.StatusBadRequest, "bad_request", inv.Msg)
 		return

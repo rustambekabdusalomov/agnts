@@ -1,7 +1,6 @@
 package orchestrator
 
 import (
-	"agnts/internal/ai"
 	"archive/tar"
 	"bytes"
 	"context"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -278,7 +278,7 @@ func (o *Orchestrator) translateBatch(ctx context.Context, ws Workspace, s domai
 	if err := ws.WriteFile(ctx, TranslationPath, nil); err != nil {
 		return 0, fmt.Errorf("clear translation: %w", err)
 	}
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeTranslate, TicketKey: sub.ticket, Subject: subjectOf(sub, lang)}, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeTranslate, TicketKey: sub.ticket, Subject: subjectOf(sub, lang)}, ai.Request{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
 		MaxTurns: min(s.MaxTurns, translateMaxTurns),

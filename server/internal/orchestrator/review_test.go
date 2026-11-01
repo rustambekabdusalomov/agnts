@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -30,7 +31,7 @@ func newReviewHarness(t *testing.T) (*harness, *[]string) {
 	h.settings.s.AutoReview = true
 	h.settings.s.SelfReview = false // selfreview_test.go turns it on
 	var models []string
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { models = append(models, r.Model) }
+	h.runner.onClaude = func(r ai.Request) { models = append(models, r.Model) }
 	return h, &models
 }
 
@@ -192,7 +193,7 @@ func TestReviewFailureAndRateLimit(t *testing.T) {
 	h, _ := newReviewHarness(t)
 	h.toReview("PAY-6", analysis(0))
 
-	h.runner.scripts = []script{{result: orchestrator.ClaudeResult{RateLimited: true}}}
+	h.runner.scripts = []script{{result: ai.Result{RateLimited: true}}}
 	h.step()
 	if tk := h.expect("PAY-6", domain.StateWaitingForReview); tk.ReviewState != domain.ReviewPending {
 		t.Fatalf("rate-limited review state: %q", tk.ReviewState)
@@ -226,7 +227,7 @@ func TestReportIsReviewed(t *testing.T) {
 		t.Fatal(err)
 	}
 	var settings []string
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { settings = append(settings, r.Settings) }
+	h.runner.onClaude = func(r ai.Request) { settings = append(settings, r.Settings) }
 	h.runner.scripts = []script{
 		{result: ok("p1"), files: map[string]string{orchestrator.AnalysisPath: analysisOfKind("plan")}},
 		reportScript("p1", "# Token expiry plan\n\n1. Add an expiry."),

@@ -5,11 +5,11 @@
 package orchestrator
 
 import (
-	"agnts/internal/ai"
 	"context"
 	"io"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/toolchain"
 )
@@ -416,9 +416,6 @@ type Workspace interface {
 	Close(ctx context.Context) error
 }
 
-// ClaudeRequest is one agent invocation (ai.Request).
-type ClaudeRequest = ai.Request
-
 // ToolQuestion is a tool call a run asks the people following it about.
 type ToolQuestion = ai.ToolQuestion
 
@@ -429,26 +426,6 @@ const (
 	CodexPrefix = ai.CodexPrefix
 	MusePrefix  = ai.MusePrefix
 )
-
-// ClaudeEventKind classifies stream lines.
-type ClaudeEventKind = ai.EventKind
-
-// Claude event kinds.
-const (
-	ClaudeInit       = ai.EventInit
-	ClaudeText       = ai.EventText
-	ClaudeTool       = ai.EventTool
-	ClaudeToolResult = ai.EventToolResult
-	ClaudeRateLimit  = ai.EventRateLimit
-	ClaudeBudget     = ai.EventBudget
-	ClaudeResultEv   = ai.EventResult
-)
-
-// ClaudeEvent is one parsed step of an agent's stream.
-type ClaudeEvent = ai.Event
-
-// ClaudeResult summarises a finished invocation.
-type ClaudeResult = ai.Result
 
 // ExecResult is the outcome of Workspace.Exec.
 type ExecResult struct {

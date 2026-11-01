@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres/pgtest"
@@ -166,7 +167,7 @@ func TestSchedulerSwitchesModules(t *testing.T) {
 		t.Fatal(err)
 	}
 	var models []string
-	s.runner.onClaude = func(r orchestrator.ClaudeRequest) { models = append(models, r.Model) }
+	s.runner.onClaude = func(r ai.Request) { models = append(models, r.Model) }
 	s.runner.scripts = []script{{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}}}
 	if n := s.o.Tick(s.a); n != 1 {
 		t.Fatalf("switching on: started %d runs", n)

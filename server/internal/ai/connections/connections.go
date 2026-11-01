@@ -1,12 +1,13 @@
-// Package claude decides which Claude account each run uses. The owner of a
-// workspace picks the mode: shared (the workspace's own connection) or per
-// member (the connection of the ticket's member). When that account is at
-// its limit or missing, a fallback switch lets runs continue on agnts's API
-// key, paid with the workspace's credits.
-package claude
+// Package connections keeps the AI accounts calls run on and picks one for
+// a call (ai.Accounts): the workspace's connection or a member's, per
+// module (Muse, Claude; Codex runs on the workspace's OpenAI key). The
+// owner of a workspace picks the mode: shared (the workspace's own
+// connection) or per member (the connection of the ticket's member). When
+// that account is at its limit or missing, a fallback switch lets runs
+// continue on agnts's API key, paid with the workspace's credits.
+package connections
 
 import (
-	"agnts/internal/ai"
 	"context"
 	"errors"
 	"fmt"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/rustambekabdusalomov/agnts-muse/credential"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"

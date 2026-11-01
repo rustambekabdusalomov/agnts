@@ -24,6 +24,7 @@ const (
 // a strong model gets the strong model of whichever provider runs it.
 type Tier string
 
+// Tiers.
 const (
 	Light  Tier = "light"
 	Strong Tier = "strong"

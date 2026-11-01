@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -46,7 +47,7 @@ func TestMultiRepoCheckpointKeepsTheBudget(t *testing.T) {
 	h := newHarness(t)
 	_, _, group := h.shop()
 	var budgets []int
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { budgets = append(budgets, r.MaxTurns) }
+	h.runner.onClaude = func(r ai.Request) { budgets = append(budgets, r.MaxTurns) }
 	if _, err := h.o.CreateTask(h.ctx, orchestrator.TaskInput{GroupID: group, Kind: "code", Title: "Show refunds", Priority: "medium",
 		AfterApprove: "pr", Start: "code"}, domain.OriginWeb); err != nil {
 		t.Fatal(err)
@@ -54,7 +55,7 @@ func TestMultiRepoCheckpointKeepsTheBudget(t *testing.T) {
 	h.runner.scripts = []script{
 		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: `{"summary":"s","plan":["p"],"complexity":"simple",` +
 			`"approaches":[{"title":"Both","sketch":"API then page."}],"footprint":{"files":["api/main.go"]}}`}},
-		{result: orchestrator.ClaudeResult{SessionID: "s1", Turns: 75, Subtype: "error_max_turns", IsError: true}, edit: "api:half"},
+		{result: ai.Result{SessionID: "s1", Turns: 75, Subtype: "error_max_turns", IsError: true}, edit: "api:half"},
 		{result: ok("s1"), edit: "api:v1\nweb:v1"},
 	}
 	for _, f := range []string{"api", "web"} {

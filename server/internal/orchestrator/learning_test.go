@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -72,7 +73,7 @@ func TestLessonsGainConfidenceAndArePromoted(t *testing.T) {
 func TestRunTroubleBecomesAWatchedTip(t *testing.T) {
 	h, refl := newReflectHarness(t)
 	var models []string
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { models = append(models, r.Model) }
+	h.runner.onClaude = func(r ai.Request) { models = append(models, r.Model) }
 	h.ingest("PAY-71")
 	h.runner.scripts = []script{
 		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},

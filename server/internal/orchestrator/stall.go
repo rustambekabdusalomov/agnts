@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/guard"
 )
@@ -56,9 +57,9 @@ func isEditTool(name string) bool {
 
 // observe takes one stream event and returns a stall when this event
 // shows one (each kind of stall on the same target only once).
-func (d *stallDetector) observe(e ClaudeEvent) *domain.Stall {
+func (d *stallDetector) observe(e ai.Event) *domain.Stall {
 	switch e.Kind {
-	case ClaudeTool:
+	case ai.EventTool:
 		d.calls++
 		name, _ := e.Data["tool"].(string)
 		if id, _ := e.Data["id"].(string); id != "" {
@@ -84,7 +85,7 @@ func (d *stallDetector) observe(e ClaudeEvent) *domain.Stall {
 		if d.coding && !d.edited && d.calls >= stallBeforeEdit {
 			return d.fire(StallNoEdits, "start", fmt.Sprintf("%d tool calls and no edit yet", d.calls))
 		}
-	case ClaudeToolResult:
+	case ai.EventToolResult:
 		id, _ := e.Data["id"].(string)
 		summary, ok := d.pending[id]
 		delete(d.pending, id)

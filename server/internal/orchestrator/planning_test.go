@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -15,8 +16,8 @@ func TestRecheckComplexAnalysis(t *testing.T) {
 	h := newHarness(t)
 	h.settings.s.RecheckComplex = true
 	h.settings.s.AskFirst = false
-	var reqs []orchestrator.ClaudeRequest
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { reqs = append(reqs, r) }
+	var reqs []ai.Request
+	h.runner.onClaude = func(r ai.Request) { reqs = append(reqs, r) }
 	rechecked := strings.Replace(complexAnalysis, `"plan":["Add a ledger"]`, `"plan":["Add a ledger","Backfill old refunds"]`, 1)
 	h.ingest("PAY-1")
 	h.runner.scripts = []script{

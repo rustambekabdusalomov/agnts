@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -235,7 +236,7 @@ func (o *Orchestrator) runReflect(ctx context.Context, r domain.Reflection) ([]d
 		model = s.Models.Helper // a run's trouble is small and plain: the cheap model reads it
 	}
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeReflect, WorkspaceID: r.WorkspaceID,
-		TicketKey: r.TicketKey, Subject: r.Source}, ClaudeRequest{
+		TicketKey: r.TicketKey, Subject: r.Source}, ai.Request{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: min(s.MaxTurns, reflectMaxTurns),

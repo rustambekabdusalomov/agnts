@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -55,7 +56,7 @@ func TestReportTaskWithoutRepository(t *testing.T) {
 	}
 
 	var settings []string
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { settings = append(settings, r.Settings) }
+	h.runner.onClaude = func(r ai.Request) { settings = append(settings, r.Settings) }
 	h.runner.scripts = []script{
 		{result: ok("p1"), files: map[string]string{orchestrator.AnalysisPath: analysisOfKind("plan")}},
 		reportScript("p1", "# Token expiry plan\n\n1. Add an expiry."),

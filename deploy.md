@@ -144,6 +144,8 @@ sets, so compose fails before it builds anything. The tag must match
 Codex CLI is installed at the version pinned in the Dockerfile (`ARG
 CODEX_VERSION`). Add `--build-arg CODEX_VERSION=<version>` for another one,
 or an empty value to leave it out (then remove `codex` from `AGNTS_PROVIDERS`).
+`AGNTS_CODEX_MODELS` (`light=<model>,strong=<model>`) names the Codex models
+for each tier; without it, calls never switch to Codex.
 New runs use the new image; runs in progress keep theirs.
 
 Check it, and roll back if a run misbehaves:

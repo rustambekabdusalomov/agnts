@@ -1,13 +1,13 @@
 package orchestrator
 
 import (
-	"agnts/internal/ai"
 	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"strings"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 

@@ -15,7 +15,6 @@
 package musecredits
 
 import (
-	"agnts/internal/ai"
 	"context"
 	"errors"
 	"fmt"
@@ -30,6 +29,7 @@ import (
 	"github.com/rustambekabdusalomov/agnts-muse/money"
 	"github.com/rustambekabdusalomov/agnts-muse/msp"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -194,7 +195,7 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 	turns, timeout = min(s.MaxTurns, turns), min(s.TimeoutMin, timeout)
 	model := s.Models.Analyze
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDocument, WorkspaceID: run.WorkspaceID, Subject: d.Title, ModelStage: "document", DocumentRunID: run.ID},
-		ClaudeRequest{
+		ai.Request{
 			Prompt:   documentPrompt(d, run.Source, files, g),
 			Model:    model,
 			MaxTurns: turns,

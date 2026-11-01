@@ -1,7 +1,6 @@
 package orchestrator
 
 import (
-	"agnts/internal/ai"
 	"cmp"
 	"context"
 	"fmt"
@@ -9,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -94,9 +94,6 @@ type Workspaces interface {
 	ByID(ctx context.Context, id int64) (domain.Workspace, error)
 	Active(ctx context.Context) ([]int64, error)
 }
-
-// ClaudeAccounts picks the account each call uses, per module.
-type ClaudeAccounts = ai.Accounts
 
 // AccessSource says which coding modules a person may use.
 type AccessSource interface {

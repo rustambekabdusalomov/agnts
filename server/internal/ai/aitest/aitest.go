@@ -35,9 +35,13 @@ var (
 	_ ai.Hearer   = (*Provider)(nil)
 )
 
-// Muse, Claude and Codex return stand-ins for the three providers.
-func Muse() *Provider   { return &Provider{real: musecode.New(musecode.Config{})} }
+// Muse returns a stand-in for Muse Code.
+func Muse() *Provider { return &Provider{real: musecode.New(musecode.Config{})} }
+
+// Claude returns a stand-in for Claude Code.
 func Claude() *Provider { return &Provider{real: claudecode.New(nil)} }
+
+// Codex returns a stand-in for Codex, with light and strong models.
 func Codex() *Provider {
 	return &Provider{real: codex.New(map[ai.Tier]string{ai.Light: "gpt-5-mini", ai.Strong: "gpt-5"})}
 }
@@ -45,10 +49,17 @@ func Codex() *Provider {
 // Providers returns a registry of the three stand-ins.
 func Providers() *ai.Registry { return ai.NewRegistry(Muse(), Claude(), Codex()) }
 
-func (p *Provider) ID() string          { return p.real.ID() }
-func (p *Provider) Name() string        { return p.real.Name() }
+// ID implements ai.Provider.
+func (p *Provider) ID() string { return p.real.ID() }
+
+// Name implements ai.Provider.
+func (p *Provider) Name() string { return p.real.Name() }
+
+// Catalog implements ai.Provider.
 func (p *Provider) Catalog() ai.Catalog { return p.real.Catalog() }
-func (p *Provider) FreeCredits() bool   { return p.real.FreeCredits() }
+
+// FreeCredits implements ai.Provider.
+func (p *Provider) FreeCredits() bool { return p.real.FreeCredits() }
 
 // Caps implements ai.Provider.
 func (p *Provider) Caps() ai.Caps {

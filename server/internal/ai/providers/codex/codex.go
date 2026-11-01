@@ -43,10 +43,17 @@ func New(tiers map[ai.Tier]string) *Provider {
 	return &Provider{tiers: t}
 }
 
-func (p *Provider) ID() string        { return ai.Codex }
-func (p *Provider) Name() string      { return "Codex" }
+// ID implements ai.Provider.
+func (p *Provider) ID() string { return ai.Codex }
+
+// Name implements ai.Provider.
+func (p *Provider) Name() string { return "Codex" }
+
+// FreeCredits implements ai.Provider: free credits are Muse ledger money.
 func (p *Provider) FreeCredits() bool { return false }
-func (p *Provider) Caps() ai.Caps     { return ai.Caps{ai.CapResume} }
+
+// Caps implements ai.Provider.
+func (p *Provider) Caps() ai.Caps { return ai.Caps{ai.CapResume} }
 
 // Catalog implements ai.Provider.
 func (p *Provider) Catalog() ai.Catalog { return catalog{p.tiers} }

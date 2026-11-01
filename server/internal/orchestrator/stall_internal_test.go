@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
-func tool(name, target, id string) ClaudeEvent {
-	return ClaudeEvent{Kind: ClaudeTool, Tool: name + ": " + target, Data: map[string]any{"tool": name, "id": id}}
+func tool(name, target, id string) ai.Event {
+	return ai.Event{Kind: ai.EventTool, Tool: name + ": " + target, Data: map[string]any{"tool": name, "id": id}}
 }
 
-func result(id string, failed bool) ClaudeEvent {
-	return ClaudeEvent{Kind: ClaudeToolResult, Data: map[string]any{"id": id, "is_error": failed}}
+func result(id string, failed bool) ai.Event {
+	return ai.Event{Kind: ai.EventToolResult, Data: map[string]any{"id": id, "is_error": failed}}
 }
 
 func TestStallDetector(t *testing.T) {

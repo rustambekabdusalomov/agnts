@@ -10,10 +10,10 @@ import (
 	"github.com/rustambekabdusalomov/agnts-muse/budget"
 	"github.com/rustambekabdusalomov/agnts-muse/money"
 
+	"agnts/internal/ai"
 	"agnts/internal/billing"
 	"agnts/internal/domain"
 	"agnts/internal/musecredits"
-	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
 	"agnts/internal/store/postgres/pgtest"
 )
@@ -61,7 +61,7 @@ func TestRunPaysFreeCreditsFirst(t *testing.T) {
 	// the platform's monthly cap and the run cap; its limit is what the
 	// payers have ($0.20 + $5.00), below the $25 cap.
 	rctx, acct := ctx, domain.ClaudeAccount{Credits: true, UserID: judge}
-	b, err := svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: run.ID, WorkspaceID: ws})
+	b, err := svc.Budget(rctx, acct, ai.Request{RunID: run.ID, WorkspaceID: ws})
 	if err != nil || b == nil {
 		t.Fatalf("budget = %+v, %v", b, err)
 	}
@@ -90,7 +90,7 @@ func TestRunPaysFreeCreditsFirst(t *testing.T) {
 
 	// A second run before billing settled the first must not see the 7¢
 	// again: the wallet copy counts unsettled spend.
-	b2, err := svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: run.ID, WorkspaceID: ws})
+	b2, err := svc.Budget(rctx, acct, ai.Request{RunID: run.ID, WorkspaceID: ws})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestRunPaysFreeCreditsFirst(t *testing.T) {
 		t.Fatalf("wallet = %d credits, want 493 (500 - 7)", bal)
 	}
 	// After settling, the copy still matches the wallet.
-	if _, err := svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: run.ID + 1, WorkspaceID: ws}); err != nil {
+	if _, err := svc.Budget(rctx, acct, ai.Request{RunID: run.ID + 1, WorkspaceID: ws}); err != nil {
 		t.Fatal(err)
 	}
 	var total int64
@@ -129,11 +129,11 @@ func TestRunPaysFreeCreditsFirst(t *testing.T) {
 func TestOwnAccountRunsHaveNoBudget(t *testing.T) {
 	svc := musecredits.New(musecredits.Config{}, nil, nil)
 	ctx, acct := context.Background(), domain.ClaudeAccount{ConnectionID: 5}
-	if b, err := svc.Budget(ctx, acct, orchestrator.ClaudeRequest{RunID: 1, WorkspaceID: 1}); b != nil || err != nil {
+	if b, err := svc.Budget(ctx, acct, ai.Request{RunID: 1, WorkspaceID: 1}); b != nil || err != nil {
 		t.Fatalf("own account: %+v, %v", b, err)
 	}
 	ctx, acct = context.Background(), domain.ClaudeAccount{Credits: true}
-	if b, err := svc.Budget(ctx, acct, orchestrator.ClaudeRequest{}); b != nil || err != nil {
+	if b, err := svc.Budget(ctx, acct, ai.Request{}); b != nil || err != nil {
 		t.Fatalf("outside a run: %+v, %v", b, err)
 	}
 }
@@ -174,17 +174,17 @@ func TestWorkspaceBudgetPerRun(t *testing.T) {
 		t.Fatal(err)
 	}
 	rctx, acct := ctx, domain.ClaudeAccount{Credits: true}
-	if _, err := svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: 9001, WorkspaceID: ws}); err == nil {
+	if _, err := svc.Budget(rctx, acct, ai.Request{RunID: 9001, WorkspaceID: ws}); err == nil {
 		t.Fatal("a run without any credits must not start")
 	}
 	if _, err := credits.Add(domain.System(ctx), postgres.LedgerEntry{WorkspaceID: ws, Amount: 1000, Reason: postgres.CreditGrant}); err != nil {
 		t.Fatal(err)
 	}
-	b, err := svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: 9001, WorkspaceID: ws, Budget: 50})
+	b, err := svc.Budget(rctx, acct, ai.Request{RunID: 9001, WorkspaceID: ws, Budget: 50})
 	if err != nil || b.Limit != 50*money.Cent {
 		t.Fatalf("budget 50 credits: %+v, %v", b, err)
 	}
-	if b, _ = svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: 9001, WorkspaceID: ws}); b.Limit != 10*money.Dollar {
+	if b, _ = svc.Budget(rctx, acct, ai.Request{RunID: 9001, WorkspaceID: ws}); b.Limit != 10*money.Dollar {
 		t.Fatalf("no setting: limit %v, want the $10 the wallet has", b.Limit)
 	}
 }
@@ -215,7 +215,7 @@ func TestMonthlyLimitStopsSpend(t *testing.T) {
 	}
 
 	rctx, acct := ctx, domain.ClaudeAccount{Credits: true, UserID: dev}
-	b, err := svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: 9101, WorkspaceID: ws})
+	b, err := svc.Budget(rctx, acct, ai.Request{RunID: 9101, WorkspaceID: ws})
 	if err != nil || b.Limit != 30*money.Cent || len(b.Caps) != 1 {
 		t.Fatalf("budget = %+v, %v; want a 30¢ limit under the person's cap", b, err)
 	}
@@ -233,21 +233,21 @@ func TestMonthlyLimitStopsSpend(t *testing.T) {
 	if u, _ = svc.Usage(ctx, dev); u.MonthUsed != 30 || u.TotalUsed != 30 {
 		t.Fatalf("usage = %+v, want 30 used", u)
 	}
-	if _, err := svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: 9102, WorkspaceID: ws}); err == nil {
+	if _, err := svc.Budget(rctx, acct, ai.Request{RunID: 9102, WorkspaceID: ws}); err == nil {
 		t.Fatal("a run started past the monthly limit")
 	}
 	// Raising the limit gives the difference; spend this month still counts.
 	if _, err := svc.SetLimit(ctx, dev, 50, admin); err != nil {
 		t.Fatal(err)
 	}
-	if b, err = svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: 9102, WorkspaceID: ws}); err != nil || b.Limit != 20*money.Cent {
+	if b, err = svc.Budget(rctx, acct, ai.Request{RunID: 9102, WorkspaceID: ws}); err != nil || b.Limit != 20*money.Cent {
 		t.Fatalf("raised budget = %+v, %v; want 20¢ left", b, err)
 	}
 	// No limit: only the wallet bounds the run.
 	if _, err := svc.SetLimit(ctx, dev, 0, admin); err != nil {
 		t.Fatal(err)
 	}
-	if b, err = svc.Budget(rctx, acct, orchestrator.ClaudeRequest{RunID: 9103, WorkspaceID: ws}); err != nil || len(b.Caps) != 0 {
+	if b, err = svc.Budget(rctx, acct, ai.Request{RunID: 9103, WorkspaceID: ws}); err != nil || len(b.Caps) != 0 {
 		t.Fatalf("unlimited budget = %+v, %v", b, err)
 	}
 	if _, err := svc.SetLimit(ctx, dev, -5, admin); err == nil {

@@ -1,7 +1,6 @@
 package orchestrator
 
 import (
-	"agnts/internal/ai"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -14,6 +13,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -119,7 +119,7 @@ func (o *Orchestrator) hold(ctx context.Context, m transcriptMeta, model string)
 // callClaude runs one agent invocation through the AI gateway and records
 // its transcript. Every invocation of the orchestrator goes through here;
 // recording problems are logged and never fail the run.
-func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest, onEvent func(ClaudeEvent)) (ClaudeResult, error) {
+func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ai.Request, onEvent func(ai.Event)) (ai.Result, error) {
 	// Where it runs: the run's route for its model's module, else routed
 	// now for its person.
 	call := ai.Call{Who: o.whoFor(ctx, m), Purpose: m.Purpose, Box: ws, Req: req, ModelStage: m.ModelStage, DocumentRunID: m.DocumentRunID}
@@ -129,7 +129,7 @@ func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcrip
 	} else {
 		var hold *ai.Hold
 		if route, hold = o.ai.RouteCall(ctx, call); hold != nil {
-			return ClaudeResult{}, hold
+			return ai.Result{}, hold
 		}
 	}
 	call.Route = &route
@@ -165,7 +165,7 @@ type recording struct {
 
 // record starts the transcript of an invocation; nil when run history is
 // off or it cannot be stored.
-func (o *Orchestrator) record(ctx context.Context, m transcriptMeta, req ClaudeRequest, route ai.Route) *recording {
+func (o *Orchestrator) record(ctx context.Context, m transcriptMeta, req ai.Request, route ai.Route) *recording {
 	if o.recorder == nil {
 		return nil
 	}
@@ -182,7 +182,7 @@ func (o *Orchestrator) record(ctx context.Context, m transcriptMeta, req ClaudeR
 }
 
 // Event implements ai.Recording.
-func (r *recording) Event(e ClaudeEvent) {
+func (r *recording) Event(e ai.Event) {
 	r.tw.event(e)
 	if r.tw.due(time.Now()) {
 		r.o.flushTranscript(r.ctx, r.id, r.tw)
@@ -190,7 +190,7 @@ func (r *recording) Event(e ClaudeEvent) {
 }
 
 // Finish implements ai.Recording.
-func (r *recording) Finish(ctx context.Context, res ClaudeResult, err error) int64 {
+func (r *recording) Finish(ctx context.Context, res ai.Result, err error) int64 {
 	if r.m.Run != nil {
 		r.o.transcripts.Delete(r.m.Run.ID)
 	}
@@ -210,7 +210,7 @@ func (r *recording) Finish(ctx context.Context, res ClaudeResult, err error) int
 }
 
 // startTranscript stores the running transcript; nil when it cannot be.
-func (o *Orchestrator) startTranscript(ctx context.Context, m transcriptMeta, req ClaudeRequest, acct domain.ClaudeAccount) (*transcriptWriter, int64) {
+func (o *Orchestrator) startTranscript(ctx context.Context, m transcriptMeta, req ai.Request, acct domain.ClaudeAccount) (*transcriptWriter, int64) {
 	wsID := m.WorkspaceID
 	if wsID == 0 {
 		wsID = domain.WorkspaceOf(ctx)
@@ -281,7 +281,7 @@ func (o *Orchestrator) noteTranscript(runID int64, text string) {
 }
 
 // transcriptEnd says how an invocation ended.
-func transcriptEnd(ctx context.Context, res ClaudeResult, err error) domain.TranscriptEnd {
+func transcriptEnd(ctx context.Context, res ai.Result, err error) domain.TranscriptEnd {
 	end := domain.TranscriptEnd{Status: domain.TranscriptDone, ExitReason: res.Subtype, SessionID: res.SessionID,
 		Model: res.Model, Turns: res.Turns, Usage: res.Usage}
 	var oom *OOMError
@@ -335,17 +335,17 @@ func (w *transcriptWriter) mask(s string) string {
 }
 
 // event records one stream event.
-func (w *transcriptWriter) event(e ClaudeEvent) {
+func (w *transcriptWriter) event(e ai.Event) {
 	line := map[string]any{}
 	toolOut, text := w.lim.ToolOutputKB<<10, w.lim.TextKB<<10
 	switch e.Kind {
-	case ClaudeInit:
+	case ai.EventInit:
 		line["k"] = "init"
 		line["session_id"], line["model"] = e.Data["session_id"], e.Data["model"]
-	case ClaudeText:
+	case ai.EventText:
 		line["k"] = "text"
 		line["text"], line["cut"] = cutMiddle(e.Text, text)
-	case ClaudeTool:
+	case ai.EventTool:
 		w.mu.Lock()
 		w.counts.ToolCalls++
 		w.mu.Unlock()
@@ -358,7 +358,7 @@ func (w *transcriptWriter) event(e ClaudeEvent) {
 				line["input"] = json.RawMessage(in)
 			}
 		}
-	case ClaudeToolResult:
+	case ai.EventToolResult:
 		failed, _ := e.Data["is_error"].(bool)
 		if failed {
 			w.mu.Lock()
@@ -372,10 +372,10 @@ func (w *transcriptWriter) event(e ClaudeEvent) {
 		}
 		out, _ := e.Data["output"].(string)
 		line["output"], line["cut"] = cutMiddle(out, toolOut)
-	case ClaudeRateLimit:
+	case ai.EventRateLimit:
 		line["k"] = "rate_limit"
 		line["status"] = rateStatus(e.Data)
-	case ClaudeResultEv:
+	case ai.EventResult:
 		line["k"] = "result"
 		line["subtype"], line["error"], line["turns"] = e.Data["subtype"], e.Data["is_error"], e.Data["num_turns"]
 		if c, ok := e.Data["total_cost_usd"]; ok {
@@ -512,7 +512,7 @@ const (
 )
 
 // fitPrompt moves a prompt too long for the command line into PromptPath.
-func (o *Orchestrator) fitPrompt(ctx context.Context, ws Workspace, m transcriptMeta, req ClaudeRequest) ClaudeRequest {
+func (o *Orchestrator) fitPrompt(ctx context.Context, ws Workspace, m transcriptMeta, req ai.Request) ai.Request {
 	if len(req.Prompt) <= maxArgPrompt {
 		return req
 	}

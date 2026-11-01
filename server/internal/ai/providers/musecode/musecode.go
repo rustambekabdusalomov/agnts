@@ -83,8 +83,13 @@ var (
 // New returns Muse Code.
 func New(cfg Config) *Provider { return &Provider{cfg: cfg} }
 
-func (p *Provider) ID() string        { return ai.Muse }
-func (p *Provider) Name() string      { return "Muse" }
+// ID implements ai.Provider.
+func (p *Provider) ID() string { return ai.Muse }
+
+// Name implements ai.Provider.
+func (p *Provider) Name() string { return "Muse" }
+
+// FreeCredits implements ai.Provider: free credits are Muse ledger money.
 func (p *Provider) FreeCredits() bool { return true }
 
 // Caps implements ai.Provider.

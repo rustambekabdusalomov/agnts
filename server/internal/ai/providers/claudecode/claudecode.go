@@ -26,8 +26,8 @@ var DefaultModels = map[string]string{
 
 // Credential environment names.
 const (
-	EnvAPIKey = "ANTHROPIC_API_KEY"
-	EnvOAuth  = "CLAUDE_CODE_OAUTH_TOKEN"
+	EnvAPIKey = "ANTHROPIC_API_KEY"       //nolint:gosec // a variable name, not a credential
+	EnvOAuth  = "CLAUDE_CODE_OAUTH_TOKEN" //nolint:gosec // a variable name, not a credential
 )
 
 // Provider is Claude Code.
@@ -49,10 +49,17 @@ func New(models map[string]string) *Provider {
 	return &Provider{models: m}
 }
 
-func (p *Provider) ID() string        { return ai.Claude }
-func (p *Provider) Name() string      { return "Claude" }
+// ID implements ai.Provider.
+func (p *Provider) ID() string { return ai.Claude }
+
+// Name implements ai.Provider.
+func (p *Provider) Name() string { return "Claude" }
+
+// FreeCredits implements ai.Provider: free credits are Muse ledger money.
 func (p *Provider) FreeCredits() bool { return false }
-func (p *Provider) Caps() ai.Caps     { return ai.Caps{ai.CapEffort, ai.CapResume, ai.CapInRunGuard} }
+
+// Caps implements ai.Provider.
+func (p *Provider) Caps() ai.Caps { return ai.Caps{ai.CapEffort, ai.CapResume, ai.CapInRunGuard} }
 
 // Catalog implements ai.Provider.
 func (p *Provider) Catalog() ai.Catalog { return catalog{} }

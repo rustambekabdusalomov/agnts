@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -19,7 +20,7 @@ const checkpointMinTurns = 45
 // changed so far, compares that with the plan, and resumes the session
 // with a checkpoint prompt that asks Claude to get back on course before
 // it finishes.
-func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, modelStage, prompt, session string, design *Analysis) (ClaudeResult, error) {
+func (o *Orchestrator) codeWithCheckpoint(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, modelStage, prompt, session string, design *Analysis) (ai.Result, error) {
 	// The same budget claudeTurns gives the run: tickets in several
 	// repositories get more turns.
 	total := int(float64(s.MaxTurns) * domain.TurnScale(len(t.Repos)))

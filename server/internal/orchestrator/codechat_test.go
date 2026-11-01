@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -418,7 +419,7 @@ func TestCodeLiveMuseRun(t *testing.T) {
 
 	var steered string
 	var asked, decided bool
-	c.runner.onClaude = func(r orchestrator.ClaudeRequest) {
+	c.runner.onClaude = func(r ai.Request) {
 		if r.Steer == nil || r.Ask == nil {
 			t.Errorf("the coding run is not live: steer %v ask %v", r.Steer != nil, r.Ask != nil)
 			return
@@ -463,7 +464,7 @@ func TestCodeLiveMuseRun(t *testing.T) {
 	c.settings.s.Models.Coding = "sonnet"
 	c.send(conv.ID, "and minutes")
 	c.runner.scripts = []script{{result: ok("v1"), edit: "minutes"}}
-	c.runner.onClaude = func(r orchestrator.ClaudeRequest) {
+	c.runner.onClaude = func(r ai.Request) {
 		if r.Steer != nil || r.Ask != nil {
 			t.Errorf("a Claude run got steer or ask")
 		}

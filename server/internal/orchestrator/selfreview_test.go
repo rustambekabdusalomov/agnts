@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -171,12 +172,12 @@ func TestDriftCheckpoint(t *testing.T) {
 	a["approaches"] = []any{map[string]any{"title": "Round in refund.go", "sketch": "Use math.Round."}}
 	b, _ := json.Marshal(a)
 	var budgets []int
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { budgets = append(budgets, r.MaxTurns) }
+	h.runner.onClaude = func(r ai.Request) { budgets = append(budgets, r.MaxTurns) }
 	h.runner.execs["git status --porcelain --untracked-files=all"] = []orchestrator.ExecResult{{Output: " M refund.go\n?? util/helpers.go\nR  a.go -> b.go\n"}}
 	h.ingest("PAY-1")
 	h.runner.scripts = []script{
 		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: string(b)}},
-		{result: orchestrator.ClaudeResult{SessionID: "s1", Turns: 50, Subtype: "error_max_turns", IsError: true}, edit: "half"},
+		{result: ai.Result{SessionID: "s1", Turns: 50, Subtype: "error_max_turns", IsError: true}, edit: "half"},
 		{result: ok("s1"), edit: "rest"},
 	}
 	h.step() // analyze
@@ -215,7 +216,7 @@ func TestNoDriftCheckpointForMuse(t *testing.T) {
 	a["approaches"] = []any{map[string]any{"title": "Round in refund.go", "sketch": "Use math.Round."}}
 	b, _ := json.Marshal(a)
 	var budgets []int
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { budgets = append(budgets, r.MaxTurns) }
+	h.runner.onClaude = func(r ai.Request) { budgets = append(budgets, r.MaxTurns) }
 	h.ingest("PAY-1")
 	h.runner.scripts = []script{
 		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: string(b)}},

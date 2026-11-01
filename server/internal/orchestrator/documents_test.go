@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
@@ -159,7 +160,7 @@ func TestDocumentFromReport(t *testing.T) {
 	}
 }
 
-func withUsage(r orchestrator.ClaudeResult) orchestrator.ClaudeResult {
+func withUsage(r ai.Result) ai.Result {
 	r.Usage = domain.TokenUsage{Input: 1000, Output: 500, CostUSD: 0.25}
 	return r
 }
