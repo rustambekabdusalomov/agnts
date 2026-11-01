@@ -250,6 +250,9 @@ type Settings struct {
 	PRComments PRCommentSettings `json:"prComments"`
 	// CI: agnts watches CI pipelines and fixes what fails.
 	CI CISettings `json:"ci"`
+	// LogWatch: agnts reads the projects' logs and reports or fixes what
+	// it finds there.
+	LogWatch LogWatchSettings `json:"logWatch"`
 	// Guard: how strict agnts-guard, the hooks inside every run, is.
 	Guard GuardSettings `json:"guard"`
 	// SecondOpinion is the model ("codex:<model>", or a Claude model) that
@@ -353,6 +356,7 @@ func DefaultSettings() Settings {
 		PullReviews:     DefaultPullReviewSettings(),
 		PRComments:      DefaultPRCommentSettings(),
 		CI:              DefaultCISettings(),
+		LogWatch:        DefaultLogWatchSettings(),
 		Guard:           GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
 		Stalls:          StallsLog,
 		ProveFixes:      true,
@@ -450,6 +454,9 @@ func (s *Settings) Validate() error {
 		errs = append(errs, fmt.Errorf("merge method must be one of %s", strings.Join(MergeMethods, ", ")))
 	}
 	if err := s.CI.Validate(); err != nil {
+		errs = append(errs, err)
+	}
+	if err := s.LogWatch.Validate(); err != nil {
 		errs = append(errs, err)
 	}
 	if err := s.Guard.Validate(); err != nil {

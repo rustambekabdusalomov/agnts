@@ -102,6 +102,7 @@ func clone(v domain.Settings) domain.Settings {
 	v.Deny = append([]string{}, v.Deny...)
 	v.EgressAllow = append([]string{}, v.EgressAllow...)
 	v.CI.InfraPatterns = append([]string{}, v.CI.InfraPatterns...)
+	v.LogWatch = v.LogWatch.Clone()
 	v.Guard.Disabled = append([]string{}, v.Guard.Disabled...)
 	return v
 }
