@@ -22,6 +22,7 @@ import { useIntegrations } from '../components/integrations/useIntegrations'
 import { settingsSection } from '../components/settings/sections'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { lines } from '../components/ci/ci'
+import { useRepos } from '../components/repos/useRepos'
 import { useModels } from '../composables/useModels'
 import { LOCALES, type Locale } from '../i18n'
 import { usePrefs, type Theme } from '../stores/prefs'
@@ -180,6 +181,37 @@ function setInfra(v: string) {
 const perDay = (n: number) => t('ci.perDay', { n })
 const logModes = computed(() => (['off', 'report', 'ticket'] as const).map((m) => ({ value: m, label: t(`logwatch.mode_${m}`) })))
 const severities = computed(() => (['low', 'medium', 'high', 'critical'] as const).map((v) => ({ value: v, label: t(`logwatch.sev_${v}`) })))
+// Overrides, one a line: "<source>/<service> errors=ticket security=off"
+// or "repo:<repository> errors=ticket". Unknown repositories are dropped.
+const repoList = useRepos()
+const logOverrides = computed<string>({
+  get: () =>
+    (draft.value?.logWatch?.overrides ?? [])
+      .map((o) => {
+        const who = o.repoId ? `repo:${repoList.data.value?.find((r) => r.id === o.repoId)?.name ?? o.repoId}` : (o.service ?? '')
+        return [who, o.errors ? `errors=${o.errors}` : '', o.security ? `security=${o.security}` : ''].filter(Boolean).join(' ')
+      })
+      .join('\n'),
+  set: (v) => {
+    if (!draft.value?.logWatch) return
+    const modes = ['off', 'report', 'ticket']
+    draft.value.logWatch.overrides = lines(v).flatMap((l) => {
+      const [who, ...rest] = l.split(/\s+/)
+      const o: { repoId?: number; service?: string; errors?: 'off' | 'report' | 'ticket'; security?: 'off' | 'report' | 'ticket' } = {}
+      if (who.startsWith('repo:')) {
+        const name = who.slice(5)
+        const id = repoList.data.value?.find((r) => r.name === name)?.id ?? Number(name)
+        if (!id) return []
+        o.repoId = id
+      } else o.service = who
+      for (const kv of rest) {
+        const [k, m] = kv.split('=')
+        if ((k === 'errors' || k === 'security') && modes.includes(m)) o[k] = m as 'off' | 'report' | 'ticket'
+      }
+      return o.errors || o.security ? [o] : []
+    })
+  },
+})
 // Custom detectors, one a line: "category:severity name=regex", e.g.
 // "security:high billing-token=\S+"; a bare line is "error:medium <it>=<it>".
 const logPatterns = computed<string>({
@@ -511,6 +543,16 @@ const section = computed(() => settingsSection(route.params.section))
             spellcheck="false"
             placeholder="security:high billing-token=\S+"
             :aria-label="t('logwatch.patterns')"
+          />
+        </CfgRow>
+        <CfgRow :label="t('logwatch.overrides')" :help="t('logwatch.overridesRuleHelp')">
+          <textarea
+            v-model="logOverrides"
+            class="ci-infra"
+            maxlength="25000"
+            spellcheck="false"
+            placeholder="prod-loki/api errors=ticket&#10;repo:billing security=ticket"
+            :aria-label="t('logwatch.overrides')"
           />
         </CfgRow>
         <div class="help"><HiIcon name="info" /><p>{{ t('logwatch.overridesHelp') }} <RouterLink :to="{ name: 'logSources' }">{{ t('logwatch.sources') }}</RouterLink></p></div>

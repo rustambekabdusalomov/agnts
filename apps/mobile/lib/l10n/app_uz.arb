@@ -2140,6 +2140,8 @@
   "logwatchIndexHelp_opensearch": "Bo‘sh bo‘lsa logs-*, filebeat-* va logstash-* o‘qiladi.",
   "logwatchIndexHelp_splunk": "Bo‘sh bo‘lsa token o‘qiy oladigan barcha indekslarda qidiriladi.",
   "logwatchIndexHelp_cloudwatch": "Servislar — log guruhlari; prefiks ro‘yxatni toraytiradi (/ecs/, /aws/lambda/).",
+  "logwatchOverrides": "Istisnolar",
+  "logwatchOverridesRuleHelp": "Har qatorda bittadan: servis manba/servis ko‘rinishida (prod-loki/api) yoki repozitoriy repo:nom ko‘rinishida, so‘ng errors= va/yoki security= off, report yoki ticket. Servis qatori repozitoriy qatoridan ustun.",
   "maccountPasswordInstead": "Parol bilan kirish",
   "maccountGoogleInstead": "Google orqali davom etish",
   "maccountSetupLede": "Adminlar ikki bosqichli kirish bilan kiradi. Akkauntni quyidagi kalit orqali autentifikator ilovasiga qo‘shing (yoki sozlash havolasini shu telefonda oching), so‘ng u ko‘rsatgan 6 xonali kodni kiriting.",

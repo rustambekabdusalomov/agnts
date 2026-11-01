@@ -248,6 +248,8 @@
     "indexHelp_elasticsearch": "Пусто — читаются logs-*, filebeat-* и logstash-*.",
     "indexHelp_opensearch": "Пусто — читаются logs-*, filebeat-* и logstash-*.",
     "indexHelp_splunk": "Пусто — поиск по всем индексам, доступным токену.",
-    "indexHelp_cloudwatch": "Сервисы — это группы логов; префикс сужает список (/ecs/, /aws/lambda/)."
+    "indexHelp_cloudwatch": "Сервисы — это группы логов; префикс сужает список (/ecs/, /aws/lambda/).",
+    "overrides": "Исключения",
+    "overridesRuleHelp": "По одному в строке: сервис как источник/сервис (prod-loki/api) или репозиторий как repo:имя, затем errors= и/или security= off, report или ticket. Строка сервиса важнее строки репозитория."
   }
 }

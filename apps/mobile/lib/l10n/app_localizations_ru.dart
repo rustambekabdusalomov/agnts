@@ -7475,6 +7475,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get logwatchIndexHelp_cloudwatch => 'Сервисы — это группы логов; префикс сужает список (/ecs/, /aws/lambda/).';
 
   @override
+  String get logwatchOverrides => 'Исключения';
+
+  @override
+  String get logwatchOverridesRuleHelp =>
+      'По одному в строке: сервис как источник/сервис (prod-loki/api) или репозиторий как repo:имя, затем errors= и/или security= off, report или ticket. Строка сервиса важнее строки репозитория.';
+
+  @override
   String get maccountPasswordInstead => 'Войти с паролем';
 
   @override

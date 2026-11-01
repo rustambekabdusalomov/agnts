@@ -248,6 +248,8 @@
     "indexHelp_elasticsearch": "Empty reads logs-*, filebeat-* and logstash-*.",
     "indexHelp_opensearch": "Empty reads logs-*, filebeat-* and logstash-*.",
     "indexHelp_splunk": "Empty searches every index the token may read.",
-    "indexHelp_cloudwatch": "Services are log groups; this narrows the list (/ecs/, /aws/lambda/)."
+    "indexHelp_cloudwatch": "Services are log groups; this narrows the list (/ecs/, /aws/lambda/).",
+    "overrides": "Overrides",
+    "overridesRuleHelp": "One a line: a service as source/service (prod-loki/api) or a repository as repo:name, then errors= and/or security= off, report or ticket. A service's line wins over its repository's."
   }
 }

@@ -2140,6 +2140,8 @@
   "logwatchIndexHelp_opensearch": "Пусто — читаются logs-*, filebeat-* и logstash-*.",
   "logwatchIndexHelp_splunk": "Пусто — поиск по всем индексам, доступным токену.",
   "logwatchIndexHelp_cloudwatch": "Сервисы — это группы логов; префикс сужает список (/ecs/, /aws/lambda/).",
+  "logwatchOverrides": "Исключения",
+  "logwatchOverridesRuleHelp": "По одному в строке: сервис как источник/сервис (prod-loki/api) или репозиторий как repo:имя, затем errors= и/или security= off, report или ticket. Строка сервиса важнее строки репозитория.",
   "maccountPasswordInstead": "Войти с паролем",
   "maccountGoogleInstead": "Продолжить через Google",
   "maccountSetupLede": "Админы входят с двумя факторами. Добавьте аккаунт в приложение-аутентификатор по секрету ниже (или откройте ссылку настройки на этом телефоне), затем введите 6-значный код из него.",

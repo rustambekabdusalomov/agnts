@@ -4236,6 +4236,8 @@
   "logwatchIndexHelp_opensearch": "Empty reads logs-*, filebeat-* and logstash-*.",
   "logwatchIndexHelp_splunk": "Empty searches every index the token may read.",
   "logwatchIndexHelp_cloudwatch": "Services are log groups; this narrows the list (/ecs/, /aws/lambda/).",
+  "logwatchOverrides": "Overrides",
+  "logwatchOverridesRuleHelp": "One a line: a service as source/service (prod-loki/api) or a repository as repo:name, then errors= and/or security= off, report or ticket. A service's line wins over its repository's.",
   "maccountPasswordInstead": "Sign in with a password",
   "maccountGoogleInstead": "Continue with Google instead",
   "maccountSetupLede": "Admins sign in with two factors. Add this account to an authenticator app with the secret below (or open the setup link on this phone), then enter the 6-digit code it shows.",

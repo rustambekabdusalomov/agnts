@@ -7187,6 +7187,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get logwatchIndexHelp_cloudwatch => 'Servislar — log guruhlari; prefiks ro‘yxatni toraytiradi (/ecs/, /aws/lambda/).';
 
   @override
+  String get logwatchOverrides => 'Istisnolar';
+
+  @override
+  String get logwatchOverridesRuleHelp =>
+      'Har qatorda bittadan: servis manba/servis ko‘rinishida (prod-loki/api) yoki repozitoriy repo:nom ko‘rinishida, so‘ng errors= va/yoki security= off, report yoki ticket. Servis qatori repozitoriy qatoridan ustun.';
+
+  @override
   String get maccountPasswordInstead => 'Parol bilan kirish';
 
   @override

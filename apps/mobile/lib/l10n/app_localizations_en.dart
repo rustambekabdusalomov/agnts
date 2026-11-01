@@ -7186,6 +7186,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logwatchIndexHelp_cloudwatch => 'Services are log groups; this narrows the list (/ecs/, /aws/lambda/).';
 
   @override
+  String get logwatchOverrides => 'Overrides';
+
+  @override
+  String get logwatchOverridesRuleHelp =>
+      'One a line: a service as source/service (prod-loki/api) or a repository as repo:name, then errors= and/or security= off, report or ticket. A service\'s line wins over its repository\'s.';
+
+  @override
   String get maccountPasswordInstead => 'Sign in with a password';
 
   @override

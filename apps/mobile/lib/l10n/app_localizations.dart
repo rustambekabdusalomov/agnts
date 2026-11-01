@@ -12933,6 +12933,18 @@ abstract class AppLocalizations {
   /// **'Services are log groups; this narrows the list (/ecs/, /aws/lambda/).'**
   String get logwatchIndexHelp_cloudwatch;
 
+  /// No description provided for @logwatchOverrides.
+  ///
+  /// In en, this message translates to:
+  /// **'Overrides'**
+  String get logwatchOverrides;
+
+  /// No description provided for @logwatchOverridesRuleHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One a line: a service as source/service (prod-loki/api) or a repository as repo:name, then errors= and/or security= off, report or ticket. A service\'s line wins over its repository\'s.'**
+  String get logwatchOverridesRuleHelp;
+
   /// No description provided for @maccountPasswordInstead.
   ///
   /// In en, this message translates to:

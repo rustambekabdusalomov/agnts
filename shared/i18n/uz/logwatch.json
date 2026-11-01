@@ -248,6 +248,8 @@
     "indexHelp_elasticsearch": "Bo‘sh bo‘lsa logs-*, filebeat-* va logstash-* o‘qiladi.",
     "indexHelp_opensearch": "Bo‘sh bo‘lsa logs-*, filebeat-* va logstash-* o‘qiladi.",
     "indexHelp_splunk": "Bo‘sh bo‘lsa token o‘qiy oladigan barcha indekslarda qidiriladi.",
-    "indexHelp_cloudwatch": "Servislar — log guruhlari; prefiks ro‘yxatni toraytiradi (/ecs/, /aws/lambda/)."
+    "indexHelp_cloudwatch": "Servislar — log guruhlari; prefiks ro‘yxatni toraytiradi (/ecs/, /aws/lambda/).",
+    "overrides": "Istisnolar",
+    "overridesRuleHelp": "Har qatorda bittadan: servis manba/servis ko‘rinishida (prod-loki/api) yoki repozitoriy repo:nom ko‘rinishida, so‘ng errors= va/yoki security= off, report yoki ticket. Servis qatori repozitoriy qatoridan ustun."
   }
 }
