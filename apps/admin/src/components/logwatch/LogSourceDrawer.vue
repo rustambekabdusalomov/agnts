@@ -21,7 +21,7 @@ const emit = defineEmits<{ saved: [LogSource] }>()
 const { t } = useI18n()
 const qc = useQueryClient()
 
-type Auth = 'none' | 'basic' | 'bearer' | 'apikey'
+type Auth = 'none' | 'basic' | 'bearer' | 'apikey' | 'aws'
 const blank = () => ({
   name: '', kind: 'loki' as LogKind, environment: 'production' as LogSourceInput['environment'], address: '',
   authKind: 'none' as Auth, user: '', password: '', token: '', tenant: '', changeAuth: true,
@@ -134,6 +134,15 @@ const save = useMutation({
             <template v-if="form.authKind === 'basic'">
               <input v-model="form.user" type="text" maxlength="200" :placeholder="t('logwatch.user')" :aria-label="t('logwatch.user')" autocomplete="off">
               <input v-model="form.password" type="password" maxlength="500" :placeholder="t('logwatch.password')" :aria-label="t('logwatch.password')" autocomplete="new-password">
+            </template>
+            <template v-else-if="form.authKind === 'aws'">
+              <input v-model="form.user" type="text" maxlength="200" :placeholder="t('logwatch.awsKeyId')" :aria-label="t('logwatch.awsKeyId')" autocomplete="off">
+              <input v-model="form.password" type="password" maxlength="500" :placeholder="t('logwatch.awsSecret')" :aria-label="t('logwatch.awsSecret')" autocomplete="new-password">
+              <input v-model="form.tenant" type="password" maxlength="4000" :placeholder="t('logwatch.awsSession')" :aria-label="t('logwatch.awsSession')" autocomplete="new-password">
+            </template>
+            <template v-else-if="form.kind === 'datadog'">
+              <input v-model="form.token" type="password" maxlength="4000" :placeholder="t('logwatch.ddApiKey')" :aria-label="t('logwatch.ddApiKey')" autocomplete="new-password">
+              <input v-model="form.password" type="password" maxlength="500" :placeholder="t('logwatch.ddAppKey')" :aria-label="t('logwatch.ddAppKey')" autocomplete="new-password">
             </template>
             <input v-else-if="form.authKind !== 'none'" v-model="form.token" type="password" maxlength="4000" :placeholder="t(`logwatch.tokenPh_${form.kind}`)" :aria-label="t('logwatch.token')" autocomplete="new-password">
             <span class="fhelp">{{ t(`logwatch.authHelp_${form.kind}`) }}</span>

@@ -8450,7 +8450,7 @@ export interface components {
         /** @description Credentials; sealed when saved and never returned */
         LogAuthInput: {
             /** @enum {string} */
-            kind: "none" | "basic" | "bearer" | "apikey";
+            kind: "none" | "basic" | "bearer" | "apikey" | "aws";
             user?: string;
             password?: string;
             token?: string;
@@ -8477,7 +8477,7 @@ export interface components {
             id?: number;
             name: string;
             /** @enum {string} */
-            kind: "loki" | "elasticsearch" | "opensearch" | "graylog" | "push";
+            kind: "loki" | "elasticsearch" | "opensearch" | "graylog" | "datadog" | "cloudwatch" | "splunk" | "push";
             /** @enum {string} */
             environment: "production" | "staging" | "development";
             /** @description https://loki.example.com, or http:// on a private network; empty for push */
@@ -8495,7 +8495,7 @@ export interface components {
             id: number;
             name: string;
             /** @enum {string} */
-            kind: "loki" | "elasticsearch" | "opensearch" | "graylog" | "push";
+            kind: "loki" | "elasticsearch" | "opensearch" | "graylog" | "datadog" | "cloudwatch" | "splunk" | "push";
             environment: string;
             address: string;
             authKind: string;

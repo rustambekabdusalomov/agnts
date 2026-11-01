@@ -22,11 +22,14 @@ const (
 	LogElasticsearch LogKind = "elasticsearch"
 	LogOpenSearch    LogKind = "opensearch"
 	LogGraylog       LogKind = "graylog"
+	LogDatadog       LogKind = "datadog"
+	LogCloudWatch    LogKind = "cloudwatch"
+	LogSplunk        LogKind = "splunk"
 	LogPush          LogKind = "push"
 )
 
 // LogKinds lists the kinds agnts can read.
-var LogKinds = []LogKind{LogLoki, LogElasticsearch, LogOpenSearch, LogGraylog, LogPush}
+var LogKinds = []LogKind{LogLoki, LogElasticsearch, LogOpenSearch, LogGraylog, LogDatadog, LogCloudWatch, LogSplunk, LogPush}
 
 // Valid reports whether k is a known kind.
 func (k LogKind) Valid() bool { return slices.Contains(LogKinds, k) }
@@ -59,8 +62,10 @@ const (
 )
 
 // LogAuth are the credentials agnts reads a source with. Kind is "none",
-// "basic", "bearer" or "apikey". They are sealed at rest and never
-// returned by the API.
+// "basic", "bearer", "apikey" or "aws" (CloudWatch: the access key id as
+// User, the secret as Password, a session token as Tenant). Datadog takes
+// the API key as Token and the application key as Password. They are
+// sealed at rest and never returned by the API.
 type LogAuth struct {
 	Kind     string `json:"kind"`
 	User     string `json:"user,omitempty"`
@@ -71,7 +76,7 @@ type LogAuth struct {
 }
 
 // LogAuthKinds lists the auth kinds.
-var LogAuthKinds = []string{"none", "basic", "bearer", "apikey"}
+var LogAuthKinds = []string{"none", "basic", "bearer", "apikey", "aws"}
 
 // LogFields name where a source keeps the parts of an entry. Empty fields
 // are detected (Test connection) or fall back to the usual names.

@@ -42,15 +42,18 @@ export const canFix = (f: Pick<LogFinding, 'status' | 'repoIds' | 'ticketKey' | 
   f.repoIds.length > 0 && ['open', 'reported', 'regression'].includes(f.status) && !liveTicket(f)
 
 /** The source kinds agnts reads, in the form's order. */
-export const LOG_KINDS = ['loki', 'elasticsearch', 'opensearch', 'graylog', 'push'] as const
+export const LOG_KINDS = ['loki', 'elasticsearch', 'opensearch', 'graylog', 'datadog', 'cloudwatch', 'splunk', 'push'] as const
 export type LogKind = (typeof LOG_KINDS)[number]
 
 /** Auth kinds each source kind takes, the usual first. */
-export const AUTH_KINDS: Record<LogKind, ('none' | 'basic' | 'bearer' | 'apikey')[]> = {
+export const AUTH_KINDS: Record<LogKind, ('none' | 'basic' | 'bearer' | 'apikey' | 'aws')[]> = {
   loki: ['none', 'basic', 'bearer'],
   elasticsearch: ['apikey', 'basic', 'none'],
   opensearch: ['basic', 'none'],
   graylog: ['bearer', 'basic'],
+  datadog: ['apikey'],
+  cloudwatch: ['aws'],
+  splunk: ['bearer', 'basic'],
   push: ['none'],
 }
 
@@ -69,6 +72,9 @@ export const ADDRESS_PH: Record<LogKind, string> = {
   elasticsearch: 'https://es.example.com:9200',
   opensearch: 'https://opensearch.example.com:9200',
   graylog: 'https://graylog.example.com',
+  datadog: 'https://api.datadoghq.eu',
+  cloudwatch: 'https://logs.eu-central-1.amazonaws.com',
+  splunk: 'https://splunk.example.com:8089',
   push: '',
 }
 

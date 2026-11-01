@@ -78,6 +78,12 @@ func New(src domain.LogSource, c *Client) (Puller, error) {
 		return &Elastic{src: src, c: c}, nil
 	case domain.LogGraylog:
 		return &Graylog{src: src, c: c}, nil
+	case domain.LogDatadog:
+		return &Datadog{src: src, c: c}, nil
+	case domain.LogCloudWatch:
+		return &CloudWatch{src: src, c: c}, nil
+	case domain.LogSplunk:
+		return &Splunk{src: src, c: c}, nil
 	}
 	return nil, fmt.Errorf("%s sources are not read by agnts", src.Kind)
 }
