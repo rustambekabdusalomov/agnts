@@ -149,10 +149,11 @@ after checking the host resolves to a public address. Grants need
 `AGNTS_GATEWAY_SECRET` on agnts and the egress proxy (a gateway is not
 needed).
 
-## Codex CLI (optional)
+## Codex CLI
 
 Runs whose model is `codex:<model>` use Codex CLI instead of Claude Code. The
-image installs it only when built with a pinned version:
+image installs the version pinned in the Dockerfile (`ARG CODEX_VERSION`). To
+build another one, or none (an empty value):
 
     docker compose --profile build build --build-arg CODEX_VERSION=<version> runner
 
