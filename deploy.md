@@ -141,8 +141,10 @@ compose file in `src/deploy` needs `AGNTS_DOMAIN`, which only `/opt/agnts/.env`
 sets, so compose fails before it builds anything. The tag must match
 `AGNTS_RUNNER_IMAGE` in `/opt/agnts/.env` (unset means `agnts-runner:latest`).
 
-Add `--build-arg CODEX_VERSION=<version>` to also install Codex CLI for
-`codex:<model>` runs. New runs use the new image; runs in progress keep theirs.
+Codex CLI is installed at the version pinned in the Dockerfile (`ARG
+CODEX_VERSION`). Add `--build-arg CODEX_VERSION=<version>` for another one,
+or an empty value to leave it out (then remove `codex` from `AGNTS_PROVIDERS`).
+New runs use the new image; runs in progress keep theirs.
 
 Check it, and roll back if a run misbehaves:
 

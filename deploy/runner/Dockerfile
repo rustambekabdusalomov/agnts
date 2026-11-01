@@ -75,10 +75,10 @@ RUN set -eu; \
     chmod 0755 /usr/local/bin/muse; rm /tmp/muse.json; \
     /usr/local/bin/muse --version
 
-# Codex CLI, agnts's second coding tool, only when a version is given
-# (--build-arg CODEX_VERSION=x.y.z): pin it like Claude Code, since agnts
-# parses its `codex exec --json` stream. It runs on Claude's Node too.
-ARG CODEX_VERSION=
+# Codex CLI, one of agnts's coding modules, pinned like Claude Code since
+# agnts parses its `codex exec --json` stream. It runs on Claude's Node too.
+# --build-arg CODEX_VERSION= (empty) leaves it out.
+ARG CODEX_VERSION=0.166.0
 RUN if [ -n "$CODEX_VERSION" ]; then \
       export PATH=/opt/claude/node/bin:$PATH \
    && npm install -g --prefix /opt/codex --fetch-retries=5 "@openai/codex@${CODEX_VERSION}" \
