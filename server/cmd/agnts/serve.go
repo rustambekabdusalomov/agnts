@@ -598,6 +598,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.orch.SetCIHook(a.ci)
 	a.logs = logwatch.New(postgres.NewLogs(pool, box), a.store, a.orch, a.settings, repos,
 		logsource.Dialer{Router: logsource.NetrouteRouter(router)}, log.With("component", "logs"))
+	a.logs.SetTriager(logTriager{a.orch})
 	a.links = commitlink.New(a.store, a.vcs, log.With("component", "commit-links"))
 	a.links.OnRevert(a.orch.Reverted)
 	a.orch.SetCommitLinker(a.links)
@@ -1429,4 +1430,16 @@ func (t meetingTickets) CreateTask(ctx context.Context, in orchestrator.TaskInpu
 
 func (t meetingTickets) TicketByKey(ctx context.Context, key string) (domain.Ticket, error) {
 	return t.store.TicketByKey(ctx, key)
+}
+
+// logTriager is the orchestrator's model triage of log findings, as the
+// log watcher asks for it.
+type logTriager struct{ o *orchestrator.Orchestrator }
+
+func (t logTriager) Triage(ctx context.Context, f domain.LogFinding, sample string) (logwatch.Triage, error) {
+	r, err := t.o.TriageLogFinding(ctx, f, sample)
+	if err != nil {
+		return logwatch.Triage{}, err
+	}
+	return logwatch.Triage{Class: domain.LogClass(r.Class), Severity: domain.LogSeverity(r.Severity), Title: r.Title, Remediation: r.Remediation}, nil
 }
