@@ -133,6 +133,9 @@
     "modulesCustom": "Alohida ro‘yxat",
     "modulesCustomHelp": "Birinchisi asosiy modul. Faqat yoqilgan modullarni tanlash mumkin.",
     "modulesSet": "{name} foydalana oladi: {list}",
-    "modulesFollow": "{name} endi standart modullardan foydalanadi"
+    "modulesFollow": "{name} endi standart modullardan foydalanadi",
+    "modulesNotEnabled": "Hali yoqilmagan, shuning uchun bu yerda yo‘q: {list}. Bu server ularni ishga tushira oladi.",
+    "modulesOpenSettings": "Modullar sozlamalarini ochish",
+    "modulesServerOnly": "Bu server faqat {list} ni ishga tushira oladi. Ko‘proq taklif qilish uchun modul serverdagi AGNTS_PROVIDERS ga (va ishga tushirish obraziga) qo‘shilishi kerak."
   }
 }

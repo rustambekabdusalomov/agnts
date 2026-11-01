@@ -17,6 +17,7 @@ type ModulesService interface {
 	For(ctx context.Context, user int64) (domain.Access, error)
 	User(ctx context.Context, user int64) (modules.UserModules, error)
 	SetUser(ctx context.Context, user int64, own []string, by int64) (modules.UserModules, error)
+	SetOrder(ctx context.Context, user int64, order []string) (modules.UserModules, error)
 }
 
 // accessOf is what person user may use; without a modules service, the
@@ -86,6 +87,10 @@ func toUserModules(u modules.UserModules) gen.UserModules {
 	if u.Own != nil {
 		own := toModules(u.Own)
 		out.Own = &own
+	}
+	if u.Order != nil {
+		order := toModules(u.Order)
+		out.Order = &order
 	}
 	return out
 }
@@ -175,4 +180,45 @@ func (s *Server) SetUserModules(w http.ResponseWriter, r *http.Request, id int64
 		s.opt.Tickets.Wake()
 	}
 	writeJSON(w, http.StatusOK, toUserModules(u))
+}
+
+// GetMyModules implements gen.ServerInterface.
+func (s *Server) GetMyModules(w http.ResponseWriter, r *http.Request) {
+	if s.modulesOff(w) {
+		return
+	}
+	u, _ := userFrom(r.Context())
+	um, err := s.opt.Modules.User(r.Context(), u.ID)
+	if err != nil {
+		s.modulesError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toUserModules(um))
+}
+
+// SetMyModuleOrder implements gen.ServerInterface: a person orders the
+// modules an Admin lets them use.
+func (s *Server) SetMyModuleOrder(w http.ResponseWriter, r *http.Request) {
+	if s.modulesOff(w) {
+		return
+	}
+	var req gen.SetMyModuleOrderJSONBody
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	var order []string
+	if req.Order != nil {
+		order = fromModules(*req.Order)
+	}
+	u, _ := userFrom(r.Context())
+	um, err := s.opt.Modules.SetOrder(r.Context(), u.ID, order)
+	if err != nil {
+		s.modulesError(w, r, err)
+		return
+	}
+	if s.opt.Tickets != nil {
+		s.opt.Tickets.Wake()
+	}
+	writeJSON(w, http.StatusOK, toUserModules(um))
 }

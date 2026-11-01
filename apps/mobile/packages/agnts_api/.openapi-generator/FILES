@@ -397,6 +397,7 @@ doc/SetCreditLimitRequest.md
 doc/SetFreeCreditsRequest.md
 doc/SetMeetingCohostsRequest.md
 doc/SetMemberRoleRequest.md
+doc/SetMyModuleOrderRequest.md
 doc/SetPlaneWebhookSecretRequest.md
 doc/SetSlotsRequest.md
 doc/SetTicketBenchmarkRequest.md
@@ -898,6 +899,7 @@ lib/src/model/set_credit_limit_request.dart
 lib/src/model/set_free_credits_request.dart
 lib/src/model/set_meeting_cohosts_request.dart
 lib/src/model/set_member_role_request.dart
+lib/src/model/set_my_module_order_request.dart
 lib/src/model/set_plane_webhook_secret_request.dart
 lib/src/model/set_slots_request.dart
 lib/src/model/set_ticket_benchmark_request.dart
@@ -1378,6 +1380,7 @@ test/set_credit_limit_request_test.dart
 test/set_free_credits_request_test.dart
 test/set_meeting_cohosts_request_test.dart
 test/set_member_role_request_test.dart
+test/set_my_module_order_request_test.dart
 test/set_plane_webhook_secret_request_test.dart
 test/set_slots_request_test.dart
 test/set_ticket_benchmark_request_test.dart

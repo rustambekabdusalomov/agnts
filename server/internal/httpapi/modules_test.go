@@ -14,14 +14,16 @@ import (
 
 // fakeModules keeps module access in memory, with the domain's rules.
 type fakeModules struct {
-	mu  sync.Mutex
-	cfg domain.ModulesConfig
-	own map[int64][]string
+	mu    sync.Mutex
+	cfg   domain.ModulesConfig
+	own   map[int64][]string
+	order map[int64][]string
 }
 
 func newFakeModules() *fakeModules {
 	all := []string{domain.ProviderMuse, domain.ProviderClaude, domain.ProviderCodex}
-	return &fakeModules{cfg: domain.ModulesConfig{Enabled: all, Default: []string{domain.ProviderClaude, domain.ProviderCodex}}, own: map[int64][]string{}}
+	return &fakeModules{cfg: domain.ModulesConfig{Enabled: all, Default: []string{domain.ProviderClaude, domain.ProviderCodex}},
+		own: map[int64][]string{}, order: map[int64][]string{}}
 }
 
 func (f *fakeModules) Config(context.Context) (domain.ModulesConfig, error) {
@@ -47,14 +49,29 @@ func (f *fakeModules) For(_ context.Context, user int64) (domain.Access, error) 
 	if !ok {
 		own = nil
 	}
-	return domain.ResolveAccess(domain.Ceiling(), f.cfg, own), nil
+	return domain.ResolveAccess(domain.Ceiling(), f.cfg, own).Ordered(f.order[user]), nil
 }
 
 func (f *fakeModules) User(ctx context.Context, user int64) (modules.UserModules, error) {
 	a, _ := f.For(ctx, user)
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	return modules.UserModules{Own: f.own[user], Effective: a.Modules}, nil
+	return modules.UserModules{Own: f.own[user], Effective: a.Modules, Order: f.order[user]}, nil
+}
+
+func (f *fakeModules) SetOrder(ctx context.Context, user int64, order []string) (modules.UserModules, error) {
+	f.mu.Lock()
+	base := domain.ResolveAccess(domain.Ceiling(), f.cfg, f.own[user])
+	f.mu.Unlock()
+	if order != nil {
+		if err := domain.ValidateOrder(base, order); err != nil {
+			return modules.UserModules{}, &modules.InvalidError{Msg: err.Error()}
+		}
+	}
+	f.mu.Lock()
+	f.order[user] = order
+	f.mu.Unlock()
+	return f.User(ctx, user)
 }
 
 func (f *fakeModules) SetUser(ctx context.Context, user int64, own []string, _ int64) (modules.UserModules, error) {
@@ -149,5 +166,40 @@ func TestModulesPerViewer(t *testing.T) {
 	rec := h.do("GET", "/api/platform/settings/modules", "", cookie)
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"available":["muse","claude","codex"]`) {
 		t.Fatalf("settings: %d %s", rec.Code, rec.Body)
+	}
+}
+
+// People put the modules they may use in their own order; the catalog
+// follows it.
+func TestMyModuleOrder(t *testing.T) {
+	domain.SetProviders([]string{domain.ProviderMuse, domain.ProviderClaude, domain.ProviderCodex})
+	t.Cleanup(func() { domain.SetProviders([]string{domain.ProviderMuse}) })
+	h := newHarness(t, pinger{})
+	cookie := h.signIn(t)
+	h.modules.cfg.Default = []string{domain.ProviderClaude, domain.ProviderCodex, domain.ProviderMuse}
+
+	if rec := h.do("PUT", "/api/account/modules", `{"order":["muse","claude"]}`, cookie); rec.Code != http.StatusOK ||
+		!strings.Contains(rec.Body.String(), `"effective":["muse","claude","codex"]`) {
+		t.Fatalf("set order: %d %s", rec.Code, rec.Body)
+	}
+	if rec := h.do("GET", "/api/models", "", cookie); !strings.Contains(rec.Body.String(), `"primary":"muse"`) {
+		t.Fatalf("catalog after ordering: %s", rec.Body)
+	}
+	if rec := h.do("GET", "/api/account/modules", "", cookie); !strings.Contains(rec.Body.String(), `"order":["muse","claude"]`) {
+		t.Fatalf("my modules: %s", rec.Body)
+	}
+	// Codex first, or a module the Admin did not give, is refused.
+	if rec := h.do("PUT", "/api/account/modules", `{"order":["codex"]}`, cookie); rec.Code != http.StatusBadRequest {
+		t.Fatalf("codex first: %d", rec.Code)
+	}
+	h.modules.own[1] = []string{domain.ProviderClaude}
+	if rec := h.do("PUT", "/api/account/modules", `{"order":["muse"]}`, cookie); rec.Code != http.StatusBadRequest {
+		t.Fatalf("a module not given: %d", rec.Code)
+	}
+	// Back to the Admin's order.
+	delete(h.modules.own, 1)
+	if rec := h.do("PUT", "/api/account/modules", `{"order":null}`, cookie); rec.Code != http.StatusOK ||
+		!strings.Contains(rec.Body.String(), `"effective":["claude","codex","muse"]`) {
+		t.Fatalf("reset: %d %s", rec.Code, rec.Body)
 	}
 }

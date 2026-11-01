@@ -10,6 +10,7 @@ import ModuleList from '../../components/modules/ModuleList.vue'
 import ModulesSettingsCard from '../../components/modules/ModulesSettingsCard.vue'
 import { listProblem, type Module } from '../../components/modules/modules'
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
+import HiIcon from '../../components/ui/HiIcon.vue'
 import { initialsOf, nameOf, useAgo, useModulesSettings, usePlatform, within, type PlatformUser } from '../../composables/usePlatform'
 import { useUi } from '../../stores/ui'
 
@@ -100,6 +101,15 @@ const limitOpen = computed({ get: () => !!limiting.value, set: (v: boolean) => {
 const showModules = ref(false)
 const { settings: modulesSettings } = useModulesSettings()
 const enabledModules = computed(() => modulesSettings.data.value?.enabled ?? [])
+// Modules the server can run but nobody may use yet: the dialog says where
+// to enable them, since it offers only enabled ones.
+const notEnabled = computed(() => (modulesSettings.data.value?.available ?? []).filter((m) => !enabledModules.value.includes(m)))
+const serverOnly = computed(() => (modulesSettings.data.value?.available ?? []).length === 1)
+function openModulesSettings() {
+  moduling.value = null
+  showModules.value = true
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 const moduleNames = (list: readonly Module[]) => list.map((m) => t(`modules.name_${m}`)).join(', ')
 const moduling = ref<PlatformUser | null>(null)
 const followDefault = ref(true)
@@ -283,6 +293,16 @@ const modulesOpen = computed({ get: () => !!moduling.value, set: (v: boolean) =>
         <p v-if="modulesSettings.isPending.value" class="hint">{{ t('common.loading') }}</p>
         <ModuleList v-else v-model="ownModules" :options="enabledModules" :label="t('platform.modulesCustom')" />
         <p class="hint">{{ t('platform.modulesCustomHelp') }}</p>
+        <div v-if="notEnabled.length" class="help">
+          <HiIcon name="info" />
+          <div>
+            <p>{{ t('platform.modulesNotEnabled', { list: moduleNames(notEnabled) }) }}</p>
+            <button type="button" class="btn btn-s" style="margin-top: 6px" @click="openModulesSettings">{{ t('platform.modulesOpenSettings') }}</button>
+          </div>
+        </div>
+        <div v-else-if="serverOnly" class="help">
+          <HiIcon name="info" /><p>{{ t('platform.modulesServerOnly', { list: moduleNames(enabledModules) }) }}</p>
+        </div>
         <p v-if="modulesProblem" class="ferr">{{ t(`modules.problem_${modulesProblem}`) }}</p>
       </template>
     </div>

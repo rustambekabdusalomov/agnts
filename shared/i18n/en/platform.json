@@ -133,6 +133,9 @@
     "modulesCustom": "Their own list",
     "modulesCustomHelp": "The first is their default module. Only enabled modules can be chosen.",
     "modulesSet": "{name} may use {list}",
-    "modulesFollow": "{name} follows the default modules now"
+    "modulesFollow": "{name} follows the default modules now",
+    "modulesNotEnabled": "Not enabled yet, so not offered here: {list}. This server can run them.",
+    "modulesOpenSettings": "Open Modules settings",
+    "modulesServerOnly": "This server can run only {list}. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image)."
   }
 }

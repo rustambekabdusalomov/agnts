@@ -3187,6 +3187,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/account/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The coding modules you may use, in your order (the first is your default module) */
+        get: operations["getMyModules"];
+        /** Put the modules you may use in your own order; the first is your default module and cannot be codex. Null goes back to the Admin's order */
+        put: operations["setMyModuleOrder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/free-credits": {
         parameters: {
             query?: never;
@@ -5935,8 +5953,10 @@ export interface components {
         UserModules: {
             /** @description The list an Admin set; absent or null follows the default */
             own?: components["schemas"]["Module"][] | null;
-            /** @description What the person may use now, the default module first */
+            /** @description What the person may use now, in their order, the default module first */
             effective: components["schemas"]["Module"][];
+            /** @description The order the person put their modules in themselves; absent or null keeps the Admin's */
+            order?: components["schemas"]["Module"][] | null;
             /** Format: date-time */
             setAt?: string;
         };
@@ -15606,6 +15626,53 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+        };
+    };
+    getMyModules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserModules"];
+                };
+            };
+        };
+    };
+    setMyModuleOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    order?: components["schemas"]["Module"][] | null;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserModules"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
         };
     };
     getMyFreeCredits: {

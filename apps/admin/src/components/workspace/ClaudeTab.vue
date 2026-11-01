@@ -7,6 +7,7 @@ import type { components } from '../../api/schema.gen'
 import { useUi } from '../../stores/ui'
 import { useWorkspace } from '../../stores/workspace'
 import ClaudeConnect from '../account/ClaudeConnect.vue'
+import CodexCard from './CodexCard.vue'
 import MuseConnect from '../account/MuseConnect.vue'
 import { accountModules, type AccountModule } from '../modules/modules'
 import { useModels } from '../../composables/useModels'
@@ -108,7 +109,10 @@ const when = (s: string) => new Date(s).toLocaleString([], { dateStyle: 'medium'
 
 <template>
   <p v-if="pending" class="hint">{{ t('common.loading') }}</p>
-  <p v-else-if="!conns.length" class="hint">{{ t('ws.noAccountModules') }}</p>
+  <div v-else-if="!conns.length" class="stack">
+    <p class="hint">{{ t('ws.noAccountModules') }}</p>
+    <CodexCard v-if="catalog.has('codex')" />
+  </div>
   <div v-else-if="wc" class="stack">
     <section class="card">
       <div class="ch"><div><h2>{{ t(w('ws.claude')) }}</h2><p class="sub">{{ owner ? t(w('ws.claudeSub')) : t('ws.readOnly') }}</p></div></div>
@@ -155,6 +159,8 @@ const when = (s: string) => new Date(s).toLocaleString([], { dateStyle: 'medium'
         @disconnect="disconnect.mutate('claude')"
       />
     </section>
+
+    <CodexCard v-if="catalog.has('codex')" />
 
     <section class="card">
       <div class="ch">

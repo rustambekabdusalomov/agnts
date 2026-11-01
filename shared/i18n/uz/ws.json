@@ -135,6 +135,13 @@
     "memberAccountsSubBoth": "Kim o‘z Muse va Claude hisoblarini ulagan (Profil).",
     "connectionMuse": "Ish maydonining Muse hisobi",
     "connectionClaude": "Ish maydonining Claude hisobi",
-    "noAccountModules": "Modullaringiz uchun bu yerda ulanadigan hisob yo‘q: Codex ish maydonining OpenAI integratsiyasi orqali ishlaydi."
+    "noAccountModules": "Modullaringiz uchun bu yerda ulanadigan hisob yo‘q: Codex ish maydonining OpenAI integratsiyasi orqali ishlaydi.",
+    "codexSub": "Ish maydonining OpenAI API kalitida ishlaydi",
+    "codexKey": "OpenAI API kaliti",
+    "codexConnected": "Ulangan",
+    "codexNotConnected": "Ulanmagan: Codex ishga tushirishlari u ulanguncha kutadi",
+    "codexConnect": "OpenAI ni ulash",
+    "codexManage": "OpenAI sozlamalari",
+    "codexCredits": "OpenAI Codex ishga tushirishlari uchun to‘g‘ridan-to‘g‘ri, har bir chaqiruv uchun haq oladi. Ular ish maydoni kreditlarini sarflamaydi, kreditlar bilan davom ettirish ularga taalluqli emas."
   }
 }

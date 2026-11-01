@@ -78,9 +78,11 @@ Class | Method | HTTP request | Description
 [*AccountApi*](doc/AccountApi.md) | [**getMyClaude**](doc/AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude or Muse connection (used by workspaces in per-member mode)
 [*AccountApi*](doc/AccountApi.md) | [**getMyCreditUsage**](doc/AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the monthly limit an Admin set
 [*AccountApi*](doc/AccountApi.md) | [**getMyFreeCredits**](doc/AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
+[*AccountApi*](doc/AccountApi.md) | [**getMyModules**](doc/AccountApi.md#getmymodules) | **GET** /account/modules | The coding modules you may use, in your order (the first is your default module)
 [*AccountApi*](doc/AccountApi.md) | [**getMyMuseLogin**](doc/AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
 [*AccountApi*](doc/AccountApi.md) | [**resendVerification**](doc/AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
 [*AccountApi*](doc/AccountApi.md) | [**setMyClaude**](doc/AccountApi.md#setmyclaude) | **PUT** /account/claude | Connect your Claude account
+[*AccountApi*](doc/AccountApi.md) | [**setMyModuleOrder**](doc/AccountApi.md#setmymoduleorder) | **PUT** /account/modules | Put the modules you may use in your own order; the first is your default module and cannot be codex. Null goes back to the Admin&#39;s order
 [*AccountApi*](doc/AccountApi.md) | [**startMyMuseLogin**](doc/AccountApi.md#startmymuselogin) | **POST** /account/muse/login | Connect your Muse account by signing in with Meta (shows a code to confirm on Meta&#39;s page)
 [*AccountApi*](doc/AccountApi.md) | [**updateProfile**](doc/AccountApi.md#updateprofile) | **PUT** /account/profile | Change the display name or email
 [*AnalyticsApi*](doc/AnalyticsApi.md) | [**getAnalytics**](doc/AnalyticsApi.md#getanalytics) | **GET** /analytics | Throughput, quality, time and plan statistics for a period
@@ -796,6 +798,7 @@ Class | Method | HTTP request | Description
  - [SetFreeCreditsRequest](doc/SetFreeCreditsRequest.md)
  - [SetMeetingCohostsRequest](doc/SetMeetingCohostsRequest.md)
  - [SetMemberRoleRequest](doc/SetMemberRoleRequest.md)
+ - [SetMyModuleOrderRequest](doc/SetMyModuleOrderRequest.md)
  - [SetPlaneWebhookSecretRequest](doc/SetPlaneWebhookSecretRequest.md)
  - [SetSlotsRequest](doc/SetSlotsRequest.md)
  - [SetTicketBenchmarkRequest](doc/SetTicketBenchmarkRequest.md)

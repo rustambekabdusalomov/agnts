@@ -18,6 +18,10 @@
     "problem_empty": "Choose at least one module.",
     "problem_codexFirst": "Codex cannot be the default module: put Muse Code or Claude Code first.",
     "save": "Save",
-    "saved": "Modules saved"
+    "saved": "Modules saved",
+    "mineTitle": "Your coding modules",
+    "mineSub": "The modules an Admin lets you use. Put them in your order: the first is your default, used when a setting names a module you can't use.",
+    "mineSaved": "Your module order is saved",
+    "mineReset": "Use the Admin's order"
   }
 }

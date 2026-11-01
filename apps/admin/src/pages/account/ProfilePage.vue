@@ -14,6 +14,7 @@ import PrefsControls from '../../components/PrefsControls.vue'
 import { useModels } from '../../composables/useModels'
 import { accountModules, type AccountModule } from '../../components/modules/modules'
 import CfgRow from '../../components/form/CfgRow.vue'
+import MyModulesCard from '../../components/modules/MyModulesCard.vue'
 import TotpQr from '../../components/account/TotpQr.vue'
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
 import { useSession } from '../../stores/session'
@@ -207,6 +208,8 @@ async function signOut() {
 
     <FreeCreditsCard v-if="catalog.has('muse')" always />
     <CreditLimitsCard v-if="catalog.has('muse')" />
+
+    <MyModulesCard />
 
     <section class="card">
       <div class="ch"><div><h2>{{ t('settings.appearance') }}</h2><p class="sub">{{ t('settings.appearanceSub') }}</p></div></div>

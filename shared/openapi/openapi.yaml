@@ -3938,6 +3938,43 @@ paths:
               schema: { $ref: '#/components/schemas/MuseLogin' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /account/modules:
+    get:
+      operationId: getMyModules
+      summary: The coding modules you may use, in your order (the first is your default module)
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserModules' }
+    put:
+      operationId: setMyModuleOrder
+      summary: Put the modules you may use in your own order; the first is your default module and cannot be codex. Null goes back to the Admin's order
+      tags: [account]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: array
+                  nullable: true
+                  maxItems: 3
+                  items: { $ref: '#/components/schemas/Module' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserModules' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
   /account/free-credits:
     get:
       operationId: getMyFreeCredits
@@ -7578,7 +7615,12 @@ components:
           items: { $ref: '#/components/schemas/Module' }
         effective:
           type: array
-          description: What the person may use now, the default module first
+          description: What the person may use now, in their order, the default module first
+          items: { $ref: '#/components/schemas/Module' }
+        order:
+          type: array
+          nullable: true
+          description: The order the person put their modules in themselves; absent or null keeps the Admin's
           items: { $ref: '#/components/schemas/Module' }
         setAt: { type: string, format: date-time }
 

@@ -17,9 +17,11 @@ Method | HTTP request | Description
 [**getMyClaude**](AccountApi.md#getmyclaude) | **GET** /account/claude | Your personal Claude or Muse connection (used by workspaces in per-member mode)
 [**getMyCreditUsage**](AccountApi.md#getmycreditusage) | **GET** /account/credit-usage | What you spent on agnts&#39;s Muse key this month and the monthly limit an Admin set
 [**getMyFreeCredits**](AccountApi.md#getmyfreecredits) | **GET** /account/free-credits | Free credits an Admin gave you; runs on agnts&#39;s Muse key spend them before your workspace&#39;s credits
+[**getMyModules**](AccountApi.md#getmymodules) | **GET** /account/modules | The coding modules you may use, in your order (the first is your default module)
 [**getMyMuseLogin**](AccountApi.md#getmymuselogin) | **GET** /account/muse/login/{id} | How your Meta sign-in is going
 [**resendVerification**](AccountApi.md#resendverification) | **POST** /account/verify | Send the email verification link again
 [**setMyClaude**](AccountApi.md#setmyclaude) | **PUT** /account/claude | Connect your Claude account
+[**setMyModuleOrder**](AccountApi.md#setmymoduleorder) | **PUT** /account/modules | Put the modules you may use in your own order; the first is your default module and cannot be codex. Null goes back to the Admin&#39;s order
 [**startMyMuseLogin**](AccountApi.md#startmymuselogin) | **POST** /account/muse/login | Connect your Muse account by signing in with Meta (shows a code to confirm on Meta&#39;s page)
 [**updateProfile**](AccountApi.md#updateprofile) | **PUT** /account/profile | Change the display name or email
 
@@ -368,6 +370,47 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getMyModules**
+> UserModules getMyModules()
+
+The coding modules you may use, in your order (the first is your default module)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAccountApi();
+
+try {
+    final response = api.getMyModules();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AccountApi->getMyModules: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**UserModules**](UserModules.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **getMyMuseLogin**
 > MuseLogin getMyMuseLogin(id)
 
@@ -486,6 +529,51 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ClaudeConnectionState**](ClaudeConnectionState.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setMyModuleOrder**
+> UserModules setMyModuleOrder(setMyModuleOrderRequest)
+
+Put the modules you may use in your own order; the first is your default module and cannot be codex. Null goes back to the Admin's order
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getAccountApi();
+final SetMyModuleOrderRequest setMyModuleOrderRequest = ; // SetMyModuleOrderRequest | 
+
+try {
+    final response = api.setMyModuleOrder(setMyModuleOrderRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling AccountApi->setMyModuleOrder: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **setMyModuleOrderRequest** | [**SetMyModuleOrderRequest**](SetMyModuleOrderRequest.md)|  | 
+
+### Return type
+
+[**UserModules**](UserModules.md)
 
 ### Authorization
 

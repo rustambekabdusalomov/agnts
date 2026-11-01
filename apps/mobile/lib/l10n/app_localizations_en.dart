@@ -8718,6 +8718,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modulesSaved => 'Modules saved';
 
   @override
+  String get modulesMineTitle => 'Your coding modules';
+
+  @override
+  String get modulesMineSub =>
+      'The modules an Admin lets you use. Put them in your order: the first is your default, used when a setting names a module you can\'t use.';
+
+  @override
+  String get modulesMineSaved => 'Your module order is saved';
+
+  @override
+  String get modulesMineReset => 'Use the Admin\'s order';
+
+  @override
   String get mpreviewTitle => 'agnts\'s preview';
 
   @override
@@ -9944,6 +9957,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String platformModulesFollow(String name) {
     return '$name follows the default modules now';
+  }
+
+  @override
+  String platformModulesNotEnabled(String list) {
+    return 'Not enabled yet, so not offered here: $list. This server can run them.';
+  }
+
+  @override
+  String get platformModulesOpenSettings => 'Open Modules settings';
+
+  @override
+  String platformModulesServerOnly(String list) {
+    return 'This server can run only $list. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image).';
   }
 
   @override
@@ -15581,4 +15607,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wsNoAccountModules => 'Your modules have no account to connect here: Codex runs on the workspace\'s OpenAI integration.';
+
+  @override
+  String get wsCodexSub => 'Runs on the workspace\'s OpenAI API key';
+
+  @override
+  String get wsCodexKey => 'OpenAI API key';
+
+  @override
+  String get wsCodexConnected => 'Connected';
+
+  @override
+  String get wsCodexNotConnected => 'Not connected: Codex runs wait until one is';
+
+  @override
+  String get wsCodexConnect => 'Connect OpenAI';
+
+  @override
+  String get wsCodexManage => 'OpenAI settings';
+
+  @override
+  String get wsCodexCredits =>
+      'OpenAI bills Codex runs directly, per call. They don\'t use workspace credits, and turning on continuing with credits doesn\'t apply to them.';
 }

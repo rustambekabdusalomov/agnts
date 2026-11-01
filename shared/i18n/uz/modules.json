@@ -18,6 +18,10 @@
     "problem_empty": "Kamida bitta modulni tanlang.",
     "problem_codexFirst": "Codex asosiy modul bo‘la olmaydi: birinchi o‘ringa Muse Code yoki Claude Code qo‘ying.",
     "save": "Saqlash",
-    "saved": "Modullar saqlandi"
+    "saved": "Modullar saqlandi",
+    "mineTitle": "Kod modullaringiz",
+    "mineSub": "Administrator sizga ruxsat bergan modullar. Ularni o‘z tartibingizga qo‘ying: birinchisi standart modulingiz, sozlamalarda sizga mavjud bo‘lmagan modul ko‘rsatilganda shu ishlatiladi.",
+    "mineSaved": "Modullar tartibi saqlandi",
+    "mineReset": "Administrator tartibi"
   }
 }

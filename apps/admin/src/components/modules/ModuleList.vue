@@ -6,7 +6,8 @@ import { moved, type Module } from './modules'
 
 // An ordered pick from `options`: the ticked modules first, in order (the
 // first is the default), with arrows to reorder them; the rest after.
-const props = defineProps<{ options: readonly Module[]; label: string; disabled?: boolean }>()
+// `fixed` only orders: every option is in, without checkboxes.
+const props = defineProps<{ options: readonly Module[]; label: string; disabled?: boolean; fixed?: boolean }>()
 const model = defineModel<Module[]>({ required: true })
 const { t } = useI18n()
 
@@ -20,7 +21,11 @@ function tick(m: Module, on: boolean) {
 <template>
   <ol class="mod-list" :aria-label="label">
     <li v-for="m in rows" :key="m" class="mod-row">
-      <CheckBox :model-value="model.includes(m)" :disabled="disabled" @update:model-value="(on) => tick(m, on)">
+      <span v-if="fixed">
+        {{ name(m) }}
+        <span v-if="model[0] === m" class="badge b-info" style="margin-left: 6px">{{ t('modules.default') }}</span>
+      </span>
+      <CheckBox v-else :model-value="model.includes(m)" :disabled="disabled" @update:model-value="(on) => tick(m, on)">
         {{ name(m) }}
         <span v-if="model[0] === m" class="badge b-info" style="margin-left: 6px">{{ t('modules.default') }}</span>
       </CheckBox>

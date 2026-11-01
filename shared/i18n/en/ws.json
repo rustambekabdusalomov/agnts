@@ -135,6 +135,13 @@
     "memberAccountsSubBoth": "Who has connected their own Muse and Claude accounts (Profile).",
     "connectionMuse": "Workspace Muse account",
     "connectionClaude": "Workspace Claude account",
-    "noAccountModules": "Your modules have no account to connect here: Codex runs on the workspace's OpenAI integration."
+    "noAccountModules": "Your modules have no account to connect here: Codex runs on the workspace's OpenAI integration.",
+    "codexSub": "Runs on the workspace's OpenAI API key",
+    "codexKey": "OpenAI API key",
+    "codexConnected": "Connected",
+    "codexNotConnected": "Not connected: Codex runs wait until one is",
+    "codexConnect": "Connect OpenAI",
+    "codexManage": "OpenAI settings",
+    "codexCredits": "OpenAI bills Codex runs directly, per call. They don't use workspace credits, and turning on continuing with credits doesn't apply to them."
   }
 }
