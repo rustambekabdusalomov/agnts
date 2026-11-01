@@ -33,6 +33,8 @@ import (
 	"agnts/internal/ai/providers/musecode"
 	"agnts/internal/billing"
 	"agnts/internal/ciwatch"
+	"agnts/internal/logsource"
+	"agnts/internal/logwatch"
 	"agnts/internal/commitlink"
 	"agnts/internal/config"
 	"agnts/internal/docs"
@@ -184,6 +186,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Pulls:        a.orch,
 		Drafts:       a.orch,
 		CI:           a.ci,
+		Logs:         a.logs,
 		CommitLinks:  a.store,
 		Assistant:    a.orch,
 		Code:         a.orch,
@@ -320,6 +323,9 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		go pruneDeliveries(sys, a.store, log)
 		// CI watching: poll repositories without webhooks, follow CI tickets.
 		go every(sys, 5*time.Minute, func(ctx context.Context) { a.forEachWorkspace(ctx, a.ci.Tick) })
+		// Log watcher: one reader per log source; follow log tickets.
+		go a.logs.Run(sys)
+		go every(sys, 5*time.Minute, func(ctx context.Context) { a.forEachWorkspace(ctx, a.logs.Tick) })
 		if cfg.UsageRefresh > 0 {
 			go a.refresher.IdleLoop(sys, cfg.UsageRefresh, a.orch.Active, a.claude.PausedAccounts)
 		}
@@ -393,6 +399,7 @@ type agent struct {
 	budget        *orchestrator.MemoryBudget
 	network       *network.Service
 	ci            *ciwatch.Service
+	logs          *logwatch.Service
 	links         *commitlink.Service
 	assistant     *postgres.Assistant
 	docStore      *postgres.Documents
@@ -589,6 +596,8 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.billing.OnChange(a.orch.ForgetWorkspace)
 	a.ci = ciwatch.New(postgres.NewCI(pool, box), a.store, a.orch, a.vcs, repos, a.settings, log.With("component", "ci"))
 	a.orch.SetCIHook(a.ci)
+	a.logs = logwatch.New(postgres.NewLogs(pool, box), a.store, a.orch, a.settings, repos,
+		logsource.Dialer{Router: logsource.NetrouteRouter(router)}, log.With("component", "logs"))
 	a.links = commitlink.New(a.store, a.vcs, log.With("component", "commit-links"))
 	a.links.OnRevert(a.orch.Reverted)
 	a.orch.SetCommitLinker(a.links)
@@ -645,6 +654,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.oauth = oauth.New(pool, cfg.PublicURL.String(), cfg.MCPRedirectHosts, log.With("component", "oauth"))
 	a.notifier = notify.New(a.store, a.orch, a.settings, fcm, a.telegramConfig, cfg.TelegramAPI, log.With("component", "notify"))
 	a.notifier.SetCIFixer(a.ci)
+	a.notifier.SetLogFixer(a.logs)
 	a.assistant = postgres.NewAssistant(pool, box)
 	a.orch.SetAssistant(a.assistant, mcpserver.NewSnapshotter(a.mcpDeps()))
 	a.orch.SetAssistantActions(&actions.Assistant{Deps: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Role: a.workspaces.Role})

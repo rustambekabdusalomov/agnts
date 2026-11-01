@@ -140,7 +140,7 @@ func (s *Service) test(ctx context.Context, x domain.LogSource) (TestResult, err
 
 // Discover lists the services a saved source's logs hold, marking the
 // ones already watched and suggesting a repository by name.
-func (s *Service) Discover(ctx context.Context, id int64, repos []domain.Repository) ([]domain.LogService, error) {
+func (s *Service) Discover(ctx context.Context, id int64) ([]domain.LogService, error) {
 	src, err := s.store.LogSource(ctx, id, true)
 	if err != nil {
 		return nil, err
@@ -162,6 +162,7 @@ func (s *Service) Discover(ctx context.Context, id int64, repos []domain.Reposit
 	if err != nil {
 		return nil, err
 	}
+	repos, _ := s.tickets.ListRepositories(ctx)
 	have := map[string]domain.LogService{}
 	for _, v := range src.Services {
 		have[v.Name] = v

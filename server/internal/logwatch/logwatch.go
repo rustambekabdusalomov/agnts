@@ -48,6 +48,7 @@ type Store interface {
 type Tickets interface {
 	TicketByKey(ctx context.Context, key string) (domain.Ticket, error)
 	RepositoryByID(ctx context.Context, id int64) (domain.Repository, error)
+	ListRepositories(ctx context.Context) ([]domain.Repository, error)
 	AppendEvent(ctx context.Context, ev domain.Event) error
 }
 

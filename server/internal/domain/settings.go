@@ -194,6 +194,9 @@ type NotifySettings struct {
 	FollowUps bool `json:"followUps"`
 	// CI announces a watched branch going red.
 	CI bool `json:"ci"`
+	// Logs announces what the log watcher finds, and a log source that
+	// stopped.
+	Logs bool `json:"logs"`
 }
 
 // Settings are the runtime settings edited on the Settings page.
@@ -370,7 +373,7 @@ func DefaultSettings() Settings {
 
 		MaxTicketRepos: DefaultMaxTicketRepos,
 		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
-		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
+		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true, Logs: true},
 		Meetings:       DefaultMeetingSettings(),
 	}
 }

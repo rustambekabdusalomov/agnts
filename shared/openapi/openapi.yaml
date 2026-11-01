@@ -5123,6 +5123,298 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '502': { $ref: '#/components/responses/BadGateway' }
 
+  /log-sources:
+    get:
+      operationId: listLogSources
+      summary: The logging systems agnts reads, and the push sources, with their services and health
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LogSource' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createLogSource
+      summary: Add a log source; a pulling source must pass the connection test
+      tags: [logs]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LogSourceInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogSource' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /log-sources/test:
+    post:
+      operationId: testLogSource
+      summary: Test a log source as the form has it (with id and no auth, the saved credentials)
+      tags: [logs]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LogSourceInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogSourceTest' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /log-sources/rotate-key:
+    post:
+      operationId: rotateLogKey
+      summary: Replace the key that hashes secrets found in logs (findings of one secret before and after are then two)
+      tags: [logs]
+      x-role: owner
+      responses:
+        '204': { description: Rotated }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /log-sources/{sourceId}:
+    parameters:
+      - $ref: '#/components/parameters/LogSourceID'
+    get:
+      operationId: getLogSource
+      summary: One log source
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogSource' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: updateLogSource
+      summary: Change a log source; auth left out keeps the saved credentials
+      tags: [logs]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LogSourceInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogSource' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteLogSource
+      summary: Remove a log source (its findings stay)
+      tags: [logs]
+      x-role: owner
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-sources/{sourceId}/discover:
+    parameters:
+      - $ref: '#/components/parameters/LogSourceID'
+    get:
+      operationId: discoverLogServices
+      summary: The services the source's logs hold (watched ones as saved, new ones with a suggested repository)
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LogService' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-sources/{sourceId}/services:
+    parameters:
+      - $ref: '#/components/parameters/LogSourceID'
+    put:
+      operationId: setLogServices
+      summary: Replace the services agnts watches in this source and the repositories each runs on
+      tags: [logs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              maxItems: 200
+              items: { $ref: '#/components/schemas/LogService' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LogService' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-sources/{sourceId}/push-token:
+    parameters:
+      - $ref: '#/components/parameters/LogSourceID'
+    post:
+      operationId: createLogPushToken
+      summary: Make a push source's token (again); it is shown once
+      tags: [logs]
+      x-role: owner
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogPushToken' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-findings:
+    get:
+      operationId: listLogFindings
+      summary: Findings of the log watcher, newest sighting first
+      tags: [logs]
+      parameters:
+        - { name: category, in: query, required: false, schema: { type: string, enum: [error, security] } }
+        - { name: status, in: query, required: false, schema: { $ref: '#/components/schemas/LogFindingStatus' } }
+        - { name: severity, in: query, required: false, schema: { $ref: '#/components/schemas/LogSeverity' } }
+        - { name: repoId, in: query, required: false, schema: { type: integer, format: int64 } }
+        - { name: sourceId, in: query, required: false, schema: { type: integer, format: int64 } }
+        - { name: active, in: query, required: false, description: Only findings that still need attention, schema: { type: boolean } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LogFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /log-findings/{findingId}:
+    parameters:
+      - $ref: '#/components/parameters/LogFindingID'
+    get:
+      operationId: getLogFinding
+      summary: One finding with its redacted log excerpt
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-findings/{findingId}/fix:
+    parameters:
+      - $ref: '#/components/parameters/LogFindingID'
+    post:
+      operationId: fixLogFinding
+      summary: Open a ticket for the finding now, on the service's repositories (ignores the mode and the daily budget)
+      tags: [logs]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-findings/{findingId}/notify:
+    parameters:
+      - $ref: '#/components/parameters/LogFindingID'
+    post:
+      operationId: notifyLogFinding
+      summary: Send the finding's notification now, whatever the mode
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-findings/{findingId}/mute:
+    parameters:
+      - $ref: '#/components/parameters/LogFindingID'
+    post:
+      operationId: muteLogFinding
+      summary: Ignore this finding (no tickets, no notifications)
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /log-findings/{findingId}/unmute:
+    parameters:
+      - $ref: '#/components/parameters/LogFindingID'
+    post:
+      operationId: unmuteLogFinding
+      summary: Watch a muted finding again
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/log-finding:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: getTicketLogFinding
+      summary: The log finding a log ticket fixes (404 for other tickets)
+      tags: [logs]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/ci:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -7321,6 +7613,16 @@ components:
       schema: { type: string }
     NetworkID:
       name: networkId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    LogSourceID:
+      name: sourceId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    LogFindingID:
+      name: findingId
       in: path
       required: true
       schema: { type: integer, format: int64 }
@@ -9694,6 +9996,7 @@ components:
         pullReviews: { $ref: '#/components/schemas/PullReviewSettings' }
         prComments: { $ref: '#/components/schemas/PRCommentSettings' }
         ci: { $ref: '#/components/schemas/CISettings' }
+        logWatch: { $ref: '#/components/schemas/LogWatchSettings' }
         guard: { $ref: '#/components/schemas/GuardSettings' }
         stalls:
           type: string
@@ -10076,6 +10379,222 @@ components:
           description: Extra regular expressions that mark a failure as infra (not the code)
           items: { type: string, maxLength: 300 }
 
+    LogSeverity:
+      type: string
+      enum: [low, medium, high, critical]
+
+    LogFindingStatus:
+      type: string
+      enum: [open, reported, fixing, fixed, resolved, muted, regression]
+      description: 'open: seen, nothing done yet (below the threshold, or off); reported: shown and notified; fixing: a ticket works on it; fixed: the fix merged; resolved: quiet after the fix; muted: ignored; regression: back after the fix'
+
+    LogMode:
+      type: string
+      enum: [off, report, ticket]
+
+    LogFields:
+      type: object
+      description: Where a source keeps the parts of an entry; empty fields fall back to the usual names
+      properties:
+        message: { type: string, maxLength: 120 }
+        timestamp: { type: string, maxLength: 120 }
+        level: { type: string, maxLength: 120 }
+        service: { type: string, maxLength: 120 }
+        revision: { type: string, maxLength: 120 }
+
+    LogScope:
+      type: object
+      description: 'What a source reads: a Loki base selector, an Elasticsearch index pattern, Graylog streams'
+      properties:
+        selector: { type: string, maxLength: 500 }
+        index: { type: string, maxLength: 300 }
+        streams:
+          type: array
+          maxItems: 50
+          items: { type: string, maxLength: 100 }
+
+    LogAuthInput:
+      type: object
+      required: [kind]
+      description: Credentials; sealed when saved and never returned
+      properties:
+        kind: { type: string, enum: [none, basic, bearer, apikey] }
+        user: { type: string, maxLength: 200 }
+        password: { type: string, maxLength: 500 }
+        token: { type: string, maxLength: 4000 }
+        tenant: { type: string, maxLength: 200, description: "Loki's X-Scope-OrgID" }
+
+    LogService:
+      type: object
+      required: [name, selector, repoIds, enabled]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        name: { type: string, maxLength: 120 }
+        selector: { type: string, maxLength: 500, description: 'Loki: a matcher like {app="api"}; Elasticsearch: the service field''s value; Graylog: a stream id' }
+        repoIds:
+          type: array
+          maxItems: 20
+          description: The repositories the service runs on; none means its findings are only reported
+          items: { type: integer, format: int64 }
+        groupId: { type: integer, format: int64, nullable: true }
+        enabled: { type: boolean }
+
+    LogSourceInput:
+      type: object
+      required: [name, kind, environment, enabled]
+      properties:
+        id: { type: integer, format: int64, description: For a test of a saved source }
+        name: { type: string, maxLength: 80 }
+        kind: { type: string, enum: [loki, elasticsearch, opensearch, graylog, push] }
+        environment: { type: string, enum: [production, staging, development] }
+        address: { type: string, maxLength: 500, description: 'https://loki.example.com, or http:// on a private network; empty for push' }
+        auth: { $ref: '#/components/schemas/LogAuthInput' }
+        caPem: { type: string, maxLength: 20000 }
+        scope: { $ref: '#/components/schemas/LogScope' }
+        fields: { $ref: '#/components/schemas/LogFields' }
+        pollSeconds: { type: integer, minimum: 5, maximum: 300, description: 'How often agnts reads it (15 by default)' }
+        enabled: { type: boolean }
+
+    LogSource:
+      type: object
+      required: [id, name, kind, environment, address, authKind, hasAuth, caPem, scope, fields, pollSeconds, enabled, status, lastError, dropped, hasPushToken, services, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        kind: { type: string, enum: [loki, elasticsearch, opensearch, graylog, push] }
+        environment: { type: string }
+        address: { type: string }
+        authKind: { type: string }
+        authUser: { type: string }
+        authTenant: { type: string }
+        hasAuth: { type: boolean }
+        caPem: { type: string }
+        scope: { $ref: '#/components/schemas/LogScope' }
+        fields: { $ref: '#/components/schemas/LogFields' }
+        pollSeconds: { type: integer }
+        enabled: { type: boolean }
+        status: { type: string, enum: [new, ok, behind, failing, auth_failed] }
+        lastError: { type: string }
+        lastReadAt: { type: string, format: date-time }
+        gapFrom: { type: string, format: date-time, description: Start of a range not read after a long outage }
+        gapTo: { type: string, format: date-time }
+        dropped: { type: integer, format: int64, description: Entries skipped over the per-minute cap }
+        networkId: { type: integer, format: int64, description: The private network the last read went through }
+        hasPushToken: { type: boolean }
+        pushUrl: { type: string, description: Where a push source's shipper sends }
+        services:
+          type: array
+          items: { $ref: '#/components/schemas/LogService' }
+        createdAt: { type: string, format: date-time }
+
+    LogSourceTest:
+      type: object
+      required: [version, fields, labels, sample, network, latencyMs]
+      properties:
+        version: { type: string }
+        fields: { $ref: '#/components/schemas/LogFields' }
+        labels:
+          type: array
+          items: { type: string }
+        sample: { type: string, description: The newest entry, redacted }
+        newest: { type: string, format: date-time }
+        network: { type: string, description: 'The private network used, or empty for a direct connection' }
+        latencyMs: { type: integer, format: int64 }
+
+    LogPushToken:
+      type: object
+      required: [token, url]
+      properties:
+        token: { type: string }
+        url: { type: string }
+
+    LogOccurrence:
+      type: object
+      required: [at, sourceId, service, count]
+      properties:
+        at: { type: string, format: date-time }
+        sourceId: { type: integer, format: int64 }
+        service: { type: string }
+        revision: { type: string }
+        count: { type: integer }
+
+    LogFinding:
+      type: object
+      required: [id, service, repoIds, repos, category, detector, class, severity, title, remediation, status, reason, count, hourCount, firstSeenAt, lastSeenAt, revision, route, secretMask, occurrences, ticketKey]
+      properties:
+        id: { type: integer, format: int64 }
+        service: { type: string }
+        repoIds:
+          type: array
+          items: { type: integer, format: int64 }
+        repos:
+          type: array
+          items: { type: string }
+        category: { type: string, enum: [error, security] }
+        detector: { type: string }
+        class: { type: string, description: 'code, config, infra, dependency, leak, exposure, weakness, attack or noise' }
+        severity: { $ref: '#/components/schemas/LogSeverity' }
+        title: { type: string }
+        remediation: { type: string }
+        status: { $ref: '#/components/schemas/LogFindingStatus' }
+        reason: { type: string, description: Why a finding that could have been a ticket is only reported }
+        count: { type: integer, format: int64 }
+        hourCount: { type: integer }
+        firstSeenAt: { type: string, format: date-time }
+        lastSeenAt: { type: string, format: date-time }
+        revision: { type: string }
+        route: { type: string }
+        secretMask: { type: string, description: 'A leaked secret''s first and last characters; never the value' }
+        occurrences:
+          type: array
+          items: { $ref: '#/components/schemas/LogOccurrence' }
+        reportedAt: { type: string, format: date-time }
+        ticketKey: { type: string }
+        ticketState: { $ref: '#/components/schemas/TicketState' }
+        fixedSha: { type: string }
+        fixedAt: { type: string, format: date-time }
+        sample: { type: string, description: 'Redacted log excerpt (single reads only)' }
+
+    LogPattern:
+      type: object
+      required: [name, pattern, category, severity]
+      properties:
+        name: { type: string, maxLength: 80 }
+        pattern: { type: string, maxLength: 500, description: A regular expression (RE2, case-insensitive) }
+        category: { type: string, enum: [error, security] }
+        severity: { $ref: '#/components/schemas/LogSeverity' }
+
+    LogOverride:
+      type: object
+      properties:
+        repoId: { type: integer, format: int64 }
+        service: { type: string, maxLength: 200, description: '<source name>/<service name>' }
+        errors: { $ref: '#/components/schemas/LogMode' }
+        security: { $ref: '#/components/schemas/LogMode' }
+
+    LogWatchSettings:
+      type: object
+      required: [errors, security, alwaysNotifyLeaks, minSeverity, threshold, maxAutoPerDay, attackTicketAfter, resolveAfterDays, digest, triagePerDay, patterns, overrides]
+      properties:
+        errors: { $ref: '#/components/schemas/LogMode' }
+        security: { $ref: '#/components/schemas/LogMode' }
+        alwaysNotifyLeaks: { type: boolean, description: 'Notify a high-severity secret leak even when Security is off' }
+        minSeverity: { $ref: '#/components/schemas/LogSeverity' }
+        threshold: { type: integer, minimum: 1, maximum: 1000, description: 'Occurrences within the hour before a plain error acts' }
+        maxAutoPerDay: { type: integer, minimum: 0, maximum: 50, description: Automatic log tickets a day at most }
+        attackTicketAfter: { type: integer, minimum: 0, maximum: 50, description: 'Bursts of the same attack within 7 days before a hardening ticket; 0 never' }
+        resolveAfterDays: { type: integer, minimum: 1, maximum: 30 }
+        digest: { type: boolean, description: One daily summary instead of a message per finding }
+        triagePerDay: { type: integer, minimum: 0, maximum: 500, description: 'Model triage calls a day for new findings; 0 off' }
+        patterns:
+          type: array
+          maxItems: 50
+          items: { $ref: '#/components/schemas/LogPattern' }
+        overrides:
+          type: array
+          maxItems: 200
+          items: { $ref: '#/components/schemas/LogOverride' }
+
     PullReviewSettings:
       type: object
       description: Reviews of the pull requests waiting for you on GitHub or GitLab
@@ -10385,6 +10904,7 @@ components:
         previewPhotos: { type: boolean, description: Send phone screenshots to Telegram with the message }
         followUps: { type: boolean, description: Follow-up tickets were suggested }
         ci: { type: boolean, description: A watched branch went red }
+        logs: { type: boolean, description: The log watcher found something, or a log source stopped }
 
     Repository:
       type: object

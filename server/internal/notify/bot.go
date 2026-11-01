@@ -153,6 +153,27 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		}
 		n.say(ctx, b, cfg, t.Key+" opened: agnts is on it. You review the fix before anything is pushed.")
 		return "Done"
+	case "lgf", "lgm": // lgf:<finding id> (Fix it), lgm:<finding id> (Mute)
+		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
+		id, err := strconv.ParseInt(arg, 10, 64)
+		if err != nil || n.logs == nil {
+			return "Not available"
+		}
+		if verb == "lgm" {
+			if _, err := n.logs.Mute(ctx, id, true); err != nil {
+				n.say(ctx, b, cfg, "Mute: "+friendly(err))
+				return "Not done"
+			}
+			n.say(ctx, b, cfg, "Muted: agnts won't notify or open tickets for it again.")
+			return "Done"
+		}
+		t, err := n.logs.Fix(ctx, id, domain.OriginTelegram)
+		if err != nil {
+			n.say(ctx, b, cfg, "Fix it: "+friendly(err))
+			return "Not done"
+		}
+		n.say(ctx, b, cfg, t.Key+" opened: agnts is on it. You review the fix before anything is pushed.")
+		return "Done"
 	case "rsu", "kpv":
 		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
 		var err error

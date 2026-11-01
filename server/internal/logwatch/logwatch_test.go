@@ -175,6 +175,9 @@ func (t *memTickets) TicketByKey(_ context.Context, key string) (domain.Ticket, 
 func (t *memTickets) RepositoryByID(_ context.Context, id int64) (domain.Repository, error) {
 	return domain.Repository{ID: id, Name: fmt.Sprint("repo", id)}, nil
 }
+func (t *memTickets) ListRepositories(context.Context) ([]domain.Repository, error) {
+	return []domain.Repository{{ID: 3, Name: "api"}}, nil
+}
 func (t *memTickets) AppendEvent(_ context.Context, ev domain.Event) error {
 	t.mu.Lock()
 	t.events = append(t.events, ev)
