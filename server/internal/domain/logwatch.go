@@ -356,6 +356,8 @@ type LogFinding struct {
 	Route       string
 	Bursts      []time.Time
 	SecretMask  string
+	// SecretHMAC is the keyed hash of a leaked secret; never shown.
+	SecretHMAC string
 	// Sample is the redacted excerpt; filled by single reads only.
 	Sample      string
 	SampleAt    *time.Time
