@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/store/postgres"
 	"agnts/internal/usage"
@@ -109,29 +110,29 @@ func TestPickShared(t *testing.T) {
 	s := New(Config{Subscriptions: true, PlatformKey: "sk-ant-api-platform"}, conns, u, fakeSettings{}, fakeUsers{})
 	w := domain.Workspace{ID: 7, OwnerID: 1, ClaudeMode: domain.ClaudeShared}
 
-	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, true); ok || !strings.Contains(why, "Workspace settings") {
+	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "Workspace settings") {
 		t.Fatalf("no connection: ok=%v %q", ok, why)
 	}
 	conns.add(7, 0, 10, postgres.ClaudeSubscription)
-	a, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, true)
+	a, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, ai.PickOpts{Credits: true})
 	if !ok || a.ConnectionID != 10 || a.Credits {
 		t.Fatalf("shared: %+v %v", a, ok)
 	}
 	// Every member's ticket runs on the shared account.
-	if a, _, _, _ := s.Pick(ctx, w, ptr(2), domain.ProviderClaude, true); a.ConnectionID != 10 {
+	if a, _, _, _ := s.Pick(ctx, w, ptr(2), domain.ProviderClaude, ai.PickOpts{Credits: true}); a.ConnectionID != 10 {
 		t.Fatalf("member's ticket in shared mode: %+v", a)
 	}
 	// At its limit: the ticket waits, unless the fallback uses credits.
 	u.paused[10] = true
-	if _, ok, why, until := s.Pick(ctx, w, nil, domain.ProviderClaude, true); ok || !strings.Contains(why, "limit") || until.IsZero() {
+	if _, ok, why, until := s.Pick(ctx, w, nil, domain.ProviderClaude, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "limit") || until.IsZero() {
 		t.Fatalf("paused: ok=%v %q %v", ok, why, until)
 	}
 	w.ClaudeFallback = true
-	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, true); ok || !strings.Contains(why, "no credits") {
+	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "no credits") {
 		t.Fatalf("fallback without credits: ok=%v %q", ok, why)
 	}
 	w.CreditsBalance = 100
-	if a, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, true); !ok || !a.Credits {
+	if a, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, ai.PickOpts{Credits: true}); !ok || !a.Credits {
 		t.Fatalf("fallback: %+v %v", a, ok)
 	}
 	// The credits run gets agnts's key.
@@ -150,22 +151,22 @@ func TestPickPerMember(t *testing.T) {
 	w := domain.Workspace{ID: 7, OwnerID: 1, ClaudeMode: domain.ClaudePerMember}
 
 	// Ann's account is at its limit: her tickets wait, the owner's run.
-	if _, ok, why, _ := s.Pick(ctx, w, ptr(2), domain.ProviderClaude, true); ok || !strings.Contains(why, "limit") {
+	if _, ok, why, _ := s.Pick(ctx, w, ptr(2), domain.ProviderClaude, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "limit") {
 		t.Fatalf("ann's ticket: ok=%v %q", ok, why)
 	}
-	if a, ok, _, _ := s.Pick(ctx, w, ptr(1), domain.ProviderClaude, true); !ok || a.ConnectionID != 21 {
+	if a, ok, _, _ := s.Pick(ctx, w, ptr(1), domain.ProviderClaude, ai.PickOpts{Credits: true}); !ok || a.ConnectionID != 21 {
 		t.Fatalf("owner's ticket: %+v", a)
 	}
 	// Bob has none.
-	if _, ok, why, _ := s.Pick(ctx, w, ptr(3), domain.ProviderClaude, true); ok || !strings.Contains(why, "bob has not connected") {
+	if _, ok, why, _ := s.Pick(ctx, w, ptr(3), domain.ProviderClaude, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "bob has not connected") {
 		t.Fatalf("bob: ok=%v %q", ok, why)
 	}
 	// A ticket without a person goes to the default member, else the owner.
-	if a, _, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, true); a.ConnectionID != 21 {
+	if a, _, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, ai.PickOpts{Credits: true}); a.ConnectionID != 21 {
 		t.Fatalf("no member: %+v", a)
 	}
 	w.DefaultMemberID = ptr(2)
-	if _, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, true); ok {
+	if _, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderClaude, ai.PickOpts{Credits: true}); ok {
 		t.Fatal("default member ann is paused")
 	}
 	// Ann's API key runs as an API key.
@@ -184,7 +185,7 @@ func TestSubscriptionsOff(t *testing.T) {
 	conns := newConns()
 	conns.add(7, 0, 10, postgres.ClaudeSubscription)
 	s := New(Config{Subscriptions: false}, conns, fakeUsage{}, fakeSettings{}, fakeUsers{})
-	if _, ok, why, _ := s.Pick(ctx, domain.Workspace{ID: 7, ClaudeMode: domain.ClaudeShared}, nil, domain.ProviderClaude, true); ok || !strings.Contains(why, "API keys only") {
+	if _, ok, why, _ := s.Pick(ctx, domain.Workspace{ID: 7, ClaudeMode: domain.ClaudeShared}, nil, domain.ProviderClaude, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "API keys only") {
 		t.Fatalf("subscription on a cloud server: ok=%v %q", ok, why)
 	}
 	if _, err := s.Check(ctx, postgres.ClaudeSubscription, "sk-ant-oat01-"+strings.Repeat("x", 40)); err == nil {

@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -131,7 +132,8 @@ func (s *Service) SubscriptionsAllowed() bool { return s.cfg.Subscriptions }
 // module provider. Muse uses the Muse connection, then free credits, then
 // workspace credits; Claude its connection, then workspace credits; Codex
 // the workspace's OpenAI key. credits false leaves agnts's key out.
-func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, provider string, credits bool) (domain.ClaudeAccount, bool, string, time.Time) {
+func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, provider string, opts ai.PickOpts) (domain.ClaudeAccount, bool, string, time.Time) {
+	credits := opts.Credits
 	payer := w.RunPerson(member)
 	tool := domain.ModuleName(provider)
 	if provider == domain.ProviderCodex {
@@ -162,6 +164,8 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, p
 		why = "could not read the " + tool + " account: " + err.Error()
 	case conn.Kind == postgres.ClaudeSubscription && !s.cfg.Subscriptions:
 		why = "this server accepts Anthropic API keys only; connect one instead of a subscription token"
+	case slices.Contains(opts.Skip, conn.ID):
+		why = tool + " refused " + label(conn, who)
 	default:
 		acct := domain.ClaudeAccount{ConnectionID: conn.ID, Label: label(conn, who), Provider: provider}
 		st, serr := s.settings.Get(ctx)

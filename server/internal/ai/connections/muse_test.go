@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/store/postgres"
 )
@@ -27,11 +28,11 @@ func TestPickMuse(t *testing.T) {
 
 	// A Claude connection does not count for a Muse run.
 	conns.add(7, 0, 10, postgres.ClaudeSubscription)
-	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderMuse, true); ok || !strings.Contains(why, "Muse account") {
+	if _, ok, why, _ := s.Pick(ctx, w, nil, domain.ProviderMuse, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "Muse account") {
 		t.Fatalf("claude connection on muse: ok=%v %q", ok, why)
 	}
 	conns.add(7, 0, 11, postgres.MuseLogin)
-	if a, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderMuse, true); !ok || a.ConnectionID != 11 || a.Credits {
+	if a, ok, _, _ := s.Pick(ctx, w, nil, domain.ProviderMuse, ai.PickOpts{Credits: true}); !ok || a.ConnectionID != 11 || a.Credits {
 		t.Fatalf("muse connection: %+v %v", a, ok)
 	}
 
@@ -41,17 +42,17 @@ func TestPickMuse(t *testing.T) {
 	s.conns = conns
 	ann := int64(2)
 	free[ann] = true
-	a, ok, _, _ := s.Pick(ctx, w, &ann, domain.ProviderMuse, true)
+	a, ok, _, _ := s.Pick(ctx, w, &ann, domain.ProviderMuse, ai.PickOpts{Credits: true})
 	if !ok || !a.Credits || a.UserID != ann || a.Label != "free credits" {
 		t.Fatalf("free credits: %+v %v", a, ok)
 	}
 	// Someone without free credits needs the workspace's credits on.
 	bob := int64(3)
-	if _, ok, why, _ := s.Pick(ctx, w, &bob, domain.ProviderMuse, true); ok || !strings.Contains(why, "continuing with credits") {
+	if _, ok, why, _ := s.Pick(ctx, w, &bob, domain.ProviderMuse, ai.PickOpts{Credits: true}); ok || !strings.Contains(why, "continuing with credits") {
 		t.Fatalf("no free credits: ok=%v %q", ok, why)
 	}
 	w.ClaudeFallback, w.CreditsBalance = true, 500
-	if a, ok, _, _ := s.Pick(ctx, w, &bob, domain.ProviderMuse, true); !ok || !a.Credits || a.UserID != bob || a.Label != "workspace credits" {
+	if a, ok, _, _ := s.Pick(ctx, w, &bob, domain.ProviderMuse, ai.PickOpts{Credits: true}); !ok || !a.Credits || a.UserID != bob || a.Label != "workspace credits" {
 		t.Fatalf("workspace credits: %+v %v", a, ok)
 	}
 }
