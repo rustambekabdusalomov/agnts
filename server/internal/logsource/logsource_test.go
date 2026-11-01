@@ -384,3 +384,16 @@ func TestRedirectToOtherHostRefused(t *testing.T) {
 		t.Fatalf("redirect: %v", err)
 	}
 }
+
+func TestDialerOperatorAllowList(t *testing.T) {
+	d := Dialer{Allow: []string{"loki", "10.0.0.0/8"}}
+	if _, err := d.For(1, domain.LogSource{Address: "http://loki:3100"}); err != nil {
+		t.Errorf("an allowed name over http: %v", err)
+	}
+	if _, err := d.For(1, domain.LogSource{Address: "http://10.0.4.12:3100"}); err != nil {
+		t.Errorf("an allowed CIDR over http: %v", err)
+	}
+	if _, err := d.For(1, domain.LogSource{Address: "https://192.168.1.5"}); !errors.Is(err, ErrPrivateAddress) {
+		t.Errorf("outside the list: %v", err)
+	}
+}

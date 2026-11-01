@@ -131,6 +131,12 @@ type Config struct {
 	// OVPNImage and OVPNNetwork are the OpenVPN sidecars' image and the
 	// network they share with the gateway (AGNTS_OVPN_IMAGE, AGNTS_OVPN_NETWORK).
 	OVPNImage, OVPNNetwork string
+	// LogsPrivateAllow are hosts and CIDRs the log watcher may read
+	// directly although they are private (AGNTS_LOGS_PRIVATE_ALLOW, e.g.
+	// "loki,10.0.0.0/8"): a Loki next to agnts in its own network. The
+	// server's operator sets it; workspaces reach other private loggers
+	// through their private networks.
+	LogsPrivateAllow []string
 	// PrivatePollEvery is how often the trackers of workspaces on a VPN
 	// are read, since their webhooks cannot reach agnts
 	// (AGNTS_PRIVATE_POLL_EVERY).
@@ -411,6 +417,11 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.GatewaySecret = get("AGNTS_GATEWAY_SECRET", "")
 	if c.Gateway != "" && len(c.GatewaySecret) < 24 {
 		errs = append(errs, errors.New("AGNTS_GATEWAY needs AGNTS_GATEWAY_SECRET, a random value of at least 24 characters shared with the gateway and the egress proxy"))
+	}
+	for _, h := range strings.Split(get("AGNTS_LOGS_PRIVATE_ALLOW", ""), ",") {
+		if h = strings.TrimSpace(h); h != "" {
+			c.LogsPrivateAllow = append(c.LogsPrivateAllow, h)
+		}
 	}
 	c.LinkURL = get("AGNTS_LINK_URL", strings.TrimRight(get("AGNTS_PUBLIC_URL", "http://localhost:8080"), "/")+"/link")
 	c.OVPNImage = get("AGNTS_OVPN_IMAGE", "agnts-ovpn:latest")

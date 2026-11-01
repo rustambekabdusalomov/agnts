@@ -597,7 +597,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.ci = ciwatch.New(postgres.NewCI(pool, box), a.store, a.orch, a.vcs, repos, a.settings, log.With("component", "ci"))
 	a.orch.SetCIHook(a.ci)
 	a.logs = logwatch.New(postgres.NewLogs(pool, box), a.store, a.orch, a.settings, repos,
-		logsource.Dialer{Router: logsource.NetrouteRouter(router)}, log.With("component", "logs"))
+		logsource.Dialer{Router: logsource.NetrouteRouter(router), Allow: cfg.LogsPrivateAllow}, log.With("component", "logs"))
 	a.logs.SetTriager(logTriager{a.orch})
 	a.links = commitlink.New(a.store, a.vcs, log.With("component", "commit-links"))
 	a.links.OnRevert(a.orch.Reverted)

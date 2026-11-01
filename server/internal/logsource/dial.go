@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"agnts/internal/domain"
@@ -65,6 +66,10 @@ type Dialer struct {
 	Resolve func(ctx context.Context, host string) ([]net.IP, error)
 	// AllowPrivate lets tests reach httptest servers on loopback.
 	AllowPrivate bool
+	// Allow are hosts (names) and CIDRs the server's operator lets the log
+	// watcher reach directly although private, over http too: a logging
+	// system next to agnts in its own network.
+	Allow []string
 	Timeout      time.Duration
 }
 
@@ -116,11 +121,14 @@ func (d Dialer) For(ws int64, src domain.LogSource) (*Client, error) {
 		dial = func(ctx context.Context, _, addr string) (net.Conn, error) {
 			return d.Router.Dial(ctx, ws, id, addr, "logs")
 		}
+	} else if d.allowedName(host) {
+		var dialer net.Dialer
+		dial = func(ctx context.Context, network, addr string) (net.Conn, error) { return dialer.DialContext(ctx, network, addr) }
 	} else {
-		if u.Scheme == "http" && !d.AllowPrivate {
+		if u.Scheme == "http" && !d.AllowPrivate && !d.allowedIP(net.ParseIP(host)) {
 			return nil, ErrPlainHTTP
 		}
-		if ip := net.ParseIP(host); ip != nil && !d.AllowPrivate && !domain.IsPublicIP(ip) {
+		if ip := net.ParseIP(host); ip != nil && !d.AllowPrivate && !domain.IsPublicIP(ip) && !d.allowedIP(ip) {
 			return nil, ErrPrivateAddress
 		}
 		dial = d.publicDial
@@ -164,6 +172,32 @@ func (d Dialer) For(ws int64, src domain.LogSource) (*Client, error) {
 	return out, nil
 }
 
+// allowedName: the operator allows this host name as it is.
+func (d Dialer) allowedName(host string) bool {
+	for _, a := range d.Allow {
+		if !strings.Contains(a, "/") && strings.EqualFold(a, host) {
+			return true
+		}
+	}
+	return false
+}
+
+// allowedIP: the operator allows a CIDR (or an address) holding ip.
+func (d Dialer) allowedIP(ip net.IP) bool {
+	if ip == nil {
+		return false
+	}
+	for _, a := range d.Allow {
+		if _, n, err := net.ParseCIDR(a); err == nil && n.Contains(ip) {
+			return true
+		}
+		if x := net.ParseIP(a); x != nil && x.Equal(ip) {
+			return true
+		}
+	}
+	return false
+}
+
 func (d Dialer) pick(ws int64, host string, port int) (netroute.Network, bool) {
 	if d.Router == nil {
 		return netroute.Network{}, false
@@ -196,7 +230,7 @@ func (d Dialer) publicDial(ctx context.Context, network, addr string) (net.Conn,
 		return nil, fmt.Errorf("%s has no address", host)
 	}
 	for _, ip := range ips {
-		if !d.AllowPrivate && !domain.IsPublicIP(ip) {
+		if !d.AllowPrivate && !domain.IsPublicIP(ip) && !d.allowedIP(ip) {
 			return nil, ErrPrivateAddress
 		}
 	}
