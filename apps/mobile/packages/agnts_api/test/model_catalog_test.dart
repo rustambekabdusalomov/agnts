@@ -24,6 +24,12 @@ void main() {
       // TODO
     });
 
+    // The modules you may use, in your order, each with its own light and strong model (absent when the module has none, like Codex without AGNTS_CODEX_MODELS)
+    // List<ModelCatalogModulesInner> modules
+    test('to test the property `modules`', () async {
+      // TODO
+    });
+
     // Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it
     // List<ModelCatalogTiersInner> tiers
     test('to test the property `tiers`', () async {

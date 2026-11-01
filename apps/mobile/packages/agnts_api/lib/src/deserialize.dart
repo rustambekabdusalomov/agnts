@@ -218,6 +218,7 @@ import 'package:agnts_api/src/model/member.dart';
 import 'package:agnts_api/src/model/meta.dart';
 import 'package:agnts_api/src/model/model_catalog.dart';
 import 'package:agnts_api/src/model/model_catalog_models_inner.dart';
+import 'package:agnts_api/src/model/model_catalog_modules_inner.dart';
 import 'package:agnts_api/src/model/model_catalog_tiers_inner.dart';
 import 'package:agnts_api/src/model/model_overrides.dart';
 import 'package:agnts_api/src/model/modules_settings.dart';
@@ -932,6 +933,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ModelCatalog.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ModelCatalogModelsInner':
           return ModelCatalogModelsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ModelCatalogModulesInner':
+          return ModelCatalogModulesInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ModelCatalogTiersInner':
           return ModelCatalogTiersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ModelOverrides':

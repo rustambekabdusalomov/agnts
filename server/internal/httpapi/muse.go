@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
 	"agnts/internal/musecredits"
@@ -216,6 +217,29 @@ func (s *Server) ListModels(w http.ResponseWriter, r *http.Request) {
 	for _, p := range a.Modules {
 		out.Providers = append(out.Providers, gen.ModelCatalogProviders(p))
 	}
+	modules := make([]struct {
+		Id     gen.ModelCatalogModulesId `json:"id"`
+		Label  string                    `json:"label"`
+		Light  *gen.Model                `json:"light,omitempty"`
+		Strong *gen.Model                `json:"strong,omitempty"`
+	}, 0, len(a.Modules))
+	for _, p := range a.Modules {
+		var m struct {
+			Id     gen.ModelCatalogModulesId `json:"id"`
+			Label  string                    `json:"label"`
+			Light  *gen.Model                `json:"light,omitempty"`
+			Strong *gen.Model                `json:"strong,omitempty"`
+		}
+		m.Id, m.Label = gen.ModelCatalogModulesId(p), ai.ModuleName(p)
+		if light, strong := s.tierModels(p); light != "" {
+			m.Light = &light
+			if strong != "" {
+				m.Strong = &strong
+			}
+		}
+		modules = append(modules, m)
+	}
+	out.Modules = &modules
 	for _, m := range s.models(a) {
 		row := struct {
 			Id                  gen.Model                      `json:"id"`
@@ -257,7 +281,38 @@ func (s *Server) models(a domain.Access) []ModelInfo {
 				ModelInfo{ID: "haiku", Label: "Claude Haiku", Provider: p},
 				ModelInfo{ID: "sonnet", Label: "Claude Sonnet", Provider: p},
 				ModelInfo{ID: "opus", Label: "Claude Opus", Provider: p, Strong: true})
+		case domain.ProviderCodex:
+			// Codex's models are free-form; the ones named for its tiers
+			// (AGNTS_CODEX_MODELS) are listed.
+			if prov, ok := s.provider(p); ok {
+				for _, id := range prov.Catalog().Listed() {
+					ref, _ := ai.ParseModel(id)
+					out = append(out, ModelInfo{ID: id, Label: "Codex " + ref.Name, Provider: p, Strong: prov.Catalog().TierOf(ref.Name) == ai.Strong})
+				}
+			}
 		}
 	}
 	return out
+}
+
+// provider is the coding agent of module p, when the server has one.
+func (s *Server) provider(p string) (ai.Provider, bool) {
+	if s.opt.Providers == nil {
+		return nil, false
+	}
+	return s.opt.Providers.Get(p)
+}
+
+// tierModels are module p's light and strong models ("" for none).
+func (s *Server) tierModels(p string) (light, strong string) {
+	if prov, ok := s.provider(p); ok {
+		return prov.Catalog().Model(ai.Light), prov.Catalog().Model(ai.Strong)
+	}
+	switch p {
+	case domain.ProviderMuse:
+		return domain.MuseSpark, domain.MuseWonder
+	case domain.ProviderClaude:
+		return "sonnet", "opus"
+	}
+	return "", ""
 }

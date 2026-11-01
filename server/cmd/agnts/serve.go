@@ -168,8 +168,9 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	a.meet = meetSvc
 	docSvc.SetMeetingWatcher(meetSvc.NotesChanged)
 	handler, err := httpapi.NewHandler(httpapi.Options{
-		Auth:    svc,
-		Tickets: a.orch,
+		Providers: a.providers,
+		Auth:      svc,
+		Tickets:   a.orch,
 		Admin: &httpapi.Admin{
 			Settings: a.settings, Usage: a.usage, Refresher: refresher, Logs: a.store,
 			Dashboard: a.dashboard, Integrations: a.adminInteg, Repos: a.repos, Docs: docs.New(cfg.DocsDir),

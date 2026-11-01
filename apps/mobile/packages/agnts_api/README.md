@@ -662,6 +662,7 @@ Class | Method | HTTP request | Description
  - [Meta](doc/Meta.md)
  - [ModelCatalog](doc/ModelCatalog.md)
  - [ModelCatalogModelsInner](doc/ModelCatalogModelsInner.md)
+ - [ModelCatalogModulesInner](doc/ModelCatalogModulesInner.md)
  - [ModelCatalogTiersInner](doc/ModelCatalogTiersInner.md)
  - [ModelOverrides](doc/ModelOverrides.md)
  - [Module](doc/Module.md)

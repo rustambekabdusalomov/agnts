@@ -255,6 +255,7 @@ doc/Meta.md
 doc/MetaApi.md
 doc/ModelCatalog.md
 doc/ModelCatalogModelsInner.md
+doc/ModelCatalogModulesInner.md
 doc/ModelCatalogTiersInner.md
 doc/ModelOverrides.md
 doc/Module.md
@@ -764,6 +765,7 @@ lib/src/model/member.dart
 lib/src/model/meta.dart
 lib/src/model/model_catalog.dart
 lib/src/model/model_catalog_models_inner.dart
+lib/src/model/model_catalog_modules_inner.dart
 lib/src/model/model_catalog_tiers_inner.dart
 lib/src/model/model_overrides.dart
 lib/src/model/module.dart
@@ -1239,6 +1241,7 @@ test/member_test.dart
 test/meta_api_test.dart
 test/meta_test.dart
 test/model_catalog_models_inner_test.dart
+test/model_catalog_modules_inner_test.dart
 test/model_catalog_test.dart
 test/model_catalog_tiers_inner_test.dart
 test/model_overrides_test.dart

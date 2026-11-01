@@ -77,14 +77,61 @@ const themes = computed(() => [
 ])
 const LANG_LABEL: Record<Locale, string> = { en: 'English', ru: 'Русский', uz: 'Oʻzbekcha' }
 const langs = LOCALES.map((l) => ({ value: l, label: LANG_LABEL[l] }))
-// The stage pickers offer the server's models and the tiers (the light or
-// strong model of whichever module runs); Codex is set by name below.
-const models = computed(() => [
-  ...catalog.models.value.filter((m) => m.provider !== 'codex').map((m) => ({ value: m.id as Model, label: m.label })),
-  ...catalog.tiers.value.map((m) => ({ value: m.id as Model, label: t(m.strong ? 'settings.modelTierStrong' : 'settings.modelTierLight') })),
-])
-// Without Claude Code the section is about Muse: its wording, not Claude's.
-const museWords = computed(() => catalog.claudeOff.value)
+// Models: one coding module for every stage, picked as a tab among the
+// modules an Admin enabled for the viewer; each tab offers its own models.
+type Module = 'muse' | 'claude' | 'codex'
+const moduleOfModel = (id: string): Module => (id.startsWith('muse:') ? 'muse' : id.startsWith('codex:') ? 'codex' : 'claude')
+// Every stage model, review included (its auto choice stays as it is).
+const modelKeys = ['analyze', 'coding', 'retry', 'helper', 'learn', 'preview', 'review'] as const
+const stageModules = computed(() => {
+  const m = draft.value?.models
+  if (!m) return []
+  return [...new Set(modelKeys.map((k) => m[k]).filter((x): x is string => !!x && x !== 'auto').map(moduleOfModel))]
+})
+// The tab: the module analysis runs on, else the viewer's first one.
+const moduleTab = computed<Module | undefined>(() => {
+  const enabled = catalog.modules.value.map((m) => m.id)
+  const own = draft.value ? moduleOfModel(draft.value.models.analyze) : undefined
+  return own && enabled.includes(own) ? own : enabled[0]
+})
+const mixedModules = computed(() => stageModules.value.length > 1)
+const models = computed(() =>
+  catalog.models.value.filter((m) => m.provider === moduleTab.value).map((m) => ({ value: m.id as Model, label: m.label })),
+)
+const isStrongModel = (id: string) => catalog.models.value.find((m) => m.id === id)?.strong ?? /opus|wonder/.test(id)
+// Picking a module moves every stage to it at the same level: a strong
+// model to its strong one, the rest to its light one. Codex without
+// models of its own leaves the names to type.
+function chooseModule(p: Module) {
+  const mod = catalog.modules.value.find((m) => m.id === p)
+  if (!draft.value || !mod) return
+  const m = draft.value.models
+  for (const k of modelKeys) {
+    const cur = m[k]
+    if (!cur || cur === 'auto' || moduleOfModel(cur) === p) continue
+    const next = isStrongModel(cur) ? (mod.strong ?? mod.light) : mod.light
+    // Review has no name field: without a Codex model it reviews on auto.
+    m[k] = (next ?? (k === 'review' ? 'auto' : p === 'codex' ? 'codex:' : cur)) as Model
+  }
+}
+// A Codex stage's model, typed by name.
+function codexName(k: (typeof stages)[number]): string {
+  const m = draft.value?.models[k] ?? ''
+  return m.startsWith('codex:') ? m.slice('codex:'.length) : ''
+}
+function setCodexName(k: (typeof stages)[number], v: string) {
+  const m = draft.value?.models
+  if (!m) return
+  m[k] = `codex:${v.trim().toLowerCase()}` as Model
+  // Previews have no row of their own: on Codex they take the coding model.
+  if (k === 'coding' && m.preview && moduleOfModel(m.preview) === 'codex') m.preview = m[k]
+}
+const codexMissing = computed(() => {
+  const m = draft.value?.models
+  return !!m && moduleTab.value === 'codex' && modelKeys.some((k) => m[k] === 'codex:')
+})
+// The help names the tab's own models.
+const museWords = computed(() => moduleTab.value === 'muse')
 // The budget per run is kept in credits (1 credit = $0.01) and set in
 // whole dollars; 0 leaves the server's cap.
 const runBudgetUsd = computed({
@@ -95,6 +142,7 @@ const runBudgetUsd = computed({
 })
 const budgetLabel = (n: number) => (n === 0 ? t('settings.runBudgetServer') : '$' + n)
 const w = (key: string) => (museWords.value ? `${key}Muse` : key)
+const wm = (key: string) => (moduleTab.value === 'codex' ? `${key}Codex` : w(key))
 const stages = ['analyze', 'coding', 'retry', 'helper', 'learn'] as const
 const stageKey: Record<(typeof stages)[number], string> = {
   analyze: 'Analyze',
@@ -152,17 +200,6 @@ const effortLevels = computed(() => (['', 'low', 'medium', 'high'] as const).map
 const effortStages = ['analyze', 'coding', 'review', 'complex'] as const
 const effortLabel = (s: (typeof effortStages)[number]) => t(`harnessSettings.effort${s[0].toUpperCase()}${s.slice(1)}`)
 
-// Coding on Codex: a codex: model in the coding stage. Empty is Claude.
-const codexModel = computed({
-  get: () => (draft.value?.models.coding.startsWith('codex:') ? draft.value.models.coding.slice('codex:'.length) : ''),
-  set: (v: string) => {
-    if (!draft.value) return
-    const m = v.trim().toLowerCase()
-    const strong = catalog.models.value.find((x) => x.provider === catalog.primary.value && x.strong)?.id ?? 'opus'
-    draft.value.models.coding = m ? `codex:${m}` : strong
-  },
-})
-
 // Each section is its own page at /settings/<section>; the sidebar lists
 // them under Settings. Edits are kept across sections until saved or
 // discarded.
@@ -212,8 +249,33 @@ const section = computed(() => settingsSection(route.params.section))
           <RouterLink class="btn btn-s" :to="{ name: 'workspace', query: { tab: 'ai' } }" :title="t(w('settings.claudeMoved'))">{{ t(w('settings.claudeOpen')) }}</RouterLink>
         </div>
         <div class="cfg-row" style="display: block">
+          <div class="cfg-lbl">{{ t('settings.moduleTabs') }}</div>
+          <div class="cfg-help">{{ t('settings.moduleTabsHelp') }}</div>
+          <div class="tabs" role="tablist" :aria-label="t('settings.moduleTabs')" style="margin-top: 10px">
+            <button
+              v-for="m in catalog.modules.value"
+              :key="m.id"
+              type="button"
+              class="tab"
+              role="tab"
+              :aria-selected="moduleTab === m.id"
+              :aria-pressed="moduleTab === m.id"
+              @click="chooseModule(m.id)"
+            >
+              {{ m.label }}
+            </button>
+          </div>
+          <p v-if="mixedModules" class="hint" style="margin-top: 8px">{{ t('settings.modulesMixed') }}</p>
+        </div>
+        <div class="cfg-row" style="display: block">
           <div class="cfg-lbl">{{ t('settings.models') }}</div>
-          <div class="cfg-help">{{ t(w('settings.modelsHelp')) }}</div>
+          <div class="cfg-help">{{ t(wm('settings.modelsHelp')) }}</div>
+          <span v-if="moduleTab === 'codex'" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px">
+            <span class="badge" :class="integ('openai')?.connected ? 'b-ok' : 'b-gray'">
+              {{ integ('openai')?.connected ? t('settings.connected') : t('settings.notConnected') }}
+            </span>
+            <RouterLink class="btn btn-s" :to="{ name: 'integration', params: { provider: 'openai' } }">{{ t('harnessSettings.codexConnect') }}</RouterLink>
+          </span>
         </div>
         <CfgRow
           v-for="st in stages"
@@ -221,23 +283,27 @@ const section = computed(() => settingsSection(route.params.section))
           :label="t(`settings.stage${stageKey[st]}`)"
           :help="t(st === 'coding' ? w('settings.stageCodingHelp') : `settings.stage${stageKey[st]}Help`)"
         >
-          <SegButtons
-            :model-value="draft.models[st] ?? models[0]?.value ?? ''"
-            :options="models"
-            :label="t(`settings.stage${stageKey[st]}`)"
-            @update:model-value="setModel(st, $event)"
-          />
-        </CfgRow>
-        <CfgRow v-if="catalog.has('codex')" :label="t('harnessSettings.codex')" :help="t('harnessSettings.codexHelp')">
           <span style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-            <input v-model.lazy="codexModel" class="cfg-in mono" maxlength="64" placeholder="gpt-5-codex" :aria-label="t('harnessSettings.codex')">
-            <span class="badge" :class="integ('openai')?.connected ? 'b-ok' : 'b-gray'">
-              {{ integ('openai')?.connected ? t('settings.connected') : t('settings.notConnected') }}
-            </span>
-            <RouterLink class="btn btn-s" :to="{ name: 'integration', params: { provider: 'openai' } }">{{ t('harnessSettings.codexConnect') }}</RouterLink>
+            <SegButtons
+              v-if="models.length"
+              :model-value="draft.models[st] ?? models[0]?.value ?? ''"
+              :options="models"
+              :label="t(`settings.stage${stageKey[st]}`)"
+              @update:model-value="setModel(st, $event)"
+            />
+            <input
+              v-if="moduleTab === 'codex'"
+              :value="codexName(st)"
+              class="cfg-in mono"
+              maxlength="64"
+              placeholder="gpt-5-codex"
+              :aria-label="`${t('settings.codexModelLabel')}: ${t(`settings.stage${stageKey[st]}`)}`"
+              @change="setCodexName(st, ($event.target as HTMLInputElement).value)"
+            >
           </span>
         </CfgRow>
-        <CfgRow v-if="draft.models.review !== undefined" :label="t('settings.stageReview')" :help="t(w('settings.stageReviewHelp'))">
+        <p v-if="codexMissing" class="ferr">{{ t('settings.codexModelNeeded') }}</p>
+        <CfgRow v-if="draft.models.review !== undefined" :label="t('settings.stageReview')" :help="t(wm('settings.stageReviewHelp'))">
           <SegButtons v-model="draft.models.review" :options="reviewModels" :label="t('settings.stageReview')" />
         </CfgRow>
         <CfgRow :label="t('settings.maxTurns')" :help="t('settings.maxTurnsHelp')">

@@ -7304,6 +7304,14 @@ export interface components {
                 inputPerMillionUSD?: number;
                 outputPerMillionUSD?: number;
             }[];
+            /** @description The modules you may use, in your order, each with its own light and strong model (absent when the module has none, like Codex without AGNTS_CODEX_MODELS) */
+            modules?: {
+                /** @enum {string} */
+                id: "muse" | "claude" | "codex";
+                label: string;
+                light?: components["schemas"]["Model"];
+                strong?: components["schemas"]["Model"];
+            }[];
             /** @description Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it */
             tiers?: {
                 id: components["schemas"]["Model"];

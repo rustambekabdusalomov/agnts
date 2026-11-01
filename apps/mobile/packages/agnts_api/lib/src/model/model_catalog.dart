@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/model_catalog_models_inner.dart';
+import 'package:agnts_api/src/model/model_catalog_modules_inner.dart';
 import 'package:agnts_api/src/model/model_catalog_tiers_inner.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -27,6 +28,8 @@ class ModelCatalog {
     required  this.primary,
 
     required  this.models,
+
+     this.modules,
 
      this.tiers,
   });
@@ -69,6 +72,19 @@ class ModelCatalog {
 
 
 
+      /// The modules you may use, in your order, each with its own light and strong model (absent when the module has none, like Codex without AGNTS_CODEX_MODELS)
+  @JsonKey(
+    
+    name: r'modules',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<ModelCatalogModulesInner>? modules;
+
+
+
       /// Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it
   @JsonKey(
     
@@ -89,6 +105,7 @@ class ModelCatalog {
       other.providers == providers &&
       other.primary == primary &&
       other.models == models &&
+      other.modules == modules &&
       other.tiers == tiers;
 
     @override
@@ -96,6 +113,7 @@ class ModelCatalog {
         providers.hashCode +
         primary.hashCode +
         models.hashCode +
+        modules.hashCode +
         tiers.hashCode;
 
   factory ModelCatalog.fromJson(Map<String, dynamic> json) => _$ModelCatalogFromJson(json);

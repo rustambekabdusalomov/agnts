@@ -9102,6 +9102,17 @@ components:
               strong: { type: boolean, description: 'The stronger, dearer tier' }
               inputPerMillionUSD: { type: number }
               outputPerMillionUSD: { type: number }
+        modules:
+          type: array
+          description: 'The modules you may use, in your order, each with its own light and strong model (absent when the module has none, like Codex without AGNTS_CODEX_MODELS)'
+          items:
+            type: object
+            required: [id, label]
+            properties:
+              id: { type: string, enum: [muse, claude, codex] }
+              label: { type: string }
+              light: { $ref: '#/components/schemas/Model' }
+              strong: { $ref: '#/components/schemas/Model' }
         tiers:
           type: array
           description: 'Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it'

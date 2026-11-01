@@ -275,6 +275,7 @@ export 'package:agnts_api/src/model/member.dart';
 export 'package:agnts_api/src/model/meta.dart';
 export 'package:agnts_api/src/model/model_catalog.dart';
 export 'package:agnts_api/src/model/model_catalog_models_inner.dart';
+export 'package:agnts_api/src/model/model_catalog_modules_inner.dart';
 export 'package:agnts_api/src/model/model_catalog_tiers_inner.dart';
 export 'package:agnts_api/src/model/model_overrides.dart';
 export 'package:agnts_api/src/model/module.dart';

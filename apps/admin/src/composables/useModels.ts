@@ -8,6 +8,7 @@ import { modelLabel } from '../api/types'
 export type ModelCatalog = components['schemas']['ModelCatalog']
 export type CatalogModel = ModelCatalog['models'][number]
 export type CatalogTier = NonNullable<ModelCatalog['tiers']>[number]
+export type CatalogModule = NonNullable<ModelCatalog['modules']>[number]
 export type ModelProvider = ModelCatalog['primary']
 
 /** A model's name: the catalog's label, else the one agnts has known it by. */
@@ -25,6 +26,9 @@ export function useModels() {
   /** Tiers a setting may name instead of a model: the run lands on the
    * light or strong model of whichever module can run it. */
   const tiers = computed(() => query.data.value?.tiers ?? [])
+  /** The modules the viewer may use, in their order, each with its light
+   * and strong model. */
+  const modules = computed(() => query.data.value?.modules ?? [])
   /** Whether the server offers a coding tool. */
   const has = (p: ModelProvider) => providers.value.includes(p)
   /** Muse Code is the default tool: Claude's plans, windows and wording do not apply. */
@@ -36,5 +40,5 @@ export function useModels() {
   /** Claude Code is not offered (known only once the catalog is in). */
   const claudeOff = computed(() => !!query.data.value && !providers.value.includes('claude'))
   const label = (id: string) => catalogLabel([...models.value, ...tiers.value], id)
-  return { query, providers, primary, models, tiers, has, isMuse, claudeOff, label }
+  return { query, providers, primary, models, tiers, modules, has, isMuse, claudeOff, label }
 }
