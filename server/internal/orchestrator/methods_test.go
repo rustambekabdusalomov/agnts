@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/skillpacks"
@@ -57,8 +58,8 @@ func TestMethodSkills(t *testing.T) {
 	}
 
 	// With migrations; Claude loads one.
-	h.runner.stream = func(on func(orchestrator.ClaudeEvent)) {
-		on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: "Skill: agnts-method-migrations", Data: map[string]any{"tool": "Skill", "id": "k1"}})
+	h.runner.stream = func(on func(ai.Event)) {
+		on(ai.Event{Kind: ai.EventTool, Tool: "Skill: agnts-method-migrations", Data: map[string]any{"tool": "Skill", "id": "k1"}})
 	}
 	code("PAY-72")
 	if got := strings.Join(methods(), ","); got != "follow-existing-pattern,house-style,migrations,reuse-first" {

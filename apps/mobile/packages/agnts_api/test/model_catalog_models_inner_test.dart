@@ -7,7 +7,7 @@ void main() {
   // TODO add properties to the entity
 
   group(ModelCatalogModelsInner, () {
-    // muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.
+    // muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers.
     // String id
     test('to test the property `id`', () async {
       // TODO

@@ -20,6 +20,15 @@ type Dashboard struct {
 		Get(ctx context.Context) (domain.Settings, error)
 	}
 	tz *time.Location
+	// viewer is the account whose usage the person viewing sees; nil: the
+	// install's one account.
+	viewer func(ctx context.Context) (domain.ClaudeAccount, bool)
+}
+
+// SetViewerAccount sets how the account whose usage the dashboard shows is
+// found for the person viewing it.
+func (d *Dashboard) SetViewerAccount(f func(ctx context.Context) (domain.ClaudeAccount, bool)) {
+	d.viewer = f
 }
 
 // NewDashboard returns the dashboard service; tz decides "today".
@@ -72,7 +81,11 @@ func (d *Dashboard) Build(ctx context.Context) (Data, error) {
 	}
 	var out Data
 	out.Parallel = s.Parallel
-	if out.Usage, err = d.usage.Current(ctx, s); err != nil {
+	var acct domain.ClaudeAccount
+	if d.viewer != nil {
+		acct, _ = d.viewer(ctx)
+	}
+	if out.Usage, err = d.usage.Current(ctx, acct, s); err != nil {
 		return out, err
 	}
 

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -37,7 +38,8 @@ func newReflectHarnessWith(t *testing.T, with func(*orchestrator.Deps)) (*harnes
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	deps := orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
 		Settings: h.settings, Usage: h.usage, Rules: postgres.NewRules(pool), Reflections: refl,
 	}
 	if with != nil {

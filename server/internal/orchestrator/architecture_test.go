@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -34,7 +35,8 @@ func TestArchitectureFlow(t *testing.T) {
 	cfg.FixAttempts = 1
 	h.settings.s.AutoReview, h.settings.s.SelfReview = true, true
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: &pullGit{fakeGit: h.git, host: host.reviewHost}, Host: host,
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: &pullGit{fakeGit: h.git, host: host.reviewHost}, Host: host,
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
 		Settings: h.settings, Usage: h.usage, Briefs: postgres.NewBriefs(pool), Rules: rules,
 		PullReviews: h.store, PRPosts: h.store, ReviewDrafts: h.store,

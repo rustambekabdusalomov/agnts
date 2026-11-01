@@ -1,17 +1,15 @@
-// Package runner runs Claude Code in Docker containers and parses its output.
-package runner
+package claudecode
 
 import (
 	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
-	"agnts/internal/orchestrator"
 )
 
 // The stream-json format is only partly documented, and rate_limit_event not
@@ -107,13 +105,11 @@ func resultText(raw json.RawMessage) string {
 	return strings.Join(texts, "\n")
 }
 
-var rateLimitText = regexp.MustCompile(`(?i)(usage limit|rate limit|limit reached|limit will reset|resets? at)`)
-
 // ParseStream reads Claude Code's stream-json output, calls onEvent for each
 // meaningful line, and returns the final result. It returns an error only
 // if the stream ends without a result line.
-func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
-	var res orchestrator.ClaudeResult
+func ParseStream(r io.Reader, onEvent func(ai.Event)) (ai.Result, error) {
+	var res ai.Result
 	gotResult := false
 	// Usage per assistant message, for a stream cut off before its result
 	// line. A message split over several lines repeats its usage, so the
@@ -139,7 +135,7 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 		switch {
 		case l.Type == "system" && l.Subtype == "init":
 			res.Model = l.Model
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeInit, Data: map[string]any{"session_id": l.SessionID, "model": l.Model}})
+			ai.Emit(onEvent, ai.Event{Kind: ai.EventInit, Data: map[string]any{"session_id": l.SessionID, "model": l.Model}})
 
 		case l.Type == "assistant":
 			blocks := l.Content
@@ -157,11 +153,11 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 				switch b.Type {
 				case "text":
 					if t := strings.TrimSpace(b.Text); t != "" {
-						emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeText, Text: t})
+						ai.Emit(onEvent, ai.Event{Kind: ai.EventText, Text: t})
 					}
 				case "tool_use":
-					emit(onEvent, orchestrator.ClaudeEvent{
-						Kind: orchestrator.ClaudeTool, Tool: toolSummary(b.Name, b.Input),
+					ai.Emit(onEvent, ai.Event{
+						Kind: ai.EventTool, Tool: ai.ToolSummary(b.Name, b.Input),
 						Data: map[string]any{"tool": b.Name, "id": b.ID, "input": b.Input},
 					})
 				}
@@ -174,7 +170,7 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 			}
 			for _, b := range blocks {
 				if b.Type == "tool_result" && b.ToolUseID != "" {
-					emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult,
+					ai.Emit(onEvent, ai.Event{Kind: ai.EventToolResult,
 						Data: map[string]any{"id": b.ToolUseID, "is_error": b.IsError, "output": resultText(b.Content)}})
 				}
 			}
@@ -182,7 +178,7 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 		case strings.Contains(l.Type, "rate_limit"):
 			var data map[string]any
 			_ = json.Unmarshal(line, &data)
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeRateLimit, Data: data})
+			ai.Emit(onEvent, ai.Event{Kind: ai.EventRateLimit, Data: data})
 			if limitedStatus(data) {
 				res.RateLimited = true
 			}
@@ -195,10 +191,10 @@ func ParseStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestra
 			res.Text = l.Result
 			res.Usage = resultUsage(l)
 			res.Duration = time.Duration(l.Duration) * time.Millisecond
-			if res.IsError && rateLimitText.MatchString(l.Result) {
+			if res.IsError && ai.RateLimitText.MatchString(l.Result) {
 				res.RateLimited = true
 			}
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeResultEv, Text: l.Result, Data: map[string]any{
+			ai.Emit(onEvent, ai.Event{Kind: ai.EventResult, Text: l.Result, Data: map[string]any{
 				"subtype": l.Subtype, "is_error": res.IsError, "num_turns": l.NumTurns,
 				"duration_ms": l.Duration, "total_cost_usd": l.CostUSD,
 			}})
@@ -233,12 +229,6 @@ func resultUsage(l streamLine) domain.TokenUsage {
 	return u
 }
 
-func emit(f func(orchestrator.ClaudeEvent), e orchestrator.ClaudeEvent) {
-	if f != nil {
-		f(e)
-	}
-}
-
 // limitedStatus reports whether a rate-limit line says requests are being
 // refused now (as opposed to an informational usage update).
 func limitedStatus(data map[string]any) bool {
@@ -267,20 +257,4 @@ func limitedStatus(data map[string]any) bool {
 		return false
 	}
 	return walk(data)
-}
-
-// toolSummary renders a tool call as one log line, e.g. "Bash: go test ./...".
-func toolSummary(name string, input json.RawMessage) string {
-	var in map[string]any
-	_ = json.Unmarshal(input, &in)
-	for _, k := range []string{"command", "skill", "file_path", "path", "pattern", "url", "description"} {
-		if s, ok := in[k].(string); ok && s != "" {
-			s = strings.ReplaceAll(s, "\n", " ")
-			if len(s) > 200 {
-				s = s[:200] + "…"
-			}
-			return name + ": " + s
-		}
-	}
-	return name
 }

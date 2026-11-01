@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -20,13 +21,13 @@ func TestStagesAreRecorded(t *testing.T) {
 	rec := postgres.NewTranscripts(h.pool)
 	h.o.SetRecorder(rec)
 	h.ingest("PAY-40")
-	spend := func(session string, cost float64) orchestrator.ClaudeResult {
+	spend := func(session string, cost float64) ai.Result {
 		r := ok(session)
 		r.Usage = domain.TokenUsage{Input: 100, Output: 10, CostUSD: cost}
 		return r
 	}
-	h.runner.stream = func(on func(orchestrator.ClaudeEvent)) {
-		on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult, Data: map[string]any{"id": "t1", "is_error": true,
+	h.runner.stream = func(on func(ai.Event)) {
+		on(ai.Event{Kind: ai.EventToolResult, Data: map[string]any{"id": "t1", "is_error": true,
 			"output": "FAIL with token glpat-abcdefghijklmnopqrstuvwxyz"}})
 	}
 	h.runner.scripts = []script{

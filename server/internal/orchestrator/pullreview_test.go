@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -116,7 +117,8 @@ func TestPullReviewFlow(t *testing.T) {
 	host := &reviewHost{queue: map[int]domain.PullRequest{}, pulls: map[int]domain.PullRequest{}}
 	git := &pullGit{fakeGit: h.git, host: host}
 	h.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: git, Host: host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: git, Host: host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
 		PullReviews: h.store,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	host.set(pull(4, "aaa1111"))

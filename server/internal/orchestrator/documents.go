@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -192,35 +193,20 @@ func (o *Orchestrator) generateDocument(ctx context.Context, d domain.Document, 
 		turns, timeout = docRepoMaxTurns, docRepoTimeout
 	}
 	turns, timeout = min(s.MaxTurns, turns), min(s.TimeoutMin, timeout)
-	model := s.Models.Analyze
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDocument, WorkspaceID: run.WorkspaceID, Subject: d.Title, ModelStage: "document"},
-		ClaudeRequest{
+	model := s.Models.For(domain.ModelDocuments)
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDocument, WorkspaceID: run.WorkspaceID, Subject: d.Title, ModelStage: "document", DocumentRunID: run.ID},
+		ai.Request{
 			Prompt:   documentPrompt(d, run.Source, files, g),
 			Model:    model,
 			MaxTurns: turns,
 			Timeout:  time.Duration(timeout) * time.Minute,
 			Settings: permissionSettings(s, true),
 			ReadOnly: true,
-		}, func(e ClaudeEvent) {
-			if e.Kind == ClaudeRateLimit {
-				o.usage.Record(ctx, e.Data)
-			}
-		})
-	if !res.Usage.IsZero() || res.Turns > 0 {
-		m := model
-		if res.Model != "" {
-			m = res.Model
-		}
-		if rerr := o.docs.RecordDocumentCall(context.WithoutCancel(ctx), run.ID, domain.ClaudeCall{ModelStage: "document", Model: m,
-			Usage: res.Usage, Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID}); rerr != nil {
-			o.log.Error("record document spend", "document_run", run.ID, "err", rerr)
-		}
-	}
+		}, nil)
 	if err != nil {
 		return "", nil, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return "", nil, &stopError{"rate limited"}
 	}
 	if res.IsError {

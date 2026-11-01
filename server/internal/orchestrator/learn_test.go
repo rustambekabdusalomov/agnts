@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -27,7 +29,8 @@ func newLearnHarness(t *testing.T) (*harness, *postgres.Lessons) {
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, Homes: &memHomes{},
 		Settings: h.settings, Usage: h.usage, Lessons: lessons,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	return h, lessons
@@ -151,7 +154,7 @@ func TestLearnFailureKeepsTicketDone(t *testing.T) {
 func TestLearnRateLimitedStaysPending(t *testing.T) {
 	h, _ := newLearnHarness(t)
 	h.shipped("PAY-4")
-	h.runner.scripts = []script{{result: orchestrator.ClaudeResult{RateLimited: true, IsError: true}}}
+	h.runner.scripts = []script{{result: ai.Result{RateLimited: true, IsError: true}}}
 	h.step()
 	if tk := h.expect("PAY-4", domain.StateDone); tk.LearnState != domain.LearnPending {
 		t.Fatalf("learn state: %q", tk.LearnState)

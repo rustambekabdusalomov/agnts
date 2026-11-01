@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -30,16 +31,11 @@ func (o *Orchestrator) secondOpinion(ctx context.Context, s domain.Settings, ws 
 		return out
 	}
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeSecondOpinion, WorkspaceID: t.WorkspaceID,
-		Run: run, TicketKey: t.Key, ModelStage: "second_opinion"}, ClaudeRequest{
+		Run: run, TicketKey: t.Key, ModelStage: "second_opinion"}, ai.Request{
 		Prompt: prompt, Model: s.SecondOpinion, MaxTurns: min(s.MaxTurns, 30), ReadOnly: true,
 		Timeout:  time.Duration(min(s.TimeoutMin, 15)) * time.Minute,
 		Settings: permissionSettings(s, true),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
-	o.recordSpend(ctx, run, "second_opinion", s.SecondOpinion, res)
+	}, nil)
 	switch {
 	case err != nil:
 		out.Error = err.Error()

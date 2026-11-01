@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -194,43 +195,23 @@ func parseOffset(s string) (int, bool) {
 	return total * 1000, true
 }
 
-// MeetingTranscriber hears a meeting's audio on the Muse account in ctx
-// (the runner implements it).
-type MeetingTranscriber interface {
-	TranscribeMeeting(ctx context.Context, image string, audio []byte, ext string) ([]domain.MeetingSegment, error)
-}
-
-// SetMeetingTranscriber lets meeting notes be heard.
-func (o *Orchestrator) SetMeetingTranscriber(t MeetingTranscriber) { o.meetHear = t }
-
 // CanHearMeetings reports whether meeting audio can be transcribed.
-func (o *Orchestrator) CanHearMeetings() bool { return o.meetHear != nil }
+func (o *Orchestrator) CanHearMeetings() bool { return o.ai.CanHear() }
 
 // HearMeeting returns what was said in a meeting's audio (ext: ogg or
 // mp4), heard by Muse on the account the workspace's runs use for user,
 // who turned the notes on. Unlike the assistant it may use the platform's
 // key: hearing is not metered, the notes it leads to are.
 func (o *Orchestrator) HearMeeting(ctx context.Context, user int64, audio []byte, ext string) ([]domain.MeetingSegment, error) {
-	if o.meetHear == nil {
+	if !o.ai.CanHear() {
 		return nil, invalid("meeting notes are not available on this server")
 	}
-	if o.accounts != nil && o.workspaces != nil {
-		w, err := o.workspaces.ByID(ctx, domain.WorkspaceOf(ctx))
-		if err != nil {
-			return nil, err
-		}
-		var member *int64
-		if w.ClaudeMode == domain.ClaudePerMember && user > 0 {
-			member = &user
-		}
-		// Only Muse hears audio, whatever modules the person codes with.
-		acct, ok, why, _ := o.accounts.Pick(ctx, w, member, domain.ProviderMuse)
-		if !ok {
-			return nil, fmt.Errorf("muse cannot hear the meeting: %s", why)
-		}
-		ctx = domain.WithClaude(ctx, acct)
+	// Only Muse hears audio, whatever modules the person codes with.
+	segs, err := o.ai.Hear(ctx, ai.Who{Person: user}, audio, ext)
+	var h *ai.Hold
+	if errors.As(err, &h) {
+		return nil, fmt.Errorf("muse cannot hear the meeting: %s", h.Why)
 	}
-	segs, err := o.meetHear.TranscribeMeeting(ctx, o.cfg.Image, audio, ext)
 	if err != nil {
 		return nil, fmt.Errorf("hear the meeting: %w", err)
 	}

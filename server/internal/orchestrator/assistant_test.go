@@ -11,6 +11,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/secret"
@@ -54,7 +55,7 @@ type assistantHarness struct {
 	ask   context.Context // acts for the asker
 	other context.Context // another person in the same workspace
 	user  int64
-	reqs  []orchestrator.ClaudeRequest
+	reqs  []ai.Request
 }
 
 func newAssistantHarness(t *testing.T) *assistantHarness {
@@ -71,7 +72,7 @@ func newAssistantHarness(t *testing.T) *assistantHarness {
 	a.user = pgtest.User(t, pool, "asker")
 	a.ask = domain.WithActor(h.ctx, domain.Actor{UserID: a.user, Username: "asker"})
 	a.other = domain.WithActor(h.ctx, domain.Actor{UserID: pgtest.User(t, pool, "someone"), Username: "someone"})
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { a.reqs = append(a.reqs, r) }
+	h.runner.onClaude = func(r ai.Request) { a.reqs = append(a.reqs, r) }
 	return a
 }
 

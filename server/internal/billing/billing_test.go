@@ -54,7 +54,7 @@ func TestSettleAndWithin(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelAnalyze, Model: "opus",
-		Usage: domain.TokenUsage{Input: 1, CostUSD: 1.234}}); err != nil {
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 1.234}, OnCredits: true}); err != nil {
 		t.Fatal(err)
 	}
 	if ok, _ := s.Within(sys, ws, run.ID); !ok {
@@ -71,11 +71,45 @@ func TestSettleAndWithin(t *testing.T) {
 	}
 	// More than the balance: the run must stop.
 	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelCoding, Model: "opus",
-		Usage: domain.TokenUsage{Input: 1, CostUSD: 2}}); err != nil {
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 2}, OnCredits: true}); err != nil {
 		t.Fatal(err)
 	}
 	if ok, why := s.Within(sys, ws, run.ID); ok || why == "" {
 		t.Fatal("over the balance")
+	}
+}
+
+// A run whose analysis ran on a member's own account and whose coding ran
+// on credits is charged for the coding alone.
+func TestSettleChargesOnlyCallsOnCredits(t *testing.T) {
+	s, credits, ws, ctx := setup(t)
+	sys := domain.System(ctx)
+	if _, err := credits.Add(sys, postgres.LedgerEntry{WorkspaceID: ws, Amount: 300, Reason: postgres.CreditGrant}); err != nil {
+		t.Fatal(err)
+	}
+	store := postgres.NewAgent(pgtest.Open(t))
+	tk, err := store.CreateTicket(ctx, domain.Ticket{Key: "C-2", Source: domain.SourceLocal, Title: "t", State: domain.StateNew, Priority: "medium",
+		Kind: domain.KindPlan, AfterApprove: "pr"}, domain.Event{TicketKey: "C-2", Type: domain.EventTicketCreated})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, run, ok, err := store.ClaimTicket(ctx, tk.ID, "main")
+	if err != nil || !ok {
+		t.Fatal(err)
+	}
+	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelAnalyze, Model: "opus",
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 1.5}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelCoding, Model: "opus",
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 0.5}, OnCredits: true}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Settle(sys, ws, run.ID, "C-2"); err != nil {
+		t.Fatal(err)
+	}
+	if bal, _ := credits.Balance(sys, ws); bal != 300-50 {
+		t.Fatalf("balance %d, want %d (only the call on credits)", bal, 300-50)
 	}
 }
 
@@ -289,7 +323,7 @@ func TestFreeCreditsOweNothing(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := store.RecordClaudeCall(ctx, domain.ClaudeCall{RunID: run.ID, ModelStage: domain.ModelAnalyze, Model: "muse:muse-spark-1.3",
-		Usage: domain.TokenUsage{Input: 1, CostUSD: 0.36}}); err != nil {
+		Usage: domain.TokenUsage{Input: 1, CostUSD: 0.36}, OnCredits: true}); err != nil {
 		t.Fatal(err)
 	}
 	s.SetFree(func(context.Context, int64) (float64, error) { return 0.36, nil })

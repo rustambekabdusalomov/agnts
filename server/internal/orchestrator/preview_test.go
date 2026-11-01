@@ -13,6 +13,7 @@ import (
 	"sync"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -262,7 +263,7 @@ func TestPreviewDroppedOnApproveAndRequeuedOnRateLimit(t *testing.T) {
 	h := newHarness(t)
 	h.withPreview()
 	h.toReview("PAY-1", analysis(0))
-	h.runner.scripts = []script{{result: orchestrator.ClaudeResult{RateLimited: true}}}
+	h.runner.scripts = []script{{result: ai.Result{RateLimited: true}}}
 	h.step()
 	if tk := h.state("PAY-1"); tk.PreviewState != domain.PreviewPending {
 		t.Fatalf("rate-limited preview: %q", tk.PreviewState)

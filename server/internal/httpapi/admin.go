@@ -79,7 +79,7 @@ func (s *Server) SetTicketModels(w http.ResponseWriter, r *http.Request, key gen
 	}
 	a := s.viewerAccess(r.Context())
 	for _, x := range m {
-		if x != "" && x != domain.ModelAuto && domain.ValidModel(x) && !a.Allows(domain.ProviderOf(x)) {
+		if x != "" && x != domain.ModelAuto && domain.ValidModel(x) && !domain.AllowedModel(a, x) {
 			writeError(w, http.StatusBadRequest, "bad_request", domain.ModuleName(domain.ProviderOf(x))+" is not enabled for you: pick one of "+strings.Join(domain.AvailableModels(a), ", "))
 			return
 		}
@@ -412,7 +412,7 @@ func (s *Server) usageOf(ctx context.Context, provider string) (gen.Usage, error
 	m, isMember := memberFrom(ctx)
 	u, _ := userFrom(ctx)
 	if s.opt.Claude == nil || !isMember {
-		v, err := s.opt.Admin.Usage.Current(ctx, st) // one account for everything
+		v, err := s.opt.Admin.Usage.Current(ctx, domain.ClaudeAccount{}, st) // one account for everything
 		out := toUsage(v)
 		connected := true
 		out.Provider, out.Connected = &p, &connected
@@ -423,7 +423,7 @@ func (s *Server) usageOf(ctx context.Context, provider string) (gen.Usage, error
 		connected := false
 		return gen.Usage{Status: gen.UsageStatusUnknown, PauseAbove: st.PauseAbove, Provider: &p, Connected: &connected}, nil
 	}
-	v, err := s.opt.Admin.Usage.Current(domain.WithClaude(ctx, acct), st)
+	v, err := s.opt.Admin.Usage.Current(ctx, acct, st)
 	out := toUsage(v)
 	connected := true
 	out.Provider, out.Connected = &p, &connected
@@ -444,16 +444,15 @@ func (s *Server) RefreshUsage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
+	var acct domain.ClaudeAccount // the install's one account
 	if m, ok := memberFrom(ctx); ok && s.opt.Claude != nil {
 		u, _ := userFrom(ctx)
-		acct, ok := s.opt.Claude.AccountFor(ctx, m.w, u.ID, domain.ProviderClaude)
-		if !ok {
+		if acct, ok = s.opt.Claude.AccountFor(ctx, m.w, u.ID, domain.ProviderClaude); !ok {
 			writeError(w, http.StatusConflict, "conflict", "no Claude account is connected to read limits from")
 			return
 		}
-		ctx = domain.WithClaude(ctx, acct)
 	}
-	if err := s.opt.Admin.Refresher.Refresh(ctx); errors.Is(err, usage.ErrBusy) {
+	if err := s.opt.Admin.Refresher.Refresh(ctx, acct); errors.Is(err, usage.ErrBusy) {
 		writeError(w, http.StatusConflict, "conflict", err.Error())
 		return
 	} else if err != nil {
@@ -492,6 +491,9 @@ func toSettings(v domain.Settings) gen.Settings {
 	stalls, deep, prove, learnRuns, second, methods := v.Stalls, v.DeepReview, v.ProveFixes, v.LearnFromRuns, v.SecondOpinion, v.MethodSkills
 	maxRepos := v.TicketRepoLimit()
 	recheck, baseline := v.RecheckComplex, v.BaselineChecks
+	// Chat and documents show the model they run on: until set, the
+	// helper's and the analysis's.
+	chat, docModel := v.Models.For(domain.ModelChat), v.Models.For(domain.ModelDocuments)
 	effort := gen.EffortSettings{Analyze: gen.EffortSettingsAnalyze(v.Effort.Analyze), Coding: gen.EffortSettingsCoding(v.Effort.Coding),
 		Review: gen.EffortSettingsReview(v.Effort.Review), Complex: gen.EffortSettingsComplex(v.Effort.Complex)}
 	return gen.Settings{
@@ -503,10 +505,10 @@ func toSettings(v domain.Settings) gen.Settings {
 			ResolveFixed: v.PRComments.ResolveFixed, AutoAddress: v.PRComments.AutoAddress},
 		Ci: &ci,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
-			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview},
+			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview, Chat: &chat, Documents: &docModel},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect, PublicDocuments: &publicDocs,
 		MaxTurns: v.MaxTurns, RunBudget: &v.RunBudget, TimeoutMin: v.TimeoutMin, Allow: v.Allow, Deny: v.Deny,
-		AskFirst: v.AskFirst, AutoResume: v.AutoResume, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
+		AskFirst: v.AskFirst, AutoResume: v.AutoResume, SwitchModules: &v.SwitchModules, PauseAbove: v.PauseAbove, Parallel: v.Parallel, AutoLearn: &autoLearn,
 		AutoReview: &autoReview, SuggestFollowUps: &followUps,
 		Git: gen.GitSettings{AuthorName: v.Git.AuthorName, AuthorEmail: v.Git.AuthorEmail, CoAuthor: v.Git.CoAuthor,
 			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
@@ -561,7 +563,7 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 		AutoPreview: cur.AutoPreview, VisualCheck: cur.VisualCheck, EgressAllow: cur.EgressAllow,
 		AutoBrief: cur.AutoBrief, SelfReview: cur.SelfReview, Reflect: cur.Reflect, PublicDocuments: cur.PublicDocuments,
 		MaxTurns: req.MaxTurns, TimeoutMin: req.TimeoutMin, Allow: req.Allow, Deny: req.Deny,
-		AskFirst: req.AskFirst, AutoResume: req.AutoResume, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
+		AskFirst: req.AskFirst, AutoResume: req.AutoResume, SwitchModules: cur.SwitchModules, PauseAbove: req.PauseAbove, Parallel: cur.Parallel, AutoLearn: cur.AutoLearn,
 		AutoReview: cur.AutoReview, SuggestFollowUps: cur.SuggestFollowUps, PullReviews: cur.PullReviews, PRComments: cur.PRComments, CI: cur.CI,
 		Guard: cur.Guard, Stalls: cur.Stalls, DeepReview: cur.DeepReview, ProveFixes: cur.ProveFixes, LearnFromRuns: cur.LearnFromRuns, MethodSkills: cur.MethodSkills,
 		SecondOpinion: cur.SecondOpinion, MaxTicketRepos: cur.MaxTicketRepos, Effort: cur.Effort, RecheckComplex: cur.RecheckComplex, BaselineChecks: cur.BaselineChecks,
@@ -571,6 +573,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.RunBudget != nil {
 		v.RunBudget = *req.RunBudget
+	}
+	if req.SwitchModules != nil {
+		v.SwitchModules = *req.SwitchModules
 	}
 	if req.Notify != nil {
 		v.Notify = domain.NotifySettings{Push: req.Notify.Push, Telegram: req.Notify.Telegram, NeedsYou: req.Notify.NeedsYou,
@@ -615,6 +620,12 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.MaxTicketRepos != nil {
 		v.MaxTicketRepos = *req.MaxTicketRepos
+	}
+	if req.Models.Chat != nil {
+		v.Models.Chat = *req.Models.Chat
+	}
+	if req.Models.Documents != nil {
+		v.Models.Documents = *req.Models.Documents
 	}
 	if req.Models.Preview != nil {
 		v.Models.Preview = *req.Models.Preview

@@ -29,8 +29,8 @@ import (
 	"github.com/rustambekabdusalomov/agnts-muse/money"
 	"github.com/rustambekabdusalomov/agnts-muse/msp"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
-	"agnts/internal/orchestrator"
 )
 
 // CreditUSD is what one agnts credit is worth: $0.01 of model cost.
@@ -127,9 +127,8 @@ func userKeyPart(user int64) string { return fmt.Sprintf("u:%d:", user) }
 // counts against the platform's monthly cap. Runs on a person's own Muse
 // account, and calls outside a ticket run, get no budget (they are
 // settled afterwards as before).
-func (s *Service) Budget(ctx context.Context, req orchestrator.ClaudeRequest) (*muse.Budget, error) {
-	acct, ok := domain.ClaudeOf(ctx)
-	if !ok || !acct.Credits || req.RunID == 0 {
+func (s *Service) Budget(ctx context.Context, acct ai.Account, req ai.Request) (*muse.Budget, error) {
+	if !acct.Credits || req.RunID == 0 {
 		return nil, nil
 	}
 	ws := req.WorkspaceID

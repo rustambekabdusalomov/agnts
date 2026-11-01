@@ -17,6 +17,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -27,7 +29,7 @@ import (
 
 // script is what the fake Claude does on each invocation, in order.
 type script struct {
-	result orchestrator.ClaudeResult
+	result ai.Result
 	files  map[string]string // files it writes (e.g. analysis.json)
 	edit   string            // marker written to the repo, so Commit sees a change
 	err    error
@@ -42,12 +44,12 @@ type fakeRunner struct {
 	opened   int
 	closed   int
 	lastHome []byte
-	onClaude func(orchestrator.ClaudeRequest)
+	onClaude func(ai.Request)
 	onExec   func(cmd string)  // called for every command, with the lock held
 	head     string            // what git rev-parse HEAD prints, when set
 	written  map[string]string // every file agnts put into a workspace, last write wins
 	// stream, when set, sends more events during every invocation.
-	stream func(on func(orchestrator.ClaudeEvent))
+	stream func(on func(ai.Event))
 	// exported are the folders the runs exported, in order ("" for
 	// /workspace); trees are the names in each run's starting tar.
 	exported []string
@@ -84,7 +86,15 @@ type fakeWS struct {
 
 func (w *fakeWS) ID() string { return "ctr-1" }
 
-func (w *fakeWS) Claude(_ context.Context, req orchestrator.ClaudeRequest, on func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
+// The gateway's stand-in providers ask the box (aitest.Scripted); a fake
+// workspace runs no processes.
+func (w *fakeWS) Run(context.Context, ai.Cmd, io.Writer, io.Writer) (int, error) { return 0, nil }
+func (w *fakeWS) Attach(context.Context, ai.Cmd, io.Writer) (ai.Process, error) {
+	return nil, errors.New("fakeWS: no processes")
+}
+func (w *fakeWS) OOM(context.Context, int) error { return nil }
+
+func (w *fakeWS) Claude(_ context.Context, req ai.Request, on func(ai.Event)) (ai.Result, error) {
 	w.r.mu.Lock()
 	defer w.r.mu.Unlock()
 	w.r.prompts = append(w.r.prompts, req.Prompt)
@@ -93,12 +103,12 @@ func (w *fakeWS) Claude(_ context.Context, req orchestrator.ClaudeRequest, on fu
 	}
 	w.r.resumes = append(w.r.resumes, req.Resume)
 	if len(w.r.scripts) == 0 {
-		return orchestrator.ClaudeResult{}, errors.New("unexpected claude call")
+		return ai.Result{}, errors.New("unexpected claude call")
 	}
 	s := w.r.scripts[0]
 	w.r.scripts = w.r.scripts[1:]
-	on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeInit, Data: map[string]any{"session_id": s.result.SessionID}})
-	on(orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: "Read: main.go"})
+	on(ai.Event{Kind: ai.EventInit, Data: map[string]any{"session_id": s.result.SessionID}})
+	on(ai.Event{Kind: ai.EventTool, Tool: "Read: main.go"})
 	if w.r.stream != nil {
 		// WriteFile takes the lock: let go of it while the stream runs.
 		w.r.mu.Unlock()
@@ -364,19 +374,19 @@ type fakeUsage struct {
 	records int
 }
 
-func (f *fakeUsage) Paused(context.Context, domain.Settings) (bool, time.Time) {
+func (f *fakeUsage) Paused(context.Context, domain.ClaudeAccount, domain.Settings) (bool, time.Time) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return f.paused, time.Time{}
 }
 
-func (f *fakeUsage) Record(context.Context, map[string]any) {
+func (f *fakeUsage) Record(context.Context, domain.ClaudeAccount, map[string]any) {
 	f.mu.Lock()
 	f.records++
 	f.mu.Unlock()
 }
 
-func (f *fakeUsage) RecordLimited(context.Context) {
+func (f *fakeUsage) RecordLimited(context.Context, domain.ClaudeAccount) {
 	f.mu.Lock()
 	f.paused = true
 	f.mu.Unlock()
@@ -421,6 +431,8 @@ type harness struct {
 	plane    *fakeTracker
 	settings *fakeSettings
 	usage    *fakeUsage
+	// muse stands in for Muse: tests give it ears.
+	muse     *aitest.Provider
 	shots    *memShots
 	progress *memProgress
 }
@@ -440,16 +452,18 @@ func newHarness(t *testing.T) *harness {
 	}
 	h := &harness{t: t, ctx: ctx, store: store, pool: pool,
 		runner: &fakeRunner{execs: map[string][]orchestrator.ExecResult{}}, git: &fakeGit{}, host: &fakeHost{}, tracker: &fakeTracker{}, plane: &fakeTracker{},
-		shots: &memShots{m: map[string][]byte{}}, progress: &memProgress{}}
+		shots: &memShots{m: map[string][]byte{}}, progress: &memProgress{}, muse: aitest.Muse()}
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.settings = &fakeSettings{s: domain.DefaultSettings()}
 	h.settings.s.Git.AuthorName, h.settings.s.Git.AuthorEmail = "Rustam", "r@example.com"
 	h.settings.s.AutoReview = false     // review_test.go turns it on
 	h.settings.s.RecheckComplex = false // planning_test.go turns it on
+	h.settings.s.SwitchModules = false  // these tests wait at limits; modules_test.go switches
 	h.usage = &fakeUsage{}
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker, domain.SourcePlane: h.plane},
+		Providers: ai.NewRegistry(h.muse, aitest.Claude(), aitest.Codex()),
+		Store:     store, Runner: h.runner, Git: h.git, Host: h.host, Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker, domain.SourcePlane: h.plane},
 		Homes: &memHomes{}, Progress: h.progress, Settings: h.settings, Usage: h.usage, Translations: postgres.NewTranslations(pool),
 		Shots: h.shots, PreviewEnvs: fakeEnvs{},
 	}, log)
@@ -513,8 +527,8 @@ func analysis(questions int) string {
 	return string(b)
 }
 
-func ok(session string) orchestrator.ClaudeResult {
-	return orchestrator.ClaudeResult{SessionID: session, Turns: 5, Subtype: "success", Text: "done"}
+func ok(session string) ai.Result {
+	return ai.Result{SessionID: session, Turns: 5, Subtype: "success", Text: "done"}
 }
 
 // ---- tests ----
@@ -609,7 +623,7 @@ func TestCheckFailureIsFixed(t *testing.T) {
 func TestTokenSpendPerStage(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-20")
-	spend := func(session string, in, out int64, cost float64) orchestrator.ClaudeResult {
+	spend := func(session string, in, out int64, cost float64) ai.Result {
 		r := ok(session)
 		r.Model = "claude-opus-5-5"
 		r.Usage = domain.TokenUsage{Input: in, Output: out, CacheRead: 10 * in, CostUSD: cost}
@@ -662,7 +676,7 @@ func TestTokenSpendPerStage(t *testing.T) {
 func TestPartialSpendIsRecorded(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-21")
-	cut := orchestrator.ClaudeResult{Partial: true, Usage: domain.TokenUsage{Input: 40, Output: 7}}
+	cut := ai.Result{Partial: true, Usage: domain.TokenUsage{Input: 40, Output: 7}}
 	h.runner.scripts = []script{{result: cut, err: errors.New("claude timed out after 1m0s")}}
 
 	h.step()
@@ -871,7 +885,7 @@ func TestRetryWithNote(t *testing.T) {
 func TestRateLimitedAnalysis(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-4")
-	h.runner.scripts = []script{{result: orchestrator.ClaudeResult{SessionID: "s4", RateLimited: true, IsError: true}}}
+	h.runner.scripts = []script{{result: ai.Result{SessionID: "s4", RateLimited: true, IsError: true}}}
 	h.step()
 	tk := h.expect("PAY-4", domain.StateRateLimited)
 	if tk.ResumeState != domain.StateNew {
@@ -1063,7 +1077,7 @@ func TestModelsStopAndPRTemplate(t *testing.T) {
 	}
 
 	var models []string
-	h.runner.onClaude = func(req orchestrator.ClaudeRequest) { models = append(models, req.Model) }
+	h.runner.onClaude = func(req ai.Request) { models = append(models, req.Model) }
 	h.runner.scripts = []script{
 		{result: ok("m1"), files: map[string]string{orchestrator.AnalysisPath: analysis(0)}},
 		{result: ok("m1"), edit: "x"},
@@ -1110,7 +1124,7 @@ func TestModelsStopAndPRTemplate(t *testing.T) {
 func TestAutoResume(t *testing.T) {
 	h := newHarness(t)
 	h.ingest("PAY-23")
-	h.runner.scripts = []script{{result: orchestrator.ClaudeResult{RateLimited: true, IsError: true}}}
+	h.runner.scripts = []script{{result: ai.Result{RateLimited: true, IsError: true}}}
 	h.step()
 	h.expect("PAY-23", domain.StateRateLimited)
 

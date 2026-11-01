@@ -1,4 +1,4 @@
-package runner
+package codex
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"agnts/internal/orchestrator"
+	"agnts/internal/ai"
 )
 
 func TestParseCodexStream(t *testing.T) {
@@ -15,8 +15,8 @@ func TestParseCodexStream(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = f.Close() }()
-	var evs []orchestrator.ClaudeEvent
-	res, err := ParseCodexStream(f, func(e orchestrator.ClaudeEvent) { evs = append(evs, e) })
+	var evs []ai.Event
+	res, err := ParseCodexStream(f, func(e ai.Event) { evs = append(evs, e) })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,11 +24,11 @@ func TestParseCodexStream(t *testing.T) {
 		res.Text != "Rounded half up in pay/refund.go." || res.Usage.CacheRead != 24448 || res.Usage.Input != 315 || res.Usage.Output != 122 {
 		t.Fatalf("result: %+v", res)
 	}
-	var kinds []orchestrator.ClaudeEventKind
+	var kinds []ai.EventKind
 	for _, e := range evs {
 		kinds = append(kinds, e.Kind)
 	}
-	want := []orchestrator.ClaudeEventKind{"init", "tool", "tool_result", "tool", "text", "result"}
+	want := []ai.EventKind{"init", "tool", "tool_result", "tool", "text", "result"}
 	if !slices.Equal(kinds, want) {
 		t.Fatalf("events %v, want %v", kinds, want)
 	}
@@ -47,7 +47,7 @@ func TestCodexFailureAndArgs(t *testing.T) {
 	if _, err := ParseCodexStream(strings.NewReader(`{"type":"thread.started","thread_id":"t1"}`), nil); err == nil {
 		t.Fatal("a stream without a finished turn parsed")
 	}
-	argv := codexArgv(orchestrator.ClaudeRequest{Prompt: "review", ReadOnly: true, Resume: "t1"}, "gpt-5-codex")
+	argv := codexArgv(ai.Request{Prompt: "review", ReadOnly: true, Resume: "t1"}, "gpt-5-codex")
 	if got := strings.Join(argv, " "); got != "codex exec --json --skip-git-repo-check --sandbox read-only --model gpt-5-codex resume t1 review" {
 		t.Fatalf("argv: %s", got)
 	}

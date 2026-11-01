@@ -19,6 +19,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 )
 
@@ -48,17 +50,17 @@ func decodeBody(t *testing.T, body []byte) []map[string]any {
 func TestTranscriptWriterLines(t *testing.T) {
 	sw := domain.NewRedactor(domain.AuthBearer, "swagger-token-123456")
 	w := newTranscriptWriter(domain.RunHistorySettings{ToolOutputKB: 1, TextKB: 1, TranscriptMB: 8}, &sw)
-	w.event(ClaudeEvent{Kind: ClaudeInit, Data: map[string]any{"session_id": "s1", "model": "opus"}})
-	w.event(ClaudeEvent{Kind: ClaudeText, Text: "calling the API with swagger-token-123456"})
-	w.event(ClaudeEvent{Kind: ClaudeTool, Tool: "Bash: go test", Data: map[string]any{"tool": "Bash", "id": "t1",
+	w.event(ai.Event{Kind: ai.EventInit, Data: map[string]any{"session_id": "s1", "model": "opus"}})
+	w.event(ai.Event{Kind: ai.EventText, Text: "calling the API with swagger-token-123456"})
+	w.event(ai.Event{Kind: ai.EventTool, Tool: "Bash: go test", Data: map[string]any{"tool": "Bash", "id": "t1",
 		"input": json.RawMessage(`{"command":"go test ./..."}`)}})
 	big := strings.Repeat("a", 3000) + "THE ERROR AT THE END"
-	w.event(ClaudeEvent{Kind: ClaudeToolResult, Data: map[string]any{"id": "t1", "is_error": true, "output": big}})
-	w.event(ClaudeEvent{Kind: ClaudeToolResult, Data: map[string]any{"id": "t2", "is_error": false,
+	w.event(ai.Event{Kind: ai.EventToolResult, Data: map[string]any{"id": "t1", "is_error": true, "output": big}})
+	w.event(ai.Event{Kind: ai.EventToolResult, Data: map[string]any{"id": "t2", "is_error": false,
 		"output": "GITHUB_TOKEN=ghp_" + strings.Repeat("Z9", 20)}})
 	first, _ := w.take()
 	w.note("stall: the same test failed 6 times")
-	w.event(ClaudeEvent{Kind: ClaudeResultEv, Text: "done", Data: map[string]any{"subtype": "success", "is_error": false, "num_turns": 3, "total_cost_usd": 0.5}})
+	w.event(ai.Event{Kind: ai.EventResult, Text: "done", Data: map[string]any{"subtype": "success", "is_error": false, "num_turns": 3, "total_cost_usd": 0.5}})
 	second, counts := w.take()
 
 	lines := decodeBody(t, append(first, second...)) // two gzip members read as one stream
@@ -99,11 +101,11 @@ func TestTranscriptWriterLines(t *testing.T) {
 func TestTranscriptWriterCap(t *testing.T) {
 	w := newTranscriptWriter(domain.RunHistorySettings{ToolOutputKB: 1024, TextKB: 1024, TranscriptMB: 1}, nil)
 	for i := 0; i < 3; i++ {
-		w.event(ClaudeEvent{Kind: ClaudeText, Text: strings.Repeat("x", 600<<10)})
+		w.event(ai.Event{Kind: ai.EventText, Text: strings.Repeat("x", 600<<10)})
 	}
-	w.event(ClaudeEvent{Kind: ClaudeTool, Tool: "Read: a.go", Data: map[string]any{"tool": "Read", "id": "t9",
+	w.event(ai.Event{Kind: ai.EventTool, Tool: "Read: a.go", Data: map[string]any{"tool": "Read", "id": "t9",
 		"input": json.RawMessage(`{"file_path":"a.go"}`)}})
-	w.event(ClaudeEvent{Kind: ClaudeResultEv, Text: "done", Data: map[string]any{"subtype": "success"}})
+	w.event(ai.Event{Kind: ai.EventResult, Text: "done", Data: map[string]any{"subtype": "success"}})
 	body, counts := w.take()
 	lines := decodeBody(t, body)
 	if !counts.Truncated || len(lines) != 4 { // two texts fit, the third is past the cap; tool and result are kept
@@ -124,9 +126,9 @@ func TestTranscriptWriterDue(t *testing.T) {
 	if w.due(now) || !w.due(now.Add(flushEvery+time.Second)) {
 		t.Fatal("time flush")
 	}
-	w.event(ClaudeEvent{Kind: ClaudeText, Text: strings.Repeat("y", 30<<10)})
+	w.event(ai.Event{Kind: ai.EventText, Text: strings.Repeat("y", 30<<10)})
 	for i := 0; i < 10; i++ {
-		w.event(ClaudeEvent{Kind: ClaudeText, Text: strings.Repeat("y", 30<<10)})
+		w.event(ai.Event{Kind: ai.EventText, Text: strings.Repeat("y", 30<<10)})
 	}
 	if !w.due(now) {
 		t.Fatal("size flush")
@@ -150,17 +152,17 @@ func TestTranscriptEnd(t *testing.T) {
 	cancel()
 	for _, tc := range []struct {
 		ctx  context.Context
-		res  ClaudeResult
+		res  ai.Result
 		err  error
 		want domain.TranscriptStatus
 	}{
-		{ctx, ClaudeResult{Subtype: "success"}, nil, domain.TranscriptDone},
-		{ctx, ClaudeResult{Subtype: "error_max_turns", IsError: true}, nil, domain.TranscriptError},
-		{ctx, ClaudeResult{RateLimited: true}, nil, domain.TranscriptError},
-		{ctx, ClaudeResult{}, errors.New("claude timed out after 30m0s"), domain.TranscriptTimeout},
-		{ctx, ClaudeResult{}, &OOMError{LimitMB: 4096}, domain.TranscriptOOM},
-		{cancelled, ClaudeResult{}, context.Canceled, domain.TranscriptCancelled},
-		{ctx, ClaudeResult{}, errors.New("docker exec failed"), domain.TranscriptError},
+		{ctx, ai.Result{Subtype: "success"}, nil, domain.TranscriptDone},
+		{ctx, ai.Result{Subtype: "error_max_turns", IsError: true}, nil, domain.TranscriptError},
+		{ctx, ai.Result{RateLimited: true}, nil, domain.TranscriptError},
+		{ctx, ai.Result{}, errors.New("claude timed out after 30m0s"), domain.TranscriptTimeout},
+		{ctx, ai.Result{}, &OOMError{LimitMB: 4096}, domain.TranscriptOOM},
+		{cancelled, ai.Result{}, context.Canceled, domain.TranscriptCancelled},
+		{ctx, ai.Result{}, errors.New("docker exec failed"), domain.TranscriptError},
 	} {
 		if got := transcriptEnd(tc.ctx, tc.res, tc.err); got.Status != tc.want {
 			t.Errorf("%+v %v: %s, want %s", tc.res, tc.err, got.Status, tc.want)
@@ -211,12 +213,12 @@ func (m *memRecorder) RunHistorySettings(context.Context) (domain.RunHistorySett
 // scriptedWS is a Workspace whose Claude streams fixed events.
 type scriptedWS struct {
 	Workspace
-	events []ClaudeEvent
-	res    ClaudeResult
+	events []ai.Event
+	res    ai.Result
 	err    error
 }
 
-func (w scriptedWS) Claude(_ context.Context, _ ClaudeRequest, on func(ClaudeEvent)) (ClaudeResult, error) {
+func (w scriptedWS) Claude(_ context.Context, _ ai.Request, on func(ai.Event)) (ai.Result, error) {
 	for _, e := range w.events {
 		if on != nil {
 			on(e)
@@ -227,16 +229,17 @@ func (w scriptedWS) Claude(_ context.Context, _ ClaudeRequest, on func(ClaudeEve
 
 func TestCallClaudeRecords(t *testing.T) {
 	rec := &memRecorder{bodies: map[int64][]byte{}, ends: map[int64]domain.TranscriptEnd{}}
-	o := &Orchestrator{recorder: rec, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
-	ctx := domain.WithClaude(domain.System(context.Background()), domain.ClaudeAccount{ConnectionID: 7, Label: "team"})
+	o := &Orchestrator{ai: ai.New(ai.Deps{Providers: aitest.Providers()}), recorder: rec, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	ctx := ai.WithAdmission(domain.System(context.Background()), ai.Admission{Access: domain.DefaultAccess(), Primary: ai.Claude,
+		Routes: map[string]ai.Route{ai.Claude: {Provider: ai.Claude, Account: domain.ClaudeAccount{ConnectionID: 7, Label: "team"}}}})
 	run := &domain.Run{ID: 42, Stage: domain.StageCode}
-	ws := scriptedWS{events: []ClaudeEvent{
-		{Kind: ClaudeTool, Tool: "Bash: go test", Data: map[string]any{"tool": "Bash", "id": "t1"}},
-		{Kind: ClaudeToolResult, Data: map[string]any{"id": "t1", "is_error": true, "output": "FAIL"}},
-	}, res: ClaudeResult{Subtype: "success", Turns: 3, Usage: domain.TokenUsage{Input: 10, CostUSD: 0.2}}}
+	ws := scriptedWS{events: []ai.Event{
+		{Kind: ai.EventTool, Tool: "Bash: go test", Data: map[string]any{"tool": "Bash", "id": "t1"}},
+		{Kind: ai.EventToolResult, Data: map[string]any{"id": "t1", "is_error": true, "output": "FAIL"}},
+	}, res: ai.Result{Subtype: "success", Turns: 3, Usage: domain.TokenUsage{Input: 10, CostUSD: 0.2}}}
 	seen := 0
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: "code", WorkspaceID: 5, Run: run, TicketKey: "PAY-1", ModelStage: "coding"},
-		ClaudeRequest{Prompt: "fix it", Model: "opus"}, func(ClaudeEvent) {
+		ai.Request{Prompt: "fix it", Model: "opus"}, func(ai.Event) {
 			seen++
 			run.Harness.Stalls = append(run.Harness.Stalls, domain.Stall{Reason: "loop"}) // a stall during the call
 		})
@@ -260,26 +263,28 @@ func TestCallClaudeRecords(t *testing.T) {
 	}
 
 	// Without a workspace nothing is recorded, and the call still runs.
-	o2 := &Orchestrator{recorder: rec, log: o.log}
-	if _, err := o2.callClaude(domain.System(context.Background()), ws, transcriptMeta{Purpose: domain.PurposeDetect}, ClaudeRequest{}, nil); err != nil || len(rec.starts) != 1 {
+	o2 := &Orchestrator{ai: o.ai, recorder: rec, log: o.log}
+	if _, err := o2.callClaude(domain.System(context.Background()), ws, transcriptMeta{Purpose: domain.PurposeDetect}, ai.Request{}, nil); err != nil || len(rec.starts) != 1 {
 		t.Fatalf("no workspace: %v, %d starts", err, len(rec.starts))
 	}
 	// A failing recorder never fails the run.
 	rec.fail = true
 	ws.err = errors.New("claude ended badly")
-	if _, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeBrief, WorkspaceID: 5}, ClaudeRequest{}, nil); err == nil || err.Error() != "claude ended badly" {
+	if _, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeBrief, WorkspaceID: 5}, ai.Request{}, nil); err == nil || err.Error() != "claude ended badly" {
 		t.Fatalf("failing recorder: %v", err)
 	}
 }
 
-// Every Claude Code or Codex invocation goes through callClaude, so it is
-// recorded. The usage refresh is the one exception: a one-turn probe in a
-// throwaway container, with no workspace.
+// Every model call of the orchestrator goes through callClaude, so it is
+// recorded, and callClaude through the gateway. The usage refresh is the
+// one exception: a one-turn probe in a throwaway container, with no
+// workspace.
 func TestEveryClaudeCallIsRecorded(t *testing.T) {
-	call := regexp.MustCompile(`\.Claude\(ctx`)
+	call := regexp.MustCompile(`\.ai\.Run\(ctx|\.Exec\(ctx, (ws|w|box), `)
 	allowed := map[string]bool{
 		filepath.Join("orchestrator", "transcript.go"): true, // callClaude itself
 		filepath.Join("usage", "usage.go"):             true, // the usage refresh probe
+		filepath.Join("ai", "gateway.go"):              true, // the gateway runs providers
 	}
 	root := ".."
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
@@ -292,7 +297,7 @@ func TestEveryClaudeCallIsRecorded(t *testing.T) {
 		}
 		rel, _ := filepath.Rel(root, p)
 		for i, line := range strings.Split(string(b), "\n") {
-			if call.MatchString(line) && !strings.Contains(line, "o.callClaude(") && !allowed[rel] {
+			if call.MatchString(line) && !strings.Contains(line, "o.callClaude(") && !allowed[rel] && !strings.HasPrefix(rel, filepath.Join("ai", "providers")) {
 				t.Errorf("%s:%d calls Claude without recording it; use o.callClaude: %s", rel, i+1, strings.TrimSpace(line))
 			}
 		}

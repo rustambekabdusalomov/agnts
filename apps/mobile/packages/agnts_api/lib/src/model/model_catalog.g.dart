@@ -13,6 +13,10 @@ abstract class _$ModelCatalogCWProxy {
 
   ModelCatalog models(List<ModelCatalogModelsInner> models);
 
+  ModelCatalog modules(List<ModelCatalogModulesInner>? modules);
+
+  ModelCatalog tiers(List<ModelCatalogTiersInner>? tiers);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ModelCatalog(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +27,8 @@ abstract class _$ModelCatalogCWProxy {
     List<ModelCatalogProvidersEnum> providers,
     ModelCatalogPrimaryEnum primary,
     List<ModelCatalogModelsInner> models,
+    List<ModelCatalogModulesInner>? modules,
+    List<ModelCatalogTiersInner>? tiers,
   });
 }
 
@@ -45,6 +51,13 @@ class _$ModelCatalogCWProxyImpl implements _$ModelCatalogCWProxy {
       this(models: models);
 
   @override
+  ModelCatalog modules(List<ModelCatalogModulesInner>? modules) =>
+      this(modules: modules);
+
+  @override
+  ModelCatalog tiers(List<ModelCatalogTiersInner>? tiers) => this(tiers: tiers);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ModelCatalog(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -55,6 +68,8 @@ class _$ModelCatalogCWProxyImpl implements _$ModelCatalogCWProxy {
     Object? providers = const $CopyWithPlaceholder(),
     Object? primary = const $CopyWithPlaceholder(),
     Object? models = const $CopyWithPlaceholder(),
+    Object? modules = const $CopyWithPlaceholder(),
+    Object? tiers = const $CopyWithPlaceholder(),
   }) {
     return ModelCatalog(
       providers: providers == const $CopyWithPlaceholder()
@@ -69,6 +84,14 @@ class _$ModelCatalogCWProxyImpl implements _$ModelCatalogCWProxy {
           ? _value.models
           // ignore: cast_nullable_to_non_nullable
           : models as List<ModelCatalogModelsInner>,
+      modules: modules == const $CopyWithPlaceholder()
+          ? _value.modules
+          // ignore: cast_nullable_to_non_nullable
+          : modules as List<ModelCatalogModulesInner>?,
+      tiers: tiers == const $CopyWithPlaceholder()
+          ? _value.tiers
+          // ignore: cast_nullable_to_non_nullable
+          : tiers as List<ModelCatalogTiersInner>?,
     );
   }
 }
@@ -106,6 +129,25 @@ ModelCatalog _$ModelCatalogFromJson(Map<String, dynamic> json) =>
               )
               .toList(),
         ),
+        modules: $checkedConvert(
+          'modules',
+          (v) => (v as List<dynamic>?)
+              ?.map(
+                (e) => ModelCatalogModulesInner.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList(),
+        ),
+        tiers: $checkedConvert(
+          'tiers',
+          (v) => (v as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    ModelCatalogTiersInner.fromJson(e as Map<String, dynamic>),
+              )
+              .toList(),
+        ),
       );
       return val;
     });
@@ -117,6 +159,8 @@ Map<String, dynamic> _$ModelCatalogToJson(ModelCatalog instance) =>
           .toList(),
       'primary': _$ModelCatalogPrimaryEnumEnumMap[instance.primary]!,
       'models': instance.models.map((e) => e.toJson()).toList(),
+      'modules': ?instance.modules?.map((e) => e.toJson()).toList(),
+      'tiers': ?instance.tiers?.map((e) => e.toJson()).toList(),
     };
 
 const _$ModelCatalogProvidersEnumEnumMap = {

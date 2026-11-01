@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/skillpacks"
 )
@@ -63,8 +64,8 @@ func hasFiles(ctx context.Context, ws Workspace, rs []runRepo, re string) bool {
 
 // noteSkill records a skill Claude loaded in a run, from its Skill tool
 // call ("Skill: <name>").
-func noteSkill(run *domain.Run, e ClaudeEvent) {
-	if e.Kind != ClaudeTool {
+func noteSkill(run *domain.Run, e ai.Event) {
+	if e.Kind != ai.EventTool {
 		return
 	}
 	if tool, _ := e.Data["tool"].(string); tool != "Skill" {

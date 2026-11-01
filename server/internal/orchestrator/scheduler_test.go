@@ -10,6 +10,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/aitest"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -25,7 +27,11 @@ type fakeAccounts struct {
 	picked []domain.ClaudeAccount
 }
 
-func (f *fakeAccounts) Pick(_ context.Context, w domain.Workspace, member *int64, provider string) (domain.ClaudeAccount, bool, string, time.Time) {
+func (f *fakeAccounts) Credential(_ context.Context, a domain.ClaudeAccount) (ai.Credential, error) {
+	return ai.Credential{Token: "test"}, nil
+}
+
+func (f *fakeAccounts) Pick(_ context.Context, w domain.Workspace, member *int64, provider string, _ bool) (domain.ClaudeAccount, bool, string, time.Time) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.paused[w.ID] {
@@ -74,7 +80,8 @@ func newSchedAccess(t *testing.T, budgetMB int64, access orchestrator.AccessSour
 	settings := postgres.NewSettings(pool, domain.DefaultSettings())
 	s.settings, s.pool = settings, pool
 	s.o = orchestrator.New(orchestrator.DefaultConfig(), orchestrator.Deps{
-		Store: s.store, Runner: s.runner, Git: &fakeGit{}, Host: &fakeHost{}, Homes: &memHomes{},
+		Providers: aitest.Providers(),
+		Store:     s.store, Runner: s.runner, Git: &fakeGit{}, Host: &fakeHost{}, Homes: &memHomes{},
 		Settings: settings, Usage: &fakeUsage{}, Workspaces: postgres.NewWorkspaces(pool),
 		Accounts: s.accounts, Capacity: s.budget, Access: access,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))

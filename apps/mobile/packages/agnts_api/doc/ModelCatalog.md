@@ -11,6 +11,8 @@ Name | Type | Description | Notes
 **providers** | **List&lt;String&gt;** | The coding modules you may use (an Admin chooses them); empty when none | 
 **primary** | **String** | Your default module; settings naming a module you may not use run on its models | 
 **models** | [**List&lt;ModelCatalogModelsInner&gt;**](ModelCatalogModelsInner.md) |  | 
+**modules** | [**List&lt;ModelCatalogModulesInner&gt;**](ModelCatalogModulesInner.md) | The modules you may use, in your order, each with its own light and strong model (absent when the module has none, like Codex without AGNTS_CODEX_MODELS) | [optional] 
+**tiers** | [**List&lt;ModelCatalogTiersInner&gt;**](ModelCatalogTiersInner.md) | Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

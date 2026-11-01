@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/toolchain"
 )
@@ -1466,7 +1467,8 @@ func (o *Orchestrator) AutoResume(ctx context.Context, s domain.Settings) {
 	if !s.AutoResume || ctx.Err() != nil {
 		return
 	}
-	if paused, _ := o.usage.Paused(ctx, s); paused {
+	// The workspace's default person's account for the coding model.
+	if err := o.hold(ctx, transcriptMeta{Purpose: ai.PurposeAutoResume}, s.For(domain.AccessOf(ctx)).Models.Coding); errors.Is(err, ErrPlanLimit) {
 		return
 	}
 	ts, err := o.store.ListTickets(ctx, TicketFilter{States: []domain.TicketState{domain.StateRateLimited}})

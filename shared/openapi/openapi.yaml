@@ -9073,12 +9073,12 @@ components:
 
     Model:
       type: string
-      pattern: '^(haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63}|muse:[a-z0-9][a-z0-9._-]{0,63})$'
-      description: 'muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), or codex:<model> for Codex CLI. listModels says which this server offers.'
+      pattern: '^(haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63}|muse:[a-z0-9][a-z0-9._-]{0,63}|tier:(light|strong))$'
+      description: 'muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers.'
 
     ReviewModel:
       type: string
-      pattern: '^(auto|haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63}|muse:[a-z0-9][a-z0-9._-]{0,63})$'
+      pattern: '^(auto|haiku|sonnet|opus|codex:[a-z0-9][a-z0-9._-]{0,63}|muse:[a-z0-9][a-z0-9._-]{0,63}|tier:(light|strong))$'
       description: 'auto: the stronger model (muse:wonder, opus) for complex tickets, the lighter one otherwise'
 
     ModelCatalog:
@@ -9102,6 +9102,27 @@ components:
               strong: { type: boolean, description: 'The stronger, dearer tier' }
               inputPerMillionUSD: { type: number }
               outputPerMillionUSD: { type: number }
+        modules:
+          type: array
+          description: 'The modules you may use, in your order, each with its own light and strong model (absent when the module has none, like Codex without AGNTS_CODEX_MODELS)'
+          items:
+            type: object
+            required: [id, label]
+            properties:
+              id: { type: string, enum: [muse, claude, codex] }
+              label: { type: string }
+              light: { $ref: '#/components/schemas/Model' }
+              strong: { $ref: '#/components/schemas/Model' }
+        tiers:
+          type: array
+          description: 'Tiers a setting may name instead of a model: the run lands on the light or strong model of whichever module can run it'
+          items:
+            type: object
+            required: [id, label, strong]
+            properties:
+              id: { $ref: '#/components/schemas/Model' }
+              label: { type: string }
+              strong: { type: boolean }
 
     MuseLogin:
       type: object
@@ -9148,6 +9169,8 @@ components:
         learn: { $ref: '#/components/schemas/Model' }
         review: { $ref: '#/components/schemas/ReviewModel' }
         preview: { $ref: '#/components/schemas/Model' }
+        chat: { $ref: '#/components/schemas/Model' }
+        documents: { $ref: '#/components/schemas/Model' }
 
     TicketRepo:
       type: object
@@ -9652,6 +9675,7 @@ components:
           items: { type: string, maxLength: 200 }
         askFirst: { type: boolean }
         autoResume: { type: boolean }
+        switchModules: { type: boolean, description: "When a call's module cannot run (no usable account, its limit reached, not enabled for the person), run it on the person's next module, on the model of the same tier; off waits for the module" }
         autoLearn: { type: boolean, description: Learn from every pushed ticket }
         autoReview: { type: boolean, description: Review every result while it waits for review }
         autoPreview: { type: boolean, description: Take screenshots of every UI change in repositories with a preview command }

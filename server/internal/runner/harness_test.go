@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/providers/claudecode"
 	"agnts/internal/guard"
 	"agnts/internal/orchestrator"
 )
@@ -116,9 +118,7 @@ func TestHostileRepoInRunner(t *testing.T) {
 	defer cancel()
 	cfg := DefaultConfig()
 	cfg.Network, cfg.GuardBinary = "agnts-test-runs", guardBin
-	r := New(NewDocker(sock), cfg, func(context.Context) (Credential, error) {
-		return Credential{Env: "CLAUDE_CODE_OAUTH_TOKEN", Token: token}, nil
-	})
+	r := New(NewDocker(sock), cfg)
 	ws, err := r.Open(ctx, orchestrator.WorkspaceSpec{TicketKey: "HOSTILE-1", Image: image, Repo: bytes.NewReader(hostileRepo(t))})
 	if err != nil {
 		t.Fatal(err)
@@ -126,7 +126,7 @@ func TestHostileRepoInRunner(t *testing.T) {
 	defer func() { _ = ws.Close(context.Background()) }()
 
 	gc := guard.Config{Profile: guard.Standard, Rules: []guard.Rule{{ID: 1, Title: "no ls", On: guard.OnBash, Pattern: `^ls\b`, Action: guard.ActionBlock}}}
-	res, err := ws.Claude(ctx, orchestrator.ClaudeRequest{
+	res, err := claudecode.New(nil).Exec(ctx, ws, ai.Credential{Env: claudecode.EnvOAuth, Token: token}, ai.Request{
 		Prompt:   "Run the shell command `ls -la /workspace` with the Bash tool, then reply DONE. Do nothing else.",
 		Model:    "haiku",
 		MaxTurns: 4,

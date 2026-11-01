@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/toolchain"
 )
@@ -36,8 +37,8 @@ func (o *Orchestrator) DetectDeep(ctx context.Context, repo domain.Repository, b
 	if err != nil {
 		return base, err
 	}
-	if paused, _ := o.usage.Paused(ctx, s); paused {
-		return base, ErrPlanLimit
+	if err := o.hold(ctx, transcriptMeta{Purpose: domain.PurposeDetect, WorkspaceID: repo.WorkspaceID}, s.Models.Helper); err != nil {
+		return base, err
 	}
 	if err := o.git.Prepare(ctx, repo, repo.DefaultBranch); err != nil {
 		return base, fmt.Errorf("prepare repository: %w", err)
@@ -60,22 +61,17 @@ func (o *Orchestrator) DetectDeep(ctx context.Context, repo domain.Repository, b
 			o.log.Warn("remove container", "repo", repo.Name, "err", err)
 		}
 	}()
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDetect, WorkspaceID: repo.WorkspaceID, Subject: repo.Name}, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeDetect, WorkspaceID: repo.WorkspaceID, Subject: repo.Name}, ai.Request{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
 		MaxTurns: min(s.MaxTurns, detectMaxTurns),
 		Timeout:  time.Duration(min(s.TimeoutMin, detectTimeoutMin)) * time.Minute,
 		Settings: permissionSettings(s, true),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	if err != nil {
 		return base, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return base, ErrPlanLimit
 	}
 	if res.IsError {

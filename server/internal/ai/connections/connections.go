@@ -1,9 +1,11 @@
-// Package claude decides which Claude account each run uses. The owner of a
-// workspace picks the mode: shared (the workspace's own connection) or per
-// member (the connection of the ticket's member). When that account is at
-// its limit or missing, a fallback switch lets runs continue on agnts's API
-// key, paid with the workspace's credits.
-package claude
+// Package connections keeps the AI accounts calls run on and picks one for
+// a call (ai.Accounts): the workspace's connection or a member's, per
+// module (Muse, Claude; Codex runs on the workspace's OpenAI key). The
+// owner of a workspace picks the mode: shared (the workspace's own
+// connection) or per member (the connection of the ticket's member). When
+// that account is at its limit or missing, a fallback switch lets runs
+// continue on agnts's API key, paid with the workspace's credits.
+package connections
 
 import (
 	"context"
@@ -15,6 +17,7 @@ import (
 
 	"github.com/rustambekabdusalomov/agnts-muse/credential"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -35,10 +38,10 @@ type Connections interface {
 	UpdateToken(ctx context.Context, id int64, token string) error
 }
 
-// Usage says whether an account is at its limit (the account is in ctx).
+// Usage says whether an account is at its limit.
 type Usage interface {
-	Paused(ctx context.Context, s domain.Settings) (bool, time.Time)
-	Current(ctx context.Context, s domain.Settings) (usage.View, error)
+	Paused(ctx context.Context, acct domain.ClaudeAccount, s domain.Settings) (bool, time.Time)
+	Current(ctx context.Context, acct domain.ClaudeAccount, s domain.Settings) (usage.View, error)
 }
 
 // Users names members in messages.
@@ -66,9 +69,10 @@ type Config struct {
 	// has not turned on continuing with credits. Free credits are Muse
 	// ledger money: they never pay for Claude.
 	Free func(ctx context.Context, userID int64) bool
-	// CodexReady says whether the workspace ctx acts in has an OpenAI key
-	// for Codex runs (Integrations → OpenAI); nil when Codex is not set up.
-	CodexReady func(ctx context.Context) bool
+	// CodexKey returns the OpenAI API key of the workspace ctx acts in,
+	// for Codex runs (Integrations → OpenAI; "" when none); nil when Codex
+	// is not set up.
+	CodexKey func(ctx context.Context) (string, error)
 }
 
 // Service picks accounts and manages connections.
@@ -81,7 +85,7 @@ type Service struct {
 	hc       *http.Client
 }
 
-var _ orchestrator.ClaudeAccounts = (*Service)(nil)
+var _ ai.Accounts = (*Service)(nil)
 
 // New returns the service.
 func New(cfg Config, conns Connections, usage Usage, settings orchestrator.SettingsSource, users Users) *Service {
@@ -123,15 +127,15 @@ func connProvider(provider string) string {
 // SubscriptionsAllowed reports whether subscription tokens are accepted.
 func (s *Service) SubscriptionsAllowed() bool { return s.cfg.Subscriptions }
 
-// Pick implements orchestrator.ClaudeAccounts: the account a run of a
-// ticket of member in w uses on module provider. Muse uses the Muse
-// connection, then free credits, then workspace credits; Claude its
-// connection, then workspace credits; Codex the workspace's OpenAI key.
-func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, provider string) (domain.ClaudeAccount, bool, string, time.Time) {
+// Pick implements ai.Accounts: the account a call of member in w uses on
+// module provider. Muse uses the Muse connection, then free credits, then
+// workspace credits; Claude its connection, then workspace credits; Codex
+// the workspace's OpenAI key. credits false leaves agnts's key out.
+func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, provider string, credits bool) (domain.ClaudeAccount, bool, string, time.Time) {
 	payer := w.RunPerson(member)
 	tool := domain.ModuleName(provider)
 	if provider == domain.ProviderCodex {
-		if s.cfg.CodexReady == nil || !s.cfg.CodexReady(ctx) {
+		if !s.codexReady(ctx) {
 			return domain.ClaudeAccount{}, false, "Codex runs need an OpenAI API key: connect OpenAI under Integrations", time.Time{}
 		}
 		return domain.ClaudeAccount{Label: "the workspace's OpenAI key", UserID: payer, Provider: provider}, true, "", time.Time{}
@@ -164,7 +168,7 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, p
 		if serr != nil {
 			st = domain.DefaultSettings()
 		}
-		paused, at := s.usage.Paused(domain.WithClaude(ctx, acct), st)
+		paused, at := s.usage.Paused(ctx, acct, st)
 		if !paused {
 			return acct, true, "", time.Time{}
 		}
@@ -172,6 +176,9 @@ func (s *Service) Pick(ctx context.Context, w domain.Workspace, member *int64, p
 		if !at.IsZero() {
 			why += "; resumes at " + at.Format("15:04")
 		}
+	}
+	if !credits {
+		return domain.ClaudeAccount{}, false, why, until
 	}
 	if provider == domain.ProviderMuse && s.CreditsEnabled(provider) && s.cfg.Free != nil && s.cfg.Free(ctx, payer) {
 		return domain.ClaudeAccount{Credits: true, Label: "free credits", UserID: payer, Provider: provider}, true, "", time.Time{}
@@ -211,66 +218,56 @@ func (s *Service) name(ctx context.Context, id int64) string {
 	return u.Username
 }
 
-// Credential is what a run container needs to reach Claude.
-type Credential struct {
-	// Env is the variable Claude Code reads it from:
-	// CLAUDE_CODE_OAUTH_TOKEN for a subscription, ANTHROPIC_API_KEY for a key.
-	Env   string
-	Token string
+// codexReady reports whether the workspace ctx acts in has an OpenAI key.
+func (s *Service) codexReady(ctx context.Context) bool {
+	if s.cfg.CodexKey == nil {
+		return false
+	}
+	key, err := s.cfg.CodexKey(ctx)
+	return err == nil && key != ""
 }
 
-// CredentialFor returns the credential of the account ctx runs on. Without
-// an account in ctx it uses the workspace's shared connection (translation
-// and usage refresh runs outside the scheduler).
-func (s *Service) CredentialFor(ctx context.Context) (Credential, error) {
-	a, ok := domain.ClaudeOf(ctx)
-	provider := connProvider(domain.CurrentProvider(ctx))
-	if ok && a.Provider != "" {
-		provider = connProvider(a.Provider)
-	}
-	if ok && a.Credits {
+// Credential implements ai.Accounts: acct's secret. Codex runs on the
+// workspace's OpenAI key; a run on credits on agnts's key for its module.
+func (s *Service) Credential(ctx context.Context, acct domain.ClaudeAccount) (ai.Credential, error) {
+	switch {
+	case acct.Provider == domain.ProviderCodex:
+		if s.cfg.CodexKey == nil {
+			return ai.Credential{}, errors.New("codex is not available on this server")
+		}
+		key, err := s.cfg.CodexKey(ctx)
+		if err != nil {
+			return ai.Credential{}, fmt.Errorf("openai key: %w", err)
+		}
+		return ai.Credential{Env: "OPENAI_API_KEY", Token: key}, nil
+	case acct.Credits:
+		provider := connProvider(acct.Provider)
 		if !s.CreditsEnabled(provider) {
-			return Credential{}, errors.New("credits are not available on this server")
+			return ai.Credential{}, errors.New("credits are not available on this server")
 		}
 		if provider == domain.ProviderMuse {
-			return Credential{Env: EnvMuseKey, Token: s.cfg.MuseKey}, nil
+			return ai.Credential{Env: EnvMuseKey, Token: s.cfg.MuseKey}, nil
 		}
-		return Credential{Env: "ANTHROPIC_API_KEY", Token: s.cfg.PlatformKey}, nil
+		return ai.Credential{Env: "ANTHROPIC_API_KEY", Token: s.cfg.PlatformKey}, nil
+	case acct.ConnectionID <= 0:
+		return ai.Credential{}, fmt.Errorf("%s is not connected: connect an account in Workspace settings → AI accounts", strings.ToLower(domain.ModuleName(acct.Provider)))
 	}
-	var c postgres.ClaudeConnection
-	var err error
-	switch {
-	case ok && a.ConnectionID > 0:
-		c, err = s.conns.ByID(ctx, a.ConnectionID)
-	default:
-		ws, werr := domain.MustWorkspace(ctx)
-		if werr != nil {
-			return Credential{}, werr
-		}
-		c, err = s.conns.ForWorkspace(ctx, ws, provider)
-		if errors.Is(err, domain.ErrNotFound) {
-			if actor, ok := domain.ActorOf(ctx); ok {
-				c, err = s.conns.ForUser(ctx, actor.UserID, provider)
-			}
-		}
-	}
+	c, err := s.conns.ByID(ctx, acct.ConnectionID)
 	if errors.Is(err, domain.ErrNotFound) {
-		tool := domain.ModuleName(provider)
-		return Credential{}, fmt.Errorf("%s is not connected: connect an account in Workspace settings → AI accounts", strings.ToLower(tool))
+		return ai.Credential{}, fmt.Errorf("the %s account was disconnected", strings.ToLower(domain.ModuleName(acct.Provider)))
 	}
 	if err != nil {
-		return Credential{}, err
+		return ai.Credential{}, err
 	}
 	switch c.Kind {
 	case postgres.MuseAPIKey:
-		return Credential{Env: EnvMuseKey, Token: c.Token}, nil
+		return ai.Credential{Env: EnvMuseKey, Token: c.Token}, nil
 	case postgres.MuseLogin:
-		return Credential{Env: EnvMuseLogin, Token: c.Token}, nil
+		return ai.Credential{Env: EnvMuseLogin, Token: c.Token}, nil
+	case postgres.ClaudeAPIKey:
+		return ai.Credential{Env: "ANTHROPIC_API_KEY", Token: c.Token}, nil
 	}
-	if c.Kind == postgres.ClaudeAPIKey {
-		return Credential{Env: "ANTHROPIC_API_KEY", Token: c.Token}, nil
-	}
-	return Credential{Env: "CLAUDE_CODE_OAUTH_TOKEN", Token: c.Token}, nil
+	return ai.Credential{Env: "CLAUDE_CODE_OAUTH_TOKEN", Token: c.Token}, nil
 }
 
 // Environment names of Muse credentials (the runner reads them).
@@ -392,7 +389,7 @@ func (s *Service) UsageOf(ctx context.Context, c postgres.ClaudeConnection) (usa
 	if err != nil {
 		st = domain.DefaultSettings()
 	}
-	return s.usage.Current(domain.WithClaude(ctx, domain.ClaudeAccount{ConnectionID: c.ID, Provider: postgres.ProviderOfKind(c.Kind)}), st)
+	return s.usage.Current(ctx, domain.ClaudeAccount{ConnectionID: c.ID, Provider: postgres.ProviderOfKind(c.Kind)}, st)
 }
 
 // AccountFor returns the account the person in ctx sees usage for in
@@ -420,7 +417,11 @@ func (s *Service) PausedAccounts(ctx context.Context) []domain.ClaudeAccount {
 	}
 	out := make([]domain.ClaudeAccount, 0, len(ids))
 	for _, id := range ids {
-		out = append(out, domain.ClaudeAccount{ConnectionID: id})
+		a := domain.ClaudeAccount{ConnectionID: id}
+		if c, err := s.conns.ByID(ctx, id); err == nil {
+			a.Provider, a.Label = postgres.ProviderOfKind(c.Kind), c.Account
+		}
+		out = append(out, a)
 	}
 	return out
 }
@@ -435,16 +436,15 @@ func (s *Service) Resolve(ctx context.Context, ws domain.Workspace, provider str
 	return s.AccountFor(ctx, ws, uid, provider)
 }
 
-// KeepMuseLogin saves the Muse login a run ended with, when Muse refreshed
-// it during the run, so the connection does not expire. Runs on credits
-// and on API keys have nothing to keep.
-func (s *Service) KeepMuseLogin(ctx context.Context, file []byte) error {
-	a, ok := domain.ClaudeOf(ctx)
-	if !ok || a.Credits || a.ConnectionID == 0 {
+// KeepMuseLogin saves the Muse login a run on acct ended with, when Muse
+// refreshed it during the run, so the connection does not expire. Runs on
+// credits and on API keys have nothing to keep.
+func (s *Service) KeepMuseLogin(ctx context.Context, acct domain.ClaudeAccount, file []byte) error {
+	if acct.Credits || acct.ConnectionID == 0 {
 		return nil
 	}
 	if _, err := credential.LoginFile(file, ""); err != nil {
 		return err
 	}
-	return s.conns.UpdateToken(ctx, a.ConnectionID, string(file))
+	return s.conns.UpdateToken(ctx, acct.ConnectionID, string(file))
 }

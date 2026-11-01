@@ -170,7 +170,7 @@ const searchPages = computed<SearchPage[]>(() => [
   ...menus.value.flatMap((m) => m.items.filter((x) => x.to).map((x) => ({ key: x.key, label: t(x.label), icon: x.icon, to: x.to! }))),
   ...visibleSections(catalog.claudeOff.value).map((s) => ({
     key: `settings-${s.key}`,
-    label: `${t('nav.settings')} · ${t(sectionLabel(s, catalog.claudeOff.value))}`,
+    label: `${t('nav.settings')} · ${t(sectionLabel(s))}`,
     icon: sectionIcon(s, catalog.claudeOff.value),
     to: { name: 'settings', params: { section: s.key } },
   })),
@@ -390,7 +390,7 @@ onBeforeUnmount(() => {
                         :to="{ name: 'settings', params: { section: s.key } }"
                         :aria-current="settingsAt === s.key ? 'page' : undefined"
                       >
-                        <HiIcon :name="sectionIcon(s, catalog.claudeOff.value)" /><span class="lbl">{{ t(sectionLabel(s, catalog.claudeOff.value)) }}</span>
+                        <HiIcon :name="sectionIcon(s, catalog.claudeOff.value)" /><span class="lbl">{{ t(sectionLabel(s)) }}</span>
                       </RouterLink>
                     </div>
                   </div>
@@ -511,7 +511,7 @@ onBeforeUnmount(() => {
         :aria-current="settingsAt === x.key ? 'page' : undefined"
         @click="closeFly"
       >
-        <HiIcon :name="sectionIcon(x, catalog.claudeOff.value)" />{{ t(sectionLabel(x, catalog.claudeOff.value)) }}
+        <HiIcon :name="sectionIcon(x, catalog.claudeOff.value)" />{{ t(sectionLabel(x)) }}
       </RouterLink>
     </nav>
   </Transition>

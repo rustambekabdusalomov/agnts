@@ -20,6 +20,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"agnts/internal/accounts"
+	"agnts/internal/ai"
 	"agnts/internal/auth"
 	"agnts/internal/documents"
 	"agnts/internal/domain"
@@ -40,16 +41,19 @@ type Pinger interface {
 
 // Options configure the HTTP server.
 type Options struct {
-	Auth    *auth.Service
-	Tickets Tickets
-	Admin   *Admin  // Phase 2 pages; nil answers 501
-	Broker  *Broker // live event stream; nil answers 501
-	Devices Devices // push registrations
-	Lessons Lessons // Learn pages; nil answers 501
-	Rules   Rules   // Rules page; nil answers 501
-	Briefs  Briefs  // repository briefs; nil answers 501
-	Reviews Reviews // pull request reviews; nil answers 501
-	Pulls   Pulls   // pull request conversations; nil answers 501
+	// Providers are the coding agents behind the AI gateway: the model
+	// catalog lists their models. nil: the built-in Claude and Muse lists.
+	Providers *ai.Registry
+	Auth      *auth.Service
+	Tickets   Tickets
+	Admin     *Admin  // Phase 2 pages; nil answers 501
+	Broker    *Broker // live event stream; nil answers 501
+	Devices   Devices // push registrations
+	Lessons   Lessons // Learn pages; nil answers 501
+	Rules     Rules   // Rules page; nil answers 501
+	Briefs    Briefs  // repository briefs; nil answers 501
+	Reviews   Reviews // pull request reviews; nil answers 501
+	Pulls     Pulls   // pull request conversations; nil answers 501
 	// Drafts asks for reviews from pull request pages and keeps their
 	// draft comments; nil answers 501.
 	Drafts ReviewDrafts

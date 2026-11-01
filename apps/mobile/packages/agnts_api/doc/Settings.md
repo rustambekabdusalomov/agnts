@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **deny** | **List&lt;String&gt;** |  | 
 **askFirst** | **bool** |  | 
 **autoResume** | **bool** |  | 
+**switchModules** | **bool** | When a call's module cannot run (no usable account, its limit reached, not enabled for the person), run it on the person's next module, on the model of the same tier; off waits for the module | [optional] 
 **autoLearn** | **bool** | Learn from every pushed ticket | [optional] 
 **autoReview** | **bool** | Review every result while it waits for review | [optional] 
 **autoPreview** | **bool** | Take screenshots of every UI change in repositories with a preview command | [optional] 

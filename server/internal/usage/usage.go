@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 	"agnts/internal/store/postgres"
@@ -26,21 +27,14 @@ type Store interface {
 	Latest(ctx context.Context, conn *int64) (postgres.UsageSnapshot, bool, error)
 }
 
-// connOf is the Claude account ctx runs on: a connection, or nil for
-// agnts's own key and for installs that never picked one.
-func connOf(ctx context.Context) *int64 {
-	if a, ok := domain.ClaudeOf(ctx); ok && a.ConnectionID > 0 {
-		id := a.ConnectionID
+// connOf is acct's connection, or nil for agnts's own key and for
+// installs with one account for everything.
+func connOf(acct domain.ClaudeAccount) *int64 {
+	if acct.ConnectionID > 0 {
+		id := acct.ConnectionID
 		return &id
 	}
 	return nil
-}
-
-// onCredits reports whether ctx runs on agnts's key, paid with credits:
-// plan limits do not apply to it.
-func onCredits(ctx context.Context) bool {
-	a, ok := domain.ClaudeOf(ctx)
-	return ok && a.Credits
 }
 
 // Events appends to the event log (so SSE clients refresh).
@@ -57,36 +51,19 @@ type Tracker struct {
 	// paused learns when an account reaches or leaves its limit, so the
 	// account's row can show it.
 	paused func(ctx context.Context, conn int64, until *time.Time)
-	// resolve finds the account a context without one reads.
-	resolve func(ctx context.Context) (domain.ClaudeAccount, bool)
 
 	mu         sync.Mutex
 	refreshing bool
-}
-
-// SetResolver sets how a reading is found for a context without a Claude
-// account (pages and the refresh button): the account the workspace's
-// person would run on.
-func (t *Tracker) SetResolver(f func(ctx context.Context) (domain.ClaudeAccount, bool)) {
-	t.resolve = f
-}
-
-// account returns ctx with its Claude account, resolving one when needed.
-func (t *Tracker) account(ctx context.Context) context.Context {
-	if _, ok := domain.ClaudeOf(ctx); ok || t.resolve == nil {
-		return ctx
-	}
-	if a, ok := t.resolve(ctx); ok {
-		return domain.WithClaude(ctx, a)
-	}
-	return ctx
 }
 
 // OnPaused sets what learns that an account reached (until set) or left
 // (nil) its limit.
 func (t *Tracker) OnPaused(f func(ctx context.Context, conn int64, until *time.Time)) { t.paused = f }
 
-var _ orchestrator.UsageGate = (*Tracker)(nil)
+var (
+	_ orchestrator.UsageGate = (*Tracker)(nil)
+	_ ai.Limits              = (*Tracker)(nil)
+)
 
 // New returns a usage tracker.
 func New(store Store, events Events, log *slog.Logger) *Tracker {
@@ -109,12 +86,12 @@ type View struct {
 
 // Current returns the latest reading with windows that have reset rolled
 // over to zero, and whether new runs are paused.
-func (t *Tracker) Current(ctx context.Context, s domain.Settings) (View, error) {
-	ctx = t.account(ctx)
-	if onCredits(ctx) {
+func (t *Tracker) Current(ctx context.Context, acct domain.ClaudeAccount, s domain.Settings) (View, error) {
+	if acct.Credits {
+		// agnts's key, paid with credits: plan limits do not apply.
 		return View{Status: "allowed", PauseAbove: s.PauseAbove}, nil
 	}
-	snap, ok, err := t.store.Latest(ctx, connOf(ctx))
+	snap, ok, err := t.store.Latest(ctx, connOf(acct))
 	if err != nil {
 		return View{}, err
 	}
@@ -177,9 +154,9 @@ func latest(now time.Time, ts ...*time.Time) *time.Time {
 	return out
 }
 
-// Paused implements orchestrator.UsageGate.
-func (t *Tracker) Paused(ctx context.Context, s domain.Settings) (bool, time.Time) {
-	v, err := t.Current(ctx, s)
+// Paused implements ai.Limits.
+func (t *Tracker) Paused(ctx context.Context, acct domain.ClaudeAccount, s domain.Settings) (bool, time.Time) {
+	v, err := t.Current(ctx, acct, s)
 	if err != nil {
 		t.log.Warn("usage: read", "err", err)
 		return false, time.Time{} // unknown usage never blocks work
@@ -190,13 +167,13 @@ func (t *Tracker) Paused(ctx context.Context, s domain.Settings) (bool, time.Tim
 	return v.Paused, time.Time{}
 }
 
-// Record implements orchestrator.UsageGate.
-func (t *Tracker) Record(ctx context.Context, data map[string]any) {
+// Record implements ai.Limits.
+func (t *Tracker) Record(ctx context.Context, acct domain.ClaudeAccount, data map[string]any) {
 	r := Parse(data)
-	if r.empty() {
+	if r.empty() || acct.Credits {
 		return
 	}
-	conn := connOf(ctx)
+	conn := connOf(acct)
 	prev, ok, err := t.store.Latest(ctx, conn)
 	if err != nil {
 		t.log.Warn("usage: read", "err", err)
@@ -226,7 +203,7 @@ func (t *Tracker) Record(ctx context.Context, data map[string]any) {
 		return
 	}
 	if conn != nil && t.paused != nil {
-		if v, err := t.Current(ctx, domain.Settings{PauseAbove: 100}); err == nil {
+		if v, err := t.Current(ctx, acct, domain.Settings{PauseAbove: 100}); err == nil {
 			if v.Paused {
 				t.paused(ctx, *conn, v.PausedUntil)
 			} else {
@@ -237,9 +214,9 @@ func (t *Tracker) Record(ctx context.Context, data map[string]any) {
 	t.announce(ctx, snap)
 }
 
-// RecordLimited implements orchestrator.UsageGate.
-func (t *Tracker) RecordLimited(ctx context.Context) {
-	t.Record(ctx, map[string]any{"rate_limit_info": map[string]any{"status": "rejected"}})
+// RecordLimited implements ai.Limits.
+func (t *Tracker) RecordLimited(ctx context.Context, acct domain.ClaudeAccount) {
+	t.Record(ctx, acct, map[string]any{"rate_limit_info": map[string]any{"status": "rejected"}})
 }
 
 func (t *Tracker) announce(ctx context.Context, s postgres.UsageSnapshot) {
@@ -385,6 +362,7 @@ func epoch(f float64) time.Time {
 
 // Refresher runs a tiny Claude invocation to get a fresh reading.
 type Refresher struct {
+	ai      *ai.Gateway
 	tracker *Tracker
 	runner  orchestrator.Runner
 	image   string
@@ -392,17 +370,15 @@ type Refresher struct {
 }
 
 // NewRefresher returns a refresher using the runner image.
-func NewRefresher(t *Tracker, r orchestrator.Runner, image string, log *slog.Logger) *Refresher {
-	return &Refresher{tracker: t, runner: r, image: image, log: log}
+func NewRefresher(t *Tracker, r orchestrator.Runner, gw *ai.Gateway, image string, log *slog.Logger) *Refresher {
+	return &Refresher{tracker: t, runner: r, ai: gw, image: image, log: log}
 }
 
 // ErrBusy is returned when a refresh is already running.
 var ErrBusy = errors.New("a usage refresh is already running")
 
-// Refresh starts a refresh in the background, on the account ctx resolves
-// to.
-func (r *Refresher) Refresh(ctx context.Context) error {
-	ctx = r.tracker.account(ctx)
+// Refresh starts a refresh of acct's reading in the background.
+func (r *Refresher) Refresh(ctx context.Context, acct domain.ClaudeAccount) error {
 	r.tracker.mu.Lock()
 	if r.tracker.refreshing {
 		r.tracker.mu.Unlock()
@@ -418,7 +394,7 @@ func (r *Refresher) Refresh(ctx context.Context) error {
 		}()
 		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Minute)
 		defer cancel()
-		if err := r.run(bg); err != nil {
+		if err := r.run(bg, acct); err != nil {
 			r.log.Warn("usage refresh", "err", err)
 			_ = r.tracker.events.AppendEvent(bg, domain.Event{Type: domain.EventUsageUpdated, Level: domain.LevelWarn, Message: "usage refresh failed: " + err.Error()})
 		}
@@ -426,7 +402,13 @@ func (r *Refresher) Refresh(ctx context.Context) error {
 	return nil
 }
 
-func (r *Refresher) run(ctx context.Context) error {
+func (r *Refresher) run(ctx context.Context, acct domain.ClaudeAccount) error {
+	// Only Claude reports its limits on a probe; Muse reports its own
+	// after every run.
+	route, hold := r.ai.Route(ctx, ai.Who{}, ai.PurposeUsageProbe, ai.Want{Provider: ai.Claude, Pin: &acct})
+	if hold != nil {
+		return hold
+	}
 	var empty bytes.Buffer
 	_ = tar.NewWriter(&empty).Close()
 	ws, err := r.runner.Open(ctx, orchestrator.WorkspaceSpec{TicketKey: "usage-refresh", Image: r.image, Repo: &empty})
@@ -435,22 +417,20 @@ func (r *Refresher) run(ctx context.Context) error {
 	}
 	defer func() { _ = ws.Close(context.WithoutCancel(ctx)) }()
 	got := false
-	res, err := ws.Claude(ctx, orchestrator.ClaudeRequest{
+	// The gateway records the readings of the stream and a refusal.
+	res, err := r.ai.Run(ctx, ai.Call{Purpose: ai.PurposeUsageProbe, Route: &route, Box: ws, Req: ai.Request{
 		Prompt: "Reply with the single word OK.", Model: "haiku", MaxTurns: 1, Timeout: 2 * time.Minute,
-	}, func(e orchestrator.ClaudeEvent) {
-		if e.Kind == orchestrator.ClaudeRateLimit {
+	}}, func(e ai.Event) {
+		if e.Kind == ai.EventRateLimit {
 			got = true
-			r.tracker.Record(ctx, e.Data)
 		}
 	})
 	if err != nil {
 		return err
 	}
-	if res.RateLimited {
-		r.tracker.RecordLimited(ctx)
-	} else if !got {
+	if !res.RateLimited && !got {
 		// No reading in the stream: at least record that runs are allowed.
-		r.tracker.Record(ctx, map[string]any{"rate_limit_info": map[string]any{"status": "allowed"}})
+		r.tracker.Record(ctx, acct, map[string]any{"rate_limit_info": map[string]any{"status": "allowed"}})
 	}
 	return nil
 }
@@ -473,8 +453,11 @@ func (r *Refresher) IdleLoop(ctx context.Context, every time.Duration, active fu
 				if ctx.Err() != nil {
 					return
 				}
-				actx, cancel := context.WithTimeout(domain.WithClaude(ctx, a), 3*time.Minute)
-				if err := r.run(actx); err != nil {
+				if a.Provider != "" && a.Provider != domain.ProviderClaude {
+					continue // only Claude reports its limits on a probe
+				}
+				actx, cancel := context.WithTimeout(ctx, 3*time.Minute)
+				if err := r.run(actx, a); err != nil {
 					r.log.Warn("idle usage refresh", "account", a.ConnectionID, "err", err)
 				}
 				cancel()

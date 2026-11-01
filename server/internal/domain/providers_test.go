@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"context"
 	"slices"
 	"strings"
 	"testing"
@@ -186,31 +185,7 @@ func TestCheckModels(t *testing.T) {
 	}
 }
 
-func TestAccountsInContext(t *testing.T) {
-	ctx := context.Background()
-	if _, ok := ClaudeOf(ctx); ok {
-		t.Fatal("no account was set")
-	}
-	set := map[string]ClaudeAccount{
-		ProviderClaude: {ConnectionID: 1, Provider: ProviderClaude},
-		ProviderCodex:  {Provider: ProviderCodex},
-	}
-	ctx = WithAccounts(ctx, ProviderClaude, set)
-	if a, _ := ClaudeOf(ctx); a.ConnectionID != 1 {
-		t.Fatal("primary")
-	}
-	cx := UseProvider(ctx, ProviderCodex)
-	if a, ok := ClaudeOf(cx); !ok || a.Provider != ProviderCodex || CurrentProvider(cx) != ProviderCodex {
-		t.Fatal("codex call")
-	}
-	if _, ok := ClaudeOf(UseProvider(ctx, ProviderMuse)); ok {
-		t.Fatal("a module the run did not pick has no account")
-	}
-	// An account set without its module serves any call (legacy).
-	legacy := WithClaude(context.Background(), ClaudeAccount{ConnectionID: 7})
-	if a, ok := ClaudeOf(UseProvider(legacy, ProviderClaude)); !ok || a.ConnectionID != 7 {
-		t.Fatal("legacy account")
-	}
+func TestRunPerson(t *testing.T) {
 	w := Workspace{OwnerID: 1}
 	m := int64(5)
 	if w.RunPerson(&m) != 5 || w.RunPerson(nil) != 1 {
@@ -255,5 +230,56 @@ func TestOrdered(t *testing.T) {
 	}
 	if ValidateOrder(claudeCodex, []string{ProviderMuse}) == nil {
 		t.Error("a module the person may not use was accepted")
+	}
+}
+
+// A tier is the default module's model of that tier, for whoever runs.
+func TestTiers(t *testing.T) {
+	muse := Access{Modules: []string{ProviderMuse, ProviderClaude}}
+	claude := Access{Modules: []string{ProviderClaude}}
+	for _, c := range []struct {
+		a     Access
+		m     string
+		want  string
+		allow bool
+	}{
+		{muse, TierStrong, MuseWonder, true}, {muse, TierLight, MuseSpark, true},
+		{claude, TierStrong, "opus", true}, {claude, TierLight, "sonnet", true},
+		{Access{Modules: []string{}}, TierStrong, TierStrong, false},
+	} {
+		if got := EffectiveModel(c.a, c.m); got != c.want {
+			t.Errorf("%v %s: %s, want %s", c.a.Modules, c.m, got, c.want)
+		}
+		if AllowedModel(c.a, c.m) != c.allow {
+			t.Errorf("%v %s: allowed %v", c.a.Modules, c.m, !c.allow)
+		}
+	}
+	if !ValidModel(TierLight) || ValidModel("tier:huge") {
+		t.Fatal("valid tiers")
+	}
+	s := Settings{Models: StageModels{Analyze: TierStrong, Coding: TierLight}}.For(claude)
+	if s.ModelFor(Ticket{}, ModelAnalyze) != "opus" || s.ModelFor(Ticket{Models: map[string]string{ModelCoding: TierStrong}}, ModelCoding) != "opus" {
+		t.Fatal("settings and ticket tiers")
+	}
+}
+
+// Chat and documents follow the helper and analysis models until set.
+func TestChatAndDocumentModels(t *testing.T) {
+	m := StageModels{Analyze: "opus", Helper: "haiku"}
+	if m.For(ModelChat) != "haiku" || m.For(ModelDocuments) != "opus" {
+		t.Fatalf("unset: %s %s", m.For(ModelChat), m.For(ModelDocuments))
+	}
+	m.Chat, m.Documents = "muse:spark", "sonnet"
+	if m.For(ModelChat) != "muse:spark" || m.For(ModelDocuments) != "sonnet" {
+		t.Fatal("set")
+	}
+	s := Settings{Models: StageModels{Analyze: "sonnet", Coding: "sonnet", Retry: "sonnet", Helper: "haiku", Learn: "sonnet", Review: ModelAuto,
+		Preview: "sonnet", Chat: "gpt"}, MaxTurns: 150, TimeoutMin: 45, PauseAbove: 90, Parallel: 1}
+	if err := s.Validate(); err == nil || !strings.Contains(err.Error(), "chat") {
+		t.Fatalf("invalid chat model: %v", err)
+	}
+	// A person with Muse alone gets Muse for chat too.
+	if got := (StageModels{Chat: "opus"}).EffectiveModels(Access{Modules: []string{ProviderMuse}}).Chat; got != MuseSpark {
+		t.Fatalf("mapped chat: %s", got)
 	}
 }

@@ -704,10 +704,10 @@ func finishMeetingNotes(ctx context.Context, tx pgx.Tx, runID, docID int64, res 
 	return nil
 }
 
-// DocumentRunCostUSD is the API cost of a generation's calls.
+// DocumentRunCostUSD is the API cost of a generation's calls on credits.
 func (s *Documents) DocumentRunCostUSD(ctx context.Context, runID int64) (float64, error) {
 	var usd float64
-	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE document_run_id = $1`, runID).Scan(&usd)
+	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE document_run_id = $1 AND on_credits`, runID).Scan(&usd)
 	return usd, err
 }
 
@@ -720,10 +720,11 @@ func (s *Documents) RecordDocumentCall(ctx context.Context, runID int64, c domai
 		transcript = &c.TranscriptID
 	}
 	_, err := s.db.Exec(ctx, `INSERT INTO claude_calls (document_run_id, model_stage, model,
-			input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, turns, duration_ms, partial, transcript_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+			input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd, turns, duration_ms, partial, transcript_id,
+			provider, connection_id, on_credits)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
 		runID, c.ModelStage, c.Model, u.Input, u.Output, u.CacheRead, u.CacheWrite, u.CostUSD,
-		c.Turns, c.Duration.Milliseconds(), c.Partial, transcript)
+		c.Turns, c.Duration.Milliseconds(), c.Partial, transcript, callProvider(c), nullID(c.ConnectionID), c.OnCredits)
 	return err
 }
 

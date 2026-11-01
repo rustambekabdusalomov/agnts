@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/orchestrator"
 )
@@ -123,7 +124,7 @@ func (r *Runner) provision(ctx context.Context, image string, specs []string, pr
 	}
 	exec := func(timeout time.Duration, argv ...string) (int, string, error) {
 		var buf tailBuffer
-		code, err := r.docker.Exec(ctx, id, ExecConfig{Cmd: timeoutCmd(timeout, argv...), User: agentUser, WorkingDir: "/tmp",
+		code, err := r.docker.Exec(ctx, id, ExecConfig{Cmd: ai.TimeoutArgv(timeout, argv...), User: agentUser, WorkingDir: "/tmp",
 			Env: []string{"NO_COLOR=1"}}, &buf, &buf)
 		return code, stripANSI(buf.String()), err
 	}

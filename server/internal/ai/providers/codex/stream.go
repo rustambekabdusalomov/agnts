@@ -1,4 +1,4 @@
-package runner
+package codex
 
 import (
 	"bufio"
@@ -7,8 +7,8 @@ import (
 	"io"
 	"strings"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
-	"agnts/internal/orchestrator"
 )
 
 // Codex CLI (codex exec --json) is agnts's second coding tool. Its stream
@@ -20,10 +20,6 @@ import (
 // no hooks, so agnts-guard's in-run checks do not apply (the server's
 // checks after the run still do), and no permission rules (the container
 // and its egress proxy are the boundary).
-
-// CodexPrefix marks a model as a Codex model in agnts's settings:
-// "codex:<model>".
-const CodexPrefix = orchestrator.CodexPrefix
 
 type codexLine struct {
 	Type     string     `json:"type"`
@@ -54,8 +50,8 @@ type codexItem struct {
 }
 
 // ParseCodexStream reads codex exec --json output.
-func ParseCodexStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orchestrator.ClaudeResult, error) {
-	var res orchestrator.ClaudeResult
+func ParseCodexStream(r io.Reader, onEvent func(ai.Event)) (ai.Result, error) {
+	var res ai.Result
 	sc := bufio.NewScanner(r)
 	sc.Buffer(make([]byte, 64*1024), 16*1024*1024)
 	ended := false
@@ -71,7 +67,7 @@ func ParseCodexStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orch
 		switch l.Type {
 		case "thread.started":
 			res.SessionID = l.ThreadID
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeInit, Data: map[string]any{"session_id": l.ThreadID, "model": "codex"}})
+			ai.Emit(onEvent, ai.Event{Kind: ai.EventInit, Data: map[string]any{"session_id": l.ThreadID, "model": "codex"}})
 		case "turn.completed":
 			ended = true
 			res.Turns++
@@ -85,7 +81,7 @@ func ParseCodexStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orch
 				msg = l.Error.Message
 			}
 			res.IsError, res.Subtype, res.Text = true, "error_during_execution", msg
-			if rateLimitText.MatchString(msg) {
+			if ai.RateLimitText.MatchString(msg) {
 				res.RateLimited = true
 			}
 		case "item.started", "item.completed":
@@ -102,12 +98,12 @@ func ParseCodexStream(r io.Reader, onEvent func(orchestrator.ClaudeEvent)) (orch
 	if !res.IsError {
 		res.Subtype = "success"
 	}
-	emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeResultEv, Text: res.Text, Data: map[string]any{
+	ai.Emit(onEvent, ai.Event{Kind: ai.EventResult, Text: res.Text, Data: map[string]any{
 		"subtype": res.Subtype, "is_error": res.IsError, "num_turns": res.Turns}})
 	return res, nil
 }
 
-func codexItemEvent(l codexLine, res *orchestrator.ClaudeResult, onEvent func(orchestrator.ClaudeEvent)) {
+func codexItemEvent(l codexLine, res *ai.Result, onEvent func(ai.Event)) {
 	it := l.Item
 	if it == nil {
 		return
@@ -117,12 +113,12 @@ func codexItemEvent(l codexLine, res *orchestrator.ClaudeResult, onEvent func(or
 	case "agent_message":
 		if !started && strings.TrimSpace(it.Text) != "" {
 			res.Text = it.Text
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeText, Text: strings.TrimSpace(it.Text)})
+			ai.Emit(onEvent, ai.Event{Kind: ai.EventText, Text: strings.TrimSpace(it.Text)})
 		}
 	case "command_execution":
 		if started {
 			input := mustJSON(map[string]string{"command": it.Command})
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: toolSummary("Bash", input),
+			ai.Emit(onEvent, ai.Event{Kind: ai.EventTool, Tool: ai.ToolSummary("Bash", input),
 				Data: map[string]any{"tool": "Bash", "id": it.ID, "input": input}})
 			return
 		}
@@ -131,14 +127,14 @@ func codexItemEvent(l codexLine, res *orchestrator.ClaudeResult, onEvent func(or
 		if it.ExitCode != nil {
 			data["exit_code"] = *it.ExitCode
 		}
-		emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeToolResult, Data: data})
+		ai.Emit(onEvent, ai.Event{Kind: ai.EventToolResult, Data: data})
 	case "file_change":
 		if started {
 			return
 		}
 		for _, c := range it.Changes {
 			// Codex reports which files changed and how, not the diff.
-			emit(onEvent, orchestrator.ClaudeEvent{Kind: orchestrator.ClaudeTool, Tool: "Edit: " + c.Path,
+			ai.Emit(onEvent, ai.Event{Kind: ai.EventTool, Tool: "Edit: " + c.Path,
 				Data: map[string]any{"tool": "Edit", "id": it.ID + ":" + c.Path,
 					"input": mustJSON(map[string]string{"file_path": c.Path, "kind": c.Kind})}})
 		}
@@ -151,7 +147,7 @@ func mustJSON(v any) json.RawMessage {
 }
 
 // codexArgv is the codex exec command line for a request.
-func codexArgv(req orchestrator.ClaudeRequest, model string) []string {
+func codexArgv(req ai.Request, model string) []string {
 	sandbox := "danger-full-access" // the run container is the sandbox
 	if req.ReadOnly {
 		sandbox = "read-only"

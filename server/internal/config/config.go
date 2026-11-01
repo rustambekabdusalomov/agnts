@@ -55,6 +55,11 @@ type Config struct {
 	// (AGNTS_CLAUDE_MODELS, e.g. "opus=claude-opus-5-5,haiku="); an empty id
 	// passes the short name to Claude Code unchanged.
 	ClaudeModels map[string]string
+	// CodexModels are the Codex models for light and strong work
+	// (AGNTS_CODEX_MODELS, e.g. "light=gpt-5-mini,strong=gpt-5"). Without
+	// them Codex runs only the models settings name, and calls never
+	// switch to it.
+	CodexModels map[string]string
 	// InternalAddr serves the egress proxy the hosts allowed in Settings
 	// (AGNTS_INTERNAL_ADDR). Keep it private; empty disables.
 	InternalAddr string
@@ -242,6 +247,18 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 				break
 			}
 			c.ClaudeModels[strings.TrimSpace(name)] = strings.TrimSpace(id)
+		}
+	}
+	if v := get("AGNTS_CODEX_MODELS", ""); v != "" {
+		c.CodexModels = map[string]string{}
+		for _, pair := range strings.Split(v, ",") {
+			tier, model, ok := strings.Cut(strings.TrimSpace(pair), "=")
+			tier = strings.TrimSpace(tier)
+			if !ok || (tier != "light" && tier != "strong") || strings.TrimSpace(model) == "" {
+				errs = append(errs, errors.New("AGNTS_CODEX_MODELS must be light=<model> and strong=<model>, separated by a comma"))
+				break
+			}
+			c.CodexModels[tier] = strings.TrimPrefix(strings.TrimSpace(model), "codex:")
 		}
 	}
 	c.MetricsAddr = get("AGNTS_METRICS_ADDR", "")

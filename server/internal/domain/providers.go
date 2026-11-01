@@ -144,7 +144,15 @@ func AvailableModels(a Access) []string {
 // run would cost about three times as much; hard work still reaches Wonder
 // through the review's auto choice and a stuck session's escalation. A
 // Codex model maps to the light model.
+//
+// A tier is the default module's model of that tier.
 func EffectiveModel(a Access, m string) string {
+	switch {
+	case m == TierStrong && !a.None():
+		return StrongModel(a)
+	case m == TierLight && !a.None():
+		return LightModel(a)
+	}
 	if m == "" || m == ModelAuto || a.Allows(ProviderOf(m)) || a.None() {
 		return m
 	}
@@ -157,5 +165,6 @@ func EffectiveModel(a Access, m string) string {
 // EffectiveModels applies EffectiveModel to every stage.
 func (m StageModels) EffectiveModels(a Access) StageModels {
 	return StageModels{Analyze: EffectiveModel(a, m.Analyze), Coding: EffectiveModel(a, m.Coding), Retry: EffectiveModel(a, m.Retry),
-		Helper: EffectiveModel(a, m.Helper), Learn: EffectiveModel(a, m.Learn), Review: EffectiveModel(a, m.Review), Preview: EffectiveModel(a, m.Preview)}
+		Helper: EffectiveModel(a, m.Helper), Learn: EffectiveModel(a, m.Learn), Review: EffectiveModel(a, m.Review), Preview: EffectiveModel(a, m.Preview),
+		Chat: EffectiveModel(a, m.Chat), Documents: EffectiveModel(a, m.Documents)}
 }

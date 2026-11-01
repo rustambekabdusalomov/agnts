@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -526,22 +527,17 @@ func (o *Orchestrator) runRuleReview(ctx context.Context, r domain.Rule) (RuleRe
 		}
 	}()
 	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeRules, WorkspaceID: r.WorkspaceID,
-		Subject: fmt.Sprintf("rule %d: %s", r.ID, truncate(r.Title, 80))}, ClaudeRequest{
+		Subject: fmt.Sprintf("rule %d: %s", r.ID, truncate(r.Title, 80))}, ai.Request{
 		Prompt:   prompt,
 		Model:    s.Models.Analyze,
 		MaxTurns: min(s.MaxTurns, ruleMaxTurns),
 		Timeout:  time.Duration(min(s.TimeoutMin, ruleTimeoutMin)) * time.Minute,
 		Settings: permissionSettings(s, false),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	if err != nil {
 		return rv, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return rv, &stopError{"rate limited"}
 	}
 	if res.IsError {

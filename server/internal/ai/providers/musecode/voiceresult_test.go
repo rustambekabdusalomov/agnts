@@ -1,11 +1,11 @@
-package runner
+package musecode
 
 import (
 	"errors"
 	"strings"
 	"testing"
 
-	"agnts/internal/orchestrator"
+	"agnts/internal/ai"
 )
 
 func TestVoiceResult(t *testing.T) {
@@ -29,7 +29,7 @@ func TestVoiceResult(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), c.want) {
 			t.Errorf("exit %d: %v (want %q)", c.code, err, c.want)
 		}
-		if noWords := c.want == "no words"; errors.Is(err, orchestrator.ErrNoSpeech) != noWords {
+		if noWords := c.want == "no words"; errors.Is(err, ai.ErrNoSpeech) != noWords {
 			t.Errorf("exit %d: ErrNoSpeech is %v", c.code, !noWords)
 		}
 	}

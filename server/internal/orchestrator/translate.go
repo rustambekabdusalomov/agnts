@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -25,7 +26,7 @@ const (
 )
 
 // ErrPlanLimit means the tool cannot be asked now: the plan limit is reached.
-var ErrPlanLimit = errors.New("the plan limit is reached; try again after it resets")
+var ErrPlanLimit = ai.ErrLimit
 
 // TranslatedText is a text of the ticket page and its translation.
 type TranslatedText struct {
@@ -219,8 +220,8 @@ func (o *Orchestrator) translateMissing(ctx context.Context, sub translateSubjec
 	if err != nil {
 		return err
 	}
-	if paused, _ := o.usage.Paused(ctx, s); paused {
-		return ErrPlanLimit
+	if err := o.hold(ctx, transcriptMeta{Purpose: domain.PurposeTranslate}, s.Models.Helper); err != nil {
+		return err
 	}
 	prompt, err := render("translate", promptData{Language: domain.Languages[lang]})
 	if err != nil {
@@ -277,22 +278,17 @@ func (o *Orchestrator) translateBatch(ctx context.Context, ws Workspace, s domai
 	if err := ws.WriteFile(ctx, TranslationPath, nil); err != nil {
 		return 0, fmt.Errorf("clear translation: %w", err)
 	}
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeTranslate, TicketKey: sub.ticket, Subject: subjectOf(sub, lang)}, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeTranslate, TicketKey: sub.ticket, Subject: subjectOf(sub, lang)}, ai.Request{
 		Prompt:   prompt,
 		Model:    s.Models.Helper,
 		MaxTurns: min(s.MaxTurns, translateMaxTurns),
 		Timeout:  time.Duration(min(s.TimeoutMin, translateTimeoutMin)) * time.Minute,
 		Settings: permissionSettings(s, true),
-	}, func(e ClaudeEvent) {
-		if e.Kind == ClaudeRateLimit {
-			o.usage.Record(ctx, e.Data)
-		}
-	})
+	}, nil)
 	if err != nil {
 		return 0, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return 0, ErrPlanLimit
 	}
 	if res.IsError {

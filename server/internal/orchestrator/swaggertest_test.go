@@ -11,6 +11,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"agnts/internal/ai"
+	"agnts/internal/ai/aitest"
 	"agnts/internal/apiclient"
 	"agnts/internal/domain"
 	"agnts/internal/guard"
@@ -52,7 +54,8 @@ func newSwaggerHarness(t *testing.T) *swaggerHarness {
 	cfg := orchestrator.DefaultConfig()
 	cfg.FixAttempts = 1
 	h.o = orchestrator.New(cfg, orchestrator.Deps{
-		Store: h.store, Runner: h.runner, Git: h.git, Host: h.host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
+		Providers: aitest.Providers(),
+		Store:     h.store, Runner: h.runner, Git: h.git, Host: h.host, Homes: &memHomes{}, Settings: h.settings, Usage: h.usage,
 		Trackers: map[domain.TicketSource]orchestrator.Tracker{domain.SourceJira: h.tracker}, SwaggerTests: tests,
 	}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	suites := postgres.NewSwaggerSuites(pool, box)
@@ -106,8 +109,8 @@ func TestSwaggerTestRun(t *testing.T) {
 	h := newSwaggerHarness(t)
 	// The workspace codes with Codex: a Swagger test still runs on Claude.
 	h.settings.s.Models.Coding = "codex:gpt-5"
-	var req orchestrator.ClaudeRequest
-	h.runner.onClaude = func(r orchestrator.ClaudeRequest) { req = r }
+	var req ai.Request
+	h.runner.onClaude = func(r ai.Request) { req = r }
 	tk := h.create(false)
 	if tk.State != domain.StateCoding || tk.Held || tk.Kind != domain.KindSwaggerTest {
 		t.Fatalf("created %+v", tk)
@@ -264,7 +267,7 @@ func TestSwaggerTestFormChecks(t *testing.T) {
 	}
 }
 
-func guardConfigOf(t *testing.T, req orchestrator.ClaudeRequest) guard.Config {
+func guardConfigOf(t *testing.T, req ai.Request) guard.Config {
 	t.Helper()
 	for _, e := range req.Env {
 		if v, ok := strings.CutPrefix(e, guard.ConfigEnv+"="); ok {

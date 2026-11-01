@@ -61,37 +61,37 @@ func TestPauseAndRoll(t *testing.T) {
 	s := domain.DefaultSettings()
 	s.PauseAbove = 80
 
-	if paused, _ := tr.Paused(ctx, s); paused {
+	if paused, _ := tr.Paused(ctx, domain.ClaudeAccount{}, s); paused {
 		t.Fatal("no data must not pause")
 	}
 	reset := time.Now().Add(time.Hour)
-	tr.Record(ctx, map[string]any{"rateLimitType": "five_hour", "utilization": 0.85, "resetsAt": float64(reset.Unix()), "status": "allowed_warning"})
-	if paused, until := tr.Paused(ctx, s); !paused || until.Unix() != reset.Unix() {
+	tr.Record(ctx, domain.ClaudeAccount{}, map[string]any{"rateLimitType": "five_hour", "utilization": 0.85, "resetsAt": float64(reset.Unix()), "status": "allowed_warning"})
+	if paused, until := tr.Paused(ctx, domain.ClaudeAccount{}, s); !paused || until.Unix() != reset.Unix() {
 		t.Fatalf("85%% above 80%% threshold: %v %v", paused, until)
 	}
 	s.PauseAbove = 90
-	if paused, _ := tr.Paused(ctx, s); paused {
+	if paused, _ := tr.Paused(ctx, domain.ClaudeAccount{}, s); paused {
 		t.Fatal("85% under 90% threshold")
 	}
 
 	// A later line without utilization keeps the previous reading.
-	tr.Record(ctx, map[string]any{"rate_limit_info": map[string]any{"status": "allowed"}})
-	v, _ := tr.Current(ctx, s)
+	tr.Record(ctx, domain.ClaudeAccount{}, map[string]any{"rate_limit_info": map[string]any{"status": "allowed"}})
+	v, _ := tr.Current(ctx, domain.ClaudeAccount{}, s)
 	if v.FiveHour == nil || *v.FiveHour != 0.85 || v.Status != "allowed" {
 		t.Fatalf("merge: %+v", v)
 	}
 
 	// After the reset time the window reads as zero and nothing is paused.
 	tr.now = func() time.Time { return reset.Add(time.Minute) }
-	v, _ = tr.Current(ctx, s)
+	v, _ = tr.Current(ctx, domain.ClaudeAccount{}, s)
 	if v.FiveHour == nil || *v.FiveHour != 0 || v.Paused {
 		t.Fatalf("roll: %+v", v)
 	}
 
 	// Refused with no reset time: paused for 30 minutes.
 	tr.now = time.Now
-	tr.RecordLimited(ctx)
-	if paused, _ := tr.Paused(ctx, s); !paused {
+	tr.RecordLimited(ctx, domain.ClaudeAccount{})
+	if paused, _ := tr.Paused(ctx, domain.ClaudeAccount{}, s); !paused {
 		t.Fatal("rejected should pause")
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 	"agnts/internal/guard"
 	"agnts/internal/orchestrator"
@@ -59,7 +60,7 @@ func TestStopKeepsWorkAndRetryContinues(t *testing.T) {
 
 	// Stopped mid-run and retried at once, while the run still tears down.
 	calls := 0
-	h.runner.onClaude = func(orchestrator.ClaudeRequest) {
+	h.runner.onClaude = func(ai.Request) {
 		if calls++; calls > 1 {
 			return
 		}
@@ -150,7 +151,7 @@ func TestSavedWorkDroppedWhenTheBranchMoved(t *testing.T) {
 	}
 	h.step()
 	h.unfinished("base1")
-	h.runner.onClaude = func(orchestrator.ClaudeRequest) {
+	h.runner.onClaude = func(ai.Request) {
 		if len(h.runner.prompts) == 2 {
 			if _, err := h.o.Stop(h.ctx, "PAY-32", domain.OriginWeb); err != nil {
 				t.Error(err)
@@ -214,7 +215,7 @@ func TestDiscardWorkStartsFromTheLastCommit(t *testing.T) {
 	}
 	h.step()
 	h.unfinished("base1")
-	h.runner.onClaude = func(orchestrator.ClaudeRequest) {
+	h.runner.onClaude = func(ai.Request) {
 		if len(h.runner.prompts) == 2 {
 			if _, err := h.o.Stop(h.ctx, "PAY-34", domain.OriginWeb); err != nil {
 				t.Error(err)
@@ -249,7 +250,7 @@ func TestRejectedWorkContinuesOrStartsOver(t *testing.T) {
 		}
 		h.step()
 		h.unfinished("base1")
-		h.runner.onClaude = func(orchestrator.ClaudeRequest) {
+		h.runner.onClaude = func(ai.Request) {
 			if len(h.runner.prompts) == 2 {
 				if _, err := h.o.Reject(h.ctx, "PAY-35", "later", domain.OriginWeb); err != nil {
 					t.Error(err)
@@ -293,7 +294,7 @@ func TestTooLargeWorkIsNotKept(t *testing.T) {
 	h.step()
 	h.unfinished("base1")
 	h.runner.execs[saveDiff] = []orchestrator.ExecResult{{Output: "warning: CRLF will be replaced by LF\n5000000"}}
-	h.runner.onClaude = func(orchestrator.ClaudeRequest) {
+	h.runner.onClaude = func(ai.Request) {
 		if len(h.runner.prompts) == 2 {
 			if _, err := h.o.Stop(h.ctx, "PAY-36", domain.OriginWeb); err != nil {
 				t.Error(err)
@@ -317,7 +318,7 @@ func TestRestoredWorkWithoutASessionGetsTheFullTask(t *testing.T) {
 	}
 	h.step()
 	h.unfinished("base1")
-	h.runner.onClaude = func(orchestrator.ClaudeRequest) {
+	h.runner.onClaude = func(ai.Request) {
 		if len(h.runner.prompts) == 2 {
 			if _, err := h.o.Stop(h.ctx, "PAY-37", domain.OriginWeb); err != nil {
 				t.Error(err)

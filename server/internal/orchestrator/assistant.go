@@ -17,6 +17,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -473,7 +474,7 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 	if err != nil {
 		return out, nil, err
 	}
-	if ctx, err = o.assistantAccount(ctx, s, user); err != nil {
+	if err = o.assistantReady(ctx, s, user); err != nil {
 		return out, nil, err
 	}
 
@@ -580,25 +581,25 @@ func (o *Orchestrator) codeHandoff(ctx context.Context, ws, user int64, c Assist
 // answer was made from (JSON, as kept with the answer), with the current
 // prompt: `agnts eval assistant` compares the two. user is whose Claude
 // account it runs on in per-member mode (0: the workspace's default).
-func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang string, user int64) (AssistantAnswer, ClaudeResult, error) {
+func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang string, user int64) (AssistantAnswer, ai.Result, error) {
 	var files []AssistantFile
 	if err := json.Unmarshal(snapshot, &files); err != nil {
-		return AssistantAnswer{}, ClaudeResult{}, fmt.Errorf("the snapshot is not readable: %w", err)
+		return AssistantAnswer{}, ai.Result{}, fmt.Errorf("the snapshot is not readable: %w", err)
 	}
 	if len(files) == 0 {
-		return AssistantAnswer{}, ClaudeResult{}, errors.New("the snapshot is empty")
+		return AssistantAnswer{}, ai.Result{}, errors.New("the snapshot is empty")
 	}
 	ctx = o.withPerson(ctx, user)
 	s, err := o.settings.Get(ctx)
 	if err != nil {
-		return AssistantAnswer{}, ClaudeResult{}, err
+		return AssistantAnswer{}, ai.Result{}, err
 	}
-	if ctx, err = o.assistantAccount(ctx, s, user); err != nil {
-		return AssistantAnswer{}, ClaudeResult{}, err
+	if err = o.assistantReady(ctx, s, user); err != nil {
+		return AssistantAnswer{}, ai.Result{}, err
 	}
 	box, _, err := o.assistantWorkspace(ctx, "replay", 0)
 	if err != nil {
-		return AssistantAnswer{}, ClaudeResult{}, fmt.Errorf("start container: %w", err)
+		return AssistantAnswer{}, ai.Result{}, fmt.Errorf("start container: %w", err)
 	}
 	defer func() { _ = box.Close(context.WithoutCancel(ctx)) }()
 	m := domain.AssistantMessage{Lang: lang}
@@ -644,34 +645,17 @@ func assistantConversationFiles(question string, history []domain.AssistantMessa
 	return []AssistantFile{{Name: "conversation.json", Content: string(b)}, {Name: "question.txt", Content: question}}
 }
 
-// assistantAccount puts the Claude account the asker's answers run on into
-// ctx: the workspace's, or the asker's own in per-member mode. agnts's own
-// key (credits) is not used: an answer is not a run that credits can pay
-// for.
-func (o *Orchestrator) assistantAccount(ctx context.Context, s domain.Settings, user int64) (context.Context, error) {
-	if o.accounts == nil || o.workspaces == nil {
-		if paused, _ := o.usage.Paused(ctx, s); paused {
-			return ctx, ErrPlanLimit
-		}
-		return ctx, nil
+// assistantReady says why the asker's answers cannot run now, nil when
+// they can: on the workspace's account, or the asker's own in per-member
+// mode. agnts's own key (credits) is not used: an answer is not a run that
+// credits can pay for (ai.PolicyOf).
+func (o *Orchestrator) assistantReady(ctx context.Context, s domain.Settings, user int64) error {
+	err := o.hold(ctx, transcriptMeta{Purpose: domain.PurposeAssistant, Person: user}, s.Models.For(domain.ModelChat)) // answers run on the chat model
+	var h *ai.Hold
+	if errors.As(err, &h) && !h.Limited && h.Err == nil {
+		return &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(domain.ProviderOf(s.Models.For(domain.ModelChat))) + ": " + h.Why + "."}
 	}
-	w, err := o.workspaces.ByID(ctx, domain.WorkspaceOf(ctx))
-	if err != nil {
-		return ctx, err
-	}
-	var member *int64
-	if w.ClaudeMode == domain.ClaudePerMember && user > 0 {
-		member = &user
-	}
-	provider := domain.ProviderOf(s.Models.Helper) // answers run on the helper model
-	acct, ok, why, _ := o.accounts.Pick(ctx, w, member, provider)
-	if !ok {
-		return ctx, &assistantError{msg: "The assistant cannot reach " + domain.ModuleName(provider) + ": " + why + "."}
-	}
-	if acct.Credits {
-		return ctx, &assistantError{msg: fmt.Sprintf("The assistant needs a connected %s account (Workspace settings → AI accounts); it does not run on credits.", domain.ModuleName(provider))}
-	}
-	return domain.WithClaude(ctx, acct), nil
+	return err
 }
 
 // assistantWorkspace returns the person's warm container, or a new one.
@@ -740,37 +724,35 @@ func AssistantAnswerPath(id int64) string {
 
 // runAssistant writes the snapshot into the container and runs Claude on
 // it, forwarding what it reads and says to the asker as it goes.
-func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID, user int64, ws Workspace, a domain.AssistantMessage, files []AssistantFile) (ClaudeResult, error) {
+func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID, user int64, ws Workspace, a domain.AssistantMessage, files []AssistantFile) (ai.Result, error) {
 	dir := AssistantDir(a.ID)
 	names := make([]string, 0, len(files))
 	for _, f := range files {
 		if err := ws.WriteFile(ctx, dir+"/"+f.Name, []byte(f.Content)); err != nil {
-			return ClaudeResult{}, fmt.Errorf("write %s: %w", f.Name, err)
+			return ai.Result{}, fmt.Errorf("write %s: %w", f.Name, err)
 		}
 		names = append(names, f.Name)
 	}
 	prompt, err := render("assistant", promptData{Language: domain.AssistantLanguages[a.Lang], AssistantDir: dir, AssistantFiles: names,
 		AnswerPath: AssistantAnswerPath(a.ID), AsOf: time.Now().UTC().Format("2006-01-02 15:04 UTC"), AssistantTools: AssistantTools})
 	if err != nil {
-		return ClaudeResult{}, err
+		return ai.Result{}, err
 	}
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeAssistant, WorkspaceID: wsID,
-		Subject: "message " + strconv.FormatInt(a.ID, 10)}, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.PurposeAssistant, WorkspaceID: wsID, Person: user,
+		Subject: "message " + strconv.FormatInt(a.ID, 10)}, ai.Request{
 		Prompt:   prompt,
-		Model:    s.Models.Helper,
+		Model:    s.Models.For(domain.ModelChat),
 		MaxTurns: assistantMaxTurns,
 		Timeout:  assistantTimeout,
 		Settings: AssistantPermissions(),
 		ReadOnly: true,
-	}, func(e ClaudeEvent) {
+	}, func(e ai.Event) {
 		switch e.Kind {
-		case ClaudeRateLimit:
-			o.usage.Record(ctx, e.Data)
-		case ClaudeTool:
+		case ai.EventTool:
 			if f := readFileOf(e.Tool, dir); f != "" {
 				o.publish(wsID, user, EventAssistantProgress, a, map[string]any{"file": f})
 			}
-		case ClaudeText:
+		case ai.EventText:
 			if t := strings.TrimSpace(e.Text); t != "" {
 				o.publish(wsID, user, EventAssistantPartial, a, map[string]any{"text": truncate(t, 2000)})
 			}
@@ -780,7 +762,6 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 		return res, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		return res, ErrPlanLimit
 	}
 	return res, nil

@@ -365,17 +365,26 @@ func (u *TokenUsage) Add(o TokenUsage) {
 // Partial is true when the stream ended without a result, so the tokens
 // were summed from the messages seen and the cost is unknown.
 type ClaudeCall struct {
-	ID         int64
-	RunID      int64
-	TicketID   int64
-	ModelStage string
-	Model      string
-	Usage      TokenUsage
-	Turns      int
-	Duration   time.Duration
-	Partial    bool
+	ID    int64
+	RunID int64
+	// DocumentRunID is the document generation the call belongs to,
+	// instead of a ticket's run.
+	DocumentRunID int64
+	TicketID      int64
+	ModelStage    string
+	Model         string
+	Usage         TokenUsage
+	Turns         int
+	Duration      time.Duration
+	Partial       bool
 	// TranscriptID is the invocation's run history transcript; 0 for none.
 	TranscriptID int64
+	// Provider is the module it ran on; ConnectionID the connection that
+	// paid (0 for none), OnCredits whether agnts's key did, charged to the
+	// workspace.
+	Provider     string
+	ConnectionID int64
+	OnCredits    bool
 	CreatedAt    time.Time
 }
 
@@ -556,6 +565,9 @@ const (
 	// EventGuard: what agnts-guard, the hooks inside the run, refused or
 	// sent back, and what the scan of agent files found.
 	EventGuard = "guard"
+	// EventRerouted: a call ran on another module than its settings name,
+	// because that one could not run.
+	EventRerouted = "rerouted"
 	// EventBudget: a Muse run's spend against its budget, after every
 	// model call (data cost_usd, total_usd, held_usd, limit_usd), and its
 	// budget steering, escalations and stops.

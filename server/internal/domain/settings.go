@@ -15,15 +15,30 @@ var Models = []string{"haiku", "sonnet", "opus"}
 // codexModel matches a Codex CLI model: "codex:" and the model's name.
 var codexModel = regexp.MustCompile(`^codex:[a-z0-9][a-z0-9._-]{0,63}$`)
 
-// ValidModel reports whether m names a model of any provider: a Claude
-// alias, codex:<model> or muse:<model>.
+// Tiers a setting may name instead of a model: the run's person's default
+// module's light or strong model, whichever modules they have.
+const (
+	TierLight  = "tier:light"
+	TierStrong = "tier:strong"
+)
+
+// IsTier reports whether m names a tier, not a model.
+func IsTier(m string) bool { return m == TierLight || m == TierStrong }
+
+// ValidModel reports whether m names a model of any provider (a Claude
+// alias, codex:<model> or muse:<model>) or a tier.
 func ValidModel(m string) bool {
-	return slices.Contains(Models, m) || codexModel.MatchString(m) || museModel.MatchString(m)
+	return slices.Contains(Models, m) || codexModel.MatchString(m) || museModel.MatchString(m) || IsTier(m)
 }
 
 // AllowedModel reports whether a person with access a may pick m: a valid
-// model of a module they may use.
-func AllowedModel(a Access, m string) bool { return ValidModel(m) && a.Allows(ProviderOf(m)) }
+// model of a module they may use, or a tier (any module will do).
+func AllowedModel(a Access, m string) bool {
+	if IsTier(m) {
+		return !a.None()
+	}
+	return ValidModel(m) && a.Allows(ProviderOf(m))
+}
 
 // IsCodex reports whether m runs on Codex CLI.
 func IsCodex(m string) bool { return strings.HasPrefix(m, "codex:") }
@@ -37,6 +52,12 @@ const (
 	ModelLearn   = "learn"   // lessons from finished tickets
 	ModelReview  = "review"  // code review while a ticket waits for review
 	ModelPreview = "preview" // screenshots while a ticket waits for review
+	// ModelChat answers the assistant chat (and decides when a spoken
+	// question can be heard); unset, the helper's model.
+	ModelChat = "chat"
+	// ModelDocuments writes documents and meeting notes; unset, the
+	// analysis model.
+	ModelDocuments = "documents"
 	// ModelRecheck re-checks a complex ticket's analysis; it is the
 	// coding model, so nobody picks it on its own.
 	ModelRecheck = "recheck"
@@ -109,6 +130,9 @@ type StageModels struct {
 	Learn   string `json:"learn"`
 	Review  string `json:"review"` // a model or ModelAuto
 	Preview string `json:"preview"`
+	// Chat and Documents are "" until set: they follow Helper and Analyze.
+	Chat      string `json:"chat,omitempty"`
+	Documents string `json:"documents,omitempty"`
 }
 
 // For returns the model for a stage name.
@@ -126,6 +150,16 @@ func (m StageModels) For(stage string) string {
 		return m.Review
 	case ModelPreview:
 		return m.Preview
+	case ModelChat:
+		if m.Chat != "" {
+			return m.Chat
+		}
+		return m.Helper
+	case ModelDocuments:
+		if m.Documents != "" {
+			return m.Documents
+		}
+		return m.Analyze
 	default:
 		return m.Coding
 	}
@@ -178,8 +212,13 @@ type Settings struct {
 	Deny       []string `json:"deny"`
 	AskFirst   bool     `json:"askFirst"`
 	AutoResume bool     `json:"autoResume"`
-	AutoLearn  bool     `json:"autoLearn"`  // learn run after every push
-	AutoReview bool     `json:"autoReview"` // code review of every result
+	// SwitchModules lets a call whose module cannot run (no usable
+	// account, its limit reached, not enabled for the person) run on the
+	// person's next module, on the model of the same tier. Off: it waits
+	// for its own module.
+	SwitchModules bool `json:"switchModules"`
+	AutoLearn     bool `json:"autoLearn"`  // learn run after every push
+	AutoReview    bool `json:"autoReview"` // code review of every result
 	// AutoPreview takes screenshots of every UI change in a repository
 	// with a preview command.
 	AutoPreview bool `json:"autoPreview"`
@@ -301,6 +340,7 @@ func DefaultSettings() Settings {
 		Deny:            []string{},
 		AskFirst:        true,
 		AutoResume:      true,
+		SwitchModules:   true,
 		AutoLearn:       true,
 		AutoReview:      true,
 		AutoPreview:     true,
@@ -362,6 +402,11 @@ func (s *Settings) Validate() error {
 	// modules stay valid.
 	for name, m := range map[string]string{"analyze": s.Models.Analyze, "coding": s.Models.Coding, "retry": s.Models.Retry, "helper": s.Models.Helper, "learn": s.Models.Learn, "preview": s.Models.Preview} {
 		if !ValidModel(m) {
+			errs = append(errs, fmt.Errorf("model for %s must be one of %s, muse:<model> or codex:<model>", name, strings.Join(Models, ", ")))
+		}
+	}
+	for name, m := range map[string]string{"chat": s.Models.Chat, "documents": s.Models.Documents} {
+		if m != "" && !ValidModel(m) {
 			errs = append(errs, fmt.Errorf("model for %s must be one of %s, muse:<model> or codex:<model>", name, strings.Join(Models, ", ")))
 		}
 	}
@@ -488,7 +533,7 @@ func (s Settings) Modules(models map[string]string) []string {
 	if p := s.Access.Primary(); p != "" {
 		out = append(out, p)
 	}
-	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview} {
+	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview, ModelChat, ModelDocuments} {
 		add(s.ModelFor(Ticket{Models: models}, stage))
 	}
 	add(s.SecondOpinion)
@@ -517,6 +562,12 @@ func (s Settings) CheckModels(a Access, prev Settings) error {
 	check("learn", s.Models.Learn, prev.Models.Learn, false)
 	check("review", s.Models.Review, prev.Models.Review, true)
 	check("preview", s.Models.Preview, prev.Models.Preview, false)
+	if s.Models.Chat != "" {
+		check("chat", s.Models.Chat, prev.Models.Chat, false)
+	}
+	if s.Models.Documents != "" {
+		check("documents", s.Models.Documents, prev.Models.Documents, false)
+	}
 	if s.SecondOpinion != "" {
 		check("second opinion", s.SecondOpinion, prev.SecondOpinion, false)
 	}

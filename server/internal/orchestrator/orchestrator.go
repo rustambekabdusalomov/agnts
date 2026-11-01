@@ -15,6 +15,7 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
+	"agnts/internal/ai"
 	"agnts/internal/domain"
 )
 
@@ -47,14 +48,7 @@ type SettingsSource interface {
 
 // UsageGate tracks plan usage: whether new runs may start, and readings
 // taken from Claude Code's rate limit events.
-type UsageGate interface {
-	// Paused reports whether new runs must wait, and until when if known.
-	Paused(ctx context.Context, s domain.Settings) (bool, time.Time)
-	// Record stores a rate-limit reading (data is the raw stream line).
-	Record(ctx context.Context, data map[string]any)
-	// RecordLimited notes that a run was refused at the plan limit.
-	RecordLimited(ctx context.Context)
-}
+type UsageGate = ai.Limits
 
 // Deps are the orchestrator's collaborators.
 type Deps struct {
@@ -103,7 +97,12 @@ type Deps struct {
 	Workspaces Workspaces
 	// Accounts picks each run's Claude account; nil uses Usage alone (one
 	// connection for everything).
-	Accounts ClaudeAccounts
+	Accounts ai.Accounts
+	// AI is the gateway every model call goes through; nil builds one from
+	// Providers, Access, Accounts, Workspaces and Usage, recording spend in
+	// Store and Documents.
+	AI        *ai.Gateway
+	Providers *ai.Registry
 	// Access says which coding modules each person may use; nil gives
 	// everyone the default access.
 	Access AccessSource
@@ -124,6 +123,8 @@ type Deps struct {
 
 // Orchestrator runs tickets through their stages.
 type Orchestrator struct {
+	// ai is the gateway every model call goes through.
+	ai        *ai.Gateway
 	baselines baselines // check results on base commits
 	cfg       Config
 	store     Store
@@ -156,7 +157,7 @@ type Orchestrator struct {
 
 	queue      Queue
 	workspaces Workspaces
-	accounts   ClaudeAccounts
+	accounts   ai.Accounts
 	capacity   Capacity
 	credits    Credits
 	sched      *schedState
@@ -165,7 +166,6 @@ type Orchestrator struct {
 	docHost  DocumentHost
 	docWatch DocumentWatcher
 	meetings MeetingNotesSource // nil: no meeting notes
-	meetHear MeetingTranscriber // nil: meeting audio is not heard
 
 	swagger SwaggerTests
 	suites  SwaggerSuites
@@ -191,7 +191,6 @@ type Orchestrator struct {
 	snapshots     AssistantSnapshotter
 	assistantEv   AssistantEvents
 	assistantActs AssistantActions // nil: the assistant only answers
-	transcriber   Transcriber      // nil: no spoken questions
 	asst          assistantState
 	answering     sync.WaitGroup
 
@@ -206,7 +205,13 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	if q == nil {
 		q, _ = d.Store.(Queue)
 	}
+	gw := d.AI
+	if gw == nil {
+		gw = ai.New(ai.Deps{Providers: d.Providers, Access: d.Access, Accounts: d.Accounts, Workspaces: d.Workspaces, Limits: d.Usage,
+			Settings: d.Settings, Spend: spendTo(d.Store, d.Documents), Log: log})
+	}
 	return &Orchestrator{
+		ai:  gw,
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes, progress: d.Progress,
 		settings: personSettings{d.Settings}, stored: d.Settings, access: d.Access, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
@@ -214,6 +219,23 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 		swagger: d.SwaggerTests, specs: newSpecFetcher(), docs: d.Documents, docHost: d.DocumentHost,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
+	}
+}
+
+// spendTo records spend in store (ticket runs) and docs (document
+// generations).
+func spendTo(store Store, docs DocumentRuns) ai.Spend {
+	return func(ctx context.Context, c domain.ClaudeCall) error {
+		if c.DocumentRunID > 0 {
+			if docs == nil {
+				return nil
+			}
+			return docs.RecordDocumentCall(ctx, c.DocumentRunID, c)
+		}
+		if store == nil {
+			return nil
+		}
+		return store.RecordClaudeCall(ctx, c)
 	}
 }
 
@@ -238,6 +260,17 @@ func (o *Orchestrator) withPerson(ctx context.Context, user int64) context.Conte
 		o.log.Warn("read modules", "user", user, "err", err)
 	}
 	return domain.WithAccess(ctx, a)
+}
+
+// runAccount is the main account of the run ctx belongs to: its default
+// module's (the account the run row records).
+func runAccount(ctx context.Context) domain.ClaudeAccount {
+	if a, ok := ai.AdmissionOf(ctx); ok {
+		if r, ok := a.Main(); ok {
+			return r.Account
+		}
+	}
+	return domain.ClaudeAccount{}
 }
 
 // runKey names a ticket's active run: keys are unique per workspace.
@@ -607,12 +640,12 @@ func (o *Orchestrator) transition(ctx context.Context, t *domain.Ticket, run *do
 
 // watch adds stall detection to a stream handler, in the stages that do
 // the ticket's work.
-func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, next func(ClaudeEvent)) func(ClaudeEvent) {
+func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspace, t domain.Ticket, run *domain.Run, next func(ai.Event)) func(ai.Event) {
 	if s.Stalls == domain.StallsOff || (run.Stage != domain.StageCode && run.Stage != domain.StageAnalyze) {
 		return next
 	}
 	d := newStallDetector(run.Stage == domain.StageCode && !t.Kind.Report())
-	return func(e ClaudeEvent) {
+	return func(e ai.Event) {
 		next(e)
 		if st := d.observe(e); st != nil {
 			o.onStall(ctx, s, ws, t, run, *st)
@@ -622,32 +655,31 @@ func (o *Orchestrator) watch(ctx context.Context, s domain.Settings, ws Workspac
 
 // streamTo returns a Claude event handler that logs to the ticket and
 // feeds rate-limit readings to the usage tracker.
-func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domain.Run) func(ClaudeEvent) {
-	return func(e ClaudeEvent) {
+func (o *Orchestrator) streamTo(ctx context.Context, t domain.Ticket, run *domain.Run) func(ai.Event) {
+	return func(e ai.Event) {
 		noteSkill(run, e)
 		ev := domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Data: eventData(e.Data)}
 		switch e.Kind {
-		case ClaudeInit:
+		case ai.EventInit:
 			if id, _ := e.Data["session_id"].(string); id != "" {
 				run.SessionID = id
 			}
 			return
-		case ClaudeText:
+		case ai.EventText:
 			ev.Type, ev.Message = domain.EventClaudeText, truncate(e.Text, 4000)
-		case ClaudeTool:
+		case ai.EventTool:
 			ev.Type, ev.Message = domain.EventClaudeTool, e.Tool
 			if target, _ := e.Data["target"].(string); target != "" {
 				ev.Message = e.Tool + " · " + target
 			}
-		case ClaudeRateLimit:
-			o.usage.Record(ctx, e.Data)
+		case ai.EventRateLimit:
 			ev.Type, ev.Message = domain.EventRateLimit, "plan usage update"
 			if st := rateStatus(e.Data); st != "" && st != "allowed" {
 				ev.Level, ev.Message = domain.LevelWarn, "plan usage: "+strings.ReplaceAll(st, "_", " ")
 			}
-		case ClaudeResultEv:
+		case ai.EventResult:
 			ev.Type, ev.Message = domain.EventClaudeResult, truncate(e.Text, 4000)
-		case ClaudeBudget:
+		case ai.EventBudget:
 			ev.Type, ev.Message = domain.EventBudget, e.Text
 			if lvl, _ := e.Data["level"].(string); lvl == "warn" {
 				ev.Level = domain.LevelWarn
@@ -732,19 +764,33 @@ func bashRule(c string) string {
 
 // claude runs one invocation with the model for modelStage, and turns rate
 // limits and errors into states.
-func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string) (ClaudeResult, error) {
+func (o *Orchestrator) claude(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string) (ai.Result, error) {
 	return o.claudeTurns(ctx, s, ws, t, run, modelStage, prompt, resume, 0)
 }
 
 // claudeTurns is claude with a turn budget: above zero, the invocation may
 // take at most that many turns, and reaching them is not an error (the
 // result says error_max_turns, and the session can be resumed).
-func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string, budget int) (ClaudeResult, error) {
+func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, modelStage, prompt, resume string, budget int) (ai.Result, error) {
 	model := s.ModelFor(*t, modelStage)
+	// Where it runs first: the request depends on the module it lands on
+	// (a call may switch modules when its own cannot run).
+	meta := transcriptMeta{Purpose: domain.TranscriptPurpose(run.Stage), WorkspaceID: t.WorkspaceID, Run: run, TicketKey: t.Key, ModelStage: modelStage}
+	route, hold := o.ai.RouteCall(ctx, ai.Call{Who: o.whoFor(ctx, meta), Purpose: meta.Purpose, Req: ai.Request{Model: model}})
+	if hold != nil {
+		return ai.Result{}, hold
+	}
+	meta.Route = &route
+	if route.Model != "" {
+		model = route.Model
+	}
+	if route.Moved() && run.Model == "" { // once a run
+		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventRerouted, Level: domain.LevelWarn,
+			Message: fmt.Sprintf("%s ran on %s: %s", stageName(modelStage), modelName(model), route.Rerouted)})
+	}
 	if run.Model == "" {
 		run.Model = model
 	}
-	ctx = domain.UseProvider(ctx, domain.ProviderOf(model))
 	// A ticket in several repositories has more to read and change.
 	scale := domain.TurnScale(len(t.Repos))
 	turns := int(float64(s.MaxTurns) * scale)
@@ -755,7 +801,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		turns = min(turns, budget)
 	}
 	effort := ""
-	if !domain.IsCodex(model) {
+	if route.Caps.Has(ai.CapEffort) {
 		complex := false
 		if modelStage != domain.ModelAnalyze && s.Effort.Complex != "" {
 			if a := o.latestAnalysis(ctx, *t); a != nil {
@@ -786,8 +832,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	// run as it works, and decide the tool calls it asks about.
 	steer, ask, release := o.codeLiveFor(ctx, *t, run.Stage, model, readOnly)
 	defer release()
-	res, err := o.callClaude(ctx, ws, transcriptMeta{Purpose: domain.TranscriptPurpose(run.Stage), WorkspaceID: t.WorkspaceID,
-		Run: run, TicketKey: t.Key, ModelStage: modelStage}, ClaudeRequest{
+	res, err := o.callClaude(ctx, ws, meta, ai.Request{
 		Prompt:   prompt,
 		Model:    model,
 		MaxTurns: turns,
@@ -805,8 +850,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 	if res.SessionID != "" {
 		run.SessionID = res.SessionID
 	}
-	o.recordSpend(ctx, run, modelStage, model, res)
-	if a, ok := domain.ClaudeOf(ctx); ok && a.Credits && o.credits != nil {
+	if res.Account.Credits && o.credits != nil {
 		if within, why := o.credits.Within(ctx, t.WorkspaceID, run.ID); !within {
 			run.ExitReason = "credits"
 			return res, fmt.Errorf("%s; buy credits in Billing and retry", why)
@@ -816,7 +860,6 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		return res, err
 	}
 	if res.RateLimited {
-		o.usage.RecordLimited(ctx)
 		run.ExitReason = "rate_limited"
 		if run.Stage.Side() {
 			// A side run never moves the ticket; it is queued again and
@@ -842,25 +885,6 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		return res, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
 	}
 	return res, nil
-}
-
-// recordSpend stores the tokens an invocation used, failed and rate-limited
-// ones included: they were spent all the same. An invocation that never
-// reached Claude (no turns, no tokens) is not recorded.
-func (o *Orchestrator) recordSpend(ctx context.Context, run *domain.Run, modelStage, model string, res ClaudeResult) {
-	if res.Usage.IsZero() && res.Turns == 0 {
-		return
-	}
-	if res.Model != "" {
-		model = res.Model
-	}
-	// The run may have been stopped; the spend is recorded regardless.
-	if err := o.store.RecordClaudeCall(context.WithoutCancel(ctx), domain.ClaudeCall{
-		RunID: run.ID, ModelStage: modelStage, Model: model, Usage: res.Usage,
-		Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID,
-	}); err != nil {
-		o.log.Error("record claude spend", "run_id", run.ID, "err", err)
-	}
 }
 
 var errNoRepo = errors.New("no repository is linked to this ticket; add one on the Repositories page and retry")
@@ -1184,8 +1208,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		knowledge = append(knowledge, *m)
 	}
 
-	acct, _ := domain.ClaudeOf(ctx)
-	session, err := o.store.LastSessionID(ctx, t.ID, acct)
+	session, err := o.store.LastSessionID(ctx, t.ID, runAccount(ctx))
 	if err != nil {
 		return err
 	}
@@ -1289,7 +1312,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		return err
 	}
 
-	var res ClaudeResult
+	var res ai.Result
 	if saved != nil && saved.Checking && feedback == "" {
 		// Claude had finished before the stop: only the checks were cut short.
 		res.SessionID = session
@@ -1496,7 +1519,7 @@ func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Wo
 
 // checkAndFix runs the checks, sending failures back to Claude up to the
 // configured number of fix attempts.
-func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, res *ClaudeResult) (checkReport, error) {
+func (o *Orchestrator) checkAndFix(ctx context.Context, s domain.Settings, ws Workspace, t *domain.Ticket, run *domain.Run, rs []runRepo, res *ai.Result) (checkReport, error) {
 	var checks checkReport
 	for attempt := 0; ; attempt++ {
 		checks = o.runChecks(ctx, ws, *t, rs, run)
@@ -1592,8 +1615,7 @@ func (o *Orchestrator) report(ctx context.Context, s domain.Settings, t domain.T
 	defer o.closeWorkspace(ctx, t, ws)
 	d.Context, d.Tracker = o.contextFiles(ctx, ws, t, rs), o.trackerContext(ctx, ws, t)
 
-	acct, _ := domain.ClaudeOf(ctx)
-	session, err := o.store.LastSessionID(ctx, t.ID, acct)
+	session, err := o.store.LastSessionID(ctx, t.ID, runAccount(ctx))
 	if err != nil {
 		return err
 	}
