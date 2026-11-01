@@ -190,7 +190,7 @@ func (a *Agent) send(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			a.flush(context.WithoutCancel(ctx)) // what is left, once
+			_ = a.flush(context.WithoutCancel(ctx)) // what is left, once
 			return
 		case <-t.C:
 		case <-a.wake:

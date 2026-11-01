@@ -2,6 +2,7 @@ package logwatch
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -497,7 +498,7 @@ func TestPush(t *testing.T) {
 	if err != nil || r.Findings != 1 {
 		t.Fatalf("push %+v %v", r, err)
 	}
-	if _, err := f.svc.Push(context.Background(), "agl_nope", strings.NewReader("x"), "text/plain", "", PushPlain); err != ErrUnknownToken {
+	if _, err := f.svc.Push(context.Background(), "agl_nope", strings.NewReader("x"), "text/plain", "", PushPlain); !errors.Is(err, ErrUnknownToken) {
 		t.Fatalf("unknown token: %v", err)
 	}
 }

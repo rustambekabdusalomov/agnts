@@ -42,11 +42,11 @@ func fakeLoki(t *testing.T, entries map[string][]time.Time, calls *atomic.Int32)
 		}
 		switch r.URL.Path {
 		case "/loki/api/v1/labels":
-			fmt.Fprint(w, `{"status":"success","data":["app","env","level","service_name"]}`)
+			_, _ = fmt.Fprint(w, `{"status":"success","data":["app","env","level","service_name"]}`)
 		case "/loki/api/v1/label/service_name/values":
-			fmt.Fprint(w, `{"status":"success","data":["api","worker"]}`)
+			_, _ = fmt.Fprint(w, `{"status":"success","data":["api","worker"]}`)
 		case "/loki/api/v1/status/buildinfo":
-			fmt.Fprint(w, `{"version":"3.2.0"}`)
+			_, _ = fmt.Fprint(w, `{"version":"3.2.0"}`)
 		case "/loki/api/v1/query_range":
 			if calls != nil {
 				calls.Add(1)
@@ -75,7 +75,7 @@ func fakeLoki(t *testing.T, entries map[string][]time.Time, calls *atomic.Int32)
 				}
 			}
 			b, _ := json.Marshal(map[string]any{"status": "success", "data": map[string]any{"resultType": "streams", "result": res}})
-			w.Write(b)
+			_, _ = w.Write(b)
 		default:
 			http.NotFound(w, r)
 		}
@@ -180,7 +180,7 @@ func TestElasticPull(t *testing.T) {
 	var bodies []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			fmt.Fprint(w, `{"version":{"number":"2.17.0","distribution":"opensearch"}}`)
+			_, _ = fmt.Fprint(w, `{"version":{"number":"2.17.0","distribution":"opensearch"}}`)
 			return
 		}
 		b, _ := io.ReadAll(r.Body)
@@ -237,7 +237,7 @@ func TestElasticPull(t *testing.T) {
 			hits = append(hits, map[string]any{"_id": d["_id"], "_source": src, "sort": []any{ts.UnixMilli()}})
 		}
 		out, _ := json.Marshal(map[string]any{"hits": map[string]any{"hits": hits}})
-		w.Write(out)
+		_, _ = w.Write(out)
 	}))
 	defer srv.Close()
 	src := domain.LogSource{Name: "os", Kind: domain.LogOpenSearch, Scope: domain.LogScope{Index: "logs-*"},
@@ -286,15 +286,15 @@ func TestGraylog(t *testing.T) {
 		}
 		switch r.URL.Path {
 		case "/api/system":
-			fmt.Fprint(w, `{"version":"6.1.0"}`)
+			_, _ = fmt.Fprint(w, `{"version":"6.1.0"}`)
 		case "/api/streams":
-			fmt.Fprint(w, `{"streams":[{"id":"s1","title":"api"},{"id":"s2","title":"old","disabled":true}]}`)
+			_, _ = fmt.Fprint(w, `{"streams":[{"id":"s1","title":"api"},{"id":"s2","title":"old","disabled":true}]}`)
 		case "/api/search/messages":
 			if r.Header.Get("X-Requested-By") == "" {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
-			fmt.Fprintf(w, `{"schema":[{"field":"timestamp"},{"field":"message"},{"field":"source"},{"field":"level"},{"field":"_id"}],
+			_, _ = fmt.Fprintf(w, `{"schema":[{"field":"timestamp"},{"field":"message"},{"field":"source"},{"field":"level"},{"field":"_id"}],
 				"datarows":[["%s","panic: x","api-1","3","m1"]]}`, now.Add(-time.Minute).Format(time.RFC3339Nano))
 		default:
 			http.NotFound(w, r)
@@ -335,8 +335,8 @@ func TestParsePush(t *testing.T) {
 	}
 	var gz bytes.Buffer
 	zw := gzip.NewWriter(&gz)
-	zw.Write([]byte(`[{"msg":"a"},{"msg":"b"}]`))
-	zw.Close()
+	_, _ = zw.Write([]byte(`[{"msg":"a"},{"msg":"b"}]`))
+	_ = zw.Close()
 	if es, err := ParsePush(&gz, "application/json", "gzip", "svc", now); err != nil || len(es) != 2 || es[0].Service != "svc" {
 		t.Fatalf("gzip array %+v %v", es, err)
 	}
@@ -365,14 +365,17 @@ func TestDialerRefusesPrivateAndPlainHTTP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = c.HTTP.Get("https://rebind.example.com/")
+	resp, err := c.HTTP.Get("https://rebind.example.com/")
+	if err == nil {
+		_ = resp.Body.Close()
+	}
 	if !errors.Is(err, ErrPrivateAddress) {
 		t.Errorf("rebinding to loopback: %v", err)
 	}
 }
 
 func TestRedirectToOtherHostRefused(t *testing.T) {
-	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "stolen") }))
+	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = fmt.Fprint(w, "stolen") }))
 	defer other.Close()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, strings.Replace(other.URL, "127.0.0.1", "localhost", 1)+"/x", http.StatusFound)

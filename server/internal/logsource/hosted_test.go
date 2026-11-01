@@ -34,7 +34,7 @@ func TestDatadogPull(t *testing.T) {
 		}
 		b, _ := io.ReadAll(r.Body)
 		_ = json.Unmarshal(b, &body)
-		fmt.Fprintf(w, `{"data":[{"id":"e1","attributes":{"timestamp":"%s","message":"panic: x","service":"api","status":"error","host":"h1","attributes":{"caller":"x.go:1"}}}]}`,
+		_, _ = fmt.Fprintf(w, `{"data":[{"id":"e1","attributes":{"timestamp":"%s","message":"panic: x","service":"api","status":"error","host":"h1","attributes":{"caller":"x.go:1"}}}]}`,
 			now.Add(-time.Minute).Format(time.RFC3339Nano))
 	}))
 	defer srv.Close()
@@ -61,21 +61,21 @@ func TestCloudWatchPull(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(r.Header.Get("Authorization"), "AWS4-HMAC-SHA256 Credential=AKID/") || r.Header.Get("X-Amz-Security-Token") != "sess" {
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, `{"__type":"UnrecognizedClientException"}`)
+			_, _ = fmt.Fprint(w, `{"__type":"UnrecognizedClientException"}`)
 			return
 		}
 		target := strings.TrimPrefix(r.Header.Get("X-Amz-Target"), "Logs_20140328.")
 		targets = append(targets, target)
 		switch target {
 		case "DescribeLogGroups":
-			fmt.Fprint(w, `{"logGroups":[{"logGroupName":"/ecs/api"}]}`)
+			_, _ = fmt.Fprint(w, `{"logGroups":[{"logGroupName":"/ecs/api"}]}`)
 		case "FilterLogEvents":
 			var in map[string]any
 			_ = json.NewDecoder(r.Body).Decode(&in)
 			if !strings.Contains(fmt.Sprint(in["filterPattern"]), `?"panic"`) {
 				t.Errorf("pattern %v", in["filterPattern"])
 			}
-			fmt.Fprintf(w, `{"events":[{"eventId":"1","timestamp":%d,"message":"panic: x\n","logStreamName":"s1"}]}`, now.Add(-time.Minute).UnixMilli())
+			_, _ = fmt.Fprintf(w, `{"events":[{"eventId":"1","timestamp":%d,"message":"panic: x\n","logStreamName":"s1"}]}`, now.Add(-time.Minute).UnixMilli())
 		}
 	}))
 	defer srv.Close()
@@ -106,11 +106,11 @@ func TestSplunkPull(t *testing.T) {
 		}
 		switch r.URL.Path {
 		case "/services/server/info":
-			fmt.Fprint(w, `{"entry":[{"content":{"version":"9.3.0"}}]}`)
+			_, _ = fmt.Fprint(w, `{"entry":[{"content":{"version":"9.3.0"}}]}`)
 		case "/services/search/jobs/export":
 			_ = r.ParseForm()
 			search = r.Form.Get("search")
-			fmt.Fprintf(w, "{\"preview\":false,\"result\":{\"_time\":\"%s\",\"_raw\":\"ERROR boom\",\"_cd\":\"1:2\",\"sourcetype\":\"api\",\"host\":\"h\",\"source\":\"/var/log/api.log\"}}\n",
+			_, _ = fmt.Fprintf(w, "{\"preview\":false,\"result\":{\"_time\":\"%s\",\"_raw\":\"ERROR boom\",\"_cd\":\"1:2\",\"sourcetype\":\"api\",\"host\":\"h\",\"source\":\"/var/log/api.log\"}}\n",
 				now.Add(-time.Minute).Format("2006-01-02T15:04:05.000-07:00"))
 		}
 	}))

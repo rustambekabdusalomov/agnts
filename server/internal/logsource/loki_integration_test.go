@@ -43,7 +43,7 @@ func TestLokiIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	if resp.StatusCode/100 != 2 {
 		t.Fatalf("push: %d", resp.StatusCode)
 	}

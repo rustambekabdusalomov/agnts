@@ -631,4 +631,3 @@ func parseSplunkTime(v any) time.Time {
 	}
 	return time.Time{}
 }
-

@@ -265,7 +265,7 @@ func (a *Agent) followLogs(ctx context.Context, d *docker, id string, since time
 		}
 		return
 	}
-	if err := demux(resp.Body, line); err != nil && ctx.Err() == nil && !errors.Is(err, io.EOF) {
+	if err := demux(resp.Body, line); ctx.Err() == nil && !errors.Is(err, io.EOF) {
 		a.log.Warn("container logs", "service", svc, "err", err)
 	}
 }

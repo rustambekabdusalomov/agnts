@@ -43,7 +43,7 @@ func (a *Agent) watchFiles(ctx context.Context, svc, glob string) {
 			if _, ok := files[p]; ok {
 				continue
 			}
-			f, err := os.Open(p)
+			f, err := os.Open(p) //nolint:gosec // G304: the operator's AGNTS_WATCH_FILES globs
 			if err != nil {
 				continue
 			}
@@ -82,7 +82,7 @@ func (a *Agent) readFile(svc, path string, tf *tailed) error {
 	}
 	if !os.SameFile(now, tf.info) || now.Size() < tf.offset {
 		// Rotated: read the new file from the start.
-		f, err := os.Open(path)
+		f, err := os.Open(path) //nolint:gosec // G304: as above
 		if err != nil {
 			return err
 		}

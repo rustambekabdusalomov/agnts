@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -36,7 +37,7 @@ func TestDemux(t *testing.T) {
 	b.Write(frame(1, "2026-11-02T09:00:00.1Z first\n2026-11-02T09:00:00.2Z sec"))
 	b.Write(frame(2, "ond\n"))
 	var got []string
-	if err := demux(&b, func(l string) { got = append(got, l) }); err != io.EOF {
+	if err := demux(&b, func(l string) { got = append(got, l) }); !errors.Is(err, io.EOF) {
 		t.Fatal(err)
 	}
 	if len(got) != 2 || !strings.HasSuffix(got[1], "second") {
@@ -111,15 +112,15 @@ func fakeDocker(t *testing.T, events []map[string]any) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/_ping":
-			fmt.Fprint(w, "OK")
+			_, _ = fmt.Fprint(w, "OK")
 		case r.URL.Path == "/containers/json":
-			fmt.Fprint(w, `[{"Id":"abc123def4567890","Names":["/api-1"],"Labels":{"agnts.watch":"logs","com.docker.compose.service":"api"}}]`)
+			_, _ = fmt.Fprint(w, `[{"Id":"abc123def4567890","Names":["/api-1"],"Labels":{"agnts.watch":"logs","com.docker.compose.service":"api"}}]`)
 		case strings.HasSuffix(r.URL.Path, "/json"):
-			fmt.Fprint(w, `{"Name":"/api-1","Config":{"Tty":false,"Labels":{"com.docker.compose.service":"api","org.opencontainers.image.revision":"3f9c1a2"}},"State":{"ExitCode":2,"OOMKilled":false},"RestartCount":4}`)
+			_, _ = fmt.Fprint(w, `{"Name":"/api-1","Config":{"Tty":false,"Labels":{"com.docker.compose.service":"api","org.opencontainers.image.revision":"3f9c1a2"}},"State":{"ExitCode":2,"OOMKilled":false},"RestartCount":4}`)
 		case strings.HasSuffix(r.URL.Path, "/logs"):
-			w.Write(frame(2, time.Now().UTC().Format(time.RFC3339Nano)+" panic: boom\n"))
+			_, _ = w.Write(frame(2, time.Now().UTC().Format(time.RFC3339Nano)+" panic: boom\n"))
 			// Five seconds later: past the panic's context window.
-			w.Write(frame(1, time.Now().Add(5*time.Second).UTC().Format(time.RFC3339Nano)+" GET / 200\n"))
+			_, _ = w.Write(frame(1, time.Now().Add(5*time.Second).UTC().Format(time.RFC3339Nano)+" GET / 200\n"))
 		case r.URL.Path == "/events":
 			if r.URL.Query().Get("since") == "" {
 				t.Error("events must resume from a time")
@@ -147,7 +148,7 @@ func TestDockerCrashesAndLogs(t *testing.T) {
 	}
 	events := []map[string]any{
 		ev("stop", "", 0), ev("die", "143", time.Second), // a deploy: ignored
-		ev("die", "2", time.Minute),                      // a crash
+		ev("die", "2", time.Minute), // a crash
 		ev("health_status: unhealthy", "", 2*time.Minute),
 	}
 	srv := fakeDocker(t, events)

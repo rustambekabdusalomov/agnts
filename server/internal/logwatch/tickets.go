@@ -13,10 +13,10 @@ import (
 
 // priorityOf maps a finding's severity to a ticket priority.
 func priorityOf(f domain.LogFinding) string {
-	switch {
-	case f.Severity == domain.LogCritical:
+	switch f.Severity {
+	case domain.LogCritical:
 		return "highest"
-	case f.Severity == domain.LogHigh:
+	case domain.LogHigh:
 		return "high"
 	}
 	return "medium"

@@ -38,8 +38,8 @@ func (k LogKind) Valid() bool { return slices.Contains(LogKinds, k) }
 // as opposed to the source pushing to agnts.
 func (k LogKind) Pulls() bool { return k.Valid() && k != LogPush }
 
-// Environments a log source may be in. Production-only detectors (debug
-// mode) apply to production sources only.
+// LogEnvironments are the environments a log source may be in.
+// Production-only detectors (debug mode) apply to production sources only.
 var LogEnvironments = []string{"production", "staging", "development"}
 
 // Poll interval bounds and default, in seconds.
@@ -416,8 +416,8 @@ type LogOverride struct {
 	Security LogMode `json:"security,omitempty"`
 }
 
-// LogWatchSettings: how agnts watches project logs and what it does with
-// what it finds. Workspace-level, like CISettings.
+// LogWatchSettings are how agnts watches project logs and what it does
+// with what it finds. Workspace-level, like CISettings.
 type LogWatchSettings struct {
 	// Errors and Security say what to do with a finding of that category:
 	// "off" records it only, "report" shows and notifies, "ticket" also

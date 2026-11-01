@@ -1013,8 +1013,8 @@ func SignalOf(ev LogEvent) (LogSignal, string) {
 	return SignalNone, ""
 }
 
-// ProbeExposed: a scanner's path was answered with a success, so whatever
-// it looks for (.env, .git) is served. That is an exposure at once.
+// ProbeExposed reports a scanner's path answered with a success: whatever
+// it looks for (.env, .git) is served, an exposure at once.
 func ProbeExposed(ev LogEvent) (LogHit, bool) {
 	a := ev.Access
 	if a == nil || a.Status < 200 || a.Status >= 300 || !probePath.MatchString(a.Path) {

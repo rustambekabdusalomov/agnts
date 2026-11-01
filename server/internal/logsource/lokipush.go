@@ -170,9 +170,9 @@ func lokiPushProto(b []byte, defService string) ([]domain.LogEntry, error) {
 				case num == 1 && wire == 2:
 					return pbFields(v, func(num, wire int, _ []byte, n uint64) error {
 						if wire == 0 && num == 1 {
-							sec = int64(n)
+							sec = int64(n) //nolint:gosec // G115: protobuf int64 is sent as its two's complement
 						} else if wire == 0 && num == 2 {
-							nanos = int64(n)
+							nanos = int64(n) //nolint:gosec // G115: as above; time.Unix normalizes it
 						}
 						return nil
 					})
@@ -223,11 +223,12 @@ func pbFields(b []byte, fn func(num, wire int, v []byte, n uint64) error) error 
 			b = b[8:]
 		case 2:
 			n, k := binary.Uvarint(b)
-			if k <= 0 || uint64(len(b)-k) < n {
+			if k <= 0 || n > uint64(len(b)-k) { //nolint:gosec // G115: len(b)-k >= 0 here
 				return errProto
 			}
-			v := b[k : k+int(n)]
-			b = b[k+int(n):]
+			end := k + int(n) //nolint:gosec // G115: n <= len(b)-k, checked above
+			v := b[k:end]
+			b = b[end:]
 			if err := fn(num, wire, v, 0); err != nil {
 				return err
 			}
@@ -246,10 +247,11 @@ func pbFields(b []byte, fn func(num, wire int, v []byte, n uint64) error) error 
 // snappyDecode decodes a snappy block (not the framed format), refusing
 // output over max.
 func snappyDecode(src []byte, max int) ([]byte, error) {
-	n, k := binary.Uvarint(src)
-	if k <= 0 || n > uint64(max) {
+	n64, k := binary.Uvarint(src)
+	if k <= 0 || max < 0 || n64 > uint64(max) {
 		return nil, errors.New("bad or too large length")
 	}
+	n := int(n64) //nolint:gosec // G115: n64 <= max, an int
 	src = src[k:]
 	dst := make([]byte, 0, n)
 	for len(src) > 0 {
@@ -270,7 +272,7 @@ func snappyDecode(src []byte, max int) ([]byte, error) {
 				src = src[w:]
 			}
 			l++
-			if l > len(src) || len(dst)+l > int(n) {
+			if l > len(src) || len(dst)+l > n {
 				return nil, errors.New("literal out of range")
 			}
 			dst = append(dst, src[:l]...)
@@ -297,7 +299,7 @@ func snappyDecode(src []byte, max int) ([]byte, error) {
 				length, offset = int(tag>>2)+1, int(binary.LittleEndian.Uint32(src[1:5]))
 				src = src[5:]
 			}
-			if offset <= 0 || offset > len(dst) || len(dst)+length > int(n) {
+			if offset <= 0 || offset > len(dst) || len(dst)+length > n {
 				return nil, errors.New("copy out of range")
 			}
 			for i := 0; i < length; i++ {
@@ -305,7 +307,7 @@ func snappyDecode(src []byte, max int) ([]byte, error) {
 			}
 		}
 	}
-	if len(dst) != int(n) {
+	if len(dst) != n {
 		return nil, errors.New("length mismatch")
 	}
 	return dst, nil

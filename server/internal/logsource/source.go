@@ -120,7 +120,7 @@ func call(ctx context.Context, c *Client, a domain.LogAuth, method, path string,
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	b, err := ReadBody(resp.Body)
 	if err != nil {
 		return nil, err

@@ -69,8 +69,8 @@ type Dialer struct {
 	// Allow are hosts (names) and CIDRs the server's operator lets the log
 	// watcher reach directly although private, over http too: a logging
 	// system next to agnts in its own network.
-	Allow []string
-	Timeout      time.Duration
+	Allow   []string
+	Timeout time.Duration
 }
 
 // Client is an HTTP client for one source, and the private network it
@@ -123,7 +123,9 @@ func (d Dialer) For(ws int64, src domain.LogSource) (*Client, error) {
 		}
 	} else if d.allowedName(host) {
 		var dialer net.Dialer
-		dial = func(ctx context.Context, network, addr string) (net.Conn, error) { return dialer.DialContext(ctx, network, addr) }
+		dial = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return dialer.DialContext(ctx, network, addr)
+		}
 	} else {
 		if u.Scheme == "http" && !d.AllowPrivate && !d.allowedIP(net.ParseIP(host)) {
 			return nil, ErrPlainHTTP

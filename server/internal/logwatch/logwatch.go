@@ -114,7 +114,7 @@ func New(store Store, tickets Tickets, work Work, settings Settings, ancestry An
 // SetTriager adds model triage (phase 2).
 func (s *Service) SetTriager(t Triager) { s.triager = t }
 
-// Errors the HTTP layer maps.
+// ErrInvalid is a request the HTTP layer answers with 400.
 var ErrInvalid = errors.New("invalid")
 
 func invalid(format string, a ...any) error {
@@ -411,7 +411,7 @@ func (s *Service) act(ctx context.Context, st domain.Settings, src domain.LogSou
 	mode := lw.ModeFor(f.Category, serviceKey(src, f.Service), f.RepoIDs)
 	leak := f.Class == domain.LogClassLeak && f.Severity.AtLeast(domain.LogHigh)
 	if mode == domain.LogModeOff {
-		if !(leak && lw.AlwaysNotifyLeaks) {
+		if !leak || !lw.AlwaysNotifyLeaks {
 			return nil
 		}
 		mode = domain.LogModeReport
