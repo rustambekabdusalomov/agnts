@@ -1347,7 +1347,8 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
 .tk-more { margin-top: 4px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--primary-ink); cursor: pointer; }
 .tk-head-act { align-self: flex-start; }
 .tk-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.tk-lang { width: 200px; }
+.tk-lang { display: flex; gap: 8px; align-items: center; }
+.tk-lang > :last-child { width: 200px; }
 .tk-tr-note { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; }
 .tk-tabs { margin: 4px 0 -4px; }
 .tk-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 14px; align-items: start; }
