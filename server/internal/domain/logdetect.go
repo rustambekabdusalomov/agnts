@@ -851,7 +851,9 @@ func detectPersonalData(ev LogEvent, red []string) []LogHit {
 				card = true
 			}
 		}
-		if logEmail.MatchString(raw) {
+		// user:password@host in a URL is a credential (the secret detector
+		// reports it), not an email address.
+		if logEmail.MatchString(urlCredentials.ReplaceAllString(raw, "://")) {
 			email = true
 		}
 	}

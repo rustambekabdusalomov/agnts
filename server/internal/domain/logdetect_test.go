@@ -229,6 +229,14 @@ func TestPersonalData(t *testing.T) {
 	}
 }
 
+func TestURLPasswordIsNotAnEmail(t *testing.T) {
+	for _, h := range detectAll(t, []LogEntry{{Time: t0, Message: `INFO connecting to postgres://billing:Sup3rS3cret-2026@db.internal:5432/billing`}}, LogRules{}) {
+		if h.Detector == "personal_data" {
+			t.Errorf("a URL's password@host is not an email: %+v", h)
+		}
+	}
+}
+
 func TestDebugModeOnlyInProduction(t *testing.T) {
 	e := []LogEntry{{Time: t0, Message: `[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.`}}
 	if h := detectAll(t, e, LogRules{}); len(h) != 0 {
