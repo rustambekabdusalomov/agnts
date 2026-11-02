@@ -400,3 +400,22 @@ func TestDialerOperatorAllowList(t *testing.T) {
 		t.Errorf("outside the list: %v", err)
 	}
 }
+
+// Loki 3 labels each line with detected_level: an error line and the
+// trace after it come back as two streams, and must stay one.
+func TestStreamKeyIgnoresLevelLabels(t *testing.T) {
+	a := streamKey(map[string]string{"service_name": "billing", "container": "c1", "detected_level": "error"})
+	b := streamKey(map[string]string{"service_name": "billing", "container": "c1"})
+	if a != b || strings.Contains(selectorOf(a), "detected_level") {
+		t.Fatalf("%q vs %q", a, b)
+	}
+	es := []domain.LogEntry{
+		{Time: now, Stream: a, Message: "2026-11-02T07:41:36.980Z ERROR billing.jobs: job charge_order failed"},
+		{Time: now.Add(time.Millisecond), Stream: b, Message: "Traceback (most recent call last):"},
+		{Time: now.Add(2 * time.Millisecond), Stream: b, Message: `  File "/app/billing/jobs.py", line 142, in charge_order`},
+		{Time: now.Add(3 * time.Millisecond), Stream: a, Message: "ZeroDivisionError: division by zero"},
+	}
+	if evs := domain.FrameLogs(es, domain.LogFields{}); len(evs) != 1 {
+		t.Fatalf("framed into %d events, want 1", len(evs))
+	}
+}

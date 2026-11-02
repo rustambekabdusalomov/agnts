@@ -100,7 +100,7 @@ func lokiStream(labels map[string]string, defService string) (svc, level, stream
 			break
 		}
 	}
-	return svc, level, labelString(labels)
+	return svc, level, streamKey(labels)
 }
 
 // parseLabels reads Loki's label string: {app="api", env="prod"}.

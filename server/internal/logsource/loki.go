@@ -205,7 +205,7 @@ func (l *Loki) Pull(ctx context.Context, svcs []domain.LogService, f Filter, cur
 		n := 0
 		var last time.Time
 		for _, s := range res.Data.Result {
-			stream := labelString(s.Stream)
+			stream := streamKey(s.Stream)
 			name := svc.Name
 			if name == "" && l.src.Fields.Service != "" {
 				name = s.Stream[l.src.Fields.Service]
@@ -275,6 +275,23 @@ func enabled(svcs []domain.LogService) []domain.LogService {
 	return out
 }
 
+// levelLabels are labels Loki (detected_level, Loki 3) or a pipeline sets
+// per line: they split one producer's output into streams, so they are
+// not part of what identifies it.
+var levelLabels = map[string]bool{"detected_level": true, "level": true, "severity": true, "lvl": true}
+
+// streamKey identifies a producer by its labels, leaving per-line level
+// labels out: an error line and the trace after it are one stream.
+func streamKey(m map[string]string) string {
+	keep := make(map[string]string, len(m))
+	for k, v := range m {
+		if !levelLabels[k] {
+			keep[k] = v
+		}
+	}
+	return labelString(keep)
+}
+
 func labelString(m map[string]string) string {
 	keys := make([]string, 0, len(m))
 	for k := range m {
@@ -334,7 +351,7 @@ func (l *Loki) withContext(ctx context.Context, entries []domain.LogEntry, until
 			continue
 		}
 		for _, s := range res.Data.Result {
-			stream := labelString(s.Stream)
+			stream := streamKey(s.Stream)
 			for _, v := range s.Values {
 				ts, err := parseNanos(v[0])
 				if err != nil || ts.After(until) {
