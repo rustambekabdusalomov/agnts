@@ -26,7 +26,7 @@ const runHistoryKey = "run_history"
 // backgroundPurposes are the calls outside a ticket's stages.
 var backgroundPurposes = []string{
 	string(domain.PurposeAssistant), string(domain.PurposeBrief), string(domain.PurposeDetect),
-	string(domain.PurposeReflect), string(domain.PurposeRules), string(domain.PurposeTranslate),
+	string(domain.PurposeReflect), string(domain.PurposeRules), string(domain.PurposeTranslate), string(domain.PurposeLogTriage),
 }
 
 // StartTranscript implements orchestrator.Recorder. The workspace is

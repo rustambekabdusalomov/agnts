@@ -6676,6 +6676,812 @@ class AppLocalizationsRu extends AppLocalizations {
   String get logsTypeBudget => 'Расход';
 
   @override
+  String get logwatchTitle => 'Наблюдение за логами';
+
+  @override
+  String get logwatchLede =>
+      'Ошибки и проблемы безопасности, которые agnts нашёл в логах ваших проектов, сгруппированные по ошибке. Он сообщает о них или открывает тикет на исправление — как указано в настройках.';
+
+  @override
+  String get logwatchBack => 'Наблюдение за логами';
+
+  @override
+  String get logwatchSources => 'Источники логов';
+
+  @override
+  String get logwatchSettings => 'Настройки';
+
+  @override
+  String get logwatchCategoryLabel => 'Категория';
+
+  @override
+  String get logwatchFilterLabel => 'Показать';
+
+  @override
+  String get logwatchCat_error => 'Ошибки';
+
+  @override
+  String get logwatchCat_security => 'Безопасность';
+
+  @override
+  String get logwatchFilter_active => 'Требует внимания';
+
+  @override
+  String get logwatchFilter_fixed => 'Исправлено';
+
+  @override
+  String get logwatchFilter_muted => 'Скрыто';
+
+  @override
+  String get logwatchFilter_all => 'Все';
+
+  @override
+  String get logwatchRepo => 'Репозиторий';
+
+  @override
+  String get logwatchAllRepos => 'Все репозитории';
+
+  @override
+  String get logwatchEmptyActive => 'Ничего не требует внимания: новых ошибок и проблем безопасности в логах нет.';
+
+  @override
+  String get logwatchEmptyFilter => 'Здесь ничего нет.';
+
+  @override
+  String get logwatchHowTitle => 'Как работает наблюдение за логами';
+
+  @override
+  String get logwatchHowSources =>
+      'Добавьте источник логов: адрес вашего Loki, Elasticsearch, OpenSearch или Graylog, либо push-токен для Vector или Fluent Bit. Затем выберите сервисы и репозитории, на которых они работают.';
+
+  @override
+  String get logwatchHowModes =>
+      'Что делать, решают Настройки → Наблюдение за логами: Сообщать (показать здесь и уведомить) или Открыть тикет. Автоматические тикеты выключены, пока вы их не включите.';
+
+  @override
+  String get logwatchColStatus => 'Статус';
+
+  @override
+  String get logwatchColFinding => 'Находка';
+
+  @override
+  String get logwatchColCount => 'Встречено';
+
+  @override
+  String get logwatchColLastSeen => 'Последний раз';
+
+  @override
+  String get logwatchColTicket => 'Тикет';
+
+  @override
+  String get logwatchColTime => 'Время';
+
+  @override
+  String get logwatchColService => 'Сервис';
+
+  @override
+  String get logwatchColRevision => 'Ревизия';
+
+  @override
+  String get logwatchColSource => 'Источник';
+
+  @override
+  String get logwatchColHealth => 'Состояние';
+
+  @override
+  String get logwatchColServices => 'Сервисы';
+
+  @override
+  String get logwatchColLastRead => 'Последнее чтение';
+
+  @override
+  String logwatchTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n раза', many: '$n раз', few: '$n раза', one: '$n раз');
+    return '$_temp0';
+  }
+
+  @override
+  String logwatchMasked(String mask) {
+    return 'Значение: $mask (скрыто; agnts его не хранит)';
+  }
+
+  @override
+  String get logwatchReportOnly => 'Только отчёт';
+
+  @override
+  String get logwatchFix => 'Исправить';
+
+  @override
+  String logwatchFixStarted(String key) {
+    return 'Открыт $key: agnts взялся за него. Вы проверите исправление до отправки.';
+  }
+
+  @override
+  String get logwatchMute => 'Скрыть';
+
+  @override
+  String get logwatchUnmute => 'Показывать';
+
+  @override
+  String get logwatchMuted => 'Скрыто: больше никаких уведомлений и тикетов.';
+
+  @override
+  String get logwatchUnmuted => 'Снова отслеживается.';
+
+  @override
+  String get logwatchNotify => 'Уведомить';
+
+  @override
+  String get logwatchNotified => 'Уведомление отправлено.';
+
+  @override
+  String get logwatchStatus_open => 'Замечено';
+
+  @override
+  String get logwatchStatus_reported => 'Сообщено';
+
+  @override
+  String get logwatchStatus_fixing => 'Исправляется';
+
+  @override
+  String get logwatchStatus_fixed => 'Исправлено';
+
+  @override
+  String get logwatchStatus_resolved => 'Исчезло';
+
+  @override
+  String get logwatchStatus_muted => 'Скрыто';
+
+  @override
+  String get logwatchStatus_regression => 'Вернулось';
+
+  @override
+  String get logwatchStatusHelp_open => 'Замечено в логах; ниже порога или категория выключена';
+
+  @override
+  String get logwatchStatusHelp_reported => 'Показано здесь и отправлено уведомление';
+
+  @override
+  String get logwatchStatusHelp_fixing => 'Над ним работает тикет';
+
+  @override
+  String get logwatchStatusHelp_fixed => 'Исправление влито; ждём, пока исчезнет из логов';
+
+  @override
+  String get logwatchStatusHelp_resolved => 'Тихо после исправления';
+
+  @override
+  String get logwatchStatusHelp_muted => 'Игнорируется: без тикетов и уведомлений';
+
+  @override
+  String get logwatchStatusHelp_regression => 'Снова в логах после исправления';
+
+  @override
+  String get logwatchSev_low => 'Низкая';
+
+  @override
+  String get logwatchSev_medium => 'Средняя';
+
+  @override
+  String get logwatchSev_high => 'Высокая';
+
+  @override
+  String get logwatchSev_critical => 'Критическая';
+
+  @override
+  String get logwatchClass_code => 'Ошибка в коде';
+
+  @override
+  String get logwatchClass_config => 'Конфигурация';
+
+  @override
+  String get logwatchClass_infra => 'Инфраструктура';
+
+  @override
+  String get logwatchClass_dependency => 'Зависимость';
+
+  @override
+  String get logwatchClass_leak => 'Утечка';
+
+  @override
+  String get logwatchClass_exposure => 'Раскрытие';
+
+  @override
+  String get logwatchClass_weakness => 'Уязвимость';
+
+  @override
+  String get logwatchClass_attack => 'Атака';
+
+  @override
+  String get logwatchClass_noise => 'Шум';
+
+  @override
+  String get logwatchClass_ => 'Неизвестно';
+
+  @override
+  String get logwatchNotFound => 'Такой находки нет.';
+
+  @override
+  String logwatchOpenTicket(String key) {
+    return 'Открыть $key';
+  }
+
+  @override
+  String get logwatchRegressionNote => 'Это вернулось после того, как исправление влили.';
+
+  @override
+  String get logwatchNoReposNote =>
+      'Для этого сервиса не выбран репозиторий, поэтому о нём только сообщается. Выберите репозитории, чтобы agnts мог исправить:';
+
+  @override
+  String get logwatchRemediation => 'Как исправить';
+
+  @override
+  String get logwatchExcerpt => 'Фрагмент лога';
+
+  @override
+  String get logwatchExcerptSub => 'Обезличено: секреты и персональные данные скрыты до сохранения.';
+
+  @override
+  String get logwatchNoExcerpt => 'Фрагмент не сохранён (удаляется через 30 дней после закрытия).';
+
+  @override
+  String get logwatchOccurrences => 'Появления';
+
+  @override
+  String get logwatchOccurrencesSub => 'Последние 20 пакетов, где оно встречалось.';
+
+  @override
+  String get logwatchNoOccurrences => 'Нет сохранённых появлений.';
+
+  @override
+  String get logwatchFacts => 'Сведения';
+
+  @override
+  String get logwatchCount => 'Встречено';
+
+  @override
+  String get logwatchLastHour => 'За последний час';
+
+  @override
+  String get logwatchFirstSeen => 'Впервые';
+
+  @override
+  String get logwatchLastSeen => 'Последний раз';
+
+  @override
+  String get logwatchDetector => 'Детектор';
+
+  @override
+  String get logwatchRoute => 'Маршрут';
+
+  @override
+  String get logwatchRevision => 'Ревизия';
+
+  @override
+  String get logwatchFixedSha => 'Исправлено в';
+
+  @override
+  String get logwatchTicket => 'Тикет';
+
+  @override
+  String get logwatchCardTitle => 'Найдено в логах';
+
+  @override
+  String get logwatchGoneNow => 'Исчезло из логов';
+
+  @override
+  String get logwatchWaitingQuiet => 'Влито; следим за логами';
+
+  @override
+  String get logwatchBackAgain => 'Снова в логах';
+
+  @override
+  String get logwatchOpenFinding => 'Открыть находку';
+
+  @override
+  String get logwatchSourcesLede =>
+      'Системы логов, которые читает agnts, по адресу (через вашу частную сеть, если адрес в ней), и push-токены, с которыми шлют логи ваши шипперы.';
+
+  @override
+  String get logwatchAddSource => 'Добавить источник';
+
+  @override
+  String get logwatchSourceDrawerSub => 'agnts проверит подключение перед сохранением.';
+
+  @override
+  String get logwatchKind => 'Система логов';
+
+  @override
+  String get logwatchKind_loki => 'Grafana Loki';
+
+  @override
+  String get logwatchKind_elasticsearch => 'Elasticsearch';
+
+  @override
+  String get logwatchKind_opensearch => 'OpenSearch';
+
+  @override
+  String get logwatchKind_graylog => 'Graylog';
+
+  @override
+  String get logwatchKind_push => 'Push (Vector, Fluent Bit…)';
+
+  @override
+  String get logwatchName => 'Название';
+
+  @override
+  String get logwatchNamePh => 'prod-loki';
+
+  @override
+  String get logwatchEnvironment => 'Окружение';
+
+  @override
+  String get logwatchEnvironmentHelp => 'Режим отладки считается проблемой только в продакшене.';
+
+  @override
+  String get logwatchEnv_production => 'Продакшен';
+
+  @override
+  String get logwatchEnv_staging => 'Стейджинг';
+
+  @override
+  String get logwatchEnv_development => 'Разработка';
+
+  @override
+  String get logwatchAddress => 'Адрес';
+
+  @override
+  String get logwatchAddressHelp =>
+      'Публичный адрес должен быть https. Адрес в вашей частной сети (10.x, *.local) доступен через неё — сначала добавьте сеть в настройках рабочего пространства.';
+
+  @override
+  String get logwatchAuth => 'Учётные данные';
+
+  @override
+  String get logwatchAuth_none => 'Нет';
+
+  @override
+  String get logwatchAuth_basic => 'Логин и пароль';
+
+  @override
+  String get logwatchAuth_bearer => 'Токен';
+
+  @override
+  String get logwatchAuth_apikey => 'API-ключ';
+
+  @override
+  String logwatchAuthSaved(String kind) {
+    return 'Сохранены ($kind); остаются, пока вы их не измените.';
+  }
+
+  @override
+  String get logwatchAuthChange => 'Изменить';
+
+  @override
+  String get logwatchUser => 'Пользователь';
+
+  @override
+  String get logwatchPassword => 'Пароль';
+
+  @override
+  String get logwatchToken => 'Токен';
+
+  @override
+  String get logwatchTokenPh_loki => 'Bearer-токен';
+
+  @override
+  String get logwatchTokenPh_elasticsearch => 'API-ключ (base64 id:key)';
+
+  @override
+  String get logwatchTokenPh_opensearch => 'Токен';
+
+  @override
+  String get logwatchTokenPh_graylog => 'Токен доступа Graylog';
+
+  @override
+  String get logwatchTokenPh_push => '';
+
+  @override
+  String get logwatchAuthHelp_loki => 'Используйте токен только для чтения. Для многоарендного Loki нужен ещё тенант (X-Scope-OrgID).';
+
+  @override
+  String get logwatchAuthHelp_elasticsearch => 'Используйте ключ только с правом чтения шаблона индексов.';
+
+  @override
+  String get logwatchAuthHelp_opensearch => 'Используйте пользователя только с правом чтения шаблона индексов.';
+
+  @override
+  String get logwatchAuthHelp_graylog => 'Создайте токен доступа для пользователя с ролью Reader.';
+
+  @override
+  String get logwatchAuthHelp_push => '';
+
+  @override
+  String get logwatchTenant => 'Тенант';
+
+  @override
+  String get logwatchTenantPh => 'Тенант (X-Scope-OrgID), необязательно';
+
+  @override
+  String get logwatchSelector => 'Базовый селектор';
+
+  @override
+  String get logwatchSelectorHelp => 'Необязательно: то, что общее для всех сервисов, например метка окружения.';
+
+  @override
+  String get logwatchPollEvery => 'Читать каждые';
+
+  @override
+  String get logwatchPollHelp => '15 секунд — находки появятся в течение минуты; для большого общего кластера можно 60.';
+
+  @override
+  String logwatchSeconds(String n) {
+    return '$n с';
+  }
+
+  @override
+  String get logwatchAdvanced => 'Имена полей и CA-сертификат';
+
+  @override
+  String get logwatchField_service => 'Поле или метка сервиса';
+
+  @override
+  String get logwatchField_level => 'Поле уровня';
+
+  @override
+  String get logwatchField_message => 'Поле сообщения';
+
+  @override
+  String get logwatchField_timestamp => 'Поле времени';
+
+  @override
+  String get logwatchField_revision => 'Поле ревизии (задеплоенный коммит)';
+
+  @override
+  String get logwatchFieldsHelp => 'Проверка подключения заполнит их сама; меняйте, только если она ошиблась.';
+
+  @override
+  String get logwatchCa => 'CA-сертификат (PEM) для частного CA';
+
+  @override
+  String get logwatchPushHelp =>
+      'Ваш шиппер отправляет логи в agnts с токеном. После добавления источника agnts покажет токен и готовые настройки Vector и Fluent Bit.';
+
+  @override
+  String get logwatchEnabled => 'Читать этот источник';
+
+  @override
+  String get logwatchTest => 'Проверить подключение';
+
+  @override
+  String get logwatchTesting => 'Проверяем…';
+
+  @override
+  String logwatchTestOk(String version, String ms) {
+    return 'Подключено: версия $version, $ms мс';
+  }
+
+  @override
+  String logwatchViaNetwork(String name) {
+    return 'Через частную сеть $name.';
+  }
+
+  @override
+  String get logwatchDirect => 'Напрямую, через интернет.';
+
+  @override
+  String logwatchServicesOf(String name) {
+    return 'Сервисы $name';
+  }
+
+  @override
+  String get logwatchServicesSub =>
+      'Отметьте сервисы для наблюдения и выберите репозитории для каждого (несколько — для шлюза). Без репозитория о сервисе только сообщается.';
+
+  @override
+  String get logwatchDiscovering => 'Ищем сервисы в логах…';
+
+  @override
+  String logwatchSelectorOf(String name) {
+    return 'Селектор $name';
+  }
+
+  @override
+  String get logwatchNoReposYet => 'Без репозитория: только отчёт';
+
+  @override
+  String get logwatchAddRepo => 'Добавить репозиторий';
+
+  @override
+  String get logwatchNoServices => 'Сервисы пока не найдены. Добавьте по имени ниже.';
+
+  @override
+  String get logwatchAddService => 'Добавить сервис по имени';
+
+  @override
+  String get logwatchAddServicePh => 'api';
+
+  @override
+  String get logwatchAdd => 'Добавить';
+
+  @override
+  String logwatchTokenTitle(String name) {
+    return 'Push-токен для $name';
+  }
+
+  @override
+  String get logwatchTokenSub => 'Показывается один раз: скопируйте в настройки шиппера сейчас. Новый токен отключает старый.';
+
+  @override
+  String get logwatchPushUrl => 'Адрес для отправки';
+
+  @override
+  String get logwatchPushToken => 'Токен';
+
+  @override
+  String get logwatchTokenDone => 'Я скопировал';
+
+  @override
+  String get logwatchPrivateNetwork => 'Через частную сеть';
+
+  @override
+  String get logwatchSource_new => 'Ещё не читался';
+
+  @override
+  String get logwatchSource_ok => 'Читается';
+
+  @override
+  String get logwatchSource_behind => 'Отстаёт';
+
+  @override
+  String get logwatchSource_failing => 'Ошибка';
+
+  @override
+  String get logwatchSource_auth_failed => 'Доступ отклонён';
+
+  @override
+  String logwatchDropped(String n) {
+    return 'Пропущено записей сверх лимита: $n';
+  }
+
+  @override
+  String logwatchGap(String from, String to) {
+    return 'Не прочитано: с $from по $to';
+  }
+
+  @override
+  String get logwatchDisabled => 'Выключен';
+
+  @override
+  String get logwatchHasToken => 'Токен задан';
+
+  @override
+  String get logwatchNoToken => 'Токена ещё нет';
+
+  @override
+  String logwatchWatching(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n сервиса',
+      many: '$n сервисов',
+      few: '$n сервиса',
+      one: '$n сервис',
+      zero: 'Сервисы не выбраны',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get logwatchServices => 'Сервисы';
+
+  @override
+  String get logwatchMakeToken => 'Создать токен';
+
+  @override
+  String get logwatchNewToken => 'Новый токен';
+
+  @override
+  String get logwatchEdit => 'Изменить';
+
+  @override
+  String get logwatchDelete => 'Удалить';
+
+  @override
+  String logwatchDeleteTitle(String name) {
+    return 'Удалить $name?';
+  }
+
+  @override
+  String get logwatchDeleteBody => 'agnts перестанет его читать. Находки останутся.';
+
+  @override
+  String get logwatchNoSources => 'Источников логов пока нет.';
+
+  @override
+  String get logwatchHowPull =>
+      'Loki, Elasticsearch, OpenSearch или Graylog: укажите адрес и учётные данные только для чтения. agnts читает новые записи каждые 15 секунд, отфильтрованные под свои детекторы.';
+
+  @override
+  String get logwatchHowPrivate =>
+      'В вашей внутренней сети? Добавьте её как частную сеть (WireGuard, OpenVPN или agnts-link) и укажите внутренний адрес.';
+
+  @override
+  String get logwatchHowPush => 'Нет системы логов с API? Добавьте push-источник и направьте Vector или Fluent Bit в agnts.';
+
+  @override
+  String get logwatchSettingsTitle => 'Наблюдение за логами';
+
+  @override
+  String get logwatchSettingsSub => 'Что agnts делает с ошибками и проблемами безопасности, найденными в логах.';
+
+  @override
+  String get logwatchErrorsMode => 'Ошибки';
+
+  @override
+  String get logwatchErrorsModeHelp => 'Исключения, паники и всплески ошибок сервера.';
+
+  @override
+  String get logwatchSecurityMode => 'Безопасность';
+
+  @override
+  String get logwatchSecurityModeHelp => 'Секреты и персональные данные в логах, стек-трейсы клиентам, режим отладки, атаки.';
+
+  @override
+  String get logwatchMode_off => 'Выкл.';
+
+  @override
+  String get logwatchMode_report => 'Сообщать';
+
+  @override
+  String get logwatchMode_ticket => 'Открыть тикет';
+
+  @override
+  String get logwatchAlwaysLeaks => 'Всегда сообщать об утечке секретов';
+
+  @override
+  String get logwatchAlwaysLeaksHelp => 'Секрет в логах — это живой инцидент: уведомлять, даже если Безопасность выключена.';
+
+  @override
+  String get logwatchMinSeverity => 'Минимальная важность';
+
+  @override
+  String get logwatchMinSeverityHelp => 'Находки ниже записываются, но о них не сообщается и тикеты не открываются.';
+
+  @override
+  String get logwatchThreshold => 'Ошибок в час до реакции';
+
+  @override
+  String get logwatchThresholdHelp => 'Обычная ошибка срабатывает после стольких за час; паники, утечки и атаки — с первого раза.';
+
+  @override
+  String get logwatchMaxAutoPerDay => 'Автотикетов в день';
+
+  @override
+  String get logwatchMaxAutoPerDayHelp => 'На «Исправить» лимит не действует.';
+
+  @override
+  String get logwatchAttackAfter => 'Атак до тикета на защиту';
+
+  @override
+  String get logwatchAttackAfterHelp =>
+      'Одна и та же атака на маршрут столько раз за 7 дней открывает тикет на ограничение частоты или блокировку; 0 — никогда.';
+
+  @override
+  String get logwatchResolveAfter => 'Тихих дней до закрытия';
+
+  @override
+  String get logwatchResolveAfterHelp => 'Для логов без ревизии: исправленная находка закрывается после стольких тихих дней.';
+
+  @override
+  String get logwatchDigest => 'Ежедневная сводка';
+
+  @override
+  String get logwatchDigestHelp => 'Одно сообщение в день вместо сообщения на каждую находку (серьёзные утечки — сразу).';
+
+  @override
+  String get logwatchTriage => 'Разбор моделью';
+
+  @override
+  String get logwatchTriageHelp => 'Лёгкая модель объясняет новые находки (за кредиты пространства); 0 — заголовки по правилам.';
+
+  @override
+  String get logwatchPatterns => 'Свои детекторы';
+
+  @override
+  String get logwatchPatternsHelp => 'По одному в строке: категория:важность имя=регулярка, например security:high billing-token=\\S+';
+
+  @override
+  String get logwatchOverridesHelp => 'О сервисе только сообщается, пока у него нет репозиториев: выберите их в разделе';
+
+  @override
+  String get logwatchNotifyLabel => 'Наблюдение за логами что-то нашло';
+
+  @override
+  String get logwatchAgentTitle => 'agnts-watch (без системы логов)';
+
+  @override
+  String get logwatchAgentHelp =>
+      'На сервере без системы логов: запустите это рядом с сервисами. Агент следит за контейнерами с меткой agnts.watch=logs, сообщает о падениях, OOM и проваленных проверках здоровья и сам подключается к agnts.';
+
+  @override
+  String get logwatchKind_datadog => 'Datadog';
+
+  @override
+  String get logwatchKind_cloudwatch => 'Amazon CloudWatch Logs';
+
+  @override
+  String get logwatchKind_splunk => 'Splunk';
+
+  @override
+  String get logwatchAuth_aws => 'Ключ доступа AWS';
+
+  @override
+  String get logwatchAwsKeyId => 'ID ключа доступа';
+
+  @override
+  String get logwatchAwsSecret => 'Секретный ключ';
+
+  @override
+  String get logwatchAwsSession => 'Токен сессии (необязательно)';
+
+  @override
+  String get logwatchDdApiKey => 'API-ключ';
+
+  @override
+  String get logwatchDdAppKey => 'Application key';
+
+  @override
+  String get logwatchTokenPh_datadog => 'API-ключ';
+
+  @override
+  String get logwatchTokenPh_cloudwatch => '';
+
+  @override
+  String get logwatchTokenPh_splunk => 'Токен аутентификации Splunk';
+
+  @override
+  String get logwatchAuthHelp_datadog => 'Достаточно application key с правом logs_read_data.';
+
+  @override
+  String get logwatchAuthHelp_cloudwatch => 'IAM-пользователь или роль только с logs:DescribeLogGroups и logs:FilterLogEvents.';
+
+  @override
+  String get logwatchAuthHelp_splunk => 'API управления (порт 8089); токен пользователя с правом поиска по индексу.';
+
+  @override
+  String get logwatchIndex_elasticsearch => 'Шаблон индексов';
+
+  @override
+  String get logwatchIndex_opensearch => 'Шаблон индексов';
+
+  @override
+  String get logwatchIndex_splunk => 'Индекс';
+
+  @override
+  String get logwatchIndex_cloudwatch => 'Префикс групп логов';
+
+  @override
+  String get logwatchIndexHelp_elasticsearch => 'Пусто — читаются logs-*, filebeat-* и logstash-*.';
+
+  @override
+  String get logwatchIndexHelp_opensearch => 'Пусто — читаются logs-*, filebeat-* и logstash-*.';
+
+  @override
+  String get logwatchIndexHelp_splunk => 'Пусто — поиск по всем индексам, доступным токену.';
+
+  @override
+  String get logwatchIndexHelp_cloudwatch => 'Сервисы — это группы логов; префикс сужает список (/ecs/, /aws/lambda/).';
+
+  @override
+  String get logwatchOverrides => 'Исключения';
+
+  @override
+  String get logwatchOverridesRuleHelp =>
+      'По одному в строке: сервис как источник/сервис (prod-loki/api) или репозиторий как repo:имя, затем errors= и/или security= off, report или ticket. Строка сервиса важнее строки репозитория.';
+
+  @override
   String get maccountPasswordInstead => 'Войти с паролем';
 
   @override
@@ -8700,6 +9506,104 @@ class AppLocalizationsRu extends AppLocalizations {
   String get minsightsTaskActions => 'Действия с задачей';
 
   @override
+  String get mlogsTitle => 'Наблюдение за логами';
+
+  @override
+  String get mlogsLede => 'Что agnts нашёл в логах ваших проектов и что ещё требует внимания.';
+
+  @override
+  String get mlogsErrors => 'Ошибки';
+
+  @override
+  String get mlogsSecurity => 'Безопасность';
+
+  @override
+  String get mlogsEmpty => 'Ничего не требует внимания.';
+
+  @override
+  String mlogsLastSeen(String when) {
+    return 'замечено $when';
+  }
+
+  @override
+  String get mlogsReportOnly => 'только отчёт';
+
+  @override
+  String get mlogsStatusOpen => 'Замечено';
+
+  @override
+  String get mlogsStatusReported => 'Сообщено';
+
+  @override
+  String get mlogsStatusFixing => 'Исправляется';
+
+  @override
+  String get mlogsStatusFixed => 'Исправлено';
+
+  @override
+  String get mlogsStatusResolved => 'Исчезло';
+
+  @override
+  String get mlogsStatusMuted => 'Скрыто';
+
+  @override
+  String get mlogsStatusRegression => 'Вернулось';
+
+  @override
+  String get mlogsCardTitle => 'Найдено в логах';
+
+  @override
+  String get mlogsFix => 'Исправить';
+
+  @override
+  String get mlogsFixConfirm => 'Открыть тикет на исправление? Вы проверите исправление до отправки.';
+
+  @override
+  String get mlogsMute => 'Скрыть';
+
+  @override
+  String get mlogsUnmute => 'Показывать';
+
+  @override
+  String get mlogsMutedDone => 'Скрыто';
+
+  @override
+  String get mlogsUnmutedDone => 'Снова отслеживается';
+
+  @override
+  String mlogsMasked(String mask) {
+    return 'значение: $mask (скрыто)';
+  }
+
+  @override
+  String get mlogsNoRepos =>
+      'Для этого сервиса не выбран репозиторий, поэтому о нём только сообщается. Выберите их в панели администратора, в разделе «Источники логов».';
+
+  @override
+  String get mlogsTicket => 'Тикет';
+
+  @override
+  String get mlogsFactCount => 'Встречено';
+
+  @override
+  String get mlogsFactLastHour => 'За час';
+
+  @override
+  String get mlogsFactFirstSeen => 'Впервые';
+
+  @override
+  String get mlogsFactLastSeen => 'Последний раз';
+
+  @override
+  String get mlogsRemediation => 'Как исправить';
+
+  @override
+  String get mlogsExcerpt => 'Фрагмент лога (обезличен)';
+
+  @override
+  String get mlogsNoExcerpt => 'Фрагмент не сохранён.';
+
+  @override
   String get mmanageFillAll => 'Заполните обязательные поля.';
 
   @override
@@ -9559,6 +10463,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navMeetings => 'Встречи';
+
+  @override
+  String get navLogWatcher => 'Наблюдение за логами';
 
   @override
   String get networkTitle => 'Частные сети';
@@ -13433,7 +14340,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsNotConnected => 'Не подключено';
 
   @override
-  String get settingsClaude => 'Claude Code';
+  String get settingsAiModels => 'ИИ-модели';
 
   @override
   String get settingsClaudeSub => 'Движок, который пишет код';
@@ -13443,6 +14350,30 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsModelsHelp => 'Выберите модель для каждого шага. Haiku расходует меньше всего лимита тарифа, Opus — больше всего.';
+
+  @override
+  String get settingsModuleTabs => 'Модуль для кода';
+
+  @override
+  String get settingsModuleTabsHelp =>
+      'Все этапы идут на выбранном модуле, на его собственных моделях. Показаны только модули, которые администратор включил для вас.';
+
+  @override
+  String get settingsModulesMixed =>
+      'Сейчас этапы используют несколько модулей. Выбор модуля переведёт их все на него, на том же уровне (Opus станет Muse Wonder).';
+
+  @override
+  String get settingsModelsHelpCodex => 'Выберите модель Codex для каждого этапа: подойдёт любая модель, доступная вашему ключу OpenAI.';
+
+  @override
+  String get settingsStageReviewHelpCodex =>
+      'Проверяет каждый результат, пока вы его смотрите. «Авто» берёт более сильную модель вашего основного модуля для сложных задач и более лёгкую для остальных.';
+
+  @override
+  String get settingsCodexModelNeeded => 'Укажите модель Codex для каждого этапа.';
+
+  @override
+  String get settingsCodexModelLabel => 'Модель Codex';
 
   @override
   String get settingsStageAnalyze => 'Чтение тикета и вопросы';
@@ -13475,6 +14406,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsStageLearnHelp => 'Читает каждое отправленное изменение и пишет уроки о том, что ново для репозитория.';
 
   @override
+  String get settingsStageChat => 'Чат';
+
+  @override
+  String get settingsStageChatHelp =>
+      'Ответы в чате ассистента и голосовые вопросы. Никогда не идёт за кредиты: нужен подключённый аккаунт.';
+
+  @override
+  String get settingsStageDocuments => 'Документы и заметки встреч';
+
+  @override
+  String get settingsStageDocumentsHelp => 'Пишет документы, а также заметки и задачи по итогам встречи.';
+
+  @override
+  String get settingsMeetingAudioMuse =>
+      'Звук встречи всегда слушает Muse — единственный модуль, который слышит аудио; заметки пишет модель выше.';
+
+  @override
   String get settingsStageReview => 'Код-ревью';
 
   @override
@@ -13483,6 +14431,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsModelAuto => 'Авто';
+
+  @override
+  String get settingsModelTierLight => 'Лёгкая, любой модуль';
+
+  @override
+  String get settingsModelTierStrong => 'Сильная, любой модуль';
 
   @override
   String get settingsMaxTurns => 'Лимит шагов на запуск';
@@ -13569,6 +14523,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsAutoResume => 'Продолжать приостановленные запуски после сброса лимита';
+
+  @override
+  String get settingsSwitchModules => 'Переключать модуль, если он не может работать';
+
+  @override
+  String get settingsSwitchModulesHelp =>
+      'Если у аккаунта модуля исчерпан лимит, его нет или модуль не включён для человека, запуск идёт на следующем модуле того же уровня (opus становится Muse Wonder). Выключено: запуск ждёт свой модуль.';
 
   @override
   String get settingsAutoLearn => 'Учиться на каждом отправленном изменении';
@@ -13690,9 +14651,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsCiRed => 'Когда отслеживаемая ветка краснеет';
-
-  @override
-  String get settingsClaudeMuse => 'Muse Code';
 
   @override
   String get settingsClaudeMovedMuse => 'Muse подключается для каждого пространства.';
@@ -15540,6 +16498,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String ticketMuseEscalated(String model) {
     return 'Переведён на $model';
   }
+
+  @override
+  String get ticketSrcLogs => 'Найдено в логах';
 
   @override
   String get ticketsTabsLabel => 'Списки тикетов';

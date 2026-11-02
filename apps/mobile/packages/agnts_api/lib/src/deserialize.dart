@@ -180,6 +180,19 @@ import 'package:agnts_api/src/model/linked_commit.dart';
 import 'package:agnts_api/src/model/linked_commits.dart';
 import 'package:agnts_api/src/model/live_run.dart';
 import 'package:agnts_api/src/model/local_branch.dart';
+import 'package:agnts_api/src/model/log_auth_input.dart';
+import 'package:agnts_api/src/model/log_fields.dart';
+import 'package:agnts_api/src/model/log_finding.dart';
+import 'package:agnts_api/src/model/log_occurrence.dart';
+import 'package:agnts_api/src/model/log_override.dart';
+import 'package:agnts_api/src/model/log_pattern.dart';
+import 'package:agnts_api/src/model/log_push_token.dart';
+import 'package:agnts_api/src/model/log_scope.dart';
+import 'package:agnts_api/src/model/log_service.dart';
+import 'package:agnts_api/src/model/log_source.dart';
+import 'package:agnts_api/src/model/log_source_input.dart';
+import 'package:agnts_api/src/model/log_source_test.dart';
+import 'package:agnts_api/src/model/log_watch_settings.dart';
 import 'package:agnts_api/src/model/login_request.dart';
 import 'package:agnts_api/src/model/login_response.dart';
 import 'package:agnts_api/src/model/mcp_status.dart';
@@ -854,6 +867,41 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return LiveRun.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LocalBranch':
           return LocalBranch.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogAuthInput':
+          return LogAuthInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogFields':
+          return LogFields.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogFinding':
+          return LogFinding.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogFindingStatus':
+          
+          
+        case 'LogMode':
+          
+          
+        case 'LogOccurrence':
+          return LogOccurrence.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogOverride':
+          return LogOverride.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogPattern':
+          return LogPattern.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogPushToken':
+          return LogPushToken.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogScope':
+          return LogScope.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogService':
+          return LogService.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogSeverity':
+          
+          
+        case 'LogSource':
+          return LogSource.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogSourceInput':
+          return LogSourceInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogSourceTest':
+          return LogSourceTest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LogWatchSettings':
+          return LogWatchSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LoginRequest':
           return LoginRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LoginResponse':

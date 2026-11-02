@@ -256,6 +256,7 @@
     "museCharged": "{amount} yechildi",
     "museSteered": "Byudjet kam: yakunlash buyurildi",
     "museStopped": "Byudjet tugagani uchun to‘xtatildi",
-    "museEscalated": "{model} ga o‘tkazildi"
+    "museEscalated": "{model} ga o‘tkazildi",
+    "srcLogs": "Loglarda topilgan"
   }
 }

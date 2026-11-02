@@ -1,5 +1,8 @@
 # agnts Incidents (Docker crash → fix) — Plan
 
+> **Superseded (2026-11-02) by [Log watcher plan.md](Log%20watcher%20plan.md).** Never implemented. Its crash
+> watching, socket proxy and enrollment carry over as signals and setup of the log watcher; read that plan instead.
+
 Oct 7, 2026 · draft
 
 ## Overview

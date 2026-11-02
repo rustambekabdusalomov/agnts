@@ -192,10 +192,27 @@ Class | Method | HTTP request | Description
 [*LearnApi*](doc/LearnApi.md) | [**listLessons**](doc/LearnApi.md#listlessons) | **GET** /lessons | Lessons agnts learned from pushed tickets, newest first
 [*LearnApi*](doc/LearnApi.md) | [**markLessonLearned**](doc/LearnApi.md#marklessonlearned) | **PUT** /lessons/{id}/learned | Mark a lesson learned
 [*LearnApi*](doc/LearnApi.md) | [**unmarkLessonLearned**](doc/LearnApi.md#unmarklessonlearned) | **DELETE** /lessons/{id}/learned | Mark a lesson as not learned yet
+[*LogsApi*](doc/LogsApi.md) | [**createLogPushToken**](doc/LogsApi.md#createlogpushtoken) | **POST** /log-sources/{sourceId}/push-token | Make a push source&#39;s token (again); it is shown once
+[*LogsApi*](doc/LogsApi.md) | [**createLogSource**](doc/LogsApi.md#createlogsource) | **POST** /log-sources | Add a log source; a pulling source must pass the connection test
+[*LogsApi*](doc/LogsApi.md) | [**deleteLogSource**](doc/LogsApi.md#deletelogsource) | **DELETE** /log-sources/{sourceId} | Remove a log source (its findings stay)
+[*LogsApi*](doc/LogsApi.md) | [**discoverLogServices**](doc/LogsApi.md#discoverlogservices) | **GET** /log-sources/{sourceId}/discover | The services the source&#39;s logs hold (watched ones as saved, new ones with a suggested repository)
 [*LogsApi*](doc/LogsApi.md) | [**exportEvents**](doc/LogsApi.md#exportevents) | **GET** /events/export | Download the log (last 90 days) as JSON lines or CSV
+[*LogsApi*](doc/LogsApi.md) | [**fixLogFinding**](doc/LogsApi.md#fixlogfinding) | **POST** /log-findings/{findingId}/fix | Open a ticket for the finding now, on the service&#39;s repositories (ignores the mode and the daily budget)
 [*LogsApi*](doc/LogsApi.md) | [**getEventSummary**](doc/LogsApi.md#geteventsummary) | **GET** /events/summary | Run statistics and time per step, for the Logs page
+[*LogsApi*](doc/LogsApi.md) | [**getLogFinding**](doc/LogsApi.md#getlogfinding) | **GET** /log-findings/{findingId} | One finding with its redacted log excerpt
+[*LogsApi*](doc/LogsApi.md) | [**getLogSource**](doc/LogsApi.md#getlogsource) | **GET** /log-sources/{sourceId} | One log source
+[*LogsApi*](doc/LogsApi.md) | [**getTicketLogFinding**](doc/LogsApi.md#getticketlogfinding) | **GET** /tickets/{key}/log-finding | The log finding a log ticket fixes (404 for other tickets)
 [*LogsApi*](doc/LogsApi.md) | [**listEvents**](doc/LogsApi.md#listevents) | **GET** /events | The global log, newest first, with filters and a cursor
+[*LogsApi*](doc/LogsApi.md) | [**listLogFindings**](doc/LogsApi.md#listlogfindings) | **GET** /log-findings | Findings of the log watcher, newest sighting first
+[*LogsApi*](doc/LogsApi.md) | [**listLogSources**](doc/LogsApi.md#listlogsources) | **GET** /log-sources | The logging systems agnts reads, and the push sources, with their services and health
+[*LogsApi*](doc/LogsApi.md) | [**muteLogFinding**](doc/LogsApi.md#mutelogfinding) | **POST** /log-findings/{findingId}/mute | Ignore this finding (no tickets, no notifications)
+[*LogsApi*](doc/LogsApi.md) | [**notifyLogFinding**](doc/LogsApi.md#notifylogfinding) | **POST** /log-findings/{findingId}/notify | Send the finding&#39;s notification now, whatever the mode
+[*LogsApi*](doc/LogsApi.md) | [**rotateLogKey**](doc/LogsApi.md#rotatelogkey) | **POST** /log-sources/rotate-key | Replace the key that hashes secrets found in logs (findings of one secret before and after are then two)
+[*LogsApi*](doc/LogsApi.md) | [**setLogServices**](doc/LogsApi.md#setlogservices) | **PUT** /log-sources/{sourceId}/services | Replace the services agnts watches in this source and the repositories each runs on
 [*LogsApi*](doc/LogsApi.md) | [**streamEvents**](doc/LogsApi.md#streamevents) | **GET** /events/stream | Server-Sent Events with every new event row (resume with Last-Event-ID)
+[*LogsApi*](doc/LogsApi.md) | [**testLogSource**](doc/LogsApi.md#testlogsource) | **POST** /log-sources/test | Test a log source as the form has it (with id and no auth, the saved credentials)
+[*LogsApi*](doc/LogsApi.md) | [**unmuteLogFinding**](doc/LogsApi.md#unmutelogfinding) | **POST** /log-findings/{findingId}/unmute | Watch a muted finding again
+[*LogsApi*](doc/LogsApi.md) | [**updateLogSource**](doc/LogsApi.md#updatelogsource) | **PUT** /log-sources/{sourceId} | Change a log source; auth left out keeps the saved credentials
 [*McpApi*](doc/McpApi.md) | [**decideConsent**](doc/McpApi.md#decideconsent) | **POST** /oauth/consent | Approve or deny a Claude connection; returns where to send the browser
 [*McpApi*](doc/McpApi.md) | [**getConsent**](doc/McpApi.md#getconsent) | **GET** /oauth/consent | Details of a pending Claude connection request, for the consent page
 [*McpApi*](doc/McpApi.md) | [**getMcpSettings**](doc/McpApi.md#getmcpsettings) | **GET** /mcp-settings | The MCP connector URL and current connections
@@ -623,6 +640,22 @@ Class | Method | HTTP request | Description
  - [LinkedCommits](doc/LinkedCommits.md)
  - [LiveRun](doc/LiveRun.md)
  - [LocalBranch](doc/LocalBranch.md)
+ - [LogAuthInput](doc/LogAuthInput.md)
+ - [LogFields](doc/LogFields.md)
+ - [LogFinding](doc/LogFinding.md)
+ - [LogFindingStatus](doc/LogFindingStatus.md)
+ - [LogMode](doc/LogMode.md)
+ - [LogOccurrence](doc/LogOccurrence.md)
+ - [LogOverride](doc/LogOverride.md)
+ - [LogPattern](doc/LogPattern.md)
+ - [LogPushToken](doc/LogPushToken.md)
+ - [LogScope](doc/LogScope.md)
+ - [LogService](doc/LogService.md)
+ - [LogSeverity](doc/LogSeverity.md)
+ - [LogSource](doc/LogSource.md)
+ - [LogSourceInput](doc/LogSourceInput.md)
+ - [LogSourceTest](doc/LogSourceTest.md)
+ - [LogWatchSettings](doc/LogWatchSettings.md)
  - [LoginRequest](doc/LoginRequest.md)
  - [LoginResponse](doc/LoginResponse.md)
  - [McpStatus](doc/McpStatus.md)

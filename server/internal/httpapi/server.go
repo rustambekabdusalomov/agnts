@@ -58,6 +58,8 @@ type Options struct {
 	// draft comments; nil answers 501.
 	Drafts ReviewDrafts
 	CI     CI // CI watching; nil answers 501
+	// Logs is the log watcher; nil answers 501.
+	Logs Logs
 	// CommitLinks reads commits linked to tickets by number; nil answers
 	// 501 (and commits show no linked tickets).
 	CommitLinks CommitLinks
@@ -146,7 +148,10 @@ type Server struct {
 	// guest's page asks every 10 seconds, and a client's office may share
 	// one address.
 	publicLimiter *ipLimiter
-	ops           map[string]opInfo
+	// pushLimiter: log pushes per token every minute (a shipper sends a
+	// batch every few seconds).
+	pushLimiter *ipLimiter
+	ops         map[string]opInfo
 }
 
 var _ gen.ServerInterface = (*Server)(nil)
@@ -159,7 +164,7 @@ func NewHandler(opt Options) (http.Handler, error) {
 	}
 	s := &Server{opt: opt, loginLimiter: newIPLimiter(5, time.Minute), mailLimiter: newIPLimiter(5, 10*time.Minute),
 		feedbackLimiter: newIPLimiter(5, 10*time.Minute), hookLimiter: newIPLimiter(30, 10*time.Minute),
-		publicLimiter: newIPLimiter(300, time.Minute), ops: ops}
+		publicLimiter: newIPLimiter(300, time.Minute), pushLimiter: newIPLimiter(120, time.Minute), ops: ops}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -182,6 +187,14 @@ func NewHandler(opt Options) (http.Handler, error) {
 		// A deploy pipeline's call, without a session: the token is the
 		// credential and names the suite.
 		r.With(middleware.RequestSize(16<<10), middleware.NoCache).Post("/webhooks/swagger-suite/{token}", s.suiteHook)
+	}
+	if opt.Logs != nil {
+		// Log shippers push with a token, without a session.
+		push := r.With(middleware.NoCache)
+		push.Post("/webhooks/logs", s.logsPush)
+		push.Post("/webhooks/logs/loki/api/v1/push", s.logsPush)
+		push.Post("/webhooks/logs/{token}", s.logsPush)
+		push.Post("/webhooks/logs/{token}/loki/api/v1/push", s.logsPush)
 	}
 	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)

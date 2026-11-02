@@ -74,5 +74,11 @@ void main() {
       // TODO
     });
 
+    // The log watcher found something, or a log source stopped
+    // bool logs
+    test('to test the property `logs`', () async {
+      // TODO
+    });
+
   });
 }

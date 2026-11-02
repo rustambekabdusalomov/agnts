@@ -38,6 +38,8 @@ func (s TicketSource) Name() string {
 		return "Git"
 	case SourceCI:
 		return "CI"
+	case SourceLogs:
+		return "Logs"
 	}
 	return string(s)
 }
@@ -522,6 +524,14 @@ const (
 	EventPreview        = "preview_done"
 	EventFollowUps      = "follow_ups_suggested"
 	EventCIFailure      = "ci_failure"
+	// EventLogFinding: the log watcher found something worth reporting
+	// (data: findingId, title, service, category, severity, notify).
+	EventLogFinding = "log_finding"
+	// EventLogSource: a log source stopped (credentials refused) or came
+	// back (data: sourceId, name, status, notify).
+	EventLogSource = "log_source"
+	// EventLogDigest: the daily summary of what the log watcher reported.
+	EventLogDigest = "log_digest"
 	// EventSwaggerResults: a Swagger test finished (data: passed, failed,
 	// skipped, blocked, and newFailures for a suite).
 	EventSwaggerResults = "swagger_results"

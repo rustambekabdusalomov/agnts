@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **previewPhotos** | **bool** | Send phone screenshots to Telegram with the message | [optional] 
 **followUps** | **bool** | Follow-up tickets were suggested | [optional] 
 **ci** | **bool** | A watched branch went red | [optional] 
+**logs** | **bool** | The log watcher found something, or a log source stopped | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

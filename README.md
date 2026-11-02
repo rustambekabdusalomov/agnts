@@ -80,6 +80,33 @@ AGNTS_TEST_DATABASE_URL=postgres://hiro:hiro@localhost:5442/hiro_test?sslmode=di
 After editing `shared/openapi/openapi.yaml` or `shared/i18n/*.json`, run
 `make gen` and commit the generated files. CI fails if they are stale.
 
+## Log watcher
+
+agnts reads your projects' logs, finds errors (exceptions, panics, crash loops,
+5xx bursts) and security mistakes (secrets and personal data written to logs,
+stack traces sent to clients, debug mode in production, brute force and
+scanning), groups them by cause and, as Settings → Log watcher says, reports
+them or opens a ticket on the service's repositories. Automatic tickets are
+off until you turn them on; every fix waits for your approval.
+
+- **Log sources** (Log watcher → Log sources): Loki, Elasticsearch,
+  OpenSearch, Graylog, Datadog, CloudWatch Logs or Splunk by address and
+  read-only credentials, tested before they are saved. An address on a
+  workspace's private network goes through it; `AGNTS_LOGS_PRIVATE_ALLOW` lets
+  a logger next to agnts be read directly.
+- **Push:** a push source's token lets Vector, Fluent Bit, Promtail or Grafana
+  Alloy send to `/webhooks/logs` (Loki's push API under
+  `/webhooks/logs/loki/api/v1/push`).
+- **No logging system:** `agnts watch` runs on the project's server and follows
+  containers labelled `agnts.watch=logs` (crashes, OOM kills and failed health
+  checks too) and log files, through a read-only Docker socket proxy.
+- Each service is mapped to the repositories it runs on (several for a
+  gateway); without one, its findings are only reported.
+
+Tests against a real Loki run when `AGNTS_TEST_LOKI_URL` is set
+(`docker run -p 3100:3100 grafana/loki:3.2.0`); with `AGNTS_TEST_DATABASE_URL`
+as well, `internal/logwatch`'s end-to-end test runs the whole flow.
+
 ## Connecting agnts to your work
 
 Everything is set up in the admin panel (Integrations, Repositories,

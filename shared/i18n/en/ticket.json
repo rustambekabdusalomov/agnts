@@ -256,6 +256,7 @@
     "museCharged": "charged {amount}",
     "museSteered": "Budget low: told to wrap up",
     "museStopped": "Stopped over budget",
-    "museEscalated": "Moved to {model}"
+    "museEscalated": "Moved to {model}",
+    "srcLogs": "Found in logs"
   }
 }

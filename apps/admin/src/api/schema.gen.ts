@@ -4107,6 +4107,267 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/log-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The logging systems agnts reads, and the push sources, with their services and health */
+        get: operations["listLogSources"];
+        put?: never;
+        /** Add a log source; a pulling source must pass the connection test */
+        post: operations["createLogSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-sources/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test a log source as the form has it (with id and no auth, the saved credentials) */
+        post: operations["testLogSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-sources/rotate-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replace the key that hashes secrets found in logs (findings of one secret before and after are then two) */
+        post: operations["rotateLogKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-sources/{sourceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        /** One log source */
+        get: operations["getLogSource"];
+        /** Change a log source; auth left out keeps the saved credentials */
+        put: operations["updateLogSource"];
+        post?: never;
+        /** Remove a log source (its findings stay) */
+        delete: operations["deleteLogSource"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-sources/{sourceId}/discover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        /** The services the source's logs hold (watched ones as saved, new ones with a suggested repository) */
+        get: operations["discoverLogServices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-sources/{sourceId}/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace the services agnts watches in this source and the repositories each runs on */
+        put: operations["setLogServices"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-sources/{sourceId}/push-token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make a push source's token (again); it is shown once */
+        post: operations["createLogPushToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Findings of the log watcher, newest sighting first */
+        get: operations["listLogFindings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-findings/{findingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        /** One finding with its redacted log excerpt */
+        get: operations["getLogFinding"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-findings/{findingId}/fix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open a ticket for the finding now, on the service's repositories (ignores the mode and the daily budget) */
+        post: operations["fixLogFinding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-findings/{findingId}/notify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send the finding's notification now, whatever the mode */
+        post: operations["notifyLogFinding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-findings/{findingId}/mute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ignore this finding (no tickets, no notifications) */
+        post: operations["muteLogFinding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/log-findings/{findingId}/unmute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Watch a muted finding again */
+        post: operations["unmuteLogFinding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/log-finding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** The log finding a log ticket fixes (404 for other tickets) */
+        get: operations["getTicketLogFinding"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/ci": {
         parameters: {
             query?: never;
@@ -6433,7 +6694,7 @@ export interface components {
             state: components["schemas"]["TicketState"];
             kind: components["schemas"]["TicketKind"];
             /** @enum {string} */
-            source: "jira" | "plane" | "local" | "git" | "ci";
+            source: "jira" | "plane" | "local" | "git" | "ci" | "logs";
             held?: boolean;
         };
         FollowUps: {
@@ -6793,7 +7054,7 @@ export interface components {
             /** @description The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key */
             ticketNumber?: string;
             /** @enum {string} */
-            source: "jira" | "plane" | "local" | "git" | "ci";
+            source: "jira" | "plane" | "local" | "git" | "ci" | "logs";
             /**
              * Format: int64
              * @description The primary repository; repos lists all of them
@@ -7866,6 +8127,7 @@ export interface components {
             pullReviews?: components["schemas"]["PullReviewSettings"];
             prComments?: components["schemas"]["PRCommentSettings"];
             ci?: components["schemas"]["CISettings"];
+            logWatch?: components["schemas"]["LogWatchSettings"];
             guard?: components["schemas"]["GuardSettings"];
             /** @description What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) */
             stalls?: string;
@@ -8161,6 +8423,219 @@ export interface components {
             feedbackRounds: number;
             /** @description Extra regular expressions that mark a failure as infra (not the code) */
             infraPatterns: string[];
+        };
+        /** @enum {string} */
+        LogSeverity: "low" | "medium" | "high" | "critical";
+        /**
+         * @description open: seen, nothing done yet (below the threshold, or off); reported: shown and notified; fixing: a ticket works on it; fixed: the fix merged; resolved: quiet after the fix; muted: ignored; regression: back after the fix
+         * @enum {string}
+         */
+        LogFindingStatus: "open" | "reported" | "fixing" | "fixed" | "resolved" | "muted" | "regression";
+        /** @enum {string} */
+        LogMode: "off" | "report" | "ticket";
+        /** @description Where a source keeps the parts of an entry; empty fields fall back to the usual names */
+        LogFields: {
+            message?: string;
+            timestamp?: string;
+            level?: string;
+            service?: string;
+            revision?: string;
+        };
+        /** @description What a source reads: a Loki base selector, an Elasticsearch index pattern, Graylog streams */
+        LogScope: {
+            selector?: string;
+            index?: string;
+            streams?: string[];
+        };
+        /** @description Credentials; sealed when saved and never returned */
+        LogAuthInput: {
+            /** @enum {string} */
+            kind: "none" | "basic" | "bearer" | "apikey" | "aws";
+            user?: string;
+            password?: string;
+            token?: string;
+            /** @description Loki's X-Scope-OrgID */
+            tenant?: string;
+        };
+        LogService: {
+            /** Format: int64 */
+            readonly id?: number;
+            name: string;
+            /** @description Loki: a matcher like {app="api"}; Elasticsearch: the service field's value; Graylog: a stream id */
+            selector: string;
+            /** @description The repositories the service runs on; none means its findings are only reported */
+            repoIds: number[];
+            /** Format: int64 */
+            groupId?: number | null;
+            enabled: boolean;
+        };
+        LogSourceInput: {
+            /**
+             * Format: int64
+             * @description For a test of a saved source
+             */
+            id?: number;
+            name: string;
+            /** @enum {string} */
+            kind: "loki" | "elasticsearch" | "opensearch" | "graylog" | "datadog" | "cloudwatch" | "splunk" | "push";
+            /** @enum {string} */
+            environment: "production" | "staging" | "development";
+            /** @description https://loki.example.com, or http:// on a private network; empty for push */
+            address?: string;
+            auth?: components["schemas"]["LogAuthInput"];
+            caPem?: string;
+            scope?: components["schemas"]["LogScope"];
+            fields?: components["schemas"]["LogFields"];
+            /** @description How often agnts reads it (15 by default) */
+            pollSeconds?: number;
+            enabled: boolean;
+        };
+        LogSource: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** @enum {string} */
+            kind: "loki" | "elasticsearch" | "opensearch" | "graylog" | "datadog" | "cloudwatch" | "splunk" | "push";
+            environment: string;
+            address: string;
+            authKind: string;
+            authUser?: string;
+            authTenant?: string;
+            hasAuth: boolean;
+            caPem: string;
+            scope: components["schemas"]["LogScope"];
+            fields: components["schemas"]["LogFields"];
+            pollSeconds: number;
+            enabled: boolean;
+            /** @enum {string} */
+            status: "new" | "ok" | "behind" | "failing" | "auth_failed";
+            lastError: string;
+            /** Format: date-time */
+            lastReadAt?: string;
+            /**
+             * Format: date-time
+             * @description Start of a range not read after a long outage
+             */
+            gapFrom?: string;
+            /** Format: date-time */
+            gapTo?: string;
+            /**
+             * Format: int64
+             * @description Entries skipped over the per-minute cap
+             */
+            dropped: number;
+            /**
+             * Format: int64
+             * @description The private network the last read went through
+             */
+            networkId?: number;
+            hasPushToken: boolean;
+            /** @description Where a push source's shipper sends */
+            pushUrl?: string;
+            services: components["schemas"]["LogService"][];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        LogSourceTest: {
+            version: string;
+            fields: components["schemas"]["LogFields"];
+            labels: string[];
+            /** @description The newest entry, redacted */
+            sample: string;
+            /** Format: date-time */
+            newest?: string;
+            /** @description The private network used, or empty for a direct connection */
+            network: string;
+            /** Format: int64 */
+            latencyMs: number;
+        };
+        LogPushToken: {
+            token: string;
+            url: string;
+        };
+        LogOccurrence: {
+            /** Format: date-time */
+            at: string;
+            /** Format: int64 */
+            sourceId: number;
+            service: string;
+            revision?: string;
+            count: number;
+        };
+        LogFinding: {
+            /** Format: int64 */
+            id: number;
+            service: string;
+            repoIds: number[];
+            repos: string[];
+            /** @enum {string} */
+            category: "error" | "security";
+            detector: string;
+            /** @description code, config, infra, dependency, leak, exposure, weakness, attack or noise */
+            class: string;
+            severity: components["schemas"]["LogSeverity"];
+            title: string;
+            remediation: string;
+            status: components["schemas"]["LogFindingStatus"];
+            /** @description Why a finding that could have been a ticket is only reported */
+            reason: string;
+            /** Format: int64 */
+            count: number;
+            hourCount: number;
+            /** Format: date-time */
+            firstSeenAt: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+            revision: string;
+            route: string;
+            /** @description A leaked secret's first and last characters; never the value */
+            secretMask: string;
+            occurrences: components["schemas"]["LogOccurrence"][];
+            /** Format: date-time */
+            reportedAt?: string;
+            ticketKey: string;
+            ticketState?: components["schemas"]["TicketState"];
+            fixedSha?: string;
+            /** Format: date-time */
+            fixedAt?: string;
+            /** @description Redacted log excerpt (single reads only) */
+            sample?: string;
+        };
+        LogPattern: {
+            name: string;
+            /** @description A regular expression (RE2, case-insensitive) */
+            pattern: string;
+            /** @enum {string} */
+            category: "error" | "security";
+            severity: components["schemas"]["LogSeverity"];
+        };
+        LogOverride: {
+            /** Format: int64 */
+            repoId?: number;
+            /** @description <source name>/<service name> */
+            service?: string;
+            errors?: components["schemas"]["LogMode"];
+            security?: components["schemas"]["LogMode"];
+        };
+        LogWatchSettings: {
+            errors: components["schemas"]["LogMode"];
+            security: components["schemas"]["LogMode"];
+            /** @description Notify a high-severity secret leak even when Security is off */
+            alwaysNotifyLeaks: boolean;
+            minSeverity: components["schemas"]["LogSeverity"];
+            /** @description Occurrences within the hour before a plain error acts */
+            threshold: number;
+            /** @description Automatic log tickets a day at most */
+            maxAutoPerDay: number;
+            /** @description Bursts of the same attack within 7 days before a hardening ticket; 0 never */
+            attackTicketAfter: number;
+            resolveAfterDays: number;
+            /** @description One daily summary instead of a message per finding */
+            digest: boolean;
+            /** @description Model triage calls a day for new findings; 0 off */
+            triagePerDay: number;
+            patterns: components["schemas"]["LogPattern"][];
+            overrides: components["schemas"]["LogOverride"][];
         };
         /** @description Reviews of the pull requests waiting for you on GitHub or GitLab */
         PullReviewSettings: {
@@ -8496,6 +8971,8 @@ export interface components {
             followUps?: boolean;
             /** @description A watched branch went red */
             ci?: boolean;
+            /** @description The log watcher found something, or a log source stopped */
+            logs?: boolean;
         };
         Repository: {
             /** Format: int64 */
@@ -10615,6 +11092,8 @@ export interface components {
         MessageID: number;
         ActionID: string;
         NetworkID: number;
+        LogSourceID: number;
+        LogFindingID: number;
         CIFailureID: number;
         RepoID: number;
         GroupID: number;
@@ -17184,6 +17663,424 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             502: components["responses"]["BadGateway"];
+        };
+    };
+    listLogSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogSource"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createLogSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogSourceInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogSource"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    testLogSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogSourceInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogSourceTest"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    rotateLogKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rotated */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getLogSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogSource"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateLogSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogSourceInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogSource"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteLogSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    discoverLogServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogService"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setLogServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogService"][];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogService"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    createLogPushToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sourceId: components["parameters"]["LogSourceID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogPushToken"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listLogFindings: {
+        parameters: {
+            query?: {
+                category?: "error" | "security";
+                status?: components["schemas"]["LogFindingStatus"];
+                severity?: components["schemas"]["LogSeverity"];
+                repoId?: number;
+                sourceId?: number;
+                /** @description Only findings that still need attention */
+                active?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogFinding"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getLogFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogFinding"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    fixLogFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    notifyLogFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogFinding"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    muteLogFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogFinding"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    unmuteLogFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["LogFindingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogFinding"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getTicketLogFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogFinding"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
         };
     };
     getTicketCIFailure: {

@@ -253,6 +253,27 @@ and `Caddyfile.cloud` from before are kept beside them as `*.pre-meetings`.
 Step 3 leaves `livekit`, `redis` and `livekit-egress` running; recreate them
 with `--profile meetings up -d` only when their settings change.
 
+## Loki for the log watcher (once)
+
+The log watcher reads this server's own container logs from a Loki in
+`/opt/loki` (files in `deploy/loki/`): Grafana Alloy ships every container's
+output there through a read-only Docker socket proxy, logs are kept 14 days,
+and nothing is published. Loki joins `agnts_default`, so agnts reaches it at
+`http://loki:3100`, which `AGNTS_LOGS_PRIVATE_ALLOW=loki` in `/opt/agnts/.env`
+allows.
+
+```sh
+ssh root@45.138.158.39 'mkdir -p /opt/loki'
+scp deploy/loki/docker-compose.yml deploy/loki/loki-config.yaml deploy/loki/config.alloy root@45.138.158.39:/opt/loki/
+ssh root@45.138.158.39 'cd /opt/loki && docker compose up -d'
+```
+
+Alloy's first start backfills each container's history; Loki refuses lines
+older than 7 days (Alloy logs "timestamp too old" once). The log source is
+`server-loki` in workspace 1, its services labelled by compose service.
+
+This server has it set up (2 November 2026).
+
 ## Rollback
 
 ```sh

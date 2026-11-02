@@ -6395,6 +6395,804 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logsTypeBudget => 'Spend';
 
   @override
+  String get logwatchTitle => 'Log watcher';
+
+  @override
+  String get logwatchLede =>
+      'Errors and security mistakes agnts found in your projects\' logs, grouped by error. It reports them, or opens a ticket to fix them, as Settings say.';
+
+  @override
+  String get logwatchBack => 'Log watcher';
+
+  @override
+  String get logwatchSources => 'Log sources';
+
+  @override
+  String get logwatchSettings => 'Settings';
+
+  @override
+  String get logwatchCategoryLabel => 'Category';
+
+  @override
+  String get logwatchFilterLabel => 'Show';
+
+  @override
+  String get logwatchCat_error => 'Errors';
+
+  @override
+  String get logwatchCat_security => 'Security';
+
+  @override
+  String get logwatchFilter_active => 'Needs attention';
+
+  @override
+  String get logwatchFilter_fixed => 'Fixed';
+
+  @override
+  String get logwatchFilter_muted => 'Muted';
+
+  @override
+  String get logwatchFilter_all => 'All';
+
+  @override
+  String get logwatchRepo => 'Repository';
+
+  @override
+  String get logwatchAllRepos => 'All repositories';
+
+  @override
+  String get logwatchEmptyActive => 'Nothing needs your attention: no new errors or security problems in the logs.';
+
+  @override
+  String get logwatchEmptyFilter => 'No findings here.';
+
+  @override
+  String get logwatchHowTitle => 'How the log watcher works';
+
+  @override
+  String get logwatchHowSources =>
+      'Add a log source: the address of your Loki, Elasticsearch, OpenSearch or Graylog, or a push token for Vector or Fluent Bit. Then pick the services to watch and the repositories each runs on.';
+
+  @override
+  String get logwatchHowModes =>
+      'Settings → Log watcher decides what happens: Report (shown here and notified) or Open ticket. Automatic tickets are off until you turn them on.';
+
+  @override
+  String get logwatchColStatus => 'Status';
+
+  @override
+  String get logwatchColFinding => 'Finding';
+
+  @override
+  String get logwatchColCount => 'Seen';
+
+  @override
+  String get logwatchColLastSeen => 'Last seen';
+
+  @override
+  String get logwatchColTicket => 'Ticket';
+
+  @override
+  String get logwatchColTime => 'Time';
+
+  @override
+  String get logwatchColService => 'Service';
+
+  @override
+  String get logwatchColRevision => 'Revision';
+
+  @override
+  String get logwatchColSource => 'Source';
+
+  @override
+  String get logwatchColHealth => 'Health';
+
+  @override
+  String get logwatchColServices => 'Services';
+
+  @override
+  String get logwatchColLastRead => 'Last read';
+
+  @override
+  String logwatchTimes(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', one: '$n time');
+    return '$_temp0';
+  }
+
+  @override
+  String logwatchMasked(String mask) {
+    return 'Value: $mask (masked; agnts never stores it)';
+  }
+
+  @override
+  String get logwatchReportOnly => 'Report only';
+
+  @override
+  String get logwatchFix => 'Fix it';
+
+  @override
+  String logwatchFixStarted(String key) {
+    return '$key opened: agnts is on it. You review the fix before anything is pushed.';
+  }
+
+  @override
+  String get logwatchMute => 'Mute';
+
+  @override
+  String get logwatchUnmute => 'Unmute';
+
+  @override
+  String get logwatchMuted => 'Muted: no more notifications or tickets for it.';
+
+  @override
+  String get logwatchUnmuted => 'Watching it again.';
+
+  @override
+  String get logwatchNotify => 'Notify now';
+
+  @override
+  String get logwatchNotified => 'Notification sent.';
+
+  @override
+  String get logwatchStatus_open => 'Seen';
+
+  @override
+  String get logwatchStatus_reported => 'Reported';
+
+  @override
+  String get logwatchStatus_fixing => 'Fixing';
+
+  @override
+  String get logwatchStatus_fixed => 'Fixed';
+
+  @override
+  String get logwatchStatus_resolved => 'Gone';
+
+  @override
+  String get logwatchStatus_muted => 'Muted';
+
+  @override
+  String get logwatchStatus_regression => 'Back';
+
+  @override
+  String get logwatchStatusHelp_open => 'Seen in the logs; below the threshold, or its category is off';
+
+  @override
+  String get logwatchStatusHelp_reported => 'Shown here and notified';
+
+  @override
+  String get logwatchStatusHelp_fixing => 'A ticket works on it';
+
+  @override
+  String get logwatchStatusHelp_fixed => 'The fix merged; waiting to see it gone from the logs';
+
+  @override
+  String get logwatchStatusHelp_resolved => 'Quiet since the fix';
+
+  @override
+  String get logwatchStatusHelp_muted => 'Ignored: no tickets, no notifications';
+
+  @override
+  String get logwatchStatusHelp_regression => 'In the logs again after the fix';
+
+  @override
+  String get logwatchSev_low => 'Low';
+
+  @override
+  String get logwatchSev_medium => 'Medium';
+
+  @override
+  String get logwatchSev_high => 'High';
+
+  @override
+  String get logwatchSev_critical => 'Critical';
+
+  @override
+  String get logwatchClass_code => 'Code bug';
+
+  @override
+  String get logwatchClass_config => 'Configuration';
+
+  @override
+  String get logwatchClass_infra => 'Infrastructure';
+
+  @override
+  String get logwatchClass_dependency => 'Dependency';
+
+  @override
+  String get logwatchClass_leak => 'Leak';
+
+  @override
+  String get logwatchClass_exposure => 'Exposure';
+
+  @override
+  String get logwatchClass_weakness => 'Weakness';
+
+  @override
+  String get logwatchClass_attack => 'Attack';
+
+  @override
+  String get logwatchClass_noise => 'Noise';
+
+  @override
+  String get logwatchClass_ => 'Unknown';
+
+  @override
+  String get logwatchNotFound => 'No such finding.';
+
+  @override
+  String logwatchOpenTicket(String key) {
+    return 'Open $key';
+  }
+
+  @override
+  String get logwatchRegressionNote => 'This came back after its fix merged.';
+
+  @override
+  String get logwatchNoReposNote =>
+      'No repository is selected for this service, so it is only reported. Select its repositories to let agnts fix it:';
+
+  @override
+  String get logwatchRemediation => 'How to fix it';
+
+  @override
+  String get logwatchExcerpt => 'Log excerpt';
+
+  @override
+  String get logwatchExcerptSub => 'Redacted: secrets and personal data are hidden before anything is stored.';
+
+  @override
+  String get logwatchNoExcerpt => 'No excerpt kept (it is dropped 30 days after the finding is over).';
+
+  @override
+  String get logwatchOccurrences => 'Sightings';
+
+  @override
+  String get logwatchOccurrencesSub => 'The last 20 batches it was seen in.';
+
+  @override
+  String get logwatchNoOccurrences => 'No sightings kept.';
+
+  @override
+  String get logwatchFacts => 'Facts';
+
+  @override
+  String get logwatchCount => 'Seen';
+
+  @override
+  String get logwatchLastHour => 'In the last hour';
+
+  @override
+  String get logwatchFirstSeen => 'First seen';
+
+  @override
+  String get logwatchLastSeen => 'Last seen';
+
+  @override
+  String get logwatchDetector => 'Detector';
+
+  @override
+  String get logwatchRoute => 'Route';
+
+  @override
+  String get logwatchRevision => 'Revision';
+
+  @override
+  String get logwatchFixedSha => 'Fixed in';
+
+  @override
+  String get logwatchTicket => 'Ticket';
+
+  @override
+  String get logwatchCardTitle => 'Found in the logs';
+
+  @override
+  String get logwatchGoneNow => 'Gone from the logs';
+
+  @override
+  String get logwatchWaitingQuiet => 'Merged; watching the logs';
+
+  @override
+  String get logwatchBackAgain => 'Back in the logs';
+
+  @override
+  String get logwatchOpenFinding => 'Open the finding';
+
+  @override
+  String get logwatchSourcesLede =>
+      'The logging systems agnts reads, by address (through your private network when the address is on one), and the push tokens your log shippers send with.';
+
+  @override
+  String get logwatchAddSource => 'Add source';
+
+  @override
+  String get logwatchSourceDrawerSub => 'agnts tests the connection before it saves.';
+
+  @override
+  String get logwatchKind => 'Logging system';
+
+  @override
+  String get logwatchKind_loki => 'Grafana Loki';
+
+  @override
+  String get logwatchKind_elasticsearch => 'Elasticsearch';
+
+  @override
+  String get logwatchKind_opensearch => 'OpenSearch';
+
+  @override
+  String get logwatchKind_graylog => 'Graylog';
+
+  @override
+  String get logwatchKind_push => 'Push (Vector, Fluent Bit…)';
+
+  @override
+  String get logwatchName => 'Name';
+
+  @override
+  String get logwatchNamePh => 'prod-loki';
+
+  @override
+  String get logwatchEnvironment => 'Environment';
+
+  @override
+  String get logwatchEnvironmentHelp => 'Debug mode counts as a problem in production only.';
+
+  @override
+  String get logwatchEnv_production => 'Production';
+
+  @override
+  String get logwatchEnv_staging => 'Staging';
+
+  @override
+  String get logwatchEnv_development => 'Development';
+
+  @override
+  String get logwatchAddress => 'Address';
+
+  @override
+  String get logwatchAddressHelp =>
+      'A public address must use https. An address on your private network (10.x, *.local) is reached through it; add the network in Workspace settings first.';
+
+  @override
+  String get logwatchAuth => 'Credentials';
+
+  @override
+  String get logwatchAuth_none => 'None';
+
+  @override
+  String get logwatchAuth_basic => 'User and password';
+
+  @override
+  String get logwatchAuth_bearer => 'Token';
+
+  @override
+  String get logwatchAuth_apikey => 'API key';
+
+  @override
+  String logwatchAuthSaved(String kind) {
+    return 'Saved ($kind); kept unless you change them.';
+  }
+
+  @override
+  String get logwatchAuthChange => 'Change credentials';
+
+  @override
+  String get logwatchUser => 'User';
+
+  @override
+  String get logwatchPassword => 'Password';
+
+  @override
+  String get logwatchToken => 'Token';
+
+  @override
+  String get logwatchTokenPh_loki => 'Bearer token';
+
+  @override
+  String get logwatchTokenPh_elasticsearch => 'API key (base64 id:key)';
+
+  @override
+  String get logwatchTokenPh_opensearch => 'Token';
+
+  @override
+  String get logwatchTokenPh_graylog => 'Graylog access token';
+
+  @override
+  String get logwatchTokenPh_push => '';
+
+  @override
+  String get logwatchAuthHelp_loki => 'Use a read-only token. A multi-tenant Loki also needs the tenant (X-Scope-OrgID).';
+
+  @override
+  String get logwatchAuthHelp_elasticsearch => 'Use a key with read access to the index pattern only.';
+
+  @override
+  String get logwatchAuthHelp_opensearch => 'Use a user with read access to the index pattern only.';
+
+  @override
+  String get logwatchAuthHelp_graylog => 'Create an access token for a user with the Reader role.';
+
+  @override
+  String get logwatchAuthHelp_push => '';
+
+  @override
+  String get logwatchTenant => 'Tenant';
+
+  @override
+  String get logwatchTenantPh => 'Tenant (X-Scope-OrgID), optional';
+
+  @override
+  String get logwatchSelector => 'Base selector';
+
+  @override
+  String get logwatchSelectorHelp => 'Optional: what all services share, such as the environment label.';
+
+  @override
+  String get logwatchPollEvery => 'Read every';
+
+  @override
+  String get logwatchPollHelp => '15 seconds keeps findings within a minute; a large shared cluster may want 60.';
+
+  @override
+  String logwatchSeconds(String n) {
+    return '$n s';
+  }
+
+  @override
+  String get logwatchAdvanced => 'Field names and CA certificate';
+
+  @override
+  String get logwatchField_service => 'Service field or label';
+
+  @override
+  String get logwatchField_level => 'Level field';
+
+  @override
+  String get logwatchField_message => 'Message field';
+
+  @override
+  String get logwatchField_timestamp => 'Time field';
+
+  @override
+  String get logwatchField_revision => 'Revision field (deployed commit)';
+
+  @override
+  String get logwatchFieldsHelp => 'Test connection fills these in; change them only if it guessed wrong.';
+
+  @override
+  String get logwatchCa => 'CA certificate (PEM), for a private CA';
+
+  @override
+  String get logwatchPushHelp =>
+      'Your shipper sends to agnts with a token. agnts shows the token and ready Vector and Fluent Bit configuration once you add the source.';
+
+  @override
+  String get logwatchEnabled => 'Read this source';
+
+  @override
+  String get logwatchTest => 'Test connection';
+
+  @override
+  String get logwatchTesting => 'Testing…';
+
+  @override
+  String logwatchTestOk(String version, String ms) {
+    return 'Connected: version $version, $ms ms';
+  }
+
+  @override
+  String logwatchViaNetwork(String name) {
+    return 'Through the private network $name.';
+  }
+
+  @override
+  String get logwatchDirect => 'Directly, over the internet.';
+
+  @override
+  String logwatchServicesOf(String name) {
+    return 'Services of $name';
+  }
+
+  @override
+  String get logwatchServicesSub =>
+      'Tick the services to watch and pick the repositories each runs on (several for a gateway). Without a repository a service is only reported.';
+
+  @override
+  String get logwatchDiscovering => 'Looking for services in the logs…';
+
+  @override
+  String logwatchSelectorOf(String name) {
+    return 'Selector of $name';
+  }
+
+  @override
+  String get logwatchNoReposYet => 'No repository: report only';
+
+  @override
+  String get logwatchAddRepo => 'Add a repository';
+
+  @override
+  String get logwatchNoServices => 'No services found yet. Add one by name below.';
+
+  @override
+  String get logwatchAddService => 'Add a service by name';
+
+  @override
+  String get logwatchAddServicePh => 'api';
+
+  @override
+  String get logwatchAdd => 'Add';
+
+  @override
+  String logwatchTokenTitle(String name) {
+    return 'Push token for $name';
+  }
+
+  @override
+  String get logwatchTokenSub => 'Shown once: copy it into your shipper\'s configuration now. Making a new one stops the old one.';
+
+  @override
+  String get logwatchPushUrl => 'Push address';
+
+  @override
+  String get logwatchPushToken => 'Token';
+
+  @override
+  String get logwatchTokenDone => 'I copied it';
+
+  @override
+  String get logwatchPrivateNetwork => 'Through a private network';
+
+  @override
+  String get logwatchSource_new => 'Not read yet';
+
+  @override
+  String get logwatchSource_ok => 'Reading';
+
+  @override
+  String get logwatchSource_behind => 'Falling behind';
+
+  @override
+  String get logwatchSource_failing => 'Failing';
+
+  @override
+  String get logwatchSource_auth_failed => 'Credentials refused';
+
+  @override
+  String logwatchDropped(String n) {
+    return '$n entries skipped over the limit';
+  }
+
+  @override
+  String logwatchGap(String from, String to) {
+    return 'Not read: $from to $to';
+  }
+
+  @override
+  String get logwatchDisabled => 'Turned off';
+
+  @override
+  String get logwatchHasToken => 'Token set';
+
+  @override
+  String get logwatchNoToken => 'No token yet';
+
+  @override
+  String logwatchWatching(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n services', one: '$n service', zero: 'No services watched');
+    return '$_temp0';
+  }
+
+  @override
+  String get logwatchServices => 'Services';
+
+  @override
+  String get logwatchMakeToken => 'Make token';
+
+  @override
+  String get logwatchNewToken => 'New token';
+
+  @override
+  String get logwatchEdit => 'Edit';
+
+  @override
+  String get logwatchDelete => 'Delete';
+
+  @override
+  String logwatchDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get logwatchDeleteBody => 'agnts stops reading it. Its findings stay.';
+
+  @override
+  String get logwatchNoSources => 'No log sources yet.';
+
+  @override
+  String get logwatchHowPull =>
+      'Loki, Elasticsearch, OpenSearch or Graylog: enter the address and read-only credentials. agnts reads new entries every 15 seconds, filtered to what its detectors look for.';
+
+  @override
+  String get logwatchHowPrivate =>
+      'On your own network? Add it as a private network (WireGuard, OpenVPN or agnts-link) and enter the internal address.';
+
+  @override
+  String get logwatchHowPush => 'No logging system with an API? Add a push source and point Vector or Fluent Bit at agnts.';
+
+  @override
+  String get logwatchSettingsTitle => 'Log watcher';
+
+  @override
+  String get logwatchSettingsSub => 'What agnts does with the errors and security problems it finds in your logs.';
+
+  @override
+  String get logwatchErrorsMode => 'Errors';
+
+  @override
+  String get logwatchErrorsModeHelp => 'Exceptions, panics and bursts of server errors.';
+
+  @override
+  String get logwatchSecurityMode => 'Security';
+
+  @override
+  String get logwatchSecurityModeHelp => 'Secrets and personal data in logs, stack traces sent to clients, debug mode, attacks.';
+
+  @override
+  String get logwatchMode_off => 'Off';
+
+  @override
+  String get logwatchMode_report => 'Report';
+
+  @override
+  String get logwatchMode_ticket => 'Open ticket';
+
+  @override
+  String get logwatchAlwaysLeaks => 'Always notify secret leaks';
+
+  @override
+  String get logwatchAlwaysLeaksHelp => 'A secret written to the logs is a live incident: notify it even when Security is off.';
+
+  @override
+  String get logwatchMinSeverity => 'Lowest severity';
+
+  @override
+  String get logwatchMinSeverityHelp => 'Findings below it are recorded, not reported or ticketed.';
+
+  @override
+  String get logwatchThreshold => 'Errors per hour before acting';
+
+  @override
+  String get logwatchThresholdHelp => 'A plain error acts after this many in an hour; panics, leaks and attacks act on the first one.';
+
+  @override
+  String get logwatchMaxAutoPerDay => 'Automatic tickets a day';
+
+  @override
+  String get logwatchMaxAutoPerDayHelp => 'Fix it is not capped.';
+
+  @override
+  String get logwatchAttackAfter => 'Attacks before a hardening ticket';
+
+  @override
+  String get logwatchAttackAfterHelp =>
+      'The same attack on one route this many times in 7 days opens a ticket to add rate limiting or lockout; 0 never.';
+
+  @override
+  String get logwatchResolveAfter => 'Quiet days before resolved';
+
+  @override
+  String get logwatchResolveAfterHelp => 'For logs without a deployed revision: a fixed finding is resolved after this many quiet days.';
+
+  @override
+  String get logwatchDigest => 'Daily digest';
+
+  @override
+  String get logwatchDigestHelp => 'One message a day instead of one per finding (high-severity leaks still come at once).';
+
+  @override
+  String get logwatchTriage => 'Model triage';
+
+  @override
+  String get logwatchTriageHelp => 'A light model explains new findings (on the workspace\'s credits); 0 keeps the rules\' titles.';
+
+  @override
+  String get logwatchPatterns => 'Custom detectors';
+
+  @override
+  String get logwatchPatternsHelp => 'One a line: category:severity name=regex, such as security:high billing-token=\\S+';
+
+  @override
+  String get logwatchOverridesHelp => 'A service is reported only until it has repositories: select them under';
+
+  @override
+  String get logwatchNotifyLabel => 'The log watcher found something';
+
+  @override
+  String get logwatchAgentTitle => 'agnts-watch (no logging system)';
+
+  @override
+  String get logwatchAgentHelp =>
+      'On a server without a logging system: run this next to your services. It follows the containers labelled agnts.watch=logs, reports crashes, OOM kills and failed health checks, and connects out to agnts only.';
+
+  @override
+  String get logwatchKind_datadog => 'Datadog';
+
+  @override
+  String get logwatchKind_cloudwatch => 'Amazon CloudWatch Logs';
+
+  @override
+  String get logwatchKind_splunk => 'Splunk';
+
+  @override
+  String get logwatchAuth_aws => 'AWS access key';
+
+  @override
+  String get logwatchAwsKeyId => 'Access key id';
+
+  @override
+  String get logwatchAwsSecret => 'Secret access key';
+
+  @override
+  String get logwatchAwsSession => 'Session token (optional)';
+
+  @override
+  String get logwatchDdApiKey => 'API key';
+
+  @override
+  String get logwatchDdAppKey => 'Application key';
+
+  @override
+  String get logwatchTokenPh_datadog => 'API key';
+
+  @override
+  String get logwatchTokenPh_cloudwatch => '';
+
+  @override
+  String get logwatchTokenPh_splunk => 'Splunk authentication token';
+
+  @override
+  String get logwatchAuthHelp_datadog => 'An application key with the logs_read_data scope is enough.';
+
+  @override
+  String get logwatchAuthHelp_cloudwatch => 'An IAM user or role with logs:DescribeLogGroups and logs:FilterLogEvents only.';
+
+  @override
+  String get logwatchAuthHelp_splunk => 'The management API (port 8089); a token of a user who can search the index.';
+
+  @override
+  String get logwatchIndex_elasticsearch => 'Index pattern';
+
+  @override
+  String get logwatchIndex_opensearch => 'Index pattern';
+
+  @override
+  String get logwatchIndex_splunk => 'Index';
+
+  @override
+  String get logwatchIndex_cloudwatch => 'Log group prefix';
+
+  @override
+  String get logwatchIndexHelp_elasticsearch => 'Empty reads logs-*, filebeat-* and logstash-*.';
+
+  @override
+  String get logwatchIndexHelp_opensearch => 'Empty reads logs-*, filebeat-* and logstash-*.';
+
+  @override
+  String get logwatchIndexHelp_splunk => 'Empty searches every index the token may read.';
+
+  @override
+  String get logwatchIndexHelp_cloudwatch => 'Services are log groups; this narrows the list (/ecs/, /aws/lambda/).';
+
+  @override
+  String get logwatchOverrides => 'Overrides';
+
+  @override
+  String get logwatchOverridesRuleHelp =>
+      'One a line: a service as source/service (prod-loki/api) or a repository as repo:name, then errors= and/or security= off, report or ticket. A service\'s line wins over its repository\'s.';
+
+  @override
   String get maccountPasswordInstead => 'Sign in with a password';
 
   @override
@@ -8333,6 +9131,104 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minsightsTaskActions => 'Task actions';
 
   @override
+  String get mlogsTitle => 'Log watcher';
+
+  @override
+  String get mlogsLede => 'What agnts found in your projects\' logs and still needs attention.';
+
+  @override
+  String get mlogsErrors => 'Errors';
+
+  @override
+  String get mlogsSecurity => 'Security';
+
+  @override
+  String get mlogsEmpty => 'Nothing needs your attention.';
+
+  @override
+  String mlogsLastSeen(String when) {
+    return 'seen $when';
+  }
+
+  @override
+  String get mlogsReportOnly => 'report only';
+
+  @override
+  String get mlogsStatusOpen => 'Seen';
+
+  @override
+  String get mlogsStatusReported => 'Reported';
+
+  @override
+  String get mlogsStatusFixing => 'Fixing';
+
+  @override
+  String get mlogsStatusFixed => 'Fixed';
+
+  @override
+  String get mlogsStatusResolved => 'Gone';
+
+  @override
+  String get mlogsStatusMuted => 'Muted';
+
+  @override
+  String get mlogsStatusRegression => 'Back';
+
+  @override
+  String get mlogsCardTitle => 'Found in the logs';
+
+  @override
+  String get mlogsFix => 'Fix it';
+
+  @override
+  String get mlogsFixConfirm => 'Open a ticket to fix this? You review the fix before anything is pushed.';
+
+  @override
+  String get mlogsMute => 'Mute';
+
+  @override
+  String get mlogsUnmute => 'Unmute';
+
+  @override
+  String get mlogsMutedDone => 'Muted';
+
+  @override
+  String get mlogsUnmutedDone => 'Watching it again';
+
+  @override
+  String mlogsMasked(String mask) {
+    return 'value: $mask (masked)';
+  }
+
+  @override
+  String get mlogsNoRepos =>
+      'No repository is selected for this service, so it is only reported. Select them in the admin panel under Log sources.';
+
+  @override
+  String get mlogsTicket => 'Ticket';
+
+  @override
+  String get mlogsFactCount => 'Seen';
+
+  @override
+  String get mlogsFactLastHour => 'Last hour';
+
+  @override
+  String get mlogsFactFirstSeen => 'First seen';
+
+  @override
+  String get mlogsFactLastSeen => 'Last seen';
+
+  @override
+  String get mlogsRemediation => 'How to fix it';
+
+  @override
+  String get mlogsExcerpt => 'Log excerpt (redacted)';
+
+  @override
+  String get mlogsNoExcerpt => 'No excerpt kept.';
+
+  @override
   String get mmanageFillAll => 'Fill in the required fields.';
 
   @override
@@ -9168,6 +10064,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navMeetings => 'Meetings';
+
+  @override
+  String get navLogWatcher => 'Log watcher';
 
   @override
   String get networkTitle => 'Private networks';
@@ -12863,7 +13762,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNotConnected => 'Not connected';
 
   @override
-  String get settingsClaude => 'Claude Code';
+  String get settingsAiModels => 'AI models';
 
   @override
   String get settingsClaudeSub => 'The engine that does the coding';
@@ -12873,6 +13772,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsModelsHelp => 'Pick which model runs each step. Haiku uses the least of your plan, Opus the most.';
+
+  @override
+  String get settingsModuleTabs => 'Coding module';
+
+  @override
+  String get settingsModuleTabsHelp =>
+      'Every stage runs on the module you pick, with its own models. Only the modules an Admin enabled for you are listed.';
+
+  @override
+  String get settingsModulesMixed =>
+      'Stages use several modules now. Picking a module moves them all to it, at the same level (Opus becomes Muse Wonder).';
+
+  @override
+  String get settingsModelsHelpCodex => 'Pick which Codex model runs each step: name any model your OpenAI key can use.';
+
+  @override
+  String get settingsStageReviewHelpCodex =>
+      'Reviews each result while you review it. Auto uses your default module\'s stronger model for complex tickets and its lighter one for the rest.';
+
+  @override
+  String get settingsCodexModelNeeded => 'Name a Codex model for every step.';
+
+  @override
+  String get settingsCodexModelLabel => 'Codex model';
 
   @override
   String get settingsStageAnalyze => 'Reading the ticket and asking questions';
@@ -12905,6 +13828,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsStageLearnHelp => 'Reads each pushed change and writes lessons about what is new to the repository.';
 
   @override
+  String get settingsStageChat => 'Chat';
+
+  @override
+  String get settingsStageChatHelp =>
+      'Answers in the assistant chat, and spoken questions. Never runs on credits: it needs a connected account.';
+
+  @override
+  String get settingsStageDocuments => 'Documents and meeting notes';
+
+  @override
+  String get settingsStageDocumentsHelp => 'Writes documents and the notes and action items of a meeting.';
+
+  @override
+  String get settingsMeetingAudioMuse =>
+      'Meeting audio is always heard by Muse, the only module that hears audio; the notes are written by the model above.';
+
+  @override
   String get settingsStageReview => 'Code review';
 
   @override
@@ -12913,6 +13853,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsModelAuto => 'Auto';
+
+  @override
+  String get settingsModelTierLight => 'Light, any module';
+
+  @override
+  String get settingsModelTierStrong => 'Strong, any module';
 
   @override
   String get settingsMaxTurns => 'Turn limit per run';
@@ -12998,6 +13944,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAutoResume => 'Resume paused runs after the limit resets';
+
+  @override
+  String get settingsSwitchModules => 'Switch modules when one cannot run';
+
+  @override
+  String get settingsSwitchModulesHelp =>
+      'When a module\'s account is at its limit, missing, or not enabled for the person, the run uses their next module at the same level (opus becomes Muse Wonder). Off: it waits for the module.';
 
   @override
   String get settingsAutoLearn => 'Learn from every pushed change';
@@ -13111,9 +14064,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsCiRed => 'When a watched branch goes red';
-
-  @override
-  String get settingsClaudeMuse => 'Muse Code';
 
   @override
   String get settingsClaudeMovedMuse => 'Muse is connected per workspace.';
@@ -14888,6 +15838,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String ticketMuseEscalated(String model) {
     return 'Moved to $model';
   }
+
+  @override
+  String get ticketSrcLogs => 'Found in logs';
 
   @override
   String get ticketsTabsLabel => 'Ticket lists';

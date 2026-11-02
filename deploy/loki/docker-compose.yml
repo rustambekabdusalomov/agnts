@@ -1,0 +1,46 @@
+# Loki for agnts's log watcher, with Grafana Alloy shipping this server's
+# Docker container logs into it. Nothing is published: agnts reaches Loki on
+# its own network (agnts_default) at http://loki:3100.
+name: loki
+
+services:
+  loki:
+    image: grafana/loki:3.2.0
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./loki-config.yaml:/etc/loki/config.yaml:ro
+      - lokidata:/loki
+    networks: [default, agnts]
+    logging: &logging
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  # Alloy reads container logs through a socket proxy that allows reads
+  # only: it cannot start, exec into or remove anything.
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    restart: unless-stopped
+    environment: { CONTAINERS: 1, EVENTS: 1, INFO: 1, NETWORKS: 1, POST: 0 }
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    logging: *logging
+
+  alloy:
+    image: grafana/alloy:v1.5.1
+    restart: unless-stopped
+    command: ["run", "--storage.path=/var/lib/alloy", "/etc/alloy/config.alloy"]
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy:ro
+      - alloydata:/var/lib/alloy
+    depends_on: [loki, docker-proxy]
+    logging: *logging
+
+volumes:
+  lokidata:
+  alloydata:
+
+networks:
+  agnts:
+    external: true
+    name: agnts_default

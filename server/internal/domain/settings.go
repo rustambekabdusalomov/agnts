@@ -194,6 +194,9 @@ type NotifySettings struct {
 	FollowUps bool `json:"followUps"`
 	// CI announces a watched branch going red.
 	CI bool `json:"ci"`
+	// Logs announces what the log watcher finds, and a log source that
+	// stopped.
+	Logs bool `json:"logs"`
 }
 
 // Settings are the runtime settings edited on the Settings page.
@@ -250,6 +253,9 @@ type Settings struct {
 	PRComments PRCommentSettings `json:"prComments"`
 	// CI: agnts watches CI pipelines and fixes what fails.
 	CI CISettings `json:"ci"`
+	// LogWatch: agnts reads the projects' logs and reports or fixes what
+	// it finds there.
+	LogWatch LogWatchSettings `json:"logWatch"`
 	// Guard: how strict agnts-guard, the hooks inside every run, is.
 	Guard GuardSettings `json:"guard"`
 	// SecondOpinion is the model ("codex:<model>", or a Claude model) that
@@ -353,6 +359,7 @@ func DefaultSettings() Settings {
 		PullReviews:     DefaultPullReviewSettings(),
 		PRComments:      DefaultPRCommentSettings(),
 		CI:              DefaultCISettings(),
+		LogWatch:        DefaultLogWatchSettings(),
 		Guard:           GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
 		Stalls:          StallsLog,
 		ProveFixes:      true,
@@ -366,7 +373,7 @@ func DefaultSettings() Settings {
 
 		MaxTicketRepos: DefaultMaxTicketRepos,
 		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
-		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true},
+		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true, Logs: true},
 		Meetings:       DefaultMeetingSettings(),
 	}
 }
@@ -450,6 +457,9 @@ func (s *Settings) Validate() error {
 		errs = append(errs, fmt.Errorf("merge method must be one of %s", strings.Join(MergeMethods, ", ")))
 	}
 	if err := s.CI.Validate(); err != nil {
+		errs = append(errs, err)
+	}
+	if err := s.LogWatch.Validate(); err != nil {
 		errs = append(errs, err)
 	}
 	if err := s.Guard.Validate(); err != nil {

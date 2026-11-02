@@ -65,6 +65,7 @@
     "assistantCode": "Kod",
     "assistantConversations": "Suhbatlar",
     "documents": "Hujjatlar",
-    "meetings": "Uchrashuvlar"
+    "meetings": "Uchrashuvlar",
+    "logWatcher": "Loglarni kuzatish"
   }
 }

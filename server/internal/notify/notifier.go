@@ -62,7 +62,17 @@ type Notifier struct {
 	log      *slog.Logger
 	wake     chan struct{}
 	ci       CIFixer // nil: no Fix it button
+	logs     LogFixer
 }
+
+// LogFixer acts on a log finding (Telegram's Fix it and Mute buttons).
+type LogFixer interface {
+	Fix(ctx context.Context, id int64, origin domain.Origin) (domain.Ticket, error)
+	Mute(ctx context.Context, id int64, mute bool) (domain.LogFinding, error)
+}
+
+// SetLogFixer enables the Fix it and Mute buttons on log watcher messages.
+func (n *Notifier) SetLogFixer(l LogFixer) { n.logs = l }
 
 // CIFixer opens a ticket for a CI failure (Telegram's Fix it button).
 type CIFixer interface {
@@ -191,6 +201,10 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	}
 	if e.Type == domain.EventCIFailure {
 		n.ciFailure(ctx, e)
+		return
+	}
+	if e.Type == domain.EventLogFinding || e.Type == domain.EventLogSource || e.Type == domain.EventLogDigest {
+		n.logEvent(ctx, e)
 		return
 	}
 	to, _ := e.Data["to"].(string)
@@ -810,5 +824,80 @@ func (n *Notifier) ciFailure(ctx context.Context, e domain.Event) {
 	}
 	if _, err := b.Send(ctx, cfg.ChatID, text, buttons, false); err != nil {
 		n.log.Warn("telegram notify", "ci", int64(id), "err", err)
+	}
+}
+
+// logEvent announces what the log watcher found, a log source that
+// stopped, or the daily digest. A finding notifies once (the watcher
+// decides), never per occurrence.
+func (n *Notifier) logEvent(ctx context.Context, e domain.Event) {
+	if on, _ := e.Data["notify"].(bool); !on {
+		return
+	}
+	s, err := n.settings.Get(ctx)
+	if err != nil || !s.Notify.Logs {
+		return
+	}
+	id, _ := e.Data["findingId"].(float64)
+	var title, body string
+	var buttons [][]Button
+	route := ""
+	switch e.Type {
+	case domain.EventLogSource:
+		name, _ := e.Data["name"].(string)
+		title, body = "Log source "+name, e.Message
+		route = "/log-sources"
+	case domain.EventLogDigest:
+		text, _ := e.Data["text"].(string)
+		title, body = "Log watcher: the last day", e.Message+"\n\n"+text
+		route = "/log-watcher"
+	default:
+		service, _ := e.Data["service"].(string)
+		sev, _ := e.Data["severity"].(string)
+		cat, _ := e.Data["category"].(string)
+		kind, _ := e.Data["kind"].(string)
+		count, _ := e.Data["count"].(float64)
+		what := "an error"
+		if cat == string(domain.LogSecurity) {
+			what = "a security problem"
+		}
+		title = fmt.Sprintf("%s: %s in the logs", service, what)
+		if kind == "regression" {
+			title = fmt.Sprintf("%s: a fixed problem is back in the logs", service)
+		}
+		body = fmt.Sprintf("%s\n%s, seen %d times", e.Message, sev, int64(count))
+		if mask, _ := e.Data["mask"].(string); mask != "" {
+			body += "\nvalue: " + mask
+		}
+		if rem, _ := e.Data["remediation"].(string); rem != "" {
+			body += "\n\n" + rem
+		}
+		if reason, _ := e.Data["reason"].(string); reason != "" {
+			body += "\n\n" + reason
+		}
+		route = fmt.Sprintf("/log-watcher/%d", int64(id))
+		if e.TicketKey != "" {
+			body += "\n\nagnts opened " + e.TicketKey + " to fix it; you review the fix before anything is pushed."
+			route = ""
+		} else if n.logs != nil && id > 0 {
+			row := []Button{{Text: "Mute", Data: fmt.Sprintf("lgm:%d", int64(id))}}
+			if repos, _ := e.Data["repos"].(string); repos != "" {
+				row = append([]Button{{Text: "Fix it", Data: fmt.Sprintf("lgf:%d", int64(id))}}, row...)
+			}
+			buttons = [][]Button{row}
+		}
+	}
+	if s.Notify.Push && n.fcm != nil {
+		n.push(ctx, Push{Title: title, Body: truncate(body, 180), Ticket: e.TicketKey, Route: route})
+	}
+	if !s.Notify.Telegram {
+		return
+	}
+	b, cfg, ok := n.bot(ctx)
+	if !ok {
+		return
+	}
+	if _, err := b.Send(ctx, cfg.ChatID, title+"\n\n"+truncate(body, 1500), buttons, false); err != nil {
+		n.log.Warn("telegram notify", "log", int64(id), "err", err)
 	}
 }

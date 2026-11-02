@@ -65,6 +65,7 @@
     "assistantCode": "Код",
     "assistantConversations": "Разговоры",
     "documents": "Документы",
-    "meetings": "Встречи"
+    "meetings": "Встречи",
+    "logWatcher": "Наблюдение за логами"
   }
 }

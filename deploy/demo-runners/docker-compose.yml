@@ -1,0 +1,23 @@
+# Three pretend services for demonstrating agnts's log watcher. Alloy (in
+# /opt/loki) ships their output to Loki like every container's; the log
+# source server-loki lists them as services.
+name: demo
+
+x-runner: &runner
+  build: .
+  image: agnts-demo-runners:latest
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  shop-api:
+    <<: *runner
+    environment: { DEMO_SERVICE: shop-api, DEMO_EVERY: 45s }
+  billing-worker:
+    <<: *runner
+    environment: { DEMO_SERVICE: billing-worker, DEMO_EVERY: 50s }
+  auth-gateway:
+    <<: *runner
+    environment: { DEMO_SERVICE: auth-gateway, DEMO_EVERY: 60s }

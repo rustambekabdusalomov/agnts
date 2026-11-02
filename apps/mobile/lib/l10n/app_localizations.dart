@@ -11439,6 +11439,1512 @@ abstract class AppLocalizations {
   /// **'Spend'**
   String get logsTypeBudget;
 
+  /// No description provided for @logwatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log watcher'**
+  String get logwatchTitle;
+
+  /// No description provided for @logwatchLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Errors and security mistakes agnts found in your projects\' logs, grouped by error. It reports them, or opens a ticket to fix them, as Settings say.'**
+  String get logwatchLede;
+
+  /// No description provided for @logwatchBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Log watcher'**
+  String get logwatchBack;
+
+  /// No description provided for @logwatchSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Log sources'**
+  String get logwatchSources;
+
+  /// No description provided for @logwatchSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get logwatchSettings;
+
+  /// No description provided for @logwatchCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get logwatchCategoryLabel;
+
+  /// No description provided for @logwatchFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get logwatchFilterLabel;
+
+  /// No description provided for @logwatchCat_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Errors'**
+  String get logwatchCat_error;
+
+  /// No description provided for @logwatchCat_security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get logwatchCat_security;
+
+  /// No description provided for @logwatchFilter_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get logwatchFilter_active;
+
+  /// No description provided for @logwatchFilter_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get logwatchFilter_fixed;
+
+  /// No description provided for @logwatchFilter_muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get logwatchFilter_muted;
+
+  /// No description provided for @logwatchFilter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get logwatchFilter_all;
+
+  /// No description provided for @logwatchRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get logwatchRepo;
+
+  /// No description provided for @logwatchAllRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'All repositories'**
+  String get logwatchAllRepos;
+
+  /// No description provided for @logwatchEmptyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needs your attention: no new errors or security problems in the logs.'**
+  String get logwatchEmptyActive;
+
+  /// No description provided for @logwatchEmptyFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No findings here.'**
+  String get logwatchEmptyFilter;
+
+  /// No description provided for @logwatchHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How the log watcher works'**
+  String get logwatchHowTitle;
+
+  /// No description provided for @logwatchHowSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a log source: the address of your Loki, Elasticsearch, OpenSearch or Graylog, or a push token for Vector or Fluent Bit. Then pick the services to watch and the repositories each runs on.'**
+  String get logwatchHowSources;
+
+  /// No description provided for @logwatchHowModes.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings → Log watcher decides what happens: Report (shown here and notified) or Open ticket. Automatic tickets are off until you turn them on.'**
+  String get logwatchHowModes;
+
+  /// No description provided for @logwatchColStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get logwatchColStatus;
+
+  /// No description provided for @logwatchColFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding'**
+  String get logwatchColFinding;
+
+  /// No description provided for @logwatchColCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen'**
+  String get logwatchColCount;
+
+  /// No description provided for @logwatchColLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen'**
+  String get logwatchColLastSeen;
+
+  /// No description provided for @logwatchColTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get logwatchColTicket;
+
+  /// No description provided for @logwatchColTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get logwatchColTime;
+
+  /// No description provided for @logwatchColService.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get logwatchColService;
+
+  /// No description provided for @logwatchColRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision'**
+  String get logwatchColRevision;
+
+  /// No description provided for @logwatchColSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get logwatchColSource;
+
+  /// No description provided for @logwatchColHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get logwatchColHealth;
+
+  /// No description provided for @logwatchColServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get logwatchColServices;
+
+  /// No description provided for @logwatchColLastRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Last read'**
+  String get logwatchColLastRead;
+
+  /// No description provided for @logwatchTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} time} other {{n} times}}'**
+  String logwatchTimes(num n);
+
+  /// No description provided for @logwatchMasked.
+  ///
+  /// In en, this message translates to:
+  /// **'Value: {mask} (masked; agnts never stores it)'**
+  String logwatchMasked(String mask);
+
+  /// No description provided for @logwatchReportOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Report only'**
+  String get logwatchReportOnly;
+
+  /// No description provided for @logwatchFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix it'**
+  String get logwatchFix;
+
+  /// No description provided for @logwatchFixStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'{key} opened: agnts is on it. You review the fix before anything is pushed.'**
+  String logwatchFixStarted(String key);
+
+  /// No description provided for @logwatchMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get logwatchMute;
+
+  /// No description provided for @logwatchUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get logwatchUnmute;
+
+  /// No description provided for @logwatchMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted: no more notifications or tickets for it.'**
+  String get logwatchMuted;
+
+  /// No description provided for @logwatchUnmuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Watching it again.'**
+  String get logwatchUnmuted;
+
+  /// No description provided for @logwatchNotify.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify now'**
+  String get logwatchNotify;
+
+  /// No description provided for @logwatchNotified.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification sent.'**
+  String get logwatchNotified;
+
+  /// No description provided for @logwatchStatus_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen'**
+  String get logwatchStatus_open;
+
+  /// No description provided for @logwatchStatus_reported.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported'**
+  String get logwatchStatus_reported;
+
+  /// No description provided for @logwatchStatus_fixing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixing'**
+  String get logwatchStatus_fixing;
+
+  /// No description provided for @logwatchStatus_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get logwatchStatus_fixed;
+
+  /// No description provided for @logwatchStatus_resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Gone'**
+  String get logwatchStatus_resolved;
+
+  /// No description provided for @logwatchStatus_muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get logwatchStatus_muted;
+
+  /// No description provided for @logwatchStatus_regression.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get logwatchStatus_regression;
+
+  /// No description provided for @logwatchStatusHelp_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen in the logs; below the threshold, or its category is off'**
+  String get logwatchStatusHelp_open;
+
+  /// No description provided for @logwatchStatusHelp_reported.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown here and notified'**
+  String get logwatchStatusHelp_reported;
+
+  /// No description provided for @logwatchStatusHelp_fixing.
+  ///
+  /// In en, this message translates to:
+  /// **'A ticket works on it'**
+  String get logwatchStatusHelp_fixing;
+
+  /// No description provided for @logwatchStatusHelp_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'The fix merged; waiting to see it gone from the logs'**
+  String get logwatchStatusHelp_fixed;
+
+  /// No description provided for @logwatchStatusHelp_resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet since the fix'**
+  String get logwatchStatusHelp_resolved;
+
+  /// No description provided for @logwatchStatusHelp_muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignored: no tickets, no notifications'**
+  String get logwatchStatusHelp_muted;
+
+  /// No description provided for @logwatchStatusHelp_regression.
+  ///
+  /// In en, this message translates to:
+  /// **'In the logs again after the fix'**
+  String get logwatchStatusHelp_regression;
+
+  /// No description provided for @logwatchSev_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get logwatchSev_low;
+
+  /// No description provided for @logwatchSev_medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get logwatchSev_medium;
+
+  /// No description provided for @logwatchSev_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get logwatchSev_high;
+
+  /// No description provided for @logwatchSev_critical.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get logwatchSev_critical;
+
+  /// No description provided for @logwatchClass_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Code bug'**
+  String get logwatchClass_code;
+
+  /// No description provided for @logwatchClass_config.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get logwatchClass_config;
+
+  /// No description provided for @logwatchClass_infra.
+  ///
+  /// In en, this message translates to:
+  /// **'Infrastructure'**
+  String get logwatchClass_infra;
+
+  /// No description provided for @logwatchClass_dependency.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependency'**
+  String get logwatchClass_dependency;
+
+  /// No description provided for @logwatchClass_leak.
+  ///
+  /// In en, this message translates to:
+  /// **'Leak'**
+  String get logwatchClass_leak;
+
+  /// No description provided for @logwatchClass_exposure.
+  ///
+  /// In en, this message translates to:
+  /// **'Exposure'**
+  String get logwatchClass_exposure;
+
+  /// No description provided for @logwatchClass_weakness.
+  ///
+  /// In en, this message translates to:
+  /// **'Weakness'**
+  String get logwatchClass_weakness;
+
+  /// No description provided for @logwatchClass_attack.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack'**
+  String get logwatchClass_attack;
+
+  /// No description provided for @logwatchClass_noise.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise'**
+  String get logwatchClass_noise;
+
+  /// No description provided for @logwatchClass_.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get logwatchClass_;
+
+  /// No description provided for @logwatchNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No such finding.'**
+  String get logwatchNotFound;
+
+  /// No description provided for @logwatchOpenTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {key}'**
+  String logwatchOpenTicket(String key);
+
+  /// No description provided for @logwatchRegressionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This came back after its fix merged.'**
+  String get logwatchRegressionNote;
+
+  /// No description provided for @logwatchNoReposNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository is selected for this service, so it is only reported. Select its repositories to let agnts fix it:'**
+  String get logwatchNoReposNote;
+
+  /// No description provided for @logwatchRemediation.
+  ///
+  /// In en, this message translates to:
+  /// **'How to fix it'**
+  String get logwatchRemediation;
+
+  /// No description provided for @logwatchExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'Log excerpt'**
+  String get logwatchExcerpt;
+
+  /// No description provided for @logwatchExcerptSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Redacted: secrets and personal data are hidden before anything is stored.'**
+  String get logwatchExcerptSub;
+
+  /// No description provided for @logwatchNoExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'No excerpt kept (it is dropped 30 days after the finding is over).'**
+  String get logwatchNoExcerpt;
+
+  /// No description provided for @logwatchOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'Sightings'**
+  String get logwatchOccurrences;
+
+  /// No description provided for @logwatchOccurrencesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The last 20 batches it was seen in.'**
+  String get logwatchOccurrencesSub;
+
+  /// No description provided for @logwatchNoOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'No sightings kept.'**
+  String get logwatchNoOccurrences;
+
+  /// No description provided for @logwatchFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Facts'**
+  String get logwatchFacts;
+
+  /// No description provided for @logwatchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen'**
+  String get logwatchCount;
+
+  /// No description provided for @logwatchLastHour.
+  ///
+  /// In en, this message translates to:
+  /// **'In the last hour'**
+  String get logwatchLastHour;
+
+  /// No description provided for @logwatchFirstSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'First seen'**
+  String get logwatchFirstSeen;
+
+  /// No description provided for @logwatchLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen'**
+  String get logwatchLastSeen;
+
+  /// No description provided for @logwatchDetector.
+  ///
+  /// In en, this message translates to:
+  /// **'Detector'**
+  String get logwatchDetector;
+
+  /// No description provided for @logwatchRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get logwatchRoute;
+
+  /// No description provided for @logwatchRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision'**
+  String get logwatchRevision;
+
+  /// No description provided for @logwatchFixedSha.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed in'**
+  String get logwatchFixedSha;
+
+  /// No description provided for @logwatchTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get logwatchTicket;
+
+  /// No description provided for @logwatchCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in the logs'**
+  String get logwatchCardTitle;
+
+  /// No description provided for @logwatchGoneNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Gone from the logs'**
+  String get logwatchGoneNow;
+
+  /// No description provided for @logwatchWaitingQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged; watching the logs'**
+  String get logwatchWaitingQuiet;
+
+  /// No description provided for @logwatchBackAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Back in the logs'**
+  String get logwatchBackAgain;
+
+  /// No description provided for @logwatchOpenFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the finding'**
+  String get logwatchOpenFinding;
+
+  /// No description provided for @logwatchSourcesLede.
+  ///
+  /// In en, this message translates to:
+  /// **'The logging systems agnts reads, by address (through your private network when the address is on one), and the push tokens your log shippers send with.'**
+  String get logwatchSourcesLede;
+
+  /// No description provided for @logwatchAddSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add source'**
+  String get logwatchAddSource;
+
+  /// No description provided for @logwatchSourceDrawerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts tests the connection before it saves.'**
+  String get logwatchSourceDrawerSub;
+
+  /// No description provided for @logwatchKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging system'**
+  String get logwatchKind;
+
+  /// No description provided for @logwatchKind_loki.
+  ///
+  /// In en, this message translates to:
+  /// **'Grafana Loki'**
+  String get logwatchKind_loki;
+
+  /// No description provided for @logwatchKind_elasticsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Elasticsearch'**
+  String get logwatchKind_elasticsearch;
+
+  /// No description provided for @logwatchKind_opensearch.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenSearch'**
+  String get logwatchKind_opensearch;
+
+  /// No description provided for @logwatchKind_graylog.
+  ///
+  /// In en, this message translates to:
+  /// **'Graylog'**
+  String get logwatchKind_graylog;
+
+  /// No description provided for @logwatchKind_push.
+  ///
+  /// In en, this message translates to:
+  /// **'Push (Vector, Fluent Bit…)'**
+  String get logwatchKind_push;
+
+  /// No description provided for @logwatchName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get logwatchName;
+
+  /// No description provided for @logwatchNamePh.
+  ///
+  /// In en, this message translates to:
+  /// **'prod-loki'**
+  String get logwatchNamePh;
+
+  /// No description provided for @logwatchEnvironment.
+  ///
+  /// In en, this message translates to:
+  /// **'Environment'**
+  String get logwatchEnvironment;
+
+  /// No description provided for @logwatchEnvironmentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug mode counts as a problem in production only.'**
+  String get logwatchEnvironmentHelp;
+
+  /// No description provided for @logwatchEnv_production.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get logwatchEnv_production;
+
+  /// No description provided for @logwatchEnv_staging.
+  ///
+  /// In en, this message translates to:
+  /// **'Staging'**
+  String get logwatchEnv_staging;
+
+  /// No description provided for @logwatchEnv_development.
+  ///
+  /// In en, this message translates to:
+  /// **'Development'**
+  String get logwatchEnv_development;
+
+  /// No description provided for @logwatchAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get logwatchAddress;
+
+  /// No description provided for @logwatchAddressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A public address must use https. An address on your private network (10.x, *.local) is reached through it; add the network in Workspace settings first.'**
+  String get logwatchAddressHelp;
+
+  /// No description provided for @logwatchAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials'**
+  String get logwatchAuth;
+
+  /// No description provided for @logwatchAuth_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get logwatchAuth_none;
+
+  /// No description provided for @logwatchAuth_basic.
+  ///
+  /// In en, this message translates to:
+  /// **'User and password'**
+  String get logwatchAuth_basic;
+
+  /// No description provided for @logwatchAuth_bearer.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get logwatchAuth_bearer;
+
+  /// No description provided for @logwatchAuth_apikey.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get logwatchAuth_apikey;
+
+  /// No description provided for @logwatchAuthSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved ({kind}); kept unless you change them.'**
+  String logwatchAuthSaved(String kind);
+
+  /// No description provided for @logwatchAuthChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change credentials'**
+  String get logwatchAuthChange;
+
+  /// No description provided for @logwatchUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get logwatchUser;
+
+  /// No description provided for @logwatchPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get logwatchPassword;
+
+  /// No description provided for @logwatchToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get logwatchToken;
+
+  /// No description provided for @logwatchTokenPh_loki.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearer token'**
+  String get logwatchTokenPh_loki;
+
+  /// No description provided for @logwatchTokenPh_elasticsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'API key (base64 id:key)'**
+  String get logwatchTokenPh_elasticsearch;
+
+  /// No description provided for @logwatchTokenPh_opensearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get logwatchTokenPh_opensearch;
+
+  /// No description provided for @logwatchTokenPh_graylog.
+  ///
+  /// In en, this message translates to:
+  /// **'Graylog access token'**
+  String get logwatchTokenPh_graylog;
+
+  /// No description provided for @logwatchTokenPh_push.
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get logwatchTokenPh_push;
+
+  /// No description provided for @logwatchAuthHelp_loki.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a read-only token. A multi-tenant Loki also needs the tenant (X-Scope-OrgID).'**
+  String get logwatchAuthHelp_loki;
+
+  /// No description provided for @logwatchAuthHelp_elasticsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a key with read access to the index pattern only.'**
+  String get logwatchAuthHelp_elasticsearch;
+
+  /// No description provided for @logwatchAuthHelp_opensearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a user with read access to the index pattern only.'**
+  String get logwatchAuthHelp_opensearch;
+
+  /// No description provided for @logwatchAuthHelp_graylog.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an access token for a user with the Reader role.'**
+  String get logwatchAuthHelp_graylog;
+
+  /// No description provided for @logwatchAuthHelp_push.
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get logwatchAuthHelp_push;
+
+  /// No description provided for @logwatchTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenant'**
+  String get logwatchTenant;
+
+  /// No description provided for @logwatchTenantPh.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenant (X-Scope-OrgID), optional'**
+  String get logwatchTenantPh;
+
+  /// No description provided for @logwatchSelector.
+  ///
+  /// In en, this message translates to:
+  /// **'Base selector'**
+  String get logwatchSelector;
+
+  /// No description provided for @logwatchSelectorHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: what all services share, such as the environment label.'**
+  String get logwatchSelectorHelp;
+
+  /// No description provided for @logwatchPollEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Read every'**
+  String get logwatchPollEvery;
+
+  /// No description provided for @logwatchPollHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'15 seconds keeps findings within a minute; a large shared cluster may want 60.'**
+  String get logwatchPollHelp;
+
+  /// No description provided for @logwatchSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} s'**
+  String logwatchSeconds(String n);
+
+  /// No description provided for @logwatchAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Field names and CA certificate'**
+  String get logwatchAdvanced;
+
+  /// No description provided for @logwatchField_service.
+  ///
+  /// In en, this message translates to:
+  /// **'Service field or label'**
+  String get logwatchField_service;
+
+  /// No description provided for @logwatchField_level.
+  ///
+  /// In en, this message translates to:
+  /// **'Level field'**
+  String get logwatchField_level;
+
+  /// No description provided for @logwatchField_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message field'**
+  String get logwatchField_message;
+
+  /// No description provided for @logwatchField_timestamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Time field'**
+  String get logwatchField_timestamp;
+
+  /// No description provided for @logwatchField_revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision field (deployed commit)'**
+  String get logwatchField_revision;
+
+  /// No description provided for @logwatchFieldsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection fills these in; change them only if it guessed wrong.'**
+  String get logwatchFieldsHelp;
+
+  /// No description provided for @logwatchCa.
+  ///
+  /// In en, this message translates to:
+  /// **'CA certificate (PEM), for a private CA'**
+  String get logwatchCa;
+
+  /// No description provided for @logwatchPushHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shipper sends to agnts with a token. agnts shows the token and ready Vector and Fluent Bit configuration once you add the source.'**
+  String get logwatchPushHelp;
+
+  /// No description provided for @logwatchEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this source'**
+  String get logwatchEnabled;
+
+  /// No description provided for @logwatchTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get logwatchTest;
+
+  /// No description provided for @logwatchTesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing…'**
+  String get logwatchTesting;
+
+  /// No description provided for @logwatchTestOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected: version {version}, {ms} ms'**
+  String logwatchTestOk(String version, String ms);
+
+  /// No description provided for @logwatchViaNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Through the private network {name}.'**
+  String logwatchViaNetwork(String name);
+
+  /// No description provided for @logwatchDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Directly, over the internet.'**
+  String get logwatchDirect;
+
+  /// No description provided for @logwatchServicesOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Services of {name}'**
+  String logwatchServicesOf(String name);
+
+  /// No description provided for @logwatchServicesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the services to watch and pick the repositories each runs on (several for a gateway). Without a repository a service is only reported.'**
+  String get logwatchServicesSub;
+
+  /// No description provided for @logwatchDiscovering.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for services in the logs…'**
+  String get logwatchDiscovering;
+
+  /// No description provided for @logwatchSelectorOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Selector of {name}'**
+  String logwatchSelectorOf(String name);
+
+  /// No description provided for @logwatchNoReposYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository: report only'**
+  String get logwatchNoReposYet;
+
+  /// No description provided for @logwatchAddRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a repository'**
+  String get logwatchAddRepo;
+
+  /// No description provided for @logwatchNoServices.
+  ///
+  /// In en, this message translates to:
+  /// **'No services found yet. Add one by name below.'**
+  String get logwatchNoServices;
+
+  /// No description provided for @logwatchAddService.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a service by name'**
+  String get logwatchAddService;
+
+  /// No description provided for @logwatchAddServicePh.
+  ///
+  /// In en, this message translates to:
+  /// **'api'**
+  String get logwatchAddServicePh;
+
+  /// No description provided for @logwatchAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get logwatchAdd;
+
+  /// No description provided for @logwatchTokenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Push token for {name}'**
+  String logwatchTokenTitle(String name);
+
+  /// No description provided for @logwatchTokenSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown once: copy it into your shipper\'s configuration now. Making a new one stops the old one.'**
+  String get logwatchTokenSub;
+
+  /// No description provided for @logwatchPushUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Push address'**
+  String get logwatchPushUrl;
+
+  /// No description provided for @logwatchPushToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get logwatchPushToken;
+
+  /// No description provided for @logwatchTokenDone.
+  ///
+  /// In en, this message translates to:
+  /// **'I copied it'**
+  String get logwatchTokenDone;
+
+  /// No description provided for @logwatchPrivateNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Through a private network'**
+  String get logwatchPrivateNetwork;
+
+  /// No description provided for @logwatchSource_new.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read yet'**
+  String get logwatchSource_new;
+
+  /// No description provided for @logwatchSource_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get logwatchSource_ok;
+
+  /// No description provided for @logwatchSource_behind.
+  ///
+  /// In en, this message translates to:
+  /// **'Falling behind'**
+  String get logwatchSource_behind;
+
+  /// No description provided for @logwatchSource_failing.
+  ///
+  /// In en, this message translates to:
+  /// **'Failing'**
+  String get logwatchSource_failing;
+
+  /// No description provided for @logwatchSource_auth_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials refused'**
+  String get logwatchSource_auth_failed;
+
+  /// No description provided for @logwatchDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} entries skipped over the limit'**
+  String logwatchDropped(String n);
+
+  /// No description provided for @logwatchGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read: {from} to {to}'**
+  String logwatchGap(String from, String to);
+
+  /// No description provided for @logwatchDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Turned off'**
+  String get logwatchDisabled;
+
+  /// No description provided for @logwatchHasToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Token set'**
+  String get logwatchHasToken;
+
+  /// No description provided for @logwatchNoToken.
+  ///
+  /// In en, this message translates to:
+  /// **'No token yet'**
+  String get logwatchNoToken;
+
+  /// No description provided for @logwatchWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {No services watched} one {{n} service} other {{n} services}}'**
+  String logwatchWatching(num n);
+
+  /// No description provided for @logwatchServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get logwatchServices;
+
+  /// No description provided for @logwatchMakeToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Make token'**
+  String get logwatchMakeToken;
+
+  /// No description provided for @logwatchNewToken.
+  ///
+  /// In en, this message translates to:
+  /// **'New token'**
+  String get logwatchNewToken;
+
+  /// No description provided for @logwatchEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get logwatchEdit;
+
+  /// No description provided for @logwatchDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get logwatchDelete;
+
+  /// No description provided for @logwatchDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String logwatchDeleteTitle(String name);
+
+  /// No description provided for @logwatchDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts stops reading it. Its findings stay.'**
+  String get logwatchDeleteBody;
+
+  /// No description provided for @logwatchNoSources.
+  ///
+  /// In en, this message translates to:
+  /// **'No log sources yet.'**
+  String get logwatchNoSources;
+
+  /// No description provided for @logwatchHowPull.
+  ///
+  /// In en, this message translates to:
+  /// **'Loki, Elasticsearch, OpenSearch or Graylog: enter the address and read-only credentials. agnts reads new entries every 15 seconds, filtered to what its detectors look for.'**
+  String get logwatchHowPull;
+
+  /// No description provided for @logwatchHowPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'On your own network? Add it as a private network (WireGuard, OpenVPN or agnts-link) and enter the internal address.'**
+  String get logwatchHowPrivate;
+
+  /// No description provided for @logwatchHowPush.
+  ///
+  /// In en, this message translates to:
+  /// **'No logging system with an API? Add a push source and point Vector or Fluent Bit at agnts.'**
+  String get logwatchHowPush;
+
+  /// No description provided for @logwatchSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log watcher'**
+  String get logwatchSettingsTitle;
+
+  /// No description provided for @logwatchSettingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'What agnts does with the errors and security problems it finds in your logs.'**
+  String get logwatchSettingsSub;
+
+  /// No description provided for @logwatchErrorsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Errors'**
+  String get logwatchErrorsMode;
+
+  /// No description provided for @logwatchErrorsModeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceptions, panics and bursts of server errors.'**
+  String get logwatchErrorsModeHelp;
+
+  /// No description provided for @logwatchSecurityMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get logwatchSecurityMode;
+
+  /// No description provided for @logwatchSecurityModeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Secrets and personal data in logs, stack traces sent to clients, debug mode, attacks.'**
+  String get logwatchSecurityModeHelp;
+
+  /// No description provided for @logwatchMode_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get logwatchMode_off;
+
+  /// No description provided for @logwatchMode_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get logwatchMode_report;
+
+  /// No description provided for @logwatchMode_ticket.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ticket'**
+  String get logwatchMode_ticket;
+
+  /// No description provided for @logwatchAlwaysLeaks.
+  ///
+  /// In en, this message translates to:
+  /// **'Always notify secret leaks'**
+  String get logwatchAlwaysLeaks;
+
+  /// No description provided for @logwatchAlwaysLeaksHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A secret written to the logs is a live incident: notify it even when Security is off.'**
+  String get logwatchAlwaysLeaksHelp;
+
+  /// No description provided for @logwatchMinSeverity.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest severity'**
+  String get logwatchMinSeverity;
+
+  /// No description provided for @logwatchMinSeverityHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Findings below it are recorded, not reported or ticketed.'**
+  String get logwatchMinSeverityHelp;
+
+  /// No description provided for @logwatchThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Errors per hour before acting'**
+  String get logwatchThreshold;
+
+  /// No description provided for @logwatchThresholdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A plain error acts after this many in an hour; panics, leaks and attacks act on the first one.'**
+  String get logwatchThresholdHelp;
+
+  /// No description provided for @logwatchMaxAutoPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic tickets a day'**
+  String get logwatchMaxAutoPerDay;
+
+  /// No description provided for @logwatchMaxAutoPerDayHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix it is not capped.'**
+  String get logwatchMaxAutoPerDayHelp;
+
+  /// No description provided for @logwatchAttackAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Attacks before a hardening ticket'**
+  String get logwatchAttackAfter;
+
+  /// No description provided for @logwatchAttackAfterHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The same attack on one route this many times in 7 days opens a ticket to add rate limiting or lockout; 0 never.'**
+  String get logwatchAttackAfterHelp;
+
+  /// No description provided for @logwatchResolveAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet days before resolved'**
+  String get logwatchResolveAfter;
+
+  /// No description provided for @logwatchResolveAfterHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'For logs without a deployed revision: a fixed finding is resolved after this many quiet days.'**
+  String get logwatchResolveAfterHelp;
+
+  /// No description provided for @logwatchDigest.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily digest'**
+  String get logwatchDigest;
+
+  /// No description provided for @logwatchDigestHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One message a day instead of one per finding (high-severity leaks still come at once).'**
+  String get logwatchDigestHelp;
+
+  /// No description provided for @logwatchTriage.
+  ///
+  /// In en, this message translates to:
+  /// **'Model triage'**
+  String get logwatchTriage;
+
+  /// No description provided for @logwatchTriageHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A light model explains new findings (on the workspace\'s credits); 0 keeps the rules\' titles.'**
+  String get logwatchTriageHelp;
+
+  /// No description provided for @logwatchPatterns.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom detectors'**
+  String get logwatchPatterns;
+
+  /// No description provided for @logwatchPatternsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One a line: category:severity name=regex, such as security:high billing-token=\\S+'**
+  String get logwatchPatternsHelp;
+
+  /// No description provided for @logwatchOverridesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A service is reported only until it has repositories: select them under'**
+  String get logwatchOverridesHelp;
+
+  /// No description provided for @logwatchNotifyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'The log watcher found something'**
+  String get logwatchNotifyLabel;
+
+  /// No description provided for @logwatchAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts-watch (no logging system)'**
+  String get logwatchAgentTitle;
+
+  /// No description provided for @logwatchAgentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'On a server without a logging system: run this next to your services. It follows the containers labelled agnts.watch=logs, reports crashes, OOM kills and failed health checks, and connects out to agnts only.'**
+  String get logwatchAgentHelp;
+
+  /// No description provided for @logwatchKind_datadog.
+  ///
+  /// In en, this message translates to:
+  /// **'Datadog'**
+  String get logwatchKind_datadog;
+
+  /// No description provided for @logwatchKind_cloudwatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Amazon CloudWatch Logs'**
+  String get logwatchKind_cloudwatch;
+
+  /// No description provided for @logwatchKind_splunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Splunk'**
+  String get logwatchKind_splunk;
+
+  /// No description provided for @logwatchAuth_aws.
+  ///
+  /// In en, this message translates to:
+  /// **'AWS access key'**
+  String get logwatchAuth_aws;
+
+  /// No description provided for @logwatchAwsKeyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Access key id'**
+  String get logwatchAwsKeyId;
+
+  /// No description provided for @logwatchAwsSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret access key'**
+  String get logwatchAwsSecret;
+
+  /// No description provided for @logwatchAwsSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Session token (optional)'**
+  String get logwatchAwsSession;
+
+  /// No description provided for @logwatchDdApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get logwatchDdApiKey;
+
+  /// No description provided for @logwatchDdAppKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Application key'**
+  String get logwatchDdAppKey;
+
+  /// No description provided for @logwatchTokenPh_datadog.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get logwatchTokenPh_datadog;
+
+  /// No description provided for @logwatchTokenPh_cloudwatch.
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get logwatchTokenPh_cloudwatch;
+
+  /// No description provided for @logwatchTokenPh_splunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Splunk authentication token'**
+  String get logwatchTokenPh_splunk;
+
+  /// No description provided for @logwatchAuthHelp_datadog.
+  ///
+  /// In en, this message translates to:
+  /// **'An application key with the logs_read_data scope is enough.'**
+  String get logwatchAuthHelp_datadog;
+
+  /// No description provided for @logwatchAuthHelp_cloudwatch.
+  ///
+  /// In en, this message translates to:
+  /// **'An IAM user or role with logs:DescribeLogGroups and logs:FilterLogEvents only.'**
+  String get logwatchAuthHelp_cloudwatch;
+
+  /// No description provided for @logwatchAuthHelp_splunk.
+  ///
+  /// In en, this message translates to:
+  /// **'The management API (port 8089); a token of a user who can search the index.'**
+  String get logwatchAuthHelp_splunk;
+
+  /// No description provided for @logwatchIndex_elasticsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Index pattern'**
+  String get logwatchIndex_elasticsearch;
+
+  /// No description provided for @logwatchIndex_opensearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Index pattern'**
+  String get logwatchIndex_opensearch;
+
+  /// No description provided for @logwatchIndex_splunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Index'**
+  String get logwatchIndex_splunk;
+
+  /// No description provided for @logwatchIndex_cloudwatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Log group prefix'**
+  String get logwatchIndex_cloudwatch;
+
+  /// No description provided for @logwatchIndexHelp_elasticsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty reads logs-*, filebeat-* and logstash-*.'**
+  String get logwatchIndexHelp_elasticsearch;
+
+  /// No description provided for @logwatchIndexHelp_opensearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty reads logs-*, filebeat-* and logstash-*.'**
+  String get logwatchIndexHelp_opensearch;
+
+  /// No description provided for @logwatchIndexHelp_splunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty searches every index the token may read.'**
+  String get logwatchIndexHelp_splunk;
+
+  /// No description provided for @logwatchIndexHelp_cloudwatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Services are log groups; this narrows the list (/ecs/, /aws/lambda/).'**
+  String get logwatchIndexHelp_cloudwatch;
+
+  /// No description provided for @logwatchOverrides.
+  ///
+  /// In en, this message translates to:
+  /// **'Overrides'**
+  String get logwatchOverrides;
+
+  /// No description provided for @logwatchOverridesRuleHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One a line: a service as source/service (prod-loki/api) or a repository as repo:name, then errors= and/or security= off, report or ticket. A service\'s line wins over its repository\'s.'**
+  String get logwatchOverridesRuleHelp;
+
   /// No description provided for @maccountPasswordInstead.
   ///
   /// In en, this message translates to:
@@ -14925,6 +16431,192 @@ abstract class AppLocalizations {
   /// **'Task actions'**
   String get minsightsTaskActions;
 
+  /// No description provided for @mlogsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log watcher'**
+  String get mlogsTitle;
+
+  /// No description provided for @mlogsLede.
+  ///
+  /// In en, this message translates to:
+  /// **'What agnts found in your projects\' logs and still needs attention.'**
+  String get mlogsLede;
+
+  /// No description provided for @mlogsErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Errors'**
+  String get mlogsErrors;
+
+  /// No description provided for @mlogsSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get mlogsSecurity;
+
+  /// No description provided for @mlogsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needs your attention.'**
+  String get mlogsEmpty;
+
+  /// No description provided for @mlogsLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'seen {when}'**
+  String mlogsLastSeen(String when);
+
+  /// No description provided for @mlogsReportOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'report only'**
+  String get mlogsReportOnly;
+
+  /// No description provided for @mlogsStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen'**
+  String get mlogsStatusOpen;
+
+  /// No description provided for @mlogsStatusReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported'**
+  String get mlogsStatusReported;
+
+  /// No description provided for @mlogsStatusFixing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixing'**
+  String get mlogsStatusFixing;
+
+  /// No description provided for @mlogsStatusFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get mlogsStatusFixed;
+
+  /// No description provided for @mlogsStatusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Gone'**
+  String get mlogsStatusResolved;
+
+  /// No description provided for @mlogsStatusMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get mlogsStatusMuted;
+
+  /// No description provided for @mlogsStatusRegression.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get mlogsStatusRegression;
+
+  /// No description provided for @mlogsCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in the logs'**
+  String get mlogsCardTitle;
+
+  /// No description provided for @mlogsFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix it'**
+  String get mlogsFix;
+
+  /// No description provided for @mlogsFixConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a ticket to fix this? You review the fix before anything is pushed.'**
+  String get mlogsFixConfirm;
+
+  /// No description provided for @mlogsMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get mlogsMute;
+
+  /// No description provided for @mlogsUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get mlogsUnmute;
+
+  /// No description provided for @mlogsMutedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get mlogsMutedDone;
+
+  /// No description provided for @mlogsUnmutedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Watching it again'**
+  String get mlogsUnmutedDone;
+
+  /// No description provided for @mlogsMasked.
+  ///
+  /// In en, this message translates to:
+  /// **'value: {mask} (masked)'**
+  String mlogsMasked(String mask);
+
+  /// No description provided for @mlogsNoRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'No repository is selected for this service, so it is only reported. Select them in the admin panel under Log sources.'**
+  String get mlogsNoRepos;
+
+  /// No description provided for @mlogsTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get mlogsTicket;
+
+  /// No description provided for @mlogsFactCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen'**
+  String get mlogsFactCount;
+
+  /// No description provided for @mlogsFactLastHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Last hour'**
+  String get mlogsFactLastHour;
+
+  /// No description provided for @mlogsFactFirstSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'First seen'**
+  String get mlogsFactFirstSeen;
+
+  /// No description provided for @mlogsFactLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen'**
+  String get mlogsFactLastSeen;
+
+  /// No description provided for @mlogsRemediation.
+  ///
+  /// In en, this message translates to:
+  /// **'How to fix it'**
+  String get mlogsRemediation;
+
+  /// No description provided for @mlogsExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'Log excerpt (redacted)'**
+  String get mlogsExcerpt;
+
+  /// No description provided for @mlogsNoExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'No excerpt kept.'**
+  String get mlogsNoExcerpt;
+
   /// No description provided for @mmanageFillAll.
   ///
   /// In en, this message translates to:
@@ -16478,6 +18170,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Meetings'**
   String get navMeetings;
+
+  /// No description provided for @navLogWatcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Log watcher'**
+  String get navLogWatcher;
 
   /// No description provided for @networkTitle.
   ///
@@ -22941,11 +24639,11 @@ abstract class AppLocalizations {
   /// **'Not connected'**
   String get settingsNotConnected;
 
-  /// No description provided for @settingsClaude.
+  /// No description provided for @settingsAiModels.
   ///
   /// In en, this message translates to:
-  /// **'Claude Code'**
-  String get settingsClaude;
+  /// **'AI models'**
+  String get settingsAiModels;
 
   /// No description provided for @settingsClaudeSub.
   ///
@@ -22964,6 +24662,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick which model runs each step. Haiku uses the least of your plan, Opus the most.'**
   String get settingsModelsHelp;
+
+  /// No description provided for @settingsModuleTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Coding module'**
+  String get settingsModuleTabs;
+
+  /// No description provided for @settingsModuleTabsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Every stage runs on the module you pick, with its own models. Only the modules an Admin enabled for you are listed.'**
+  String get settingsModuleTabsHelp;
+
+  /// No description provided for @settingsModulesMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Stages use several modules now. Picking a module moves them all to it, at the same level (Opus becomes Muse Wonder).'**
+  String get settingsModulesMixed;
+
+  /// No description provided for @settingsModelsHelpCodex.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick which Codex model runs each step: name any model your OpenAI key can use.'**
+  String get settingsModelsHelpCodex;
+
+  /// No description provided for @settingsStageReviewHelpCodex.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews each result while you review it. Auto uses your default module\'s stronger model for complex tickets and its lighter one for the rest.'**
+  String get settingsStageReviewHelpCodex;
+
+  /// No description provided for @settingsCodexModelNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Name a Codex model for every step.'**
+  String get settingsCodexModelNeeded;
+
+  /// No description provided for @settingsCodexModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Codex model'**
+  String get settingsCodexModelLabel;
 
   /// No description provided for @settingsStageAnalyze.
   ///
@@ -23025,6 +24765,36 @@ abstract class AppLocalizations {
   /// **'Reads each pushed change and writes lessons about what is new to the repository.'**
   String get settingsStageLearnHelp;
 
+  /// No description provided for @settingsStageChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get settingsStageChat;
+
+  /// No description provided for @settingsStageChatHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers in the assistant chat, and spoken questions. Never runs on credits: it needs a connected account.'**
+  String get settingsStageChatHelp;
+
+  /// No description provided for @settingsStageDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents and meeting notes'**
+  String get settingsStageDocuments;
+
+  /// No description provided for @settingsStageDocumentsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Writes documents and the notes and action items of a meeting.'**
+  String get settingsStageDocumentsHelp;
+
+  /// No description provided for @settingsMeetingAudioMuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting audio is always heard by Muse, the only module that hears audio; the notes are written by the model above.'**
+  String get settingsMeetingAudioMuse;
+
   /// No description provided for @settingsStageReview.
   ///
   /// In en, this message translates to:
@@ -23042,6 +24812,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Auto'**
   String get settingsModelAuto;
+
+  /// No description provided for @settingsModelTierLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light, any module'**
+  String get settingsModelTierLight;
+
+  /// No description provided for @settingsModelTierStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong, any module'**
+  String get settingsModelTierStrong;
 
   /// No description provided for @settingsMaxTurns.
   ///
@@ -23204,6 +24986,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resume paused runs after the limit resets'**
   String get settingsAutoResume;
+
+  /// No description provided for @settingsSwitchModules.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch modules when one cannot run'**
+  String get settingsSwitchModules;
+
+  /// No description provided for @settingsSwitchModulesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'When a module\'s account is at its limit, missing, or not enabled for the person, the run uses their next module at the same level (opus becomes Muse Wonder). Off: it waits for the module.'**
+  String get settingsSwitchModulesHelp;
 
   /// No description provided for @settingsAutoLearn.
   ///
@@ -23414,12 +25208,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When a watched branch goes red'**
   String get settingsCiRed;
-
-  /// No description provided for @settingsClaudeMuse.
-  ///
-  /// In en, this message translates to:
-  /// **'Muse Code'**
-  String get settingsClaudeMuse;
 
   /// No description provided for @settingsClaudeMovedMuse.
   ///
@@ -26516,6 +28304,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Moved to {model}'**
   String ticketMuseEscalated(String model);
+
+  /// No description provided for @ticketSrcLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in logs'**
+  String get ticketSrcLogs;
 
   /// No description provided for @ticketsTabsLabel.
   ///

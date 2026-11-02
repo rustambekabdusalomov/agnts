@@ -175,6 +175,13 @@ class MoreScreen extends ConsumerWidget {
                   value: '${ref.watch(ciFailuresProvider('red')).value?.length ?? ''}',
                   onTap: () => context.push('/ci'),
                 ),
+                // What the log watcher found and still needs attention.
+                ListRow(
+                  leading: HIcon('shield', size: 22, color: c.badInk),
+                  title: l.mlogsTitle,
+                  value: '${ref.watch(logFindingsProvider('error')).value?.length ?? ''}',
+                  onTap: () => context.push('/log-watcher'),
+                ),
               ]),
               // Documents: reports and pages of the workspace; meetings: calls
               // and their notes.

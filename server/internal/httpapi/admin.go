@@ -476,7 +476,8 @@ func toSettings(v domain.Settings) gen.Settings {
 	preview, autoPreview, visualCheck := v.Models.Preview, v.AutoPreview, v.VisualCheck
 	previewNote, previewPhotos, egress := v.Notify.Preview, v.Notify.PreviewPhotos, append([]string{}, v.EgressAllow...)
 	autoBrief, selfReview, reflect, publicDocs := v.AutoBrief, v.SelfReview, v.Reflect, v.PublicDocuments
-	ciNote := v.Notify.CI
+	ciNote, logsNote := v.Notify.CI, v.Notify.Logs
+	logWatch := toLogWatch(v.LogWatch)
 	ci := gen.CISettings{AutoFix: v.CI.AutoFix, MaxAutoPerDay: v.CI.MaxAutoPerDay, RetryFlaky: v.CI.RetryFlaky,
 		FeedbackRounds: v.CI.FeedbackRounds, InfraPatterns: append([]string{}, v.CI.InfraPatterns...)}
 	pulls := gen.PullReviewSettings{Enabled: v.PullReviews.Enabled, ReviewRequested: v.PullReviews.ReviewRequested, All: &v.PullReviews.All,
@@ -503,7 +504,7 @@ func toSettings(v domain.Settings) gen.Settings {
 		PullReviews: &pulls,
 		PrComments: &gen.PRCommentSettings{Attribution: v.PRComments.Attribution, LearnFromComments: v.PRComments.LearnFromComments,
 			ResolveFixed: v.PRComments.ResolveFixed, AutoAddress: v.PRComments.AutoAddress},
-		Ci: &ci,
+		Ci: &ci, LogWatch: &logWatch,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
 			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview, Chat: &chat, Documents: &docModel},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect, PublicDocuments: &publicDocs,
@@ -514,7 +515,7 @@ func toSettings(v domain.Settings) gen.Settings {
 			PrTitle: v.Git.PRTitle, Draft: v.Git.Draft},
 		Notify: &gen.NotifySettings{Push: v.Notify.Push, Telegram: v.Notify.Telegram, NeedsYou: v.Notify.NeedsYou,
 			Stopped: v.Notify.Stopped, Done: v.Notify.Done, Lessons: &lessons, Review: &reviewNote, FollowUps: &followUpsNote,
-			Preview: &previewNote, PreviewPhotos: &previewPhotos, Ci: &ciNote},
+			Preview: &previewNote, PreviewPhotos: &previewPhotos, Ci: &ciNote, Logs: &logsNote},
 	}
 }
 
@@ -583,6 +584,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 			FollowUps: cur.Notify.FollowUps, Preview: cur.Notify.Preview, PreviewPhotos: cur.Notify.PreviewPhotos, CI: cur.Notify.CI}
 		if req.Notify.Ci != nil {
 			v.Notify.CI = *req.Notify.Ci
+		}
+		if req.Notify.Logs != nil {
+			v.Notify.Logs = *req.Notify.Logs
 		}
 		if req.Notify.Preview != nil {
 			v.Notify.Preview = *req.Notify.Preview
@@ -695,6 +699,9 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.BaselineChecks != nil {
 		v.BaselineChecks = *req.BaselineChecks
+	}
+	if l := req.LogWatch; l != nil {
+		v.LogWatch = fromLogWatch(*l)
 	}
 	if c := req.Ci; c != nil {
 		v.CI = domain.CISettings{AutoFix: c.AutoFix, MaxAutoPerDay: c.MaxAutoPerDay, RetryFlaky: c.RetryFlaky,
