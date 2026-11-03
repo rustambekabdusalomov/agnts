@@ -61,6 +61,7 @@ func (o *Orchestrator) guardConfig(ctx context.Context, s domain.Settings, t dom
 		for _, g := range r.Harness.SecretAllow {
 			c.SecretAllow = append(c.SecretAllow, r.Rel(g))
 		}
+		c.Bases = append(c.Bases, guard.RepoBase{Folder: r.Folder(), Branch: r.DefaultBranch})
 	}
 	if readOnly || repo == nil || run.Stage != domain.StageCode || t.Kind.Report() {
 		return c

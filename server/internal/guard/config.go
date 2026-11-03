@@ -156,6 +156,17 @@ type Config struct {
 	FactCheck bool `json:"factCheck,omitempty"`
 	// API is set in a Swagger test run.
 	API *APIGuard `json:"api,omitempty"`
+	// Bases are the run's repositories and the branch each change started
+	// from: a check configuration the change creates may be written, one
+	// the base already has may not.
+	Bases []RepoBase `json:"bases,omitempty"`
+}
+
+// RepoBase is a repository of the run: its folder under /workspace ("" for
+// /workspace itself) and its default branch, which the change started from.
+type RepoBase struct {
+	Folder string `json:"folder,omitempty"`
+	Branch string `json:"branch"`
 }
 
 // APIGuard is what HookAPI protects in a Swagger test run.

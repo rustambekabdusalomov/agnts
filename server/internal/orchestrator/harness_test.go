@@ -66,6 +66,11 @@ func TestGuardConfigFollowsStageAndProfile(t *testing.T) {
 	if !slices.Contains(code.Disabled, "pre:destructive") {
 		t.Fatalf("disabled: %v", code.Disabled)
 	}
+	// The guard knows where the change started, so it lets a check
+	// configuration the change creates through.
+	if !slices.Equal(code.Bases, []guard.RepoBase{{Branch: "main"}}) {
+		t.Fatalf("bases: %+v", code.Bases)
+	}
 	evs, _ := h.store.Events(h.ctx, orchestrator.EventFilter{TicketKey: "PAY-31"})
 	var guardMsg string
 	for _, e := range evs {
