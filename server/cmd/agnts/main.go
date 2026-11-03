@@ -389,6 +389,16 @@ func egressProxy(ctx context.Context) error {
 		allow = strings.Split(v, ",")
 	}
 	proxy := egress.New(allow, log)
+	// Hosts whose service refuses this server's network (Meta's models)
+	// go through another proxy.
+	if v := strings.TrimSpace(os.Getenv("AGNTS_EGRESS_UPSTREAM")); v != "" {
+		up, err := egress.ParseUpstream(v, os.Getenv("AGNTS_EGRESS_UPSTREAM_HOSTS"))
+		if err != nil {
+			return err
+		}
+		proxy.SetUpstream(up)
+		log.Info("egress proxy: upstream proxy", "via", up.String())
+	}
 	// Hosts added in Settings (a staging API for previews) come from agnts's
 	// internal listener, which Caddy does not route and run containers
 	// cannot reach.

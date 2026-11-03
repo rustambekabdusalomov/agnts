@@ -319,16 +319,7 @@ func (p *Proxy) Allowed(host string) bool {
 	if extra := p.extra.Load(); extra != nil {
 		list = append(append([]string{}, p.allow...), (*extra)...)
 	}
-	for _, a := range list {
-		if strings.HasPrefix(a, ".") {
-			if strings.HasSuffix(host, a) {
-				return true
-			}
-		} else if host == a {
-			return true
-		}
-	}
-	return false
+	return matches(list, host)
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {

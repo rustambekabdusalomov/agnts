@@ -86,6 +86,12 @@ services:
       # Hosts added under Settings -> Network (a staging API for previews),
       # re-read every 30 seconds.
       AGNTS_EGRESS_EXTRA_URL: http://agnts:8081/egress/allow
+      # Another proxy for hosts whose service refuses this server's network
+      # (socks5://[user:pass@]host:port or http://...); by default it carries
+      # Muse's hosts only (api.meta.ai, auth.meta.com). Empty: everything
+      # goes direct.
+      AGNTS_EGRESS_UPSTREAM: ${AGNTS_EGRESS_UPSTREAM:-}
+      AGNTS_EGRESS_UPSTREAM_HOSTS: ${AGNTS_EGRESS_UPSTREAM_HOSTS:-}
       # Private networks: a run's connection to a host on its workspace's
       # routes goes through the gateway (empty AGNTS_GATEWAY: off).
       AGNTS_GATEWAY: ${AGNTS_GATEWAY:-}
