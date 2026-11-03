@@ -161,6 +161,35 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	}
 	chatSvc := chat.New(chatDeps)
 	a.chat = chatSvc
+	// Muse's way out of the server (egress's upstream proxy): tell the
+	// platform's Admin when it stops working and when it is back.
+	if cfg.RunProxy != "" {
+		go egress.Watch(sys, cfg.RunProxy, 30*time.Second, 2, func(ctx context.Context, al egress.Alert) {
+			text := museAlertText(al, cfg.PublicURL)
+			log.Warn("muse route", "down", al.Down, "since", al.Since, "err", al.Err)
+			if err := a.notifier.PlatformAlert(ctx, cfg.AlertWorkspace, text); err != nil {
+				log.Warn("muse route alert: telegram", "err", err)
+			}
+			if !mailer.Enabled() {
+				return
+			}
+			subject := "agnts: Muse's route is down"
+			if !al.Down {
+				subject = "agnts: Muse's route works again"
+			}
+			admins, err := a.users.List(sys)
+			if err != nil {
+				return
+			}
+			for _, u := range admins {
+				if u.IsAdmin && u.Email != "" {
+					if err := mailer.Send(ctx, mail.Message{To: u.Email, Subject: subject, Body: text}); err != nil {
+						log.Warn("muse route alert: mail", "to", u.Email, "err", err)
+					}
+				}
+			}
+		})
+	}
 	go chatSvc.Run(sys)
 	go postgres.Listen(sys, pool, "hiro_events", func() {
 		broker.Notify()
@@ -1466,4 +1495,41 @@ func (t logTriager) Triage(ctx context.Context, f domain.LogFinding, sample stri
 		return logwatch.Triage{}, err
 	}
 	return logwatch.Triage{Class: domain.LogClass(r.Class), Severity: domain.LogSeverity(r.Severity), Title: r.Title, Remediation: r.Remediation}, nil
+}
+
+// museAlertText says what happened to Muse's route and what to do.
+func museAlertText(al egress.Alert, public *url.URL) string {
+	at := func(t time.Time) string { return t.Local().Format("15:04") }
+	st := al.Status
+	if !al.Down {
+		var b strings.Builder
+		fmt.Fprintf(&b, "✅ agnts: Muse's route works again (down since %s, %s).", at(al.Since), time.Since(al.Since).Round(time.Minute))
+		if st.Exit != nil {
+			fmt.Fprintf(&b, "\nMeta sees it as %s (%s).", st.Exit.IP, st.Exit.Org)
+		}
+		return b.String()
+	}
+	var b strings.Builder
+	fmt.Fprintf(&b, "⚠️ agnts: Muse's route is down since %s. Muse runs, team chat answers on Muse and Meta sign-ins fail until it is back.\n", at(al.Since))
+	switch {
+	case al.Err != nil:
+		fmt.Fprintf(&b, "\nThe egress proxy does not answer: %s", al.Err)
+	case st.Error != "":
+		fmt.Fprintf(&b, "\nWhy: %s", st.Error)
+	}
+	if st.Via != "" {
+		fmt.Fprintf(&b, "\nThrough: %s", st.Via)
+		if strings.HasPrefix(st.Via, "socks5://172.") || strings.HasPrefix(st.Via, "socks5://10.") || strings.HasPrefix(st.Via, "socks5://192.168.") {
+			host := "this server"
+			if public != nil {
+				host = public.Hostname()
+			}
+			fmt.Fprintf(&b, "\n\nIt is a laptop's SSH tunnel. Start it again and keep it open:\nssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R %s root@%s",
+				strings.TrimPrefix(strings.TrimPrefix(st.Via, "socks5://"), "socks5h://"), host)
+		}
+	}
+	if public != nil {
+		fmt.Fprintf(&b, "\n\nAdmin → Dashboard shows it: %s/admin", strings.TrimRight(public.String(), "/"))
+	}
+	return b.String()
 }

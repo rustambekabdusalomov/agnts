@@ -49,6 +49,7 @@ type Config struct {
 	TelegramAPI      string         // AGNTS_TELEGRAM_API, Bot API base URL
 	MCPRedirectHosts []string       // AGNTS_MCP_REDIRECT_HOSTS, hosts Claude connectors may redirect to
 	RunProxy         string         // AGNTS_RUN_PROXY, egress proxy for run containers (e.g. http://egress:3128)
+	AlertWorkspace   int64          // AGNTS_ALERT_WORKSPACE, whose Telegram chat gets platform alerts (Muse's route down); 0: none
 	EgressAllow      []string       // AGNTS_EGRESS_ALLOW, hosts run containers may reach
 	MetricsAddr      string         // AGNTS_METRICS_ADDR, Prometheus listener (keep it private); empty disables
 	// ClaudeModels overrides the full model id for a short name
@@ -244,6 +245,11 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.FCMCredentials = get("AGNTS_FCM_CREDENTIALS", "")
 	c.TelegramAPI = get("AGNTS_TELEGRAM_API", "https://api.telegram.org")
 	c.RunProxy = get("AGNTS_RUN_PROXY", "")
+	if v := get("AGNTS_ALERT_WORKSPACE", ""); v != "" {
+		if c.AlertWorkspace, err = strconv.ParseInt(v, 10, 64); err != nil || c.AlertWorkspace < 0 {
+			errs = append(errs, errors.New("AGNTS_ALERT_WORKSPACE must be a workspace id"))
+		}
+	}
 	if v := get("AGNTS_CLAUDE_MODELS", ""); v != "" {
 		c.ClaudeModels = map[string]string{}
 		for _, pair := range strings.Split(v, ",") {

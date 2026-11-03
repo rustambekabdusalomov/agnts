@@ -313,6 +313,12 @@ running on the laptop:
 ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 172.19.0.1:1080 root@45.138.158.39
 ```
 
+**Seeing it, and alerts.** Admin → Dashboard has a *Muse route* card (egress checks the way every
+30 seconds; the Dashboard menu item is marked while it is down). When it fails two checks in a
+row (or egress is silent for 3 minutes), agnts sends an alert to the Telegram chat of the workspace
+in `AGNTS_ALERT_WORKSPACE` (here `1`), and emails the Admins when mail is set up; another when it
+works again.
+
 The port is reachable only from the host and its containers. While the tunnel is
 down, Muse calls fail as before; set `AGNTS_EGRESS_UPSTREAM=` and recreate egress
 to go direct again.
