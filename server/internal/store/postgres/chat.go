@@ -160,16 +160,16 @@ func (s *Chat) MarkRead(ctx context.Context, user, channel, last int64) error {
 // Messages
 
 const chatMsgCols = `m.id, m.workspace_id, m.channel_id, m.reply_to, m.author_user_id, COALESCE(u.username, m.author_agent, ''),
-	m.kind, m.body, m.card, m.ai, COALESCE(m.ticket_key, ''), COALESCE(m.client_msg_id::text, ''), m.created_at`
+	m.kind, m.body, m.card, m.ai, COALESCE(m.ticket_key, ''), COALESCE(m.client_msg_id::text, ''), m.created_at, m.audio`
 
 const chatMsgFrom = `chat_messages m LEFT JOIN users u ON u.id = m.author_user_id`
 
 func scanMessage(row pgx.Row) (domain.ChatMessage, error) {
 	var m domain.ChatMessage
 	var kind string
-	var card, ai []byte
+	var card, ai, audio []byte
 	err := row.Scan(&m.ID, &m.WorkspaceID, &m.ChannelID, &m.ReplyTo, &m.AuthorID, &m.Author, &kind, &m.Body, &card, &ai,
-		&m.TicketKey, &m.ClientMsgID, &m.CreatedAt)
+		&m.TicketKey, &m.ClientMsgID, &m.CreatedAt, &audio)
 	if err != nil {
 		return m, notFound(err)
 	}
@@ -181,6 +181,10 @@ func scanMessage(row pgx.Row) (domain.ChatMessage, error) {
 	if len(ai) > 0 {
 		m.AI = &domain.ChatAI{}
 		_ = json.Unmarshal(ai, m.AI)
+	}
+	if len(audio) > 0 {
+		m.Audio = &domain.ChatAudio{}
+		_ = json.Unmarshal(audio, m.Audio)
 	}
 	m.Refs = []domain.ChatRef{}
 	return m, nil
@@ -334,6 +338,7 @@ const (
 	ChatJobAnswer     = "answer"
 	ChatJobCodeAnswer = "code_answer"
 	ChatJobTicket     = "ticket"
+	ChatJobTranscribe = "transcribe"
 )
 
 // Send stores user's message with the jobs to run on it, in one
@@ -636,4 +641,101 @@ func (s *Chat) OpenPRWorkspaces(ctx context.Context) ([]int64, error) {
 		out = append(out, id)
 	}
 	return out, rows.Err()
+}
+
+// ChatVoice is a voice message's recording: as the browser made it, to
+// play back, and the WAV Muse hears.
+type ChatVoice struct {
+	ContentType string
+	Data, WAV   []byte
+	DurationMS  int64
+}
+
+// SendVoice stores user's voice message, its recording and the job that
+// hears it, in one transaction; a resend with the same client id returns
+// the stored message, with created false.
+func (s *Chat) SendVoice(ctx context.Context, user int64, in domain.ChatSend, v ChatVoice) (domain.ChatMessage, bool, error) {
+	var m domain.ChatMessage
+	created := false
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		audio, _ := json.Marshal(domain.ChatAudio{ContentType: v.ContentType, DurationMS: v.DurationMS, Transcript: domain.VoicePending})
+		var id int64
+		err := tx.QueryRow(ctx, `INSERT INTO chat_messages (channel_id, reply_to, author_user_id, kind, body, client_msg_id, audio)
+			SELECT $1, $2, $3, 'text', '', $4::uuid, $5 FROM chat_channels WHERE id = $1 AND archived_at IS NULL
+			ON CONFLICT (workspace_id, author_user_id, client_msg_id) WHERE client_msg_id IS NOT NULL DO NOTHING
+			RETURNING id`, in.ChannelID, in.ReplyTo, user, in.ClientMsgID, audio).Scan(&id)
+		if errors.Is(err, pgx.ErrNoRows) {
+			err = tx.QueryRow(ctx, `SELECT id FROM chat_messages WHERE author_user_id = $1 AND client_msg_id = $2::uuid`, user, in.ClientMsgID).Scan(&id)
+			if err != nil {
+				return notFound(err) // no such open channel
+			}
+			m, err = messageTx(ctx, tx, id)
+			return err
+		}
+		if err != nil {
+			return err
+		}
+		created = true
+		if _, err := tx.Exec(ctx, `INSERT INTO chat_audio (workspace_id, message_id, content_type, data, wav)
+			SELECT workspace_id, id, $2, $3, $4 FROM chat_messages WHERE id = $1`, id, v.ContentType, v.Data, v.WAV); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `INSERT INTO chat_jobs (message_id, kind, user_id) VALUES ($1, 'transcribe', $2)`, id, user); err != nil {
+			return err
+		}
+		if m, err = messageTx(ctx, tx, id); err != nil {
+			return err
+		}
+		return messageEvent(ctx, tx, domain.EventChatMessage, m)
+	})
+	return m, created, err
+}
+
+// Voice returns a voice message's recording and its type; wav, when asked,
+// is the WAV still waiting to be heard (nil once it was).
+func (s *Chat) Voice(ctx context.Context, msg int64, wav bool) (string, []byte, error) {
+	var ct string
+	var data []byte
+	col := "data"
+	if wav {
+		col = "wav"
+	}
+	err := s.db.QueryRow(ctx, `SELECT content_type, `+col+` FROM chat_audio WHERE message_id = $1`, msg).Scan(&ct, &data)
+	return ct, data, notFound(err)
+}
+
+// SetTranscript saves what was heard in a voice message: its text becomes
+// the body (state done), or the state says why there is none. The WAV is
+// dropped, and jobs (links, an answer) are queued on the text.
+func (s *Chat) SetTranscript(ctx context.Context, msg int64, text, state, why string, jobs []string, user int64) (domain.ChatMessage, error) {
+	var m domain.ChatMessage
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		tag, err := tx.Exec(ctx, `UPDATE chat_messages SET body = $2,
+				audio = jsonb_set(jsonb_set(audio, '{transcript}', to_jsonb($3::text)), '{error}', to_jsonb($4::text))
+			WHERE id = $1 AND audio IS NOT NULL`, msg, text, state, why)
+		if err != nil {
+			return err
+		}
+		if tag.RowsAffected() == 0 {
+			return domain.ErrNotFound
+		}
+		if _, err := tx.Exec(ctx, `UPDATE chat_audio SET wav = NULL WHERE message_id = $1`, msg); err != nil {
+			return err
+		}
+		var by *int64
+		if user > 0 {
+			by = &user
+		}
+		for _, k := range jobs {
+			if _, err := tx.Exec(ctx, `INSERT INTO chat_jobs (workspace_id, message_id, kind, user_id)
+				SELECT workspace_id, id, $2, $3 FROM chat_messages WHERE id = $1`, msg, k, by); err != nil {
+				return err
+			}
+		}
+		if m, err = messageTx(ctx, tx, msg); err != nil {
+			return err
+		}
+		return messageEvent(ctx, tx, domain.EventChatMessage, m)
+	})
+	return m, err
 }

@@ -58,10 +58,45 @@ type ChatMessage struct {
 	Card        *ChatCard       `json:"card,omitempty"`
 	AI          *ChatAI         `json:"ai,omitempty"`
 	TicketKey   string          `json:"ticketKey,omitempty"`
+	Audio       *ChatAudio      `json:"audio,omitempty"` // a voice message; Body is its transcript
 	ClientMsgID string          `json:"clientMsgId,omitempty"`
 	Refs        []ChatRef       `json:"refs"`
 	CreatedAt   time.Time       `json:"createdAt"`
 	WorkspaceID int64           `json:"-"`
+}
+
+// ChatAudio is a voice message's recording, kept to play back, and where
+// its transcript stands.
+type ChatAudio struct {
+	ContentType string `json:"contentType"`
+	DurationMS  int64  `json:"durationMs"`
+	Transcript  string `json:"transcript"` // pending, done, none (no words heard) or failed
+	Error       string `json:"error,omitempty"`
+}
+
+// Where a voice message's transcript stands.
+const (
+	VoicePending = "pending"
+	VoiceDone    = "done"
+	VoiceNone    = "none"
+	VoiceFailed  = "failed"
+)
+
+// Voice message limits: as long as a spoken question, the recording at
+// most 3 MB (2 minutes of Opus is a fraction of that).
+const (
+	ChatMaxVoice      = 2 * time.Minute
+	ChatMaxVoiceBytes = 3 << 20
+)
+
+// chatAudioTypes are the recordings browsers make, which they also play.
+var chatAudioTypes = map[string]bool{"audio/webm": true, "audio/ogg": true, "audio/mp4": true, "audio/mpeg": true, "audio/aac": true, "audio/wav": true}
+
+// ChatAudioType returns the bare media type of a recording ("audio/webm;
+// codecs=opus" → "audio/webm") and whether chat keeps that kind.
+func ChatAudioType(ct string) (string, bool) {
+	t := strings.ToLower(strings.TrimSpace(strings.SplitN(ct, ";", 2)[0]))
+	return t, chatAudioTypes[t]
 }
 
 // FromAgent reports whether agnts wrote the message (an answer, a note or

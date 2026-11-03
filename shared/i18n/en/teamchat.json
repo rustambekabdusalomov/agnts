@@ -82,6 +82,17 @@
     "draftDescription": "Description",
     "draftRepo": "Repository",
     "draftEdit": "Edit",
-    "draftDone": "Done editing"
+    "draftDone": "Done editing",
+    "voiceStart": "Record a voice message",
+    "voiceRecording": "Recording",
+    "voiceEncoding": "Preparing the voice message…",
+    "voiceLimit": "up to {n} min",
+    "voiceSend": "Send voice message",
+    "voiceDenied": "Allow the microphone for this site to send voice messages.",
+    "voiceNoMic": "No microphone could be opened.",
+    "voiceMessage": "Voice message, {time}",
+    "voiceListening": "Muse is listening…",
+    "voiceNoWords": "No words were heard in this voice message.",
+    "voiceFailed": "Could not transcribe it: {error}"
   }
 }

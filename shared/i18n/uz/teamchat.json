@@ -82,6 +82,17 @@
     "draftDescription": "Tavsif",
     "draftRepo": "Repozitoriy",
     "draftEdit": "Tahrirlash",
-    "draftDone": "Tayyor"
+    "draftDone": "Tayyor",
+    "voiceStart": "Ovozli xabar yozish",
+    "voiceRecording": "Yozilmoqda",
+    "voiceEncoding": "Ovozli xabar tayyorlanmoqda…",
+    "voiceLimit": "{n} daqiqagacha",
+    "voiceSend": "Ovozli xabarni yuborish",
+    "voiceDenied": "Ovozli xabar yuborish uchun bu saytga mikrofonga ruxsat bering.",
+    "voiceNoMic": "Mikrofonni ochib bo'lmadi.",
+    "voiceMessage": "Ovozli xabar, {time}",
+    "voiceListening": "Muse tinglamoqda…",
+    "voiceNoWords": "Bu ovozli xabarda so'z eshitilmadi.",
+    "voiceFailed": "Matnga aylantirib bo'lmadi: {error}"
   }
 }

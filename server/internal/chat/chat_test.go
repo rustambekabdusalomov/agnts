@@ -119,6 +119,15 @@ func (f *fakeBrain) ChatCode(_ context.Context, c orchestrator.ChatCodeCall) (or
 	return f.code, nil
 }
 
+func (f *fakeBrain) Transcribe(_ context.Context, wav []byte) (string, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if string(wav) == "silence" {
+		return "", orchestrator.ErrNoSpeech
+	}
+	return f.replies["heard"], nil
+}
+
 func (f *fakeBrain) RepoBrief(context.Context, int64) (domain.RepoBrief, error) {
 	return domain.RepoBrief{Body: "api is a Go service; auth lives in internal/auth."}, nil
 }
@@ -495,5 +504,56 @@ func TestAnswerKnowsARepositorysTickets(t *testing.T) {
 	ms, _ := h.store.Messages(h.ctx, cs[0].ID, 0, 0, 50)
 	if b := ms[len(ms)-1].Body; !strings.Contains(b, "[ticket:BILLING-1]") {
 		t.Fatalf("answer %q", b)
+	}
+}
+
+func TestVoiceMessage(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	ch := cs[0].ID
+	in := VoiceInput{ClientMsgID: newUUID(), ContentType: "audio/webm;codecs=opus", Data: []byte("opus bytes"), WAV: []byte("RIFF wav"), DurationMS: 4200}
+	if _, _, err := h.s.SendVoice(h.ctx, ch, VoiceInput{ClientMsgID: newUUID(), ContentType: "text/html", Data: []byte("x"), DurationMS: 1000}); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("html as audio: %v", err)
+	}
+	m, created, err := h.s.SendVoice(h.ctx, ch, in)
+	if err != nil || !created || m.Audio == nil || m.Audio.Transcript != domain.VoicePending || m.Audio.ContentType != "audio/webm" || m.Body != "" {
+		t.Fatalf("send %v %v %+v", err, created, m)
+	}
+	if again, created, _ := h.s.SendVoice(h.ctx, ch, in); created || again.ID != m.ID {
+		t.Fatalf("resend %v %+v", created, again)
+	}
+	if ct, data, err := h.s.Voice(h.ctx, m.ID); err != nil || ct != "audio/webm" || string(data) != "opus bytes" {
+		t.Fatalf("play %q %q %v", ct, data, err)
+	}
+
+	// Heard: its words are its text, linked and, said to agnts, answered.
+	h.brain.replies["heard"] = "agnts, what was done today?"
+	h.brain.replies["answer"] = `{"answer_md": "Nothing yet.", "citations": [], "insufficient": true}`
+	h.runJobs(t)
+	got, _ := h.store.Message(h.ctx, m.ID)
+	if got.Body != "agnts, what was done today?" || got.Audio.Transcript != domain.VoiceDone {
+		t.Fatalf("heard %+v", got)
+	}
+	if _, wav, _ := h.store.Voice(h.ctx, m.ID, true); wav != nil {
+		t.Fatal("the WAV is kept after it was heard")
+	}
+	ms, _ := h.store.Messages(h.ctx, ch, 0, 0, 50)
+	if last := ms[len(ms)-1]; !last.FromAgent() || last.ReplyTo == nil || *last.ReplyTo != m.ID {
+		t.Fatalf("a spoken question to agnts was not answered: %+v", last)
+	}
+
+	// No words in it.
+	quiet, _, _ := h.s.SendVoice(h.ctx, ch, VoiceInput{ClientMsgID: newUUID(), ContentType: "audio/ogg", Data: []byte("o"), WAV: []byte("silence"), DurationMS: 900})
+	h.runJobs(t)
+	if got, _ := h.store.Message(h.ctx, quiet.ID); got.Audio.Transcript != domain.VoiceNone || got.Body != "" {
+		t.Fatalf("silence %+v", got.Audio)
+	}
+}
+
+func TestSpokenAgent(t *testing.T) {
+	for in, want := range map[string]bool{"agnts, what broke?": true, "Hey agents what's up": true, "Агентс, что сделано?": true, "the agents table is slow": false} {
+		if mentionsAgentSpoken(in) != want {
+			t.Errorf("%q: %v", in, !want)
+		}
 	}
 }

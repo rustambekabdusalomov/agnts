@@ -139,6 +139,8 @@ func (s *Service) runJob(ctx context.Context, j postgres.ChatJob) {
 			err = s.codeAnswer(jctx, j)
 		case postgres.ChatJobTicket:
 			err = s.draft(jctx, j)
+		case postgres.ChatJobTranscribe:
+			err = s.transcribe(jctx, j)
 		default:
 			err = fmt.Errorf("unknown job %q", j.Kind)
 		}

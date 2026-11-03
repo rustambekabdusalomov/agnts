@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query'
 import { reactive } from 'vue'
-import { api, currentWorkspace, HttpError, unwrap } from '../../api/client'
+import { api, currentWorkspace, HttpError, sendChatVoice, unwrap } from '../../api/client'
 import type { TicketEvent } from '../../api/types'
 import { livePoll, onLiveReconnect, useLive } from '../../composables/useLive'
 import { queryClient } from '../../queryClient'
@@ -212,6 +212,14 @@ export function send(channelId: number, body: string, replyTo?: number) {
   chat.outbox.push({ clientMsgId: newClientId(), channelId, body, replyTo, createdAt: new Date().toISOString(), status: 'pending' })
   saveOutbox()
   void flush()
+}
+
+/** Sends a voice message now (it is not kept to resend offline); Muse's transcript arrives with an event. */
+export async function sendVoice(channelId: number, clip: { recording: Blob; wav: Blob; durationMs: number }, replyTo?: number) {
+  ensureWs()
+  const m = await sendChatVoice(channelId, { clientMsgId: newClientId(), replyTo, ...clip })
+  take(m)
+  return m
 }
 
 export function retrySend(clientMsgId: string) {

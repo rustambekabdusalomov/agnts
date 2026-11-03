@@ -10,7 +10,7 @@ import ChatComposer from '../components/chat/ChatComposer.vue'
 import ChatMessageItem from '../components/chat/ChatMessageItem.vue'
 import { dayOf, secs, type ChatChannel, type ChatMessage } from '../components/chat/chat'
 import {
-  chat, channelState, discard, flush, loadChannel, loadOlder, markRead, retrySend, send, STATS_KEY, toTicket, useChatChannels,
+  chat, channelState, discard, flush, loadChannel, loadOlder, markRead, retrySend, send, sendVoice, STATS_KEY, toTicket, useChatChannels,
 } from '../components/chat/useChat'
 import { livePoll, useLive } from '../composables/useLive'
 import { useSession } from '../stores/session'
@@ -207,6 +207,17 @@ function jump(id: number) {
 
 // ---- sending, replies, tickets ----
 
+async function onVoice(clip: { recording: Blob; wav: Blob; durationMs: number }) {
+  const to = replyTo.value?.id
+  replyTo.value = undefined
+  stickNext = true
+  try {
+    await sendVoice(channelId.value, clip, to)
+  } catch (e) {
+    ui.notify(e instanceof Error ? e.message : t('common.error'))
+  }
+}
+
 function onSend(body: string) {
   if (!channelId.value) return
   stickNext = true
@@ -292,7 +303,7 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
         </div>
       </div>
 
-      <ChatComposer :channel-name="channel?.name ?? ''" :reply-to="replyTo" @send="onSend" @cancel-reply="replyTo = undefined" />
+      <ChatComposer :channel-name="channel?.name ?? ''" :reply-to="replyTo" @send="onSend" @voice="onVoice" @cancel-reply="replyTo = undefined" />
     </div>
   </section>
 </template>
