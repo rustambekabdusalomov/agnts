@@ -320,7 +320,7 @@ func (h *handler) preEdit(e edit) bool {
 		h.refuse(domain.FlagEnvFile, e.path, "")
 		return true
 	}
-	if domain.IsCheckConfig(e.path) && h.blocks(domain.FlagCheckConfig) {
+	if domain.IsCheckConfig(e.path) && h.blocks(domain.FlagCheckConfig) && !h.newOnBranch(e.path) {
 		h.refuse(domain.FlagCheckConfig, e.path, "")
 		return true
 	}
@@ -640,6 +640,30 @@ func matchSegs(g, p []string) bool {
 
 func matchAny(globs []string, p string) bool {
 	return slices.ContainsFunc(globs, func(g string) bool { return MatchGlob(g, p) })
+}
+
+// newOnBranch reports whether p (relative to the workspace) is not in the
+// commit its repository's change started from: a file the change creates,
+// like a new repository's first lint configuration. Unsure (no base known,
+// git failing), it is not.
+func (h *handler) newOnBranch(p string) bool {
+	var base *RepoBase
+	for i, b := range h.cfg.Bases {
+		if (b.Folder == "" || strings.HasPrefix(p, b.Folder+"/")) && (base == nil || len(b.Folder) > len(base.Folder)) {
+			base = &h.cfg.Bases[i]
+		}
+	}
+	if p == "" || base == nil || base.Branch == "" {
+		return false
+	}
+	rel, dir := p, "."
+	if base.Folder != "" {
+		rel, dir = strings.TrimPrefix(p, base.Folder+"/"), base.Folder
+	}
+	cmd := "cd " + shellQuote(dir) + " && base=$(git merge-base HEAD " + shellQuote("origin/"+base.Branch) + " 2>/dev/null || git merge-base HEAD " + shellQuote(base.Branch) +
+		" 2>/dev/null) && [ -n \"$base\" ] && ! git cat-file -e \"$base\":" + shellQuote(rel) + " 2>/dev/null && echo new"
+	exit, out, _ := h.env.Run(cmd, 10*time.Second)
+	return exit == 0 && strings.TrimSpace(out) == "new"
 }
 
 func shellQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'" }
