@@ -93,8 +93,13 @@ function pick(h: Hit | undefined) {
   void router.push(h.to)
 }
 function key(e: KeyboardEvent) {
+  // Esc leaves the search: the results close and focus goes back to the
+  // page. What is typed stays (it filters the page's list); the browser
+  // would clear a search field on Esc.
   if (e.key === 'Escape') {
+    e.preventDefault()
     open.value = false
+    input.value?.blur()
     return
   }
   if (!on.value) return
