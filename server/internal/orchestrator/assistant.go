@@ -37,8 +37,10 @@ const (
 )
 
 const (
-	assistantMaxTurns = 6
-	assistantTimeout  = 2 * time.Minute
+	// An answer reads up to a dozen snapshot files (memory.json among them)
+	// before it writes; Muse reads one file a turn.
+	assistantMaxTurns = 16
+	assistantTimeout  = 4 * time.Minute
 	assistantMemoryMB = 1024
 	// assistantWarm is how long a person's container is kept after an
 	// answer, for their next question.
@@ -523,6 +525,13 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 	}
 	keep = true
 	raw, err := box.ReadFile(ctx, AssistantAnswerPath(a.ID))
+	if text := strings.TrimSpace(res.Text); err != nil && len(text) >= 40 {
+		// It replied with the answer (the prompt asks for it first) but
+		// stopped before writing the file, at the turn limit or the clock:
+		// the text is the answer, without links or actions.
+		o.log.Warn("assistant: answer file missing, using its text", "message", a.ID, "subtype", res.Subtype)
+		raw, err = json.Marshal(map[string]any{"answer": text})
+	}
 	if err != nil {
 		if res.IsError {
 			return out, nil, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 500))
