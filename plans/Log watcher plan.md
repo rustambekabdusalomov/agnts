@@ -19,6 +19,8 @@
 >   (search export). Loki's push API (Promtail, Alloy) is at `/webhooks/logs/loki/api/v1/push`.
 > - **Not built:** deep links back to Grafana, Kibana or Graylog; the Rust CLI's `agnts watch install --host` (the admin
 >   shows a compose snippet instead). A source shows that it went through a private network, not which one.
+> - **Planned, not built (added 2026-11-03):** the OTLP logs receiver for OpenTelemetry Collectors and SDKs, phase 4,
+>   see "OpenTelemetry (OTLP) push" below.
 
 Nov 2, 2026 · draft, revised: v1 connects to the user's logging systems · supersedes `Incidents plan.md` (never
 implemented; its on-host Docker watcher becomes phase 3) · copies the shape of `ciwatch` · reaches private loggers
@@ -245,6 +247,73 @@ compression = "gzip"
 
 The snippets filter before sending; the admin says so ("send errors only; agnts drops the rest anyway"). Loki's own
 push API (`/loki/api/v1/push`, protobuf + snappy, for Promtail and Grafana Alloy) is phase 2.
+
+### OpenTelemetry (OTLP) push
+
+*Planned (phase 4), not built.*
+
+OpenTelemetry is a pipe, not a store: there is no address to read logs from, and a Collector can't be queried. Where
+OTel logs already land in Loki (Loki 3 ingests OTLP natively, resource attributes become labels such as
+`service_name`) or in Elasticsearch/OpenSearch, the user adds that store as a pull source and nothing new is needed.
+This section is for the remaining case: an OTel Collector, or SDKs exporting directly, with no store agnts can read.
+The user adds a Push source and points an `otlphttp` exporter at agnts.
+
+- `POST /webhooks/logs/v1/logs` and `/webhooks/logs/{token}/v1/logs`. The exporter's `logs_endpoint` is set to the full
+  URL (it appends nothing when `logs_endpoint` is given). Same token, size limit, rate limit and 202/429 as the plain
+  push endpoint; a new push format `PushOTLP` next to `PushPlain` and `PushLoki`.
+- Bodies: OTLP `ExportLogsServiceRequest` as `application/x-protobuf` (the exporter's default) or `application/json`,
+  gzip accepted (the exporter gzips by default). Protobuf is decoded with a small hand-written wire reader for the
+  fields below, like `lokipush.go`, so no protobuf dependency.
+- Response: an empty `ExportLogsServiceResponse` in the request's encoding with 200, as OTLP/HTTP requires; on a
+  partial drop (over the 20,000-entry cap), `partial_success.rejected_log_records` and a message. 429 and 503 carry
+  `Retry-After`, which the exporter honours; 400 and 401 are not retried.
+- gRPC (`:4317`) is not offered: it needs its own port through the proxy. The snippet uses OTLP/HTTP.
+
+Mapping `resourceLogs[].scopeLogs[].logRecords[]` to `LogEntry`:
+
+| `LogEntry` | OTLP |
+| --- | --- |
+| `Time` | `timeUnixNano`, else `observedTimeUnixNano`, else receive time |
+| `Service` | resource `service.name` (with `service.namespace/` prefix when set), else the source's default service |
+| `Revision` | resource `service.version`, else `deployment.version` / `vcs.revision` |
+| `Level` | `severityText`; if empty, from `severityNumber` (1–4 trace, 5–8 debug, 9–12 info, 13–16 warn, 17–20 error, 21–24 fatal) |
+| `Message` | `body` as a string; a map or array body as compact JSON. Record attributes `exception.type`, `exception.message`, `exception.stacktrace` are appended as text so the stack-trace framers and detectors see them |
+| `Stream` | resource `service.instance.id`, else `host.name` / `k8s.pod.name` / `container.id`, plus the scope name |
+| `Key` | hash of time, stream and body |
+
+`traceId` and `spanId` (hex) are kept on the entry as `TraceID` and `SpanID` (new optional `LogEntry` fields), stored
+on the finding's sample, and shown on the finding card. With a trace URL template on the source (e.g.
+`https://grafana.acme.com/explore?…{traceId}…`, optional), the card links to the trace in Tempo or Jaeger. Record
+attributes are not otherwise stored; the secret and personal-data detectors run on them before they are dropped, so a
+token in `http.request.header.authorization` is still found and masked.
+
+The admin's Push source shows this snippet:
+
+```yaml
+exporters:
+  otlphttp/agnts:
+    logs_endpoint: https://agnts.example.com/webhooks/logs/v1/logs
+    headers:
+      Authorization: "Bearer ${env:AGNTS_LOG_TOKEN}"
+processors:
+  filter/agnts:                  # send errors and error-looking lines only
+    error_mode: ignore
+    logs:
+      log_record:
+        - severity_number < SEVERITY_NUMBER_ERROR and not IsMatch(body, "(?i)panic|exception|traceback|bearer|password|secret")
+service:
+  pipelines:
+    logs/agnts:
+      receivers: [otlp]
+      processors: [filter/agnts, batch]
+      exporters: [otlphttp/agnts]
+```
+
+A separate pipeline means the user's existing logs pipeline is untouched. For SDKs exporting directly (no Collector),
+the admin shows `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` and `OTEL_EXPORTER_OTLP_LOGS_HEADERS="Authorization=Bearer …"`,
+with a note that all logs are then sent and agnts drops what it doesn't need.
+
+The address-safety rules don't apply here: agnts doesn't dial out, the user's Collector dials in.
 
 ### Network and address safety
 
@@ -548,7 +617,8 @@ and drops `sample` of resolved and muted findings after 30 days.
   `POST /log-sources/{id}/push-token` (push: create or rotate).
 - `POST /webhooks/logs` and `/webhooks/logs/{token}` (push). Not behind `webhookWorkspace`: like
   `/webhooks/swagger-suite/{token}`, the token names the source and its workspace. Size limit, gzip, rate limit per
-  token, 401 for unknown or revoked tokens.
+  token, 401 for unknown or revoked tokens. Phase 4 adds `/webhooks/logs/v1/logs` and `/webhooks/logs/{token}/v1/logs`
+  (OTLP/HTTP), routed to the same handler like the Loki push paths.
 - `GET /log-findings` (filters: category, status, severity, repo, source), `GET /log-findings/{id}`,
   `POST /log-findings/{id}/fix`, `/notify`, `/mute`, `/unmute`.
 - Settings via the existing `GET/PUT /settings` (`logWatch` object).
@@ -602,6 +672,12 @@ The gateway records the spend and the transcript, so `logwatch` writes neither.
 unhealthy, container logs, files, journald) for servers with no logging system; Datadog, CloudWatch and Splunk
 connectors; the best-effort injection detector.
 
+**4 — OpenTelemetry (planned, not built).** The OTLP/HTTP logs receiver (`/webhooks/logs/v1/logs`, protobuf and JSON,
+`PushOTLP`), `TraceID`/`SpanID` on entries and samples, the optional trace URL template, and the Collector and SDK
+snippets on the Push source. Done when a Collector with the snippet above, fed a Go service that panics and logs a
+bearer token through the OTel log bridge, gives the same two findings as the Loki smoke test, with the trace id on the
+panic's card.
+
 ## Testing
 
 - `domain`: framers on real Go/Python/Node/Java/JSON logs split into single lines as Loki and ES return them; each
@@ -612,6 +688,9 @@ connectors; the best-effort injection detector.
   the 5,000 cap, auth failure, Loki tenant header, ES 7/8 and OpenSearch 2 response shapes, Graylog 5/6 search APIs.
   Integration tests against real Loki, Elasticsearch, OpenSearch and Graylog containers when `AGNTS_TEST_LOGS=1`.
   Push parser: NDJSON, array, text, gzip, field fallbacks, oversize.
+  OTLP parser (phase 4): recorded Collector requests in protobuf and JSON, gzip, severity number-only records, map
+  bodies, `exception.*` attributes joined into the message, service and revision fallbacks, trace ids, a secret in an
+  attribute found and masked, the 20,000 cap answered with `partial_success`.
 - `dial`: private addresses refused without a matching private network; matched ones dial through a fake gateway; DNS
   that answers a public then a private IP is refused at dial time; `http` to a public host refused; redirects to
   another host not followed.
@@ -658,3 +737,5 @@ connectors; the best-effort injection detector.
 3. **Repeated attacks open hardening tickets.** The same attack on the same route `AttackTicketAfter` times (default
    3) within 7 days becomes ticket-able: rate limiting, lockout and the like.
 4. **Poll interval is 15 s by default for every source, and each source can set its own** (5 s to 5 min).
+5. **OpenTelemetry is a push format, not a source kind** (Nov 3, 2026). OTel logs stored in Loki or Elasticsearch are
+   read through those connectors; a bare Collector sends to an OTLP/HTTP receiver on the Push source. No gRPC.
