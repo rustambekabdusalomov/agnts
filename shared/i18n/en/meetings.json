@@ -314,6 +314,20 @@
     "writeAgainTitle": "Write the notes again?",
     "writeAgainBody": "Muse writes them again from the call and replaces the current notes, with any changes made to them.",
     "uninviteTitle": "Remove {name} from the invitations?",
-    "uninviteBody": "They are no longer invited and get no more reminders."
+    "uninviteBody": "They are no longer invited and get no more reminders.",
+    "uploadRecording": "Upload recording",
+    "uploadTitle": "Upload a recording of this meeting",
+    "uploadSub": "A video or audio file of a meeting held elsewhere, up to {mb} MB. Only its sound is used: agnts keeps the audio, deletes the file you send, and Muse writes the notes and draft tickets from what people said.",
+    "uploadFile": "Recording",
+    "uploadHeld": "When it was held",
+    "uploadPeople": "Who is in it (helps Muse put tasks on the right people)",
+    "uploadNow": "Upload",
+    "uploading": "Uploading",
+    "uploadingPct": "Uploading… {n}%",
+    "uploaded": "Uploaded: Muse is listening to it",
+    "uploadTooBig": "The file is bigger than {mb} MB",
+    "uploadedBadge": "Uploaded",
+    "inRecording": "{n, plural, =0 {In the recording} one {# person in the recording} other {# people in the recording}}",
+    "uploadedNote": "An uploaded recording: only its sound was heard, and the file was deleted. Nobody joined a call, so there is no attendance."
   }
 }

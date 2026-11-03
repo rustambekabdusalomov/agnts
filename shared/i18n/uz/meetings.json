@@ -314,6 +314,20 @@
     "writeAgainTitle": "Qaydlar qayta yozilsinmi?",
     "writeAgainBody": "Muse ularni qoʻngʻiroq asosida qayta yozadi va hozirgi qaydlarni ulardagi oʻzgarishlar bilan birga almashtiradi.",
     "uninviteTitle": "{name} taklif qilinganlardan olib tashlansinmi?",
-    "uninviteBody": "U endi taklif qilinmagan va eslatmalar olmaydi."
+    "uninviteBody": "U endi taklif qilinmagan va eslatmalar olmaydi.",
+    "uploadRecording": "Yozuvni yuklash",
+    "uploadTitle": "Ushbu uchrashuv yozuvini yuklash",
+    "uploadSub": "Boshqa joyda oʻtgan uchrashuvning video yoki audio fayli, {mb} MB gacha. Faqat ovozi ishlatiladi: agnts audioni saqlaydi, yuborilgan faylni oʻchiradi, Muse esa aytilganlardan eslatmalar va qoralama tiketlar yozadi.",
+    "uploadFile": "Yozuv",
+    "uploadHeld": "Qachon oʻtgan",
+    "uploadPeople": "Yozuvda kimlar bor (Muse vazifalarni toʻgʻri odamlarga biriktirishiga yordam beradi)",
+    "uploadNow": "Yuklash",
+    "uploading": "Yuklanmoqda",
+    "uploadingPct": "Yuklanmoqda… {n}%",
+    "uploaded": "Yuklandi: Muse tinglamoqda",
+    "uploadTooBig": "Fayl {mb} MB dan katta",
+    "uploadedBadge": "Yuklangan",
+    "inRecording": "{n, plural, =0 {Yozuvda} other {Yozuvda # kishi}}",
+    "uploadedNote": "Yuklangan yozuv: faqat ovozi tinglandi, fayl oʻchirildi. Qoʻngʻiroq boʻlmagan, shuning uchun ishtirok roʻyxati yoʻq."
   }
 }

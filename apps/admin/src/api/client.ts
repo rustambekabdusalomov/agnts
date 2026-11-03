@@ -130,6 +130,39 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
   return data as Attachment
 }
 
+/**
+ * Uploads a recording of a meeting held elsewhere. XMLHttpRequest, not
+ * fetch: fetch can't tell how much of a big upload has gone. The fields
+ * go before the file, which the server streams to disk as it comes.
+ */
+export function uploadMeetingRecording(
+  meetingId: number,
+  file: File,
+  v: { startedAt?: string; people: number[] },
+  onProgress: (fraction: number) => void,
+): Promise<components['schemas']['MeetingSessionBrief']> {
+  const body = new FormData()
+  if (v.startedAt) body.append('startedAt', v.startedAt)
+  if (v.people.length) body.append('people', v.people.join(','))
+  body.append('file', file, file.name)
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', apiPath(`/meetings/${meetingId}/uploads`))
+    xhr.withCredentials = true
+    xhr.responseType = 'json'
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(e.loaded / e.total)
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve(xhr.response)
+      if (xhr.status === 401) onUnauthorized()
+      reject(new HttpError(xhr.status, (xhr.response ?? undefined) as Partial<ApiError> | undefined))
+    }
+    xhr.onerror = () => reject(new HttpError(0, undefined))
+    xhr.send(body)
+  })
+}
+
 /** Muse's words for a spoken question (a WAV clip), to ask as typed ones are. */
 /** Sends a team chat voice message: the recording to keep and play, and the same audio as WAV for Muse to hear. */
 export async function sendChatVoice(

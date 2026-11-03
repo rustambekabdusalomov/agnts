@@ -116,7 +116,8 @@ const meetingVisibleTo = `($2 OR m.access = 'workspace' OR m.host_id = $1
 	OR EXISTS (SELECT 1 FROM meeting_cohosts c WHERE c.meeting_id = m.id AND c.user_id = $1)
 	OR EXISTS (SELECT 1 FROM meeting_invitees i WHERE i.meeting_id = m.id AND i.user_id = $1)
 	OR EXISTS (SELECT 1 FROM meeting_participants p JOIN meeting_sessions ps ON ps.id = p.session_id
-	           WHERE ps.meeting_id = m.id AND p.user_id = $1))`
+	           WHERE ps.meeting_id = m.id AND p.user_id = $1)
+	OR EXISTS (SELECT 1 FROM meeting_sessions us WHERE us.meeting_id = m.id AND $1 = ANY(us.people)))`
 
 // ListMeetings returns the meetings a person sees in a view.
 func (s *Meetings) ListMeetings(ctx context.Context, f MeetingFilter) ([]domain.Meeting, error) {
@@ -1016,11 +1017,13 @@ func (s *Meetings) AttendedMembers(ctx context.Context, sessionID int64) ([]int6
 }
 
 // Attended reports whether a member was in any session of a meeting, or
-// in one session when sessionID is set.
+// in one session when sessionID is set (or in its uploaded recording).
 func (s *Meetings) Attended(ctx context.Context, meetingID, sessionID, userID int64) (bool, error) {
 	var ok bool
 	err := s.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM meeting_participants p JOIN meeting_sessions ss ON ss.id = p.session_id
-		WHERE ss.meeting_id = $1 AND ($2 = 0 OR ss.id = $2) AND p.user_id = $3)`, meetingID, sessionID, userID).Scan(&ok)
+		WHERE ss.meeting_id = $1 AND ($2 = 0 OR ss.id = $2) AND p.user_id = $3)
+		OR EXISTS (SELECT 1 FROM meeting_sessions ss WHERE ss.meeting_id = $1 AND ($2 = 0 OR ss.id = $2) AND $3 = ANY(ss.people))`,
+		meetingID, sessionID, userID).Scan(&ok)
 	return ok, err
 }
 
@@ -1141,6 +1144,53 @@ func (s *Meetings) FinishMedia(ctx context.Context, egressID string, st domain.M
 // SetMediaStatus changes a file's status (deleted, expired).
 func (s *Meetings) SetMediaStatus(ctx context.Context, id int64, st domain.MediaStatus) error {
 	return s.exec1(ctx, `UPDATE meeting_media SET status = $2 WHERE id = $1`, id, string(st))
+}
+
+// SetMediaFile records that a file was replaced by another (an upload by
+// its sound) of bytes bytes.
+func (s *Meetings) SetMediaFile(ctx context.Context, id int64, file string, bytes int64) error {
+	return s.exec1(ctx, `UPDATE meeting_media SET file = $2, bytes = $3 WHERE id = $1`, id, file, bytes)
+}
+
+// NewUpload is a recording a host uploaded, as its session is made.
+type NewUpload struct {
+	MeetingID int64
+	StartedAt time.Time // when the meeting was held
+	By        int64
+	People    []int64 // members in it
+	EgressID  string  // the media's unique id ("upload-…")
+	File      string
+	Bytes     int64
+}
+
+// CreateUploadSession makes the ended session of an uploaded recording
+// and its file, with notes on and not yet queued (QueueNotes).
+func (s *Meetings) CreateUploadSession(ctx context.Context, u NewUpload) (domain.MeetingSession, error) {
+	var id int64
+	if u.People == nil {
+		u.People = []int64{} // the column is NOT NULL
+	}
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		if err := tx.QueryRow(ctx, `INSERT INTO meeting_sessions (workspace_id, meeting_id, started_at, connected_at, ended_at, notes_on, notes_by, uploaded, people)
+			SELECT workspace_id, id, $2, $2, $2, true, $3, true, $4 FROM meetings WHERE id = $1 RETURNING id`,
+			u.MeetingID, u.StartedAt, u.By, u.People).Scan(&id); err != nil {
+			return notFound(err)
+		}
+		_, err := tx.Exec(ctx, `INSERT INTO meeting_media (workspace_id, session_id, kind, egress_id, file, bytes, started_at, ended_at, status, started_by)
+			SELECT workspace_id, id, 'upload', $2, $3, $4, now(), now(), 'ready', $5 FROM meeting_sessions WHERE id = $1`,
+			id, u.EgressID, u.File, u.Bytes, u.By)
+		return err
+	})
+	if err != nil {
+		return domain.MeetingSession{}, err
+	}
+	return s.Session(ctx, id)
+}
+
+// SetUploadLength sets an uploaded session's end from how long its sound
+// runs, once it is heard.
+func (s *Meetings) SetUploadLength(ctx context.Context, id int64, ms int) error {
+	return s.exec1(ctx, `UPDATE meeting_sessions SET ended_at = started_at + make_interval(secs => $2::float8 / 1000) WHERE id = $1 AND uploaded`, id, ms)
 }
 
 // ActiveRecordings counts the video recordings running in the scope's

@@ -5560,6 +5560,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/meetings/{meetingId}/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
+         * @description Hosts only. The file (video or audio: mp4, mov, m4v, webm, mkv, ogg, opus, oga, m4a, mp3, wav; at most the server's limit, 2 GB by default) becomes a new ended session of the meeting with notes on. agnts takes its first audio track out and deletes the file as sent before anything hears it: the picture is never analysed. The session's notes then go as a call's do (queued, transcribing, writing, done).
+         */
+        post: operations["uploadMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/meetings/{meetingId}/sessions/{sessionId}": {
         parameters: {
             query?: never;
@@ -11006,6 +11028,10 @@ export interface components {
             myRsvp?: "none" | "yes" | "no" | "maybe";
             /** @description You may change, invite, cancel */
             canManage: boolean;
+            /** @description You may upload a recording of it (uploadMeetingRecording): you host it and this server hears uploads */
+            canUpload: boolean;
+            /** @description The largest recording that can be uploaded */
+            maxUploadMb: number;
         };
         MeetingInvitee: {
             /** Format: int64 */
@@ -11065,6 +11091,8 @@ export interface components {
             notesError: string;
             /** Format: int64 */
             documentId?: number;
+            /** @description A recording a host uploaded, not a call */
+            uploaded: boolean;
         };
         /**
          * @description none; recording (notes are on); queued, transcribing (Muse hears the audio), writing (Muse writes the notes); done; failed
@@ -11090,11 +11118,17 @@ export interface components {
             /** Format: int64 */
             documentId?: number;
             documentTitle: string;
+            /** @description A recording a host uploaded, not a call */
+            uploaded: boolean;
         };
         MeetingSessionDetail: {
             /** Format: int64 */
             id: number;
             meeting: components["schemas"]["Meeting"];
+            /** @description A recording a host uploaded, not a call: it has no attendance */
+            uploaded: boolean;
+            /** @description An uploaded recording: the members the uploader said are in it */
+            people: number[];
             /** Format: date-time */
             startedAt: string;
             /** Format: date-time */
@@ -11245,6 +11279,10 @@ export interface components {
                 meetings: boolean;
                 recording: boolean;
                 notes: boolean;
+                /** @description Recordings can be uploaded and heard */
+                uploads: boolean;
+                /** @description The largest recording that can be uploaded */
+                maxUploadMb: number;
             };
         };
         MeetingSettingsInput: {
@@ -20608,6 +20646,55 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+        };
+    };
+    uploadMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: date-time
+                     * @description When the meeting was held; absent is now. Send it before the file.
+                     */
+                    startedAt?: string;
+                    /** @description Comma-separated ids of the members in the recording. Send it before the file. */
+                    people?: string;
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Uploaded; its notes are queued */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingSessionBrief"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description The file is over the limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            501: components["responses"]["NotImplemented"];
         };
     };
     getMeetingSession: {

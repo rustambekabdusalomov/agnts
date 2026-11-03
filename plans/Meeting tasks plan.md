@@ -1,8 +1,13 @@
 # agnts Meeting tasks — Plan
 
-Nov 4, 2026 · v1
+Nov 4, 2026 · v1, implemented (server and admin panel)
 
-> **Status.** Being built: server and admin panel. Mobile is left for later (it keeps the one-click "Create ticket" it has today).
+> **Status.** A and B are built and tested on the server and in the admin panel. Mobile is left for later: it keeps the one-click "Create ticket", and its ARB dictionaries were not regenerated (`make gen-dart gen-arb` brings the new fields and strings when mobile is done). Where the build differs from the text below:
+> - **A member picked by hand** is recorded (`who_set_by`); a later match never replaces it, and a rewrite keeps its draft.
+> - **Untouched drafts are dropped when the rewrite is asked for** (`RegenerateNotes`), not when it ends: their items forget they were drafted, so if the rewrite fails the old items are drafted again. A draft deleted by hand is not made again (`drafted`).
+> - **The sound step streams the upload onto the box's disk** (`ai.StreamWriter`, Docker's archive API) instead of mounting it; ffmpeg keeps the first audio track (`-map 0:a:0`). A file with no audio fails its notes with "the recording has no sound".
+> - **An upload's people** can read its session and notes and are the near candidates for matching; the session's length is set from its sound once heard.
+> - Not verified end to end on a server: a real upload heard by Muse (needs the rebuilt run image with ffmpeg, as notes already do, and Muse reachable from prod).
 
 ## Overview
 
@@ -50,7 +55,7 @@ This plan closes the loop and adds a second way in:
 
 ### Only the sound
 
-- The server image has no ffmpeg, and hearing copies its input into a box with 256 MB of scratch. So the upload first goes through a small **audio step**: a short-lived box from the run image with the file mounted read-only runs `ffmpeg -vn -ac 1 -c:a libopus -b:a 24k` into an Ogg (about 11 MB an hour). The picture never leaves that box.
+- The server image has no ffmpeg, and hearing reads its whole input into memory. So the upload first goes through a small **audio step**: a short-lived box from the run image gets the file streamed onto its disk and runs `ffmpeg -map 0:a:0 -vn -ac 1 -c:a libopus -b:a 24k` into an Ogg (about 11 MB an hour). The picture never leaves that box.
 - The video is deleted as soon as the Ogg is written; then the Ogg is heard like a call's mixed audio, and removed after hearing unless the workspace keeps audio.
 - With one mixed track the transcript does not say who spoke; the people the uploader picked go to the notes as "who is in the recording" and are the first candidates for matching.
 

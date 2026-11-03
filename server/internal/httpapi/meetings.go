@@ -79,6 +79,8 @@ type meetingDetail struct {
 	Invitees  []gen.MeetingInvitee `json:"invitees"`
 	MyRsvp    *string              `json:"myRsvp,omitempty"`
 	CanManage bool                 `json:"canManage"`
+	CanUpload bool                 `json:"canUpload"`
+	MaxUpload int                  `json:"maxUploadMb"`
 }
 
 func (s *Server) writeMeetingDetail(w http.ResponseWriter, r *http.Request, status int, d meetings.Detail, err error) {
@@ -86,7 +88,8 @@ func (s *Server) writeMeetingDetail(w http.ResponseWriter, r *http.Request, stat
 		s.meetingError(w, r, err)
 		return
 	}
-	out := meetingDetail{Meeting: s.toMeeting(d.Meeting), Invitees: make([]gen.MeetingInvitee, len(d.Invitees)), CanManage: d.CanManage}
+	out := meetingDetail{Meeting: s.toMeeting(d.Meeting), Invitees: make([]gen.MeetingInvitee, len(d.Invitees)), CanManage: d.CanManage,
+		CanUpload: d.CanManage && s.opt.Meetings.UploadsReady(), MaxUpload: int(s.opt.Meetings.MaxUploadBytes() >> 20)}
 	for i, inv := range d.Invitees {
 		out.Invitees[i] = gen.MeetingInvitee{Id: inv.ID, UserId: inv.UserID, Email: inv.Email, Name: inv.Name, Rsvp: gen.MeetingInviteeRsvp(inv.RSVP)}
 	}
@@ -353,7 +356,7 @@ func (s *Server) RingMeeting(w http.ResponseWriter, r *http.Request, id gen.Meet
 
 func toSessionBrief(x domain.MeetingSession) gen.MeetingSessionBrief {
 	return gen.MeetingSessionBrief{Id: x.ID, StartedAt: x.StartedAt, ConnectedAt: x.ConnectedAt, EndedAt: x.EndedAt,
-		NotesStatus: gen.MeetingNotesStatus(x.NotesStatus), NotesError: x.NotesError, DocumentId: x.DocumentID}
+		NotesStatus: gen.MeetingNotesStatus(x.NotesStatus), NotesError: x.NotesError, DocumentId: x.DocumentID, Uploaded: x.Uploaded}
 }
 
 // ListMeetingSessions implements gen.ServerInterface.
@@ -393,7 +396,7 @@ func (s *Server) ListPastMeetingSessions(w http.ResponseWriter, r *http.Request,
 		out[i] = gen.MeetingSessionSummary{Id: v.ID, MeetingId: x.Meeting.ID, MeetingCode: domain.FormatMeetingCode(x.Meeting.Code),
 			MeetingTitle: x.Meeting.Title, StartedAt: v.StartedAt, EndedAt: v.EndedAt, People: x.People, Recordings: x.Recordings,
 			ActionItems: x.ActionItems, NotesStatus: gen.MeetingNotesStatus(v.NotesStatus), NotesError: v.NotesError, DocumentId: v.DocumentID,
-			DocumentTitle: x.DocumentName}
+			DocumentTitle: x.DocumentName, Uploaded: v.Uploaded}
 	}
 	writeJSON(w, http.StatusOK, out)
 }
@@ -432,7 +435,10 @@ func (s *Server) GetMeetingSession(w http.ResponseWriter, r *http.Request, id ge
 	out := gen.MeetingSessionDetail{Id: x.ID, Meeting: s.toMeeting(d.Meeting), StartedAt: x.StartedAt, EndedAt: x.EndedAt,
 		NotesStatus: gen.MeetingNotesStatus(x.NotesStatus), NotesError: x.NotesError, DocumentId: x.DocumentID,
 		Attendees: make([]gen.MeetingAttendee, len(d.Attendees)), Recordings: make([]gen.MeetingRecording, len(d.Media)),
-		ActionItems: toActionItems(d.ActionItems), Messages: d.Messages, CanManage: d.CanManage}
+		ActionItems: toActionItems(d.ActionItems), Messages: d.Messages, CanManage: d.CanManage, Uploaded: x.Uploaded, People: x.People}
+	if out.People == nil {
+		out.People = []int64{}
+	}
 	for i, a := range d.Attendees {
 		out.Attendees[i] = gen.MeetingAttendee{Person: a.Person.Key(), Name: a.Name, Guest: a.IsGuest, FirstIn: a.FirstIn, LastOut: a.LastOut, Seconds: a.Seconds}
 		if a.GuestMail != "" {
@@ -657,6 +663,7 @@ func (s *Server) meetingSettings(w http.ResponseWriter, r *http.Request, ms doma
 		DraftTickets: ms.DraftTickets}
 	if m := s.opt.Meetings; m != nil {
 		out.Available.Meetings, out.Available.Recording, out.Available.Notes = m.Ready(), m.RecordingReady(), m.NotesReady()
+		out.Available.Uploads, out.Available.MaxUploadMb = m.UploadsReady(), int(m.MaxUploadBytes()>>20)
 	}
 	writeJSON(w, http.StatusOK, out)
 }

@@ -42,7 +42,12 @@ const chat = useQuery({
 })
 const repos = useQuery({ queryKey: ['repos'], queryFn: () => unwrap(api.GET('/repos')) })
 const repoFor = ref<Record<number, number>>({})
-const members = useQuery({ queryKey: ['members'], queryFn: () => unwrap(api.GET('/workspace/members')), enabled: computed(() => workspace.canEdit) })
+const members = useQuery({ queryKey: ['members'], queryFn: () => unwrap(api.GET('/workspace/members')), enabled: computed(() => workspace.canEdit || !!s.value?.uploaded) })
+// An uploaded recording's people: the members the uploader said are in it.
+const people = computed(() => {
+  const byId = new Map((members.data.value ?? []).map((m) => [m.userId, m.displayName || m.username]))
+  return (s.value?.people ?? []).map((u) => byId.get(u) ?? `#${u}`)
+})
 const memberOptions = computed(() => [
   { value: 0, label: t('meetings.nobody') },
   ...(members.data.value ?? []).map((m) => ({ value: m.userId, label: m.displayName || m.username })),
@@ -127,6 +132,7 @@ const repoOptions = computed(() => [
       <template #below>
         <p class="sub" style="margin: 4px 0 0">
           {{ new Date(s.startedAt).toLocaleString(locale, { dateStyle: 'full', timeStyle: 'short' }) }}<template v-if="duration"> · {{ duration }}</template>
+          <template v-if="s.uploaded"> · <span class="badge b-gray">{{ t('meetings.uploadedBadge') }}</span></template>
           · <RouterLink class="ms-back" :to="{ name: 'meeting', params: { id: s.meeting.id } }">{{ t('meetings.theMeeting') }}</RouterLink>
         </p>
       </template>
@@ -203,7 +209,13 @@ const repoOptions = computed(() => [
         </div>
       </section>
 
-      <section class="card ms-att-card">
+      <section v-if="s.uploaded" class="card">
+        <h2><HiIcon name="people" /> {{ t('meetings.inRecording', { n: s.people.length }) }}</h2>
+        <p class="hint">{{ t('meetings.uploadedNote') }}</p>
+        <p v-if="people.length">{{ people.join(', ') }}</p>
+      </section>
+
+      <section v-else class="card ms-att-card">
         <h2 class="ms-att-h"><HiIcon name="people" /> {{ t('meetings.attendance', { n: s.attendees.length }) }}</h2>
         <table class="ms-att">
           <thead>

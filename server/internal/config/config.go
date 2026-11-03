@@ -204,6 +204,9 @@ type Config struct {
 	// MeetNotesAudio is how notes are recorded (AGNTS_MEET_NOTES_AUDIO):
 	// "mixed" (everyone in one file) or "per-speaker" (each microphone).
 	MeetNotesAudio string
+	// MeetMaxUploadMB caps a recording a host uploads for notes
+	// (AGNTS_MEET_MAX_UPLOAD_MB, default 2048).
+	MeetMaxUploadMB int
 }
 
 // Load reads the configuration from the environment.
@@ -381,6 +384,9 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	c.MeetingsEgressDir = get("AGNTS_MEETINGS_EGRESS_DIR", c.MeetingsDir)
 	if c.MeetMaxRecordings, err = strconv.Atoi(get("AGNTS_MEET_MAX_RECORDINGS", "2")); err != nil || c.MeetMaxRecordings < 0 {
 		errs = append(errs, errors.New("AGNTS_MEET_MAX_RECORDINGS must be a number"))
+	}
+	if c.MeetMaxUploadMB, err = strconv.Atoi(get("AGNTS_MEET_MAX_UPLOAD_MB", "2048")); err != nil || c.MeetMaxUploadMB < 1 {
+		errs = append(errs, errors.New("AGNTS_MEET_MAX_UPLOAD_MB must be a number of megabytes"))
 	}
 	c.MeetNotesAudio = strings.ToLower(get("AGNTS_MEET_NOTES_AUDIO", "mixed"))
 	if c.MeetNotesAudio != "mixed" && c.MeetNotesAudio != "per-speaker" {

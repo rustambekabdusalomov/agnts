@@ -181,6 +181,28 @@ func (h fakeHearer) HearMeeting(_ context.Context, _ int64, audio []byte, ext st
 	return h.segs, nil
 }
 
+// fakeSound "takes the sound out" of an upload: it checks the file came
+// whole and writes an Ogg.
+type fakeSound struct {
+	mu   sync.Mutex
+	took []string
+	fail error
+}
+
+func (f *fakeSound) TakeSound(_ context.Context, src, dst string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.fail != nil {
+		return f.fail
+	}
+	b, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	f.took = append(f.took, string(b))
+	return os.WriteFile(dst, []byte("OggS sound of "+filepath.Base(src)), 0o600)
+}
+
 type fakeNotes struct {
 	mu    sync.Mutex
 	docs  *postgres.Documents
@@ -266,6 +288,7 @@ type harness struct {
 	lk     *fakeLiveKit
 	notes  *fakeNotes
 	tix    *fakeTickets
+	sound  *fakeSound
 	push   *fakePusher
 	mail   *fakeMail
 	media  string
@@ -313,14 +336,14 @@ func newHarness(t *testing.T) harness {
 		t.Fatal(err)
 	}
 	h := harness{t: t, pool: p, ctx: ctx, ws: ws, store: postgres.NewMeetings(p), lk: newFakeLiveKit(), notes: &fakeNotes{docs: postgres.NewDocuments(p)}, push: &fakePusher{},
-		mail: &fakeMail{}, media: t.TempDir(), owner: owner, tix: &fakeTickets{store: postgres.NewAgent(p)}}
+		mail: &fakeMail{}, media: t.TempDir(), owner: owner, tix: &fakeTickets{store: postgres.NewAgent(p)}, sound: &fakeSound{}}
 	h.host, h.member, h.viewer, h.other = add("Host", domain.RoleUser), add("Member", domain.RoleUser), add("Viewer", domain.RoleViewer), add("Outsider", "")
 	h.svc = meetings.New(meetings.Config{LiveKitURL: "wss://lk.example", Keys: livekit.Keys{Key: "k", Secret: "secret-of-at-least-32-characters-long"},
-		PublicURL: "https://app.example", MediaDir: h.media, Egress: true, MaxRecordings: 2},
+		PublicURL: "https://app.example", MediaDir: h.media, Egress: true, MaxRecordings: 2, MaxUploadBytes: 1 << 20},
 		meetings.Deps{Store: h.store, LiveKit: h.lk, Workspaces: wss, Users: users, Settings: postgres.NewSettings(p, domain.DefaultSettings()),
 			Pusher: h.push, Mailer: h.mail, Notes: h.notes, Hearer: fakeHearer{segs: []domain.MeetingSegment{
 				{StartMS: 1000, EndMS: 4000, Text: "We ship refunds on Friday."}, {StartMS: 5000, EndMS: 8000, Text: "Aziza writes the migration."}}},
-			Tickets: h.tix, Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+			Tickets: h.tix, Sound: h.sound, Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
 	return h
 }
 

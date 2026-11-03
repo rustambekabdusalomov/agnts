@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { api, HttpError, unwrap } from '../api/client'
+import { api, HttpError, unwrap, uploadMeetingRecording } from '../api/client'
 import PageHeader from '../components/PageHeader.vue'
 import CheckBox from '../components/form/CheckBox.vue'
 import MeetingDrawer from '../components/meetings/MeetingDrawer.vue'
@@ -16,7 +16,8 @@ import { useUi } from '../stores/ui'
 
 // One meeting: when, who is invited and what they answered, its link, and
 // the times it was live. Its hosts change it, invite people, ring members
-// into it, cancel or delete it.
+// into it, upload a recording of it held elsewhere (only its sound is
+// heard), cancel or delete it.
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -37,7 +38,49 @@ function toggleRing(id: number, on: boolean) {
   ringWho.value = on ? [...ringWho.value, id] : ringWho.value.filter((x) => x !== id)
 }
 
-const members = useQuery({ queryKey: ['members'], queryFn: () => unwrap(api.GET('/workspace/members')), enabled: ringOpen })
+const uploadOpen = ref(false)
+const upFile = ref<File | null>(null)
+const upHeld = ref('')
+const upPeople = ref<number[]>([])
+const upProgress = ref<number | null>(null)
+function openUpload() {
+  uploadOpen.value = !uploadOpen.value
+  ringOpen.value = false
+  const d = new Date()
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+  upHeld.value = d.toISOString().slice(0, 16) // now, in local time for datetime-local
+}
+function toggleUpPerson(id: number, on: boolean) {
+  upPeople.value = on ? [...upPeople.value, id] : upPeople.value.filter((x) => x !== id)
+}
+function pickFile(e: Event) {
+  const f = (e.target as HTMLInputElement).files?.[0] ?? null
+  if (f && m.value && f.size > m.value.maxUploadMb * 1048576) {
+    ui.notify(t('meetings.uploadTooBig', { mb: m.value.maxUploadMb }))
+    upFile.value = null
+    return
+  }
+  upFile.value = f
+}
+async function upload() {
+  if (!upFile.value || upProgress.value !== null) return
+  upProgress.value = 0
+  try {
+    const x = await uploadMeetingRecording(id.value, upFile.value, { startedAt: upHeld.value ? new Date(upHeld.value).toISOString() : undefined, people: upPeople.value }, (f) => (upProgress.value = f))
+    uploadOpen.value = false
+    upFile.value = null
+    upPeople.value = []
+    refresh()
+    ui.notify(t('meetings.uploaded'))
+    void router.push({ name: 'meetingSession', params: { id: id.value, sid: x.id } })
+  } catch (e) {
+    ui.notify(e instanceof HttpError ? e.message : t('common.error'))
+  } finally {
+    upProgress.value = null
+  }
+}
+
+const members = useQuery({ queryKey: ['members'], queryFn: () => unwrap(api.GET('/workspace/members')), enabled: computed(() => ringOpen.value || uploadOpen.value) })
 const isHost = computed(() => m.value?.hostId === session.user?.id)
 
 const rsvp = useMutation({
@@ -165,13 +208,44 @@ const ringable = computed(() => (members.data.value ?? []).filter((x) => x.userI
         </ul>
       </section>
 
+      <section v-if="uploadOpen" class="card">
+        <h2>{{ t('meetings.uploadTitle') }}</h2>
+        <p class="hint">{{ t('meetings.uploadSub', { mb: m.maxUploadMb }) }}</p>
+        <div class="mp-up">
+          <div class="field">
+            <label for="mp-up-file">{{ t('meetings.uploadFile') }}</label>
+            <input id="mp-up-file" type="file" accept="video/*,audio/*,.mkv,.opus" :disabled="upProgress !== null" @change="pickFile">
+          </div>
+          <div class="field">
+            <label for="mp-up-held">{{ t('meetings.uploadHeld') }}</label>
+            <input id="mp-up-held" v-model="upHeld" type="datetime-local" :disabled="upProgress !== null">
+          </div>
+        </div>
+        <h3 class="mp-up-h">{{ t('meetings.uploadPeople') }}</h3>
+        <div class="mp-ring">
+          <CheckBox v-for="x in members.data.value ?? []" :key="x.userId" :model-value="upPeople.includes(x.userId)" @update:model-value="(on) => toggleUpPerson(x.userId, on)">
+            {{ x.displayName || x.username }}
+          </CheckBox>
+        </div>
+        <progress v-if="upProgress !== null" class="mp-progress" :value="upProgress" max="1" :aria-label="t('meetings.uploading')" />
+        <div class="actions">
+          <button type="button" class="btn btn-p" :disabled="!upFile || upProgress !== null" @click="upload">
+            <HiIcon name="upload" />{{ upProgress !== null ? t('meetings.uploadingPct', { n: Math.round(upProgress * 100) }) : t('meetings.uploadNow') }}
+          </button>
+        </div>
+      </section>
+
       <section class="card">
-        <h2>{{ t('meetings.calls') }}</h2>
+        <div class="mp-head">
+          <h2>{{ t('meetings.calls') }}</h2>
+          <button v-if="m.canUpload" type="button" class="btn btn-s" :aria-pressed="uploadOpen" @click="openUpload"><HiIcon name="upload" />{{ t('meetings.uploadRecording') }}</button>
+        </div>
         <p v-if="!sessions.data.value?.length" class="hint">{{ t('meetings.noCalls') }}</p>
         <ul v-else class="mp-calls">
           <li v-for="s in sessions.data.value" :key="s.id">
             <RouterLink class="mp-call" :to="{ name: 'meetingSession', params: { id: m.id, sid: s.id } }">{{ new Date(s.startedAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) }}</RouterLink>
             <span class="hint">{{ s.endedAt ? minutes((Date.parse(s.endedAt) - Date.parse(s.startedAt)) / 1000, locale) : t('meetings.live') }}</span>
+            <span v-if="s.uploaded" class="badge b-gray">{{ t('meetings.uploadedBadge') }}</span>
             <span v-if="notesBusy(s.notesStatus)" class="badge b-warn">{{ t(`meetings.notes_${s.notesStatus}`) }}</span>
             <span v-else-if="s.notesStatus === 'done'" class="badge b-ok">{{ t('meetings.notes_done') }}</span>
             <span v-else-if="s.notesStatus === 'failed'" class="badge b-bad" :title="s.notesError">{{ t('meetings.notes_failed') }}</span>
@@ -208,4 +282,7 @@ const ringable = computed(() => (members.data.value ?? []).filter((x) => x.userI
 .mp-call:hover { text-decoration: underline; }
 .mp-ring { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin: 12px 0 0; }
 .mp-rsvp { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.mp-up { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 12px 0 0; }
+.mp-up-h { margin: 16px 0 0; font-size: 13.5px; font-weight: 700; color: var(--ink-3); }
+.mp-progress { width: 100%; margin: 14px 0 0; accent-color: var(--primary); }
 </style>

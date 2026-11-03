@@ -69,14 +69,27 @@ func (s *Service) hear(ctx context.Context, x domain.MeetingSession) {
 		}
 		s.notesDone(ctx, x.ID)
 	}
-	if !s.NotesReady() {
+	if (x.Uploaded && !s.UploadsReady()) || (!x.Uploaded && !s.NotesReady()) {
 		fail(errors.New("notes are not available on this server"))
 		return
 	}
-	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio)
+	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio, domain.MediaUpload)
 	if err != nil {
 		fail(err)
 		return
+	}
+	for i, md := range media {
+		if md.Kind != domain.MediaUpload || md.Status != domain.MediaReady {
+			continue
+		}
+		if s.d.Sound == nil {
+			fail(errors.New("uploaded recordings are not available on this server"))
+			return
+		}
+		if media[i], err = s.takeSound(ctx, md); err != nil {
+			fail(err)
+			return
+		}
 	}
 	for _, md := range media {
 		if md.Status == domain.MediaActive && s.now().Sub(md.StartedAt) < 6*time.Hour && x.EndedAt != nil && s.now().Sub(*x.EndedAt) < audioWait {
@@ -117,6 +130,11 @@ func (s *Service) hear(ctx context.Context, x domain.MeetingSession) {
 	if err := s.d.Store.ReplaceSegments(ctx, x.ID, segs); err != nil {
 		fail(err)
 		return
+	}
+	if x.Uploaded {
+		if err := s.d.Store.SetUploadLength(ctx, x.ID, segs[len(segs)-1].EndMS); err != nil {
+			log.Warn("uploaded recording's length", "err", err)
+		}
 	}
 	if !s.settings(ctx).KeepAudio {
 		for _, md := range media {
@@ -174,6 +192,9 @@ func (s *Service) transcribe(ctx context.Context, x domain.MeetingSession, media
 			continue
 		}
 		offset := int(md.StartedAt.Sub(x.StartedAt).Milliseconds())
+		if md.Kind == domain.MediaUpload {
+			offset = 0 // the file is the whole meeting
+		}
 		var who string
 		if md.Kind == domain.MediaAudio {
 			if p, _, ok := domain.ParseMeetingIdentity(md.Identity); ok {
@@ -229,6 +250,10 @@ func (s *Service) writeNotes(ctx context.Context, m domain.Meeting, x domain.Mee
 		}
 	}
 	viewers = append(viewers, m.CohostIDs...)
+	viewers = append(viewers, x.People...) // an upload's people
+	if x.NotesBy != nil {
+		viewers = append(viewers, *x.NotesBy)
+	}
 	slices.Sort(viewers)
 	viewers = slices.Compact(viewers)
 	lang := m.Language
@@ -309,6 +334,10 @@ func (s *Service) notesDone(ctx context.Context, sessionID int64) {
 	if m.HostID != nil {
 		users = append(users, *m.HostID)
 	}
+	users = append(users, x.People...)
+	if x.NotesBy != nil {
+		users = append(users, *x.NotesBy)
+	}
 	slices.Sort(users)
 	users = slices.Compact(users)
 	for _, u := range users {
@@ -365,7 +394,7 @@ func (s *Service) RegenerateNotes(ctx context.Context, c Caller, meetingID, sess
 		}
 		return s.writeNotes(ctx, m, x, c.UserID, segs)
 	}
-	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio)
+	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio, domain.MediaUpload)
 	if err != nil {
 		return err
 	}
