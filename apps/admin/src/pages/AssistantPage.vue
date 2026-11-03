@@ -279,8 +279,8 @@ const suggestions = computed(() => [
 
 <style scoped>
 
-.as-chat { display: flex; flex-direction: column; padding: 0; height: calc(100vh - 220px); min-height: 420px; }
-.as-msgs { flex: 1; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.as-chat { display: flex; flex-direction: column; padding: 0; }
+.as-msgs { flex: 1; min-height: 0; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .as-empty { margin: auto; max-width: 520px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .as-empty h2 { margin: 0; font-size: 18px; }
 .as-big { width: 40px; height: 40px; color: var(--primary); }
@@ -321,7 +321,4 @@ const suggestions = computed(() => [
 @keyframes as-pulse { 50% { opacity: 0.3; } }
 .as-clock { font-variant-numeric: tabular-nums; }
 
-@media (max-width: 900px) {
-  .as-chat { height: calc(100vh - 160px); }
-}
 </style>

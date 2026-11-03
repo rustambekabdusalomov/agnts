@@ -339,14 +339,14 @@ async function stopAndSend() {
 </template>
 
 <style scoped>
-.cc-chat { display: flex; flex-direction: column; padding: 0; height: calc(100vh - 220px); min-height: 480px; }
+.cc-chat { display: flex; flex-direction: column; padding: 0; }
 .cc-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
 .cc-head .sp { flex: 1; }
 .cc-key { font-weight: 700; }
 .cc-attach { display: flex; gap: 6px; }
 .cc-attach input { width: 200px; }
 .cc-repos { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
-.cc-msgs { flex: 1; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.cc-msgs { flex: 1; min-height: 0; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .cc-setup { margin: 0 auto; width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 12px; }
 .cc-setup h2 { margin: 0; font-size: 18px; }
 .cc-setup > .hint { margin: 0; }
@@ -367,7 +367,6 @@ async function stopAndSend() {
 .cc-row .isel { min-width: 200px; }
 .cc-send { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 @media (max-width: 900px) {
-  .cc-chat { height: calc(100vh - 160px); }
   .cc-attach { width: 100%; }
   .cc-attach input { flex: 1; width: auto; }
 }

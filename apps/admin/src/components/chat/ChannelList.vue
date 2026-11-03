@@ -87,7 +87,7 @@ async function create() {
 <style scoped>
 .chl { display: flex; flex-direction: column; gap: 2px; padding: 12px 10px; min-width: 0; overflow-y: auto; border-right: 1px solid var(--line); }
 @media (max-width: 900px) {
-  .chl { border-right: 0; border-bottom: 1px solid var(--line); max-height: 140px; }
+  .chl { border-right: 0; border-bottom: 1px solid var(--line); max-height: 104px; padding: 8px 10px; }
 }
 .chl-h { display: flex; align-items: center; justify-content: space-between; padding: 0 6px 6px; font-size: 13px; color: var(--ink-3); }
 .chl-new { width: 26px; height: 26px; border: 1px solid var(--line-3); border-radius: 7px; background: var(--surface); color: var(--ink-2); font-size: 16px; line-height: 1; cursor: pointer; }

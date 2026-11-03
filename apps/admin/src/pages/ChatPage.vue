@@ -125,6 +125,10 @@ function seen() {
   if (chat.atBottom && channelId.value && document.visibilityState === 'visible') void markRead(channelId.value)
 }
 
+// The message being replied to; the channel watcher below clears it, and
+// runs at once, so it is declared first.
+const replyTo = ref<ChatMessage | undefined>()
+
 watch(
   channelId,
   async (id) => {
@@ -204,7 +208,6 @@ function jump(id: number) {
 
 // ---- sending, replies, tickets ----
 
-const replyTo = ref<ChatMessage | undefined>()
 function onSend(body: string) {
   if (!channelId.value) return
   stickNext = true
@@ -299,7 +302,7 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
 </template>
 
 <style scoped>
-.tc { display: grid; grid-template-columns: 220px minmax(0, 1fr); padding: 0; height: calc(100vh - 210px); min-height: 460px; overflow: hidden; }
+.tc { display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); padding: 0; overflow: hidden; }
 .tc-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .tc-h { padding: 12px 18px; border-bottom: 1px solid var(--line); }
 .tc-ht { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -323,6 +326,6 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
 .tc-pa { display: flex; gap: 8px; margin-top: 6px; }
 
 @media (max-width: 900px) {
-  .tc { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); height: calc(100vh - 150px); }
+  .tc { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
 }
 </style>
