@@ -100,13 +100,13 @@ func (s *Service) Recall(ctx context.Context, q Query) ([]Item, error) {
 	// weeks with their repositories, repositories, open findings, so "what
 	// is waiting", "what was done today" and "which repos" have an answer.
 	for _, c := range cands {
-		switch {
-		case c.Type == domain.RefTicket:
+		switch c.Type {
+		case domain.RefTicket:
 			r.add(Item{ID: c.Key(), Title: c.Title, Text: fmt.Sprintf("ticket %s %q, repository %s, state %s, last activity %s",
 				c.ID, c.Title, ifEmpty(c.Repo, "none"), c.State, when(c.At))})
-		case c.Type == domain.RefRepo:
+		case domain.RefRepo:
 			r.add(Item{ID: c.Key(), Title: c.Title, Text: "repository " + c.Title})
-		case c.Type == domain.RefFinding:
+		case domain.RefFinding:
 			r.add(Item{ID: c.Key(), Title: c.Title, Text: fmt.Sprintf("log finding %s: %s (%s), repository %s, last seen %s", c.ID, c.Title, c.State, ifEmpty(c.Repo, "none"), when(c.At))})
 		}
 	}

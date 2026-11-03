@@ -43,7 +43,7 @@ func (s *Chat) ChatCandidates(ctx context.Context) ([]ChatCandidate, error) {
 		}
 		return rows.Err()
 	}
-	err := add(`SELECT 'ticket', t.key, t.title, t.state, '', `+ticketRepos+`, t.updated_at FROM tickets t
+	err := add(`SELECT 'ticket', t.key, t.title, t.state, '', ` + ticketRepos + `, t.updated_at FROM tickets t
 		WHERE t.state NOT IN ('done', 'rejected') OR t.updated_at > now() - interval '14 days'
 		ORDER BY t.updated_at DESC LIMIT 60`)
 	if err == nil {
