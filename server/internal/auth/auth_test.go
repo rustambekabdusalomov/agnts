@@ -263,9 +263,23 @@ func TestPasswordsForAdminsOnly(t *testing.T) {
 		t.Fatal(err)
 	}
 	f.svc.PasswordsForAdminsOnly()
-	// Someone else's right password: use Google instead.
-	if _, _, _, err := f.svc.Login(ctx, LoginInput{Username: "dev@x.io", Password: "a long enough password", Client: domain.ClientWeb}); !errors.Is(err, ErrUseGoogle) {
-		t.Fatalf("non-Admin password sign-in: %v, want ErrUseGoogle", err)
+	// A User who has a password still signs in with it.
+	if _, _, u, err := f.svc.Login(ctx, LoginInput{Username: "dev@x.io", Password: "a long enough password", Client: domain.ClientWeb}); err != nil || u.IsAdmin {
+		t.Fatalf("User password sign-in: %+v %v", u, err)
+	}
+	// So does one made for them, with no two-factor code.
+	if _, err := f.svc.CreatePasswordUser(ctx, "judge", "another long password"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, u, err := f.svc.Login(ctx, LoginInput{Username: "judge", Password: "another long password", Client: domain.ClientWeb}); err != nil || u.IsAdmin {
+		t.Fatalf("made User sign-in: %+v %v", u, err)
+	}
+	if _, err := f.svc.CreatePasswordUser(ctx, "judge", "another long password"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("taken username: %v", err)
+	}
+	var inv *InvalidError
+	if _, err := f.svc.CreatePasswordUser(ctx, "judge2", "short"); !errors.As(err, &inv) {
+		t.Fatalf("short password: %v", err)
 	}
 	// A wrong one says no more than before.
 	if _, _, _, err := f.svc.Login(ctx, LoginInput{Username: "dev@x.io", Password: "wrong password!", Client: domain.ClientWeb}); !errors.Is(err, domain.ErrUnauthorized) {

@@ -49,7 +49,8 @@ Usage:
   agnts migrate [up|down|status|version]
                                 manage the database schema (default: up)
   agnts user create <username>   create a user (password + TOTP); the first one is Admin
-  agnts workspace list|create|slots|members|suspend|resume
+  agnts user add <username>      create a User who signs in with just a password
+  agnts workspace list|create|add|slots|members|suspend|resume
                                 manage workspaces (see agnts workspace)
   agnts admin grant|revoke <username>
                                 grant or remove the Admin role
@@ -170,12 +171,15 @@ func run(ctx context.Context, args []string) error {
 		}
 		return postgres.Migrate(ctx, pool, postgres.MigrateCommand(cmd), log)
 	case "user":
-		if len(args) != 3 || args[1] != "create" {
-			return errors.New("usage: agnts user create <username>")
+		if len(args) != 3 || (args[1] != "create" && args[1] != "add") {
+			return errors.New("usage: agnts user create|add <username>")
 		}
 		svc, err := newAuth(cfg, pool)
 		if err != nil {
 			return err
+		}
+		if args[1] == "add" {
+			return addUser(ctx, svc, args[2], os.Stdin, os.Stdout)
 		}
 		return createUser(ctx, svc, postgres.NewWorkspaces(pool), args[2], os.Stdin, os.Stdout)
 	default:
@@ -288,27 +292,9 @@ func purgeSessions(ctx context.Context, svc *auth.Service, log *slog.Logger) {
 
 func createUser(ctx context.Context, svc *auth.Service, ws *postgres.Workspaces, username string, in *os.File, out io.Writer) error {
 	reader := bufio.NewReader(in)
-	readSecret := func(prompt string) (string, error) {
-		_, _ = fmt.Fprint(out, prompt)
-		if term.IsTerminal(int(in.Fd())) { //nolint:gosec // fd fits in int
-			b, err := term.ReadPassword(int(in.Fd())) //nolint:gosec // fd fits in int
-			_, _ = fmt.Fprintln(out)
-			return string(b), err
-		}
-		line, err := reader.ReadString('\n')
-		return strings.TrimRight(line, "\r\n"), err
-	}
-
-	pw, err := readSecret(fmt.Sprintf("Password (at least %d characters): ", auth.MinPasswordLength))
+	pw, err := readNewPassword(reader, in, out)
 	if err != nil {
 		return err
-	}
-	again, err := readSecret("Repeat password: ")
-	if err != nil {
-		return err
-	}
-	if pw != again {
-		return errors.New("passwords do not match")
 	}
 
 	e, err := svc.BeginEnrollment(username)
@@ -346,6 +332,48 @@ func createUser(ctx context.Context, svc *auth.Service, ws *postgres.Workspaces,
 		_, _ = fmt.Fprintln(out, "This is the first user, so it is the platform's Admin.")
 	}
 	return nil
+}
+
+// addUser creates a User who signs in with a password and no two-factor
+// code, for an account made on someone's behalf. It joins no workspace:
+// agnts workspace create --owner or agnts workspace add does that.
+func addUser(ctx context.Context, svc *auth.Service, username string, in *os.File, out io.Writer) error {
+	pw, err := readNewPassword(bufio.NewReader(in), in, out)
+	if err != nil {
+		return err
+	}
+	u, err := svc.CreatePasswordUser(ctx, username, pw)
+	if err != nil {
+		return err
+	}
+	_, _ = fmt.Fprintf(out, "Created user %q (id %d). They sign in with this password.\n", u.Username, u.ID)
+	return nil
+}
+
+// readNewPassword asks for a password twice, without echo on a terminal.
+func readNewPassword(reader *bufio.Reader, in *os.File, out io.Writer) (string, error) {
+	readSecret := func(prompt string) (string, error) {
+		_, _ = fmt.Fprint(out, prompt)
+		if term.IsTerminal(int(in.Fd())) { //nolint:gosec // fd fits in int
+			b, err := term.ReadPassword(int(in.Fd())) //nolint:gosec // fd fits in int
+			_, _ = fmt.Fprintln(out)
+			return string(b), err
+		}
+		line, err := reader.ReadString('\n')
+		return strings.TrimRight(line, "\r\n"), err
+	}
+	pw, err := readSecret(fmt.Sprintf("Password (at least %d characters): ", auth.MinPasswordLength))
+	if err != nil {
+		return "", err
+	}
+	again, err := readSecret("Repeat password: ")
+	if err != nil {
+		return "", err
+	}
+	if pw != again {
+		return "", errors.New("passwords do not match")
+	}
+	return pw, nil
 }
 
 // egressProxy runs the forward proxy that run containers use to reach the

@@ -94,7 +94,7 @@ function otherAccount() {
       </div>
       <div class="login-head">
         <h1>{{ t('auth.title') }}</h1>
-        <p>{{ setup ? t('auth.setupLede') : needCode ? t('auth.codeLede') : signup.data.value?.googleClientId && signup.data.value?.passwordSignup === false ? t('auth.adminsLede') : t('auth.lede') }}</p>
+        <p>{{ setup ? t('auth.setupLede') : needCode ? t('auth.codeLede') : t('auth.lede') }}</p>
       </div>
 
       <template v-if="!needCode">
