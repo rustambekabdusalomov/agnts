@@ -16,10 +16,13 @@ import (
 // file the analysis says to copy or reuse must exist.
 
 // recheckDue reports whether the coding model re-checks analysis a of t:
-// a complex code or test ticket analysed by another model.
+// a complex code or test ticket analysed by another model of the same
+// module, as the re-check resumes the analysis's session and a module
+// cannot resume another's.
 func recheckDue(s domain.Settings, t domain.Ticket, a Analysis) bool {
+	analyze, recheck := s.ModelFor(t, domain.ModelAnalyze), s.ModelFor(t, domain.ModelRecheck)
 	return s.RecheckComplex && a.Complexity == ComplexityComplex && !t.Kind.Report() && t.Kind != domain.KindReview &&
-		s.ModelFor(t, domain.ModelAnalyze) != s.ModelFor(t, domain.ModelRecheck)
+		analyze != recheck && domain.ProviderOf(analyze) == domain.ProviderOf(recheck)
 }
 
 // recheckTurns caps the re-check and the fix of the analysis's paths.
