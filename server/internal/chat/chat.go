@@ -234,15 +234,18 @@ func (s *Service) Send(ctx context.Context, in domain.ChatSend) (domain.ChatMess
 	if !domain.ChatBodyOK(in.Body) {
 		return domain.ChatMessage{}, false, invalid("a message is 1 to %d bytes of text", domain.ChatMaxBody)
 	}
+	toAgent := false
 	if in.ReplyTo != nil {
 		p, err := s.Store.Message(ctx, *in.ReplyTo)
 		if err != nil || p.ChannelID != in.ChannelID {
 			return domain.ChatMessage{}, false, invalid("replyTo is not a message of this channel")
 		}
+		toAgent = p.FromAgent()
 	}
 	u, _ := actor(ctx)
 	jobs := []string{postgres.ChatJobLink}
-	if domain.MentionsAgent(in.Body) {
+	// A reply to agnts's answer or card is said to agnts, as @agnts is.
+	if domain.MentionsAgent(in.Body) || toAgent {
 		jobs = append(jobs, postgres.ChatJobAnswer)
 	}
 	m, created, err := s.Store.Send(ctx, u, in, jobs)

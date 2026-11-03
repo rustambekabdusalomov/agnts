@@ -430,3 +430,42 @@ func TestLinkFiles(t *testing.T) {
 		t.Fatalf("web url %q", u)
 	}
 }
+
+func TestReplyToAgnts(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	ch := cs[0].ID
+	h.brain.replies["answer"] = `{"answer_md": "The export has no row limit.", "citations": [], "insufficient": true}`
+	q := h.send(t, ch, "@agnts why does the export time out?")
+	h.runJobs(t)
+	ms, _ := h.store.Messages(h.ctx, ch, 0, 0, 50)
+	first := ms[len(ms)-1]
+	if !first.FromAgent() || *first.ReplyTo != q.ID {
+		t.Fatalf("first answer %+v", first)
+	}
+	// A reply to agnts's answer, without @agnts, is answered too, with the thread.
+	h.brain.replies["answer"] = fmt.Sprintf(`{"answer_md": "Add a limit, as said in [msg:%d].", "citations": [], "insufficient": false}`, first.ID)
+	follow, created, err := h.s.Send(h.ctx, domain.ChatSend{ChannelID: ch, ClientMsgID: newUUID(), Body: "how would we fix that?", ReplyTo: &first.ID})
+	if err != nil || !created {
+		t.Fatal(err)
+	}
+	h.runJobs(t)
+	ms, _ = h.store.Messages(h.ctx, ch, 0, 0, 50)
+	second := ms[len(ms)-1]
+	if !second.FromAgent() || *second.ReplyTo != follow.ID || !strings.Contains(second.Body, fmt.Sprintf("[msg:%d]", first.ID)) {
+		t.Fatalf("follow-up answer %+v", second)
+	}
+	p := h.brain.prompts["answer"]
+	if !strings.Contains(p, "no row limit") || !strings.Contains(p, "why does the export time out") {
+		t.Fatalf("the prompt lacks the thread:\n%s", p)
+	}
+	// A reply to a person is not.
+	n := len(ms)
+	h.send(t, ch, "ok")
+	other, _, _ := h.s.Send(h.ctx, domain.ChatSend{ChannelID: ch, ClientMsgID: newUUID(), Body: "agreed", ReplyTo: &q.ID})
+	_ = other
+	h.runJobs(t)
+	if ms, _ = h.store.Messages(h.ctx, ch, 0, 0, 50); len(ms) != n+2 {
+		t.Fatalf("agnts answered a reply to a person: %d messages, want %d", len(ms), n+2)
+	}
+}

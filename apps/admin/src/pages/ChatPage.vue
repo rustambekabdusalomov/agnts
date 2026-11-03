@@ -236,7 +236,7 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
   </PageHeader>
 
   <section class="card tc">
-    <ChannelList class="tc-side" :channels="list" :current="channelId" @created="(c) => router.push({ name: 'chat', params: { channelId: c.id } })" />
+    <ChannelList :channels="list" :current="channelId" @created="(c) => router.push({ name: 'chat', params: { channelId: c.id } })" />
 
     <div class="tc-main">
       <header class="tc-h">
@@ -300,7 +300,6 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
 
 <style scoped>
 .tc { display: grid; grid-template-columns: 220px minmax(0, 1fr); padding: 0; height: calc(100vh - 210px); min-height: 460px; overflow: hidden; }
-.tc-side { border-right: 1px solid var(--line); overflow-y: auto; }
 .tc-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .tc-h { padding: 12px 18px; border-bottom: 1px solid var(--line); }
 .tc-ht { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -325,6 +324,5 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
 
 @media (max-width: 900px) {
   .tc { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); height: calc(100vh - 150px); }
-  .tc-side { border-right: 0; border-bottom: 1px solid var(--line); max-height: 140px; }
 }
 </style>

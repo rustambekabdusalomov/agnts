@@ -44,19 +44,12 @@ type ChatModelResult struct {
 // empty container kept for the next call), opening one when there is none.
 func (o *Orchestrator) ChatModel(ctx context.Context, c ChatModelCall) (ChatModelResult, error) {
 	start := time.Now()
-	s, err := o.settings.Get(ctx)
+	ws := domain.WorkspaceOf(ctx)
+	ctx, s, model, person, err := o.chatPerson(ctx, c.User, c.Kind, c.Light)
 	if err != nil {
 		return ChatModelResult{}, err
 	}
-	model := s.Models.For(domain.ModelTeamChat)
-	if c.Light {
-		model = o.lightModelOf(model)
-	}
-	ws := domain.WorkspaceOf(ctx)
-	meta := transcriptMeta{Purpose: domain.PurposeTeamChat, WorkspaceID: ws, Person: c.User, Subject: c.Kind}
-	if err := o.hold(ctx, meta, model); err != nil {
-		return ChatModelResult{}, err
-	}
+	meta := transcriptMeta{Purpose: domain.PurposeTeamChat, WorkspaceID: ws, Person: person, Subject: c.Kind}
 	key := "team-chat:" + strconv.FormatInt(ws, 10)
 	box, err := o.chatBox(ctx, key, ws)
 	if err != nil {
@@ -85,6 +78,45 @@ func (o *Orchestrator) ChatModel(ctx context.Context, c ChatModelCall) (ChatMode
 		return ChatModelResult{}, fmt.Errorf("%s ended with %s: %s", domain.AgentName(res.Model), res.Subtype, truncate(res.Text, 300))
 	}
 	return ChatModelResult{Text: res.Text, AI: chatAI(res, start)}, nil
+}
+
+// chatPerson picks whom a team chat call runs for: the asker when their
+// modules and accounts can run the Team chat model, else the workspace's
+// run person (its default member, else its owner), so a member without
+// an account of their own still gets answers. Settings are read for that
+// person, since a model of a module they may not use maps to their own.
+func (o *Orchestrator) chatPerson(ctx context.Context, asker int64, subject string, light bool) (context.Context, domain.Settings, string, int64, error) {
+	people := []int64{asker}
+	if o.workspaces != nil {
+		if w, err := o.workspaces.ByID(ctx, domain.WorkspaceOf(ctx)); err == nil {
+			if p := w.RunPerson(nil); p != asker {
+				people = append(people, p)
+			}
+		}
+	}
+	var last error
+	for _, p := range people {
+		if p <= 0 {
+			continue
+		}
+		pctx := o.withPerson(ctx, p)
+		s, err := o.settings.Get(pctx)
+		if err != nil {
+			return ctx, s, "", 0, err
+		}
+		model := s.Models.For(domain.ModelTeamChat)
+		if light {
+			model = o.lightModelOf(model)
+		}
+		meta := transcriptMeta{Purpose: domain.PurposeTeamChat, WorkspaceID: domain.WorkspaceOf(ctx), Person: p, Subject: subject}
+		if last = o.hold(pctx, meta, model); last == nil {
+			return pctx, s, model, p, nil
+		}
+	}
+	if last == nil {
+		last = errors.New("no one in this workspace can run the team chat's model")
+	}
+	return ctx, domain.Settings{}, "", 0, last
 }
 
 func chatAI(res ai.Result, start time.Time) domain.ChatAI {
@@ -170,19 +202,15 @@ var fileCiteRe = regexp.MustCompile(`\[file:([^\]\s:]+)(?::(\d+))?\]`)
 // credentials or agnts tokens; the guard's rules apply as on any run.
 func (o *Orchestrator) ChatCode(ctx context.Context, c ChatCodeCall) (ChatCodeResult, error) {
 	start := time.Now()
-	s, err := o.settings.Get(ctx)
-	if err != nil {
-		return ChatCodeResult{}, err
-	}
 	repo, err := o.store.RepositoryByID(ctx, c.RepoID)
 	if err != nil {
 		return ChatCodeResult{}, err
 	}
-	model := s.Models.For(domain.ModelTeamChat)
-	meta := transcriptMeta{Purpose: domain.PurposeTeamChat, WorkspaceID: repo.WorkspaceID, Person: c.User, Subject: "code " + repo.Name}
-	if err := o.hold(ctx, meta, model); err != nil {
+	ctx, s, model, person, err := o.chatPerson(ctx, c.User, "code "+repo.Name, false)
+	if err != nil {
 		return ChatCodeResult{}, err
 	}
+	meta := transcriptMeta{Purpose: domain.PurposeTeamChat, WorkspaceID: repo.WorkspaceID, Person: person, Subject: "code " + repo.Name}
 	if err := o.git.Prepare(ctx, repo, repo.DefaultBranch); err != nil {
 		return ChatCodeResult{}, fmt.Errorf("prepare repository: %w", err)
 	}

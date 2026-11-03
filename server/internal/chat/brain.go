@@ -192,15 +192,21 @@ func (s *Service) answer(ctx context.Context, j postgres.ChatJob) error {
 		return err
 	}
 	s.thinking(ctx, q, "recall")
-	// The question's own links first, so memory starts from them.
+	// The question's own links first, so memory starts from them; a reply
+	// to agnts brings what it replies to (an answer, a card) and its links.
 	refs, _ := s.explicitRefs(ctx, q.Body)
 	refs = append(refs, q.Refs...)
+	thread := s.thread(ctx, q)
+	for _, t := range thread {
+		refs = append(refs, t.Refs...)
+	}
 	items, err := s.Recall(ctx, Query{Text: stripMention(q.Body), Refs: refs, Except: q.ID})
 	if err != nil {
 		return err
 	}
+	items = withThread(items, thread)
 	s.thinking(ctx, q, "answer")
-	res, err := s.Brain.ChatModel(ctx, orchestrator.ChatModelCall{Kind: "answer", User: j.UserID, Prompt: answerPrompt(q, items)})
+	res, err := s.Brain.ChatModel(ctx, orchestrator.ChatModelCall{Kind: "answer", User: j.UserID, Prompt: answerPrompt(q, items, thread)})
 	if err != nil {
 		return err
 	}
@@ -228,7 +234,36 @@ func stripMention(s string) string {
 
 var mentionStrip = regexp.MustCompile(`(?i)@agnts\b`)
 
-func answerPrompt(q domain.ChatMessage, items []Item) string {
+// thread is what a question replies to: the message, and when that is
+// agnts's answer, the question it answered (oldest first).
+func (s *Service) thread(ctx context.Context, q domain.ChatMessage) []domain.ChatMessage {
+	var out []domain.ChatMessage
+	id := q.ReplyTo
+	for i := 0; i < 2 && id != nil; i++ {
+		p, err := s.Store.Message(ctx, *id)
+		if err != nil {
+			break
+		}
+		out = append([]domain.ChatMessage{p}, out...)
+		id = p.ReplyTo
+	}
+	return out
+}
+
+// withThread puts the thread's messages first among the items, so the
+// answer can cite them.
+func withThread(items []Item, thread []domain.ChatMessage) []Item {
+	r := recall{items: nil, seen: map[string]bool{}}
+	for _, m := range thread {
+		r.msg(m)
+	}
+	for _, it := range items {
+		r.add(it)
+	}
+	return r.items
+}
+
+func answerPrompt(q domain.ChatMessage, items []Item, thread []domain.ChatMessage) string {
 	var b strings.Builder
 	b.WriteString(`You are agnts, an AI teammate in a software team's chat. Answer the question using ONLY the context items below; each starts with its id in square brackets, like [msg:812] or [ticket:PAY-214]. After each claim, cite the items it comes from with their ids in square brackets, exactly as written (for example "... merged on Nov 2 [pr:api#131]"). Do not invent facts, ids, numbers, names, dates or file paths. If the context does not hold the answer, say so in one sentence and set "insufficient" to true.
 
@@ -241,6 +276,20 @@ Answer in the language of the question, in Markdown, short (at most 150 words un
 Reply with one JSON object and nothing else: {"answer_md": "...", "citations": ["msg:812"], "insufficient": false, "needs_code": null}
 
 `)
+	if len(thread) > 0 {
+		b.WriteString("The question replies in a thread; earlier in it (oldest first):\n")
+		for _, m := range thread {
+			body := m.Body
+			if m.Card != nil {
+				body = m.Card.Title + ": " + m.Card.Summary
+				if m.Card.Result != "" {
+					body += " (" + m.Card.Result + ")"
+				}
+			}
+			fmt.Fprintf(&b, "[msg:%d] %s: %s\n", m.ID, m.Author, clip(body, 1500))
+		}
+		b.WriteString("\n")
+	}
 	fmt.Fprintf(&b, "Question from %s:\n%s\n\nContext:\n%s", q.Author, clip(stripMention(q.Body), 3000), render(items))
 	return b.String()
 }

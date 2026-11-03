@@ -64,6 +64,10 @@ type ChatMessage struct {
 	WorkspaceID int64           `json:"-"`
 }
 
+// FromAgent reports whether agnts wrote the message (an answer, a note or
+// a card).
+func (m ChatMessage) FromAgent() bool { return m.Kind == ChatKindAgent || m.Kind == ChatKindCard }
+
 // ChatAI is which model made a message or a ref, and what it took.
 type ChatAI struct {
 	Provider string  `json:"provider"`
