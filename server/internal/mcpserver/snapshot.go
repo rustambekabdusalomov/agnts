@@ -110,6 +110,10 @@ func (s *Snapshotter) Snapshot(ctx context.Context, q orchestrator.AssistantQues
 		_, l, err := s.t.listLessons(ctx, nil, LessonsInput{Status: "new", Limit: snapLessons})
 		add("lessons.json", l, err)
 	}
+	if s.t.d.Memory != nil {
+		m, err := s.t.d.Memory(ctx, q.Question)
+		add("memory.json", map[string]any{"items": m}, err)
+	}
 	if len(missing) > 0 {
 		add("missing.json", map[string][]string{"not_available": missing}, nil)
 	}

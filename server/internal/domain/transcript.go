@@ -18,13 +18,17 @@ const (
 	PurposeTranslate     TranscriptPurpose = "translate"
 	// PurposeLogTriage explains a new log watcher finding.
 	PurposeLogTriage TranscriptPurpose = "log_triage"
+	// PurposeTeamChat is the team chat's model work: links, answers,
+	// ticket drafts and code questions (the transcript's subject says
+	// which).
+	PurposeTeamChat TranscriptPurpose = "team_chat"
 )
 
 // Background reports whether the purpose is a call outside a ticket's
 // stages, which never had a claude_calls row.
 func (p TranscriptPurpose) Background() bool {
 	switch p {
-	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeDocument, PurposeReflect, PurposeRules, PurposeTranslate, PurposeLogTriage:
+	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeDocument, PurposeReflect, PurposeRules, PurposeTranslate, PurposeLogTriage, PurposeTeamChat:
 		return true
 	}
 	return false

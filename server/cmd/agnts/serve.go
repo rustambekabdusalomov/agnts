@@ -32,6 +32,7 @@ import (
 	"agnts/internal/ai/providers/codex"
 	"agnts/internal/ai/providers/musecode"
 	"agnts/internal/billing"
+	"agnts/internal/chat"
 	"agnts/internal/ciwatch"
 	"agnts/internal/commitlink"
 	"agnts/internal/config"
@@ -148,9 +149,23 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 	a.orch.SetAssistantEvents(broker)
 	go broker.Run(sys)
 	go a.notifier.Run(sys)
+	// Team chat: cards from ticket and log events, and the model work on
+	// messages (links, answers, drafts), which needs the worker's
+	// containers.
+	chatStore := postgres.NewChat(pool)
+	chatDeps := chat.Deps{Store: chatStore, Memory: chatStore, Events: a.store, Tickets: a.orch,
+		Actions: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Logs: a.logs, Repos: a.store, Checks: a.vcs,
+		Live: broker, Roles: a.workspaces, Log: log.With("component", "chat")}
+	if cfg.AgentEnabled {
+		chatDeps.Brain = a.orch
+	}
+	chatSvc := chat.New(chatDeps)
+	a.chat = chatSvc
+	go chatSvc.Run(sys)
 	go postgres.Listen(sys, pool, "hiro_events", func() {
 		broker.Notify()
 		a.notifier.Wake()
+		chatSvc.Wake()
 	}, log.With("component", "listen"))
 
 	var refresher *usage.Refresher
@@ -187,6 +202,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Drafts:       a.orch,
 		CI:           a.ci,
 		Logs:         a.logs,
+		Chat:         chatSvc,
 		CommitLinks:  a.store,
 		Assistant:    a.orch,
 		Code:         a.orch,
@@ -405,6 +421,7 @@ type agent struct {
 	docStore      *postgres.Documents
 	meetStore     *postgres.Meetings
 	meet          *meetings.Service // set once the server is built
+	chat          *chat.Service     // set once the server is built
 }
 
 // mcpDeps are the use cases the MCP tools call, and the assistant's
@@ -415,6 +432,12 @@ func (a *agent) mcpDeps() mcpserver.Deps {
 		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
 		Role:      a.workspaces.Role,
 		Meetings:  func() *meetings.Service { return a.meet },
+		Memory: func(ctx context.Context, question string) (any, error) {
+			if a.chat == nil {
+				return nil, nil
+			}
+			return a.chat.RecallFor(ctx, question)
+		},
 	}
 }
 

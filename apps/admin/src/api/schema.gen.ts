@@ -5966,10 +5966,300 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/chat/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace's team chat channels, with your unread counts (makes */
+        get: operations["listChatChannels"];
+        put?: never;
+        /** Make a channel */
+        post: operations["createChatChannel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/channels/{channelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change a channel's topic, make it agnts's channel, or archive it */
+        patch: operations["updateChatChannel"];
+        trace?: never;
+    };
+    "/chat/channels/{channelId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        /** A page of a channel, oldest first (the newest, the ones before `before`, or the ones after `after` to fill a gap after a reconnect) */
+        get: operations["listChatMessages"];
+        put?: never;
+        /** Send a message. The same clientMsgId sent again returns the stored message (200) instead of a second one (201) */
+        post: operations["sendChatMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/channels/{channelId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Save how far you have read a channel */
+        put: operations["markChatRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        /** One message with its refs (opens a citation in its channel) */
+        get: operations["getChatMessage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/messages/{messageId}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Press a button on agnts's card; it runs the real action (approve, merge, fix, …) and returns the card */
+        post: operations["actOnChatCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/messages/{messageId}/ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn a message into a ticket draft; the draft card arrives in the thread as an event */
+        post: operations["chatMessageToTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/messages/{messageId}/refs/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Remove a wrong link under a message (the linker will not add it back) */
+        post: operations["removeChatRef"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the model did in the team chat today (links, answers, drafts) and its median time */
+        get: operations["getChatStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ChatChannel: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            topic: string;
+            /** @description agnts posts its cards here */
+            agents: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            archivedAt?: string;
+            /**
+             * Format: int64
+             * @description The newest message's id
+             */
+            lastId: number;
+            unread: number;
+            /** Format: int64 */
+            lastReadId: number;
+        };
+        ChatChannelInput: {
+            /** @description Lower case letters, digits, - and _ (spaces become -) */
+            name: string;
+            topic?: string;
+            agents?: boolean;
+        };
+        ChatChannelUpdate: {
+            topic?: string;
+            agents?: boolean;
+            archive?: boolean;
+        };
+        /** @description Which model made it and what it took */
+        ChatAI: {
+            provider: string;
+            model: string;
+            /** Format: int64 */
+            ms: number;
+            costUsd: number;
+        };
+        ChatRef: {
+            /** @enum {string} */
+            type: "ticket" | "pr" | "repo" | "finding";
+            /** @description A ticket key, "<repo>#<number>", a repository name or a finding id */
+            id: string;
+            /** @enum {string} */
+            source: "explicit" | "model" | "card";
+            confidence: number;
+            reason?: string;
+            label?: string;
+            url?: string;
+            ai?: components["schemas"]["ChatAI"];
+        };
+        ChatCard: {
+            /** @enum {string} */
+            type: "log_finding" | "review_ready" | "pr_opened" | "ticket_draft";
+            /** @enum {string} */
+            state: "open" | "done" | "failed" | "expired";
+            title: string;
+            summary?: string;
+            actions: ("fix" | "mute" | "approve" | "request_changes" | "merge" | "create" | "create_assign")[];
+            data?: {
+                [key: string]: unknown;
+            };
+            by?: string;
+            done?: string;
+            result?: string;
+            /** Format: date-time */
+            at?: string;
+        };
+        ChatMessage: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            channelId: number;
+            /** Format: int64 */
+            replyTo?: number;
+            /** Format: int64 */
+            authorId?: number;
+            /** @description The person's username */
+            author: string;
+            /** @enum {string} */
+            kind: "text" | "agent_card" | "agent_text" | "system";
+            body: string;
+            card?: components["schemas"]["ChatCard"];
+            ai?: components["schemas"]["ChatAI"];
+            ticketKey?: string;
+            clientMsgId?: string;
+            refs: components["schemas"]["ChatRef"][];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ChatSendRequest: {
+            /**
+             * Format: uuid
+             * @description Made on the device; a resend with the same id returns the stored message
+             */
+            clientMsgId: string;
+            body: string;
+            /** Format: int64 */
+            replyTo?: number;
+        };
+        ChatActionRequest: {
+            /** @enum {string} */
+            action: "fix" | "mute" | "approve" | "request_changes" | "merge" | "create" | "create_assign";
+            /** @description What to change (request_changes) */
+            feedback?: string;
+            /** @description The edited draft (create, create_assign) */
+            draft?: {
+                title?: string;
+                description?: string;
+                /** Format: int64 */
+                repoId?: number;
+            };
+        };
+        ChatStats: {
+            links: number;
+            answers: number;
+            drafts: number;
+            /** Format: int64 */
+            medianMs: number;
+        };
         SignupInfo: {
             /** @description Anyone can register; otherwise only with an invite link */
             open: boolean;
@@ -7509,7 +7799,7 @@ export interface components {
             /** @enum {string} */
             level: "debug" | "info" | "warn" | "error";
             /** @enum {string} */
-            origin: "system" | "web" | "mobile" | "mcp" | "telegram" | "webhook" | "assistant";
+            origin: "system" | "web" | "mobile" | "mcp" | "telegram" | "webhook" | "assistant" | "chat";
             message: string;
             data: {
                 [key: string]: unknown;
@@ -7636,6 +7926,7 @@ export interface components {
             preview?: components["schemas"]["Model"];
             chat?: components["schemas"]["Model"];
             documents?: components["schemas"]["Model"];
+            teamChat?: components["schemas"]["Model"];
         };
         TicketRepo: {
             /** Format: int64 */
@@ -11064,6 +11355,8 @@ export interface components {
         };
     };
     parameters: {
+        ChatChannelID: number;
+        ChatMessageID: number;
         /** @description The module whose account it is: muse or claude (Codex runs on the workspace's OpenAI key). Defaults to your default module. */
         ModuleProvider: "muse" | "claude";
         MeetingID: number;
@@ -20781,6 +21074,309 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    listChatChannels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatChannel"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createChatChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatChannelInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatChannel"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    updateChatChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatChannelUpdate"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatChannel"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listChatMessages: {
+        parameters: {
+            query?: {
+                before?: number;
+                after?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    sendChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatSendRequest"];
+            };
+        };
+        responses: {
+            /** @description Already stored (a resend) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            /** @description Sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    markChatRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: int64 */
+                    lastReadId: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Saved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    actOnChatCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatActionRequest"];
+            };
+        };
+        responses: {
+            /** @description The card after the action */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    chatMessageToTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Drafting */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    removeChatRef: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    type: string;
+                    id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The message after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getChatStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatStats"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
 }

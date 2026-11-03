@@ -44,6 +44,8 @@ export const router = createRouter({
         { path: 'assistant/conversations', name: 'assistantConversations', component: () => import('../pages/AssistantConversationsPage.vue') },
         { path: 'assistant/:id(\\d+)?', name: 'assistant', component: () => import('../pages/AssistantPage.vue') },
         { path: 'assistant/code/:id(\\d+)?', name: 'assistantCode', component: () => import('../pages/CodePage.vue') },
+        // The team chat: channels where members and agnts talk.
+        { path: 'chat/:channelId(\\d+)?', name: 'chat', component: () => import('../pages/ChatPage.vue') },
         { path: 'tickets', name: 'tickets', component: () => import('../pages/TicketsPage.vue') },
         { path: 'tickets/:key', name: 'ticket', component: () => import('../pages/TicketPage.vue') },
         { path: 'tasks', name: 'tasks', component: () => import('../pages/TasksPage.vue') },

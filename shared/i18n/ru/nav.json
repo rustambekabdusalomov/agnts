@@ -66,6 +66,7 @@
     "assistantConversations": "Разговоры",
     "documents": "Документы",
     "meetings": "Встречи",
+    "chat": "Чат",
     "logWatcher": "Наблюдение за логами"
   }
 }

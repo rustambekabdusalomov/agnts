@@ -513,3 +513,20 @@ func Limit[T any](items []T, n int, f func(i int, it T)) {
 	}
 	wg.Wait()
 }
+
+// CommitChecks returns what CI says about a commit (CIOK, CIFail, CIRun,
+// CINone) and the failed or unfinished checks' names; CINone where the
+// git host cannot say.
+func (m *Multi) CommitChecks(ctx context.Context, repo domain.Repository, sha string) (string, []string, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return CINone, nil, err
+	}
+	c, ok := p.(interface {
+		CommitChecks(ctx context.Context, repo domain.Repository, sha string) (string, []string, error)
+	})
+	if !ok {
+		return CINone, nil, nil
+	}
+	return c.CommitChecks(ctx, repo, sha)
+}

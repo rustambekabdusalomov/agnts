@@ -7,6 +7,7 @@ import { api, transcribeQuestion, unwrap } from '../api/client'
 import type { AssistantConversation, AssistantLink, AssistantMessage } from '../api/types'
 import { applyLive, assistantLang, fileLabel, isOpen, live, MAX_QUESTION, secs } from '../components/assistant/assistant'
 import AssistantActionCard from '../components/assistant/AssistantActionCard.vue'
+import ChatBody from '../components/chat/ChatBody.vue'
 import ChatModeSwitch from '../components/codechat/ChatModeSwitch.vue'
 import PageHeader from '../components/PageHeader.vue'
 import ReportView from '../components/ticket/ReportView.vue'
@@ -195,7 +196,7 @@ const suggestions = computed(() => [
             <button v-if="questionOf(m)" type="button" class="btn btn-s" :disabled="ask.isPending.value" @click="send(questionOf(m))">{{ t('massistant.askAgain') }}</button>
           </template>
           <template v-else>
-            <ReportView :markdown="m.text" />
+            <ChatBody :body="m.text" cite assistant />
             <AssistantActionCard v-for="a in m.actions ?? []" :key="a.id" :action="a" />
             <div v-if="m.handoff" class="as-handoff">
               <b>{{ t('codechat.handoffTitle') }}</b>

@@ -107,6 +107,39 @@ Tests against a real Loki run when `AGNTS_TEST_LOKI_URL` is set
 (`docker run -p 3100:3100 grafana/loki:3.2.0`); with `AGNTS_TEST_DATABASE_URL`
 as well, `internal/logwatch`'s end-to-end test runs the whole flow.
 
+## Team chat
+
+Workspace members talk in channels (Chat in the admin panel), and agnts is in
+the room. See [Team chat plan.md](plans/Team%20chat%20plan.md).
+
+- **Cards with real buttons.** A new log finding, a ticket waiting for review
+  and the pull request it opened arrive as cards in agnts's channel (#general
+  unless another is marked). **Fix it**, **Approve** (push and open the PR),
+  **Request changes** and **Merge** (on the git host, with the workspace's
+  merge method) run the same checked actions as the ticket page and MCP. A card
+  is pressed once; Merge shows CI's state and is refused when someone pushed
+  after agnts.
+- **Links.** Ticket keys, PR numbers and URLs and repository names link a
+  message at once; the Team chat model's light sibling links the rest from the
+  workspace's open tickets, PRs, repositories and findings (confidence ≥ 0.7).
+- **@agnts** answers from the workspace's memory: tickets and their progress,
+  PRs, repositories' briefs, log findings and the chat itself (links and
+  Postgres full-text search, no vector index), and cites what it used; a
+  citation it was not given is removed. A question about how code works that no
+  brief answers is answered by reading the repository, read-only, with links
+  to the lines.
+- **Turn into ticket** drafts a task from a message and its thread; **Create
+  and assign** gives it to the coding agent, and its cards come back to the
+  same channel.
+- **Nothing lost or doubled.** A message carries a client id (a resend returns
+  the stored one), its model work is queued in the same transaction
+  (`chat_jobs`), and a reconnecting client replays the event stream and fetches
+  `messages?after=` to fill any gap.
+
+The model is **Settings → Models → Team chat** (any connected module; unset,
+the assistant's). Daily caps per workspace: 500 links, 200 answers, 30 code
+answers, 100 drafts.
+
 ## Connecting agnts to your work
 
 Everything is set up in the admin panel (Integrations, Repositories,

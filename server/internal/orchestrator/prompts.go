@@ -17,7 +17,7 @@ import (
 // Analytics page can compare the quality of the work before and after a
 // change: bump it whenever a change to the prompts or to the context runs
 // get could change what Claude does.
-const PromptVersion = "2026-10-29.1"
+const PromptVersion = "2026-11-03.1"
 
 // Files Claude Code writes for agnts to read back. stream-json output has no
 // structured result, so the contract is a file outside the repository.
@@ -901,6 +901,7 @@ Write {{.TranslationPath}} with exactly this shape, one item for every id in the
 
 {{range .AssistantFiles}}- {{$.AssistantDir}}/{{.}}
 {{end}}
+memory.json, when there, is what agnts's memory recalled for the question: items with an id ("msg:812" a team chat message, "ticket:PAY-214", "pr:api#14", "repo:api" with its brief, "finding:12" a log finding) and their text. When the answer uses an item, cite its id in square brackets right after the claim, exactly as written: [msg:812]. Cite only ids that are in memory.json.
 question.txt is the question; conversation.json is the talk so far (the question may refer to it; "[action ...]" lines say what became of actions you proposed). me.json says the person's role. Read only the files the question needs. Each file holds what agnts showed at {{.AsOf}}.
 
 ## Rules

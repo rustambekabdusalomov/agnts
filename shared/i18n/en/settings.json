@@ -42,6 +42,8 @@
     "stageChatHelp": "Answers in the assistant chat, and spoken questions. Never runs on credits: it needs a connected account.",
     "stageDocuments": "Documents and meeting notes",
     "stageDocumentsHelp": "Writes documents and the notes and action items of a meeting.",
+    "stageTeamChat": "Team chat",
+    "stageTeamChatHelp": "Answers @agnts and drafts tickets in the team chat. Links use the same provider's light model.",
     "meetingAudioMuse": "Meeting audio is always heard by Muse, the only module that hears audio; the notes are written by the model above.",
     "stageReview": "Code review",
     "stageReviewHelp": "Reviews each result while you review it. Auto uses Opus for complex tickets and Sonnet for the rest.",
