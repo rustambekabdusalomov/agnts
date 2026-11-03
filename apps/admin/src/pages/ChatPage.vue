@@ -4,7 +4,6 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
-import PageHeader from '../components/PageHeader.vue'
 import { AI_NAME } from '../components/chat/AiBadge.vue'
 import ChannelList from '../components/chat/ChannelList.vue'
 import ChatComposer from '../components/chat/ChatComposer.vue'
@@ -231,14 +230,8 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
 </script>
 
 <template>
-  <PageHeader :title="t('nav.chat')">
-    <span v-if="conn" class="badge" :class="conn === 'offline' ? 'b-bad' : 'b-warn'" role="status">
-      {{ conn === 'offline' ? t('teamchat.offline') : t('teamchat.reconnecting') }}<template v-if="waiting"> · {{ t('teamchat.waiting', { n: waiting }) }}</template>
-    </span>
-    <template #below><p class="sub" style="margin: 4px 0 0">{{ t('teamchat.subtitle') }}</p></template>
-  </PageHeader>
-
-  <section class="card tc">
+  <!-- No page title: the chat takes the whole page; the channel's header names it. -->
+  <section class="card tc" :aria-label="t('nav.chat')">
     <ChannelList :channels="list" :current="channelId" @created="(c) => router.push({ name: 'chat', params: { channelId: c.id } })" />
 
     <div class="tc-main">
@@ -246,6 +239,9 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
         <div class="tc-ht">
           <h2>#{{ channel?.name ?? '…' }}</h2>
           <span v-if="channel?.agents" class="badge b-info">{{ t('teamchat.agentsHere') }}</span>
+          <span v-if="conn" class="badge" :class="conn === 'offline' ? 'b-bad' : 'b-warn'" role="status">
+            {{ conn === 'offline' ? t('teamchat.offline') : t('teamchat.reconnecting') }}<template v-if="waiting"> · {{ t('teamchat.waiting', { n: waiting }) }}</template>
+          </span>
           <span class="sp" />
           <span v-if="statsLine" class="tc-stats" :title="statsTip">{{ statsLine }}</span>
         </div>
