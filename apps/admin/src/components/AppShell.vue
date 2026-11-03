@@ -434,8 +434,8 @@ onBeforeUnmount(() => {
             <span v-if="creditsLeft" class="bar me-bar" :class="creditsLevel" aria-hidden="true"><span :style="{ width: creditsPct + '%' }" /></span>
           </span>
         </RouterLink>
-        <!-- Claude plan windows; Muse runs are paid per call instead -->
-        <UsagePill v-if="!catalog.isMuse.value" />
+        <!-- Claude plan windows, whatever the default module; Muse runs are paid per call instead -->
+        <UsagePill v-if="catalog.has('claude')" />
       </div>
     </aside>
     <div class="main">
