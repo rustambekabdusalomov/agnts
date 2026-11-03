@@ -287,6 +287,19 @@ const diffRepo = ref('')
 const reviewing = computed(() => tk.value?.state === 'waiting_for_review' && opensPr.value)
 // Mirrors the server's rule: no pull request and no pending push.
 const canChangeRepo = computed(() => !!tk.value && !tk.value.prUrl && tk.value.resumeState !== 'pushing')
+// The models Retry uses on a failed ticket, by where it resumes: analysis
+// (then coding), or coding (a note goes in as requested changes, on the
+// retry model). A push runs no model.
+const retryStages = computed((): ('analyze' | 'coding' | 'retry')[] => {
+  switch (tk.value?.resumeState) {
+    case 'coding':
+      return ['coding', 'retry']
+    case 'pushing':
+      return []
+    default:
+      return ['analyze', 'coding']
+  }
+})
 const members = useRepoMembers(computed(() => (reviewing.value ? tk.value?.repoId : undefined)))
 const assignees = ref<string[]>([])
 watch(
@@ -1069,7 +1082,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
             </div>
             <KindPicker v-if="kindEditable && !pull" :ticket="tk" />
             <RepoPicker v-if="canChangeRepo && !pull" :ticket="tk" />
-            <ModelPicker v-if="!pull" :ticket="tk" :stages="['retry']" />
+            <ModelPicker v-if="!pull && retryStages.length" :ticket="tk" :stages="retryStages" />
             <div v-if="tk.resumeState !== 'pushing'" class="sec">
               <h3><label for="retry-note">{{ t('ticket.retryNote') }}</label></h3>
               <textarea id="retry-note" v-model="retryNote" maxlength="4000" :placeholder="t('ticket.retryNoteHint')" />
