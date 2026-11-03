@@ -547,6 +547,8 @@ func (s *Agent) SetAgentConfigScan(ctx context.Context, id int64, scan domain.Ag
 // A Muse session is resumable only on the account that started it: Muse
 // refuses reasoning it issued to another caller, so after a switch between
 // an account and agnts's key (credits) the work starts a new session.
+// Sessions do not move between tools either: a run whose account is for
+// another tool (Claude moved to Muse) starts a new one.
 func (s *Agent) LastSessionID(ctx context.Context, ticketID int64, acct domain.ClaudeAccount) (string, error) {
 	var (
 		id, model string
@@ -563,6 +565,9 @@ func (s *Agent) LastSessionID(ctx context.Context, ticketID int64, acct domain.C
 	}
 	if err != nil {
 		return "", err
+	}
+	if acct.Provider != "" && acct.Provider != domain.ProviderOf(model) {
+		return "", nil
 	}
 	if domain.IsMuse(model) && (conn.Int64 != acct.ConnectionID || credits != acct.Credits) {
 		return "", nil
