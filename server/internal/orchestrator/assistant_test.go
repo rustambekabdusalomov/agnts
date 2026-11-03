@@ -124,7 +124,7 @@ func TestAssistantAnswersFromTheSnapshot(t *testing.T) {
 		t.Fatalf("prompt = %s", p)
 	}
 	req := a.reqs[0]
-	if !req.ReadOnly || req.MaxTurns != 6 || !strings.Contains(req.Settings, `"Bash"`) || !strings.Contains(req.Settings, `"WebFetch"`) {
+	if !req.ReadOnly || req.MaxTurns != 16 || !strings.Contains(req.Settings, `"Bash"`) || !strings.Contains(req.Settings, `"WebFetch"`) {
 		t.Fatalf("request = %+v", req)
 	}
 	if got := strings.Join(a.live.got, " "); got != "assistant_answering assistant_answered" || len(a.live.users) != 1 || !a.live.users[a.user] {
@@ -425,5 +425,24 @@ func TestAssistantCaseReplaysProposeButStoreNothing(t *testing.T) {
 	var n int
 	if err := a.db.QueryRow(a.ctx, `SELECT count(*) FROM pending_actions WHERE origin = 'assistant'`).Scan(&n); err != nil || n != 0 {
 		t.Fatalf("a replay stored %d actions (%v)", n, err)
+	}
+}
+
+func TestAssistantKeepsItsTextWhenItRunsOutOfTurns(t *testing.T) {
+	a := newAssistantHarness(t)
+	// It replied with the answer, then hit the turn limit before writing the file.
+	a.runner.scripts = append(a.runner.scripts, script{result: ai.Result{SessionID: "s", Turns: 16, Subtype: "error_max_turns", IsError: true,
+		Text: "Сегодня закрыто 6 задач: 5 готовы, 1 отклонена."}})
+	c, err := a.o.Ask(a.ask, 0, "Что сделано сегодня?", "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := a.conversation(c.ID)
+	last := got.Messages[len(got.Messages)-1]
+	if last.Role != domain.AssistantReply || last.Status != domain.AssistantDone || last.Text != "Сегодня закрыто 6 задач: 5 готовы, 1 отклонена." {
+		t.Fatalf("answer = %+v", last)
+	}
+	if a.reqs[0].MaxTurns < 12 {
+		t.Fatalf("max turns %d", a.reqs[0].MaxTurns)
 	}
 }
