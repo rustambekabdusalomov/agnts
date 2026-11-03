@@ -16,11 +16,13 @@ type GroupInput struct {
 	Description  string
 	Instructions string
 	TaskPrefix   string
-	// BranchTemplate and CommitTemplate name the branches and write the
-	// commit messages of the group's tickets in every member; "" leaves
-	// each repository's own.
+	// BranchTemplate, CommitTemplate and PRTemplate name the branches,
+	// write the commit messages and title the pull requests of the group's
+	// tickets in every member; "" leaves each repository's own. A nil
+	// PRTemplate keeps the group's (a client that does not know it).
 	BranchTemplate string
 	CommitTemplate string
+	PRTemplate     *string
 	Members        []GroupMemberInput
 }
 
@@ -78,10 +80,16 @@ func (o *Orchestrator) SaveGroup(ctx context.Context, id int64, in GroupInput, o
 		return GroupView{}, invalid("task prefix is at most 10 letters")
 	}
 	g.BranchTemplate, g.CommitTemplate = strings.TrimSpace(in.BranchTemplate), strings.TrimSpace(in.CommitTemplate)
+	if in.PRTemplate != nil {
+		g.PRTemplate = strings.TrimSpace(*in.PRTemplate)
+	}
 	if err := domain.ValidateBranchTemplate(g.BranchTemplate); err != nil {
 		return GroupView{}, invalid("%v", err)
 	}
 	if err := domain.ValidateCommitTemplate(g.CommitTemplate); err != nil {
+		return GroupView{}, invalid("%v", err)
+	}
+	if err := domain.ValidatePRTemplate(g.PRTemplate); err != nil {
 		return GroupView{}, invalid("%v", err)
 	}
 	var cur *domain.RepoGroup
@@ -91,6 +99,9 @@ func (o *Orchestrator) SaveGroup(ctx context.Context, id int64, in GroupInput, o
 			return GroupView{}, err
 		}
 		cur = &c
+		if in.PRTemplate == nil {
+			g.PRTemplate = c.PRTemplate
+		}
 	}
 	st, err := o.settings.Get(ctx)
 	if err != nil {

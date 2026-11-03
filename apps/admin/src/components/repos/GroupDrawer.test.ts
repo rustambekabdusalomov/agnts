@@ -30,7 +30,7 @@ vi.mock('../../api/client', () => {
 const repo = (id: number, name: string, archivedAt?: string) => ({ id, name, archivedAt, taskPrefix: '' }) as Repository
 const repos = [repo(1, 'api'), repo(2, 'web'), repo(3, 'old', '2026-01-01')]
 const saved = (warnings: string[]): RepoGroup => ({
-  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: 'SHOP', branchTemplate: '{number}', commitTemplate: '', warnings, createdAt: '', updatedAt: '',
+  id: 7, name: 'Shop', description: '', instructions: '', taskPrefix: 'SHOP', branchTemplate: '{number}', commitTemplate: '', prTemplate: '', warnings, createdAt: '', updatedAt: '',
   members: [{ repoId: 2, repoName: 'web', role: 'web', archived: false }, { repoId: 1, repoName: 'api', role: '', archived: false }],
 })
 
@@ -60,6 +60,8 @@ describe('GroupDrawer', () => {
     await w.find('#g-commit-tmpl').setValue('[{number}] {type}({scope}): {subject}')
     expect(w.text()).toContain('Example: AMANAT-2288')
     expect(w.text()).toContain('Example: [AMANAT-2288] chore(deps): bump protos to v1.63.0')
+    await w.find('#g-pr-tmpl').setValue(' {type}: {subject} ({key}) ')
+    expect(w.text()).toContain('Example: chore: bump protos to v1.63.0 (SHOP-42)')
     await pickRepo(w, 'api')
     // Archived repositories cannot be added.
     await w.find('.isel-trigger').trigger('click')
@@ -76,6 +78,7 @@ describe('GroupDrawer', () => {
       init: {
         body: {
           name: 'Shop', description: '', taskPrefix: 'SHOP', instructions: '', branchTemplate: '{number}', commitTemplate: '[{number}] {type}({scope}): {subject}',
+          prTemplate: '{type}: {subject} ({key})',
           members: [{ repoId: 2, role: 'web' }, { repoId: 1, role: undefined }],
         },
       },

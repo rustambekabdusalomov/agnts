@@ -147,6 +147,7 @@ func repoCmd(ctx context.Context, cfg config.Config, pool postgresPool, args []s
 		fs.StringVar(&r.BranchPrefix, "prefix", "agnts/", "branch prefix")
 		fs.StringVar(&r.BranchTemplate, "branch-template", "", "branch name template, e.g. {type}/{key}-{slug} (placeholders {prefix} {type} {key} {number} {slug} {user}; default {prefix}{key})")
 		fs.StringVar(&r.CommitTemplate, "commit-template", "", "commit message template, e.g. [{number}] {type}({scope}): {subject} (placeholders {number} {key} {type} {scope} {subject} {title}; default KEY: Title)")
+		fs.StringVar(&r.PRTemplate, "pr-template", "", "pull request title template, e.g. [{number}] {type}: {subject} (the commit template's placeholders; default the workspace's PR title)")
 		claudeMD := fs.String("instructions", "", "file with extra instructions for Claude (optional)")
 		var tcs toolchainFlags
 		fs.Var(&tcs, "toolchain", "tool@version installed in runs, e.g. node@20 (repeatable; detected from the repository when absent)")
@@ -176,6 +177,10 @@ func repoCmd(ctx context.Context, cfg config.Config, pool postgresPool, args []s
 		}
 		if err := domain.ValidateCommitTemplate(r.CommitTemplate); err != nil {
 			return fmt.Errorf("--commit-template: %w", err)
+		}
+		r.PRTemplate = strings.TrimSpace(r.PRTemplate)
+		if err := domain.ValidatePRTemplate(r.PRTemplate); err != nil {
+			return fmt.Errorf("--pr-template: %w", err)
 		}
 		if *claudeMD != "" {
 			b, err := os.ReadFile(*claudeMD)

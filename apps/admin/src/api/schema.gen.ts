@@ -7713,6 +7713,8 @@ export interface components {
             branchTemplate: string;
             /** @description Writes the commit messages of the group's tickets in every member, replacing each repository's own; empty keeps theirs */
             commitTemplate: string;
+            /** @description Titles the pull requests of the group's tickets in every member, replacing each repository's own; empty keeps theirs */
+            prTemplate: string;
             members: components["schemas"]["RepoGroupMember"][];
             /** @description What the repositories share uneasily in one run container (a build variable both set) */
             warnings: string[];
@@ -7730,6 +7732,8 @@ export interface components {
             branchTemplate?: string;
             /** @description Commit message template (as a repository's); must contain {subject} or {title}. Empty keeps each repository's own */
             commitTemplate?: string;
+            /** @description Pull request title template (as a repository's); must contain {subject} or {title}. Empty keeps each repository's own */
+            prTemplate?: string;
             /** @description In order; the first is the primary repository of the group's tickets */
             members: {
                 /** Format: int64 */
@@ -8083,7 +8087,7 @@ export interface components {
             authorEmail: string;
             /** @description Add a Co-authored-by agnts line */
             coAuthor: boolean;
-            /** @description {key} and {title} are replaced */
+            /** @description Pull request title template, with the commit template's placeholders {number} {key} {type} {scope} {subject} {title}; must contain {subject} or {title}. A repository's or group's own replaces it */
             prTitle: string;
             draft: boolean;
         };
@@ -8995,6 +8999,8 @@ export interface components {
             branchTemplate?: string;
             /** @description How agnts writes commit messages, with placeholders {number} {key} {type} {scope} {subject} {title}; empty uses KEY: Title */
             commitTemplate?: string;
+            /** @description How agnts titles pull requests, with the commit template's placeholders; empty uses the workspace's PR title (Settings, Git) */
+            prTemplate?: string;
             taskPrefix: string;
             /** @description Extra instructions added to every prompt */
             instructions: string;
@@ -9050,6 +9056,8 @@ export interface components {
             branchTemplate?: string;
             /** @description Commit message template; must contain {subject} or {title}. Empty uses KEY: Title */
             commitTemplate?: string;
+            /** @description Pull request title template, with the commit template's placeholders; must contain {subject} or {title}. Empty uses the workspace's PR title */
+            prTemplate?: string;
             taskPrefix?: string;
             instructions?: string;
             jiraProject?: string;

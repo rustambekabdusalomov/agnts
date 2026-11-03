@@ -42,6 +42,35 @@ func TestValidateCommitTemplate(t *testing.T) {
 	}
 }
 
+func TestPRTitle(t *testing.T) {
+	v := CommitVars{Number: "AMANAT-2288", Key: "VIS-3", Title: "Update protos", Kind: KindBug, Info: CommitInfo{Scope: "deps", Subject: "bump protos"}}
+	ws := GitSettings{PRTitle: "[{key}] {title}"}
+	for _, c := range []struct {
+		name, repo string
+		git        GitSettings
+		want       string
+	}{
+		{"the repository's", "{number} {type}({scope}): {subject}", ws, "AMANAT-2288 fix(deps): bump protos"},
+		{"the workspace's", "", ws, "[VIS-3] Update protos"},
+		{"the workspace's, with the commit's placeholders", "", GitSettings{PRTitle: "{type}: {subject}"}, "fix: bump protos"},
+		{"none set", "", GitSettings{}, "VIS-3: Update protos"},
+	} {
+		if got := PRTitle(c.repo, c.git, v); got != c.want {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+	for _, ok := range []string{"", DefaultPRTitle, "[{number}] {type}({scope}): {subject}"} {
+		if err := ValidatePRTemplate(ok); err != nil {
+			t.Errorf("%q: %v", ok, err)
+		}
+	}
+	for _, bad := range []string{"{key}", "{key}: {summary}", "{title}\nmore"} {
+		if err := ValidatePRTemplate(bad); err == nil || !strings.Contains(err.Error(), "pull request title") {
+			t.Errorf("%q: %v", bad, err)
+		}
+	}
+}
+
 func TestTicketNumber(t *testing.T) {
 	if n := (Ticket{Key: "VIS-1"}).Number(); n != "VIS-1" {
 		t.Errorf("fallback %q", n)

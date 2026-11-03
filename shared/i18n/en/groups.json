@@ -23,6 +23,7 @@
     "prefixHelp": "Key prefix of tasks made from the group, as {prefix}-12. Empty uses the first repository's.",
     "branchTemplateHelp": "Names the branches of this group's tickets in every repository, so they all get the same name. It replaces each repository's own format. Must contain {key} or {number}. Leave empty to keep each repository's own.",
     "commitTemplateHelp": "Writes the commit messages of this group's tickets in every repository, replacing each repository's own format. Leave empty to keep each repository's own.",
+    "prTemplateHelp": "Titles the pull requests of this group's tickets in every repository, replacing each repository's own format. Leave empty to keep each repository's own.",
     "instructions": "Instructions",
     "instructionsPh": "The web app calls the API through src/api; change both together and keep the OpenAPI spec in sync.",
     "instructionsHelp": "How the repositories fit together, in Markdown. Added to every prompt of the group's tickets.",

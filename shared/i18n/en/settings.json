@@ -68,7 +68,7 @@
     "coAuthor": "Add a Co-authored-by: agnts line",
     "coAuthorHelp": "Teammates can see which commits agnts wrote",
     "prTitle": "Pull request title",
-    "prTitleHelp": "'{key}' and '{title}' are replaced with the ticket's key and title",
+    "prTitleHelp": "Placeholders {number}, {key}, {type}, {scope}, {subject} and {title}, as in the commit message format. A repository's or group's own format replaces it.",
     "draft": "Open as draft",
     "runs": "Runs",
     "runsSub": "Defaults for every ticket and task",

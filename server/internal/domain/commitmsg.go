@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"slices"
@@ -96,6 +97,32 @@ func CommitLine(tmpl string, v CommitVars) string {
 		"{title}", oneLine(v.Title, commitSubjectMax),
 	)
 	return strings.Join(strings.Fields(r.Replace(tmpl)), " ")
+}
+
+// ValidatePRTemplate reports what is wrong with a pull request title
+// template: it takes the commit template's placeholders and rules. ""
+// is valid and keeps the workspace's title (GitSettings.PRTitle).
+func ValidatePRTemplate(tmpl string) error {
+	if tmpl == "" {
+		return nil
+	}
+	if err := checkPlaceholders(tmpl, CommitPlaceholders, "pull request title"); err != nil {
+		return err
+	}
+	if !strings.Contains(tmpl, "{subject}") && !strings.Contains(tmpl, "{title}") {
+		return fmt.Errorf("pull request title template must contain {subject} or {title}")
+	}
+	if strings.ContainsAny(tmpl, "\r\n") {
+		return fmt.Errorf("pull request title template must be one line")
+	}
+	return nil
+}
+
+// PRTitle fills a pull request title template as CommitLine fills a
+// commit's: a repository's (or its group's) template, else the
+// workspace's.
+func PRTitle(repoTmpl string, g GitSettings, v CommitVars) string {
+	return CommitLine(cmp.Or(repoTmpl, g.PRTitle, DefaultPRTitle), v)
 }
 
 // commitScope keeps a scope to lowercase letters, digits and - _ / .

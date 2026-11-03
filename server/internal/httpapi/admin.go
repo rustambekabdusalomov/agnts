@@ -729,7 +729,7 @@ func toRepo(x admin.RepoView) gen.Repository {
 	}
 	return gen.Repository{Id: x.ID, Name: x.Name, Kind: gen.RepositoryKind(x.Kind), Provider: gen.RepositoryProvider(x.Provider),
 		CloneUrl: x.CloneURL, DefaultBranch: x.DefaultBranch, BuildCmd: x.BuildCmd, LintCmd: x.LintCmd, TestCmd: x.TestCmd,
-		BranchPrefix: x.BranchPrefix, BranchTemplate: &x.BranchTemplate, CommitTemplate: &x.CommitTemplate, TaskPrefix: orchestrator.TaskPrefix(x.Repository), Instructions: x.ClaudeMD,
+		BranchPrefix: x.BranchPrefix, BranchTemplate: &x.BranchTemplate, CommitTemplate: &x.CommitTemplate, PrTemplate: &x.PRTemplate, TaskPrefix: orchestrator.TaskPrefix(x.Repository), Instructions: x.ClaudeMD,
 		JiraProject: x.JiraProject, PlaneProject: &x.PlaneProject, ClaudeMd: gen.RepositoryClaudeMd(st), OpenTickets: x.Open, DeployWorkflow: &x.DeployWorkflow,
 		ArchivedAt: x.ArchivedAt, Preview: toRepoPreview(x.Preview),
 		Stack: &x.Stack, Toolchains: ptr(toToolchains(x.Toolchains)), ToolchainsOverride: &x.ToolchainsOverride,
@@ -890,7 +890,7 @@ func repoFromInput(in gen.RepositoryInput) domain.Repository {
 	x.DefaultBranch, x.BuildCmd, x.LintCmd, x.TestCmd = str(in.DefaultBranch), str(in.BuildCmd), str(in.LintCmd), str(in.TestCmd)
 	x.BranchPrefix, x.TaskPrefix, x.ClaudeMD, x.JiraProject = str(in.BranchPrefix), str(in.TaskPrefix), str(in.Instructions), str(in.JiraProject)
 	x.DeployWorkflow = str(in.DeployWorkflow)
-	x.BranchTemplate, x.CommitTemplate = str(in.BranchTemplate), str(in.CommitTemplate)
+	x.BranchTemplate, x.CommitTemplate, x.PRTemplate = str(in.BranchTemplate), str(in.CommitTemplate), str(in.PrTemplate)
 	x.PlaneProject = str(in.PlaneProject)
 	if in.Toolchains != nil {
 		x.Toolchains = fromToolchains(*in.Toolchains)
@@ -959,7 +959,7 @@ func (s *Server) UpdateRepo(w http.ResponseWriter, r *http.Request, id int64) {
 	// run settings.
 	saved, err := s.opt.Admin.Repos.SaveRun(r.Context(), x, admin.SaveOptions{
 		KeepPreview: in.Preview == nil, PreviewEnv: previewEnv(in), KeepRun: in.Toolchains == nil, BuildEnv: in.BuildEnv,
-		KeepPlane: in.PlaneProject == nil,
+		KeepPlane: in.PlaneProject == nil, KeepPRTemplate: in.PrTemplate == nil,
 	})
 	if err != nil {
 		s.writeAdminError(w, r, err, "a repository with that name, Jira project or Plane project already exists")

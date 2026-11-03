@@ -33,6 +33,7 @@ const form = reactive({
   defaultBranch: 'main',
   branchTemplate: '',
   commitTemplate: '',
+  prTemplate: '',
   buildCmd: '',
   lintCmd: '',
   testCmd: '',
@@ -77,6 +78,7 @@ watch(
       defaultBranch: r?.defaultBranch ?? (p?.defaultBranch || 'main'),
       branchTemplate: r?.branchTemplate ?? '',
       commitTemplate: r?.commitTemplate ?? '',
+      prTemplate: r?.prTemplate ?? '',
       buildCmd: r?.buildCmd ?? '',
       lintCmd: r?.lintCmd ?? '',
       testCmd: r?.testCmd ?? '',
@@ -125,6 +127,7 @@ const save = useMutation({
       defaultBranch: form.defaultBranch.trim() || undefined,
       branchTemplate: form.branchTemplate.trim(),
       commitTemplate: form.commitTemplate.trim(),
+      prTemplate: form.prTemplate.trim(),
       buildCmd: form.buildCmd.trim(),
       lintCmd: form.lintCmd.trim(),
       testCmd: form.testCmd.trim(),
@@ -218,7 +221,7 @@ const prefix = computed(() => (form.taskPrefix || 'VIS').toUpperCase())
         <input id="r-branch" v-model="form.defaultBranch" type="text" style="font-family: var(--mono); font-size: 14px">
         <span class="fhelp">{{ t('repos.branchHelp') }}</span>
       </div>
-      <NameFormatFields v-model:branch="form.branchTemplate" v-model:commit="form.commitTemplate" :task-prefix="prefix" :branch-prefix="repo?.branchPrefix" id-prefix="r" />
+      <NameFormatFields v-model:branch="form.branchTemplate" v-model:commit="form.commitTemplate" v-model:pr="form.prTemplate" :task-prefix="prefix" :branch-prefix="repo?.branchPrefix" id-prefix="r" />
       <ToolchainsField
         v-model="form.toolchains"
         v-model:override="form.toolchainsOverride"
