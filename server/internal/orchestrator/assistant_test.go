@@ -119,7 +119,8 @@ func TestAssistantAnswersFromTheSnapshot(t *testing.T) {
 		t.Fatalf("question.txt = %q", q)
 	}
 	p := a.runner.prompts[0]
-	if !strings.Contains(p, "Answer in Russian") || !strings.Contains(p, orchestrator.AssistantDir(2)+"/inbox.json") || !strings.Contains(p, orchestrator.AssistantAnswerPath(2)) {
+	if !strings.Contains(p, "Answer in the language question.txt is written in") || !strings.Contains(p, "answer in Russian, the app's language") ||
+		!strings.Contains(p, orchestrator.AssistantDir(2)+"/inbox.json") || !strings.Contains(p, orchestrator.AssistantAnswerPath(2)) {
 		t.Fatalf("prompt = %s", p)
 	}
 	req := a.reqs[0]
@@ -306,7 +307,7 @@ func TestAssistantReplaysSharedAnswers(t *testing.T) {
 	if q := a.runner.written[orchestrator.AssistantDir(0)+"/question.txt"]; q != "What waits on me?" {
 		t.Fatalf("replayed question.txt = %q", q)
 	}
-	if !strings.Contains(a.runner.prompts[1], "Answer in Uzbek") {
+	if !strings.Contains(a.runner.prompts[1], "answer in Uzbek, the app's language") {
 		t.Fatalf("replay prompt = %s", a.runner.prompts[1])
 	}
 }
