@@ -386,3 +386,20 @@ a.mem-name:hover { color: var(--primary-ink); }
 .q textarea { display: block; }
 .q .cfg-in + textarea { margin-top: 10px; }
 .q textarea + .fa { margin-top: 10px; }
+
+/* Full-page screens (the chats): the window's height, no page scroll; the
+   page title sits on top and the chat fills the rest, edge to edge, its
+   message list the only thing that scrolls. */
+.shell.full { height: 100vh; height: 100dvh; min-height: 0; }
+.shell.full .main { height: 100%; min-height: 0; overflow: hidden; }
+.shell.full .content { flex: 1; min-height: 0; padding: 0; gap: 0; overflow: hidden; }
+.shell.full .content > .ph { flex: none; padding: 14px 24px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.shell.full .content > .ph h1 { font-size: 22px; }
+.shell.full .content > .ro-banner { flex: none; margin: 10px 24px 0; }
+.shell.full .content > .card { flex: 1; min-height: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+@media (max-width: 760px) {
+  .shell.full .content > .ph { padding: 10px 16px 8px; }
+  .shell.full .content > .ph h1 { font-size: 19px; }
+  /* The page's one-line explanation: the messages need the room. */
+  .shell.full .content > .ph p { display: none; }
+}

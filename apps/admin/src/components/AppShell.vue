@@ -341,7 +341,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="shell" :class="{ thin: prefs.thin }">
+  <div class="shell" :class="{ thin: prefs.thin, full: route.meta.full }">
     <aside
       class="side"
       @mouseover="showTip"

@@ -42,10 +42,10 @@ export const router = createRouter({
         { path: 'dashboard', name: 'dashboard', component: () => import('../pages/DashboardPage.vue') },
         { path: 'analytics/:tab?', name: 'analytics', component: () => import('../pages/AnalyticsPage.vue') },
         { path: 'assistant/conversations', name: 'assistantConversations', component: () => import('../pages/AssistantConversationsPage.vue') },
-        { path: 'assistant/:id(\\d+)?', name: 'assistant', component: () => import('../pages/AssistantPage.vue') },
-        { path: 'assistant/code/:id(\\d+)?', name: 'assistantCode', component: () => import('../pages/CodePage.vue') },
+        { path: 'assistant/:id(\\d+)?', name: 'assistant', component: () => import('../pages/AssistantPage.vue'), meta: { full: true } },
+        { path: 'assistant/code/:id(\\d+)?', name: 'assistantCode', component: () => import('../pages/CodePage.vue'), meta: { full: true } },
         // The team chat: channels where members and agnts talk.
-        { path: 'chat/:channelId(\\d+)?', name: 'chat', component: () => import('../pages/ChatPage.vue') },
+        { path: 'chat/:channelId(\\d+)?', name: 'chat', component: () => import('../pages/ChatPage.vue'), meta: { full: true } },
         { path: 'tickets', name: 'tickets', component: () => import('../pages/TicketsPage.vue') },
         { path: 'tickets/:key', name: 'ticket', component: () => import('../pages/TicketPage.vue') },
         { path: 'tasks', name: 'tasks', component: () => import('../pages/TasksPage.vue') },
