@@ -57,6 +57,20 @@ describe('GlobalSearch', () => {
     vi.unstubAllGlobals()
   })
 
+  it('leaves the search on Esc, keeping what is typed', async () => {
+    const w = setup()
+    const input = w.find('input')
+    ;(input.element as HTMLInputElement).focus()
+    await input.setValue('SHOP')
+    expect(document.activeElement).toBe(input.element)
+    expect(w.find('#gs-list').exists()).toBe(true)
+    await input.trigger('keydown', { key: 'Escape' })
+    expect(document.activeElement).not.toBe(input.element)
+    expect(w.find('#gs-list').exists()).toBe(false)
+    expect((input.element as HTMLInputElement).value).toBe('SHOP')
+    w.unmount()
+  })
+
   it('stops listening once it is gone', () => {
     const w = setup()
     w.unmount()
