@@ -1,10 +1,15 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"agnts/internal/chat"
 	"agnts/internal/domain"
@@ -22,6 +27,8 @@ type Chat interface {
 	Messages(ctx context.Context, channel, before, after int64, limit int) ([]domain.ChatMessage, error)
 	Message(ctx context.Context, id int64) (domain.ChatMessage, error)
 	Send(ctx context.Context, in domain.ChatSend) (domain.ChatMessage, bool, error)
+	SendVoice(ctx context.Context, channel int64, in chat.VoiceInput) (domain.ChatMessage, bool, error)
+	Voice(ctx context.Context, msg int64) (string, []byte, error)
 	MarkRead(ctx context.Context, channel, last int64) error
 	Act(ctx context.Context, msg int64, in chat.ActInput) (domain.ChatMessage, error)
 	RemoveRef(ctx context.Context, msg int64, typ, id string) (domain.ChatMessage, error)
@@ -254,4 +261,89 @@ func (s *Server) GetChatMessage(w http.ResponseWriter, r *http.Request, id gen.C
 		return
 	}
 	writeJSON(w, http.StatusOK, m)
+}
+
+// SendChatVoice implements gen.ServerInterface: a voice message, as
+// multipart form data.
+func (s *Server) SendChatVoice(w http.ResponseWriter, r *http.Request, id gen.ChatChannelID) {
+	if !s.chatReady(w) {
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, domain.ChatMaxVoiceBytes+domain.AssistantMaxVoiceBytes+64<<10)
+	if err := r.ParseMultipartForm(1 << 20); err != nil { //nolint:gosec // the body is limited just above
+		var tooBig *http.MaxBytesError
+		if errors.As(err, &tooBig) {
+			writeError(w, http.StatusRequestEntityTooLarge, "too_large", "a voice message is at most 2 minutes")
+			return
+		}
+		writeError(w, http.StatusBadRequest, "bad_request", "send the voice message as multipart/form-data")
+		return
+	}
+	read := func(field string, limit int) ([]byte, string, error) {
+		f, hdr, err := r.FormFile(field)
+		if err != nil {
+			return nil, "", fmt.Errorf("the field %q is missing", field)
+		}
+		defer func() { _ = f.Close() }()
+		b, err := io.ReadAll(io.LimitReader(f, int64(limit)+1))
+		if err != nil || len(b) > limit {
+			return nil, "", errors.New("a voice message is at most 2 minutes")
+		}
+		return b, hdr.Header.Get("Content-Type"), nil
+	}
+	audio, ct, err := read("audio", domain.ChatMaxVoiceBytes)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	wav, _, err := read("wav", domain.AssistantMaxVoiceBytes)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	in := chat.VoiceInput{ClientMsgID: r.FormValue("clientMsgId"), ContentType: ct, Data: audio, WAV: wav}
+	if in.DurationMS, err = strconv.ParseInt(r.FormValue("durationMs"), 10, 64); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", "durationMs must be a number of milliseconds")
+		return
+	}
+	if v := r.FormValue("replyTo"); v != "" {
+		to, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "bad_request", "replyTo must be a message id")
+			return
+		}
+		in.ReplyTo = &to
+	}
+	m, created, err := s.opt.Chat.SendVoice(r.Context(), id, in)
+	if err != nil {
+		s.writeChatError(w, r, err)
+		return
+	}
+	status := http.StatusOK
+	if created {
+		status = http.StatusCreated
+	}
+	writeJSON(w, status, m)
+}
+
+// GetChatAudio implements gen.ServerInterface: a voice message's
+// recording. It never changes; ranges are served, as players seek.
+func (s *Server) GetChatAudio(w http.ResponseWriter, r *http.Request, id gen.ChatMessageID) {
+	if !s.chatReady(w) {
+		return
+	}
+	ct, data, err := s.opt.Chat.Voice(r.Context(), id)
+	if err != nil {
+		s.writeChatError(w, r, err)
+		return
+	}
+	if _, ok := domain.ChatAudioType(ct); !ok {
+		ct = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", ct)
+	w.Header().Set("Content-Disposition", "inline")
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; sandbox")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Cache-Control", "private, max-age=31536000, immutable")
+	http.ServeContent(w, r, "", time.Time{}, bytes.NewReader(data))
 }

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { canRecord, MAX_VOICE_SECONDS, useVoiceRecorder } from '../../composables/useVoiceRecorder'
 import { MAX_CHAT, type ChatMessage } from './chat'
 
 // The message box: Enter sends, Shift+Enter starts a new line. A reply shows
 // what it answers above the box, with a way to drop it.
 const props = defineProps<{ channelName: string; replyTo?: ChatMessage }>()
-const emit = defineEmits<{ send: [body: string]; cancelReply: [] }>()
+const emit = defineEmits<{ send: [body: string]; voice: [clip: { recording: Blob; wav: Blob; durationMs: number }]; cancelReply: [] }>()
 const { t } = useI18n()
 
 const text = ref('')
@@ -35,6 +36,33 @@ watch(
   },
 )
 
+// A voice message: the mic records, Send sends the clip (it also stops at
+// the limit), Cancel drops it. Muse hears it on the server.
+const voiceOn = canRecord()
+const voice = useVoiceRecorder(() => void sendVoice())
+const micError = ref('')
+
+async function startVoice() {
+  micError.value = ''
+  try {
+    await voice.start()
+  } catch (e) {
+    const denied = e instanceof DOMException && (e.name === 'NotAllowedError' || e.name === 'SecurityError')
+    micError.value = denied ? t('teamchat.voiceDenied') : t('teamchat.voiceNoMic')
+  }
+}
+
+async function sendVoice() {
+  if (voice.state.value !== 'recording') return
+  try {
+    emit('voice', await voice.stopClip())
+  } catch {
+    micError.value = t('teamchat.voiceNoMic')
+  }
+}
+
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+
 defineExpose({ focus: () => box.value?.focus() })
 </script>
 
@@ -44,7 +72,16 @@ defineExpose({ focus: () => box.value?.focus() })
       <span>↪ {{ t('teamchat.replyingTo', { name: replyTo.author }) }}: <i>{{ (replyTo.body || replyTo.card?.title || '').slice(0, 100) }}</i></span>
       <button type="button" class="cp-x" :aria-label="t('teamchat.cancelReply')" @click="emit('cancelReply')">×</button>
     </div>
+    <div v-if="voice.state.value !== 'idle'" class="cp-rec" role="status">
+      <span class="cp-dot" aria-hidden="true" />
+      <span v-if="voice.state.value === 'encoding'">{{ t('teamchat.voiceEncoding') }}</span>
+      <span v-else>{{ t('teamchat.voiceRecording') }} <b class="cp-clock">{{ clock(voice.seconds.value) }}</b> <small class="hint">{{ t('teamchat.voiceLimit', { n: MAX_VOICE_SECONDS / 60 }) }}</small></span>
+      <span class="cp-sp" />
+      <button type="button" class="btn" :disabled="voice.state.value === 'encoding'" @click="voice.cancel()">{{ t('form.cancel') }}</button>
+      <button type="button" class="btn btn-p" :disabled="voice.state.value === 'encoding'" @click="sendVoice">{{ t('teamchat.voiceSend') }}</button>
+    </div>
     <textarea
+      v-else
       ref="box"
       v-model="text"
       rows="2"
@@ -52,9 +89,14 @@ defineExpose({ focus: () => box.value?.focus() })
       :aria-label="t('teamchat.placeholder', { channel: channelName })"
       @keydown="onKey"
     />
-    <div class="cp-f">
-      <span class="hint" :class="{ ferr: over }">{{ text.length > MAX_CHAT - 500 ? t('teamchat.count', { n: text.length, max: MAX_CHAT }) : t('teamchat.sendHint') }}</span>
-      <button type="submit" class="btn btn-p" :disabled="!length || over">{{ t('teamchat.send') }}</button>
+    <div v-if="voice.state.value === 'idle'" class="cp-f">
+      <span class="hint" :class="{ ferr: over || micError }">{{ micError || (text.length > MAX_CHAT - 500 ? t('teamchat.count', { n: text.length, max: MAX_CHAT }) : t('teamchat.sendHint')) }}</span>
+      <span class="cp-btns">
+        <button v-if="voiceOn" type="button" class="btn cp-mic" :title="t('teamchat.voiceStart')" :aria-label="t('teamchat.voiceStart')" @click="startVoice">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+        </button>
+        <button type="submit" class="btn btn-p" :disabled="!length || over">{{ t('teamchat.send') }}</button>
+      </span>
     </div>
   </form>
 </template>
@@ -66,4 +108,13 @@ defineExpose({ focus: () => box.value?.focus() })
 .cp-reply { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 4px 10px; border-left: 3px solid var(--primary); border-radius: 6px; background: var(--primary-soft); color: var(--primary-ink); font-size: 13px; }
 .cp-reply span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cp-x { border: 0; background: none; color: inherit; font-size: 18px; line-height: 1; cursor: pointer; }
+.cp-btns { display: inline-flex; gap: 8px; }
+.cp-mic { padding: 0 10px; }
+.cp-mic svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.cp-rec { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 4px; font-size: 14.5px; }
+.cp-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--bad); animation: cp-pulse 1.2s ease-in-out infinite; }
+@keyframes cp-pulse { 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .cp-dot { animation: none; } }
+.cp-clock { font-variant-numeric: tabular-nums; }
+.cp-sp { flex: 1; }
 </style>

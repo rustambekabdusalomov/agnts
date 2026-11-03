@@ -7,6 +7,7 @@ import ChatCardView from './ChatCardView.vue'
 import RefChips from './RefChips.vue'
 import type { ChatMessage } from './chat'
 import { citationsOf } from './citations'
+import { chatAudioPath } from '../../api/client'
 
 // One message: who, when, the text (or agnts's card), its links, the reply
 // it answers, and on hover Reply and Turn into ticket.
@@ -25,6 +26,11 @@ const time = computed(() => new Date(props.message.createdAt).toLocaleTimeString
 const sources = computed(() => (props.message.kind === 'agent_text' ? citationsOf(props.message.body).length : 0))
 const snippet = (s: string) => (s.length > 120 ? `${s.slice(0, 120)}…` : s)
 const initials = computed(() => (props.message.author || '?').slice(0, 2).toUpperCase())
+const audio = computed(() => props.message.audio)
+const voiceLen = computed(() => {
+  const s = Math.round((audio.value?.durationMs ?? 0) / 1000)
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+})
 </script>
 
 <template>
@@ -42,7 +48,16 @@ const initials = computed(() => (props.message.author || '?').slice(0, 2).toUppe
         <AiBadge v-if="message.ai && message.kind !== 'agent_card'" :ai="message.ai" :extra="sources ? t('teamchat.sources', { n: sources }) : ''" />
       </div>
       <ChatCardView v-if="message.kind === 'agent_card' && message.card" :message="message" />
-      <ChatBody v-else :body="message.body" :refs="message.refs" :cite="message.kind === 'agent_text'" @jump="emit('jump', $event)" />
+      <template v-else>
+        <div v-if="audio" class="cm-voice">
+          <audio controls preload="metadata" :src="chatAudioPath(message.id)" :aria-label="t('teamchat.voiceMessage', { time: voiceLen })" />
+          <span class="cm-vlen">{{ voiceLen }}</span>
+        </div>
+        <p v-if="audio?.transcript === 'pending'" class="cm-vnote" role="status"><span class="cm-spin" />{{ t('teamchat.voiceListening') }} <span class="cm-muse">✨ {{ AI_NAME }}</span></p>
+        <p v-else-if="audio?.transcript === 'none'" class="cm-vnote">{{ t('teamchat.voiceNoWords') }}</p>
+        <p v-else-if="audio?.transcript === 'failed'" class="cm-vnote bad">{{ t('teamchat.voiceFailed', { error: audio.error || '' }) }}</p>
+        <ChatBody v-if="message.body" :body="message.body" :refs="message.refs" :cite="message.kind === 'agent_text'" @jump="emit('jump', $event)" />
+      </template>
       <RefChips :message="message" />
       <div v-if="thinking" class="cm-think" role="status"><span class="cm-spin" />{{ t('teamchat.thinking') }} <span class="cm-muse">✨ {{ AI_NAME }}</span></div>
     </div>
@@ -54,6 +69,11 @@ const initials = computed(() => (props.message.author || '?').slice(0, 2).toUppe
 </template>
 
 <style scoped>
+.cm-voice { display: flex; align-items: center; gap: 10px; margin: 4px 0 2px; }
+.cm-voice audio { height: 36px; max-width: min(360px, 100%); }
+.cm-vlen { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.cm-vnote { margin: 2px 0 4px; font-size: 13px; color: var(--ink-3); display: flex; align-items: center; gap: 6px; }
+.cm-vnote.bad { color: var(--bad); }
 .cm { position: relative; display: flex; gap: 10px; padding: 6px 10px; border-radius: 10px; transition: background-color 0.3s; }
 .cm:hover { background: var(--row-hover); }
 .cm.hl, .cm-sys.hl { background: var(--primary-soft); }

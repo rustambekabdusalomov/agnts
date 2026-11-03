@@ -131,6 +131,33 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
 }
 
 /** Muse's words for a spoken question (a WAV clip), to ask as typed ones are. */
+/** Sends a team chat voice message: the recording to keep and play, and the same audio as WAV for Muse to hear. */
+export async function sendChatVoice(
+  channelId: number,
+  v: { clientMsgId: string; durationMs: number; replyTo?: number; recording: Blob; wav: Blob },
+): Promise<components['schemas']['ChatMessage']> {
+  const body = new FormData()
+  body.append('clientMsgId', v.clientMsgId)
+  body.append('durationMs', String(Math.round(v.durationMs)))
+  if (v.replyTo) body.append('replyTo', String(v.replyTo))
+  const type = (v.recording.type || 'audio/webm').split(';')[0]
+  const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : type.includes('mpeg') ? 'mp3' : 'webm'
+  body.append('audio', new Blob([v.recording], { type }), `voice.${ext}`)
+  body.append('wav', v.wav, 'voice.wav')
+  const response = await fetch(apiPath(`/chat/channels/${channelId}/voice`), { method: 'POST', body, credentials: 'same-origin' })
+  const data = await response.json().catch(() => undefined)
+  if (!response.ok) {
+    if (response.status === 401) onUnauthorized()
+    throw new HttpError(response.status, data as Partial<ApiError> | undefined)
+  }
+  return data as components['schemas']['ChatMessage']
+}
+
+/** Where a voice message's recording plays from. */
+export function chatAudioPath(messageId: number): string {
+  return apiPath(`/chat/messages/${messageId}/audio`)
+}
+
 export async function transcribeQuestion(wav: Blob): Promise<string> {
   const body = new FormData()
   body.append('file', wav, 'question.wav')

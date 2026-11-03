@@ -111,12 +111,18 @@ export function useVoiceRecorder(onLimit: () => void) {
   }
 
   async function stop(): Promise<Blob> {
+    return (await stopClip()).wav
+  }
+
+  /** Stops and resolves with the clip as the browser recorded it (to keep and play), the same as WAV, and its length. */
+  async function stopClip(): Promise<{ recording: Blob; wav: Blob; durationMs: number }> {
     if (state.value !== 'recording') throw new Error('not recording')
     state.value = 'encoding'
+    const durationMs = Date.now() - started
     try {
       const recording = await stopped()
       release()
-      return await toWav(recording)
+      return { recording, wav: await toWav(recording), durationMs }
     } finally {
       release()
       rec = undefined
@@ -136,5 +142,5 @@ export function useVoiceRecorder(onLimit: () => void) {
   }
 
   onBeforeUnmount(cancel)
-  return { state, seconds, start, stop, cancel }
+  return { state, seconds, start, stop, stopClip, cancel }
 }

@@ -82,6 +82,17 @@
     "draftDescription": "Описание",
     "draftRepo": "Репозиторий",
     "draftEdit": "Изменить",
-    "draftDone": "Готово"
+    "draftDone": "Готово",
+    "voiceStart": "Записать голосовое сообщение",
+    "voiceRecording": "Запись",
+    "voiceEncoding": "Готовлю голосовое сообщение…",
+    "voiceLimit": "до {n} мин",
+    "voiceSend": "Отправить голосовое",
+    "voiceDenied": "Разрешите этому сайту доступ к микрофону, чтобы отправлять голосовые сообщения.",
+    "voiceNoMic": "Не удалось открыть микрофон.",
+    "voiceMessage": "Голосовое сообщение, {time}",
+    "voiceListening": "Muse слушает…",
+    "voiceNoWords": "В этом голосовом сообщении не слышно слов.",
+    "voiceFailed": "Не удалось распознать: {error}"
   }
 }

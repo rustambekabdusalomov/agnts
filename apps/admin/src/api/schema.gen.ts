@@ -6040,6 +6040,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/chat/channels/{channelId}/voice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a voice message. Muse hears it after it is stored; its words become the message's text (an event brings them) */
+        post: operations["sendChatVoice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/chat/channels/{channelId}/read": {
         parameters: {
             query?: never;
@@ -6070,6 +6089,25 @@ export interface paths {
         };
         /** One message with its refs (opens a citation in its channel) */
         get: operations["getChatMessage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/messages/{messageId}/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        /** A voice message's recording, to play */
+        get: operations["getChatAudio"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6290,10 +6328,23 @@ export interface components {
             card?: components["schemas"]["ChatCard"];
             ai?: components["schemas"]["ChatAI"];
             ticketKey?: string;
+            audio?: components["schemas"]["ChatAudio"];
             clientMsgId?: string;
             refs: components["schemas"]["ChatRef"][];
             /** Format: date-time */
             createdAt: string;
+        };
+        /** @description A voice message; the message's body is its transcript */
+        ChatAudio: {
+            contentType: string;
+            /** Format: int64 */
+            durationMs: number;
+            /**
+             * @description none: no words were heard
+             * @enum {string}
+             */
+            transcript: "pending" | "done" | "none" | "failed";
+            error?: string;
         };
         ChatSendRequest: {
             /**
@@ -21306,6 +21357,73 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    sendChatVoice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channelId: components["parameters"]["ChatChannelID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: uuid */
+                    clientMsgId: string;
+                    /**
+                     * Format: int64
+                     * @description The recording's length
+                     */
+                    durationMs: number;
+                    /** Format: int64 */
+                    replyTo?: number;
+                    /**
+                     * Format: binary
+                     * @description The recording to keep and play (WebM, Ogg, MP4, MP3, AAC or WAV), at most 3 MB
+                     */
+                    audio: string;
+                    /**
+                     * Format: binary
+                     * @description The same audio as 16-bit PCM WAV for Muse to hear
+                     */
+                    wav: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Already stored (a resend) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            /** @description Sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description The recording is too large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     markChatRead: {
         parameters: {
             query?: never;
@@ -21352,6 +21470,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getChatAudio: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                messageId: components["parameters"]["ChatMessageID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The recording */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "audio/*": string;
                 };
             };
             401: components["responses"]["Unauthorized"];

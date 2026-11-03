@@ -22,6 +22,8 @@ type Brain interface {
 	ChatModel(ctx context.Context, c orchestrator.ChatModelCall) (orchestrator.ChatModelResult, error)
 	ChatCode(ctx context.Context, c orchestrator.ChatCodeCall) (orchestrator.ChatCodeResult, error)
 	RepoBrief(ctx context.Context, repoID int64) (domain.RepoBrief, error)
+	// Transcribe hears a WAV clip on the account of the person ctx acts for.
+	Transcribe(ctx context.Context, wav []byte) (string, error)
 }
 
 var _ Brain = (*orchestrator.Orchestrator)(nil)
@@ -640,3 +642,59 @@ func (s *Service) createFromDraft(ctx context.Context, m domain.ChatMessage, in 
 	}
 	return "Created " + key, key, nil
 }
+
+// transcribe hears a voice message. Its words become its text and are
+// then linked, and answered when they ask @agnts or reply to agnts.
+func (s *Service) transcribe(ctx context.Context, j postgres.ChatJob) error {
+	m, err := s.Store.Message(ctx, j.MessageID)
+	if err != nil {
+		return err
+	}
+	if m.Audio == nil || m.Audio.Transcript != domain.VoicePending {
+		return nil // heard already
+	}
+	if s.Brain == nil {
+		_, err := s.Store.SetTranscript(ctx, m.ID, "", domain.VoiceFailed, "voice messages cannot be heard on this server", nil, 0)
+		return err
+	}
+	_, wav, err := s.Store.Voice(ctx, m.ID, true)
+	if err != nil {
+		return err
+	}
+	text, err := s.Brain.Transcribe(ctx, wav)
+	switch {
+	case errors.Is(err, orchestrator.ErrNoSpeech):
+		_, err = s.Store.SetTranscript(ctx, m.ID, "", domain.VoiceNone, "", nil, 0)
+		return err
+	case err != nil:
+		if j.Attempts < maxAttempts {
+			return err // tried again
+		}
+		_, serr := s.Store.SetTranscript(ctx, m.ID, "", domain.VoiceFailed, clip(userError(err), 300), nil, 0)
+		return errors.Join(err, serr)
+	}
+	text = clip(strings.TrimSpace(text), domain.ChatMaxBody)
+	jobs := []string{postgres.ChatJobLink}
+	toAgent := false
+	if m.ReplyTo != nil {
+		if p, err := s.Store.Message(ctx, *m.ReplyTo); err == nil {
+			toAgent = p.FromAgent()
+		}
+	}
+	if domain.MentionsAgent(text) || toAgent || mentionsAgentSpoken(text) {
+		jobs = append(jobs, postgres.ChatJobAnswer)
+	}
+	_, err = s.Store.SetTranscript(ctx, m.ID, text, domain.VoiceDone, "", jobs, j.UserID)
+	if err == nil {
+		s.Wake()
+	}
+	return err
+}
+
+// spokenAgent is how "@agnts" comes out of a transcript: "agnts", "agents",
+// "a.g.n.t.s" said at the start of the clip.
+var spokenAgent = regexp.MustCompile(`(?i)^[\s\p{P}]*(?:(?:hey|эй)[\s\p{P}]+)?(?:agnts|agents|agnt|эйджентс|агентс|agentlar)(?:[\s\p{P}]|$)`)
+
+// mentionsAgentSpoken reports whether a spoken message starts by
+// addressing agnts.
+func mentionsAgentSpoken(text string) bool { return spokenAgent.MatchString(text) }

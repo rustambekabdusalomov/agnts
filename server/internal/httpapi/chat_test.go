@@ -1,9 +1,13 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"mime/multipart"
 	"net/http"
+	"net/http/httptest"
+	"net/textproto"
 	"strings"
 	"testing"
 
@@ -56,6 +60,20 @@ func (f *fakeChat) Message(_ context.Context, id int64) (domain.ChatMessage, err
 		return domain.ChatMessage{}, domain.ErrNotFound
 	}
 	return domain.ChatMessage{ID: 5, ChannelID: 2, Refs: []domain.ChatRef{}}, nil
+}
+
+func (f *fakeChat) SendVoice(_ context.Context, ch int64, in chat.VoiceInput) (domain.ChatMessage, bool, error) {
+	if in.ContentType != "audio/webm" || string(in.Data) != "opus" || string(in.WAV) != "RIFFwav" || in.DurationMS != 4200 {
+		return domain.ChatMessage{}, false, fmt.Errorf("%w: got %+v", chat.ErrInvalid, in)
+	}
+	return domain.ChatMessage{ID: 77, ChannelID: ch, Kind: domain.ChatKindText, Audio: &domain.ChatAudio{ContentType: "audio/webm", DurationMS: 4200, Transcript: domain.VoicePending}, Refs: []domain.ChatRef{}}, true, nil
+}
+
+func (f *fakeChat) Voice(_ context.Context, id int64) (string, []byte, error) {
+	if id != 77 {
+		return "", nil, domain.ErrNotFound
+	}
+	return "audio/webm", []byte("0123456789"), nil
 }
 
 func (f *fakeChat) MarkRead(context.Context, int64, int64) error { return nil }
@@ -133,5 +151,47 @@ func TestChatAPI(t *testing.T) {
 		if rec := h.do("POST", path, `{"action":"merge","name":"x"}`, cookie); rec.Code != http.StatusForbidden {
 			t.Fatalf("viewer POST %s: %d %s", path, rec.Code, rec.Body)
 		}
+	}
+}
+
+func TestChatVoiceAPI(t *testing.T) {
+	h := newHarness(t, pinger{})
+	cookie := h.signIn(t)
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	_ = mw.WriteField("clientMsgId", "7d9f6a0e-4f6b-4a43-9a4b-1f0f8c6c2a11")
+	_ = mw.WriteField("durationMs", "4200")
+	part := func(field, name, ct, data string) {
+		hd := textproto.MIMEHeader{}
+		hd.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, field, name))
+		hd.Set("Content-Type", ct)
+		w, _ := mw.CreatePart(hd)
+		_, _ = w.Write([]byte(data))
+	}
+	part("audio", "voice.webm", "audio/webm", "opus")
+	part("wav", "voice.wav", "audio/wav", "RIFFwav")
+	_ = mw.Close()
+	req := httptest.NewRequest("POST", "/api/w/acme/chat/channels/1/voice", &body)
+	req.RemoteAddr = "203.0.113.7:5555"
+	for k, v := range cookie {
+		req.Header.Set(k, v)
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	rec := httptest.NewRecorder()
+	h.h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusCreated || !strings.Contains(rec.Body.String(), `"transcript":"pending"`) {
+		t.Fatalf("voice: %d %s", rec.Code, rec.Body)
+	}
+	// Played with a range, as players seek.
+	req = httptest.NewRequest("GET", "/api/w/acme/chat/messages/77/audio", nil)
+	req.RemoteAddr = "203.0.113.7:5555"
+	for k, v := range cookie {
+		req.Header.Set(k, v)
+	}
+	req.Header.Set("Range", "bytes=2-5")
+	rec = httptest.NewRecorder()
+	h.h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusPartialContent || rec.Body.String() != "2345" || rec.Header().Get("Content-Type") != "audio/webm" {
+		t.Fatalf("audio: %d %q %v", rec.Code, rec.Body, rec.Header())
 	}
 }

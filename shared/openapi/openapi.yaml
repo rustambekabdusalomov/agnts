@@ -7605,6 +7605,47 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /chat/channels/{channelId}/voice:
+    parameters:
+      - $ref: '#/components/parameters/ChatChannelID'
+    post:
+      operationId: sendChatVoice
+      summary: Send a voice message. Muse hears it after it is stored; its words become the message's text (an event brings them)
+      tags: [chat]
+      x-viewer: true
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [clientMsgId, durationMs, audio, wav]
+              properties:
+                clientMsgId: { type: string, format: uuid }
+                durationMs: { type: integer, format: int64, description: The recording's length, at most 2 minutes }
+                replyTo: { type: integer, format: int64 }
+                audio: { type: string, format: binary, description: 'The recording to keep and play (WebM, Ogg, MP4, MP3, AAC or WAV), at most 3 MB' }
+                wav: { type: string, format: binary, description: The same audio as 16-bit PCM WAV for Muse to hear, at most 4 MB }
+      responses:
+        '200':
+          description: Already stored (a resend)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatMessage' }
+        '201':
+          description: Sent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatMessage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413':
+          description: The recording is too large
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   /chat/channels/{channelId}/read:
     parameters:
       - $ref: '#/components/parameters/ChatChannelID'
@@ -7639,6 +7680,22 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ChatMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /chat/messages/{messageId}/audio:
+    parameters:
+      - $ref: '#/components/parameters/ChatMessageID'
+    get:
+      operationId: getChatAudio
+      summary: A voice message's recording, to play
+      tags: [chat]
+      responses:
+        '200':
+          description: The recording
+          content:
+            audio/*:
+              schema: { type: string, format: binary }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
@@ -8054,11 +8111,21 @@ components:
         card: { $ref: '#/components/schemas/ChatCard' }
         ai: { $ref: '#/components/schemas/ChatAI' }
         ticketKey: { type: string }
+        audio: { $ref: '#/components/schemas/ChatAudio' }
         clientMsgId: { type: string }
         refs:
           type: array
           items: { $ref: '#/components/schemas/ChatRef' }
         createdAt: { type: string, format: date-time }
+    ChatAudio:
+      type: object
+      description: A voice message; the message's body is its transcript
+      required: [contentType, durationMs, transcript]
+      properties:
+        contentType: { type: string }
+        durationMs: { type: integer, format: int64 }
+        transcript: { type: string, enum: [pending, done, none, failed], description: 'none: no words were heard' }
+        error: { type: string }
     ChatSendRequest:
       type: object
       required: [clientMsgId, body]

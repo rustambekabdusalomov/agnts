@@ -49,6 +49,9 @@ type Store interface {
 	// OpenPRWorkspaces are the workspaces with an open pull request card of
 	// the last day (ctx: the system's).
 	OpenPRWorkspaces(ctx context.Context) ([]int64, error)
+	SendVoice(ctx context.Context, user int64, in domain.ChatSend, v postgres.ChatVoice) (domain.ChatMessage, bool, error)
+	Voice(ctx context.Context, msg int64, wav bool) (string, []byte, error)
+	SetTranscript(ctx context.Context, msg int64, text, state, why string, jobs []string, user int64) (domain.ChatMessage, error)
 }
 
 var _ Store = (*postgres.Chat)(nil)
@@ -258,6 +261,55 @@ func (s *Service) Send(ctx context.Context, in domain.ChatSend) (domain.ChatMess
 // Message returns one message with its refs.
 func (s *Service) Message(ctx context.Context, id int64) (domain.ChatMessage, error) {
 	return s.Store.Message(ctx, id)
+}
+
+// VoiceInput is a voice message as the browser sends it: the recording to
+// keep and play, and the same audio as WAV for Muse to hear.
+type VoiceInput struct {
+	ClientMsgID string
+	ReplyTo     *int64
+	ContentType string
+	Data, WAV   []byte
+	DurationMS  int64
+}
+
+// SendVoice stores a voice message and queues hearing it; its transcript
+// becomes its text, links and @agnts then work on it as on typed ones.
+func (s *Service) SendVoice(ctx context.Context, channel int64, in VoiceInput) (domain.ChatMessage, bool, error) {
+	if !uuidRe.MatchString(in.ClientMsgID) {
+		return domain.ChatMessage{}, false, invalid("clientMsgId must be a UUID")
+	}
+	ct, ok := domain.ChatAudioType(in.ContentType)
+	switch {
+	case !ok:
+		return domain.ChatMessage{}, false, invalid("a voice message is WebM, Ogg, MP4, MP3, AAC or WAV audio")
+	case len(in.Data) == 0:
+		return domain.ChatMessage{}, false, invalid("the recording is empty")
+	case len(in.Data) > domain.ChatMaxVoiceBytes || len(in.WAV) > domain.AssistantMaxVoiceBytes:
+		return domain.ChatMessage{}, false, invalid("a voice message is at most %d minutes", int(domain.ChatMaxVoice.Minutes()))
+	case in.DurationMS <= 0 || in.DurationMS > domain.ChatMaxVoice.Milliseconds()+2000:
+		return domain.ChatMessage{}, false, invalid("a voice message is at most %d minutes", int(domain.ChatMaxVoice.Minutes()))
+	}
+	if in.ReplyTo != nil {
+		if p, err := s.Store.Message(ctx, *in.ReplyTo); err != nil || p.ChannelID != channel {
+			return domain.ChatMessage{}, false, invalid("replyTo is not a message of this channel")
+		}
+	}
+	u, _ := actor(ctx)
+	m, created, err := s.Store.SendVoice(ctx, u, domain.ChatSend{ChannelID: channel, ClientMsgID: in.ClientMsgID, ReplyTo: in.ReplyTo},
+		postgres.ChatVoice{ContentType: ct, Data: in.Data, WAV: in.WAV, DurationMS: in.DurationMS})
+	if err == nil && created {
+		s.Wake()
+	}
+	return m, created, err
+}
+
+// Voice returns a voice message's recording to play.
+func (s *Service) Voice(ctx context.Context, msg int64) (string, []byte, error) {
+	if _, err := s.Store.Message(ctx, msg); err != nil {
+		return "", nil, err
+	}
+	return s.Store.Voice(ctx, msg, false)
 }
 
 // MarkRead saves how far the asker has read a channel.
