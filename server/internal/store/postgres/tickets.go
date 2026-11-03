@@ -547,6 +547,8 @@ func (s *Agent) SetAgentConfigScan(ctx context.Context, id int64, scan domain.Ag
 // A Muse session is resumable only on the account that started it: Muse
 // refuses reasoning it issued to another caller, so after a switch between
 // an account and agnts's key (credits) the work starts a new session.
+// Sessions do not move between tools either: a run whose account is for
+// another tool (Claude moved to Muse) starts a new one.
 func (s *Agent) LastSessionID(ctx context.Context, ticketID int64, acct domain.ClaudeAccount) (string, error) {
 	var (
 		id, model string
@@ -563,6 +565,9 @@ func (s *Agent) LastSessionID(ctx context.Context, ticketID int64, acct domain.C
 	}
 	if err != nil {
 		return "", err
+	}
+	if acct.Provider != "" && acct.Provider != domain.ProviderOf(model) {
+		return "", nil
 	}
 	if domain.IsMuse(model) && (conn.Int64 != acct.ConnectionID || credits != acct.Credits) {
 		return "", nil
@@ -1137,10 +1142,11 @@ func (s *Agent) TicketByPR(ctx context.Context, ref domain.PRRef) (domain.Ticket
 	t, err := scanTicket(scanAppend{s.db.QueryRow(ctx, `SELECT `+ticketCols+`, x.rid FROM tickets JOIN (
 			SELECT tr.ticket_id AS tid, tr.repo_id AS rid, tr.pr_url AS url, tr.branch AS br, r.clone_url AS clone
 			FROM ticket_repos tr JOIN repositories r ON r.id = tr.repo_id) x ON x.tid = tickets.id
-		WHERE ($1 <> '' AND x.url = $1)
+		WHERE tickets.kind <> 'review' AND tickets.source <> 'git'
+		  AND (($1 <> '' AND x.url = $1)
 		   OR ($2 <> '' AND x.br = $2 AND ($3 = 0 OR x.rid = $3)
 		       AND ($4 = '' OR right(lower(rtrim(regexp_replace(regexp_replace(x.clone, '^[^@/]+@([^:/]+):', '\1/'), '\.git$', ''), '/')),
-		           length($4) + 1) = '/' || lower($4)))
+		           length($4) + 1) = '/' || lower($4))))
 		ORDER BY ($1 <> '' AND x.url = $1) DESC, tickets.updated_at DESC LIMIT 1`,
 		ref.URL, ref.Branch, ref.RepoID, strings.Trim(ref.Repo, "/")), &repoID})
 	return t, repoID, err

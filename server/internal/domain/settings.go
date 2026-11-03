@@ -512,6 +512,11 @@ func (s Settings) ModelFor(t Ticket, stage string) string {
 	if m := t.Models[stage]; ValidModel(m) {
 		return EffectiveModel(s.Access, m)
 	}
+	// The re-check is the coding model, so a ticket's coding choice is
+	// its choice too.
+	if m := t.Models[ModelCoding]; stage == ModelRecheck && ValidModel(m) {
+		return EffectiveModel(s.Access, m)
+	}
 	return EffectiveModel(s.Access, s.Models.For(stage))
 }
 

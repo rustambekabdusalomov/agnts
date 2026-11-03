@@ -524,4 +524,11 @@ func TestLastSessionIDKeepsMuseOnItsAccount(t *testing.T) {
 	if got := last(mine); got != "s3" {
 		t.Fatalf("claude session: %q", got)
 	}
+	// ...but not on a run moved to another tool.
+	if got := last(domain.ClaudeAccount{ConnectionID: conn, Provider: domain.ProviderMuse}); got != "" {
+		t.Fatalf("muse resumed claude session %q", got)
+	}
+	if got := last(domain.ClaudeAccount{Credits: true, Provider: domain.ProviderClaude}); got != "s3" {
+		t.Fatalf("claude account: %q", got)
+	}
 }

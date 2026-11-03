@@ -146,3 +146,42 @@ func TestLongPromptGoesToAFile(t *testing.T) {
 		t.Fatalf("prompt file: %.200s", w)
 	}
 }
+
+// The re-check follows the ticket's coding choice, and is skipped when it
+// would land on another module than the analysis: it resumes the
+// analysis's session, which another module cannot.
+func TestRecheckFollowsTicketModels(t *testing.T) {
+	h := newHarness(t)
+	h.settings.s.RecheckComplex = true
+	h.settings.s.AskFirst = false
+	h.settings.s.Models.Coding = domain.MuseSpark
+	var reqs []ai.Request
+	h.runner.onClaude = func(r ai.Request) { reqs = append(reqs, r) }
+	h.ingest("PAY-1")
+	if _, err := h.o.SetModels(h.ctx, "PAY-1", map[string]string{"analyze": "opus", "coding": "sonnet"}, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.runner.scripts = []script{
+		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: complexAnalysis}},
+		{result: ok("s1"), files: map[string]string{orchestrator.AnalysisPath: complexAnalysis}},
+	}
+	h.step()
+	if len(reqs) != 2 || reqs[1].Model != "sonnet" || reqs[1].Resume != "s1" {
+		t.Fatalf("re-check: %+v", reqs)
+	}
+
+	// Analysis on Claude, coding on Muse: no re-check.
+	reqs = nil
+	h.ingest("PAY-2")
+	if _, err := h.o.SetModels(h.ctx, "PAY-2", map[string]string{"analyze": "opus"}, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.runner.scripts = []script{{result: ok("s2"), files: map[string]string{orchestrator.AnalysisPath: complexAnalysis}}}
+	h.step()
+	if len(reqs) != 1 {
+		t.Fatalf("requests: %d, the last on %s resuming %q", len(reqs), reqs[len(reqs)-1].Model, reqs[len(reqs)-1].Resume)
+	}
+	if evs := h.events("PAY-2", domain.EventAnalysisChecked); len(evs) != 0 {
+		t.Fatalf("events: %+v", evs)
+	}
+}
