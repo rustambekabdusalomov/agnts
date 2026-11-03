@@ -1786,7 +1786,7 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 		return nil
 	}
 
-	title := strings.NewReplacer("{key}", t.Key, "{title}", t.Title).Replace(s.Git.PRTitle)
+	vars := domain.CommitVars{Number: t.Number(), Key: t.Key, Title: t.Title, Kind: t.Kind, Info: o.changeInfo(ctx, t)}
 	var siblings []string // the other repositories with a change, for the bodies
 	for _, r := range append(append([]runRepo{}, done...), todo...) {
 		siblings = append(siblings, r.Name)
@@ -1818,7 +1818,7 @@ func (o *Orchestrator) push(ctx context.Context, s domain.Settings, t domain.Tic
 				body += fmt.Sprintf("\n\n> **Needs a rebase:** %s changed the same lines since this branch was cut: %s.", r.DefaultBranch, strings.Join(drift, ", "))
 			}
 			var err error
-			if number, url, err = o.host.OpenPR(ctx, r.Repository, PR{Branch: r.Row.Branch, Title: title, Body: body, Draft: s.Git.Draft}); err != nil {
+			if number, url, err = o.host.OpenPR(ctx, r.Repository, PR{Branch: r.Row.Branch, Title: domain.PRTitle(r.PRTemplate, s.Git, vars), Body: body, Draft: s.Git.Draft}); err != nil {
 				o.recordPushError(ctx, t, r, err)
 				if !multi {
 					return fmt.Errorf("open pull request: %w", err)
@@ -2044,6 +2044,23 @@ func analysisComment(a Analysis, withQuestions bool) string {
 		}
 	}
 	return b.String()
+}
+
+// changeInfo is what the agent said about the ticket's change when it
+// first described it (its first coding run that did), for the pull request
+// titles: later runs describe fixes to it. Empty when none did.
+func (o *Orchestrator) changeInfo(ctx context.Context, t domain.Ticket) domain.CommitInfo {
+	runs, err := o.store.RunCommits(ctx, t.ID)
+	if err != nil {
+		o.log.Warn("read the commit info for the pull request title", "ticket", t.Key, "err", err)
+		return domain.CommitInfo{}
+	}
+	for _, rc := range runs {
+		if rc.Info != (domain.CommitInfo{}) {
+			return rc.Info
+		}
+	}
+	return domain.CommitInfo{}
 }
 
 // commitMessage is a coding run's commit message: the repository's commit

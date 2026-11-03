@@ -23,6 +23,7 @@
     "prefixHelp": "Guruhdan yaratilgan vazifalar kaliti prefiksi, masalan {prefix}-12. Boʻsh boʻlsa, birinchi repozitoriyniki ishlatiladi.",
     "branchTemplateHelp": "Bu guruh vazifalari branchlarining nomi barcha repozitoriylarda bir xil boʻlishi uchun. Har bir repozitoriyning oʻz formatini almashtiradi. {key} yoki {number} boʻlishi kerak. Har bir repozitoriyning oʻzinikini qoldirish uchun boʻsh qoldiring.",
     "commitTemplateHelp": "Bu guruh vazifalari kommit xabarlari barcha repozitoriylarda shu formatda yoziladi; har bir repozitoriyning oʻz formatini almashtiradi. Har birining oʻzinikini qoldirish uchun boʻsh qoldiring.",
+    "prTemplateHelp": "Bu guruh vazifalari pull requestlarining sarlavhasi barcha repozitoriylarda shu formatda bo'ladi; har bir repozitoriyning oʻz formatini almashtiradi. Har birining oʻzinikini qoldirish uchun boʻsh qoldiring.",
     "instructions": "Koʻrsatmalar",
     "instructionsPh": "Veb-ilova API ga src/api orqali murojaat qiladi; ikkalasini birga oʻzgartiring va OpenAPI spetsifikatsiyasini dolzarb saqlang.",
     "instructionsHelp": "Repozitoriylar bir-biriga qanday bogʻlangani, Markdown da. Guruh tiketlarining har bir promptiga qoʻshiladi.",

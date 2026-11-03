@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-// The branch name and commit message formats, with their placeholders and
-// an example of each: a repository's own, or a group's, which replace its
-// members' in the group's tickets (empty keeps each repository's own).
+// The branch name, commit message and pull request title formats, with
+// their placeholders and an example of each: a repository's own, or a
+// group's, which replace its members' in the group's tickets (empty keeps
+// each repository's own).
 const props = defineProps<{ taskPrefix: string; branchPrefix?: string; group?: boolean; idPrefix: string }>()
 const branch = defineModel<string>('branch', { required: true })
 const commit = defineModel<string>('commit', { required: true })
+const pr = defineModel<string>('pr', { required: true })
 const { t } = useI18n()
 
 const branchDefault = '{prefix}{key}'
@@ -40,16 +42,19 @@ const commitPlaceholders: [string, string][] = [
   ['{title}', 'repos.phTitle'],
 ]
 const commitPlaceholder = '[{number}] {type}({scope}): {subject}'
-const commitExample = computed(() =>
-  commit.value
-    .trim()
+// A commit-style template filled with the example change.
+const fillCommitStyle = (tmpl: string) =>
+  tmpl
     .replaceAll('{number}', 'AMANAT-2288')
     .replaceAll('{key}', `${props.taskPrefix}-42`)
     .replaceAll('{type}', 'chore')
     .replaceAll('{scope}', 'deps')
     .replaceAll('{subject}', 'bump protos to v1.63.0')
-    .replaceAll('{title}', 'Update protos'),
-)
+    .replaceAll('{title}', 'Update protos')
+const commitExample = computed(() => fillCommitStyle(commit.value.trim()))
+// Pull request titles take the commit message's placeholders.
+const prPlaceholder = '[{number}] {type}: {subject}'
+const prExample = computed(() => fillCommitStyle(pr.value.trim()))
 </script>
 
 <template>
@@ -82,6 +87,15 @@ const commitExample = computed(() =>
       </template>
     </dl>
     <span v-if="commitExample" class="fhelp" style="font-family: var(--mono)">{{ t('repos.commitTemplateExample', { example: commitExample }) }}</span>
+  </div>
+  <div class="field">
+    <label :for="`${idPrefix}-pr-tmpl`">{{ t('repos.prTemplate') }}</label>
+    <input
+      :id="`${idPrefix}-pr-tmpl`" v-model="pr" type="text" maxlength="200" :placeholder="prPlaceholder"
+      style="font-family: var(--mono); font-size: 14px"
+    >
+    <span class="fhelp">{{ group ? t('groups.prTemplateHelp') : t('repos.prTemplateHelp') }}</span>
+    <span v-if="prExample" class="fhelp" style="font-family: var(--mono)">{{ t('repos.commitTemplateExample', { example: prExample }) }}</span>
   </div>
 </template>
 

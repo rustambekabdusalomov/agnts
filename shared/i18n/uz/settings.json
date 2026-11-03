@@ -68,7 +68,7 @@
     "coAuthor": "Co-authored-by: agnts qatorini qoʻshish",
     "coAuthorHelp": "Hamkasblar qaysi commitlarni agnts yozganini koʻradi",
     "prTitle": "Pull request sarlavhasi",
-    "prTitleHelp": "'{key}' va '{title}' tiket kaliti va sarlavhasi bilan almashtiriladi",
+    "prTitleHelp": "O'rinbosarlar {number}, {key}, {type}, {scope}, {subject} va {title}, commit xabari formatidagidek. Repozitoriy yoki guruhning oʻz formati uni almashtiradi.",
     "draft": "Qoralama sifatida ochish",
     "runs": "Ishlar",
     "runsSub": "Barcha tiket va vazifalar uchun standart qiymatlar",

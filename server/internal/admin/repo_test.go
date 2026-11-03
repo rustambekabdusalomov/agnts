@@ -1,10 +1,17 @@
 package admin
 
 import (
+	"context"
+	"errors"
+	"io"
+	"log/slog"
 	"strings"
 	"testing"
 
 	"agnts/internal/domain"
+	"agnts/internal/store/postgres"
+	"agnts/internal/store/postgres/pgtest"
+	"agnts/internal/vcs/github"
 )
 
 func TestValidateDerivesKind(t *testing.T) {
@@ -83,5 +90,30 @@ func TestValidateRunSettings(t *testing.T) {
 				t.Fatalf("image %q", x.RunnerImage)
 			}
 		})
+	}
+}
+
+// A repository's pull request title format is checked like its commit
+// format, and a client that does not send it (an older one) keeps it.
+func TestRepoPRTemplate(t *testing.T) {
+	pool := pgtest.Open(t)
+	ctx, _ := pgtest.Workspace(t, pool, "admin-pr-template")
+	gh := github.New("http://127.0.0.1:1", func(context.Context) (string, error) { return "", nil }) // the instructions check after a save fails quietly
+	repos := NewRepos(postgres.NewAgent(pool), gh, nil, nil, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	x := domain.Repository{Name: "shop-api", CloneURL: "https://github.com/me/shop-api.git", PRTemplate: "{key} only"}
+	if _, err := repos.SaveRun(ctx, x, SaveOptions{}); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("a format without {subject} or {title}: %v", err)
+	}
+	x.PRTemplate = " [{number}] {type}: {subject} "
+	v, err := repos.SaveRun(ctx, x, SaveOptions{})
+	if err != nil || v.PRTemplate != "[{number}] {type}: {subject}" {
+		t.Fatalf("save: %q %v", v.PRTemplate, err)
+	}
+	x.ID, x.PRTemplate = v.ID, ""
+	if v, err = repos.SaveRun(ctx, x, SaveOptions{KeepPRTemplate: true}); err != nil || v.PRTemplate != "[{number}] {type}: {subject}" {
+		t.Fatalf("kept: %q %v", v.PRTemplate, err)
+	}
+	if v, err = repos.SaveRun(ctx, x, SaveOptions{}); err != nil || v.PRTemplate != "" {
+		t.Fatalf("cleared: %q %v", v.PRTemplate, err)
 	}
 }

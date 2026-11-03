@@ -56,6 +56,8 @@
     "commitTemplate": "Commit xabari formati",
     "commitTemplateHelp": "agnts commit xabarlarini qanday yozadi. Bo'sh scope qavslarini olib tashlaydi. Bo'sh qoldirilsa KEY: Title.",
     "commitTemplateExample": "Misol: {example}",
+    "prTemplate": "Pull request sarlavhasi formati",
+    "prTemplateHelp": "agnts pull requestlariga sarlavhani qanday qo'yadi, commit xabari formatidagi o'rinbosarlar bilan. Bo'sh qoldirilsa ish maydonining sarlavhasi (Sozlamalar → Git).",
     "placeholders": "O'rinbosarlar",
     "phPrefix": "Repozitoriyning branch prefiksi, odatda agnts/.",
     "phType": "Ish turi: kod uchun feature, bag uchun bugfix, test, swagger-test.",

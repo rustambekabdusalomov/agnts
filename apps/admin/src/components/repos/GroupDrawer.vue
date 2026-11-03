@@ -22,7 +22,7 @@ const qc = useQueryClient()
 const ui = useUi()
 
 type Member = { repoId: number; role: string }
-const form = reactive({ name: '', description: '', taskPrefix: '', instructions: '', branchTemplate: '', commitTemplate: '', members: [] as Member[] })
+const form = reactive({ name: '', description: '', taskPrefix: '', instructions: '', branchTemplate: '', commitTemplate: '', prTemplate: '', members: [] as Member[] })
 const error = ref('')
 // The group as last saved here, while its warnings are shown.
 const saved = ref<RepoGroup | null>(null)
@@ -43,6 +43,7 @@ watch(
       instructions: g?.instructions ?? '',
       branchTemplate: g?.branchTemplate ?? '',
       commitTemplate: g?.commitTemplate ?? '',
+      prTemplate: g?.prTemplate ?? '',
       members: (g?.members ?? []).map((m) => ({ repoId: m.repoId, role: m.role })),
     })
   },
@@ -81,6 +82,7 @@ const save = useMutation({
       instructions: form.instructions,
       branchTemplate: form.branchTemplate.trim(),
       commitTemplate: form.commitTemplate.trim(),
+      prTemplate: form.prTemplate.trim(),
       members: form.members.map((m) => ({ repoId: m.repoId, role: m.role.trim() || undefined })),
     }
     const id = current.value?.id
@@ -163,7 +165,7 @@ const prefix = computed(() => (form.taskPrefix || repoById.value.get(form.member
         <input id="g-prefix" v-model="form.taskPrefix" type="text" maxlength="8" placeholder="SHOP" style="font-family: var(--mono); font-size: 14px">
         <span class="fhelp">{{ t('groups.prefixHelp', { prefix }) }}</span>
       </div>
-      <NameFormatFields v-model:branch="form.branchTemplate" v-model:commit="form.commitTemplate" :task-prefix="prefix" group id-prefix="g" />
+      <NameFormatFields v-model:branch="form.branchTemplate" v-model:commit="form.commitTemplate" v-model:pr="form.prTemplate" :task-prefix="prefix" group id-prefix="g" />
       <div class="field">
         <label for="g-instr">{{ t('groups.instructions') }}</label>
         <textarea id="g-instr" v-model="form.instructions" maxlength="20000" :placeholder="t('groups.instructionsPh')" />

@@ -21,11 +21,13 @@ type RepoGroup struct {
 	// order of changes); every prompt of the group's tickets gets them.
 	Instructions string
 	TaskPrefix   string // key prefix of tickets made from the group (SHOP-12)
-	// BranchTemplate and CommitTemplate, set, replace each member's own
-	// (Repository.BranchTemplate, CommitTemplate) in the group's tickets,
-	// so its repositories get the same branch name and commit style.
+	// BranchTemplate, CommitTemplate and PRTemplate, set, replace each
+	// member's own (Repository.BranchTemplate, CommitTemplate, PRTemplate)
+	// in the group's tickets, so its repositories get the same branch
+	// name, commit style and pull request titles.
 	BranchTemplate string
 	CommitTemplate string
+	PRTemplate     string
 	Members        []GroupMember
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

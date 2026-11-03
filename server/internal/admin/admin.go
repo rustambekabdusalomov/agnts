@@ -853,6 +853,10 @@ func Validate(x *domain.Repository, gitlabHost string) error {
 	if err := domain.ValidateCommitTemplate(x.CommitTemplate); err != nil {
 		return invalid("%v", err)
 	}
+	x.PRTemplate = strings.TrimSpace(x.PRTemplate)
+	if err := domain.ValidatePRTemplate(x.PRTemplate); err != nil {
+		return invalid("%v", err)
+	}
 	x.TaskPrefix = strings.ToUpper(strings.TrimSpace(x.TaskPrefix))
 	for _, c := range x.TaskPrefix {
 		if c < 'A' || c > 'Z' {
@@ -1012,12 +1016,15 @@ type SaveOptions struct {
 	// KeepPlane keeps the stored Plane project (a client that does not
 	// know about Plane).
 	KeepPlane bool
+	// KeepPRTemplate keeps the stored pull request title format (a client
+	// that does not know about it).
+	KeepPRTemplate bool
 }
 
 // SaveRun is Save with control over the run settings.
 func (r *Repos) SaveRun(ctx context.Context, x domain.Repository, o SaveOptions) (RepoView, error) {
 	keepPreview, env := o.KeepPreview, o.PreviewEnv
-	if x.ID != 0 && (keepPreview || o.KeepRun || o.KeepPlane) {
+	if x.ID != 0 && (keepPreview || o.KeepRun || o.KeepPlane || o.KeepPRTemplate) {
 		cur, err := r.store.RepositoryByID(ctx, x.ID)
 		if err != nil {
 			return RepoView{}, err
@@ -1030,6 +1037,9 @@ func (r *Repos) SaveRun(ctx context.Context, x domain.Repository, o SaveOptions)
 		}
 		if o.KeepPlane {
 			x.PlaneProject = cur.PlaneProject
+		}
+		if o.KeepPRTemplate {
+			x.PRTemplate = cur.PRTemplate
 		}
 	}
 	if err := Validate(&x, r.gitlabHost(ctx)); err != nil {

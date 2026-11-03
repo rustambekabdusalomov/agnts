@@ -94,6 +94,7 @@ func (s *Server) saveRepoGroup(w http.ResponseWriter, r *http.Request, id int64,
 	if req.CommitTemplate != nil {
 		in.CommitTemplate = *req.CommitTemplate
 	}
+	in.PRTemplate = req.PrTemplate
 	for _, m := range req.Members {
 		x := orchestrator.GroupMemberInput{RepoID: m.RepoId}
 		if m.Role != nil {
@@ -151,7 +152,7 @@ func (s *Server) SetTicketRepos(w http.ResponseWriter, r *http.Request, key gen.
 
 func toRepoGroup(v orchestrator.GroupView) gen.RepoGroup {
 	out := gen.RepoGroup{Id: v.ID, Name: v.Name, Description: v.Description, Instructions: v.Instructions, TaskPrefix: v.TaskPrefix,
-		BranchTemplate: v.BranchTemplate, CommitTemplate: v.CommitTemplate,
+		BranchTemplate: v.BranchTemplate, CommitTemplate: v.CommitTemplate, PrTemplate: v.PRTemplate,
 		Members: make([]gen.RepoGroupMember, len(v.Members)), Warnings: nonNil(v.Warnings), CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}
 	for i, m := range v.Members {
 		out.Members[i] = gen.RepoGroupMember{RepoId: m.RepoID, RepoName: m.RepoName, Role: m.Role, Archived: m.Archived}

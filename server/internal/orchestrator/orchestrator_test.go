@@ -268,6 +268,7 @@ type fakeHost struct {
 	opened   int
 	last     orchestrator.PR
 	bodies   []string // each opened pull request's body, after its repository's name
+	titles   []string // each opened pull request's title, after its repository's name
 	comments []string
 	assigned map[int][]string
 	merged   map[int]bool // pull requests PRState reports merged
@@ -298,6 +299,7 @@ func (h *fakeHost) OpenPR(_ context.Context, repo domain.Repository, pr orchestr
 	h.opened++
 	h.last = pr
 	h.bodies = append(h.bodies, repo.Name+": "+pr.Body)
+	h.titles = append(h.titles, repo.Name+": "+pr.Title)
 	if repo.Name != "api" && repo.Name != "" {
 		n := 100 + h.opened
 		return n, fmt.Sprintf("https://github.com/acme/%s/pull/%d", repo.Name, n), nil
@@ -1335,6 +1337,7 @@ func TestTicketNumberBranchAndCommit(t *testing.T) {
 		t.Fatal(err)
 	}
 	repo.BranchTemplate, repo.CommitTemplate = "{number}", "[{number}] {type}({scope}): {subject}"
+	repo.PRTemplate = "{number} | {type}: {subject}"
 	if _, err := h.store.UpdateRepository(h.ctx, repo); err != nil {
 		t.Fatal(err)
 	}
@@ -1367,5 +1370,14 @@ func TestTicketNumberBranchAndCommit(t *testing.T) {
 	}
 	if strings.Contains(h.runner.prompts[0], `"commit"`) {
 		t.Fatal("analysis prompt asks for the commit")
+	}
+	// The pull request is titled by the repository's own format, from the
+	// same description of the change.
+	if _, err := h.o.Approve(h.ctx, tk.Key, nil, false, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.step() // push
+	if want := "AMANAT-2288 | chore: protos v1.63.0, drop local replace"; h.host.last.Title != want {
+		t.Fatalf("PR title %q, want %q", h.host.last.Title, want)
 	}
 }

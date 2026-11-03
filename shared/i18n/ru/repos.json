@@ -56,6 +56,8 @@
     "commitTemplate": "Формат сообщения коммита",
     "commitTemplateHelp": "Как agnts пишет сообщения коммитов. Пустой scope убирает скобки. Оставьте пустым для KEY: Title.",
     "commitTemplateExample": "Пример: {example}",
+    "prTemplate": "Формат заголовка пул-реквеста",
+    "prTemplateHelp": "Как agnts называет свои пул-реквесты, с подстановками формата сообщения коммита. Оставьте пустым для заголовка рабочего пространства (Настройки → Git).",
     "placeholders": "Подстановки",
     "phPrefix": "Префикс веток репозитория, по умолчанию agnts/.",
     "phType": "Вид работы: feature для кода, bugfix для бага, test, swagger-test.",

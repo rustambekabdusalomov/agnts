@@ -254,6 +254,9 @@ const effortLabel = (s: (typeof effortStages)[number]) => t(`harnessSettings.eff
 // them under Settings. Edits are kept across sections until saved or
 // discarded.
 const section = computed(() => settingsSection(route.params.section))
+// The pull request title's placeholders, shown as written (the commit
+// message format's).
+const prPlaceholders = Object.fromEntries(['number', 'key', 'type', 'scope', 'subject', 'title'].map((p) => [p, `{${p}}`]))
 </script>
 
 <template>
@@ -385,7 +388,7 @@ const section = computed(() => settingsSection(route.params.section))
         <CfgRow :label="t('settings.coAuthor')" :help="t('settings.coAuthorHelp')">
           <SwitchToggle v-model="draft.git.coAuthor" :label="t('settings.coAuthor')" />
         </CfgRow>
-        <CfgRow :label="t('settings.prTitle')" :help="t('settings.prTitleHelp')">
+        <CfgRow :label="t('settings.prTitle')" :help="t('settings.prTitleHelp', prPlaceholders)">
           <input v-model="draft.git.prTitle" class="cfg-in mono" maxlength="200" :aria-label="t('settings.prTitle')">
         </CfgRow>
         <CfgRow :label="t('settings.draft')">

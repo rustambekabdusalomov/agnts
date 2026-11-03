@@ -655,6 +655,7 @@ type Repository struct {
 	BranchPrefix   string
 	BranchTemplate string // names agnts's branches (see BranchName); "" uses DefaultBranchTemplate
 	CommitTemplate string // writes agnts's commit messages (see CommitLine); "" uses KEY: Title
+	PRTemplate     string // titles agnts's pull requests (see CommitLine); "" uses Settings.Git.PRTitle
 	ClaudeMD       string // extra instructions added to every prompt
 	JiraProject    string
 	PlaneProject   string     // Plane project identifier whose work items go here

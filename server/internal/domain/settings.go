@@ -165,7 +165,13 @@ func (m StageModels) For(stage string) string {
 	}
 }
 
-// GitSettings controls commits and pull requests.
+// DefaultPRTitle titles pull requests when neither the repository nor the
+// workspace names a format.
+const DefaultPRTitle = "{key}: {title}"
+
+// GitSettings controls commits and pull requests. PRTitle is the
+// workspace's pull request title template (see PRTitle), which a
+// repository's or group's own replaces.
 type GitSettings struct {
 	AuthorName  string `json:"authorName"`
 	AuthorEmail string `json:"authorEmail"`
@@ -372,7 +378,7 @@ func DefaultSettings() Settings {
 		Parallel:        1,
 
 		MaxTicketRepos: DefaultMaxTicketRepos,
-		Git:            GitSettings{CoAuthor: true, PRTitle: "{key}: {title}"},
+		Git:            GitSettings{CoAuthor: true, PRTitle: DefaultPRTitle},
 		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true, Logs: true},
 		Meetings:       DefaultMeetingSettings(),
 	}
@@ -486,7 +492,10 @@ func (s *Settings) Validate() error {
 		errs = append(errs, fmt.Errorf("stalls must be %s, %s or %s", StallsOff, StallsLog, StallsAct))
 	}
 	if s.Git.PRTitle == "" {
-		s.Git.PRTitle = "{key}: {title}"
+		s.Git.PRTitle = DefaultPRTitle
+	}
+	if err := ValidatePRTemplate(s.Git.PRTitle); err != nil {
+		errs = append(errs, err)
 	}
 	if s.Git.AuthorEmail != "" && !strings.Contains(s.Git.AuthorEmail, "@") {
 		errs = append(errs, errors.New("git author email is not an email address"))

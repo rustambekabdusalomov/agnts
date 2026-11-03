@@ -56,6 +56,8 @@
     "commitTemplate": "Commit message format",
     "commitTemplateHelp": "How agnts writes its commit messages. An empty scope drops its parentheses. Leave empty for KEY: Title.",
     "commitTemplateExample": "Example: {example}",
+    "prTemplate": "Pull request title format",
+    "prTemplateHelp": "How agnts titles its pull requests, with the commit message format's placeholders. Leave empty for the workspace's title (Settings → Git).",
     "placeholders": "Placeholders",
     "phPrefix": "The repository's branch prefix, agnts/ by default.",
     "phType": "The kind of work: feature for code, bugfix for a bug, test, swagger-test.",

@@ -2,6 +2,7 @@ package orchestrator_test
 
 import (
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 
@@ -9,14 +10,14 @@ import (
 	"agnts/internal/orchestrator"
 )
 
-// A group's branch and commit message formats replace each member's own
-// in the group's tickets: every repository gets the same branch and
-// commit style, whatever its own settings say.
+// A group's branch, commit message and pull request title formats replace
+// each member's own in the group's tickets: every repository gets the
+// same branch, commit style and title, whatever its own settings say.
 func TestGroupNameFormats(t *testing.T) {
 	h := newHarness(t)
 	api, web, group := h.shop()
 	repo, _ := h.store.RepositoryByID(h.ctx, api)
-	repo.BranchTemplate, repo.CommitTemplate = "feature/{key}", "{key}: {title}"
+	repo.BranchTemplate, repo.CommitTemplate, repo.PRTemplate = "feature/{key}", "{key}: {title}", "{key}: {title}"
 	if _, err := h.store.SaveRepository(h.ctx, repo); err != nil {
 		t.Fatal(err)
 	}
@@ -24,15 +25,21 @@ func TestGroupNameFormats(t *testing.T) {
 	for _, bad := range []orchestrator.GroupInput{
 		{Name: "Shop", TaskPrefix: "SHOP", BranchTemplate: "no-key", Members: members},
 		{Name: "Shop", TaskPrefix: "SHOP", CommitTemplate: "{key} only", Members: members},
+		{Name: "Shop", TaskPrefix: "SHOP", PRTemplate: ptr("{key}: {summary}"), Members: members},
 	} {
 		if _, err := h.o.SaveGroup(h.ctx, group, bad, domain.OriginWeb); !errors.Is(err, orchestrator.ErrInvalid) {
 			t.Errorf("%+v: %v", bad, err)
 		}
 	}
 	g, err := h.o.SaveGroup(h.ctx, group, orchestrator.GroupInput{Name: "Shop", TaskPrefix: "SHOP",
-		BranchTemplate: " {number} ", CommitTemplate: "[{number}] {type}({scope}): {subject}", Members: members}, domain.OriginWeb)
-	if err != nil || g.BranchTemplate != "{number}" || g.CommitTemplate != "[{number}] {type}({scope}): {subject}" {
+		BranchTemplate: " {number} ", CommitTemplate: "[{number}] {type}({scope}): {subject}", PRTemplate: ptr(" {type}: {subject} ({key}) "), Members: members}, domain.OriginWeb)
+	if err != nil || g.BranchTemplate != "{number}" || g.CommitTemplate != "[{number}] {type}({scope}): {subject}" || g.PRTemplate != "{type}: {subject} ({key})" {
 		t.Fatalf("save: %+v %v", g.RepoGroup, err)
+	}
+	// A client that does not send the pull request format keeps it.
+	if g, err = h.o.SaveGroup(h.ctx, group, orchestrator.GroupInput{Name: "Shop", TaskPrefix: "SHOP", BranchTemplate: "{number}",
+		CommitTemplate: "[{number}] {type}({scope}): {subject}", Members: members}, domain.OriginWeb); err != nil || g.PRTemplate != "{type}: {subject} ({key})" {
+		t.Fatalf("resave without it: %q %v", g.PRTemplate, err)
 	}
 
 	tk, err := h.o.CreateTask(h.ctx, orchestrator.TaskInput{GroupID: group, Kind: "code", Title: "Show refunds", Priority: "medium",
@@ -59,5 +66,14 @@ func TestGroupNameFormats(t *testing.T) {
 	want := "[" + tk.Key + "] feat(refunds): show refunds"
 	if len(h.git.messages) != 2 || !strings.HasPrefix(h.git.messages[0], want) || !strings.HasPrefix(h.git.messages[1], want) {
 		t.Fatalf("commit messages %q, want %q each", h.git.messages, want)
+	}
+	// The group's pull request title replaces the repository's too.
+	if _, err := h.o.Approve(h.ctx, tk.Key, nil, false, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	h.step() // push
+	title := "feat: show refunds (" + tk.Key + ")"
+	if !slices.Equal(h.host.titles, []string{"api: " + title, "web: " + title}) {
+		t.Fatalf("PR titles %q", h.host.titles)
 	}
 }

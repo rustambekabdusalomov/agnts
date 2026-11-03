@@ -868,7 +868,7 @@ func (s *Agent) Events(ctx context.Context, f orchestrator.EventFilter) ([]domai
 const repoCols = `id, name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, claude_md_status, deploy_workflow, archived_at,
 	preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login, preview_env IS NOT NULL, preview_env_names,
 	toolchains, toolchains_override, toolchains_detected_at, toolchain_notes, runner_image, memory_mb, build_env IS NOT NULL, build_env_names,
-	plane_project, workspace_id, harness, branch_template, commit_template`
+	plane_project, workspace_id, harness, branch_template, commit_template, pr_template`
 
 func scanRepo(row pgx.Row) (domain.Repository, error) {
 	var r domain.Repository
@@ -877,7 +877,7 @@ func scanRepo(row pgx.Row) (domain.Repository, error) {
 		&r.BuildCmd, &r.LintCmd, &r.TestCmd, &r.BranchPrefix, &r.ClaudeMD, &r.JiraProject, &r.TaskPrefix, &r.ClaudeMDState, &r.DeployWorkflow, &r.ArchivedAt,
 		&r.Preview.Command, &r.Preview.Port, &r.Preview.ReadyPath, &r.Preview.Routes, &r.Preview.UIPaths, &r.Preview.Login, &r.Preview.EnvSet, &r.Preview.EnvNames,
 		&tcs, &r.ToolchainsOverride, &r.ToolchainsDetectedAt, &r.ToolchainNotes, &r.RunnerImage, &r.MemoryMB, &r.BuildEnvSet, &r.BuildEnvNames,
-		&r.PlaneProject, &r.WorkspaceID, &harness, &r.BranchTemplate, &r.CommitTemplate)
+		&r.PlaneProject, &r.WorkspaceID, &harness, &r.BranchTemplate, &r.CommitTemplate, &r.PRTemplate)
 	if err == nil {
 		_ = json.Unmarshal(tcs, &r.Toolchains)
 		_ = json.Unmarshal(harness, &r.Harness)
@@ -949,19 +949,19 @@ func (s *Agent) SaveRepository(ctx context.Context, r domain.Repository) (domain
 	out, err := scanRepo(s.db.QueryRow(ctx, `INSERT INTO repositories
 		(name, kind, provider, clone_url, default_branch, stack, build_cmd, lint_cmd, test_cmd, branch_prefix, claude_md, jira_project, task_prefix, deploy_workflow,
 		 preview_cmd, preview_port, preview_ready_path, preview_routes, preview_ui_paths, preview_login,
-		 toolchains, toolchains_override, runner_image, memory_mb, plane_project, branch_template, commit_template)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+		 toolchains, toolchains_override, runner_image, memory_mb, plane_project, branch_template, commit_template, pr_template)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
 		ON CONFLICT (workspace_id, name) DO UPDATE SET kind = $2, provider = $3, clone_url = $4, default_branch = $5, stack = $6,
 			build_cmd = $7, lint_cmd = $8, test_cmd = $9, branch_prefix = $10, claude_md = $11, jira_project = $12,
 			task_prefix = $13, deploy_workflow = $14,
 			toolchains = CASE WHEN $22 OR $21::jsonb <> '[]'::jsonb THEN $21 ELSE repositories.toolchains END,
 			toolchains_override = $22 OR (repositories.toolchains_override AND $21::jsonb = '[]'::jsonb),
-			runner_image = $23, memory_mb = $24, plane_project = $25, branch_template = $26, commit_template = $27, updated_at = now()
+			runner_image = $23, memory_mb = $24, plane_project = $25, branch_template = $26, commit_template = $27, pr_template = $28, updated_at = now()
 		RETURNING `+repoCols,
 		r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, stackOf(r), r.BuildCmd, r.LintCmd, r.TestCmd,
 		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
 		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login,
-		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, r.PlaneProject, r.BranchTemplate, r.CommitTemplate))
+		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, r.PlaneProject, r.BranchTemplate, r.CommitTemplate, r.PRTemplate))
 	return out, uniqueConflict(err)
 }
 
@@ -972,11 +972,11 @@ func (s *Agent) UpdateRepository(ctx context.Context, r domain.Repository) (doma
 		jira_project = $12, task_prefix = $13, deploy_workflow = $14, preview_cmd = $15, preview_port = $16,
 		preview_ready_path = $17, preview_routes = $18, preview_ui_paths = $19, preview_login = $20,
 		toolchains = $21, toolchains_override = $22, runner_image = $23, memory_mb = $24, stack = $25,
-		plane_project = $26, branch_template = $27, commit_template = $28, updated_at = now() WHERE id = $1 RETURNING `+repoCols,
+		plane_project = $26, branch_template = $27, commit_template = $28, pr_template = $29, updated_at = now() WHERE id = $1 RETURNING `+repoCols,
 		r.ID, r.Name, r.Kind, r.Provider, r.CloneURL, r.DefaultBranch, r.BuildCmd, r.LintCmd, r.TestCmd,
 		r.BranchPrefix, r.ClaudeMD, r.JiraProject, r.TaskPrefix, r.DeployWorkflow,
 		r.Preview.Command, r.Preview.Port, readyPath(r.Preview.ReadyPath), nonNilSlice(r.Preview.Routes), nonNilSlice(r.Preview.UIPaths), r.Preview.Login,
-		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, stackOf(r), r.PlaneProject, r.BranchTemplate, r.CommitTemplate))
+		toolchainsJSON(r.Toolchains), r.ToolchainsOverride, r.RunnerImage, r.MemoryMB, stackOf(r), r.PlaneProject, r.BranchTemplate, r.CommitTemplate, r.PRTemplate))
 	return out, uniqueConflict(err)
 }
 

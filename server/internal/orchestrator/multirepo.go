@@ -104,8 +104,8 @@ func (o *Orchestrator) reposFor(ctx context.Context, t domain.Ticket) ([]runRepo
 	return out, nil
 }
 
-// groupFormats gives repo the branch and commit message formats of g, the
-// group its ticket came from, where g sets them.
+// groupFormats gives repo the branch, commit message and pull request
+// title formats of g, the group its ticket came from, where g sets them.
 func groupFormats(repo *domain.Repository, g *domain.RepoGroup) {
 	if g == nil {
 		return
@@ -115,6 +115,9 @@ func groupFormats(repo *domain.Repository, g *domain.RepoGroup) {
 	}
 	if g.CommitTemplate != "" {
 		repo.CommitTemplate = g.CommitTemplate
+	}
+	if g.PRTemplate != "" {
+		repo.PRTemplate = g.PRTemplate
 	}
 }
 
