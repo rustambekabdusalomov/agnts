@@ -7,7 +7,10 @@ import { usePrefs } from '../stores/prefs'
 
 const { t } = useI18n()
 const prefs = usePrefs()
-const usage = useUsage()
+// The Claude plan's windows, for anyone who may run on Claude: Muse runs
+// are paid per call and have none.
+const usage = useUsage('claude')
+const connected = computed(() => usage.data.value?.connected !== false)
 const five = computed(() => usage.data.value?.fiveHour)
 const week = computed(() => usage.data.value?.sevenDay)
 const resetText = useResetText()
@@ -26,6 +29,7 @@ function useResetText() {
 
 <template>
   <RouterLink
+    v-if="connected"
     :to="{ name: 'usage' }"
     class="side-usage"
     :aria-label="`${t('nav.session')} ${pct(five?.utilization)}%`"
