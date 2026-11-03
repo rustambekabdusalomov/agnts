@@ -9,7 +9,7 @@ import BrandLogo from './BrandLogo.vue'
 import PrefsControls from './PrefsControls.vue'
 import ConfirmDialog from './ui/ConfirmDialog.vue'
 import HiIcon from './ui/HiIcon.vue'
-import { useFeedback } from '../composables/usePlatform'
+import { egressDown, useEgress, useFeedback } from '../composables/usePlatform'
 
 // The Admin cabinet's layout: the same sidebar and top bar as a workspace,
 // with the platform's own menu instead of a workspace's.
@@ -22,6 +22,9 @@ const ui = useUi()
 const home = computed(() => session.homeWorkspace())
 const feedback = useFeedback()
 const newFeedback = computed(() => (feedback.data.value ?? []).filter((f) => f.status === 'new').length)
+// Muse's way out of the server is failing: the Dashboard says why.
+const egress = useEgress()
+const museDown = computed(() => egressDown(egress.data.value))
 const initials = computed(() => (session.user?.username ?? '?').slice(0, 2).toUpperCase())
 const confirmOut = ref(false)
 const signingOut = ref(false)
@@ -51,6 +54,7 @@ async function signOut() {
         <div class="grp">{{ t('platform.title') }}</div>
         <RouterLink class="nav-a" active-class="on" exact-active-class="on" :to="{ name: 'adminDashboard' }" :aria-label="t('platform.navDashboard')">
           <HiIcon name="dashboard" /><span class="lbl">{{ t('platform.navDashboard') }}</span>
+          <span v-if="museDown" class="cnt muse-down" :title="t('platform.museNavDown')">!</span>
         </RouterLink>
         <RouterLink class="nav-a" active-class="on" :to="{ name: 'adminWorkspaces' }" :aria-label="t('platform.workspaces')">
           <HiIcon name="repos" /><span class="lbl">{{ t('platform.workspaces') }}</span>
@@ -103,3 +107,7 @@ async function signOut() {
   </ConfirmDialog>
   <div class="toast" :class="{ show: ui.toast }" role="status">{{ ui.toast }}</div>
 </template>
+
+<style scoped>
+.muse-down { background: var(--bad); color: #fff; }
+</style>

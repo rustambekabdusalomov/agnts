@@ -457,6 +457,8 @@ const (
 	// OriginAssistant is an action the assistant proposed and its asker
 	// confirmed.
 	OriginAssistant Origin = "assistant"
+	// OriginChat is a button on a team chat card.
+	OriginChat Origin = "chat"
 )
 
 // Level is an event's severity.
@@ -575,6 +577,14 @@ const (
 	// EventGuard: what agnts-guard, the hooks inside the run, refused or
 	// sent back, and what the scan of agent files found.
 	EventGuard = "guard"
+	// Team chat: a new message, a card's state, refs under a message, a
+	// channel created or changed. Stored, so a reconnect replays them.
+	EventChatMessage = "chat_message"
+	EventChatCard    = "chat_card"
+	EventChatRef     = "chat_ref"
+	EventChatChannel = "chat_channel"
+	// EventChatThinking (live only) says agnts is working on an answer.
+	EventChatThinking = "chat_thinking"
 	// EventRerouted: a call ran on another module than its settings name,
 	// because that one could not run.
 	EventRerouted = "rerouted"

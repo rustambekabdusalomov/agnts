@@ -64,6 +64,8 @@ type Proxy struct {
 	ports map[string]bool
 	log   *slog.Logger
 	dial  func(ctx context.Context, network, addr string) (net.Conn, error)
+	// monitor checks the upstream proxy, when there is one (StatusPath).
+	monitor *Monitor
 	// router and viaGateway send a run's connections to a host on its
 	// workspace's private network through the gateway (nil: none). The
 	// router also answers grants: a host one run container alone may reach
@@ -319,21 +321,16 @@ func (p *Proxy) Allowed(host string) bool {
 	if extra := p.extra.Load(); extra != nil {
 		list = append(append([]string{}, p.allow...), (*extra)...)
 	}
-	for _, a := range list {
-		if strings.HasPrefix(a, ".") {
-			if strings.HasSuffix(host, a) {
-				return true
-			}
-		} else if host == a {
-			return true
-		}
-	}
-	return false
+	return matches(list, host)
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodConnect {
 		p.connect(w, r)
+		return
+	}
+	if r.URL.Host == "" && r.Method == http.MethodGet && r.URL.Path == StatusPath {
+		p.serveStatus(w)
 		return
 	}
 	if r.URL.Scheme != "http" || r.URL.Host == "" {

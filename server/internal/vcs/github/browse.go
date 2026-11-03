@@ -379,3 +379,43 @@ func (h *Host) Deploy(ctx context.Context, repo domain.Repository, d vcs.Deploy)
 		map[string]any{"ref": ref}, nil)
 	return needs(status, err, "Actions: Read and write")
 }
+
+// CommitChecks returns the state of a commit's check runs (vcs.CIOK,
+// CIFail, CIRun or CINone) and the names of the failed or unfinished ones.
+func (h *Host) CommitChecks(ctx context.Context, repo domain.Repository, sha string) (string, []string, error) {
+	base, err := h.base(repo)
+	if err != nil {
+		return vcs.CINone, nil, err
+	}
+	var res struct {
+		Total int `json:"total_count"`
+		Runs  []struct {
+			Name       string `json:"name"`
+			Status     string `json:"status"`
+			Conclusion string `json:"conclusion"`
+		} `json:"check_runs"`
+	}
+	if _, err := h.call(ctx, http.MethodGet, base+"/commits/"+sha+"/check-runs?per_page=50", nil, &res); err != nil {
+		return vcs.CINone, nil, err
+	}
+	if res.Total == 0 {
+		return vcs.CINone, nil, nil
+	}
+	st := vcs.CIOK
+	var bad, running []string
+	for _, r := range res.Runs {
+		switch {
+		case r.Status != "completed":
+			running = append(running, r.Name)
+		case r.Conclusion == "failure" || r.Conclusion == "timed_out" || r.Conclusion == "cancelled":
+			bad = append(bad, r.Name)
+		}
+	}
+	switch {
+	case len(bad) > 0:
+		return vcs.CIFail, bad, nil
+	case len(running) > 0:
+		return vcs.CIRun, running, nil
+	}
+	return st, nil, nil
+}

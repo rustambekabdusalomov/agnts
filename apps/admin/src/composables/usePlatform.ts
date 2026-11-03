@@ -14,6 +14,7 @@ export type RunHistorySettings = components['schemas']['RunHistorySettings']
 export type Module = components['schemas']['Module']
 export type ModulesSettings = components['schemas']['ModulesSettings']
 export type AdminAuditEntry = components['schemas']['AdminAuditEntry']
+export type EgressStatus = components['schemas']['EgressStatus']
 export type RunFilters = NonNullable<paths['/platform/runs/summary']['get']['parameters']['query']>
 
 /** The Admin cabinet's data: every user and workspace, and the server's runs and queue. */
@@ -24,6 +25,22 @@ export function usePlatform() {
   const workspaces = usePlatformWorkspaces()
   const users = useQuery({ queryKey: ['platform', 'users'], queryFn: () => unwrap(api.GET('/platform/users')), enabled })
   return { overview, workspaces, users }
+}
+
+/** The way Muse's traffic leaves the server (the egress proxy's upstream), checked by egress every 30 s. */
+export function useEgress() {
+  const session = useSession()
+  return useQuery({
+    queryKey: ['platform', 'egress'],
+    queryFn: () => unwrap(api.GET('/platform/egress')),
+    refetchInterval: 15_000,
+    enabled: computed(() => !!session.user?.isAdmin),
+  })
+}
+
+/** Whether the upstream proxy is set and failing: the Admin menu marks it. */
+export function egressDown(s?: EgressStatus): boolean {
+  return !!s?.reachable && !!s.upstream?.configured && !!s.upstream.checkedAt && !s.upstream.ok
 }
 
 /** Every workspace on the platform; the same query (and cache) as usePlatform's. */

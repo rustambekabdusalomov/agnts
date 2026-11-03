@@ -274,6 +274,55 @@ older than 7 days (Alloy logs "timestamp too old" once). The log source is
 
 This server has it set up (2 November 2026).
 
+## Muse through another network (when Meta refuses this server's)
+
+Since 3 November 2026 Meta returns an empty model catalog ("model catalog has no
+visible models") to Muse from this server's network (AS35682), for every login and
+key; the same key works from elsewhere. agnts shows it as "not logged in: run /login to
+add an API key". `egress` can send Muse's hosts (`api.meta.ai`, `auth.meta.com`)
+through another proxy, `AGNTS_EGRESS_UPSTREAM`, while everything else stays direct.
+
+1. In `/opt/agnts/docker-compose.yml`, the `egress` service's environment needs
+   (see `deploy/docker-compose.yml`):
+
+   ```yaml
+         AGNTS_EGRESS_UPSTREAM: ${AGNTS_EGRESS_UPSTREAM:-}
+         AGNTS_EGRESS_UPSTREAM_HOSTS: ${AGNTS_EGRESS_UPSTREAM_HOSTS:-}
+   ```
+
+2. Set the proxy in `/opt/agnts/.env` (back it up first) and recreate egress:
+
+   ```sh
+   AGNTS_EGRESS_UPSTREAM=socks5://user:pass@proxy-host:1080   # or http://user:pass@host:3128
+   ssh root@45.138.158.39 'cd /opt/agnts && docker compose up -d egress'
+   ```
+
+   Test a proxy before using it: `muse exec --api-key-stdin "Reply OK"` from that
+   machine must answer, not "no visible models". Another server at the same provider
+   (5.182.26.104) gets the same refusal.
+
+**A laptop as the proxy (demos).** OpenSSH's remote dynamic forward makes a SOCKS5
+proxy on the server whose traffic leaves through the laptop. sshd must let it bind
+to the Docker network's gateway (once: `/etc/ssh/sshd_config.d/agnts-tunnel.conf`
+with `GatewayPorts clientspecified`, then `systemctl reload ssh`). Find the gateway
+with `docker network inspect agnts_default -f '{{(index .IPAM.Config 0).Gateway}}'`
+(172.19.0.1 here), set `AGNTS_EGRESS_UPSTREAM=socks5://172.19.0.1:1080`, and keep this
+running on the laptop:
+
+```sh
+ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 172.19.0.1:1080 root@45.138.158.39
+```
+
+**Seeing it, and alerts.** Admin → Dashboard has a *Muse route* card (egress checks the way every
+30 seconds; the Dashboard menu item is marked while it is down). When it fails two checks in a
+row (or egress is silent for 3 minutes), agnts sends an alert to the Telegram chat of the workspace
+in `AGNTS_ALERT_WORKSPACE` (here `1`), and emails the Admins when mail is set up; another when it
+works again.
+
+The port is reachable only from the host and its containers. While the tunnel is
+down, Muse calls fail as before; set `AGNTS_EGRESS_UPSTREAM=` and recreate egress
+to go direct again.
+
 ## Rollback
 
 ```sh

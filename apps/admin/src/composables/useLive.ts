@@ -6,7 +6,10 @@ import type { TicketEvent } from '../api/types'
 type Listener = (e: TicketEvent) => void
 
 const listeners = new Set<Listener>()
+const reconnectListeners = new Set<() => void>()
 const connected = ref(false)
+// The stream was up and dropped; EventSource is trying again.
+const reconnecting = ref(false)
 let source: EventSource | null = null
 let qc: QueryClient | null = null
 let pending = new Set<string>()
@@ -14,6 +17,9 @@ let timer: ReturnType<typeof setTimeout> | undefined
 
 /** Which cached queries an event makes stale. */
 function stale(e: TicketEvent): string[] {
+  // Team chat: the chat store applies them (components/chat/useChat.ts);
+  // nothing else on the page depends on them.
+  if (e.type.startsWith('chat_')) return []
   // The asker's own answers being made: only the assistant's queries.
   if (e.type.startsWith('assistant_')) return e.type === 'assistant_progress' || e.type === 'assistant_partial' ? [] : ['assistant']
   // A Code conversation's own messages and questions: its queries only.
@@ -130,14 +136,18 @@ function connect() {
   if (source) return
   source = new EventSource(apiPath('/events/stream'), { withCredentials: true })
   source.onopen = () => {
-    if (opened) resync() // not on the first open: the page just loaded
+    const again = opened
+    if (again) resync() // not on the first open: the page just loaded
     opened = true
     connected.value = true
+    reconnecting.value = false
+    if (again) for (const l of reconnectListeners) l()
   }
   source.onerror = () => {
     // EventSource reconnects with Last-Event-ID, firing this on each try.
     if (!connected.value) return
     connected.value = false
+    reconnecting.value = true
     resync()
   }
   source.onmessage = (m) => {
@@ -178,6 +188,7 @@ export function stopLive() {
   source = null
   opened = false
   connected.value = false
+  reconnecting.value = false
 }
 
 /** Reopens the stream (another workspace): its events are another's. */
@@ -194,5 +205,11 @@ export function useLive(fn?: Listener) {
     listeners.add(fn)
     onScopeDispose(() => listeners.delete(fn))
   }
-  return { connected }
+  return { connected, reconnecting }
+}
+
+/** Calls fn each time the stream is back after a drop (not on the first open). */
+export function onLiveReconnect(fn: () => void): () => void {
+  reconnectListeners.add(fn)
+  return () => reconnectListeners.delete(fn)
 }

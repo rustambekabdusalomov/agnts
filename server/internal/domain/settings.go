@@ -58,6 +58,9 @@ const (
 	// ModelDocuments writes documents and meeting notes; unset, the
 	// analysis model.
 	ModelDocuments = "documents"
+	// ModelTeamChat answers @agnts and drafts tickets in the team chat;
+	// unset, the assistant's chat model.
+	ModelTeamChat = "team_chat"
 	// ModelRecheck re-checks a complex ticket's analysis; it is the
 	// coding model, so nobody picks it on its own.
 	ModelRecheck = "recheck"
@@ -133,6 +136,8 @@ type StageModels struct {
 	// Chat and Documents are "" until set: they follow Helper and Analyze.
 	Chat      string `json:"chat,omitempty"`
 	Documents string `json:"documents,omitempty"`
+	// TeamChat is "" until set: it follows Chat.
+	TeamChat string `json:"teamChat,omitempty"`
 }
 
 // For returns the model for a stage name.
@@ -160,6 +165,11 @@ func (m StageModels) For(stage string) string {
 			return m.Documents
 		}
 		return m.Analyze
+	case ModelTeamChat:
+		if m.TeamChat != "" {
+			return m.TeamChat
+		}
+		return m.For(ModelChat)
 	default:
 		return m.Coding
 	}
@@ -418,7 +428,7 @@ func (s *Settings) Validate() error {
 			errs = append(errs, fmt.Errorf("model for %s must be one of %s, muse:<model> or codex:<model>", name, strings.Join(Models, ", ")))
 		}
 	}
-	for name, m := range map[string]string{"chat": s.Models.Chat, "documents": s.Models.Documents} {
+	for name, m := range map[string]string{"chat": s.Models.Chat, "documents": s.Models.Documents, "team chat": s.Models.TeamChat} {
 		if m != "" && !ValidModel(m) {
 			errs = append(errs, fmt.Errorf("model for %s must be one of %s, muse:<model> or codex:<model>", name, strings.Join(Models, ", ")))
 		}
@@ -557,7 +567,7 @@ func (s Settings) Modules(models map[string]string) []string {
 	if p := s.Access.Primary(); p != "" {
 		out = append(out, p)
 	}
-	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview, ModelChat, ModelDocuments} {
+	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview, ModelChat, ModelDocuments, ModelTeamChat} {
 		add(s.ModelFor(Ticket{Models: models}, stage))
 	}
 	add(s.SecondOpinion)
@@ -591,6 +601,9 @@ func (s Settings) CheckModels(a Access, prev Settings) error {
 	}
 	if s.Models.Documents != "" {
 		check("documents", s.Models.Documents, prev.Models.Documents, false)
+	}
+	if s.Models.TeamChat != "" {
+		check("team chat", s.Models.TeamChat, prev.Models.TeamChat, false)
 	}
 	if s.SecondOpinion != "" {
 		check("second opinion", s.SecondOpinion, prev.SecondOpinion, false)

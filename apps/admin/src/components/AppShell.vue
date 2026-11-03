@@ -21,6 +21,7 @@ import { useRules } from './rules/useRules'
 import GlobalSearch, { type SearchPage } from './GlobalSearch.vue'
 import HiIcon from './ui/HiIcon.vue'
 import IncomingCall from './meetings/IncomingCall.vue'
+import { useChatChannels, useChatLive } from './chat/useChat'
 import { sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
 
 // The demo's layout: sidebar navigation with counts and the plan pill,
@@ -34,6 +35,10 @@ const ui = useUi()
 const workspace = useWorkspace()
 const { connected } = useLive()
 const catalog = useModels()
+// Team chat: live messages and unread counts on every page.
+useChatLive()
+const chatChannels = useChatChannels()
+const chatUnread = computed(() => (chatChannels.data.value ?? []).reduce((n, c) => n + (c.unread ?? 0), 0))
 
 // The workspace switcher: every workspace the person is in.
 const wsOpen = ref(false)
@@ -138,6 +143,7 @@ const menus = computed<NavMenu[]>(() => [
       // Its tabs (Needs you, Running...) are on the page; the count is what needs you.
       page('tickets', 'all', { label: 'nav.all', on: isTicketList.value, cnt: count(NEEDS) }),
       page('tasks', 'tasks', { cnt: openTasks.value, dim: true }),
+      page('chat', 'chat', { cnt: chatUnread.value }),
       page('documents', 'rules'),
       page('meetings', 'video', { on: route.name === 'meetings' || route.name === 'meeting' || route.name === 'meetingSession' }),
       page('reviews', 'pull', { cnt: readyReviews.value }),

@@ -60,6 +60,11 @@ type Options struct {
 	CI     CI // CI watching; nil answers 501
 	// Logs is the log watcher; nil answers 501.
 	Logs Logs
+	// Chat is the team chat; nil answers 501.
+	Chat Chat
+	// EgressURL is the egress proxy (AGNTS_RUN_PROXY), whose status page
+	// the platform's Admin sees; "" when there is none.
+	EgressURL string
 	// CommitLinks reads commits linked to tickets by number; nil answers
 	// 501 (and commits show no linked tickets).
 	CommitLinks CommitLinks

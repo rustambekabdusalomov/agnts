@@ -42,6 +42,8 @@
     "stageChatHelp": "Yordamchi chatidagi javoblar va ovozli savollar. Hech qachon kreditlar hisobiga ishlamaydi: ulangan hisob kerak.",
     "stageDocuments": "Hujjatlar va uchrashuv qaydlari",
     "stageDocumentsHelp": "Hujjatlarni, shuningdek uchrashuv qaydlari va vazifalarini yozadi.",
+    "stageTeamChat": "Jamoa chati",
+    "stageTeamChatHelp": "Jamoa chatida @agnts savollariga javob beradi va tiket qoralamalarini tayyorlaydi. Havolalar uchun shu provayderning yengil modeli ishlatiladi.",
     "meetingAudioMuse": "Uchrashuv ovozini doim Muse eshitadi — audioni eshitadigan yagona modul; qaydlarni yuqoridagi model yozadi.",
     "stageReview": "Kod sharhi",
     "stageReviewHelp": "Har bir natijani siz koʻrib chiqayotganda tekshiradi. Avto murakkab tiketlar uchun Opus, qolganlari uchun Sonnet ishlatadi.",

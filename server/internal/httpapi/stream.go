@@ -60,6 +60,23 @@ func (b *Broker) PublishTo(ws, user int64, e domain.Event) {
 	}
 }
 
+// PublishWorkspace sends e, which is not stored and has no id, to every
+// stream in workspace ws. A stream too slow to take it misses it.
+func (b *Broker) PublishWorkspace(ws int64, e domain.Event) {
+	e.ID = 0
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for ch, sub := range b.subs {
+		if sub.ws != ws {
+			continue
+		}
+		select {
+		case ch <- e:
+		default:
+		}
+	}
+}
+
 // Notify signals that new events may exist.
 func (b *Broker) Notify() {
 	select {

@@ -35,3 +35,18 @@ func (n *Notifier) MeetingPush(ctx context.Context, users []int64, p meetings.Pu
 		}
 	}
 }
+
+// PlatformAlert sends a message about the server itself (not a ticket) to
+// workspace ws's Telegram chat, whatever its notification settings say:
+// the platform's Admin chose that chat for such alerts.
+func (n *Notifier) PlatformAlert(ctx context.Context, ws int64, text string) error {
+	if ws <= 0 {
+		return errors.New("no workspace chosen for platform alerts (AGNTS_ALERT_WORKSPACE)")
+	}
+	b, cfg, ok := n.bot(domain.WithWorkspace(domain.System(ctx), ws))
+	if !ok {
+		return errors.New("the alert workspace has no Telegram chat connected")
+	}
+	_, err := b.Send(ctx, cfg.ChatID, text, nil, false)
+	return err
+}

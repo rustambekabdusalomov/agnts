@@ -83,7 +83,7 @@ describe('SettingsPage models', () => {
     const w = await setup()
     await tabs(w)[2].trigger('click')
     const inputs = w.findAll('input.cfg-in.mono')
-    expect(inputs).toHaveLength(7)
+    expect(inputs).toHaveLength(8) // one per stage, Team chat included
     expect(w.text()).toContain(needed())
     for (const i of inputs) {
       await i.setValue('gpt-5')

@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/vue-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { livePoll, SAFETY_POLL, startLive, stopLive, useLive } from './useLive'
+import { livePoll, onLiveReconnect, SAFETY_POLL, startLive, stopLive, useLive } from './useLive'
 
 // A stand-in for the browser's EventSource that the test drives.
 class FakeSource {
@@ -79,5 +79,27 @@ describe('useLive', () => {
       vi.advanceTimersByTime(400)
       expect(calls.map((c) => JSON.stringify(c[0]?.queryKey))).toContain(JSON.stringify(['ci']))
     }
+  })
+  it('leaves the cache alone on team chat events (the chat store applies them)', () => {
+    FakeSource.last.onopen?.()
+    const send = (e: object) => FakeSource.last.onmessage?.({ data: JSON.stringify(e) })
+    for (const type of ['chat_message', 'chat_card', 'chat_ref', 'chat_channel', 'chat_thinking']) send({ type, ticketKey: 'PAY-1', data: {} })
+    vi.advanceTimersByTime(400)
+    expect(calls).toHaveLength(0)
+  })
+
+  it('tells reconnect listeners when the stream is back, not on the first open', () => {
+    const fn = vi.fn()
+    const off = onLiveReconnect(fn)
+    const { reconnecting } = useLive()
+    const s = FakeSource.last
+    s.onopen?.()
+    expect(fn).not.toHaveBeenCalled()
+    s.onerror?.()
+    expect(reconnecting.value).toBe(true)
+    s.onopen?.()
+    expect(reconnecting.value).toBe(false)
+    expect(fn).toHaveBeenCalledTimes(1)
+    off()
   })
 })

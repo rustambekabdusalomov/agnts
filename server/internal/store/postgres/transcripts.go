@@ -27,6 +27,7 @@ const runHistoryKey = "run_history"
 var backgroundPurposes = []string{
 	string(domain.PurposeAssistant), string(domain.PurposeBrief), string(domain.PurposeDetect),
 	string(domain.PurposeReflect), string(domain.PurposeRules), string(domain.PurposeTranslate), string(domain.PurposeLogTriage),
+	string(domain.PurposeTeamChat),
 }
 
 // StartTranscript implements orchestrator.Recorder. The workspace is

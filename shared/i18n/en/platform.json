@@ -136,6 +136,29 @@
     "modulesFollow": "{name} follows the default modules now",
     "modulesNotEnabled": "Not enabled yet, so not offered here: {list}. This server can run them.",
     "modulesOpenSettings": "Open Modules settings",
-    "modulesServerOnly": "This server can run only {list}. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image)."
+    "modulesServerOnly": "This server can run only {list}. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image).",
+    "museRoute": "Muse route",
+    "museRouteSub": "How Muse's traffic leaves this server. egress checks it every 30 seconds.",
+    "museState": {
+      "loading": "Checking…",
+      "unknown": "Unknown",
+      "direct": "Direct",
+      "waiting": "First check…",
+      "up": "Working",
+      "down": "Down"
+    },
+    "museDirect": "No upstream proxy is set (AGNTS_EGRESS_UPSTREAM): Muse connects straight from this server.",
+    "museVia": "Through",
+    "museExit": "Seen by Meta as",
+    "museCheck": "Last check",
+    "museDownSince": "Down since",
+    "museLastOk": "last worked {at}",
+    "museCalls": "Muse connections",
+    "museFailed": "{n} failed",
+    "museStrip": "Last 30 minutes: {pct}% of checks worked",
+    "museFixTunnel": "Start the tunnel again on the laptop and keep it open (the laptop must stay awake and online):",
+    "museFixProxy": "Check that the upstream proxy is running and reachable from this server.",
+    "museLastCallError": "Last failed connection: {err}",
+    "museNavDown": "Muse's route is down"
   }
 }

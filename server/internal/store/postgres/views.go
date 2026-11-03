@@ -89,7 +89,9 @@ func (s *Agent) ListEvents(ctx context.Context, f LogFilter) ([]domain.Event, er
 	if c, ok := typeCondition[f.Type]; ok {
 		cond = c
 	}
-	q := `SELECT ` + eventCols + ` FROM ` + eventFrom + ` WHERE ` + cond + `
+	// Team chat messages travel as events for the stream; they are not
+	// part of the log.
+	q := `SELECT ` + eventCols + ` FROM ` + eventFrom + ` WHERE ` + cond + ` AND e.type NOT LIKE 'chat\_%'
 		  AND ($1 = '' OR e.ticket_key ILIKE $1 || '%')
 		  AND (NOT $2 OR e.level = 'error')
 		  AND ($3 = 0 OR e.id < $3)
@@ -287,7 +289,7 @@ func (s *Agent) Week(ctx context.Context, from time.Time) (WeekStats, error) {
 // RecentEvents returns the newest n events that matter to a person.
 func (s *Agent) RecentEvents(ctx context.Context, n int) ([]domain.Event, error) {
 	rows, err := s.db.Query(ctx, `SELECT `+eventCols+` FROM `+eventFrom+`
-		WHERE e.type NOT IN ('claude_text', 'claude_tool', 'rate_limit') ORDER BY e.id DESC LIMIT $1`, n)
+		WHERE e.type NOT IN ('claude_text', 'claude_tool', 'rate_limit') AND e.type NOT LIKE 'chat\_%' ORDER BY e.id DESC LIMIT $1`, n)
 	if err != nil {
 		return nil, err
 	}

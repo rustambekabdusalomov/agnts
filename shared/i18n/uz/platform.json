@@ -136,6 +136,29 @@
     "modulesFollow": "{name} endi standart modullardan foydalanadi",
     "modulesNotEnabled": "Hali yoqilmagan, shuning uchun bu yerda yo‘q: {list}. Bu server ularni ishga tushira oladi.",
     "modulesOpenSettings": "Modullar sozlamalarini ochish",
-    "modulesServerOnly": "Bu server faqat {list} ni ishga tushira oladi. Ko‘proq taklif qilish uchun modul serverdagi AGNTS_PROVIDERS ga (va ishga tushirish obraziga) qo‘shilishi kerak."
+    "modulesServerOnly": "Bu server faqat {list} ni ishga tushira oladi. Ko‘proq taklif qilish uchun modul serverdagi AGNTS_PROVIDERS ga (va ishga tushirish obraziga) qo‘shilishi kerak.",
+    "museRoute": "Muse yo'li",
+    "museRouteSub": "Muse trafigi bu serverdan qanday chiqadi. egress uni har 30 soniyada tekshiradi.",
+    "museState": {
+      "loading": "Tekshirilmoqda…",
+      "unknown": "Noma'lum",
+      "direct": "To'g'ridan-to'g'ri",
+      "waiting": "Birinchi tekshiruv…",
+      "up": "Ishlayapti",
+      "down": "Ishlamayapti"
+    },
+    "museDirect": "Proksi o'rnatilmagan (AGNTS_EGRESS_UPSTREAM): Muse bu serverdan to'g'ridan-to'g'ri ulanadi.",
+    "museVia": "Orqali",
+    "museExit": "Meta ko'radigan manzil",
+    "museCheck": "Oxirgi tekshiruv",
+    "museDownSince": "Ishlamayapti",
+    "museLastOk": "oxirgi marta {at} da ishlagan",
+    "museCalls": "Muse ulanishlari",
+    "museFailed": "{n} tasi xato",
+    "museStrip": "Oxirgi 30 daqiqa: tekshiruvlarning {pct}% muvaffaqiyatli",
+    "museFixTunnel": "Noutbukda tunnelni qayta ishga tushiring va ochiq qoldiring (noutbuk yoqilgan va internetda bo'lishi kerak):",
+    "museFixProxy": "Proksi ishlayotganini va bu serverdan ochiq ekanini tekshiring.",
+    "museLastCallError": "Oxirgi xato ulanish: {err}",
+    "museNavDown": "Muse yo'li ishlamayapti"
   }
 }

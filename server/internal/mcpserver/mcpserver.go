@@ -52,6 +52,9 @@ type Deps struct {
 	// Meetings reads the workspace's calls (made after the server, hence
 	// a function); nil or nil's result disables the meeting tools.
 	Meetings func() *meetings.Service
+	// Memory recalls what the workspace knows about a question, with the
+	// ids the assistant cites (the team chat's memory); nil leaves it out.
+	Memory func(ctx context.Context, question string) (any, error)
 }
 
 // LogFindings reads the log watcher's findings (logwatch.Service).

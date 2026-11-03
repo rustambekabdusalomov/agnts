@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import ChartLegend from '../../components/charts/ChartLegend.vue'
 import StackedBars from '../../components/charts/StackedBars.vue'
 import PageHeader from '../../components/PageHeader.vue'
+import MuseRouteCard from '../../components/platform/MuseRouteCard.vue'
 import { initialsOf, nameOf, perDay, useAgo, usePlatform, within } from '../../composables/usePlatform'
 
 // The platform at a glance: people and workspaces, how fast they grow, and
@@ -94,6 +95,8 @@ const gb = (mb: number) => `${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`
           </li>
         </ul>
       </section>
+
+      <MuseRouteCard class="span2" />
 
       <section class="card">
         <div class="ch"><div><h2>{{ t('platform.capacity') }}</h2></div><span v-if="cap?.full" class="badge b-warn">{{ t('platform.full') }}</span></div>
