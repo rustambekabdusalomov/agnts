@@ -152,6 +152,29 @@ func TestWorkspaceIsolation(t *testing.T) {
 	if _, _, err := s.TicketByPR(a, domain.PRRef{Branch: "agnts/SSH-1", Repo: "a/sshXrepo"}); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("_ matched as a wildcard: %v", err)
 	}
+	// A review of agnts's own pull request carries its URL too; the
+	// pull request is still the change's, also once the review is newer.
+	const prURL = "https://github.com/a/ssh_repo/pull/7"
+	for i, k := range []struct{ key, kind, source string }{{"SSH-1", "code", "local"}, {"SSH-PR7", "review", "git"}} {
+		if k.kind == "review" {
+			if _, err := users.db.Exec(a, `INSERT INTO tickets (key, source, kind, title) VALUES ($1, $2, $3, 't')`, k.key, k.source, k.kind); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if _, err := users.db.Exec(a, `UPDATE ticket_repos SET pr_url = $2 FROM tickets WHERE tickets.id = ticket_repos.ticket_id AND tickets.key = $1`, k.key, prURL); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := users.db.Exec(a, `INSERT INTO ticket_repos (ticket_id, repo_id, pr_url) SELECT id, $2, $3 FROM tickets
+			WHERE key = $1 AND NOT EXISTS (SELECT 1 FROM ticket_repos WHERE ticket_id = tickets.id)`, k.key, ssh.ID, prURL); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := users.db.Exec(a, `UPDATE tickets SET updated_at = now() + make_interval(mins => $2) WHERE key = $1`, k.key, i); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got, _, err := s.TicketByPR(a, domain.PRRef{URL: prURL, RepoID: ssh.ID}); err != nil || got.Key != "SSH-1" {
+		t.Fatalf("by URL with a newer review: %s %v", got.Key, err)
+	}
 
 	// Task numbers without a repository count per workspace.
 	na, _ := s.NextTaskNumber(a, nil)
