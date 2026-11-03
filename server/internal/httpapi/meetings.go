@@ -401,10 +401,19 @@ func (s *Server) ListPastMeetingSessions(w http.ResponseWriter, r *http.Request,
 func toActionItems(items []domain.ActionItem) []gen.MeetingActionItem {
 	out := make([]gen.MeetingActionItem, len(items))
 	for i, a := range items {
-		out[i] = gen.MeetingActionItem{Id: a.ID, Position: a.Position, Text: a.Text, Who: a.Who, Due: a.Due, AtMs: a.AtMS, Quote: a.Quote}
-		if a.TicketKey != "" {
-			out[i].TicketKey = &a.TicketKey
-		}
+		out[i] = toActionItem(a)
+	}
+	return out
+}
+
+func toActionItem(a domain.ActionItem) gen.MeetingActionItem {
+	out := gen.MeetingActionItem{Id: a.ID, Position: a.Position, Text: a.Text, Who: a.Who, Due: a.Due, AtMs: a.AtMS, Quote: a.Quote,
+		Speaker: a.Speaker, MemberId: a.WhoUserID, MemberByHand: a.WhoSetBy != nil, Drafted: a.Drafted}
+	if a.WhoUserID != nil && a.WhoName != "" {
+		out.MemberName = &a.WhoName
+	}
+	if a.TicketKey != "" {
+		out.TicketKey = &a.TicketKey
 	}
 	return out
 }
@@ -587,6 +596,24 @@ func (s *Server) CreateActionItemTicket(w http.ResponseWriter, r *http.Request, 
 	s.writeTicket(w, r, http.StatusCreated, t)
 }
 
+// SetActionItemMember implements gen.ServerInterface.
+func (s *Server) SetActionItemMember(w http.ResponseWriter, r *http.Request, id gen.MeetingID, sid gen.SessionID, itemID int64) {
+	if !s.meetingsReady(w) {
+		return
+	}
+	var req gen.ActionItemMemberInput
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	it, err := s.opt.Meetings.SetActionItemMember(r.Context(), meetingCaller(r), id, sid, itemID, req.UserId, origin(r))
+	if err != nil {
+		s.meetingError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toActionItem(it))
+}
+
 // ListTicketMeetings implements gen.ServerInterface.
 func (s *Server) ListTicketMeetings(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
 	if s.opt.Meetings == nil {
@@ -626,7 +653,8 @@ func (s *Server) SearchMeetingTranscripts(w http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) meetingSettings(w http.ResponseWriter, r *http.Request, ms domain.MeetingSettings) {
-	out := gen.MeetingSettings{AllowRecording: ms.AllowRecording, RetentionDays: ms.RetentionDays, KeepAudio: ms.KeepAudio, MaxParticipants: ms.MaxParticipants}
+	out := gen.MeetingSettings{AllowRecording: ms.AllowRecording, RetentionDays: ms.RetentionDays, KeepAudio: ms.KeepAudio, MaxParticipants: ms.MaxParticipants,
+		DraftTickets: ms.DraftTickets}
 	if m := s.opt.Meetings; m != nil {
 		out.Available.Meetings, out.Available.Recording, out.Available.Notes = m.Ready(), m.RecordingReady(), m.NotesReady()
 	}
@@ -661,8 +689,12 @@ func (s *Server) PutMeetingSettings(w http.ResponseWriter, r *http.Request) {
 		s.writeInternal(w, r, err)
 		return
 	}
+	drafts := cur.Meetings.DraftTickets
+	if req.DraftTickets != nil {
+		drafts = *req.DraftTickets
+	}
 	cur.Meetings = domain.MeetingSettings{AllowRecording: req.AllowRecording, RetentionDays: req.RetentionDays, KeepAudio: req.KeepAudio,
-		MaxParticipants: req.MaxParticipants}
+		MaxParticipants: req.MaxParticipants, DraftTickets: drafts}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), cur, origin(r))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())

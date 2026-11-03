@@ -14,7 +14,6 @@ import (
 
 	"agnts/internal/documents"
 	"agnts/internal/domain"
-	"agnts/internal/orchestrator"
 )
 
 // WakeNotes has the notes worker look at its queue now.
@@ -286,6 +285,13 @@ func (s *Service) NotesChanged(ctx context.Context, d domain.Document) {
 	if d.Run.Status != domain.DocRunDone && d.Run.Status != domain.DocRunFailed {
 		return
 	}
+	// Done or failed, the items are the ones to keep: the new notes', or
+	// the earlier ones a failed rewrite left.
+	if x, err := s.d.Store.Session(ctx, d.Source.SessionID); err == nil {
+		if m, err := s.d.Store.Meeting(ctx, x.MeetingID); err == nil {
+			s.settleActionItems(ctx, x, m)
+		}
+	}
 	s.notesDone(ctx, d.Source.SessionID)
 }
 
@@ -341,6 +347,9 @@ func (s *Service) RegenerateNotes(ctx context.Context, c Caller, meetingID, sess
 	}
 	segs, err := s.d.Store.Segments(ctx, x.ID)
 	if err != nil {
+		return err
+	}
+	if err := s.dropUntouchedDrafts(ctx, x.ID); err != nil {
 		return err
 	}
 	if len(segs) > 0 {
@@ -507,8 +516,7 @@ func (s *Service) ActionItemTicket(ctx context.Context, c Caller, meetingID, ses
 	if o.Origin == "" {
 		o.Origin = domain.OriginWeb
 	}
-	t, err := s.d.Tickets.CreateTask(ctx, orchestrator.TaskInput{RepoID: o.RepoID, Kind: "auto", Title: it.Text,
-		Description: s.itemDescription(ctx, m, x, it), Priority: "medium", AfterApprove: "pr", Start: o.Start}, o.Origin)
+	t, err := s.itemTicket(ctx, m, x, it, o.Start, &c.UserID, o.Origin, o.RepoID)
 	if err != nil {
 		return t, err
 	}
@@ -529,8 +537,13 @@ func (s *Service) itemDescription(ctx context.Context, m domain.Meeting, x domai
 		loc = time.UTC
 	}
 	fmt.Fprintf(&b, "From the meeting **%s** on %s.\n\n", titleOf(m), x.StartedAt.In(loc).Format("2 January 2006"))
-	if it.Who != "" {
-		fmt.Fprintf(&b, "- Who: %s\n", it.Who)
+	switch {
+	case it.WhoName != "" && it.Who != "" && domain.FoldName(it.Who) != domain.FoldName(it.WhoName):
+		fmt.Fprintf(&b, "- Who: %s (said: %s)\n", it.WhoName, it.Who)
+	case it.WhoName != "":
+		fmt.Fprintf(&b, "- Who: %s\n", it.WhoName)
+	case it.Who != "":
+		fmt.Fprintf(&b, "- Who: %s (no member matched this name)\n", it.Who)
 	}
 	if it.Due != "" {
 		fmt.Fprintf(&b, "- When: %s\n", it.Due)

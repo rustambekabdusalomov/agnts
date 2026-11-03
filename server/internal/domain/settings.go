@@ -324,11 +324,14 @@ type MeetingSettings struct {
 	KeepAudio bool `json:"keepAudio"`
 	// MaxParticipants caps the people in one call.
 	MaxParticipants int `json:"maxParticipants"`
+	// DraftTickets makes every action item a draft ticket (held) on the
+	// member who took it as soon as the notes are written.
+	DraftTickets bool `json:"draftTickets"`
 }
 
 // DefaultMeetingSettings are the settings before any are saved.
 func DefaultMeetingSettings() MeetingSettings {
-	return MeetingSettings{AllowRecording: true, RetentionDays: 90, MaxParticipants: 50}
+	return MeetingSettings{AllowRecording: true, RetentionDays: 90, MaxParticipants: 50, DraftTickets: true}
 }
 
 // Validate checks the ranges.

@@ -1485,6 +1485,14 @@ func (t meetingTickets) TicketByKey(ctx context.Context, key string) (domain.Tic
 	return t.store.TicketByKey(ctx, key)
 }
 
+func (t meetingTickets) SetMember(ctx context.Context, key string, userID int64, name string, origin domain.Origin) (domain.Ticket, error) {
+	return t.orch.SetMember(ctx, key, userID, name, origin)
+}
+
+func (t meetingTickets) DeleteTask(ctx context.Context, key string, origin domain.Origin) error {
+	return t.orch.DeleteTask(ctx, key, origin)
+}
+
 // logTriager is the orchestrator's model triage of log findings, as the
 // log watcher asks for it.
 type logTriager struct{ o *orchestrator.Orchestrator }

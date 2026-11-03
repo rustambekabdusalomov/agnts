@@ -61,7 +61,9 @@ func (o *Orchestrator) gatherMeeting(ctx context.Context, src domain.DocumentSou
 		loc = time.UTC
 	}
 	fmt.Fprintf(&about, "- Date: %s (%s)\n", x.StartedAt.In(loc).Format("Monday, 2 January 2006, 15:04"), m.TimeZone)
-	if x.EndedAt != nil {
+	if x.Uploaded {
+		about.WriteString("- An uploaded recording of a meeting held elsewhere: only its sound was heard, and the date is when it was held, as the uploader said.\n")
+	} else if x.EndedAt != nil {
 		fmt.Fprintf(&about, "- Length: %s\n", x.EndedAt.Sub(x.StartedAt).Round(time.Minute))
 	}
 	if m.HostName != "" {
@@ -71,6 +73,9 @@ func (o *Orchestrator) gatherMeeting(ctx context.Context, src domain.DocumentSou
 		fmt.Fprintf(&about, "\n## Agenda / description\n\n%s\n", d)
 	}
 	about.WriteString("\n## Who was there\n\n")
+	for _, n := range in.People {
+		fmt.Fprintf(&about, "- %s (member, in the recording)\n", n)
+	}
 	for _, a := range in.Attendees {
 		kind := "member"
 		if a.IsGuest {
@@ -141,18 +146,20 @@ const meetingNotesGuide = `Meeting notes for the people who were there and those
 // meetingActionItemsRule asks for the action items as JSON beside the notes.
 const meetingActionItemsRule = `
 Also write the action items as JSON to ` + ActionItemsPath + `: an array (empty when there are none) of
-{"text": "what is to be done, as a short imperative sentence", "who": "the person, as named in the meeting, or empty",
- "due": "when, as said (\"by Friday\"), or empty", "at": "m:ss when it was agreed", "quote": "the words that show it, at most 300 characters"}.
-The same items as in the notes' Action items section, in the same order.
+{"text": "what is to be done, as a short imperative sentence", "who": "the person who takes it, as named in the meeting (\"me\" when the speaker takes it themself), or empty",
+ "due": "when, as said (\"by Friday\"), or empty", "at": "m:ss when it was agreed", "quote": "the words that show it, at most 300 characters",
+ "speaker": "who said the line where it was taken, as the transcript names them, or empty when the transcript does not say who spoke"}.
+The same items as in the notes' Action items section, in the same order. Name one person in "who"; a task two people take is two items.
 `
 
 // actionItemJSON is one action item as the generation writes it.
 type actionItemJSON struct {
-	Text  string `json:"text"`
-	Who   string `json:"who"`
-	Due   string `json:"due"`
-	At    string `json:"at"`
-	Quote string `json:"quote"`
+	Text    string `json:"text"`
+	Who     string `json:"who"`
+	Due     string `json:"due"`
+	At      string `json:"at"`
+	Quote   string `json:"quote"`
+	Speaker string `json:"speaker"`
 }
 
 // readActionItems reads and checks the action items a notes generation
@@ -165,7 +172,7 @@ func readActionItems(raw []byte) ([]domain.ActionItem, error) {
 	}
 	out := make([]domain.ActionItem, 0, len(in))
 	for _, it := range in {
-		a := domain.ActionItem{Text: it.Text, Who: it.Who, Due: it.Due, Quote: it.Quote}
+		a := domain.ActionItem{Text: it.Text, Who: it.Who, Due: it.Due, Quote: it.Quote, Speaker: it.Speaker}
 		if ms, ok := parseOffset(it.At); ok {
 			a.AtMS = &ms
 		}

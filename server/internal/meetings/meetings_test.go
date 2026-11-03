@@ -201,15 +201,30 @@ func (n *fakeNotes) RegenerateMeetingNotes(context.Context, int64, int64, int64)
 	return nil
 }
 
-type fakeTickets struct{ made []orchestrator.TaskInput }
-
-func (t *fakeTickets) TicketByKey(context.Context, string) (domain.Ticket, error) {
-	return domain.Ticket{}, domain.ErrNotFound
+// fakeTickets keeps tickets in the store, as the orchestrator would.
+type fakeTickets struct {
+	store *postgres.Agent
+	made  []orchestrator.TaskInput
 }
 
-func (t *fakeTickets) CreateTask(_ context.Context, in orchestrator.TaskInput, _ domain.Origin) (domain.Ticket, error) {
+func (t *fakeTickets) TicketByKey(ctx context.Context, key string) (domain.Ticket, error) {
+	return t.store.TicketByKey(ctx, key)
+}
+
+func (t *fakeTickets) CreateTask(ctx context.Context, in orchestrator.TaskInput, _ domain.Origin) (domain.Ticket, error) {
 	t.made = append(t.made, in)
-	return domain.Ticket{}, errors.New("no tickets in this test")
+	return t.store.CreateTicket(ctx, domain.Ticket{Key: fmt.Sprintf("MT-%d", time.Now().UnixNano()), Source: domain.SourceLocal, Title: in.Title,
+		Description: in.Description, Priority: in.Priority, State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
+		Held: in.Start == "queue", Kind: domain.KindCode, MemberID: in.MemberID, CreatedBy: in.CreatedBy},
+		domain.Event{Type: domain.EventTicketCreated, Origin: domain.OriginSystem, Message: in.Title})
+}
+
+func (t *fakeTickets) SetMember(ctx context.Context, key string, userID int64, _ string, _ domain.Origin) (domain.Ticket, error) {
+	return t.store.UpdateTicket(ctx, key, nil, func(x *domain.Ticket) { x.MemberID = &userID })
+}
+
+func (t *fakeTickets) DeleteTask(ctx context.Context, key string, _ domain.Origin) error {
+	return t.store.DeleteTicket(ctx, key, domain.Event{TicketKey: key, Type: domain.EventTaskChanged, Origin: domain.OriginSystem, Message: "task deleted"})
 }
 
 type pushed struct {
@@ -250,6 +265,7 @@ type harness struct {
 	store  *postgres.Meetings
 	lk     *fakeLiveKit
 	notes  *fakeNotes
+	tix    *fakeTickets
 	push   *fakePusher
 	mail   *fakeMail
 	media  string
@@ -297,14 +313,14 @@ func newHarness(t *testing.T) harness {
 		t.Fatal(err)
 	}
 	h := harness{t: t, pool: p, ctx: ctx, ws: ws, store: postgres.NewMeetings(p), lk: newFakeLiveKit(), notes: &fakeNotes{docs: postgres.NewDocuments(p)}, push: &fakePusher{},
-		mail: &fakeMail{}, media: t.TempDir(), owner: owner}
+		mail: &fakeMail{}, media: t.TempDir(), owner: owner, tix: &fakeTickets{store: postgres.NewAgent(p)}}
 	h.host, h.member, h.viewer, h.other = add("Host", domain.RoleUser), add("Member", domain.RoleUser), add("Viewer", domain.RoleViewer), add("Outsider", "")
 	h.svc = meetings.New(meetings.Config{LiveKitURL: "wss://lk.example", Keys: livekit.Keys{Key: "k", Secret: "secret-of-at-least-32-characters-long"},
 		PublicURL: "https://app.example", MediaDir: h.media, Egress: true, MaxRecordings: 2},
 		meetings.Deps{Store: h.store, LiveKit: h.lk, Workspaces: wss, Users: users, Settings: postgres.NewSettings(p, domain.DefaultSettings()),
 			Pusher: h.push, Mailer: h.mail, Notes: h.notes, Hearer: fakeHearer{segs: []domain.MeetingSegment{
 				{StartMS: 1000, EndMS: 4000, Text: "We ship refunds on Friday."}, {StartMS: 5000, EndMS: 8000, Text: "Aziza writes the migration."}}},
-			Tickets: &fakeTickets{}, Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+			Tickets: h.tix, Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
 	return h
 }
 

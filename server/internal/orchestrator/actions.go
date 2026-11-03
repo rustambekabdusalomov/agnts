@@ -1170,6 +1170,10 @@ type TaskInput struct {
 	Attachments *[]int64
 	// SkipChecks: its coding runs skip the check commands. CreateTask only.
 	SkipChecks bool
+	// MemberID and CreatedBy, set, are whose ticket it is and who made it,
+	// in place of the person acting (a meeting's draft tickets). The
+	// caller checks they are members. CreateTask only.
+	MemberID, CreatedBy *int64
 }
 
 // CreateTask adds a side-project task. Its key comes from the
@@ -1221,6 +1225,7 @@ func (o *Orchestrator) CreateTask(ctx context.Context, in TaskInput, origin doma
 		State: domain.StateNew, ResumeState: domain.StateNew, AfterApprove: in.AfterApprove,
 		Held: in.Start == "queue", AskFirst: in.Start == "ask" || (in.Start == "queue" && st.AskFirst),
 		Kind: kind, KindAuto: auto, SuggestFollowUps: in.FollowUps, TicketNumber: number, SkipChecks: in.SkipChecks,
+		MemberID: in.MemberID, CreatedBy: in.CreatedBy,
 	}
 	res.apply(&t)
 	out, err := o.createTask(ctx, t, prefix, files, origin)

@@ -5686,6 +5686,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/member": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Pick the member who takes an action item; its ticket becomes theirs too */
+        put: operations["setActionItemMember"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/meetings": {
         parameters: {
             query?: never;
@@ -11132,8 +11153,27 @@ export interface components {
             /** @description When it was said, from the start of the call */
             atMs?: number;
             quote: string;
+            /** @description Who said the line where it was taken, as the transcript names them; empty when it does not say */
+            speaker: string;
+            /**
+             * Format: int64
+             * @description The member who takes it: matched from the name as said, or picked by hand; absent when nobody matched
+             */
+            memberId?: number;
+            memberName?: string;
+            /** @description The member was picked by hand, not matched */
+            memberByHand: boolean;
+            /** @description Its draft ticket was made when the notes were written */
+            drafted: boolean;
             /** @description The ticket made from it */
             ticketKey?: string;
+        };
+        ActionItemMemberInput: {
+            /**
+             * Format: int64
+             * @description A member of the workspace
+             */
+            userId: number;
         };
         ActionItemTicketInput: {
             /**
@@ -11198,6 +11238,8 @@ export interface components {
             /** @description Keep the audio of notes after it is heard */
             keepAudio: boolean;
             maxParticipants: number;
+            /** @description Every action item becomes a held draft ticket on the member who took it when the notes are written */
+            draftTickets: boolean;
             /** @description What this server can do */
             available: {
                 meetings: boolean;
@@ -11210,6 +11252,8 @@ export interface components {
             retentionDays: number;
             keepAudio: boolean;
             maxParticipants: number;
+            /** @description Absent keeps it as it is */
+            draftTickets?: boolean;
         };
         MeetingPrefs: {
             /**
@@ -20757,6 +20801,37 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    setActionItemMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionItemMemberInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingActionItem"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     listTicketMeetings: {

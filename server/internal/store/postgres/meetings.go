@@ -409,14 +409,14 @@ func (s *Meetings) SetMeetingReminderMin(ctx context.Context, userID int64, n in
 // --- Sessions ---
 
 const sessionCols = `s.id, s.workspace_id, s.meeting_id, s.room, s.started_at, s.connected_at, s.ended_at, s.guests_quiet, s.notes_on, s.notes_status,
-	s.notes_error, s.notes_by, s.document_id,
+	s.notes_error, s.notes_by, s.document_id, s.uploaded, s.people,
 	EXISTS (SELECT 1 FROM meeting_media r WHERE r.session_id = s.id AND r.kind = 'recording' AND r.status = 'active')`
 
 func scanSession(row pgx.Row) (domain.MeetingSession, error) {
 	var x domain.MeetingSession
 	var st string
 	err := row.Scan(&x.ID, &x.WorkspaceID, &x.MeetingID, &x.Room, &x.StartedAt, &x.ConnectedAt, &x.EndedAt, &x.GuestsQuiet, &x.NotesOn, &st,
-		&x.NotesError, &x.NotesBy, &x.DocumentID, &x.Recording)
+		&x.NotesError, &x.NotesBy, &x.DocumentID, &x.Uploaded, &x.People, &x.Recording)
 	x.NotesStatus = domain.NotesStatus(st)
 	return x, notFound(err)
 }
@@ -633,7 +633,7 @@ func (s *Meetings) PastSessions(ctx context.Context, userID int64, owner bool, b
 		var st, kind string
 		v := &x.Session
 		if err := rows.Scan(&v.ID, &v.WorkspaceID, &v.MeetingID, &v.Room, &v.StartedAt, &v.ConnectedAt, &v.EndedAt, &v.GuestsQuiet, &v.NotesOn, &st,
-			&v.NotesError, &v.NotesBy, &v.DocumentID, &v.Recording,
+			&v.NotesError, &v.NotesBy, &v.DocumentID, &v.Uploaded, &v.People, &v.Recording,
 			&x.Meeting.ID, &x.Meeting.Code, &x.Meeting.Title, &kind, &x.People, &x.Recordings, &x.ActionItems, &x.DocumentName); err != nil {
 			return nil, err
 		}
@@ -1279,27 +1279,79 @@ func (s *Meetings) SearchTranscripts(ctx context.Context, userID int64, owner bo
 	})
 }
 
+const actionItemCols = `a.id, a.session_id, a.position, a.text, a.who, a.due, a.at_ms, a.quote, a.speaker, a.who_user_id, a.who_set_by, a.drafted,
+	a.ticket_id, COALESCE(t.key, ''), COALESCE(NULLIF(u.display_name, ''), u.username, '')`
+
+const actionItemFrom = `meeting_action_items a LEFT JOIN tickets t ON t.id = a.ticket_id LEFT JOIN users u ON u.id = a.who_user_id`
+
+func scanActionItem(r pgx.Row) (domain.ActionItem, error) {
+	var a domain.ActionItem
+	err := r.Scan(&a.ID, &a.SessionID, &a.Position, &a.Text, &a.Who, &a.Due, &a.AtMS, &a.Quote, &a.Speaker, &a.WhoUserID, &a.WhoSetBy, &a.Drafted,
+		&a.TicketID, &a.TicketKey, &a.WhoName)
+	return a, err
+}
+
 // ActionItems returns a session's action items in order, with their tickets.
 func (s *Meetings) ActionItems(ctx context.Context, sessionID int64) ([]domain.ActionItem, error) {
-	rows, err := s.db.Query(ctx, `SELECT a.id, a.session_id, a.position, a.text, a.who, a.due, a.at_ms, a.quote, a.ticket_id, COALESCE(t.key, '')
-		FROM meeting_action_items a LEFT JOIN tickets t ON t.id = a.ticket_id WHERE a.session_id = $1 ORDER BY a.position, a.id`, sessionID)
+	rows, err := s.db.Query(ctx, `SELECT `+actionItemCols+` FROM `+actionItemFrom+` WHERE a.session_id = $1 ORDER BY a.position, a.id`, sessionID)
 	if err != nil {
 		return nil, err
 	}
-	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.ActionItem, error) {
-		var a domain.ActionItem
-		err := r.Scan(&a.ID, &a.SessionID, &a.Position, &a.Text, &a.Who, &a.Due, &a.AtMS, &a.Quote, &a.TicketID, &a.TicketKey)
-		return a, err
-	})
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.ActionItem, error) { return scanActionItem(r) })
 }
 
 // ActionItem returns one action item.
 func (s *Meetings) ActionItem(ctx context.Context, id int64) (domain.ActionItem, error) {
-	var a domain.ActionItem
-	err := s.db.QueryRow(ctx, `SELECT a.id, a.session_id, a.position, a.text, a.who, a.due, a.at_ms, a.quote, a.ticket_id, COALESCE(t.key, '')
-		FROM meeting_action_items a LEFT JOIN tickets t ON t.id = a.ticket_id WHERE a.id = $1`, id).
-		Scan(&a.ID, &a.SessionID, &a.Position, &a.Text, &a.Who, &a.Due, &a.AtMS, &a.Quote, &a.TicketID, &a.TicketKey)
+	a, err := scanActionItem(s.db.QueryRow(ctx, `SELECT `+actionItemCols+` FROM `+actionItemFrom+` WHERE a.id = $1`, id))
 	return a, notFound(err)
+}
+
+// SetActionItemMember records the member who takes an action item: by is
+// who picked them by hand, 0 when agnts matched the name. A matched member
+// never replaces one picked by hand.
+func (s *Meetings) SetActionItemMember(ctx context.Context, itemID int64, userID *int64, by int64) error {
+	if by == 0 {
+		_, err := s.db.Exec(ctx, `UPDATE meeting_action_items SET who_user_id = $2 WHERE id = $1 AND who_set_by IS NULL`, itemID, userID)
+		return err
+	}
+	return s.exec1(ctx, `UPDATE meeting_action_items SET who_user_id = $2, who_set_by = $3 WHERE id = $1`, itemID, userID, by)
+}
+
+// SetActionItemsDrafted marks action items as having (true) or not
+// having had (false) their draft ticket made.
+func (s *Meetings) SetActionItemsDrafted(ctx context.Context, ids []int64, drafted bool) error {
+	_, err := s.db.Exec(ctx, `UPDATE meeting_action_items SET drafted = $2 WHERE id = ANY($1)`, ids, drafted)
+	return err
+}
+
+// NameCandidates returns the members an action item of a session may
+// name, with the names they go by; Near ones were in the call, are
+// invited, host it, or are in the uploaded recording.
+func (s *Meetings) NameCandidates(ctx context.Context, sessionID int64) ([]domain.NameCandidate, error) {
+	rows, err := s.db.Query(ctx, `SELECT u.id, u.display_name, u.username, COALESCE(split_part(u.email, '@', 1), ''),
+			COALESCE((SELECT array_agg(DISTINCT p.name) FROM meeting_participants p WHERE p.session_id = ss.id AND p.user_id = u.id), '{}'),
+			EXISTS (SELECT 1 FROM meeting_participants p WHERE p.session_id = ss.id AND p.user_id = u.id)
+			OR EXISTS (SELECT 1 FROM meeting_invitees i WHERE i.meeting_id = ss.meeting_id AND i.user_id = u.id)
+			OR EXISTS (SELECT 1 FROM meeting_cohosts c WHERE c.meeting_id = ss.meeting_id AND c.user_id = u.id)
+			OR m.host_id = u.id OR u.id = ANY(ss.people)
+		FROM meeting_sessions ss JOIN meetings m ON m.id = ss.meeting_id
+		JOIN memberships ms ON ms.workspace_id = ss.workspace_id JOIN users u ON u.id = ms.user_id
+		WHERE ss.id = $1 ORDER BY u.id`, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.NameCandidate, error) {
+		var c domain.NameCandidate
+		var display, username, mailName string
+		var joined []string
+		err := r.Scan(&c.UserID, &display, &username, &mailName, &joined, &c.Near)
+		for _, n := range append([]string{display, username, mailName}, joined...) {
+			if n != "" {
+				c.Names = append(c.Names, n)
+			}
+		}
+		return c, err
+	})
 }
 
 // SetActionItemTicket records the ticket made from an action item, and
@@ -1395,6 +1447,15 @@ func (s *Meetings) NotesInput(ctx context.Context, sessionID int64) (domain.Meet
 		if g.Identity != "" {
 			in.Speakers = true
 			break
+		}
+	}
+	if len(x.People) > 0 {
+		rows, err := s.db.Query(ctx, `SELECT COALESCE(NULLIF(display_name, ''), username) FROM users WHERE id = ANY($1) ORDER BY 1`, x.People)
+		if err != nil {
+			return in, err
+		}
+		if in.People, err = pgx.CollectRows(rows, pgx.RowTo[string]); err != nil {
+			return in, err
 		}
 	}
 	return in, nil
