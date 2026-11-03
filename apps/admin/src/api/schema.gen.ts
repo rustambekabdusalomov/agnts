@@ -3667,6 +3667,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/egress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The egress proxy's upstream (the way Muse's traffic leaves the server) and its recent checks (Admin) */
+        get: operations["getPlatformEgress"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/workspaces": {
         parameters: {
             query?: never;
@@ -6139,6 +6156,54 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        EgressStatus: {
+            /** @description agnts could read the egress proxy's status */
+            reachable: boolean;
+            error?: string;
+            upstream?: components["schemas"]["EgressUpstream"];
+        };
+        EgressUpstream: {
+            /** @description AGNTS_EGRESS_UPSTREAM is set */
+            configured: boolean;
+            /** @description The upstream proxy */
+            via?: string;
+            hosts?: string[];
+            /** @description The host each check reaches through it */
+            target?: string;
+            ok: boolean;
+            /** Format: date-time */
+            checkedAt?: string;
+            /** Format: date-time */
+            lastOkAt?: string;
+            /** Format: date-time */
+            downSince?: string;
+            /** Format: int64 */
+            latencyMs: number;
+            error?: string;
+            exit?: {
+                ip: string;
+                org?: string;
+                city?: string;
+                country?: string;
+                /** Format: date-time */
+                at: string;
+            };
+            history: {
+                /** Format: date-time */
+                at: string;
+                ok: boolean;
+                /** Format: int64 */
+                ms: number;
+            }[];
+            /**
+             * Format: int64
+             * @description Connections runs made through it since egress started
+             */
+            calls: number;
+            /** Format: int64 */
+            failed: number;
+            lastCallError?: string;
+        };
         ChatChannel: {
             /** Format: int64 */
             id: number;
@@ -17257,6 +17322,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlatformOverview"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getPlatformEgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EgressStatus"];
                 };
             };
             403: components["responses"]["Forbidden"];

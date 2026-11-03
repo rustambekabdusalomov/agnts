@@ -396,7 +396,7 @@ func egressProxy(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		proxy.SetUpstream(up)
+		go proxy.SetUpstream(up).Run(ctx)
 		log.Info("egress proxy: upstream proxy", "via", up.String())
 	}
 	// Hosts added in Settings (a staging API for previews) come from agnts's

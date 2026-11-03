@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/tls"
 	"encoding/binary"
+	"encoding/json"
 	"io"
 	"log/slog"
 	"net"
@@ -170,5 +171,48 @@ func TestParseUpstream(t *testing.T) {
 	u, err := ParseUpstream("socks5://h:1080", "")
 	if err != nil || !u.carries("api.meta.ai") || !u.carries("AUTH.meta.com") || u.carries("api.anthropic.com") {
 		t.Fatalf("defaults: %v %v", err, u)
+	}
+}
+
+func TestMonitor(t *testing.T) {
+	site := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = io.WriteString(w, "{}") }))
+	defer site.Close()
+	up := startUpstream(t, strings.TrimPrefix(site.URL, "https://"), true)
+	u, err := ParseUpstream("socks5://u:p@"+up.ln.Addr().String(), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := New([]string{"api.meta.ai"}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	m := p.SetUpstream(u)
+	m.tls = &tls.Config{InsecureSkipVerify: true} //nolint:gosec // test server
+	if !m.check(t.Context()) {
+		t.Fatalf("check through a working upstream failed: %+v", m.Status())
+	}
+	st := m.Status()
+	if !st.OK || st.LastOKAt == nil || st.DownSince != nil || st.Target != "api.meta.ai" || len(st.History) != 1 || strings.Contains(st.Via, ":p@") {
+		t.Fatalf("up: %+v", st)
+	}
+
+	// The tunnel goes away: down, with a reason that says what to look at.
+	_ = up.ln.Close()
+	m.check(t.Context())
+	m.check(t.Context())
+	st = m.Status()
+	if st.OK || st.DownSince == nil || !strings.Contains(st.Error, "tunnel or proxy running") || len(st.History) != 3 || st.LastOKAt == nil {
+		t.Fatalf("down: %+v", st)
+	}
+
+	// Served on its path, as a plain request.
+	rec := httptest.NewRecorder()
+	p.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, StatusPath, nil))
+	var got UpstreamStatus
+	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil || !got.Configured || got.OK || len(got.History) != 3 {
+		t.Fatalf("status endpoint: %v %s", err, rec.Body)
+	}
+	// Without an upstream it says so.
+	rec = httptest.NewRecorder()
+	New(nil, slog.New(slog.NewTextHandler(io.Discard, nil))).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, StatusPath, nil))
+	if !strings.Contains(rec.Body.String(), `"configured":false`) {
+		t.Fatalf("no upstream: %s", rec.Body)
 	}
 }

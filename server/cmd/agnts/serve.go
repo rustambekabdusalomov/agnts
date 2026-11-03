@@ -203,6 +203,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		CI:           a.ci,
 		Logs:         a.logs,
 		Chat:         chatSvc,
+		EgressURL:    strings.TrimRight(cfg.RunProxy, "/"),
 		CommitLinks:  a.store,
 		Assistant:    a.orch,
 		Code:         a.orch,

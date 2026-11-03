@@ -90,20 +90,26 @@ func matches(list []string, host string) bool {
 }
 
 // SetUpstream routes the hosts u carries through it; the allowlist still
-// decides what may be reached at all.
-func (p *Proxy) SetUpstream(u *Upstream) {
+// decides what may be reached at all. The monitor it returns checks the
+// upstream every 30 seconds once Run, and serves StatusPath.
+func (p *Proxy) SetUpstream(u *Upstream) *Monitor {
+	m := NewMonitor(u, 30*time.Second)
+	p.monitor = m
 	direct := p.dial
 	p.dial = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		host, _, err := net.SplitHostPort(addr)
 		if err == nil && u.carries(host) {
 			c, err := u.dial(ctx, network, addr)
+			m.carried(err)
 			if err != nil {
 				p.log.Warn("egress: upstream proxy", "target", addr, "err", err)
+				return nil, friendly(err)
 			}
-			return c, err
+			return c, nil
 		}
 		return direct(ctx, network, addr)
 	}
+	return m
 }
 
 // connectVia opens a tunnel to addr through an HTTP proxy.
