@@ -26,6 +26,7 @@ type Memory interface {
 	SearchMessages(ctx context.Context, question string, limit int) ([]domain.ChatMessage, error)
 	MessagesSharingRefs(ctx context.Context, refs []domain.ChatRef, except int64, limit int) ([]domain.ChatMessage, error)
 	SearchTickets(ctx context.Context, question string, limit int) ([]string, error)
+	RepoTickets(ctx context.Context, repo string, limit int) ([]string, error)
 	Stats(ctx context.Context) (postgres.ChatStats, error)
 }
 
@@ -95,16 +96,18 @@ func (s *Service) Recall(ctx context.Context, q Query) ([]Item, error) {
 			}
 		}
 	}
-	// 4. The workspace at a glance: open tickets, repositories, open
-	// findings, so "what is waiting" and "which repos" have an answer.
+	// 4. The workspace at a glance: tickets open or active in the last two
+	// weeks with their repositories, repositories, open findings, so "what
+	// is waiting", "what was done today" and "which repos" have an answer.
 	for _, c := range cands {
 		switch {
-		case c.Type == domain.RefTicket && c.State != "done" && c.State != "rejected":
-			r.add(Item{ID: c.Key(), Title: c.Title, Text: fmt.Sprintf("ticket %s %q, state %s, updated %s", c.ID, c.Title, c.State, day(c.At))})
+		case c.Type == domain.RefTicket:
+			r.add(Item{ID: c.Key(), Title: c.Title, Text: fmt.Sprintf("ticket %s %q, repository %s, state %s, last activity %s",
+				c.ID, c.Title, ifEmpty(c.Repo, "none"), c.State, when(c.At))})
 		case c.Type == domain.RefRepo:
 			r.add(Item{ID: c.Key(), Title: c.Title, Text: "repository " + c.Title})
 		case c.Type == domain.RefFinding:
-			r.add(Item{ID: c.Key(), Title: c.Title, Text: fmt.Sprintf("log finding %s: %s (%s), last seen %s", c.ID, c.Title, c.State, day(c.At))})
+			r.add(Item{ID: c.Key(), Title: c.Title, Text: fmt.Sprintf("log finding %s: %s (%s), repository %s, last seen %s", c.ID, c.Title, c.State, ifEmpty(c.Repo, "none"), when(c.At))})
 		}
 	}
 	return r.items, nil
@@ -149,7 +152,7 @@ func (r *recall) ref(ref domain.ChatRef) {
 	case domain.RefPR:
 		for _, c := range r.cands {
 			if c.Type == domain.RefPR && c.ID == ref.ID {
-				r.add(Item{ID: c.Key(), Title: c.Title, URL: c.URL, Text: fmt.Sprintf("pull request %s (%s), %s, %s", c.ID, c.Title, c.State, day(c.At))})
+				r.add(Item{ID: c.Key(), Title: c.Title, URL: c.URL, Text: fmt.Sprintf("pull request %s (%s), %s, %s", c.ID, c.Title, c.State, when(c.At))})
 				if k, _, ok := strings.Cut(c.Title, ": "); ok {
 					r.ticket(k)
 				}
@@ -185,7 +188,7 @@ func (r *recall) ticket(key string) {
 func ticketItem(v orchestrator.TicketView) Item {
 	t := v.Ticket
 	var b strings.Builder
-	fmt.Fprintf(&b, "ticket %s %q (%s, %s), state %s", t.Key, t.Title, t.Kind, t.Priority, t.State)
+	fmt.Fprintf(&b, "ticket %s %q (%s, %s), state %s, last activity %s", t.Key, t.Title, t.Kind, t.Priority, t.State, when(t.UpdatedAt))
 	if v.RepoName != "" {
 		fmt.Fprintf(&b, ", repository %s", v.RepoName)
 	}
@@ -198,7 +201,7 @@ func ticketItem(v orchestrator.TicketView) Item {
 	for _, r := range t.OpenedPRs() {
 		st := "open"
 		if r.MergedAt != nil {
-			st = "merged " + day(*r.MergedAt)
+			st = "merged " + when(*r.MergedAt)
 		} else if r.ClosedAt != nil {
 			st = "closed"
 		}
@@ -228,7 +231,7 @@ func ticketItem(v orchestrator.TicketView) Item {
 			fmt.Fprintf(&b, " (files: %s)", strings.Join(ps, ", "))
 		}
 	}
-	for _, h := range lastHistory(v.History, 4) {
+	for _, h := range lastHistory(v.History, 6) {
 		fmt.Fprintf(&b, ". %s", h)
 	}
 	return Item{ID: "ticket:" + t.Key, Title: t.Title, Text: b.String()}
@@ -241,13 +244,13 @@ func lastHistory(hs []orchestrator.HistoryItem, n int) []string {
 		if h.Message == "" {
 			continue
 		}
-		out = append(out, fmt.Sprintf("%s: %s", day(h.At), clip(h.Message, 160)))
+		out = append(out, fmt.Sprintf("%s: %s", when(h.At), clip(h.Message, 160)))
 	}
 	return out
 }
 
 func (r *recall) repo(name string) {
-	if r.seen["repo:"+name] || r.s.Brain == nil {
+	if r.seen["repo:"+name] {
 		return
 	}
 	names, err := r.s.Memory.RepoNames(r.ctx)
@@ -259,12 +262,20 @@ func (r *recall) repo(name string) {
 		return
 	}
 	text := "repository " + name
-	if b, err := r.s.Brain.RepoBrief(r.ctx, id); err == nil && b.Body != "" {
-		text += ". Its brief (agnts's survey of the code):\n" + clip(b.Body, 6000)
-	} else {
-		text += " (no brief yet: agnts has not surveyed its code)"
+	if r.s.Brain != nil {
+		if b, err := r.s.Brain.RepoBrief(r.ctx, id); err == nil && b.Body != "" {
+			text += ". Its brief (agnts's survey of the code):\n" + clip(b.Body, 6000)
+		} else {
+			text += " (no brief yet: agnts has not surveyed its code)"
+		}
 	}
 	r.add(Item{ID: "repo:" + name, Title: name, Text: text})
+	// Its tickets, open or finished, with what agnts did on them.
+	if keys, err := r.s.Memory.RepoTickets(r.ctx, name, 8); err == nil {
+		for _, k := range keys {
+			r.ticket(k)
+		}
+	}
 }
 
 func (r *recall) msg(m domain.ChatMessage) {
@@ -279,14 +290,27 @@ func (r *recall) msg(m domain.ChatMessage) {
 		return
 	}
 	r.add(Item{ID: "msg:" + strconv.FormatInt(m.ID, 10), Title: m.Author,
-		Text: fmt.Sprintf("%s wrote on %s: %s", m.Author, m.CreatedAt.UTC().Format("2006-01-02 15:04"), clip(body, 700))})
+		Text: fmt.Sprintf("%s wrote on %s: %s", m.Author, when(m.CreatedAt), clip(body, 700))})
 }
 
 func day(t time.Time) string {
 	if t.IsZero() {
 		return "?"
 	}
-	return t.UTC().Format("2006-01-02")
+	return t.Local().Format("2006-01-02")
+}
+
+// when is a moment in the server's time zone, to the minute.
+func when(t time.Time) string {
+	if t.IsZero() {
+		return "?"
+	}
+	return t.Local().Format("2006-01-02 15:04")
+}
+
+// now says what time it is, so "today" and "last week" mean something.
+func now() string {
+	return time.Now().Local().Format("Monday 2006-01-02 15:04 MST")
 }
 
 func ifText(ok bool, s string) string {

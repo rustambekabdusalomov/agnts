@@ -469,3 +469,31 @@ func TestReplyToAgnts(t *testing.T) {
 		t.Fatalf("agnts answered a reply to a person: %d messages, want %d", len(ms), n+2)
 	}
 }
+
+func TestAnswerKnowsARepositorysTickets(t *testing.T) {
+	h := newHarness(t)
+	id := h.repo(t, "billing-worker")
+	if _, err := postgres.NewAgent(h.pool).CreateTicket(h.ctx, domain.Ticket{Key: "BILLING-1", TicketNumber: "1", Source: domain.SourceLocal,
+		Kind: domain.KindCode, RepoID: &id, Title: "Implement the plan", Priority: "medium", State: domain.StateDone,
+		ResumeState: domain.StateNew, AfterApprove: "pr"}, domain.Event{TicketKey: "BILLING-1", Type: domain.EventTicketCreated}); err != nil {
+		t.Fatal(err)
+	}
+	h.view("BILLING-1", domain.StateDone, 1)
+	v := h.tickets.views["BILLING-1"]
+	v.RepoName = "billing-worker"
+	h.tickets.views["BILLING-1"] = v
+	cs, _ := h.s.Channels(h.ctx)
+	h.brain.replies["answer"] = `{"answer_md": "BILLING-1 was done today [ticket:BILLING-1].", "citations": ["ticket:BILLING-1"], "insufficient": false}`
+	h.send(t, cs[0].ID, "@agnts what was done on billing-worker today?")
+	h.runJobs(t)
+	p := h.brain.prompts["answer"]
+	for _, want := range []string{"[ticket:BILLING-1] ticket BILLING-1", "repository billing-worker", "Now: "} {
+		if !strings.Contains(p, want) {
+			t.Errorf("the prompt lacks %q:\n%s", want, p)
+		}
+	}
+	ms, _ := h.store.Messages(h.ctx, cs[0].ID, 0, 0, 50)
+	if b := ms[len(ms)-1].Body; !strings.Contains(b, "[ticket:BILLING-1]") {
+		t.Fatalf("answer %q", b)
+	}
+}

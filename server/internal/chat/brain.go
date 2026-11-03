@@ -109,6 +109,9 @@ Reply with a JSON array and nothing else: [{"ref_type":"ticket","ref_id":"PAY-21
 	b.WriteString("Candidates (type:id — title [state]):\n")
 	for _, c := range cands {
 		fmt.Fprintf(&b, "%s — %s", c.Key(), clip(c.Title, 120))
+		if c.Repo != "" && c.Type != domain.RefRepo {
+			fmt.Fprintf(&b, " (%s)", c.Repo)
+		}
 		if c.State != "" {
 			fmt.Fprintf(&b, " [%s]", c.State)
 		}
@@ -290,6 +293,7 @@ Reply with one JSON object and nothing else: {"answer_md": "...", "citations": [
 		}
 		b.WriteString("\n")
 	}
+	fmt.Fprintf(&b, "Now: %s. Times in the context are in the same time zone.\n\n", now())
 	fmt.Fprintf(&b, "Question from %s:\n%s\n\nContext:\n%s", q.Author, clip(stripMention(q.Body), 3000), render(items))
 	return b.String()
 }
