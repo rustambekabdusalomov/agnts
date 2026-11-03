@@ -71,9 +71,10 @@ type Service struct {
 	adminPasswords bool
 }
 
-// PasswordsForAdminsOnly separates Admins from Users: only Admins sign in
+// PasswordsForAdminsOnly separates Admins from Users: only Admins sign up
 // with a password, everyone else with Google (SignInVerified), and an
-// account is one or the other.
+// account is one or the other. A User with a password (CreatePasswordUser,
+// or one they set later) still signs in with it.
 func (s *Service) PasswordsForAdminsOnly() { s.adminPasswords = true }
 
 // AdminPasswordsOnly reports whether Admins and Users are separate: only
@@ -117,6 +118,28 @@ func (s *Service) CreateAdmin(ctx context.Context, in AdminInput) (domain.User, 
 	u, err := s.users.Create(ctx, domain.User{Username: in.Username, Email: in.Email, DisplayName: in.DisplayName, PasswordHash: hash, IsAdmin: true})
 	if errors.Is(err, domain.ErrConflict) {
 		return domain.User{}, fmt.Errorf("%w: the username %q is taken", domain.ErrConflict, in.Username)
+	}
+	return u, err
+}
+
+// CreatePasswordUser creates a User (never an Admin) who signs in with a
+// password and no two-factor code, for accounts made on someone's behalf
+// (the CLI's `agnts user add`).
+func (s *Service) CreatePasswordUser(ctx context.Context, username, password string) (domain.User, error) {
+	username = strings.TrimSpace(username)
+	if !usernameRe.MatchString(username) {
+		return domain.User{}, Invalid("a username has 2 to 32 letters, digits, dots, dashes or underscores")
+	}
+	if len(password) < MinPasswordLength {
+		return domain.User{}, Invalid(fmt.Sprintf("the password must be at least %d characters", MinPasswordLength))
+	}
+	hash, err := secret.HashPassword(password)
+	if err != nil {
+		return domain.User{}, err
+	}
+	u, err := s.users.Create(ctx, domain.User{Username: username, PasswordHash: hash})
+	if errors.Is(err, domain.ErrConflict) {
+		return domain.User{}, fmt.Errorf("%w: the username %q is taken", domain.ErrConflict, username)
 	}
 	return u, err
 }
@@ -170,11 +193,6 @@ func (s *Service) Login(ctx context.Context, in LoginInput) (string, domain.Sess
 	}
 	if !ok {
 		return "", none, domain.User{}, domain.ErrUnauthorized
-	}
-	// Checked after the password, so it says nothing to someone who does
-	// not know it.
-	if s.adminPasswords && !u.IsAdmin {
-		return "", none, domain.User{}, ErrUseGoogle
 	}
 	switch {
 	case u.HasTOTP():
@@ -233,8 +251,8 @@ func (s *Service) BeginAdminSetup(ctx context.Context, login, password string) (
 	return s.BeginEnrollment(u.Username)
 }
 
-// ErrUseGoogle means the password was right, but only Admins sign in with
-// one here: this account signs in with Google.
+// ErrUseGoogle means only Admins sign up with a password here: everyone
+// else signs up with Google.
 var ErrUseGoogle = errors.New("auth: sign in with Google")
 
 // checkCode verifies a TOTP code once (a code is never accepted twice).

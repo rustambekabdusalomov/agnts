@@ -17,9 +17,9 @@ import (
 
 var codeRe = regexp.MustCompile(`^[0-9]{6}$`)
 
-// useGoogle answers a password sign-in or sign-up by someone who is not an
-// Admin, when only Admins use passwords.
-const useGoogle = "sign in with Google: passwords are for Admins only here"
+// useGoogle answers a password sign-up by someone who is not an Admin, when
+// only Admins sign up with passwords.
+const useGoogle = "sign up with Google: password sign-up is for Admins only here"
 
 // UserStore reads and changes accounts.
 type UserStore interface {

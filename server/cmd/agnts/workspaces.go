@@ -59,7 +59,7 @@ func workspaceCmd(ctx context.Context, pool postgresPool, args []string, out io.
 	ws := postgres.NewWorkspaces(pool)
 	users := postgres.NewUsers(pool)
 	sys := domain.System(ctx)
-	usage := errors.New("usage: agnts workspace list | create <name> --owner <username> | slots <slug> <n> | members <slug> <limit> | suspend <slug> | resume <slug>")
+	usage := errors.New("usage: agnts workspace list | create <name> --owner <username> | add <slug> <username> [viewer] | slots <slug> <n> | members <slug> <limit> | suspend <slug> | resume <slug>")
 	if len(args) == 0 {
 		return usage
 	}
@@ -99,6 +99,27 @@ func workspaceCmd(ctx context.Context, pool postgresPool, args []string, out io.
 			return err
 		}
 		_, _ = fmt.Fprintf(out, "Created workspace %q (address %s), owned by %s.\n", w.Name, w.Slug, u.Username)
+		return nil
+	case "add":
+		if len(args) < 3 || len(args) > 4 || (len(args) == 4 && args[3] != "viewer") {
+			return usage
+		}
+		w, err := byslug(args[1])
+		if err != nil {
+			return err
+		}
+		u, err := users.ByUsername(ctx, args[2])
+		if err != nil {
+			return fmt.Errorf("no user %q", args[2])
+		}
+		role := domain.RoleUser
+		if len(args) == 4 {
+			role = domain.RoleViewer
+		}
+		if err := ws.AddMember(sys, w.ID, u.ID, role); err != nil {
+			return err
+		}
+		_, _ = fmt.Fprintf(out, "%s is a member of %s (%s).\n", u.Username, w.Slug, role)
 		return nil
 	case "slots", "members":
 		if len(args) != 3 {
