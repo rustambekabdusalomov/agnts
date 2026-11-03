@@ -25,6 +25,11 @@ const state = computed(() => props.ticket.reviewState ?? 'none')
 const current = computed(() => (props.review && props.review.revision === props.ticket.revision ? props.review : undefined))
 const stale = computed(() => (props.review && !current.value ? props.review : undefined))
 const busy = computed(() => state.value === 'pending' || state.value === 'running')
+// Under review (or a pull request review) the review is live: its findings
+// can go into the feedback and it can run again. Otherwise (the ticket
+// failed or finished) the latest review is shown as it was, read-only.
+const live = computed(() => !!props.pull || props.ticket.state === 'waiting_for_review')
+const shown = computed(() => current.value ?? (live.value ? undefined : props.review))
 
 const run = useMutation({
   mutationFn: () => unwrap(api.POST('/tickets/{key}/review', { params: { path: { key: props.ticket.key } } })),
@@ -49,7 +54,7 @@ const PASSES = ['security', 'failures', 'tests', 'types']
 const passLabel = (p?: string) => (p && PASSES.includes(p) ? t(`harnessTicket.pass_${p}`) : '')
 
 const added = (f: Finding) => props.feedback.includes(findingFeedback(f))
-const actionable = computed(() => (current.value?.findings ?? []).filter((f) => f.suggestion))
+const actionable = computed(() => (live.value ? (current.value?.findings ?? []) : []).filter((f) => f.suggestion))
 const allAdded = computed(() => actionable.value.every(added))
 function addAll() {
   const lines = actionable.value.filter((f) => !added(f)).map(findingFeedback)
@@ -61,8 +66,8 @@ function addAll() {
   <div class="sec cr">
     <div class="cr-h">
       <h3>{{ pull ? t('reviews.reviewTitle') : report ? t('review.reportTitle') : t('review.title') }}</h3>
-      <span v-if="current && !busy" class="badge" :class="`b-${VERDICT_TONE[current.verdict]}`">{{ t(`review.verdict_${current.verdict}`) }}</span>
-      <span v-if="current && !busy && current.deep" class="badge b-info">{{ t('harnessTicket.deep') }}</span>
+      <span v-if="shown && !busy" class="badge" :class="`b-${VERDICT_TONE[shown.verdict]}`">{{ t(`review.verdict_${shown.verdict}`) }}</span>
+      <span v-if="shown && !busy && shown.deep" class="badge b-info">{{ t('harnessTicket.deep') }}</span>
       <span v-if="state === 'running'" class="cr-run"><span class="spin" aria-hidden="true" />{{ t('review.running') }}</span>
     </div>
     <p v-if="!pull" class="hint" style="margin: -4px 0 10px">{{ t('review.sub') }}</p>
@@ -71,14 +76,14 @@ function addAll() {
     <div v-else-if="state === 'failed'" class="help bad"><HiIcon name="info" /><p>{{ t('review.failed') }}</p></div>
     <p v-if="stale && !busy" class="hint">{{ t('review.stale', { n: stale.revision }) }}</p>
 
-    <template v-if="current && !busy">
-      <div class="summary"><p>{{ tr(current.summary) }}</p></div>
-      <p class="hint cr-model">{{ t('review.model', { model: modelLabel(current.model), reason: current.modelReason }) }}</p>
-      <p v-if="current.dropped" class="hint cr-dropped">{{ t('harnessTicket.dropped', { n: current.dropped }) }}</p>
+    <template v-if="shown && !busy">
+      <div class="summary"><p>{{ tr(shown.summary) }}</p></div>
+      <p class="hint cr-model">{{ t('review.model', { model: modelLabel(shown.model), reason: shown.modelReason }) }}</p>
+      <p v-if="shown.dropped" class="hint cr-dropped">{{ t('harnessTicket.dropped', { n: shown.dropped }) }}</p>
 
-      <p v-if="!current.findings.length" class="cr-none"><HiIcon name="check" />{{ t('review.noFindings') }}</p>
+      <p v-if="!shown.findings.length" class="cr-none"><HiIcon name="check" />{{ t('review.noFindings') }}</p>
       <ul v-else class="cr-list">
-        <li v-for="(f, i) in current.findings" :key="i" class="cr-f">
+        <li v-for="(f, i) in shown.findings" :key="i" class="cr-f">
           <div class="cr-fh">
             <span class="badge" :class="`b-${SEVERITY_TONE[f.severity]}`">{{ t(`review.sev_${f.severity}`) }}</span>
             <span class="cr-cat">{{ t(`review.cat_${f.category}`) }}</span>
@@ -94,7 +99,7 @@ function addAll() {
           <p v-if="f.detail" class="cr-detail">{{ tr(f.detail) }}</p>
           <p v-if="f.suggestion" class="cr-sug"><b>{{ t('review.suggestion') }}:</b> {{ tr(f.suggestion) }}</p>
           <button
-            v-if="f.suggestion"
+            v-if="f.suggestion && live"
             type="button"
             class="btn btn-s"
             :disabled="added(f)"
@@ -103,7 +108,7 @@ function addAll() {
             <HiIcon v-if="added(f)" name="check" />{{ added(f) ? t('review.added') : t('review.addToFeedback') }}
           </button>
           <button
-            v-if="!pull"
+            v-if="!pull && live"
             type="button"
             class="btn btn-s cr-fu"
             :disabled="suggested.has(i) || toFollowUp.isPending.value"
@@ -115,13 +120,13 @@ function addAll() {
         </li>
       </ul>
 
-      <template v-if="current.strengths.length">
+      <template v-if="shown.strengths.length">
         <h3>{{ t('review.strengths') }}</h3>
-        <ul><li v-for="(s, i) in current.strengths" :key="i">{{ tr(s) }}</li></ul>
+        <ul><li v-for="(s, i) in shown.strengths" :key="i">{{ tr(s) }}</li></ul>
       </template>
     </template>
 
-    <div v-if="!busy" class="cr-actions">
+    <div v-if="!busy && live" class="cr-actions">
       <button v-if="actionable.length > 1 && !allAdded" type="button" class="btn btn-s" @click="addAll">{{ t('review.addAll') }}</button>
       <button v-if="!pull" type="button" class="btn btn-s" :disabled="run.isPending.value" @click="run.mutate()">
         {{ current || stale || state === 'failed' ? t('review.runAgain') : t('review.run') }}

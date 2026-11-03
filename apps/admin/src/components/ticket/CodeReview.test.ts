@@ -56,6 +56,15 @@ describe('CodeReview', () => {
     expect(w.text()).toContain('Queued')
   })
 
+  it('keeps the review of a failed ticket readable, without actions', () => {
+    const w = setup({ ticket: ticket({ state: 'failed', revision: 2 }), review })
+    expect(w.find('.badge.b-bad').text()).toBe('Needs changes')
+    expect(w.findAll('.cr-f')).toHaveLength(2)
+    expect(w.text()).toContain('This review is of revision 1')
+    expect(w.findAll('.cr-f .btn')).toHaveLength(0)
+    expect(w.find('.cr-actions').exists()).toBe(false)
+  })
+
   it('shows the deep review, confidence, passes, adoption and dropped findings', () => {
     const deep: Review = {
       ...review, deep: true, dropped: 3,
