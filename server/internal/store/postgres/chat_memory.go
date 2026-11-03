@@ -16,6 +16,7 @@ type ChatCandidate struct {
 	Title string    `json:"title"`
 	State string    `json:"state,omitempty"`
 	URL   string    `json:"url,omitempty"`
+	Repo  string    `json:"repo,omitempty"` // a ticket's or PR's repositories
 	At    time.Time `json:"at"`
 }
 
@@ -35,32 +36,58 @@ func (s *Chat) ChatCandidates(ctx context.Context) ([]ChatCandidate, error) {
 		defer rows.Close()
 		for rows.Next() {
 			var c ChatCandidate
-			if err := rows.Scan(&c.Type, &c.ID, &c.Title, &c.State, &c.URL, &c.At); err != nil {
+			if err := rows.Scan(&c.Type, &c.ID, &c.Title, &c.State, &c.URL, &c.Repo, &c.At); err != nil {
 				return err
 			}
 			out = append(out, c)
 		}
 		return rows.Err()
 	}
-	err := add(`SELECT 'ticket', key, title, state, '', updated_at FROM tickets
-		WHERE state NOT IN ('done', 'rejected') OR updated_at > now() - interval '14 days'
-		ORDER BY (state NOT IN ('done', 'rejected')) DESC, updated_at DESC LIMIT 50`)
+	err := add(`SELECT 'ticket', t.key, t.title, t.state, '', ` + ticketRepos + `, t.updated_at FROM tickets t
+		WHERE t.state NOT IN ('done', 'rejected') OR t.updated_at > now() - interval '14 days'
+		ORDER BY t.updated_at DESC LIMIT 60`)
 	if err == nil {
-		err = add(`SELECT 'repo', name, name || CASE WHEN stack <> '' THEN ' (' || stack || ')' ELSE '' END, '', '', created_at
+		err = add(`SELECT 'repo', name, name || CASE WHEN stack <> '' THEN ' (' || stack || ')' ELSE '' END, '', '', name, created_at
 			FROM repositories WHERE archived_at IS NULL ORDER BY name LIMIT 40`)
 	}
 	if err == nil {
 		err = add(`SELECT 'pr', r.name || '#' || tr.pr_number, t.key || ': ' || t.title,
 				CASE WHEN tr.merged_at IS NOT NULL THEN 'merged' WHEN tr.closed_at IS NOT NULL THEN 'closed' ELSE 'open' END,
-				tr.pr_url, COALESCE(tr.merged_at, t.updated_at)
+				tr.pr_url, r.name, COALESCE(tr.merged_at, t.updated_at)
 			FROM ticket_repos tr JOIN tickets t ON t.id = tr.ticket_id JOIN repositories r ON r.id = tr.repo_id
 			WHERE tr.pr_number IS NOT NULL ORDER BY t.updated_at DESC LIMIT 20`)
 	}
 	if err == nil {
-		err = add(`SELECT 'finding', id::text, service || ': ' || title, status, '', last_seen_at FROM log_findings
+		err = add(`SELECT 'finding', id::text, service || ': ' || title, status, '', array_to_string(ARRAY(SELECT name FROM repositories WHERE id = ANY(repo_ids)), ', '), last_seen_at FROM log_findings
 			WHERE status NOT IN ('muted', 'fixed', 'resolved') ORDER BY last_seen_at DESC LIMIT 10`)
 	}
 	return out, err
+}
+
+// ticketRepos is a ticket t's repositories, comma separated: its own and
+// those of a ticket in several.
+const ticketRepos = `COALESCE((SELECT string_agg(DISTINCT r.name, ', ') FROM repositories r
+	WHERE r.id = t.repo_id OR r.id IN (SELECT repo_id FROM ticket_repos WHERE ticket_id = t.id)), '')`
+
+// RepoTickets are the keys of a repository's tickets, open or finished,
+// the most recently active first.
+func (s *Chat) RepoTickets(ctx context.Context, repo string, limit int) ([]string, error) {
+	rows, err := s.db.Query(ctx, `SELECT t.key FROM tickets t JOIN repositories r ON r.name = $1
+		WHERE t.repo_id = r.id OR EXISTS (SELECT 1 FROM ticket_repos tr WHERE tr.ticket_id = t.id AND tr.repo_id = r.id)
+		ORDER BY t.updated_at DESC LIMIT $2`, repo, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []string
+	for rows.Next() {
+		var k string
+		if err := rows.Scan(&k); err != nil {
+			return nil, err
+		}
+		out = append(out, k)
+	}
+	return out, rows.Err()
 }
 
 // TicketKeys reports which of keys are tickets of the workspace.
