@@ -618,7 +618,9 @@ const tabs = computed(() => {
   if (swaggerTest.value && !['coding', 'new'].includes(k.state)) out.push({ id: 'api', label: t('swagger.tab') })
   if (reviewingReport.value) out.push({ id: 'decide', label: t('ticket.reviewReportTitle') })
   if (report.value && (k.state === 'waiting_for_review' || (k.state === 'done' && result.value?.report))) out.push({ id: 'report', label: t('ticket.report') })
-  if (k.state === 'waiting_for_review' || (pull.value && d.value?.review)) out.push({ id: 'review', label: t('ticket.tabReview'), n: d.value?.review?.revision === k.revision ? d.value.review.findings.length || undefined : undefined })
+  // A review stays readable once the ticket moves on (failed after its
+  // fixes, done): it explains what agnts sent back.
+  if (k.state === 'waiting_for_review' || d.value?.review) out.push({ id: 'review', label: t('ticket.tabReview'), n: d.value?.review?.revision === k.revision ? d.value.review.findings.length || undefined : undefined })
   if (k.state === 'waiting_for_review' && !report.value && (k.canPreview || d.value?.preview)) {
     const pv = d.value?.preview
     out.push({ id: 'preview', label: t('preview.tab'), n: pv?.revision === k.revision ? pv.issues.length || undefined : undefined })
