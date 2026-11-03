@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 import { api, unwrap } from '../api/client'
@@ -107,6 +107,20 @@ function key(e: KeyboardEvent) {
     pick(flat.value[active.value])
   }
 }
+// ⌘/ on a Mac, Ctrl+/ elsewhere, focuses the search from anywhere on the
+// page, also from another field.
+const isMac = /mac|iphone|ipad/i.test(navigator.platform || navigator.userAgent)
+const shortcutHint = isMac ? '⌘ /' : 'Ctrl /'
+const input = ref<HTMLInputElement | null>(null)
+function shortcut(e: KeyboardEvent) {
+  if (e.key !== '/' || e.altKey || (isMac ? !e.metaKey || e.ctrlKey : !e.ctrlKey || e.metaKey)) return
+  e.preventDefault()
+  input.value?.focus()
+  input.value?.select()
+}
+onMounted(() => window.addEventListener('keydown', shortcut))
+onBeforeUnmount(() => window.removeEventListener('keydown', shortcut))
+
 // Focus leaving the search (not into its results) closes them.
 const box = ref<HTMLElement | null>(null)
 function blur(e: FocusEvent) {
@@ -119,6 +133,7 @@ function blur(e: FocusEvent) {
     <label class="search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
       <input
+        ref="input"
         v-model="ui.search"
         type="search"
         role="combobox"
@@ -128,10 +143,12 @@ function blur(e: FocusEvent) {
         :aria-activedescendant="on && flat[active] ? `gs-${flat[active].id}` : undefined"
         :placeholder="t('nav.search')"
         :aria-label="t('nav.search')"
+        :aria-keyshortcuts="isMac ? 'Meta+/' : 'Control+/'"
         @focus="open = true"
         @input="open = true"
         @keydown="key"
       >
+      <kbd v-if="!ui.search" class="gs-key" aria-hidden="true">{{ shortcutHint }}</kbd>
     </label>
     <div v-if="on" id="gs-list" class="gs-dd" role="listbox" :aria-label="t('nav.searchResults')">
       <template v-for="g in groups" :key="g.key">
@@ -163,6 +180,12 @@ function blur(e: FocusEvent) {
 <style scoped>
 .gs { position: relative; flex: 1 1 260px; max-width: 440px; }
 .gs .search { max-width: none; width: 100%; }
+.gs-key {
+  flex: none; margin-left: auto; padding: 1px 6px; border: 1px solid var(--line); border-radius: 6px;
+  font: 600 11.5px/1.5 var(--mono); color: var(--ink-3); background: var(--surface); pointer-events: none;
+}
+.gs .search:focus-within .gs-key { display: none; }
+@media (hover: none) { .gs-key { display: none; } }
 .gs-dd {
   position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; right: 0; max-height: min(70vh, 520px); overflow-y: auto;
   padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 14px 34px -12px rgba(22, 24, 29, 0.35);
