@@ -1246,3 +1246,113 @@ func SecurityTicketText(fs []SecurityFinding) (string, string) {
 	}
 	return title, b.String()
 }
+
+// Where a ticket's security check stands (Ticket.SecurityState).
+const (
+	SecCheckNone    = ""
+	SecCheckPending = "pending"
+	SecCheckRunning = "running"
+	SecCheckDone    = "done"
+	SecCheckFailed  = "failed"
+)
+
+// SecurityCheck is the security check of one change: what the scanners
+// found in the files it changed, judged by the agent when they found
+// anything. It is advice for the reviewer, kept per ticket (not
+// repository findings: the change is still being written).
+type SecurityCheck struct {
+	RunID     int64                 `json:"-"`
+	Revision  int                   `json:"revision"`
+	Summary   string                `json:"summary"`
+	Files     int                   `json:"files"`
+	Tools     map[string]SecToolRun `json:"tools,omitempty"`
+	Issues    []SecCheckIssue       `json:"issues"`
+	Rejected  []SecRejected         `json:"rejected,omitempty"`
+	Agent     string                `json:"agent,omitempty"` // done, limit, failed, skipped (nothing to judge)
+	CreatedAt time.Time             `json:"-"`
+}
+
+// SecCheckIssue is one weakness the check found in the change.
+type SecCheckIssue struct {
+	Severity   SecSeverity `json:"severity"`
+	Title      string      `json:"title"`
+	File       string      `json:"file,omitempty"`
+	Line       int         `json:"line,omitempty"`
+	CWE        string      `json:"cwe,omitempty"`
+	Tool       string      `json:"tool,omitempty"`
+	Rule       string      `json:"rule,omitempty"`
+	Advice     string      `json:"advice,omitempty"`
+	SecretMask string      `json:"secretMask,omitempty"`
+}
+
+// FeedbackText is an issue as a line of request-changes feedback.
+func (i SecCheckIssue) FeedbackText() string {
+	where := i.File
+	if i.Line > 0 {
+		where = fmt.Sprintf("%s:%d", i.File, i.Line)
+	}
+	t := fmt.Sprintf("Security (%s): %s", i.Severity, i.Title)
+	if where != "" {
+		t += " at " + where
+	}
+	if i.Advice != "" {
+		t += ". " + i.Advice
+	}
+	return t
+}
+
+// SecCheckIssues turns the hits on a change, and the agent's judgment of
+// them (nil when it did not run), into issues worst first. A hit the
+// agent rejected is left out; one it did not mention is kept as the tool
+// reported it.
+func SecCheckIssues(hits []SecHit, m *SecurityManifest) ([]SecCheckIssue, []SecRejected) {
+	byID := map[string]SecHit{}
+	for _, h := range hits {
+		byID[h.ID] = h
+	}
+	used := map[string]bool{}
+	var out []SecCheckIssue
+	var rej []SecRejected
+	if m != nil {
+		for _, r := range m.Rejected {
+			h := byID[r.Hit]
+			r.Tool, r.Rule, r.File, r.Line = h.Tool, h.Rule, h.File, h.Line
+			rej = append(rej, r)
+			used[r.Hit] = true
+		}
+		for _, f := range m.Findings {
+			is := SecCheckIssue{Severity: cmp.Or(f.Severity, SecMedium), Title: f.Title, File: f.Location.File, Line: f.Location.Line,
+				CWE: f.CWE, Advice: cmp.Or(f.Fix.Explanation, f.Impact)}
+			for _, id := range f.Hits {
+				used[id] = true
+				h := byID[id]
+				if is.File == "" {
+					is.File, is.Line = h.File, h.Line
+				}
+				is.Tool, is.Rule = cmp.Or(is.Tool, h.Tool), cmp.Or(is.Rule, h.Rule)
+				is.CWE = cmp.Or(is.CWE, h.CWE)
+				is.SecretMask = cmp.Or(is.SecretMask, h.SecretMask)
+				is.Title = cmp.Or(is.Title, h.Title)
+				if f.Severity == "" {
+					is.Severity = h.Severity
+				}
+			}
+			if is.Title != "" {
+				out = append(out, is)
+			}
+		}
+	}
+	for _, h := range hits {
+		if used[h.ID] {
+			continue
+		}
+		advice := h.Message
+		if h.FixedIn != "" {
+			advice = "Upgrade to " + h.FixedIn + " or later."
+		}
+		out = append(out, SecCheckIssue{Severity: h.Severity, Title: h.Title, File: h.File, Line: h.Line, CWE: h.CWE, Tool: h.Tool,
+			Rule: h.Rule, Advice: secClip(advice, 600), SecretMask: h.SecretMask})
+	}
+	slices.SortStableFunc(out, func(a, b SecCheckIssue) int { return cmp.Compare(b.Severity.Rank(), a.Severity.Rank()) })
+	return out, rej
+}

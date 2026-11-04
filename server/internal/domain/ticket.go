@@ -82,23 +82,24 @@ type Ticket struct {
 	Priority    string
 	State       TicketState
 	// ResumeState is where Retry sends a failed or rate-limited ticket.
-	ResumeState  TicketState
-	Revision     int
-	Turns        int
-	Models       map[string]string // stage -> model override
-	AfterApprove string            // "pr" or "main"
-	Branch       string
-	HeadSHA      string
-	PRNumber     *int
-	PRURL        string
-	Feedback     string     // review feedback not yet handled by a coding run
-	MergedAt     *time.Time // when the pull request was merged (from webhooks)
-	Assignees    []string   // git host usernames the pull request is assigned to
-	Held         bool       // kept in the queue until someone starts it
-	AskFirst     bool       // analysis may ask questions before coding
-	LearnState   string     // learn run after push: LearnNone, LearnPending, LearnDone, LearnFailed
-	ReviewState  string     // code review while waiting for review: ReviewNone, ReviewPending, ...
-	PreviewState string     // screenshots while waiting for review: PreviewNone, PreviewPending, ...
+	ResumeState   TicketState
+	Revision      int
+	Turns         int
+	Models        map[string]string // stage -> model override
+	AfterApprove  string            // "pr" or "main"
+	Branch        string
+	HeadSHA       string
+	PRNumber      *int
+	PRURL         string
+	Feedback      string     // review feedback not yet handled by a coding run
+	MergedAt      *time.Time // when the pull request was merged (from webhooks)
+	Assignees     []string   // git host usernames the pull request is assigned to
+	Held          bool       // kept in the queue until someone starts it
+	AskFirst      bool       // analysis may ask questions before coding
+	LearnState    string     // learn run after push: LearnNone, LearnPending, LearnDone, LearnFailed
+	ReviewState   string     // code review while waiting for review: ReviewNone, ReviewPending, ...
+	PreviewState  string     // screenshots while waiting for review: PreviewNone, PreviewPending, ...
+	SecurityState string     // the security check while waiting for review: SecCheckNone, SecCheckPending, ...
 	// PreviewCompare has previews of this ticket capture the default
 	// branch too (before shots). The reviewer decides per ticket.
 	PreviewCompare bool
@@ -312,11 +313,17 @@ const (
 	// StagePreview runs while a ticket waits for review, starts the app and
 	// takes screenshots for the reviewer; it never changes the ticket's state.
 	StagePreview Stage = "preview"
+	// StageSecurity runs while a ticket waits for review and checks the
+	// change with the security scanners; advice for the reviewer, it never
+	// changes the ticket's state.
+	StageSecurity Stage = "security"
 )
 
 // Side reports whether runs of stage s work beside the ticket (learn,
 // review) instead of moving it through its states.
-func (s Stage) Side() bool { return s == StageLearn || s == StageReview || s == StagePreview }
+func (s Stage) Side() bool {
+	return s == StageLearn || s == StageReview || s == StagePreview || s == StageSecurity
+}
 
 // Run is one container session (or the push step) for a ticket.
 type Run struct {

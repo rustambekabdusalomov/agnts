@@ -3,7 +3,8 @@
 #
 #   agnts-sec static [--only TOOL]... [--path PATH]... [--history N]
 #       Scans /workspace with opengrep (agnts's rules), gitleaks (the
-#       working tree and the last N commits; 0 means the whole history),
+#       working tree and the last N commits; 0 means the whole history,
+#       -1 none: a change's check),
 #       osv-scanner (lockfiles, against the offline databases in
 #       /opt/secdb) and trivy config (Dockerfile, Kubernetes, Terraform,
 #       Compose). Raw output goes to /agnts/out/sec/raw/, and what ran to
@@ -69,8 +70,23 @@ static() {
 		esac
 	done
 	want() { [ ${#only[@]} -eq 0 ] && return 0; local t; for t in "${only[@]}"; do [ "$t" = "$1" ] && return 0; done; return 1; }
-	[ ${#paths[@]} -eq 0 ] && paths=(.)
 	cd "$SRC" || die "no $SRC"
+	# A change's deleted files are gone: scan the paths that exist.
+	if [ ${#paths[@]} -gt 0 ]; then
+		local kept=() p
+		for p in "${paths[@]}"; do
+			case "$p" in /* | *..*) continue ;; esac
+			[ -e "$p" ] && kept+=("$p")
+		done
+		paths=("${kept[@]}")
+		if [ ${#paths[@]} -eq 0 ]; then
+			mkdir -p "$OUT/raw"
+			printf '{"history":0,"commits":0,"historyLimit":-1,"tools":{},"paths":[]}\n' >"$OUT/ran.json"
+			echo "agnts-sec: none of the paths exist; nothing to scan"
+			return 0
+		fi
+	fi
+	[ ${#paths[@]} -eq 0 ] && paths=(.)
 	mkdir -p "$OUT/raw" || die "cannot write $OUT"
 
 	local ex=() gex=() oex=() tex=()
@@ -100,7 +116,7 @@ static() {
 		} >"$cfg"
 		run gitleaks gitleaks dir "${paths[@]}" --config "$cfg" --no-banner --log-level error \
 			--report-format json --report-path "$OUT/raw/gitleaks.json" --exit-code 0 --max-target-megabytes 5
-		if git rev-parse --git-dir >/dev/null 2>&1; then
+		if [ "$history" -ge 0 ] && git rev-parse --git-dir >/dev/null 2>&1; then
 			local opts="-n $history"
 			[ "$history" = 0 ] && opts=""
 			# The history counts as part of gitleaks: one status for both.
@@ -121,14 +137,28 @@ static() {
 		fi
 	fi
 	if want trivy; then
-		run trivy trivy config --skip-check-update --disable-telemetry --skip-version-check --quiet \
-			--cache-dir /tmp/trivy --format json --output "$OUT/raw/trivy.json" "${tex[@]}" "${paths[@]}"
+		# trivy takes one target: run it per path and merge the reports.
+		local i=0 parts=() worst=ok tp
+		for tp in "${paths[@]}"; do
+			i=$((i + 1))
+			run trivy trivy config --skip-check-update --disable-telemetry --skip-version-check --quiet \
+				--cache-dir /tmp/trivy --format json --output "$OUT/raw/trivy-$i.json" "${tex[@]}" "$tp"
+			[ "${STATUS[trivy]}" = ok ] && parts+=("$OUT/raw/trivy-$i.json") || worst=${STATUS[trivy]}
+		done
+		STATUS[trivy]=$worst
+		if [ ${#parts[@]} -gt 0 ]; then
+			jq -s '{Results: (map(.Results // []) | add)}' "${parts[@]}" >"$OUT/raw/trivy.json"
+		fi
+		rm -f "$OUT"/raw/trivy-*.json
 	fi
 
 	local commits=0
 	git rev-parse --git-dir >/dev/null 2>&1 && commits=$(git rev-list --count HEAD 2>/dev/null || echo 0)
 	{
-		printf '{"history":%s,"commits":%s,"historyLimit":%s,"tools":{' "$([ "$history" = 0 ] && echo "$commits" || echo $((history < commits ? history : commits)))" "$commits" "$history"
+		local read=$((history < commits ? history : commits))
+		[ "$history" = 0 ] && read=$commits
+		[ "$history" -lt 0 ] && read=0
+		printf '{"history":%s,"commits":%s,"historyLimit":%s,"tools":{' "$read" "$commits" "$history"
 		local first=1 t
 		for t in "${!STATUS[@]}"; do
 			[ $first = 1 ] || printf ','
@@ -150,7 +180,12 @@ summary() {
 		local n=0
 		case $t in
 		opengrep) n=$(jq '.results | length' "$OUT/raw/opengrep.json" 2>/dev/null || echo 0) ;;
-		gitleaks) n=$(jq -s 'map(length) | add' "$OUT/raw/gitleaks.json" "$OUT/raw/gitleaks-history.json" 2>/dev/null || echo 0) ;;
+		gitleaks)
+			local gf=()
+			for f in "$OUT/raw/gitleaks.json" "$OUT/raw/gitleaks-history.json"; do [ -f "$f" ] && gf+=("$f"); done
+			n=0
+			[ ${#gf[@]} -gt 0 ] && n=$(jq -s 'map(length) | add' "${gf[@]}" 2>/dev/null || echo 0)
+			;;
 		osv) n=$(jq '[.results[]?.packages[]?] | length' "$OUT/raw/osv.json" 2>/dev/null || echo 0) ;;
 		trivy) n=$(jq '[.Results[]?.Misconfigurations[]?] | length' "$OUT/raw/trivy.json" 2>/dev/null || echo 0) ;;
 		esac

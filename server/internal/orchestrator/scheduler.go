@@ -25,17 +25,20 @@ const (
 	ClassReview  QueueClass = "review"
 	ClassPreview QueueClass = "preview"
 	ClassLearn   QueueClass = "learn"
-	// ClassSecurity is a repository security scan: nobody waits on it, it
-	// takes only spare room, like learn and reflect.
+	// ClassSecurity is the security check of a change waiting for review
+	// (a side run, like review and preview).
 	ClassSecurity QueueClass = "security"
-	ClassReflect  QueueClass = "reflect"
+	// ClassSecurityScan is a repository security scan: nobody waits on it,
+	// it takes only spare room, like learn and reflect.
+	ClassSecurityScan QueueClass = "security_scan"
+	ClassReflect      QueueClass = "reflect"
 	// ClassDocument is a document generation: someone waits for it, so
 	// it ranks right after the ticket's own stages.
 	ClassDocument QueueClass = "document"
 )
 
 func (c QueueClass) rank() int {
-	return map[QueueClass]int{ClassRule: 0, ClassMain: 1, ClassDocument: 2, ClassBrief: 3, ClassReview: 4, ClassPreview: 5, ClassSecurity: 6, ClassLearn: 7, ClassReflect: 8}[c]
+	return map[QueueClass]int{ClassRule: 0, ClassMain: 1, ClassDocument: 2, ClassBrief: 3, ClassReview: 4, ClassPreview: 5, ClassSecurity: 6, ClassSecurityScan: 7, ClassLearn: 8, ClassReflect: 9}[c]
 }
 
 // QueueItem is a ticket waiting for a run.
@@ -332,7 +335,7 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 	}
 	for _, id := range secWS {
 		if q := get(id); q != nil {
-			q.items = append(q.items, QueueItem{WorkspaceID: id, Class: ClassSecurity})
+			q.items = append(q.items, QueueItem{WorkspaceID: id, Class: ClassSecurityScan})
 		}
 	}
 	for _, it := range items {
@@ -405,8 +408,8 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 				var release func()
 				if o.capacity != nil {
 					mem = o.capacity.RunMemory(it.MemoryMB)
-					if (it.Class == ClassLearn || it.Class == ClassReflect || it.Class == ClassSecurity) && !o.capacity.Spare(mem) {
-						continue // learn, reflect and security runs only take spare room
+					if (it.Class == ClassLearn || it.Class == ClassReflect || it.Class == ClassSecurityScan) && !o.capacity.Spare(mem) {
+						continue // learn, reflect and security scans only take spare room
 					}
 					rel, fits, why := o.capacity.Reserve(mem)
 					if !fits {
@@ -557,7 +560,7 @@ func purposeOf(it QueueItem) ai.Purpose {
 		return domain.PurposeDocument
 	case ClassReflect:
 		return domain.PurposeReflect
-	case ClassSecurity:
+	case ClassSecurityScan:
 		return domain.PurposeSecurity
 	}
 	return ai.Purpose(it.Class)
@@ -621,7 +624,7 @@ func (o *Orchestrator) claimItem(ctx context.Context, it QueueItem) (scheduled, 
 		}
 		return scheduled{ws: it.WorkspaceID, stage: "document", docRunID: r.ID, work: func(ctx context.Context) { o.writeDocument(ctx, r) }}, true
 	}
-	if it.Class == ClassSecurity {
+	if it.Class == ClassSecurityScan {
 		s, ok, err := o.security.ClaimSecurityScan(wctx)
 		if err != nil {
 			o.log.Error("claim security scan", "workspace", it.WorkspaceID, "err", err)

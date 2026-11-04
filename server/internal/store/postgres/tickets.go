@@ -29,7 +29,7 @@ const ticketCols = `id, key, source, repo_id, title, description, priority, stat
 	revision, turns, models, after_approve, branch, head_sha, pr_number, pr_url, feedback, held, ask_first, merged_at, assignees, learn_state, review_state, kind, kind_auto, post_report, COALESCE(parent_key, ''),
 	COALESCE(follow_up_of, ''), suggest_follow_ups, preview_state, preview_compare, feedback_shots, feedback_files, created_at, updated_at,
 	workspace_id, member_id, created_by, wait_reason, queued_at, wait_message, self_fixes, quiet_review, replay_of, base_sha, pull_request,
-	tracker_update, tracker_kept, ci_fixes, group_id, agnts_group_name(group_id), agnts_ticket_repos(id), ticket_number, skip_checks, benchmark`
+	tracker_update, tracker_kept, ci_fixes, group_id, agnts_group_name(group_id), agnts_ticket_repos(id), ticket_number, skip_checks, benchmark, security_state`
 
 func scanTicket(row pgx.Row) (domain.Ticket, error) {
 	var t domain.Ticket
@@ -40,7 +40,7 @@ func scanTicket(row pgx.Row) (domain.Ticket, error) {
 		&t.Held, &t.AskFirst, &t.MergedAt, &t.Assignees, &t.LearnState, &t.ReviewState, &kind, &t.KindAuto, &t.PostReport, &t.ParentKey,
 		&t.FollowUpOf, &t.SuggestFollowUps, &t.PreviewState, &t.PreviewCompare, &shots, &files, &t.CreatedAt, &t.UpdatedAt,
 		&t.WorkspaceID, &t.MemberID, &t.CreatedBy, &wait, &t.QueuedAt, &t.WaitMessage, &t.SelfFixes, &t.QuietReview, &t.ReplayOf, &t.BaseSHA, &pull, &update, &t.Kept, &t.CIFixes,
-		&t.GroupID, &t.GroupName, &repos, &t.TicketNumber, &t.SkipChecks, &t.Benchmark)
+		&t.GroupID, &t.GroupName, &repos, &t.TicketNumber, &t.SkipChecks, &t.Benchmark, &t.SecurityState)
 	if err != nil {
 		return t, notFound(err)
 	}
@@ -268,7 +268,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		kind = $22, kind_auto = $23, post_report = $24, review_state = $25, suggest_follow_ups = $26,
 		preview_state = $27, preview_compare = $28, feedback_shots = $29, feedback_files = $30, member_id = $31,
 		self_fixes = $32, quiet_review = $33, pull_request = $34, tracker_update = $35, tracker_kept = $36, ci_fixes = $37,
-		group_id = $38, base_sha = $39, ticket_number = $40, skip_checks = $41, benchmark = $42,
+		group_id = $38, base_sha = $39, ticket_number = $40, skip_checks = $41, benchmark = $42, security_state = $43,
 		wait_reason = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_reason ELSE '' END,
 		wait_message = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN wait_message ELSE '' END,
 		queued_at = CASE WHEN $6 IN ('new', 'coding', 'pushing') THEN queued_at END,
@@ -278,7 +278,7 @@ func saveTicket(ctx context.Context, tx pgx.Tx, t domain.Ticket) (domain.Ticket,
 		t.Revision, t.Turns, models, t.AfterApprove, t.Branch, t.HeadSHA, t.PRNumber, t.PRURL, t.Feedback, t.Held, t.AskFirst, t.MergedAt, nonNilSlice(t.Assignees), t.LearnState,
 		string(kindOr(t.Kind)), t.KindAuto, t.PostReport, t.ReviewState, t.SuggestFollowUps,
 		t.PreviewState, t.PreviewCompare, shots, files, t.MemberID, t.SelfFixes, t.QuietReview, pullJSON(t.Pull), updateJSON(t.Update), t.Kept, t.CIFixes,
-		t.GroupID, t.BaseSHA, t.TicketNumber, t.SkipChecks, t.Benchmark))
+		t.GroupID, t.BaseSHA, t.TicketNumber, t.SkipChecks, t.Benchmark, t.SecurityState))
 }
 
 // updateJSON is a ticket's pending tracker version, nil (SQL NULL) for none.
@@ -349,14 +349,29 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 				ORDER BY updated_at
 				LIMIT 1 FOR UPDATE SKIP LOCKED`))
 		}
-		preview := false
+		class := orchestrator.ClassMain
+		if err == nil && t.State == domain.StateWaitingForReview {
+			class = orchestrator.ClassReview
+		}
 		if errors.Is(err, domain.ErrNotFound) {
 			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
 				WHERE state = 'waiting_for_review' AND preview_state = 'pending'
 				  AND NOT EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = t.id AND r.finished_at IS NULL)
 				ORDER BY updated_at
 				LIMIT 1 FOR UPDATE SKIP LOCKED`))
-			preview = err == nil
+			if err == nil {
+				class = orchestrator.ClassPreview
+			}
+		}
+		if errors.Is(err, domain.ErrNotFound) {
+			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
+				WHERE state = 'waiting_for_review' AND security_state = 'pending'
+				  AND NOT EXISTS (SELECT 1 FROM runs r WHERE r.ticket_id = t.id AND r.finished_at IS NULL)
+				ORDER BY updated_at
+				LIMIT 1 FOR UPDATE SKIP LOCKED`))
+			if err == nil {
+				class = orchestrator.ClassSecurity
+			}
 		}
 		if errors.Is(err, domain.ErrNotFound) {
 			t, err = scanTicket(tx.QueryRow(ctx, `SELECT `+ticketCols+` FROM tickets t
@@ -368,7 +383,7 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 		if err != nil {
 			return err
 		}
-		t, r, err = startRun(ctx, tx, t, preview)
+		t, r, err = startRun(ctx, tx, t, class)
 		return err
 	})
 	if errors.Is(err, domain.ErrNotFound) {
@@ -378,15 +393,19 @@ func (s *Agent) ClaimNext(ctx context.Context) (domain.Ticket, domain.Run, bool,
 }
 
 // startRun starts the run a claimed (locked) ticket needs: its main stage,
-// or the review, preview or learn side run.
-func startRun(ctx context.Context, tx pgx.Tx, t domain.Ticket, preview bool) (domain.Ticket, domain.Run, error) {
+// or the review, preview, security or learn side run (class tells review,
+// preview and security apart while the ticket waits for review).
+func startRun(ctx context.Context, tx pgx.Tx, t domain.Ticket, class orchestrator.QueueClass) (domain.Ticket, domain.Run, error) {
 	var r domain.Run
 	stage := map[domain.TicketState]domain.Stage{
 		domain.StateNew: domain.StageAnalyze, domain.StateCoding: domain.StageCode, domain.StatePushing: domain.StagePush,
 		domain.StateDone: domain.StageLearn, domain.StateWaitingForReview: domain.StageReview,
 	}[t.State]
-	if preview {
+	switch class {
+	case orchestrator.ClassPreview:
 		stage = domain.StagePreview
+	case orchestrator.ClassSecurity:
+		stage = domain.StageSecurity
 	}
 	var err error
 	if r, err = scanRun(tx.QueryRow(ctx, `INSERT INTO runs (ticket_id, stage, model) VALUES ($1, $2, '') RETURNING `+runCols,
@@ -404,6 +423,9 @@ func startRun(ctx context.Context, tx pgx.Tx, t domain.Ticket, preview bool) (do
 		t, err = saveTicket(ctx, tx, t)
 	case stage == domain.StagePreview:
 		t.PreviewState = domain.PreviewRunning
+		t, err = saveTicket(ctx, tx, t)
+	case stage == domain.StageSecurity:
+		t.SecurityState = domain.SecCheckRunning
 		t, err = saveTicket(ctx, tx, t)
 	case t.State == domain.StateNew:
 		from := t.State
@@ -425,6 +447,7 @@ const queueClassSQL = `(CASE
 	WHEN t.state IN ('new', 'coding', 'pushing') THEN 'main'
 	WHEN t.state = 'waiting_for_review' AND t.review_state = 'pending' THEN 'review'
 	WHEN t.state = 'waiting_for_review' AND t.preview_state = 'pending' THEN 'preview'
+	WHEN t.state = 'waiting_for_review' AND t.security_state = 'pending' THEN 'security'
 	WHEN t.state = 'done' AND t.learn_state = 'pending' THEN 'learn' END)`
 
 // QueueItems returns every ticket that waits for a run, in every workspace
@@ -471,7 +494,7 @@ func (s *Agent) ClaimTicket(ctx context.Context, ticketID int64, class orchestra
 		if err != nil {
 			return err
 		}
-		t, r, err = startRun(ctx, tx, t, class == orchestrator.ClassPreview)
+		t, r, err = startRun(ctx, tx, t, class)
 		return err
 	})
 	if errors.Is(err, domain.ErrNotFound) {
@@ -607,6 +630,7 @@ func (s *Agent) RecoverInterrupted(ctx context.Context) (int, error) {
 			err := tx.QueryRow(ctx, `UPDATE tickets t SET state = CASE state WHEN 'analyzing' THEN 'new' WHEN 'testing' THEN 'coding' ELSE state END,
 				review_state = CASE review_state WHEN 'running' THEN 'pending' ELSE review_state END,
 				preview_state = CASE preview_state WHEN 'running' THEN 'pending' ELSE preview_state END,
+				security_state = CASE security_state WHEN 'running' THEN 'pending' ELSE security_state END,
 				updated_at = now() FROM (SELECT state AS old FROM tickets WHERE id = $1) o
 				WHERE t.id = $1 RETURNING t.key, o.old`, p.ticket).Scan(&key, &from)
 			if err != nil {
