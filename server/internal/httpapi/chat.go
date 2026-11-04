@@ -153,7 +153,8 @@ func (s *Server) SendChatMessage(w http.ResponseWriter, r *http.Request, id gen.
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
 		return
 	}
-	m, created, err := s.opt.Chat.Send(r.Context(), domain.ChatSend{ChannelID: id, ClientMsgID: req.ClientMsgId.String(), Body: req.Body, ReplyTo: req.ReplyTo})
+	m, created, err := s.opt.Chat.Send(r.Context(), domain.ChatSend{ChannelID: id, ClientMsgID: req.ClientMsgId.String(), Body: orZero(req.Body), ReplyTo: req.ReplyTo,
+		Files: orZero(req.Files)})
 	if err != nil {
 		s.writeChatError(w, r, err)
 		return

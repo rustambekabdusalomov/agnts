@@ -1118,8 +1118,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Upload a file to attach to a task, an answer or a retry note
-         * @description The upload stays pending until the request that uses it (createTask, updateTask, answerQuestions, retryTicket, requestChanges) lists its id; pending uploads nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP) are shown in place; other files download. Claude reads every attached file, pictures and PDFs included.
+         * Upload a file to attach to a task, an answer, a retry note or a chat message
+         * @description The upload stays pending until the request that uses it (createTask, updateTask, answerQuestions, retryTicket, requestChanges, sendChatMessage, askAssistant, Code mode) lists its id; pending uploads nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP) are shown in place; other files download. Claude reads every attached file, pictures and PDFs included. Viewers may upload too, for the chats.
          */
         post: operations["uploadAttachment"];
         delete?: never;
@@ -1137,11 +1137,17 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** An attached file's bytes */
+        /**
+         * An attached file's bytes
+         * @description An AI chat (Ask) question's file is only its asker's; anyone else gets 404.
+         */
         get: operations["getAttachment"];
         put?: never;
         post?: never;
-        /** Delete an upload that nothing uses yet */
+        /**
+         * Delete an upload that nothing uses yet
+         * @description Viewers delete only their own uploads; editors any pending one.
+         */
         delete: operations["deleteAttachment"];
         options?: never;
         head?: never;
@@ -6246,7 +6252,7 @@ export interface components {
         EgressUpstream: {
             /** @description AGNTS_EGRESS_UPSTREAM is set */
             configured: boolean;
-            /** @description The upstream proxy */
+            /** @description The upstream proxy, without its password */
             via?: string;
             hosts?: string[];
             /** @description The host each check reaches through it */
@@ -6363,7 +6369,7 @@ export interface components {
             replyTo?: number;
             /** Format: int64 */
             authorId?: number;
-            /** @description The person's username */
+            /** @description The person's username, or agnts */
             author: string;
             /** @enum {string} */
             kind: "text" | "agent_card" | "agent_text" | "system";
@@ -6372,6 +6378,8 @@ export interface components {
             ai?: components["schemas"]["ChatAI"];
             ticketKey?: string;
             audio?: components["schemas"]["ChatAudio"];
+            /** @description Files that came with the message; its body may then be empty */
+            files?: components["schemas"]["AttachedFile"][];
             clientMsgId?: string;
             refs: components["schemas"]["ChatRef"][];
             /** Format: date-time */
@@ -6395,7 +6403,10 @@ export interface components {
              * @description Made on the device; a resend with the same id returns the stored message
              */
             clientMsgId: string;
-            body: string;
+            /** @description May be empty when files are sent */
+            body?: string;
+            /** @description The sender's pending uploads (uploadAttachment) to send with it */
+            files?: number[];
             /** Format: int64 */
             replyTo?: number;
         };
@@ -7197,7 +7208,10 @@ export interface components {
          */
         AssistantLanguage: "en" | "ru" | "uz";
         AssistantAsk: {
-            question: string;
+            /** @description May be empty when attachments are sent */
+            question?: string;
+            /** @description The asker's pending uploads (uploadAttachment); the answer reads them */
+            attachments?: number[];
             lang?: components["schemas"]["AssistantLanguage"];
         };
         AssistantTranscript: {
@@ -7251,8 +7265,10 @@ export interface components {
             /** @description Code mode: the ticket the message went to */
             ticketKey?: string;
             routed?: components["schemas"]["CodeRouted"];
-            /** @description Code mode: uploads that went with the message */
+            /** @description Uploads that went with the message (ids) */
             attachments?: number[];
+            /** @description The uploads of attachments still there, to show */
+            attachedFiles?: components["schemas"]["AttachedFile"][];
             /** Format: date-time */
             createdAt: string;
         };
@@ -7708,10 +7724,10 @@ export interface components {
              */
             size: number;
             /**
-             * @description pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes
+             * @description pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes; chat = a team chat message; assistant = an AI chat question
              * @enum {string}
              */
-            purpose: "pending" | "ticket" | "answer" | "retry" | "feedback";
+            purpose: "pending" | "ticket" | "answer" | "retry" | "feedback" | "chat" | "assistant";
             /** Format: int64 */
             questionId?: number;
             /** @description A picture clients can show in place */
@@ -7720,6 +7736,22 @@ export interface components {
             url: string;
             /** Format: date-time */
             createdAt: string;
+        };
+        /** @description A file a chat message brought, as the message shows it */
+        AttachedFile: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            contentType: string;
+            /**
+             * Format: int64
+             * @description Bytes
+             */
+            size: number;
+            /** @description A picture clients can show in place */
+            image: boolean;
+            /** @description Where to load the file, relative to the API base */
+            url: string;
         };
         Analysis: {
             summary: string;
@@ -13161,6 +13193,7 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
         };
@@ -21541,7 +21574,7 @@ export interface operations {
                     clientMsgId: string;
                     /**
                      * Format: int64
-                     * @description The recording's length
+                     * @description The recording's length, at most 2 minutes
                      */
                     durationMs: number;
                     /** Format: int64 */
@@ -21553,7 +21586,7 @@ export interface operations {
                     audio: string;
                     /**
                      * Format: binary
-                     * @description The same audio as 16-bit PCM WAV for Muse to hear
+                     * @description The same audio as 16-bit PCM WAV for Muse to hear, at most 4 MB
                      */
                     wav: string;
                 };

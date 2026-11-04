@@ -701,7 +701,6 @@
   "authGoogleRateLimited": "Too many attempts. Wait a minute and try again.",
   "authGoogleError": "Something went wrong signing you in with Google. Try again in a moment.",
   "authUseGoogle": "Passwords are for Admins only here. Continue with Google instead.",
-  "authAdminsLede": "Admins sign in with their password. Everyone else continues with Google.",
   "authGoogleInvite": "This invite link is invalid, already used, expired, or meant for another Google account.",
   "authGoogleAdmin": "This is an Admin account: Admins sign in with their username and password.",
   "authSetupLede": "Admins sign in with two factors. Scan this code with an authenticator app (Google Authenticator, 1Password, Authy), then enter the 6-digit code it shows.",
@@ -2458,6 +2457,19 @@
   "filesFromTask": "With the task",
   "filesFromRetry": "With a retry",
   "filesFromFeedback": "With requested changes",
+  "filesDropOne": "Drop a file here, or",
+  "filesChoose": "choose a file",
+  "filesChange": "Choose another",
+  "filesDownload": "Download {name}",
+  "@filesDownload": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "filesDrop": "Drop files to send them",
+  "filesChatHint": "Up to 10 files, 10 MB each",
   "followUpsTitle": "Follow-up tickets",
   "followUpsSub": "What finishing this ticket still needs, as agnts sees it. Pick the ones you want, then start them now or keep them held until you start each one.",
   "followUpsMode": "Follow-up suggestions",
@@ -2589,6 +2601,12 @@
   "formSaved": "Saved",
   "formSearch": "Search",
   "formNoMatch": "No matches",
+  "formPickDateTime": "Choose a date and time",
+  "formPrevMonth": "Previous month",
+  "formNextMonth": "Next month",
+  "formNow": "Now",
+  "formTime": "Time",
+  "formDone": "Done",
   "groupsView": "Groups ({n})",
   "@groupsView": {
     "placeholders": {
@@ -2657,6 +2675,7 @@
     }
   },
   "groupsCommitTemplateHelp": "Writes the commit messages of this group's tickets in every repository, replacing each repository's own format. Leave empty to keep each repository's own.",
+  "groupsPrTemplateHelp": "Titles the pull requests of this group's tickets in every repository, replacing each repository's own format. Leave empty to keep each repository's own.",
   "groupsInstructions": "Instructions",
   "groupsInstructionsPh": "The web app calls the API through src/api; change both together and keep the OpenAPI spec in sync.",
   "groupsInstructionsHelp": "How the repositories fit together, in Markdown. Added to every prompt of the group's tickets.",
@@ -4067,8 +4086,18 @@
   "logwatchField_timestamp": "Time field",
   "logwatchField_revision": "Revision field (deployed commit)",
   "logwatchFieldsHelp": "Test connection fills these in; change them only if it guessed wrong.",
+  "logwatchTraceUrl": "Trace link",
+  "logwatchTraceUrlHelp": "Optional. A link to a trace in Tempo, Jaeger or Grafana, with '{traceId}' where the id goes. Findings from logs that carry a trace id link to it.",
+  "@logwatchTraceUrlHelp": {
+    "placeholders": {
+      "traceId": {
+        "type": "String"
+      }
+    }
+  },
+  "logwatchTrace": "Trace",
   "logwatchCa": "CA certificate (PEM), for a private CA",
-  "logwatchPushHelp": "Your shipper sends to agnts with a token. agnts shows the token and ready Vector and Fluent Bit configuration once you add the source.",
+  "logwatchPushHelp": "Your shipper sends to agnts with a token. agnts shows the token and ready Vector, Fluent Bit, Promtail and OpenTelemetry configuration once you add the source.",
   "logwatchEnabled": "Read this source",
   "logwatchTest": "Test connection",
   "logwatchTesting": "Testing…",
@@ -4213,6 +4242,9 @@
   "logwatchNotifyLabel": "The log watcher found something",
   "logwatchAgentTitle": "agnts-watch (no logging system)",
   "logwatchAgentHelp": "On a server without a logging system: run this next to your services. It follows the containers labelled agnts.watch=logs, reports crashes, OOM kills and failed health checks, and connects out to agnts only.",
+  "logwatchOtelTitle": "OpenTelemetry Collector",
+  "logwatchOtelHelp": "Add this pipeline to the Collector configuration. It sends a copy of error logs only; your other pipelines stay as they are.",
+  "logwatchOtelSdk": "Apps that export with an OpenTelemetry SDK and no Collector send every log; agnts keeps what it needs:",
   "logwatchKind_datadog": "Datadog",
   "logwatchKind_cloudwatch": "Amazon CloudWatch Logs",
   "logwatchKind_splunk": "Splunk",
@@ -4888,6 +4920,7 @@
   "meetingsSettingsSub": "Recordings, what is kept and for how long, and how many people one call takes.",
   "meetingsAllowRecording": "Hosts may record calls as video",
   "meetingsKeepAudio": "Keep the audio of notes after Muse has heard it",
+  "meetingsDraftTickets": "Make every action item a draft ticket of the member who took it",
   "meetingsRetention": "Keep recordings and transcripts for (days)",
   "meetingsRetentionHelp": "0 keeps them for ever.",
   "meetingsMaxPeople": "People in one call",
@@ -4904,6 +4937,7 @@
   "meetingsTitlePlaceholder": "Sprint planning",
   "meetingsDate": "Date",
   "meetingsTime": "Time",
+  "meetingsStarts": "Starts",
   "meetingsDuration": "Length",
   "meetingsMinutes": "{n} min",
   "@meetingsMinutes": {
@@ -5010,6 +5044,46 @@
   "meetingsAnyRepo": "Any repository",
   "meetingsRepository": "Repository",
   "meetingsCreateTicket": "Create ticket",
+  "meetingsNobody": "Nobody",
+  "meetingsUnassigned": "Unassigned",
+  "meetingsSaid": "said: {who}",
+  "@meetingsSaid": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTakenBy": "Taken by",
+  "meetingsMemberByHand": "Picked by hand",
+  "meetingsMemberMatched": "Matched from “{said}”",
+  "@meetingsMemberMatched": {
+    "placeholders": {
+      "said": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsMemberSet": "Now {name}’s",
+  "@meetingsMemberSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsMemberSetTicket": "Now {name}’s, and so is {key}",
+  "@meetingsMemberSetTicket": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsDraftHint": "A draft made when the notes were written: held until someone starts it",
   "meetingsTicketMade": "{key} created",
   "@meetingsTicketMade": {
     "placeholders": {
@@ -5310,6 +5384,142 @@
     }
   },
   "meetingsUninviteBody": "They are no longer invited and get no more reminders.",
+  "meetingsUploadRecording": "Upload recording",
+  "meetingsUploadTitle": "Upload a recording of this meeting",
+  "meetingsUploadSub": "A video or audio file of a meeting held elsewhere, up to {mb} MB. Only its sound is used: agnts keeps the audio, deletes the file you send, and Muse writes the notes and draft tickets from what people said.",
+  "@meetingsUploadSub": {
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsUploadFile": "Recording",
+  "meetingsUploadHeld": "When it was held",
+  "meetingsUploadPeople": "Who is in it (helps Muse put tasks on the right people)",
+  "meetingsUploadNow": "Upload",
+  "meetingsUploading": "Uploading",
+  "meetingsUploadingPct": "Uploading… {n}%",
+  "@meetingsUploadingPct": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsUploaded": "Uploaded: Muse is listening to it",
+  "meetingsUploadTooBig": "The file is bigger than {mb} MB",
+  "@meetingsUploadTooBig": {
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsUploadedBadge": "Uploaded",
+  "meetingsInRecording": "{n, plural, =0 {In the recording} one {{n} person in the recording} other {{n} people in the recording}}",
+  "@meetingsInRecording": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsUploadedNote": "An uploaded recording: only its sound was heard, and the file was deleted. Nobody joined a call, so there is no attendance.",
+  "meetingsTodayLive": "Live",
+  "meetingsTodayInCall": "{n} in call",
+  "@meetingsTodayInCall": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTodayIn": "in {n} min",
+  "@meetingsTodayIn": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTodayNow": "now",
+  "meetingsTodayJoin": "Join",
+  "meetingsTodayLater": "Later today:",
+  "meetingsTodayLiveLine": "Live: {title}",
+  "@meetingsTodayLiveLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTodayLiveAria": "{title} is live, {n} in call. Join",
+  "@meetingsTodayLiveAria": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTodaySoonAria": "{title} starts in {n} min. Join",
+  "@meetingsTodaySoonAria": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTodayNowAria": "{title} is starting now. Join",
+  "@meetingsTodayNowAria": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTodayLaterAria": "Next meeting today: {title} at {time}",
+  "@meetingsTodayLaterAria": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsTodayMoreAria": "{n, plural, one {{n} more meeting today} other {{n} more meetings today}}",
+  "@meetingsTodayMoreAria": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "meetingsUploadDrop": "Drop the recording here, or",
+  "meetingsUploadTypes": "Video or audio · up to {mb} MB",
+  "@meetingsUploadTypes": {
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingsUploadBadType": "{name} is not a video or audio file",
+  "@meetingsUploadBadType": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "mgroupsGroups": "Groups",
   "mgroupsRepos": "Repositories",
   "mgroupsPickHint": "Pick one or more. The first one is the main one.",
@@ -5947,6 +6157,7 @@
   "navAssistantConversations": "Conversations",
   "navDocuments": "Documents",
   "navMeetings": "Meetings",
+  "navChat": "Chat",
   "navLogWatcher": "Log watcher",
   "networkTitle": "Private networks",
   "networkSub": "Reach self-hosted GitLab, Jira or package registries inside your networks. A connection goes through the network whose route matches it most closely.",
@@ -6545,6 +6756,55 @@
       }
     }
   },
+  "platformMuseRoute": "Muse route",
+  "platformMuseRouteSub": "How Muse's traffic leaves this server. egress checks it every 30 seconds.",
+  "platformMuseStateLoading": "Checking…",
+  "platformMuseStateUnknown": "Unknown",
+  "platformMuseStateDirect": "Direct",
+  "platformMuseStateWaiting": "First check…",
+  "platformMuseStateUp": "Working",
+  "platformMuseStateDown": "Down",
+  "platformMuseDirect": "No upstream proxy is set (AGNTS_EGRESS_UPSTREAM): Muse connects straight from this server.",
+  "platformMuseVia": "Through",
+  "platformMuseExit": "Seen by Meta as",
+  "platformMuseCheck": "Last check",
+  "platformMuseDownSince": "Down since",
+  "platformMuseLastOk": "last worked {at}",
+  "@platformMuseLastOk": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMuseCalls": "Muse connections",
+  "platformMuseFailed": "{n} failed",
+  "@platformMuseFailed": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMuseStrip": "Last 30 minutes: {pct}% of checks worked",
+  "@platformMuseStrip": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMuseFixTunnel": "Start the tunnel again on the laptop and keep it open (the laptop must stay awake and online):",
+  "platformMuseFixProxy": "Check that the upstream proxy is running and reachable from this server.",
+  "platformMuseLastCallError": "Last failed connection: {err}",
+  "@platformMuseLastCallError": {
+    "placeholders": {
+      "err": {
+        "type": "String"
+      }
+    }
+  },
+  "platformMuseNavDown": "Muse's route is down",
   "previewTab": "Preview",
   "previewTitle": "Screenshots of the app",
   "previewSub": "agnts started the app with this change and took screenshots. Advice only: it never blocks approval.",
@@ -7537,6 +7797,8 @@
       }
     }
   },
+  "reposPrTemplate": "Pull request title format",
+  "reposPrTemplateHelp": "How agnts titles its pull requests, with the commit message format's placeholders. Leave empty for the workspace's title (Settings → Git).",
   "reposPlaceholders": "Placeholders",
   "reposPhPrefix": "The repository's branch prefix, agnts/ by default.",
   "reposPhType": "The kind of work: feature for code, bugfix for a bug, test, swagger-test.",
@@ -8374,6 +8636,8 @@
   "settingsStageChatHelp": "Answers in the assistant chat, and spoken questions. Never runs on credits: it needs a connected account.",
   "settingsStageDocuments": "Documents and meeting notes",
   "settingsStageDocumentsHelp": "Writes documents and the notes and action items of a meeting.",
+  "settingsStageTeamChat": "Team chat",
+  "settingsStageTeamChatHelp": "Answers @agnts and drafts tickets in the team chat. Links use the same provider's light model.",
   "settingsMeetingAudioMuse": "Meeting audio is always heard by Muse, the only module that hears audio; the notes are written by the model above.",
   "settingsStageReview": "Code review",
   "settingsStageReviewHelp": "Reviews each result while you review it. Auto uses Opus for complex tickets and Sonnet for the rest.",
@@ -8407,10 +8671,22 @@
   "settingsCoAuthor": "Add a Co-authored-by: agnts line",
   "settingsCoAuthorHelp": "Teammates can see which commits agnts wrote",
   "settingsPrTitle": "Pull request title",
-  "settingsPrTitleHelp": "'{key}' and '{title}' are replaced with the ticket's key and title",
+  "settingsPrTitleHelp": "Placeholders {number}, {key}, {type}, {scope}, {subject} and {title}, as in the commit message format. A repository's or group's own format replaces it.",
   "@settingsPrTitleHelp": {
     "placeholders": {
+      "number": {
+        "type": "String"
+      },
       "key": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      },
+      "subject": {
         "type": "String"
       },
       "title": {
@@ -8974,6 +9250,321 @@
   },
   "tasksNoRepo": "No repository",
   "tasksRepoNeeded": "Code and tests need a repository: pick one, or choose another kind.",
+  "teamchatSubtitle": "Members and agnts in one room: agnts posts cards when work needs a person, links messages to tickets and answers @agnts.",
+  "teamchatChannels": "Channels",
+  "teamchatNewChannel": "New channel",
+  "teamchatChannelName": "Name",
+  "teamchatChannelNameHelp": "Lower case letters, digits, - and _ (spaces become -).",
+  "teamchatTopic": "Topic",
+  "teamchatAgentsHere": "agnts posts here",
+  "teamchatCreate": "Create",
+  "teamchatStart": "This is the start of #{channel}.",
+  "@teamchatStart": {
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatEmptyTitle": "Welcome to #{channel}",
+  "@teamchatEmptyTitle": {
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatEmptyText": "Write the first message. Mention @agnts to ask about tickets, pull requests, CI and findings.",
+  "teamchatToday": "Today",
+  "teamchatYesterday": "Yesterday",
+  "teamchatPlaceholder": "Message #{channel}",
+  "@teamchatPlaceholder": {
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatSendHint": "Enter to send, Shift+Enter for a new line · @agnts to ask agnts",
+  "teamchatCount": "{n} of {max} characters",
+  "@teamchatCount": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatSend": "Send",
+  "teamchatReply": "Reply",
+  "teamchatCancelReply": "Cancel the reply",
+  "teamchatReplyingTo": "replying to {name}",
+  "@teamchatReplyingTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatReplyingToMessage": "replying to a message",
+  "teamchatToTicket": "Turn into ticket",
+  "teamchatDrafting": "{name} is drafting a ticket…",
+  "@teamchatDrafting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatThinking": "agnts is thinking…",
+  "teamchatSources": "{n, plural, one {{n} source} other {{n} sources}}",
+  "@teamchatSources": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "teamchatSending": "Sending…",
+  "teamchatWaitingNet": "Waiting for the connection…",
+  "teamchatFailed": "Not sent",
+  "teamchatRetry": "Retry",
+  "teamchatDelete": "Delete",
+  "teamchatOffline": "Offline",
+  "teamchatReconnecting": "Reconnecting…",
+  "teamchatWaiting": "{n, plural, one {{n} message waits} other {{n} messages wait}}",
+  "@teamchatWaiting": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "teamchatNotLoaded": "That message is not loaded here. Scroll up to load older messages.",
+  "teamchatStatsLine": "{links, plural, one {{links} link} other {{links} links}} · {answers, plural, one {{answers} answer} other {{answers} answers}} · {drafts, plural, one {{drafts} draft} other {{drafts} drafts}}",
+  "@teamchatStatsLine": {
+    "placeholders": {
+      "links": {
+        "type": "num"
+      },
+      "answers": {
+        "type": "num"
+      },
+      "drafts": {
+        "type": "num"
+      }
+    }
+  },
+  "teamchatStatsMedian": "Today, median {secs}s",
+  "@teamchatStatsMedian": {
+    "placeholders": {
+      "secs": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatAiTip": "Model: {model} · cost {cost}",
+  "@teamchatAiTip": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatLinkedBy": "✨ Linked by {name} · {secs}s",
+  "@teamchatLinkedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "secs": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatRemoveLink": "Remove the link to {name}",
+  "@teamchatRemoveLink": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatCiteMsg": "message {id}",
+  "@teamchatCiteMsg": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatCiteFinding": "finding #{id}",
+  "@teamchatCiteFinding": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatBy": "by {name}",
+  "@teamchatBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatState_open": "Open",
+  "teamchatState_done": "Done",
+  "teamchatState_failed": "Failed",
+  "teamchatState_expired": "Expired",
+  "teamchatAct_fix": "Fix it",
+  "teamchatAct_mute": "Mute",
+  "teamchatAct_approve": "Approve",
+  "teamchatAct_request_changes": "Request changes",
+  "teamchatAct_merge": "Merge",
+  "teamchatAct_create": "Create task",
+  "teamchatAct_create_assign": "Create and assign to agent",
+  "teamchatApproveTitle": "Approve {key}?",
+  "@teamchatApproveTitle": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatMergeTitle": "Merge PR #{number}?",
+  "@teamchatMergeTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatMergeText": "PR #{number} in {repo} will be merged on the git host.",
+  "@teamchatMergeText": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "repo": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatMergeCiFail": "CI is failing. Merge anyway?",
+  "teamchatMergeCiFailNames": "CI is failing: {checks}. Merge anyway?",
+  "@teamchatMergeCiFailNames": {
+    "placeholders": {
+      "checks": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatMergeCiRun": "CI is still running. Merge anyway?",
+  "teamchatMergeCiRunNames": "CI is still running: {checks}. Merge anyway?",
+  "@teamchatMergeCiRunNames": {
+    "placeholders": {
+      "checks": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatMergeCiNone": "This repository has no CI checks. Merge anyway?",
+  "teamchatCiOk": "CI green",
+  "teamchatCiFail": "CI failing",
+  "teamchatCiFailNames": "CI failing: {checks}",
+  "@teamchatCiFailNames": {
+    "placeholders": {
+      "checks": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatCiRun": "CI running",
+  "teamchatCiRunNames": "CI running: {checks}",
+  "@teamchatCiRunNames": {
+    "placeholders": {
+      "checks": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatCiNone": "No CI",
+  "teamchatRegression": "Regression",
+  "teamchatNewFinding": "New",
+  "teamchatRepos": "Repositories",
+  "teamchatFiles": "{n, plural, one {{n} file} other {{n} files}}",
+  "@teamchatFiles": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "teamchatReviewFindings": "{n, plural, one {{n} review finding} other {{n} review findings}}",
+  "@teamchatReviewFindings": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "teamchatMore": "and {n} more",
+  "@teamchatMore": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatOpenFinding": "Open finding",
+  "teamchatViewDiff": "View diff",
+  "teamchatViewPr": "View PR",
+  "teamchatFeedbackPlaceholder": "What should change?",
+  "teamchatSendFeedback": "Send feedback",
+  "teamchatDraftTitle": "Title",
+  "teamchatDraftDescription": "Description",
+  "teamchatDraftRepo": "Repository",
+  "teamchatDraftEdit": "Edit",
+  "teamchatDraftDone": "Done editing",
+  "teamchatVoiceStart": "Record a voice message",
+  "teamchatVoiceRecording": "Recording",
+  "teamchatVoiceEncoding": "Preparing the voice message…",
+  "teamchatVoiceLimit": "up to {n} min",
+  "@teamchatVoiceLimit": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatVoiceSend": "Send voice message",
+  "teamchatVoiceDenied": "Allow the microphone for this site to send voice messages.",
+  "teamchatVoiceNoMic": "No microphone could be opened.",
+  "teamchatVoiceMessage": "Voice message, {time}",
+  "@teamchatVoiceMessage": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "teamchatVoiceListening": "Muse is listening…",
+  "teamchatVoiceNoWords": "No words were heard in this voice message.",
+  "teamchatVoiceFailed": "Could not transcribe it: {error}",
+  "@teamchatVoiceFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "ticketUpdateTitle": "Changed in {source} after agnts started",
   "@ticketUpdateTitle": {
     "placeholders": {

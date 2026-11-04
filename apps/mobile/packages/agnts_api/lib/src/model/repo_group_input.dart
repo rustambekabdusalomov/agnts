@@ -33,6 +33,8 @@ class RepoGroupInput {
 
      this.commitTemplate,
 
+     this.prTemplate,
+
     required  this.members,
   });
 
@@ -110,6 +112,19 @@ class RepoGroupInput {
 
 
 
+      /// Pull request title template (as a repository's); must contain {subject} or {title}. Empty keeps each repository's own
+  @JsonKey(
+    
+    name: r'prTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? prTemplate;
+
+
+
       /// In order; the first is the primary repository of the group's tickets
   @JsonKey(
     
@@ -133,6 +148,7 @@ class RepoGroupInput {
       other.taskPrefix == taskPrefix &&
       other.branchTemplate == branchTemplate &&
       other.commitTemplate == commitTemplate &&
+      other.prTemplate == prTemplate &&
       other.members == members;
 
     @override
@@ -143,6 +159,7 @@ class RepoGroupInput {
         taskPrefix.hashCode +
         branchTemplate.hashCode +
         commitTemplate.hashCode +
+        prTemplate.hashCode +
         members.hashCode;
 
   factory RepoGroupInput.fromJson(Map<String, dynamic> json) => _$RepoGroupInputFromJson(json);

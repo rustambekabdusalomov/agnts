@@ -59,6 +59,7 @@ type ChatMessage struct {
 	AI          *ChatAI         `json:"ai,omitempty"`
 	TicketKey   string          `json:"ticketKey,omitempty"`
 	Audio       *ChatAudio      `json:"audio,omitempty"` // a voice message; Body is its transcript
+	Files       []FileRef       `json:"files,omitempty"` // uploads that came with it
 	ClientMsgID string          `json:"clientMsgId,omitempty"`
 	Refs        []ChatRef       `json:"refs"`
 	CreatedAt   time.Time       `json:"createdAt"`
@@ -201,6 +202,7 @@ type ChatSend struct {
 	ClientMsgID string
 	Body        string
 	ReplyTo     *int64
+	Files       []int64 // pending uploads of the sender's
 }
 
 var chatChannelRe = regexp.MustCompile(`^[a-z0-9][a-z0-9_-]{0,39}$`)

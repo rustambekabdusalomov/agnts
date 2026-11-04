@@ -21,6 +21,8 @@ abstract class _$RepoGroupCWProxy {
 
   RepoGroup commitTemplate(String commitTemplate);
 
+  RepoGroup prTemplate(String prTemplate);
+
   RepoGroup members(List<RepoGroupMember> members);
 
   RepoGroup warnings(List<String> warnings);
@@ -43,6 +45,7 @@ abstract class _$RepoGroupCWProxy {
     String taskPrefix,
     String branchTemplate,
     String commitTemplate,
+    String prTemplate,
     List<RepoGroupMember> members,
     List<String> warnings,
     DateTime createdAt,
@@ -81,6 +84,9 @@ class _$RepoGroupCWProxyImpl implements _$RepoGroupCWProxy {
       this(commitTemplate: commitTemplate);
 
   @override
+  RepoGroup prTemplate(String prTemplate) => this(prTemplate: prTemplate);
+
+  @override
   RepoGroup members(List<RepoGroupMember> members) => this(members: members);
 
   @override
@@ -107,6 +113,7 @@ class _$RepoGroupCWProxyImpl implements _$RepoGroupCWProxy {
     Object? taskPrefix = const $CopyWithPlaceholder(),
     Object? branchTemplate = const $CopyWithPlaceholder(),
     Object? commitTemplate = const $CopyWithPlaceholder(),
+    Object? prTemplate = const $CopyWithPlaceholder(),
     Object? members = const $CopyWithPlaceholder(),
     Object? warnings = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
@@ -141,6 +148,10 @@ class _$RepoGroupCWProxyImpl implements _$RepoGroupCWProxy {
           ? _value.commitTemplate
           // ignore: cast_nullable_to_non_nullable
           : commitTemplate as String,
+      prTemplate: prTemplate == const $CopyWithPlaceholder()
+          ? _value.prTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : prTemplate as String,
       members: members == const $CopyWithPlaceholder()
           ? _value.members
           // ignore: cast_nullable_to_non_nullable
@@ -184,6 +195,7 @@ RepoGroup _$RepoGroupFromJson(
       'taskPrefix',
       'branchTemplate',
       'commitTemplate',
+      'prTemplate',
       'members',
       'warnings',
       'createdAt',
@@ -198,6 +210,7 @@ RepoGroup _$RepoGroupFromJson(
     taskPrefix: $checkedConvert('taskPrefix', (v) => v as String),
     branchTemplate: $checkedConvert('branchTemplate', (v) => v as String),
     commitTemplate: $checkedConvert('commitTemplate', (v) => v as String),
+    prTemplate: $checkedConvert('prTemplate', (v) => v as String),
     members: $checkedConvert(
       'members',
       (v) => (v as List<dynamic>)
@@ -222,6 +235,7 @@ Map<String, dynamic> _$RepoGroupToJson(RepoGroup instance) => <String, dynamic>{
   'taskPrefix': instance.taskPrefix,
   'branchTemplate': instance.branchTemplate,
   'commitTemplate': instance.commitTemplate,
+  'prTemplate': instance.prTemplate,
   'members': instance.members.map((e) => e.toJson()).toList(),
   'warnings': instance.warnings,
   'createdAt': instance.createdAt.toIso8601String(),

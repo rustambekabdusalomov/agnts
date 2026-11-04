@@ -2427,12 +2427,6 @@ abstract class AppLocalizations {
   /// **'Passwords are for Admins only here. Continue with Google instead.'**
   String get authUseGoogle;
 
-  /// No description provided for @authAdminsLede.
-  ///
-  /// In en, this message translates to:
-  /// **'Admins sign in with their password. Everyone else continues with Google.'**
-  String get authAdminsLede;
-
   /// No description provided for @authGoogleInvite.
   ///
   /// In en, this message translates to:
@@ -7053,6 +7047,42 @@ abstract class AppLocalizations {
   /// **'With requested changes'**
   String get filesFromFeedback;
 
+  /// No description provided for @filesDropOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop a file here, or'**
+  String get filesDropOne;
+
+  /// No description provided for @filesChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'choose a file'**
+  String get filesChoose;
+
+  /// No description provided for @filesChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another'**
+  String get filesChange;
+
+  /// No description provided for @filesDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download {name}'**
+  String filesDownload(String name);
+
+  /// No description provided for @filesDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop files to send them'**
+  String get filesDrop;
+
+  /// No description provided for @filesChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 10 files, 10 MB each'**
+  String get filesChatHint;
+
   /// No description provided for @followUpsTitle.
   ///
   /// In en, this message translates to:
@@ -7443,6 +7473,42 @@ abstract class AppLocalizations {
   /// **'No matches'**
   String get formNoMatch;
 
+  /// No description provided for @formPickDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date and time'**
+  String get formPickDateTime;
+
+  /// No description provided for @formPrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get formPrevMonth;
+
+  /// No description provided for @formNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get formNextMonth;
+
+  /// No description provided for @formNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get formNow;
+
+  /// No description provided for @formTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get formTime;
+
+  /// No description provided for @formDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get formDone;
+
   /// No description provided for @groupsView.
   ///
   /// In en, this message translates to:
@@ -7580,6 +7646,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Writes the commit messages of this group\'s tickets in every repository, replacing each repository\'s own format. Leave empty to keep each repository\'s own.'**
   String get groupsCommitTemplateHelp;
+
+  /// No description provided for @groupsPrTemplateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Titles the pull requests of this group\'s tickets in every repository, replacing each repository\'s own format. Leave empty to keep each repository\'s own.'**
+  String get groupsPrTemplateHelp;
 
   /// No description provided for @groupsInstructions.
   ///
@@ -12333,6 +12405,24 @@ abstract class AppLocalizations {
   /// **'Test connection fills these in; change them only if it guessed wrong.'**
   String get logwatchFieldsHelp;
 
+  /// No description provided for @logwatchTraceUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace link'**
+  String get logwatchTraceUrl;
+
+  /// No description provided for @logwatchTraceUrlHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. A link to a trace in Tempo, Jaeger or Grafana, with \'{traceId}\' where the id goes. Findings from logs that carry a trace id link to it.'**
+  String logwatchTraceUrlHelp(String traceId);
+
+  /// No description provided for @logwatchTrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace'**
+  String get logwatchTrace;
+
   /// No description provided for @logwatchCa.
   ///
   /// In en, this message translates to:
@@ -12342,7 +12432,7 @@ abstract class AppLocalizations {
   /// No description provided for @logwatchPushHelp.
   ///
   /// In en, this message translates to:
-  /// **'Your shipper sends to agnts with a token. agnts shows the token and ready Vector and Fluent Bit configuration once you add the source.'**
+  /// **'Your shipper sends to agnts with a token. agnts shows the token and ready Vector, Fluent Bit, Promtail and OpenTelemetry configuration once you add the source.'**
   String get logwatchPushHelp;
 
   /// No description provided for @logwatchEnabled.
@@ -12794,6 +12884,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'On a server without a logging system: run this next to your services. It follows the containers labelled agnts.watch=logs, reports crashes, OOM kills and failed health checks, and connects out to agnts only.'**
   String get logwatchAgentHelp;
+
+  /// No description provided for @logwatchOtelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenTelemetry Collector'**
+  String get logwatchOtelTitle;
+
+  /// No description provided for @logwatchOtelHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this pipeline to the Collector configuration. It sends a copy of error logs only; your other pipelines stay as they are.'**
+  String get logwatchOtelHelp;
+
+  /// No description provided for @logwatchOtelSdk.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps that export with an OpenTelemetry SDK and no Collector send every log; agnts keeps what it needs:'**
+  String get logwatchOtelSdk;
 
   /// No description provided for @logwatchKind_datadog.
   ///
@@ -14691,6 +14799,12 @@ abstract class AppLocalizations {
   /// **'Keep the audio of notes after Muse has heard it'**
   String get meetingsKeepAudio;
 
+  /// No description provided for @meetingsDraftTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Make every action item a draft ticket of the member who took it'**
+  String get meetingsDraftTickets;
+
   /// No description provided for @meetingsRetention.
   ///
   /// In en, this message translates to:
@@ -14786,6 +14900,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time'**
   String get meetingsTime;
+
+  /// No description provided for @meetingsStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get meetingsStarts;
 
   /// No description provided for @meetingsDuration.
   ///
@@ -15212,6 +15332,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create ticket'**
   String get meetingsCreateTicket;
+
+  /// No description provided for @meetingsNobody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody'**
+  String get meetingsNobody;
+
+  /// No description provided for @meetingsUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get meetingsUnassigned;
+
+  /// No description provided for @meetingsSaid.
+  ///
+  /// In en, this message translates to:
+  /// **'said: {who}'**
+  String meetingsSaid(String who);
+
+  /// No description provided for @meetingsTakenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken by'**
+  String get meetingsTakenBy;
+
+  /// No description provided for @meetingsMemberByHand.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked by hand'**
+  String get meetingsMemberByHand;
+
+  /// No description provided for @meetingsMemberMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched from “{said}”'**
+  String meetingsMemberMatched(String said);
+
+  /// No description provided for @meetingsMemberSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Now {name}’s'**
+  String meetingsMemberSet(String name);
+
+  /// No description provided for @meetingsMemberSetTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Now {name}’s, and so is {key}'**
+  String meetingsMemberSetTicket(String name, String key);
+
+  /// No description provided for @meetingsDraftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A draft made when the notes were written: held until someone starts it'**
+  String get meetingsDraftHint;
 
   /// No description provided for @meetingsTicketMade.
   ///
@@ -16214,6 +16388,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'They are no longer invited and get no more reminders.'**
   String get meetingsUninviteBody;
+
+  /// No description provided for @meetingsUploadRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload recording'**
+  String get meetingsUploadRecording;
+
+  /// No description provided for @meetingsUploadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a recording of this meeting'**
+  String get meetingsUploadTitle;
+
+  /// No description provided for @meetingsUploadSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A video or audio file of a meeting held elsewhere, up to {mb} MB. Only its sound is used: agnts keeps the audio, deletes the file you send, and Muse writes the notes and draft tickets from what people said.'**
+  String meetingsUploadSub(String mb);
+
+  /// No description provided for @meetingsUploadFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get meetingsUploadFile;
+
+  /// No description provided for @meetingsUploadHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'When it was held'**
+  String get meetingsUploadHeld;
+
+  /// No description provided for @meetingsUploadPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is in it (helps Muse put tasks on the right people)'**
+  String get meetingsUploadPeople;
+
+  /// No description provided for @meetingsUploadNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get meetingsUploadNow;
+
+  /// No description provided for @meetingsUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get meetingsUploading;
+
+  /// No description provided for @meetingsUploadingPct.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading… {n}%'**
+  String meetingsUploadingPct(String n);
+
+  /// No description provided for @meetingsUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded: Muse is listening to it'**
+  String get meetingsUploaded;
+
+  /// No description provided for @meetingsUploadTooBig.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is bigger than {mb} MB'**
+  String meetingsUploadTooBig(String mb);
+
+  /// No description provided for @meetingsUploadedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get meetingsUploadedBadge;
+
+  /// No description provided for @meetingsInRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0 {In the recording} one {{n} person in the recording} other {{n} people in the recording}}'**
+  String meetingsInRecording(num n);
+
+  /// No description provided for @meetingsUploadedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'An uploaded recording: only its sound was heard, and the file was deleted. Nobody joined a call, so there is no attendance.'**
+  String get meetingsUploadedNote;
+
+  /// No description provided for @meetingsTodayLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get meetingsTodayLive;
+
+  /// No description provided for @meetingsTodayInCall.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} in call'**
+  String meetingsTodayInCall(String n);
+
+  /// No description provided for @meetingsTodayIn.
+  ///
+  /// In en, this message translates to:
+  /// **'in {n} min'**
+  String meetingsTodayIn(String n);
+
+  /// No description provided for @meetingsTodayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get meetingsTodayNow;
+
+  /// No description provided for @meetingsTodayJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get meetingsTodayJoin;
+
+  /// No description provided for @meetingsTodayLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later today:'**
+  String get meetingsTodayLater;
+
+  /// No description provided for @meetingsTodayLiveLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Live: {title}'**
+  String meetingsTodayLiveLine(String title);
+
+  /// No description provided for @meetingsTodayLiveAria.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} is live, {n} in call. Join'**
+  String meetingsTodayLiveAria(String title, String n);
+
+  /// No description provided for @meetingsTodaySoonAria.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} starts in {n} min. Join'**
+  String meetingsTodaySoonAria(String title, String n);
+
+  /// No description provided for @meetingsTodayNowAria.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} is starting now. Join'**
+  String meetingsTodayNowAria(String title);
+
+  /// No description provided for @meetingsTodayLaterAria.
+  ///
+  /// In en, this message translates to:
+  /// **'Next meeting today: {title} at {time}'**
+  String meetingsTodayLaterAria(String title, String time);
+
+  /// No description provided for @meetingsTodayMoreAria.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} more meeting today} other {{n} more meetings today}}'**
+  String meetingsTodayMoreAria(num n);
+
+  /// No description provided for @meetingsUploadDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop the recording here, or'**
+  String get meetingsUploadDrop;
+
+  /// No description provided for @meetingsUploadTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Video or audio · up to {mb} MB'**
+  String meetingsUploadTypes(String mb);
+
+  /// No description provided for @meetingsUploadBadType.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is not a video or audio file'**
+  String meetingsUploadBadType(String name);
 
   /// No description provided for @mgroupsGroups.
   ///
@@ -18171,6 +18519,12 @@ abstract class AppLocalizations {
   /// **'Meetings'**
   String get navMeetings;
 
+  /// No description provided for @navChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get navChat;
+
   /// No description provided for @navLogWatcher.
   ///
   /// In en, this message translates to:
@@ -19562,6 +19916,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This server can run only {list}. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image).'**
   String platformModulesServerOnly(String list);
+
+  /// No description provided for @platformMuseRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse route'**
+  String get platformMuseRoute;
+
+  /// No description provided for @platformMuseRouteSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How Muse\'s traffic leaves this server. egress checks it every 30 seconds.'**
+  String get platformMuseRouteSub;
+
+  /// No description provided for @platformMuseStateLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get platformMuseStateLoading;
+
+  /// No description provided for @platformMuseStateUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get platformMuseStateUnknown;
+
+  /// No description provided for @platformMuseStateDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct'**
+  String get platformMuseStateDirect;
+
+  /// No description provided for @platformMuseStateWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'First check…'**
+  String get platformMuseStateWaiting;
+
+  /// No description provided for @platformMuseStateUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Working'**
+  String get platformMuseStateUp;
+
+  /// No description provided for @platformMuseStateDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get platformMuseStateDown;
+
+  /// No description provided for @platformMuseDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'No upstream proxy is set (AGNTS_EGRESS_UPSTREAM): Muse connects straight from this server.'**
+  String get platformMuseDirect;
+
+  /// No description provided for @platformMuseVia.
+  ///
+  /// In en, this message translates to:
+  /// **'Through'**
+  String get platformMuseVia;
+
+  /// No description provided for @platformMuseExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen by Meta as'**
+  String get platformMuseExit;
+
+  /// No description provided for @platformMuseCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Last check'**
+  String get platformMuseCheck;
+
+  /// No description provided for @platformMuseDownSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Down since'**
+  String get platformMuseDownSince;
+
+  /// No description provided for @platformMuseLastOk.
+  ///
+  /// In en, this message translates to:
+  /// **'last worked {at}'**
+  String platformMuseLastOk(String at);
+
+  /// No description provided for @platformMuseCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse connections'**
+  String get platformMuseCalls;
+
+  /// No description provided for @platformMuseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} failed'**
+  String platformMuseFailed(String n);
+
+  /// No description provided for @platformMuseStrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 minutes: {pct}% of checks worked'**
+  String platformMuseStrip(String pct);
+
+  /// No description provided for @platformMuseFixTunnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the tunnel again on the laptop and keep it open (the laptop must stay awake and online):'**
+  String get platformMuseFixTunnel;
+
+  /// No description provided for @platformMuseFixProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that the upstream proxy is running and reachable from this server.'**
+  String get platformMuseFixProxy;
+
+  /// No description provided for @platformMuseLastCallError.
+  ///
+  /// In en, this message translates to:
+  /// **'Last failed connection: {err}'**
+  String platformMuseLastCallError(String err);
+
+  /// No description provided for @platformMuseNavDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse\'s route is down'**
+  String get platformMuseNavDown;
 
   /// No description provided for @previewTab.
   ///
@@ -22112,6 +22592,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Example: {example}'**
   String reposCommitTemplateExample(String example);
+
+  /// No description provided for @reposPrTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request title format'**
+  String get reposPrTemplate;
+
+  /// No description provided for @reposPrTemplateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How agnts titles its pull requests, with the commit message format\'s placeholders. Leave empty for the workspace\'s title (Settings → Git).'**
+  String get reposPrTemplateHelp;
 
   /// No description provided for @reposPlaceholders.
   ///
@@ -24789,6 +25281,18 @@ abstract class AppLocalizations {
   /// **'Writes documents and the notes and action items of a meeting.'**
   String get settingsStageDocumentsHelp;
 
+  /// No description provided for @settingsStageTeamChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Team chat'**
+  String get settingsStageTeamChat;
+
+  /// No description provided for @settingsStageTeamChatHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers @agnts and drafts tickets in the team chat. Links use the same provider\'s light model.'**
+  String get settingsStageTeamChatHelp;
+
   /// No description provided for @settingsMeetingAudioMuse.
   ///
   /// In en, this message translates to:
@@ -24948,8 +25452,8 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPrTitleHelp.
   ///
   /// In en, this message translates to:
-  /// **'\'{key}\' and \'{title}\' are replaced with the ticket\'s key and title'**
-  String settingsPrTitleHelp(String key, String title);
+  /// **'Placeholders {number}, {key}, {type}, {scope}, {subject} and {title}, as in the commit message format. A repository\'s or group\'s own format replaces it.'**
+  String settingsPrTitleHelp(String number, String key, String type, String scope, String subject, String title);
 
   /// No description provided for @settingsDraft.
   ///
@@ -26762,6 +27266,570 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code and tests need a repository: pick one, or choose another kind.'**
   String get tasksRepoNeeded;
+
+  /// No description provided for @teamchatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Members and agnts in one room: agnts posts cards when work needs a person, links messages to tickets and answers @agnts.'**
+  String get teamchatSubtitle;
+
+  /// No description provided for @teamchatChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Channels'**
+  String get teamchatChannels;
+
+  /// No description provided for @teamchatNewChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'New channel'**
+  String get teamchatNewChannel;
+
+  /// No description provided for @teamchatChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get teamchatChannelName;
+
+  /// No description provided for @teamchatChannelNameHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower case letters, digits, - and _ (spaces become -).'**
+  String get teamchatChannelNameHelp;
+
+  /// No description provided for @teamchatTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic'**
+  String get teamchatTopic;
+
+  /// No description provided for @teamchatAgentsHere.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts posts here'**
+  String get teamchatAgentsHere;
+
+  /// No description provided for @teamchatCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get teamchatCreate;
+
+  /// No description provided for @teamchatStart.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the start of #{channel}.'**
+  String teamchatStart(String channel);
+
+  /// No description provided for @teamchatEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to #{channel}'**
+  String teamchatEmptyTitle(String channel);
+
+  /// No description provided for @teamchatEmptyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the first message. Mention @agnts to ask about tickets, pull requests, CI and findings.'**
+  String get teamchatEmptyText;
+
+  /// No description provided for @teamchatToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get teamchatToday;
+
+  /// No description provided for @teamchatYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get teamchatYesterday;
+
+  /// No description provided for @teamchatPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Message #{channel}'**
+  String teamchatPlaceholder(String channel);
+
+  /// No description provided for @teamchatSendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter to send, Shift+Enter for a new line · @agnts to ask agnts'**
+  String get teamchatSendHint;
+
+  /// No description provided for @teamchatCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {max} characters'**
+  String teamchatCount(String n, String max);
+
+  /// No description provided for @teamchatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get teamchatSend;
+
+  /// No description provided for @teamchatReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get teamchatReply;
+
+  /// No description provided for @teamchatCancelReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the reply'**
+  String get teamchatCancelReply;
+
+  /// No description provided for @teamchatReplyingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'replying to {name}'**
+  String teamchatReplyingTo(String name);
+
+  /// No description provided for @teamchatReplyingToMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'replying to a message'**
+  String get teamchatReplyingToMessage;
+
+  /// No description provided for @teamchatToTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn into ticket'**
+  String get teamchatToTicket;
+
+  /// No description provided for @teamchatDrafting.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is drafting a ticket…'**
+  String teamchatDrafting(String name);
+
+  /// No description provided for @teamchatThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'agnts is thinking…'**
+  String get teamchatThinking;
+
+  /// No description provided for @teamchatSources.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} source} other {{n} sources}}'**
+  String teamchatSources(num n);
+
+  /// No description provided for @teamchatSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get teamchatSending;
+
+  /// No description provided for @teamchatWaitingNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the connection…'**
+  String get teamchatWaitingNet;
+
+  /// No description provided for @teamchatFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent'**
+  String get teamchatFailed;
+
+  /// No description provided for @teamchatRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get teamchatRetry;
+
+  /// No description provided for @teamchatDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get teamchatDelete;
+
+  /// No description provided for @teamchatOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get teamchatOffline;
+
+  /// No description provided for @teamchatReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get teamchatReconnecting;
+
+  /// No description provided for @teamchatWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} message waits} other {{n} messages wait}}'**
+  String teamchatWaiting(num n);
+
+  /// No description provided for @teamchatNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'That message is not loaded here. Scroll up to load older messages.'**
+  String get teamchatNotLoaded;
+
+  /// No description provided for @teamchatStatsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{links, plural, one {{links} link} other {{links} links}} · {answers, plural, one {{answers} answer} other {{answers} answers}} · {drafts, plural, one {{drafts} draft} other {{drafts} drafts}}'**
+  String teamchatStatsLine(num links, num answers, num drafts);
+
+  /// No description provided for @teamchatStatsMedian.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, median {secs}s'**
+  String teamchatStatsMedian(String secs);
+
+  /// No description provided for @teamchatAiTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Model: {model} · cost {cost}'**
+  String teamchatAiTip(String model, String cost);
+
+  /// No description provided for @teamchatLinkedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ Linked by {name} · {secs}s'**
+  String teamchatLinkedBy(String name, String secs);
+
+  /// No description provided for @teamchatRemoveLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the link to {name}'**
+  String teamchatRemoveLink(String name);
+
+  /// No description provided for @teamchatCiteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'message {id}'**
+  String teamchatCiteMsg(String id);
+
+  /// No description provided for @teamchatCiteFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'finding #{id}'**
+  String teamchatCiteFinding(String id);
+
+  /// No description provided for @teamchatBy.
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String teamchatBy(String name);
+
+  /// No description provided for @teamchatState_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get teamchatState_open;
+
+  /// No description provided for @teamchatState_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get teamchatState_done;
+
+  /// No description provided for @teamchatState_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get teamchatState_failed;
+
+  /// No description provided for @teamchatState_expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get teamchatState_expired;
+
+  /// No description provided for @teamchatAct_fix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix it'**
+  String get teamchatAct_fix;
+
+  /// No description provided for @teamchatAct_mute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get teamchatAct_mute;
+
+  /// No description provided for @teamchatAct_approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get teamchatAct_approve;
+
+  /// No description provided for @teamchatAct_request_changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Request changes'**
+  String get teamchatAct_request_changes;
+
+  /// No description provided for @teamchatAct_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get teamchatAct_merge;
+
+  /// No description provided for @teamchatAct_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create task'**
+  String get teamchatAct_create;
+
+  /// No description provided for @teamchatAct_create_assign.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and assign to agent'**
+  String get teamchatAct_create_assign;
+
+  /// No description provided for @teamchatApproveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {key}?'**
+  String teamchatApproveTitle(String key);
+
+  /// No description provided for @teamchatMergeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge PR #{number}?'**
+  String teamchatMergeTitle(String number);
+
+  /// No description provided for @teamchatMergeText.
+  ///
+  /// In en, this message translates to:
+  /// **'PR #{number} in {repo} will be merged on the git host.'**
+  String teamchatMergeText(String number, String repo);
+
+  /// No description provided for @teamchatMergeCiFail.
+  ///
+  /// In en, this message translates to:
+  /// **'CI is failing. Merge anyway?'**
+  String get teamchatMergeCiFail;
+
+  /// No description provided for @teamchatMergeCiFailNames.
+  ///
+  /// In en, this message translates to:
+  /// **'CI is failing: {checks}. Merge anyway?'**
+  String teamchatMergeCiFailNames(String checks);
+
+  /// No description provided for @teamchatMergeCiRun.
+  ///
+  /// In en, this message translates to:
+  /// **'CI is still running. Merge anyway?'**
+  String get teamchatMergeCiRun;
+
+  /// No description provided for @teamchatMergeCiRunNames.
+  ///
+  /// In en, this message translates to:
+  /// **'CI is still running: {checks}. Merge anyway?'**
+  String teamchatMergeCiRunNames(String checks);
+
+  /// No description provided for @teamchatMergeCiNone.
+  ///
+  /// In en, this message translates to:
+  /// **'This repository has no CI checks. Merge anyway?'**
+  String get teamchatMergeCiNone;
+
+  /// No description provided for @teamchatCiOk.
+  ///
+  /// In en, this message translates to:
+  /// **'CI green'**
+  String get teamchatCiOk;
+
+  /// No description provided for @teamchatCiFail.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failing'**
+  String get teamchatCiFail;
+
+  /// No description provided for @teamchatCiFailNames.
+  ///
+  /// In en, this message translates to:
+  /// **'CI failing: {checks}'**
+  String teamchatCiFailNames(String checks);
+
+  /// No description provided for @teamchatCiRun.
+  ///
+  /// In en, this message translates to:
+  /// **'CI running'**
+  String get teamchatCiRun;
+
+  /// No description provided for @teamchatCiRunNames.
+  ///
+  /// In en, this message translates to:
+  /// **'CI running: {checks}'**
+  String teamchatCiRunNames(String checks);
+
+  /// No description provided for @teamchatCiNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No CI'**
+  String get teamchatCiNone;
+
+  /// No description provided for @teamchatRegression.
+  ///
+  /// In en, this message translates to:
+  /// **'Regression'**
+  String get teamchatRegression;
+
+  /// No description provided for @teamchatNewFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get teamchatNewFinding;
+
+  /// No description provided for @teamchatRepos.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories'**
+  String get teamchatRepos;
+
+  /// No description provided for @teamchatFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} file} other {{n} files}}'**
+  String teamchatFiles(num n);
+
+  /// No description provided for @teamchatReviewFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one {{n} review finding} other {{n} review findings}}'**
+  String teamchatReviewFindings(num n);
+
+  /// No description provided for @teamchatMore.
+  ///
+  /// In en, this message translates to:
+  /// **'and {n} more'**
+  String teamchatMore(String n);
+
+  /// No description provided for @teamchatOpenFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Open finding'**
+  String get teamchatOpenFinding;
+
+  /// No description provided for @teamchatViewDiff.
+  ///
+  /// In en, this message translates to:
+  /// **'View diff'**
+  String get teamchatViewDiff;
+
+  /// No description provided for @teamchatViewPr.
+  ///
+  /// In en, this message translates to:
+  /// **'View PR'**
+  String get teamchatViewPr;
+
+  /// No description provided for @teamchatFeedbackPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'What should change?'**
+  String get teamchatFeedbackPlaceholder;
+
+  /// No description provided for @teamchatSendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get teamchatSendFeedback;
+
+  /// No description provided for @teamchatDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get teamchatDraftTitle;
+
+  /// No description provided for @teamchatDraftDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get teamchatDraftDescription;
+
+  /// No description provided for @teamchatDraftRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get teamchatDraftRepo;
+
+  /// No description provided for @teamchatDraftEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get teamchatDraftEdit;
+
+  /// No description provided for @teamchatDraftDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done editing'**
+  String get teamchatDraftDone;
+
+  /// No description provided for @teamchatVoiceStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a voice message'**
+  String get teamchatVoiceStart;
+
+  /// No description provided for @teamchatVoiceRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get teamchatVoiceRecording;
+
+  /// No description provided for @teamchatVoiceEncoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the voice message…'**
+  String get teamchatVoiceEncoding;
+
+  /// No description provided for @teamchatVoiceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {n} min'**
+  String teamchatVoiceLimit(String n);
+
+  /// No description provided for @teamchatVoiceSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send voice message'**
+  String get teamchatVoiceSend;
+
+  /// No description provided for @teamchatVoiceDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the microphone for this site to send voice messages.'**
+  String get teamchatVoiceDenied;
+
+  /// No description provided for @teamchatVoiceNoMic.
+  ///
+  /// In en, this message translates to:
+  /// **'No microphone could be opened.'**
+  String get teamchatVoiceNoMic;
+
+  /// No description provided for @teamchatVoiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice message, {time}'**
+  String teamchatVoiceMessage(String time);
+
+  /// No description provided for @teamchatVoiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Muse is listening…'**
+  String get teamchatVoiceListening;
+
+  /// No description provided for @teamchatVoiceNoWords.
+  ///
+  /// In en, this message translates to:
+  /// **'No words were heard in this voice message.'**
+  String get teamchatVoiceNoWords;
+
+  /// No description provided for @teamchatVoiceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not transcribe it: {error}'**
+  String teamchatVoiceFailed(String error);
 
   /// No description provided for @ticketUpdateTitle.
   ///

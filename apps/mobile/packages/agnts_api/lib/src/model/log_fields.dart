@@ -29,6 +29,8 @@ class LogFields {
      this.service,
 
      this.revision,
+
+     this.traceUrl,
   });
 
   @JsonKey(
@@ -91,6 +93,19 @@ class LogFields {
 
 
 
+      /// Link to a trace in the tracing UI (Tempo, Jaeger), with {traceId} where the id goes
+  @JsonKey(
+    
+    name: r'traceUrl',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? traceUrl;
+
+
+
 
 
     @override
@@ -99,7 +114,8 @@ class LogFields {
       other.timestamp == timestamp &&
       other.level == level &&
       other.service == service &&
-      other.revision == revision;
+      other.revision == revision &&
+      other.traceUrl == traceUrl;
 
     @override
     int get hashCode =>
@@ -107,7 +123,8 @@ class LogFields {
         timestamp.hashCode +
         level.hashCode +
         service.hashCode +
-        revision.hashCode;
+        revision.hashCode +
+        traceUrl.hashCode;
 
   factory LogFields.fromJson(Map<String, dynamic> json) => _$LogFieldsFromJson(json);
 

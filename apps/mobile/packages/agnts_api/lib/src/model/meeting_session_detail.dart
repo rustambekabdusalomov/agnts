@@ -29,6 +29,10 @@ class MeetingSessionDetail {
 
     required  this.meeting,
 
+    required  this.uploaded,
+
+    required  this.people,
+
     required  this.startedAt,
 
      this.endedAt,
@@ -71,6 +75,32 @@ class MeetingSessionDetail {
 
 
   final Meeting meeting;
+
+
+
+      /// A recording a host uploaded, not a call: it has no attendance
+  @JsonKey(
+    
+    name: r'uploaded',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool uploaded;
+
+
+
+      /// An uploaded recording: the members the uploader said are in it
+  @JsonKey(
+    
+    name: r'people',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<int> people;
 
 
 
@@ -201,6 +231,8 @@ class MeetingSessionDetail {
     bool operator ==(Object other) => identical(this, other) || other is MeetingSessionDetail &&
       other.id == id &&
       other.meeting == meeting &&
+      other.uploaded == uploaded &&
+      other.people == people &&
       other.startedAt == startedAt &&
       other.endedAt == endedAt &&
       other.notesStatus == notesStatus &&
@@ -216,6 +248,8 @@ class MeetingSessionDetail {
     int get hashCode =>
         id.hashCode +
         meeting.hashCode +
+        uploaded.hashCode +
+        people.hashCode +
         startedAt.hashCode +
         endedAt.hashCode +
         notesStatus.hashCode +

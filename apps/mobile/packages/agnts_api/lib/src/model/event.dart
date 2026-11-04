@@ -266,7 +266,9 @@ telegram(r'telegram'),
 @JsonValue(r'webhook')
 webhook(r'webhook'),
 @JsonValue(r'assistant')
-assistant(r'assistant');
+assistant(r'assistant'),
+@JsonValue(r'chat')
+chat(r'chat');
 
 const EventOriginEnum(this.value);
 

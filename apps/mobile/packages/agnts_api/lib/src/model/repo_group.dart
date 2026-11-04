@@ -35,6 +35,8 @@ class RepoGroup {
 
     required  this.commitTemplate,
 
+    required  this.prTemplate,
+
     required  this.members,
 
     required  this.warnings,
@@ -132,6 +134,19 @@ class RepoGroup {
 
 
 
+      /// Titles the pull requests of the group's tickets in every member, replacing each repository's own; empty keeps theirs
+  @JsonKey(
+    
+    name: r'prTemplate',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String prTemplate;
+
+
+
   @JsonKey(
     
     name: r'members',
@@ -192,6 +207,7 @@ class RepoGroup {
       other.taskPrefix == taskPrefix &&
       other.branchTemplate == branchTemplate &&
       other.commitTemplate == commitTemplate &&
+      other.prTemplate == prTemplate &&
       other.members == members &&
       other.warnings == warnings &&
       other.createdAt == createdAt &&
@@ -206,6 +222,7 @@ class RepoGroup {
         taskPrefix.hashCode +
         branchTemplate.hashCode +
         commitTemplate.hashCode +
+        prTemplate.hashCode +
         members.hashCode +
         warnings.hashCode +
         createdAt.hashCode +

@@ -88,7 +88,7 @@ class Attachment {
 
 
 
-      /// pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes
+      /// pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes; chat = a team chat message; assistant = an AI chat question
   @JsonKey(
     
     name: r'purpose',
@@ -188,7 +188,7 @@ class Attachment {
 
 }
 
-/// pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes
+/// pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes; chat = a team chat message; assistant = an AI chat question
 enum AttachmentPurposeEnum {
 @JsonValue(r'pending')
 pending(r'pending'),
@@ -199,7 +199,11 @@ answer(r'answer'),
 @JsonValue(r'retry')
 retry(r'retry'),
 @JsonValue(r'feedback')
-feedback(r'feedback');
+feedback(r'feedback'),
+@JsonValue(r'chat')
+chat(r'chat'),
+@JsonValue(r'assistant')
+assistant(r'assistant');
 
 const AttachmentPurposeEnum(this.value);
 

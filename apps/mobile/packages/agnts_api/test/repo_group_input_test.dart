@@ -39,6 +39,12 @@ void main() {
       // TODO
     });
 
+    // Pull request title template (as a repository's); must contain {subject} or {title}. Empty keeps each repository's own
+    // String prTemplate
+    test('to test the property `prTemplate`', () async {
+      // TODO
+    });
+
     // In order; the first is the primary repository of the group's tickets
     // List<RepoGroupInputMembersInner> members
     test('to test the property `members`', () async {

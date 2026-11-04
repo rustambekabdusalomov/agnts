@@ -13,13 +13,23 @@ abstract class _$MeetingSettingsAvailableCWProxy {
 
   MeetingSettingsAvailable notes(bool notes);
 
+  MeetingSettingsAvailable uploads(bool uploads);
+
+  MeetingSettingsAvailable maxUploadMb(int maxUploadMb);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSettingsAvailable(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
   /// MeetingSettingsAvailable(...).copyWith(id: 12, name: "My name")
   /// ````
-  MeetingSettingsAvailable call({bool meetings, bool recording, bool notes});
+  MeetingSettingsAvailable call({
+    bool meetings,
+    bool recording,
+    bool notes,
+    bool uploads,
+    int maxUploadMb,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMeetingSettingsAvailable.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMeetingSettingsAvailable.copyWith.fieldName(...)`
@@ -40,6 +50,13 @@ class _$MeetingSettingsAvailableCWProxyImpl
   MeetingSettingsAvailable notes(bool notes) => this(notes: notes);
 
   @override
+  MeetingSettingsAvailable uploads(bool uploads) => this(uploads: uploads);
+
+  @override
+  MeetingSettingsAvailable maxUploadMb(int maxUploadMb) =>
+      this(maxUploadMb: maxUploadMb);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSettingsAvailable(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -50,6 +67,8 @@ class _$MeetingSettingsAvailableCWProxyImpl
     Object? meetings = const $CopyWithPlaceholder(),
     Object? recording = const $CopyWithPlaceholder(),
     Object? notes = const $CopyWithPlaceholder(),
+    Object? uploads = const $CopyWithPlaceholder(),
+    Object? maxUploadMb = const $CopyWithPlaceholder(),
   }) {
     return MeetingSettingsAvailable(
       meetings: meetings == const $CopyWithPlaceholder()
@@ -64,6 +83,14 @@ class _$MeetingSettingsAvailableCWProxyImpl
           ? _value.notes
           // ignore: cast_nullable_to_non_nullable
           : notes as bool,
+      uploads: uploads == const $CopyWithPlaceholder()
+          ? _value.uploads
+          // ignore: cast_nullable_to_non_nullable
+          : uploads as bool,
+      maxUploadMb: maxUploadMb == const $CopyWithPlaceholder()
+          ? _value.maxUploadMb
+          // ignore: cast_nullable_to_non_nullable
+          : maxUploadMb as int,
     );
   }
 }
@@ -82,11 +109,22 @@ extension $MeetingSettingsAvailableCopyWith on MeetingSettingsAvailable {
 MeetingSettingsAvailable _$MeetingSettingsAvailableFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate('MeetingSettingsAvailable', json, ($checkedConvert) {
-  $checkKeys(json, requiredKeys: const ['meetings', 'recording', 'notes']);
+  $checkKeys(
+    json,
+    requiredKeys: const [
+      'meetings',
+      'recording',
+      'notes',
+      'uploads',
+      'maxUploadMb',
+    ],
+  );
   final val = MeetingSettingsAvailable(
     meetings: $checkedConvert('meetings', (v) => v as bool),
     recording: $checkedConvert('recording', (v) => v as bool),
     notes: $checkedConvert('notes', (v) => v as bool),
+    uploads: $checkedConvert('uploads', (v) => v as bool),
+    maxUploadMb: $checkedConvert('maxUploadMb', (v) => (v as num).toInt()),
   );
   return val;
 });
@@ -97,4 +135,6 @@ Map<String, dynamic> _$MeetingSettingsAvailableToJson(
   'meetings': instance.meetings,
   'recording': instance.recording,
   'notes': instance.notes,
+  'uploads': instance.uploads,
+  'maxUploadMb': instance.maxUploadMb,
 };

@@ -29,7 +29,11 @@ func (o *Orchestrator) Upload(ctx context.Context, name string, data []byte) (do
 		return domain.Attachment{}, invalid("a file can be %d MB at most", domain.MaxAttachmentBytes>>20)
 	}
 	name = domain.CleanFileName(name)
-	return o.store.SaveAttachment(ctx, domain.Attachment{Name: name, ContentType: sniffType(name, data)}, data)
+	a := domain.Attachment{Name: name, ContentType: sniffType(name, data)}
+	if who, ok := domain.ActorOf(ctx); ok {
+		a.UploadedBy = &who.UserID
+	}
+	return o.store.SaveAttachment(ctx, a, data)
 }
 
 // textTypes name common text files the system MIME table may not know.
@@ -61,8 +65,19 @@ func sniffType(name string, data []byte) string {
 }
 
 // OpenAttachment returns an attachment and its bytes, or domain.ErrNotFound.
+// A file of an AI chat question is only its asker's, as the conversation
+// is; anyone else gets domain.ErrNotFound, so ids cannot be probed.
 func (o *Orchestrator) OpenAttachment(ctx context.Context, id int64) (domain.Attachment, []byte, error) {
-	return o.store.AttachmentData(ctx, id)
+	a, data, err := o.store.AttachmentData(ctx, id)
+	if err != nil || a.AssistantMessageID == nil {
+		return a, data, err
+	}
+	who, _ := domain.ActorOf(ctx)
+	owner, err := o.store.AssistantFileOwner(ctx, *a.AssistantMessageID)
+	if err != nil || who.UserID == 0 || owner != who.UserID {
+		return domain.Attachment{}, nil, domain.ErrNotFound
+	}
+	return a, data, nil
 }
 
 // DeleteUpload deletes an upload that nothing uses yet. Attached files
@@ -76,9 +91,27 @@ func (o *Orchestrator) DeleteUpload(ctx context.Context, id int64) error {
 		return domain.ErrNotFound
 	}
 	if as[0].Purpose != domain.AttachPending {
-		return fmt.Errorf("%s is attached to a ticket: %w", as[0].Name, domain.ErrConflict)
+		return fmt.Errorf("%s is attached already: %w", as[0].Name, domain.ErrConflict)
+	}
+	// Viewers upload for the chats: they remove only their own uploads.
+	// Editors may remove any pending one (an answer draft's, say).
+	if who, ok := domain.ActorOf(ctx); ok && as[0].UploadedByOther(who.UserID) && !o.canEdit(ctx, who.UserID) {
+		return domain.ErrForbidden
 	}
 	return o.store.DeleteAttachments(ctx, []int64{id})
+}
+
+// canEdit reports whether user may change the workspace ctx acts in.
+func (o *Orchestrator) canEdit(ctx context.Context, user int64) bool {
+	if o.codeRole == nil {
+		return true
+	}
+	ws, err := domain.MustWorkspace(ctx)
+	if err != nil {
+		return false
+	}
+	r, err := o.codeRole(ctx, ws, user)
+	return err == nil && r.CanEdit()
 }
 
 // checkUploads checks that ids are pending uploads, at most
@@ -104,6 +137,25 @@ func (o *Orchestrator) checkUploads(ctx context.Context, ids []int64) ([]int64, 
 		i := slices.IndexFunc(as, func(a domain.Attachment) bool { return a.ID == id })
 		if i < 0 || as[i].Purpose != domain.AttachPending {
 			return nil, invalid("file %d is not a new upload: upload it again", id)
+		}
+	}
+	return out, nil
+}
+
+// checkOwnUploads is checkUploads for uploads that must be user's own
+// (files sent in the chats).
+func (o *Orchestrator) checkOwnUploads(ctx context.Context, ids []int64, user int64) ([]int64, error) {
+	out, err := o.checkUploads(ctx, ids)
+	if err != nil || len(out) == 0 {
+		return out, err
+	}
+	as, err := o.store.Attachments(ctx, out)
+	if err != nil {
+		return nil, err
+	}
+	for _, a := range as {
+		if a.UploadedByOther(user) {
+			return nil, invalid("file %d is not a new upload of yours: upload it again", a.ID)
 		}
 	}
 	return out, nil

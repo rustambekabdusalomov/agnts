@@ -27,6 +27,8 @@ abstract class _$RepositoryInputCWProxy {
 
   RepositoryInput commitTemplate(String? commitTemplate);
 
+  RepositoryInput prTemplate(String? prTemplate);
+
   RepositoryInput taskPrefix(String? taskPrefix);
 
   RepositoryInput instructions(String? instructions);
@@ -66,6 +68,7 @@ abstract class _$RepositoryInputCWProxy {
     String? branchPrefix,
     String? branchTemplate,
     String? commitTemplate,
+    String? prTemplate,
     String? taskPrefix,
     String? instructions,
     String? jiraProject,
@@ -119,6 +122,10 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
   @override
   RepositoryInput commitTemplate(String? commitTemplate) =>
       this(commitTemplate: commitTemplate);
+
+  @override
+  RepositoryInput prTemplate(String? prTemplate) =>
+      this(prTemplate: prTemplate);
 
   @override
   RepositoryInput taskPrefix(String? taskPrefix) =>
@@ -179,6 +186,7 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
     Object? branchPrefix = const $CopyWithPlaceholder(),
     Object? branchTemplate = const $CopyWithPlaceholder(),
     Object? commitTemplate = const $CopyWithPlaceholder(),
+    Object? prTemplate = const $CopyWithPlaceholder(),
     Object? taskPrefix = const $CopyWithPlaceholder(),
     Object? instructions = const $CopyWithPlaceholder(),
     Object? jiraProject = const $CopyWithPlaceholder(),
@@ -232,6 +240,10 @@ class _$RepositoryInputCWProxyImpl implements _$RepositoryInputCWProxy {
           ? _value.commitTemplate
           // ignore: cast_nullable_to_non_nullable
           : commitTemplate as String?,
+      prTemplate: prTemplate == const $CopyWithPlaceholder()
+          ? _value.prTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : prTemplate as String?,
       taskPrefix: taskPrefix == const $CopyWithPlaceholder()
           ? _value.taskPrefix
           // ignore: cast_nullable_to_non_nullable
@@ -307,6 +319,7 @@ RepositoryInput _$RepositoryInputFromJson(Map<String, dynamic> json) =>
         branchPrefix: $checkedConvert('branchPrefix', (v) => v as String?),
         branchTemplate: $checkedConvert('branchTemplate', (v) => v as String?),
         commitTemplate: $checkedConvert('commitTemplate', (v) => v as String?),
+        prTemplate: $checkedConvert('prTemplate', (v) => v as String?),
         taskPrefix: $checkedConvert('taskPrefix', (v) => v as String?),
         instructions: $checkedConvert('instructions', (v) => v as String?),
         jiraProject: $checkedConvert('jiraProject', (v) => v as String?),
@@ -347,6 +360,7 @@ Map<String, dynamic> _$RepositoryInputToJson(RepositoryInput instance) =>
       'branchPrefix': ?instance.branchPrefix,
       'branchTemplate': ?instance.branchTemplate,
       'commitTemplate': ?instance.commitTemplate,
+      'prTemplate': ?instance.prTemplate,
       'taskPrefix': ?instance.taskPrefix,
       'instructions': ?instance.instructions,
       'jiraProject': ?instance.jiraProject,

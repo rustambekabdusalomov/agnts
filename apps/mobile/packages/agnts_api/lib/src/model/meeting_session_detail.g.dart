@@ -11,6 +11,10 @@ abstract class _$MeetingSessionDetailCWProxy {
 
   MeetingSessionDetail meeting(Meeting meeting);
 
+  MeetingSessionDetail uploaded(bool uploaded);
+
+  MeetingSessionDetail people(List<int> people);
+
   MeetingSessionDetail startedAt(DateTime startedAt);
 
   MeetingSessionDetail endedAt(DateTime? endedAt);
@@ -40,6 +44,8 @@ abstract class _$MeetingSessionDetailCWProxy {
   MeetingSessionDetail call({
     int id,
     Meeting meeting,
+    bool uploaded,
+    List<int> people,
     DateTime startedAt,
     DateTime? endedAt,
     MeetingNotesStatus notesStatus,
@@ -65,6 +71,12 @@ class _$MeetingSessionDetailCWProxyImpl
 
   @override
   MeetingSessionDetail meeting(Meeting meeting) => this(meeting: meeting);
+
+  @override
+  MeetingSessionDetail uploaded(bool uploaded) => this(uploaded: uploaded);
+
+  @override
+  MeetingSessionDetail people(List<int> people) => this(people: people);
 
   @override
   MeetingSessionDetail startedAt(DateTime startedAt) =>
@@ -113,6 +125,8 @@ class _$MeetingSessionDetailCWProxyImpl
   MeetingSessionDetail call({
     Object? id = const $CopyWithPlaceholder(),
     Object? meeting = const $CopyWithPlaceholder(),
+    Object? uploaded = const $CopyWithPlaceholder(),
+    Object? people = const $CopyWithPlaceholder(),
     Object? startedAt = const $CopyWithPlaceholder(),
     Object? endedAt = const $CopyWithPlaceholder(),
     Object? notesStatus = const $CopyWithPlaceholder(),
@@ -133,6 +147,14 @@ class _$MeetingSessionDetailCWProxyImpl
           ? _value.meeting
           // ignore: cast_nullable_to_non_nullable
           : meeting as Meeting,
+      uploaded: uploaded == const $CopyWithPlaceholder()
+          ? _value.uploaded
+          // ignore: cast_nullable_to_non_nullable
+          : uploaded as bool,
+      people: people == const $CopyWithPlaceholder()
+          ? _value.people
+          // ignore: cast_nullable_to_non_nullable
+          : people as List<int>,
       startedAt: startedAt == const $CopyWithPlaceholder()
           ? _value.startedAt
           // ignore: cast_nullable_to_non_nullable
@@ -196,6 +218,8 @@ MeetingSessionDetail _$MeetingSessionDetailFromJson(
     requiredKeys: const [
       'id',
       'meeting',
+      'uploaded',
+      'people',
       'startedAt',
       'notesStatus',
       'notesError',
@@ -211,6 +235,11 @@ MeetingSessionDetail _$MeetingSessionDetailFromJson(
     meeting: $checkedConvert(
       'meeting',
       (v) => Meeting.fromJson(v as Map<String, dynamic>),
+    ),
+    uploaded: $checkedConvert('uploaded', (v) => v as bool),
+    people: $checkedConvert(
+      'people',
+      (v) => (v as List<dynamic>).map((e) => (e as num).toInt()).toList(),
     ),
     startedAt: $checkedConvert('startedAt', (v) => DateTime.parse(v as String)),
     endedAt: $checkedConvert(
@@ -252,6 +281,8 @@ Map<String, dynamic> _$MeetingSessionDetailToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'meeting': instance.meeting.toJson(),
+  'uploaded': instance.uploaded,
+  'people': instance.people,
   'startedAt': instance.startedAt.toIso8601String(),
   'endedAt': ?instance.endedAt?.toIso8601String(),
   'notesStatus': _$MeetingNotesStatusEnumMap[instance.notesStatus]!,

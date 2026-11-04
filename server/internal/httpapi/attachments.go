@@ -116,3 +116,11 @@ func ids(p *[]int64) []int64 {
 	}
 	return *p
 }
+
+func toAttachedFiles(fs []domain.FileRef) []gen.AttachedFile {
+	out := make([]gen.AttachedFile, len(fs))
+	for i, f := range fs {
+		out[i] = gen.AttachedFile{Id: f.ID, Name: f.Name, ContentType: f.ContentType, Size: f.Size, Image: f.Image, Url: f.URL}
+	}
+	return out
+}

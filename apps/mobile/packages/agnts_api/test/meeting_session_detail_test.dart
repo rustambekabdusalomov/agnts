@@ -17,6 +17,18 @@ void main() {
       // TODO
     });
 
+    // A recording a host uploaded, not a call: it has no attendance
+    // bool uploaded
+    test('to test the property `uploaded`', () async {
+      // TODO
+    });
+
+    // An uploaded recording: the members the uploader said are in it
+    // List<int> people
+    test('to test the property `people`', () async {
+      // TODO
+    });
+
     // DateTime startedAt
     test('to test the property `startedAt`', () async {
       // TODO

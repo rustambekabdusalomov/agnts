@@ -166,8 +166,8 @@ void main() {
     expect(find.text('Manage'), findsOneWidget);
     // The others are offered to connect, and Claude points to the workspace settings.
     expect(find.text('Connect'), findsWidgets);
-    await tester.scrollUntilVisible(find.text('Workspace → Claude'), 300, scrollable: find.byType(Scrollable).first);
-    expect(find.text('Workspace → Claude'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Workspace → AI accounts'), 300, scrollable: find.byType(Scrollable).first);
+    expect(find.text('Workspace → AI accounts'), findsOneWidget);
   });
 
   testWidgets('MCP shows the connector and token state', (tester) async {

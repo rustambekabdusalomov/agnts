@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **level** | **String** |  | [optional] 
 **service** | **String** |  | [optional] 
 **revision** | **String** |  | [optional] 
+**traceUrl** | **String** | Link to a trace in the tracing UI (Tempo, Jaeger), with {traceId} where the id goes | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

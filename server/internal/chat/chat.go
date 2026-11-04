@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"log/slog"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -36,6 +37,8 @@ type Store interface {
 	Message(ctx context.Context, id int64) (domain.ChatMessage, error)
 	MessagesByID(ctx context.Context, ids []int64) ([]domain.ChatMessage, error)
 	Send(ctx context.Context, user int64, in domain.ChatSend, jobs []string) (domain.ChatMessage, bool, error)
+	CopyFilesToTicket(ctx context.Context, msg int64, key string) (int64, error)
+	FileData(ctx context.Context, id int64) ([]byte, error)
 	Post(ctx context.Context, m domain.ChatMessage) (domain.ChatMessage, error)
 	Update(ctx context.Context, id int64, fn func(*domain.ChatMessage) error) (domain.ChatMessage, error)
 	CardsOf(ctx context.Context, key string) ([]domain.ChatMessage, error)
@@ -167,6 +170,17 @@ func (s *Service) Wake() {
 	}
 }
 
+// uniqueIDs drops repeated ids, keeping the first of each in place.
+func uniqueIDs(ids []int64) []int64 {
+	var out []int64
+	for _, id := range ids {
+		if !slices.Contains(out, id) {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
 func actor(ctx context.Context) (int64, string) {
 	a, _ := domain.ActorOf(ctx)
 	return a.UserID, a.Username
@@ -234,7 +248,13 @@ func (s *Service) Send(ctx context.Context, in domain.ChatSend) (domain.ChatMess
 	if !uuidRe.MatchString(in.ClientMsgID) {
 		return domain.ChatMessage{}, false, invalid("clientMsgId must be a UUID")
 	}
-	if !domain.ChatBodyOK(in.Body) {
+	in.Files = uniqueIDs(in.Files)
+	switch {
+	case len(in.Files) > domain.MaxAttachments:
+		return domain.ChatMessage{}, false, invalid("attach at most %d files", domain.MaxAttachments)
+	case len(in.Files) > 0 && strings.TrimSpace(in.Body) == "":
+		in.Body = "" // files alone are a message
+	case !domain.ChatBodyOK(in.Body):
 		return domain.ChatMessage{}, false, invalid("a message is 1 to %d bytes of text", domain.ChatMaxBody)
 	}
 	toAgent := false
@@ -251,7 +271,16 @@ func (s *Service) Send(ctx context.Context, in domain.ChatSend) (domain.ChatMess
 	if domain.MentionsAgent(in.Body) || toAgent {
 		jobs = append(jobs, postgres.ChatJobAnswer)
 	}
+	if strings.TrimSpace(in.Body) == "" {
+		jobs = nil // nothing to link or answer in files alone
+		if toAgent {
+			jobs = []string{postgres.ChatJobAnswer}
+		}
+	}
 	m, created, err := s.Store.Send(ctx, u, in, jobs)
+	if errors.Is(err, domain.ErrConflict) {
+		return m, false, invalid("a file is not a new upload of yours: upload it again")
+	}
 	if err == nil && created {
 		s.Wake()
 	}

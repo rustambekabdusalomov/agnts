@@ -18,7 +18,7 @@ import (
 // acts for the person in ctx: conversations are theirs alone.
 type Assistant interface {
 	AssistantReady() bool
-	Ask(ctx context.Context, conversationID int64, question, lang string) (domain.AssistantConversation, error)
+	Ask(ctx context.Context, conversationID int64, question, lang string, files []int64) (domain.AssistantConversation, error)
 	AssistantConversations(ctx context.Context, mode domain.ChatMode) ([]domain.AssistantConversation, error)
 	AssistantConversation(ctx context.Context, id int64) (domain.AssistantConversation, error)
 	DeleteAssistantConversation(ctx context.Context, id int64) error
@@ -108,7 +108,7 @@ func (s *Server) ask(w http.ResponseWriter, r *http.Request, conversation int64)
 		writeError(w, http.StatusBadRequest, "bad_request", "lang is en, ru or uz")
 		return
 	}
-	c, err := s.opt.Assistant.Ask(r.Context(), conversation, req.Question, askLang(req.Lang))
+	c, err := s.opt.Assistant.Ask(r.Context(), conversation, orZero(req.Question), askLang(req.Lang), orZero(req.Attachments))
 	if err != nil {
 		s.writeAssistantError(w, r, err)
 		return
@@ -394,6 +394,10 @@ func toAssistantMessage(m domain.AssistantMessage) gen.AssistantMessage {
 	if len(m.Attachments) > 0 {
 		a := m.Attachments
 		out.Attachments = &a
+	}
+	if len(m.AttachedFiles) > 0 {
+		fs := toAttachedFiles(m.AttachedFiles)
+		out.AttachedFiles = &fs
 	}
 	if m.Role == domain.AssistantReply && m.Status == domain.AssistantDone {
 		d := m.DurationMS

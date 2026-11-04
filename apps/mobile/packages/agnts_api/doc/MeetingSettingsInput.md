@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **retentionDays** | **int** |  | 
 **keepAudio** | **bool** |  | 
 **maxParticipants** | **int** |  | 
+**draftTickets** | **bool** | Absent keeps it as it is | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

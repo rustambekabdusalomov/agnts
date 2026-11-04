@@ -70,6 +70,12 @@ void main() {
       // TODO
     });
 
+    // How agnts titles pull requests, with the commit template's placeholders; empty uses the workspace's PR title (Settings, Git)
+    // String prTemplate
+    test('to test the property `prTemplate`', () async {
+      // TODO
+    });
+
     // String taskPrefix
     test('to test the property `taskPrefix`', () async {
       // TODO

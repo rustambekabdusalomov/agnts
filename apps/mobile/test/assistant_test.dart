@@ -22,6 +22,7 @@ AssistantMessage _m(
   String? error,
   List<AssistantAction>? actions,
   List<String>? actionErrors,
+  List<AttachedFile>? files,
 }) => AssistantMessage(
   id: id,
   role: role,
@@ -36,6 +37,7 @@ AssistantMessage _m(
   createdAt: _at,
   actions: actions,
   actionErrors: actionErrors,
+  attachedFiles: files,
   durationMs: status == AssistantMessageStatusEnum.done && role == AssistantMessageRoleEnum.assistant ? 12000 : null,
 );
 
@@ -289,5 +291,53 @@ void main() {
     expect(find.text('Actions confirmed: 75%'), findsOneWidget);
     expect(find.text('4 offered · 3 done · 0 not done · 1 declined · 0 expired · 2 not offered'), findsOneWidget);
     expect(find.text('4 actions offered · 3 done'), findsOneWidget);
+  });
+
+  testWidgets('a question shows the files it brought, without the stand-in text', (tester) async {
+    final conv = AssistantConversation(
+      id: 8,
+      title: 'See the attached files.',
+      mode: ChatMode.chat,
+      createdAt: _at,
+      updatedAt: _at,
+      messages: [
+        _m(
+          1,
+          _q,
+          'See the attached files.',
+          files: [AttachedFile(id: 3, name: 'payments.log', contentType: 'text/plain', size: 2048, image: false, url: '/attachments/3')],
+        ),
+        _m(2, _a, 'Refund 42 failed on a currency mismatch.'),
+        _m(
+          3,
+          _q,
+          'See the attached files.',
+          files: [AttachedFile(id: 4, name: 'shot.txt', contentType: 'text/plain', size: 10, image: false, url: '/attachments/4')],
+        ),
+        _m(4, _a, '', status: AssistantMessageStatusEnum.failed, error: 'Something went wrong.'),
+        _m(5, _q, 'And the CI?'),
+        _m(6, _a, '', status: AssistantMessageStatusEnum.failed, error: 'Something went wrong.'),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [assistantConversationProvider(8).overrideWith((ref) async => conv)],
+        child: MaterialApp(
+          theme: agntsTheme(Brightness.light),
+          locale: const Locale('en'),
+          localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const AssistantScreen(conversationId: 8),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('payments.log'), findsOneWidget);
+    expect(find.text('See the attached files.'), findsNothing);
+    expect(find.text('Refund 42 failed on a currency mismatch.'), findsOneWidget);
+    // A failed answer to a question with files is not offered again (its
+    // files went with it); one to a typed question is.
+    expect(find.text('Ask again'), findsOneWidget);
+    expect(find.byIcon(Icons.attach_file_rounded), findsOneWidget);
   });
 }

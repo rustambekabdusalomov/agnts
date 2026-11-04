@@ -1309,9 +1309,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get authUseGoogle => 'Пароли здесь только для администраторов. Войдите через Google.';
 
   @override
-  String get authAdminsLede => 'Администраторы входят по паролю. Все остальные — через Google.';
-
-  @override
   String get authGoogleInvite =>
       'Ссылка-приглашение недействительна, уже использована, истекла или предназначена для другого аккаунта Google.';
 
@@ -4003,6 +4000,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get filesFromFeedback => 'К запрошенным изменениям';
 
   @override
+  String get filesDropOne => 'Перетащите файл сюда или';
+
+  @override
+  String get filesChoose => 'выберите файл';
+
+  @override
+  String get filesChange => 'Выбрать другой';
+
+  @override
+  String filesDownload(String name) {
+    return 'Скачать $name';
+  }
+
+  @override
+  String get filesDrop => 'Отпустите, чтобы отправить файлы';
+
+  @override
+  String get filesChatHint => 'До 10 файлов, до 10 МБ каждый';
+
+  @override
   String get followUpsTitle => 'Последующие тикеты';
 
   @override
@@ -4272,6 +4289,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get formNoMatch => 'Ничего не найдено';
 
   @override
+  String get formPickDateTime => 'Выберите дату и время';
+
+  @override
+  String get formPrevMonth => 'Предыдущий месяц';
+
+  @override
+  String get formNextMonth => 'Следующий месяц';
+
+  @override
+  String get formNow => 'Сейчас';
+
+  @override
+  String get formTime => 'Время';
+
+  @override
+  String get formDone => 'Готово';
+
+  @override
   String groupsView(String n) {
     return 'Группы ($n)';
   }
@@ -4354,6 +4389,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get groupsCommitTemplateHelp =>
       'Сообщения коммитов задач этой группы во всех репозиториях; заменяет собственный формат каждого репозитория. Оставьте пустым, чтобы у каждого репозитория остался свой.';
+
+  @override
+  String get groupsPrTemplateHelp =>
+      'Заголовки пул-реквестов задач этой группы во всех репозиториях; заменяет собственный формат каждого репозитория. Оставьте пустым, чтобы у каждого репозитория остался свой.';
 
   @override
   String get groupsInstructions => 'Инструкции';
@@ -7142,11 +7181,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get logwatchFieldsHelp => 'Проверка подключения заполнит их сама; меняйте, только если она ошиблась.';
 
   @override
+  String get logwatchTraceUrl => 'Ссылка на трассировку';
+
+  @override
+  String logwatchTraceUrlHelp(String traceId) {
+    return 'Необязательно. Ссылка на трассировку в Tempo, Jaeger или Grafana, где \'$traceId\' заменяется на её id. Находки из логов с trace id будут ссылаться на неё.';
+  }
+
+  @override
+  String get logwatchTrace => 'Трассировка';
+
+  @override
   String get logwatchCa => 'CA-сертификат (PEM) для частного CA';
 
   @override
   String get logwatchPushHelp =>
-      'Ваш шиппер отправляет логи в agnts с токеном. После добавления источника agnts покажет токен и готовые настройки Vector и Fluent Bit.';
+      'Ваш шиппер отправляет логи в agnts с токеном. После добавления источника agnts покажет токен и готовые настройки Vector, Fluent Bit, Promtail и OpenTelemetry.';
 
   @override
   String get logwatchEnabled => 'Читать этот источник';
@@ -7404,6 +7454,17 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get logwatchAgentHelp =>
       'На сервере без системы логов: запустите это рядом с сервисами. Агент следит за контейнерами с меткой agnts.watch=logs, сообщает о падениях, OOM и проваленных проверках здоровья и сам подключается к agnts.';
+
+  @override
+  String get logwatchOtelTitle => 'OpenTelemetry Collector';
+
+  @override
+  String get logwatchOtelHelp =>
+      'Добавьте этот конвейер в конфигурацию Collector. Он отправляет копию только логов с ошибками; остальные конвейеры не меняются.';
+
+  @override
+  String get logwatchOtelSdk =>
+      'Приложения, которые экспортируют через OpenTelemetry SDK без Collector, отправляют все логи; agnts оставит нужное:';
 
   @override
   String get logwatchKind_datadog => 'Datadog';
@@ -8503,6 +8564,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get meetingsKeepAudio => 'Хранить звук заметок после того, как Muse его прослушал';
 
   @override
+  String get meetingsDraftTickets => 'Делать из каждого пункта черновик тикета на участника, который его взял';
+
+  @override
   String get meetingsRetention => 'Хранить записи и расшифровки (дней)';
 
   @override
@@ -8549,6 +8613,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get meetingsTime => 'Время';
+
+  @override
+  String get meetingsStarts => 'Начало';
 
   @override
   String get meetingsDuration => 'Длительность';
@@ -8781,6 +8848,41 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get meetingsCreateTicket => 'Создать тикет';
+
+  @override
+  String get meetingsNobody => 'Никто';
+
+  @override
+  String get meetingsUnassigned => 'Не назначено';
+
+  @override
+  String meetingsSaid(String who) {
+    return 'сказано: $who';
+  }
+
+  @override
+  String get meetingsTakenBy => 'Кто берёт';
+
+  @override
+  String get meetingsMemberByHand => 'Выбрано вручную';
+
+  @override
+  String meetingsMemberMatched(String said) {
+    return 'Найдено по «$said»';
+  }
+
+  @override
+  String meetingsMemberSet(String name) {
+    return 'Теперь задача $name';
+  }
+
+  @override
+  String meetingsMemberSetTicket(String name, String key) {
+    return 'Теперь задача $name, как и $key';
+  }
+
+  @override
+  String get meetingsDraftHint => 'Черновик, созданный вместе с заметками: ждёт, пока его не запустят';
 
   @override
   String meetingsTicketMade(String key) {
@@ -9365,6 +9467,137 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get meetingsUninviteBody => 'Человек больше не приглашён и не получит напоминаний.';
+
+  @override
+  String get meetingsUploadRecording => 'Загрузить запись';
+
+  @override
+  String get meetingsUploadTitle => 'Загрузить запись этой встречи';
+
+  @override
+  String meetingsUploadSub(String mb) {
+    return 'Видео или аудио встречи, прошедшей в другом месте, до $mb МБ. Используется только звук: agnts сохраняет аудио, удаляет присланный файл, а Muse пишет заметки и черновики тикетов по тому, что говорили.';
+  }
+
+  @override
+  String get meetingsUploadFile => 'Запись';
+
+  @override
+  String get meetingsUploadHeld => 'Когда прошла';
+
+  @override
+  String get meetingsUploadPeople => 'Кто на записи (помогает Muse назначить задачи нужным людям)';
+
+  @override
+  String get meetingsUploadNow => 'Загрузить';
+
+  @override
+  String get meetingsUploading => 'Загрузка';
+
+  @override
+  String meetingsUploadingPct(String n) {
+    return 'Загрузка… $n%';
+  }
+
+  @override
+  String get meetingsUploaded => 'Загружено: Muse слушает запись';
+
+  @override
+  String meetingsUploadTooBig(String mb) {
+    return 'Файл больше $mb МБ';
+  }
+
+  @override
+  String get meetingsUploadedBadge => 'Загружено';
+
+  @override
+  String meetingsInRecording(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n человека на записи',
+      many: '$n человек на записи',
+      few: '$n человека на записи',
+      one: '$n человек на записи',
+      zero: 'На записи',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsUploadedNote => 'Загруженная запись: прослушан только звук, файл удалён. Звонка не было, поэтому нет посещаемости.';
+
+  @override
+  String get meetingsTodayLive => 'В эфире';
+
+  @override
+  String meetingsTodayInCall(String n) {
+    return '$n в звонке';
+  }
+
+  @override
+  String meetingsTodayIn(String n) {
+    return 'через $n мин';
+  }
+
+  @override
+  String get meetingsTodayNow => 'сейчас';
+
+  @override
+  String get meetingsTodayJoin => 'Войти';
+
+  @override
+  String get meetingsTodayLater => 'Позже сегодня:';
+
+  @override
+  String meetingsTodayLiveLine(String title) {
+    return 'В эфире: $title';
+  }
+
+  @override
+  String meetingsTodayLiveAria(String title, String n) {
+    return '«$title» идёт, в звонке $n. Войти';
+  }
+
+  @override
+  String meetingsTodaySoonAria(String title, String n) {
+    return '«$title» начнётся через $n мин. Войти';
+  }
+
+  @override
+  String meetingsTodayNowAria(String title) {
+    return '«$title» начинается сейчас. Войти';
+  }
+
+  @override
+  String meetingsTodayLaterAria(String title, String time) {
+    return 'Следующая встреча сегодня: «$title» в $time';
+  }
+
+  @override
+  String meetingsTodayMoreAria(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Ещё $n встреч сегодня',
+      few: 'Ещё $n встречи сегодня',
+      one: 'Ещё $n встреча сегодня',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsUploadDrop => 'Перетащите запись сюда или';
+
+  @override
+  String meetingsUploadTypes(String mb) {
+    return 'Видео или аудио · до $mb МБ';
+  }
+
+  @override
+  String meetingsUploadBadType(String name) {
+    return '«$name» — не видео и не аудио';
+  }
 
   @override
   String get mgroupsGroups => 'Группы';
@@ -10465,6 +10698,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navMeetings => 'Встречи';
 
   @override
+  String get navChat => 'Чат';
+
+  @override
   String get navLogWatcher => 'Наблюдение за логами';
 
   @override
@@ -11294,6 +11530,77 @@ class AppLocalizationsRu extends AppLocalizations {
   String platformModulesServerOnly(String list) {
     return 'Этот сервер может запускать только $list. Чтобы предложить больше, модуль нужно добавить в AGNTS_PROVIDERS на сервере (и в образ запусков).';
   }
+
+  @override
+  String get platformMuseRoute => 'Маршрут Muse';
+
+  @override
+  String get platformMuseRouteSub => 'Как трафик Muse выходит с этого сервера. egress проверяет его каждые 30 секунд.';
+
+  @override
+  String get platformMuseStateLoading => 'Проверка…';
+
+  @override
+  String get platformMuseStateUnknown => 'Неизвестно';
+
+  @override
+  String get platformMuseStateDirect => 'Напрямую';
+
+  @override
+  String get platformMuseStateWaiting => 'Первая проверка…';
+
+  @override
+  String get platformMuseStateUp => 'Работает';
+
+  @override
+  String get platformMuseStateDown => 'Не работает';
+
+  @override
+  String get platformMuseDirect => 'Прокси не задан (AGNTS_EGRESS_UPSTREAM): Muse подключается напрямую с этого сервера.';
+
+  @override
+  String get platformMuseVia => 'Через';
+
+  @override
+  String get platformMuseExit => 'Meta видит адрес';
+
+  @override
+  String get platformMuseCheck => 'Последняя проверка';
+
+  @override
+  String get platformMuseDownSince => 'Не работает с';
+
+  @override
+  String platformMuseLastOk(String at) {
+    return 'последний раз работал в $at';
+  }
+
+  @override
+  String get platformMuseCalls => 'Подключений Muse';
+
+  @override
+  String platformMuseFailed(String n) {
+    return '$n с ошибкой';
+  }
+
+  @override
+  String platformMuseStrip(String pct) {
+    return 'Последние 30 минут: $pct% проверок прошли';
+  }
+
+  @override
+  String get platformMuseFixTunnel => 'Снова запустите туннель на ноутбуке и не закрывайте его (ноутбук должен быть включён и в сети):';
+
+  @override
+  String get platformMuseFixProxy => 'Проверьте, что прокси запущен и доступен с этого сервера.';
+
+  @override
+  String platformMuseLastCallError(String err) {
+    return 'Последняя ошибка подключения: $err';
+  }
+
+  @override
+  String get platformMuseNavDown => 'Маршрут Muse не работает';
 
   @override
   String get previewTab => 'Превью';
@@ -12877,6 +13184,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get reposPrTemplate => 'Формат заголовка пул-реквеста';
+
+  @override
+  String get reposPrTemplateHelp =>
+      'Как agnts называет свои пул-реквесты, с подстановками формата сообщения коммита. Оставьте пустым для заголовка рабочего пространства (Настройки → Git).';
+
+  @override
   String get reposPlaceholders => 'Подстановки';
 
   @override
@@ -14419,6 +14733,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsStageDocumentsHelp => 'Пишет документы, а также заметки и задачи по итогам встречи.';
 
   @override
+  String get settingsStageTeamChat => 'Командный чат';
+
+  @override
+  String get settingsStageTeamChatHelp =>
+      'Отвечает на @agnts и готовит черновики тикетов в командном чате. Для ссылок используется лёгкая модель того же провайдера.';
+
+  @override
   String get settingsMeetingAudioMuse =>
       'Звук встречи всегда слушает Muse — единственный модуль, который слышит аудио; заметки пишет модель выше.';
 
@@ -14502,8 +14823,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsPrTitle => 'Заголовок пул-реквеста';
 
   @override
-  String settingsPrTitleHelp(String key, String title) {
-    return '\'$key\' и \'$title\' заменяются ключом и названием тикета';
+  String settingsPrTitleHelp(String number, String key, String type, String scope, String subject, String title) {
+    return 'Подстановки $number, $key, $type, $scope, $subject и $title, как в формате сообщения коммита. Собственный формат репозитория или группы заменяет его.';
   }
 
   @override
@@ -15534,6 +15855,396 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get tasksRepoNeeded => 'Для кода и тестов нужен репозиторий: выберите его или другой тип.';
+
+  @override
+  String get teamchatSubtitle =>
+      'Участники и agnts в одной комнате: agnts публикует карточки, когда нужен человек, связывает сообщения с тикетами и отвечает на @agnts.';
+
+  @override
+  String get teamchatChannels => 'Каналы';
+
+  @override
+  String get teamchatNewChannel => 'Новый канал';
+
+  @override
+  String get teamchatChannelName => 'Название';
+
+  @override
+  String get teamchatChannelNameHelp => 'Строчные буквы, цифры, - и _ (пробелы станут -).';
+
+  @override
+  String get teamchatTopic => 'Тема';
+
+  @override
+  String get teamchatAgentsHere => 'agnts пишет сюда';
+
+  @override
+  String get teamchatCreate => 'Создать';
+
+  @override
+  String teamchatStart(String channel) {
+    return 'Это начало #$channel.';
+  }
+
+  @override
+  String teamchatEmptyTitle(String channel) {
+    return 'Добро пожаловать в #$channel';
+  }
+
+  @override
+  String get teamchatEmptyText => 'Напишите первое сообщение. Упомяните @agnts, чтобы спросить о тикетах, пулл-реквестах, CI и находках.';
+
+  @override
+  String get teamchatToday => 'Сегодня';
+
+  @override
+  String get teamchatYesterday => 'Вчера';
+
+  @override
+  String teamchatPlaceholder(String channel) {
+    return 'Сообщение в #$channel';
+  }
+
+  @override
+  String get teamchatSendHint => 'Enter — отправить, Shift+Enter — новая строка · @agnts — спросить agnts';
+
+  @override
+  String teamchatCount(String n, String max) {
+    return '$n из $max символов';
+  }
+
+  @override
+  String get teamchatSend => 'Отправить';
+
+  @override
+  String get teamchatReply => 'Ответить';
+
+  @override
+  String get teamchatCancelReply => 'Отменить ответ';
+
+  @override
+  String teamchatReplyingTo(String name) {
+    return 'в ответ $name';
+  }
+
+  @override
+  String get teamchatReplyingToMessage => 'в ответ на сообщение';
+
+  @override
+  String get teamchatToTicket => 'Сделать тикет';
+
+  @override
+  String teamchatDrafting(String name) {
+    return '$name готовит черновик тикета…';
+  }
+
+  @override
+  String get teamchatThinking => 'agnts думает…';
+
+  @override
+  String teamchatSources(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n источника',
+      many: '$n источников',
+      few: '$n источника',
+      one: '$n источник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamchatSending => 'Отправка…';
+
+  @override
+  String get teamchatWaitingNet => 'Ждёт соединения…';
+
+  @override
+  String get teamchatFailed => 'Не отправлено';
+
+  @override
+  String get teamchatRetry => 'Повторить';
+
+  @override
+  String get teamchatDelete => 'Удалить';
+
+  @override
+  String get teamchatOffline => 'Нет сети';
+
+  @override
+  String get teamchatReconnecting => 'Переподключение…';
+
+  @override
+  String teamchatWaiting(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n сообщения ждут',
+      many: '$n сообщений ждут',
+      few: '$n сообщения ждут',
+      one: '$n сообщение ждёт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamchatNotLoaded => 'Это сообщение здесь не загружено. Прокрутите вверх, чтобы загрузить более старые.';
+
+  @override
+  String teamchatStatsLine(num links, num answers, num drafts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      links,
+      locale: localeName,
+      other: '$links связи',
+      many: '$links связей',
+      few: '$links связи',
+      one: '$links связь',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      answers,
+      locale: localeName,
+      other: '$answers ответа',
+      many: '$answers ответов',
+      few: '$answers ответа',
+      one: '$answers ответ',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      drafts,
+      locale: localeName,
+      other: '$drafts черновика',
+      many: '$drafts черновиков',
+      few: '$drafts черновика',
+      one: '$drafts черновик',
+    );
+    return '$_temp0 · $_temp1 · $_temp2';
+  }
+
+  @override
+  String teamchatStatsMedian(String secs) {
+    return 'Сегодня, медиана $secs с';
+  }
+
+  @override
+  String teamchatAiTip(String model, String cost) {
+    return 'Модель: $model · стоимость $cost';
+  }
+
+  @override
+  String teamchatLinkedBy(String name, String secs) {
+    return '✨ Связал $name · $secs с';
+  }
+
+  @override
+  String teamchatRemoveLink(String name) {
+    return 'Убрать связь с $name';
+  }
+
+  @override
+  String teamchatCiteMsg(String id) {
+    return 'сообщение $id';
+  }
+
+  @override
+  String teamchatCiteFinding(String id) {
+    return 'находка #$id';
+  }
+
+  @override
+  String teamchatBy(String name) {
+    return '$name';
+  }
+
+  @override
+  String get teamchatState_open => 'Открыта';
+
+  @override
+  String get teamchatState_done => 'Готово';
+
+  @override
+  String get teamchatState_failed => 'Ошибка';
+
+  @override
+  String get teamchatState_expired => 'Устарела';
+
+  @override
+  String get teamchatAct_fix => 'Исправить';
+
+  @override
+  String get teamchatAct_mute => 'Заглушить';
+
+  @override
+  String get teamchatAct_approve => 'Одобрить';
+
+  @override
+  String get teamchatAct_request_changes => 'Запросить изменения';
+
+  @override
+  String get teamchatAct_merge => 'Слить';
+
+  @override
+  String get teamchatAct_create => 'Создать задачу';
+
+  @override
+  String get teamchatAct_create_assign => 'Создать и поручить агенту';
+
+  @override
+  String teamchatApproveTitle(String key) {
+    return 'Одобрить $key?';
+  }
+
+  @override
+  String teamchatMergeTitle(String number) {
+    return 'Слить PR #$number?';
+  }
+
+  @override
+  String teamchatMergeText(String number, String repo) {
+    return 'PR #$number в $repo будет слит на git-хостинге.';
+  }
+
+  @override
+  String get teamchatMergeCiFail => 'CI падает. Всё равно слить?';
+
+  @override
+  String teamchatMergeCiFailNames(String checks) {
+    return 'CI падает: $checks. Всё равно слить?';
+  }
+
+  @override
+  String get teamchatMergeCiRun => 'CI ещё идёт. Всё равно слить?';
+
+  @override
+  String teamchatMergeCiRunNames(String checks) {
+    return 'CI ещё идёт: $checks. Всё равно слить?';
+  }
+
+  @override
+  String get teamchatMergeCiNone => 'В этом репозитории нет проверок CI. Всё равно слить?';
+
+  @override
+  String get teamchatCiOk => 'CI зелёный';
+
+  @override
+  String get teamchatCiFail => 'CI падает';
+
+  @override
+  String teamchatCiFailNames(String checks) {
+    return 'CI падает: $checks';
+  }
+
+  @override
+  String get teamchatCiRun => 'CI идёт';
+
+  @override
+  String teamchatCiRunNames(String checks) {
+    return 'CI идёт: $checks';
+  }
+
+  @override
+  String get teamchatCiNone => 'Без CI';
+
+  @override
+  String get teamchatRegression => 'Регрессия';
+
+  @override
+  String get teamchatNewFinding => 'Новая';
+
+  @override
+  String get teamchatRepos => 'Репозитории';
+
+  @override
+  String teamchatFiles(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n файла', many: '$n файлов', few: '$n файла', one: '$n файл');
+    return '$_temp0';
+  }
+
+  @override
+  String teamchatReviewFindings(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n замечания ревью',
+      many: '$n замечаний ревью',
+      few: '$n замечания ревью',
+      one: '$n замечание ревью',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String teamchatMore(String n) {
+    return 'и ещё $n';
+  }
+
+  @override
+  String get teamchatOpenFinding => 'Открыть находку';
+
+  @override
+  String get teamchatViewDiff => 'Посмотреть diff';
+
+  @override
+  String get teamchatViewPr => 'Открыть PR';
+
+  @override
+  String get teamchatFeedbackPlaceholder => 'Что нужно изменить?';
+
+  @override
+  String get teamchatSendFeedback => 'Отправить отзыв';
+
+  @override
+  String get teamchatDraftTitle => 'Заголовок';
+
+  @override
+  String get teamchatDraftDescription => 'Описание';
+
+  @override
+  String get teamchatDraftRepo => 'Репозиторий';
+
+  @override
+  String get teamchatDraftEdit => 'Изменить';
+
+  @override
+  String get teamchatDraftDone => 'Готово';
+
+  @override
+  String get teamchatVoiceStart => 'Записать голосовое сообщение';
+
+  @override
+  String get teamchatVoiceRecording => 'Запись';
+
+  @override
+  String get teamchatVoiceEncoding => 'Готовлю голосовое сообщение…';
+
+  @override
+  String teamchatVoiceLimit(String n) {
+    return 'до $n мин';
+  }
+
+  @override
+  String get teamchatVoiceSend => 'Отправить голосовое';
+
+  @override
+  String get teamchatVoiceDenied => 'Разрешите этому сайту доступ к микрофону, чтобы отправлять голосовые сообщения.';
+
+  @override
+  String get teamchatVoiceNoMic => 'Не удалось открыть микрофон.';
+
+  @override
+  String teamchatVoiceMessage(String time) {
+    return 'Голосовое сообщение, $time';
+  }
+
+  @override
+  String get teamchatVoiceListening => 'Muse слушает…';
+
+  @override
+  String get teamchatVoiceNoWords => 'В этом голосовом сообщении не слышно слов.';
+
+  @override
+  String teamchatVoiceFailed(String error) {
+    return 'Не удалось распознать: $error';
+  }
 
   @override
   String ticketUpdateTitle(String source) {

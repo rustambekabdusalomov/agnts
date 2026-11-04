@@ -199,4 +199,6 @@ const _$AttachmentPurposeEnumEnumMap = {
   AttachmentPurposeEnum.answer: 'answer',
   AttachmentPurposeEnum.retry: 'retry',
   AttachmentPurposeEnum.feedback: 'feedback',
+  AttachmentPurposeEnum.chat: 'chat',
+  AttachmentPurposeEnum.assistant: 'assistant',
 };

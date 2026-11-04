@@ -113,7 +113,7 @@ Class | Method | HTTP request | Description
 [*AssistantApi*](doc/AssistantApi.md) | [**transcribeAssistantQuestion**](doc/AssistantApi.md#transcribeassistantquestion) | **POST** /assistant/transcribe | Turn a spoken question into text
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
-[*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer or a retry note
+[*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer, a retry note or a chat message
 [*AuthApi*](doc/AuthApi.md) | [**beginLoginTotp**](doc/AuthApi.md#beginlogintotp) | **POST** /auth/login/totp | Start the two-factor setup an Admin without it does at sign-in
 [*AuthApi*](doc/AuthApi.md) | [**forgotPassword**](doc/AuthApi.md#forgotpassword) | **POST** /auth/password/forgot | Email a password reset link (always answers 204)
 [*AuthApi*](doc/AuthApi.md) | [**getMe**](doc/AuthApi.md#getme) | **GET** /auth/me | The signed-in user
@@ -127,6 +127,19 @@ Class | Method | HTTP request | Description
 [*BillingApi*](doc/BillingApi.md) | [**checkoutCredits**](doc/BillingApi.md#checkoutcredits) | **POST** /workspace/billing/checkout | Start buying credits; returns the payment page to open
 [*BillingApi*](doc/BillingApi.md) | [**getBilling**](doc/BillingApi.md#getbilling) | **GET** /workspace/billing | The workspace&#39;s plan, slots, members and credits
 [*BillingApi*](doc/BillingApi.md) | [**setSlots**](doc/BillingApi.md#setslots) | **PUT** /workspace/billing/slots | Change how many runs the workspace may have at once
+[*ChatApi*](doc/ChatApi.md) | [**actOnChatCard**](doc/ChatApi.md#actonchatcard) | **POST** /chat/messages/{messageId}/actions | Press a button on agnts&#39;s card; it runs the real action (approve, merge, fix, …) and returns the card
+[*ChatApi*](doc/ChatApi.md) | [**chatMessageToTicket**](doc/ChatApi.md#chatmessagetoticket) | **POST** /chat/messages/{messageId}/ticket | Turn a message into a ticket draft; the draft card arrives in the thread as an event
+[*ChatApi*](doc/ChatApi.md) | [**createChatChannel**](doc/ChatApi.md#createchatchannel) | **POST** /chat/channels | Make a channel
+[*ChatApi*](doc/ChatApi.md) | [**getChatAudio**](doc/ChatApi.md#getchataudio) | **GET** /chat/messages/{messageId}/audio | A voice message&#39;s recording, to play
+[*ChatApi*](doc/ChatApi.md) | [**getChatMessage**](doc/ChatApi.md#getchatmessage) | **GET** /chat/messages/{messageId} | One message with its refs (opens a citation in its channel)
+[*ChatApi*](doc/ChatApi.md) | [**getChatStats**](doc/ChatApi.md#getchatstats) | **GET** /chat/stats | What the model did in the team chat today (links, answers, drafts) and its median time
+[*ChatApi*](doc/ChatApi.md) | [**listChatChannels**](doc/ChatApi.md#listchatchannels) | **GET** /chat/channels | The workspace&#39;s team chat channels, with your unread counts (makes
+[*ChatApi*](doc/ChatApi.md) | [**listChatMessages**](doc/ChatApi.md#listchatmessages) | **GET** /chat/channels/{channelId}/messages | A page of a channel, oldest first (the newest, the ones before &#x60;before&#x60;, or the ones after &#x60;after&#x60; to fill a gap after a reconnect)
+[*ChatApi*](doc/ChatApi.md) | [**markChatRead**](doc/ChatApi.md#markchatread) | **PUT** /chat/channels/{channelId}/read | Save how far you have read a channel
+[*ChatApi*](doc/ChatApi.md) | [**removeChatRef**](doc/ChatApi.md#removechatref) | **POST** /chat/messages/{messageId}/refs/remove | Remove a wrong link under a message (the linker will not add it back)
+[*ChatApi*](doc/ChatApi.md) | [**sendChatMessage**](doc/ChatApi.md#sendchatmessage) | **POST** /chat/channels/{channelId}/messages | Send a message. The same clientMsgId sent again returns the stored message (200) instead of a second one (201)
+[*ChatApi*](doc/ChatApi.md) | [**sendChatVoice**](doc/ChatApi.md#sendchatvoice) | **POST** /chat/channels/{channelId}/voice | Send a voice message. Muse hears it after it is stored; its words become the message&#39;s text (an event brings them)
+[*ChatApi*](doc/ChatApi.md) | [**updateChatChannel**](doc/ChatApi.md#updatechatchannel) | **PATCH** /chat/channels/{channelId} | Change a channel&#39;s topic, make it agnts&#39;s channel, or archive it
 [*CiApi*](doc/CiApi.md) | [**fixCIFailure**](doc/CiApi.md#fixcifailure) | **POST** /ci/failures/{failureId}/fix | Open a ticket that fixes the failure now (ignores the auto-fix setting and the daily budget)
 [*CiApi*](doc/CiApi.md) | [**getCIFailure**](doc/CiApi.md#getcifailure) | **GET** /ci/failures/{failureId} | One CI failure group with its redacted log excerpt
 [*CiApi*](doc/CiApi.md) | [**getRepoCIWatch**](doc/CiApi.md#getrepociwatch) | **GET** /repos/{id}/ci-watch | How agnts watches this repository&#39;s CI, and whether the git token can read it
@@ -253,10 +266,12 @@ Class | Method | HTTP request | Description
 [*MeetingsApi*](doc/MeetingsApi.md) | [**ringMeeting**](doc/MeetingsApi.md#ringmeeting) | **POST** /meetings/{meetingId}/ring | Ring members into the meeting now (their phone and open agnts pages, for 30 seconds)
 [*MeetingsApi*](doc/MeetingsApi.md) | [**searchMeetingTranscripts**](doc/MeetingsApi.md#searchmeetingtranscripts) | **GET** /meetings/search | Find what was said in the meetings you see
 [*MeetingsApi*](doc/MeetingsApi.md) | [**sendMeetingMessage**](doc/MeetingsApi.md#sendmeetingmessage) | **POST** /public/meetings/{code}/call/messages | Send a chat message to the call (no secrets; at most 30 a minute)
+[*MeetingsApi*](doc/MeetingsApi.md) | [**setActionItemMember**](doc/MeetingsApi.md#setactionitemmember) | **PUT** /meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/member | Pick the member who takes an action item; its ticket becomes theirs too
 [*MeetingsApi*](doc/MeetingsApi.md) | [**setMeetingCallSettings**](doc/MeetingsApi.md#setmeetingcallsettings) | **PUT** /public/meetings/{code}/call/settings | Hosts: lock the meeting, change who may come in, quiet guests, record, take notes
 [*MeetingsApi*](doc/MeetingsApi.md) | [**setMeetingCohosts**](doc/MeetingsApi.md#setmeetingcohosts) | **PUT** /meetings/{meetingId}/cohosts | Choose a meeting&#39;s co-hosts (the host)
 [*MeetingsApi*](doc/MeetingsApi.md) | [**setMeetingHost**](doc/MeetingsApi.md#setmeetinghost) | **PUT** /meetings/{meetingId}/host | Hand a meeting to another member (the host or the owner)
 [*MeetingsApi*](doc/MeetingsApi.md) | [**updateMeeting**](doc/MeetingsApi.md#updatemeeting) | **PATCH** /meetings/{meetingId} | Change a meeting (its hosts and the owner); a new time sends the invitees an update
+[*MeetingsApi*](doc/MeetingsApi.md) | [**uploadMeetingRecording**](doc/MeetingsApi.md#uploadmeetingrecording) | **POST** /meetings/{meetingId}/uploads | Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
 [*MeetingsApi*](doc/MeetingsApi.md) | [**waitMeetingKnock**](doc/MeetingsApi.md#waitmeetingknock) | **GET** /public/meetings/{code}/knocks/{knockId} | Wait (up to 25 seconds) for a knock to be answered
 [*MetaApi*](doc/MetaApi.md) | [**getMeta**](doc/MetaApi.md#getmeta) | **GET** /meta | Server version and build information
 [*NetworkApi*](doc/NetworkApi.md) | [**connectPrivateNetwork**](doc/NetworkApi.md#connectprivatenetwork) | **POST** /networks/{networkId}/connect | Connect a disconnected network again, with its saved config
@@ -274,6 +289,7 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**deletePlatformAdmin**](doc/PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**downloadPlatformRun**](doc/PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
 [*PlatformApi*](doc/PlatformApi.md) | [**getModulesSettings**](doc/PlatformApi.md#getmodulessettings) | **GET** /platform/settings/modules | Which coding modules the server offers, and the default for new users (Admin)
+[*PlatformApi*](doc/PlatformApi.md) | [**getPlatformEgress**](doc/PlatformApi.md#getplatformegress) | **GET** /platform/egress | The egress proxy&#39;s upstream (the way Muse&#39;s traffic leaves the server) and its recent checks (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformOverview**](doc/PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRun**](doc/PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
 [*PlatformApi*](doc/PlatformApi.md) | [**getPlatformRunPrompt**](doc/PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
@@ -453,6 +469,7 @@ Class | Method | HTTP request | Description
  - [Acceptance](doc/Acceptance.md)
  - [AcceptanceCriteriaInner](doc/AcceptanceCriteriaInner.md)
  - [ActOnMeetingPersonRequest](doc/ActOnMeetingPersonRequest.md)
+ - [ActionItemMemberInput](doc/ActionItemMemberInput.md)
  - [ActionItemTicketInput](doc/ActionItemTicketInput.md)
  - [AddReviewDraftRequest](doc/AddReviewDraftRequest.md)
  - [AddressPullCommentsRequest](doc/AddressPullCommentsRequest.md)
@@ -497,6 +514,7 @@ Class | Method | HTTP request | Description
  - [AssistantStatsVersionsInner](doc/AssistantStatsVersionsInner.md)
  - [AssistantTranscript](doc/AssistantTranscript.md)
  - [AttachCodeTicketRequest](doc/AttachCodeTicketRequest.md)
+ - [AttachedFile](doc/AttachedFile.md)
  - [Attachment](doc/Attachment.md)
  - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)
  - [BeginLoginTotpRequest](doc/BeginLoginTotpRequest.md)
@@ -517,7 +535,19 @@ Class | Method | HTTP request | Description
  - [CIWatch](doc/CIWatch.md)
  - [Capacity](doc/Capacity.md)
  - [ChangePasswordRequest](doc/ChangePasswordRequest.md)
+ - [ChatAI](doc/ChatAI.md)
+ - [ChatActionRequest](doc/ChatActionRequest.md)
+ - [ChatActionRequestDraft](doc/ChatActionRequestDraft.md)
+ - [ChatAudio](doc/ChatAudio.md)
+ - [ChatCard](doc/ChatCard.md)
+ - [ChatChannel](doc/ChatChannel.md)
+ - [ChatChannelInput](doc/ChatChannelInput.md)
+ - [ChatChannelUpdate](doc/ChatChannelUpdate.md)
+ - [ChatMessage](doc/ChatMessage.md)
  - [ChatMode](doc/ChatMode.md)
+ - [ChatRef](doc/ChatRef.md)
+ - [ChatSendRequest](doc/ChatSendRequest.md)
+ - [ChatStats](doc/ChatStats.md)
  - [CheckStep](doc/CheckStep.md)
  - [CheckoutCredits200Response](doc/CheckoutCredits200Response.md)
  - [CheckoutCreditsRequest](doc/CheckoutCreditsRequest.md)
@@ -590,6 +620,10 @@ Class | Method | HTTP request | Description
  - [EditCommitMessageRequest](doc/EditCommitMessageRequest.md)
  - [EditPullCommentRequest](doc/EditPullCommentRequest.md)
  - [EffortSettings](doc/EffortSettings.md)
+ - [EgressStatus](doc/EgressStatus.md)
+ - [EgressUpstream](doc/EgressUpstream.md)
+ - [EgressUpstreamExit](doc/EgressUpstreamExit.md)
+ - [EgressUpstreamHistoryInner](doc/EgressUpstreamHistoryInner.md)
  - [Environment](doc/Environment.md)
  - [Error](doc/Error.md)
  - [Event](doc/Event.md)
@@ -658,6 +692,7 @@ Class | Method | HTTP request | Description
  - [LogWatchSettings](doc/LogWatchSettings.md)
  - [LoginRequest](doc/LoginRequest.md)
  - [LoginResponse](doc/LoginResponse.md)
+ - [MarkChatReadRequest](doc/MarkChatReadRequest.md)
  - [McpStatus](doc/McpStatus.md)
  - [Meeting](doc/Meeting.md)
  - [MeetingActionItem](doc/MeetingActionItem.md)
@@ -763,6 +798,7 @@ Class | Method | HTTP request | Description
  - [RelationType](doc/RelationType.md)
  - [Relations](doc/Relations.md)
  - [RemoteRepository](doc/RemoteRepository.md)
+ - [RemoveChatRefRequest](doc/RemoveChatRefRequest.md)
  - [RenameTicketBranchRequest](doc/RenameTicketBranchRequest.md)
  - [ReplayReport](doc/ReplayReport.md)
  - [ReplayResult](doc/ReplayResult.md)

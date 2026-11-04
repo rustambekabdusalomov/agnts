@@ -9,6 +9,8 @@ void main() {
   group(AttachmentsApi, () {
     // Delete an upload that nothing uses yet
     //
+    // Viewers delete only their own uploads; editors any pending one.
+    //
     //Future deleteAttachment(int id) async
     test('test deleteAttachment', () async {
       // TODO
@@ -16,14 +18,16 @@ void main() {
 
     // An attached file's bytes
     //
+    // An AI chat (Ask) question's file is only its asker's; anyone else gets 404.
+    //
     //Future<Uint8List> getAttachment(int id) async
     test('test getAttachment', () async {
       // TODO
     });
 
-    // Upload a file to attach to a task, an answer or a retry note
+    // Upload a file to attach to a task, an answer, a retry note or a chat message
     //
-    // The upload stays pending until the request that uses it (createTask, updateTask, answerQuestions, retryTicket, requestChanges) lists its id; pending uploads nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP) are shown in place; other files download. Claude reads every attached file, pictures and PDFs included.
+    // The upload stays pending until the request that uses it (createTask, updateTask, answerQuestions, retryTicket, requestChanges, sendChatMessage, askAssistant, Code mode) lists its id; pending uploads nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP) are shown in place; other files download. Claude reads every attached file, pictures and PDFs included. Viewers may upload too, for the chats.
     //
     //Future<Attachment> uploadAttachment(MultipartFile file) async
     test('test uploadAttachment', () async {

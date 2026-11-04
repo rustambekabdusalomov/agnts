@@ -265,10 +265,10 @@ func TestCodeModeChecks(t *testing.T) {
 	if _, err := c.o.SendCode(c.other, conv.ID, orchestrator.CodeSend{Text: "mine now"}); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("someone else's conversation: %v", err)
 	}
-	if _, err := c.o.Ask(c.ask, conv.ID, "what is waiting?", "en"); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := c.o.Ask(c.ask, conv.ID, "what is waiting?", "en", nil); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("asked in a Code conversation: %v", err)
 	}
-	chat, err := c.o.Ask(c.ask, 0, "what is waiting?", "en")
+	chat, err := c.o.Ask(c.ask, 0, "what is waiting?", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -342,7 +342,7 @@ func TestPruneKeepsCodeConversationsWithOpenTickets(t *testing.T) {
 	c := newCodeHarness(t)
 	code := c.start("Add a rest timer")
 	c.answers(3, `{"answer":"Nothing waits on you."}`)
-	chat, err := c.o.Ask(c.ask, 0, "what waits on me?", "en")
+	chat, err := c.o.Ask(c.ask, 0, "what waits on me?", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -368,7 +368,7 @@ func TestPruneKeepsCodeConversationsWithOpenTickets(t *testing.T) {
 func TestChatAnswerOffersCodeMode(t *testing.T) {
 	c := newCodeHarness(t)
 	c.answers(2, `{"answer":"I can do this in Code mode.","code":{"request":"Round refunds half up","repositories":["visper","nope","visper"]}}`)
-	conv, err := c.o.Ask(c.ask, 0, "Fix the refund rounding", "en")
+	conv, err := c.o.Ask(c.ask, 0, "Fix the refund rounding", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -379,7 +379,7 @@ func TestChatAnswerOffersCodeMode(t *testing.T) {
 
 	// A viewer is offered nothing.
 	c.answers(4, `{"answer":"I can do this in Code mode.","code":{"request":"Round refunds half up","repositories":["visper"]}}`)
-	vconv, err := c.o.Ask(c.viewer, 0, "Fix the refund rounding", "en")
+	vconv, err := c.o.Ask(c.viewer, 0, "Fix the refund rounding", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

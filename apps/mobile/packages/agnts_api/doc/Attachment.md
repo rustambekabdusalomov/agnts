@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **name** | **String** |  | 
 **contentType** | **String** |  | 
 **size** | **int** | Bytes | 
-**purpose** | **String** | pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes | 
+**purpose** | **String** | pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes; chat = a team chat message; assistant = an AI chat question | 
 **questionId** | **int** |  | [optional] 
 **image** | **bool** | A picture clients can show in place | [optional] 
 **url** | **String** | Where to load the file, relative to the API base | 

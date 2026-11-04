@@ -34,6 +34,8 @@ class MeetingSessionBrief {
     required  this.notesError,
 
      this.documentId,
+
+    required  this.uploaded,
   });
 
   @JsonKey(
@@ -120,6 +122,19 @@ class MeetingSessionBrief {
 
 
 
+      /// A recording a host uploaded, not a call
+  @JsonKey(
+    
+    name: r'uploaded',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool uploaded;
+
+
+
 
 
     @override
@@ -130,7 +145,8 @@ class MeetingSessionBrief {
       other.endedAt == endedAt &&
       other.notesStatus == notesStatus &&
       other.notesError == notesError &&
-      other.documentId == documentId;
+      other.documentId == documentId &&
+      other.uploaded == uploaded;
 
     @override
     int get hashCode =>
@@ -140,7 +156,8 @@ class MeetingSessionBrief {
         endedAt.hashCode +
         notesStatus.hashCode +
         notesError.hashCode +
-        documentId.hashCode;
+        documentId.hashCode +
+        uploaded.hashCode;
 
   factory MeetingSessionBrief.fromJson(Map<String, dynamic> json) => _$MeetingSessionBriefFromJson(json);
 

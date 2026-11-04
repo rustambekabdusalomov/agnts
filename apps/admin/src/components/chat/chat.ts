@@ -23,6 +23,8 @@ export interface OutboxItem {
   channelId: number
   body: string
   replyTo?: number
+  /** Uploads sent with it (pending on the server until it is stored). */
+  files?: S['AttachedFile'][]
   createdAt: string
   status: 'pending' | 'failed'
   error?: string

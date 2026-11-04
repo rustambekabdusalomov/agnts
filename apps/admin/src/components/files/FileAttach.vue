@@ -11,13 +11,15 @@ import HiIcon from '../ui/HiIcon.vue'
 const ids = defineModel<number[]>({ default: () => [] })
 const busy = defineModel<boolean>('busy', { default: false })
 // restored: uploads made earlier (an answer draft's), shown from the start.
-const props = defineProps<{ label?: string; restored?: Attachment[] }>()
+// bare: no button row of its own; the parent opens the picker (open()) and
+// passes dropped or pasted files (add()), as the chat composers do.
+const props = defineProps<{ label?: string; restored?: Attachment[]; bare?: boolean }>()
 const { t } = useI18n()
 
-type Item = { key: number; name: string; size: number; id?: number; preview?: string; error?: string }
+type Item = { key: number; name: string; size: number; id?: number; preview?: string; error?: string; file?: Attachment }
 let seq = 0
 const items = ref<Item[]>(
-  (props.restored ?? []).map((a) => ({ key: ++seq, name: a.name, size: a.size, id: a.id, preview: a.image ? apiPath(a.url) : undefined })),
+  (props.restored ?? []).map((a) => ({ key: ++seq, name: a.name, size: a.size, id: a.id, preview: a.image ? apiPath(a.url) : undefined, file: a })),
 )
 const input = ref<HTMLInputElement | null>(null)
 const dragging = ref(false)
@@ -56,6 +58,7 @@ function add(files: Iterable<File>) {
           return
         }
         it.id = a.id
+        it.file = a
         sync()
       })
       .catch((e) => {
@@ -107,7 +110,9 @@ function pasted(e: ClipboardEvent) {
     add(files)
   }
 }
-defineExpose({ pasted })
+// attached: the finished uploads, in order, as the server described them.
+const attached = () => items.value.flatMap((i) => (i.file ? [i.file] : []))
+defineExpose({ pasted, add, attached, open: () => input.value?.click() })
 
 const kb = (n: number) => (n >= 1 << 20 ? `${(n / (1 << 20)).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`)
 </script>
@@ -121,7 +126,8 @@ const kb = (n: number) => (n >= 1 << 20 ? `${(n / (1 << 20)).toFixed(1)} MB` : `
     @drop.prevent="dropped"
     @paste="pasted"
   >
-    <div class="fa-row">
+    <input v-if="bare" ref="input" type="file" multiple hidden @change="picked">
+    <div v-else class="fa-row">
       <button type="button" class="tab fa-btn" @click="input?.click()">
         <HiIcon name="attach" />{{ label ?? t('files.attach') }}
       </button>
