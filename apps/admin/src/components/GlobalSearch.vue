@@ -11,7 +11,7 @@ export type SearchPage = { key: string; label: string; icon: string; to: RouteLo
 
 // The top bar's search: it still filters the list on the page (ui.search),
 // and opens results across the sidebar's pages, repositories, tickets,
-// assistant chats and lessons. Lists load only once something is typed.
+// assistant chats, lessons and log watcher findings. Lists load only once something is typed.
 const props = defineProps<{ pages: SearchPage[] }>()
 const { t } = useI18n()
 const router = useRouter()
@@ -34,6 +34,15 @@ const PER_GROUP = 5
 const repos = useQuery({ queryKey: ['repos'], queryFn: () => unwrap(api.GET('/repos')), enabled: on })
 const tickets = useQuery({ queryKey: ['search', 'tickets'], queryFn: () => unwrap(api.GET('/tickets')), enabled: on, staleTime: 30_000 })
 const chats = useQuery({ queryKey: ['assistant', 'list'], queryFn: () => unwrap(api.GET('/assistant/conversations')), enabled: on })
+// Log findings, newest sighting first. The log watcher may be off on this
+// server (501): then there is simply nothing to show.
+const logFindings = useQuery({
+  queryKey: ['search', 'logFindings'],
+  queryFn: () => unwrap(api.GET('/log-findings')),
+  enabled: on,
+  staleTime: 30_000,
+  retry: false,
+})
 const lessons = useQuery({
   queryKey: computed(() => ['lessons', 'search', qSlow.value]),
   queryFn: () => unwrap(api.GET('/lessons', { params: { query: { q: qSlow.value, limit: PER_GROUP } } })),
@@ -72,6 +81,14 @@ const groups = computed(() => {
         .map((c) => ({ id: `c-${c.id}`, icon: 'assistant', title: c.title, to: { name: 'assistant', params: { id: c.id } } })),
     },
     {
+      key: 'logs',
+      label: t('nav.logWatcher'),
+      // Log text is untrusted: titles are only ever shown as text.
+      hits: (logFindings.data.value ?? [])
+        .filter((f) => has(f.title, f.service, f.reason, ...f.repos))
+        .map((f) => ({ id: `lf-${f.id}`, icon: 'shield', title: f.title, sub: f.service, to: { name: 'logFinding', params: { id: f.id } } })),
+    },
+    {
       key: 'lessons',
       label: t('nav.learn'),
       // The server matches lessons itself; it can trail the typing by a moment.
@@ -83,7 +100,7 @@ const groups = computed(() => {
   return out.map((g) => ({ ...g, hits: g.hits.slice(0, PER_GROUP) })).filter((g) => g.hits.length)
 })
 const flat = computed(() => groups.value.flatMap((g) => g.hits))
-const loading = computed(() => [repos, tickets, chats, lessons].some((x) => x.isFetching.value))
+const loading = computed(() => [repos, tickets, chats, logFindings, lessons].some((x) => x.isFetching.value))
 watch(q, () => (active.value = 0))
 
 function pick(h: Hit | undefined) {

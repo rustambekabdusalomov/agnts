@@ -17,6 +17,7 @@
     "allRepos": "All repositories",
     "emptyActive": "Nothing needs your attention: no new errors or security problems in the logs.",
     "emptyFilter": "No findings here.",
+    "noMatch": "No findings match your search.",
     "howTitle": "How the log watcher works",
     "howSources": "Add a log source: the address of your Loki, Elasticsearch, OpenSearch or Graylog, or a push token for Vector or Fluent Bit. Then pick the services to watch and the repositories each runs on.",
     "howModes": "Settings → Log watcher decides what happens: Report (shown here and notified) or Open ticket. Automatic tickets are off until you turn them on.",

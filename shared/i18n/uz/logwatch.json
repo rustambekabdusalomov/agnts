@@ -17,6 +17,7 @@
     "allRepos": "Barcha repozitoriylar",
     "emptyActive": "E’tibor talab qiladigan narsa yo‘q: loglarda yangi xato yoki xavfsizlik muammosi yo‘q.",
     "emptyFilter": "Bu yerda hech narsa yo‘q.",
+    "noMatch": "Qidiruvga mos topilma yo‘q.",
     "howTitle": "Loglarni kuzatish qanday ishlaydi",
     "howSources": "Log manbasini qo‘shing: Loki, Elasticsearch, OpenSearch yoki Graylog manzili yoki Vector va Fluent Bit uchun push-token. So‘ng kuzatiladigan servislar va ular ishlaydigan repozitoriylarni tanlang.",
     "howModes": "Nima qilishni Sozlamalar → Loglarni kuzatish belgilaydi: Xabar berish (bu yerda ko‘rsatish va bildirish) yoki Tiket ochish. Avtomatik tiketlar siz yoqmaguningizcha o‘chiq.",
