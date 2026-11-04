@@ -22,5 +22,17 @@ void main() {
       // TODO
     });
 
+    // Recordings can be uploaded and heard
+    // bool uploads
+    test('to test the property `uploads`', () async {
+      // TODO
+    });
+
+    // The largest recording that can be uploaded
+    // int maxUploadMb
+    test('to test the property `maxUploadMb`', () async {
+      // TODO
+    });
+
   });
 }

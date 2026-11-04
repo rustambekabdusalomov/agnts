@@ -42,6 +42,8 @@ class RepositoryInput {
 
      this.commitTemplate,
 
+     this.prTemplate,
+
      this.taskPrefix,
 
      this.instructions,
@@ -186,6 +188,19 @@ class RepositoryInput {
 
 
   final String? commitTemplate;
+
+
+
+      /// Pull request title template, with the commit template's placeholders; must contain {subject} or {title}. Empty uses the workspace's PR title
+  @JsonKey(
+    
+    name: r'prTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? prTemplate;
 
 
 
@@ -341,6 +356,7 @@ class RepositoryInput {
       other.branchPrefix == branchPrefix &&
       other.branchTemplate == branchTemplate &&
       other.commitTemplate == commitTemplate &&
+      other.prTemplate == prTemplate &&
       other.taskPrefix == taskPrefix &&
       other.instructions == instructions &&
       other.jiraProject == jiraProject &&
@@ -365,6 +381,7 @@ class RepositoryInput {
         branchPrefix.hashCode +
         branchTemplate.hashCode +
         commitTemplate.hashCode +
+        prTemplate.hashCode +
         taskPrefix.hashCode +
         instructions.hashCode +
         jiraProject.hashCode +

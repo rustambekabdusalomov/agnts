@@ -373,6 +373,18 @@ class _NameSize extends StatelessWidget {
   }
 }
 
+/// A file a chat message brought, as the attachment widgets show it.
+Attachment attachmentOf(AttachedFile f) => Attachment(
+  id: f.id,
+  name: f.name,
+  contentType: f.contentType,
+  size: f.size,
+  purpose: AttachmentPurposeEnum.assistant,
+  image: f.image,
+  url: f.url,
+  createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+);
+
 /// A ticket's attached files: pictures as thumbnails (tap for full screen),
 /// other files as chips with name and size. Nothing when [files] is empty.
 class AttachmentList extends StatelessWidget {

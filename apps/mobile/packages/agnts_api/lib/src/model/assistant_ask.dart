@@ -21,20 +21,36 @@ class AssistantAsk {
   /// Returns a new [AssistantAsk] instance.
   AssistantAsk({
 
-    required  this.question,
+     this.question,
+
+     this.attachments,
 
      this.lang,
   });
 
+      /// May be empty when attachments are sent
   @JsonKey(
     
     name: r'question',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final String question;
+  final String? question;
+
+
+
+      /// The asker's pending uploads (uploadAttachment); the answer reads them
+  @JsonKey(
+    
+    name: r'attachments',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? attachments;
 
 
 
@@ -55,11 +71,13 @@ class AssistantAsk {
     @override
     bool operator ==(Object other) => identical(this, other) || other is AssistantAsk &&
       other.question == question &&
+      other.attachments == attachments &&
       other.lang == lang;
 
     @override
     int get hashCode =>
         question.hashCode +
+        attachments.hashCode +
         lang.hashCode;
 
   factory AssistantAsk.fromJson(Map<String, dynamic> json) => _$AssistantAskFromJson(json);

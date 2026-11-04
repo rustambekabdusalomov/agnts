@@ -8,6 +8,7 @@ import 'package:agnts_api/src/model/code_handoff.dart';
 import 'package:agnts_api/src/model/code_routed.dart';
 import 'package:agnts_api/src/model/assistant_language.dart';
 import 'package:agnts_api/src/model/assistant_action.dart';
+import 'package:agnts_api/src/model/attached_file.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -62,6 +63,8 @@ class AssistantMessage {
      this.routed,
 
      this.attachments,
+
+     this.attachedFiles,
 
     required  this.createdAt,
   });
@@ -291,7 +294,7 @@ class AssistantMessage {
 
 
 
-      /// Code mode: uploads that went with the message
+      /// Uploads that went with the message (ids)
   @JsonKey(
     
     name: r'attachments',
@@ -301,6 +304,19 @@ class AssistantMessage {
 
 
   final List<int>? attachments;
+
+
+
+      /// The uploads of attachments still there, to show
+  @JsonKey(
+    
+    name: r'attachedFiles',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<AttachedFile>? attachedFiles;
 
 
 
@@ -339,6 +355,7 @@ class AssistantMessage {
       other.ticketKey == ticketKey &&
       other.routed == routed &&
       other.attachments == attachments &&
+      other.attachedFiles == attachedFiles &&
       other.createdAt == createdAt;
 
     @override
@@ -362,6 +379,7 @@ class AssistantMessage {
         ticketKey.hashCode +
         routed.hashCode +
         attachments.hashCode +
+        attachedFiles.hashCode +
         createdAt.hashCode;
 
   factory AssistantMessage.fromJson(Map<String, dynamic> json) => _$AssistantMessageFromJson(json);

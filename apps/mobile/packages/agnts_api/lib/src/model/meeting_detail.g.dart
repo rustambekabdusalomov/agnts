@@ -57,6 +57,10 @@ abstract class _$MeetingDetailCWProxy {
 
   MeetingDetail canManage(bool canManage);
 
+  MeetingDetail canUpload(bool canUpload);
+
+  MeetingDetail maxUploadMb(int maxUploadMb);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingDetail(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -89,6 +93,8 @@ abstract class _$MeetingDetailCWProxy {
     List<MeetingInvitee> invitees,
     MeetingDetailMyRsvpEnum? myRsvp,
     bool canManage,
+    bool canUpload,
+    int maxUploadMb,
   });
 }
 
@@ -178,6 +184,12 @@ class _$MeetingDetailCWProxyImpl implements _$MeetingDetailCWProxy {
   MeetingDetail canManage(bool canManage) => this(canManage: canManage);
 
   @override
+  MeetingDetail canUpload(bool canUpload) => this(canUpload: canUpload);
+
+  @override
+  MeetingDetail maxUploadMb(int maxUploadMb) => this(maxUploadMb: maxUploadMb);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingDetail(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -210,6 +222,8 @@ class _$MeetingDetailCWProxyImpl implements _$MeetingDetailCWProxy {
     Object? invitees = const $CopyWithPlaceholder(),
     Object? myRsvp = const $CopyWithPlaceholder(),
     Object? canManage = const $CopyWithPlaceholder(),
+    Object? canUpload = const $CopyWithPlaceholder(),
+    Object? maxUploadMb = const $CopyWithPlaceholder(),
   }) {
     return MeetingDetail(
       id: id == const $CopyWithPlaceholder()
@@ -312,6 +326,14 @@ class _$MeetingDetailCWProxyImpl implements _$MeetingDetailCWProxy {
           ? _value.canManage
           // ignore: cast_nullable_to_non_nullable
           : canManage as bool,
+      canUpload: canUpload == const $CopyWithPlaceholder()
+          ? _value.canUpload
+          // ignore: cast_nullable_to_non_nullable
+          : canUpload as bool,
+      maxUploadMb: maxUploadMb == const $CopyWithPlaceholder()
+          ? _value.maxUploadMb
+          // ignore: cast_nullable_to_non_nullable
+          : maxUploadMb as int,
     );
   }
 }
@@ -351,6 +373,8 @@ MeetingDetail _$MeetingDetailFromJson(
       'createdAt',
       'invitees',
       'canManage',
+      'canUpload',
+      'maxUploadMb',
     ],
   );
   final val = MeetingDetail(
@@ -414,6 +438,8 @@ MeetingDetail _$MeetingDetailFromJson(
       (v) => $enumDecodeNullable(_$MeetingDetailMyRsvpEnumEnumMap, v),
     ),
     canManage: $checkedConvert('canManage', (v) => v as bool),
+    canUpload: $checkedConvert('canUpload', (v) => v as bool),
+    maxUploadMb: $checkedConvert('maxUploadMb', (v) => (v as num).toInt()),
   );
   return val;
 });
@@ -445,6 +471,8 @@ Map<String, dynamic> _$MeetingDetailToJson(MeetingDetail instance) =>
       'invitees': instance.invitees.map((e) => e.toJson()).toList(),
       'myRsvp': ?_$MeetingDetailMyRsvpEnumEnumMap[instance.myRsvp],
       'canManage': instance.canManage,
+      'canUpload': instance.canUpload,
+      'maxUploadMb': instance.maxUploadMb,
     };
 
 const _$MeetingDetailKindEnumEnumMap = {

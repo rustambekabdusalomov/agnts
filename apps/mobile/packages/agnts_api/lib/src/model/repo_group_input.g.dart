@@ -19,6 +19,8 @@ abstract class _$RepoGroupInputCWProxy {
 
   RepoGroupInput commitTemplate(String? commitTemplate);
 
+  RepoGroupInput prTemplate(String? prTemplate);
+
   RepoGroupInput members(List<RepoGroupInputMembersInner> members);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `RepoGroupInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -34,6 +36,7 @@ abstract class _$RepoGroupInputCWProxy {
     String? taskPrefix,
     String? branchTemplate,
     String? commitTemplate,
+    String? prTemplate,
     List<RepoGroupInputMembersInner> members,
   });
 }
@@ -67,6 +70,9 @@ class _$RepoGroupInputCWProxyImpl implements _$RepoGroupInputCWProxy {
       this(commitTemplate: commitTemplate);
 
   @override
+  RepoGroupInput prTemplate(String? prTemplate) => this(prTemplate: prTemplate);
+
+  @override
   RepoGroupInput members(List<RepoGroupInputMembersInner> members) =>
       this(members: members);
 
@@ -84,6 +90,7 @@ class _$RepoGroupInputCWProxyImpl implements _$RepoGroupInputCWProxy {
     Object? taskPrefix = const $CopyWithPlaceholder(),
     Object? branchTemplate = const $CopyWithPlaceholder(),
     Object? commitTemplate = const $CopyWithPlaceholder(),
+    Object? prTemplate = const $CopyWithPlaceholder(),
     Object? members = const $CopyWithPlaceholder(),
   }) {
     return RepoGroupInput(
@@ -111,6 +118,10 @@ class _$RepoGroupInputCWProxyImpl implements _$RepoGroupInputCWProxy {
           ? _value.commitTemplate
           // ignore: cast_nullable_to_non_nullable
           : commitTemplate as String?,
+      prTemplate: prTemplate == const $CopyWithPlaceholder()
+          ? _value.prTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : prTemplate as String?,
       members: members == const $CopyWithPlaceholder()
           ? _value.members
           // ignore: cast_nullable_to_non_nullable
@@ -139,6 +150,7 @@ RepoGroupInput _$RepoGroupInputFromJson(Map<String, dynamic> json) =>
         taskPrefix: $checkedConvert('taskPrefix', (v) => v as String?),
         branchTemplate: $checkedConvert('branchTemplate', (v) => v as String?),
         commitTemplate: $checkedConvert('commitTemplate', (v) => v as String?),
+        prTemplate: $checkedConvert('prTemplate', (v) => v as String?),
         members: $checkedConvert(
           'members',
           (v) => (v as List<dynamic>)
@@ -161,5 +173,6 @@ Map<String, dynamic> _$RepoGroupInputToJson(RepoGroupInput instance) =>
       'taskPrefix': ?instance.taskPrefix,
       'branchTemplate': ?instance.branchTemplate,
       'commitTemplate': ?instance.commitTemplate,
+      'prTemplate': ?instance.prTemplate,
       'members': instance.members.map((e) => e.toJson()).toList(),
     };

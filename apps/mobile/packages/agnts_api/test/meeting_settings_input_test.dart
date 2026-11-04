@@ -27,5 +27,11 @@ void main() {
       // TODO
     });
 
+    // Absent keeps it as it is
+    // bool draftTickets
+    test('to test the property `draftTickets`', () async {
+      // TODO
+    });
+
   });
 }

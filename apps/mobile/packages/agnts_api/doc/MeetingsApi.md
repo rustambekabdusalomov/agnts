@@ -44,10 +44,12 @@ Method | HTTP request | Description
 [**ringMeeting**](MeetingsApi.md#ringmeeting) | **POST** /meetings/{meetingId}/ring | Ring members into the meeting now (their phone and open agnts pages, for 30 seconds)
 [**searchMeetingTranscripts**](MeetingsApi.md#searchmeetingtranscripts) | **GET** /meetings/search | Find what was said in the meetings you see
 [**sendMeetingMessage**](MeetingsApi.md#sendmeetingmessage) | **POST** /public/meetings/{code}/call/messages | Send a chat message to the call (no secrets; at most 30 a minute)
+[**setActionItemMember**](MeetingsApi.md#setactionitemmember) | **PUT** /meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/member | Pick the member who takes an action item; its ticket becomes theirs too
 [**setMeetingCallSettings**](MeetingsApi.md#setmeetingcallsettings) | **PUT** /public/meetings/{code}/call/settings | Hosts: lock the meeting, change who may come in, quiet guests, record, take notes
 [**setMeetingCohosts**](MeetingsApi.md#setmeetingcohosts) | **PUT** /meetings/{meetingId}/cohosts | Choose a meeting&#39;s co-hosts (the host)
 [**setMeetingHost**](MeetingsApi.md#setmeetinghost) | **PUT** /meetings/{meetingId}/host | Hand a meeting to another member (the host or the owner)
 [**updateMeeting**](MeetingsApi.md#updatemeeting) | **PATCH** /meetings/{meetingId} | Change a meeting (its hosts and the owner); a new time sends the invitees an update
+[**uploadMeetingRecording**](MeetingsApi.md#uploadmeetingrecording) | **POST** /meetings/{meetingId}/uploads | Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
 [**waitMeetingKnock**](MeetingsApi.md#waitmeetingknock) | **GET** /public/meetings/{code}/knocks/{knockId} | Wait (up to 25 seconds) for a knock to be answered
 
 
@@ -1643,6 +1645,57 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **setActionItemMember**
+> MeetingActionItem setActionItemMember(meetingId, sessionId, itemId, actionItemMemberInput)
+
+Pick the member who takes an action item; its ticket becomes theirs too
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getMeetingsApi();
+final int meetingId = 789; // int | 
+final int sessionId = 789; // int | 
+final int itemId = 789; // int | 
+final ActionItemMemberInput actionItemMemberInput = ; // ActionItemMemberInput | 
+
+try {
+    final response = api.setActionItemMember(meetingId, sessionId, itemId, actionItemMemberInput);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling MeetingsApi->setActionItemMember: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **meetingId** | **int**|  | 
+ **sessionId** | **int**|  | 
+ **itemId** | **int**|  | 
+ **actionItemMemberInput** | [**ActionItemMemberInput**](ActionItemMemberInput.md)|  | 
+
+### Return type
+
+[**MeetingActionItem**](MeetingActionItem.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **setMeetingCallSettings**
 > setMeetingCallSettings(code, meetingCallSettings, xMeetingSeat)
 
@@ -1824,6 +1877,59 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **uploadMeetingRecording**
+> MeetingSessionBrief uploadMeetingRecording(meetingId, file, startedAt, people)
+
+Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
+
+Hosts only. The file (video or audio: mp4, mov, m4v, webm, mkv, ogg, opus, oga, m4a, mp3, wav; at most the server's limit, 2 GB by default) becomes a new ended session of the meeting with notes on. agnts takes its first audio track out and deletes the file as sent before anything hears it: the picture is never analysed. The session's notes then go as a call's do (queued, transcribing, writing, done).
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getMeetingsApi();
+final int meetingId = 789; // int | 
+final MultipartFile file = BINARY_DATA_HERE; // MultipartFile | 
+final DateTime startedAt = 2013-10-20T19:20:30+01:00; // DateTime | When the meeting was held; absent is now. Send it before the file.
+final String people = people_example; // String | Comma-separated ids of the members in the recording. Send it before the file.
+
+try {
+    final response = api.uploadMeetingRecording(meetingId, file, startedAt, people);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling MeetingsApi->uploadMeetingRecording: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **meetingId** | **int**|  | 
+ **file** | **MultipartFile**|  | 
+ **startedAt** | **DateTime**| When the meeting was held; absent is now. Send it before the file. | [optional] 
+ **people** | **String**| Comma-separated ids of the members in the recording. Send it before the file. | [optional] 
+
+### Return type
+
+[**MeetingSessionBrief**](MeetingSessionBrief.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: multipart/form-data
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

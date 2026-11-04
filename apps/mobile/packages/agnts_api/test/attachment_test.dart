@@ -28,7 +28,7 @@ void main() {
       // TODO
     });
 
-    // pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes
+    // pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes; chat = a team chat message; assistant = an AI chat question
     // String purpose
     test('to test the property `purpose`', () async {
       // TODO

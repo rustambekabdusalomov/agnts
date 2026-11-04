@@ -33,6 +33,8 @@ abstract class _$MeetingSessionSummaryCWProxy {
 
   MeetingSessionSummary documentTitle(String documentTitle);
 
+  MeetingSessionSummary uploaded(bool uploaded);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSessionSummary(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -53,6 +55,7 @@ abstract class _$MeetingSessionSummaryCWProxy {
     String notesError,
     int? documentId,
     String documentTitle,
+    bool uploaded,
   });
 }
 
@@ -112,6 +115,9 @@ class _$MeetingSessionSummaryCWProxyImpl
       this(documentTitle: documentTitle);
 
   @override
+  MeetingSessionSummary uploaded(bool uploaded) => this(uploaded: uploaded);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSessionSummary(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -132,6 +138,7 @@ class _$MeetingSessionSummaryCWProxyImpl
     Object? notesError = const $CopyWithPlaceholder(),
     Object? documentId = const $CopyWithPlaceholder(),
     Object? documentTitle = const $CopyWithPlaceholder(),
+    Object? uploaded = const $CopyWithPlaceholder(),
   }) {
     return MeetingSessionSummary(
       id: id == const $CopyWithPlaceholder()
@@ -186,6 +193,10 @@ class _$MeetingSessionSummaryCWProxyImpl
           ? _value.documentTitle
           // ignore: cast_nullable_to_non_nullable
           : documentTitle as String,
+      uploaded: uploaded == const $CopyWithPlaceholder()
+          ? _value.uploaded
+          // ignore: cast_nullable_to_non_nullable
+          : uploaded as bool,
     );
   }
 }
@@ -218,6 +229,7 @@ MeetingSessionSummary _$MeetingSessionSummaryFromJson(
       'notesStatus',
       'notesError',
       'documentTitle',
+      'uploaded',
     ],
   );
   final val = MeetingSessionSummary(
@@ -240,6 +252,7 @@ MeetingSessionSummary _$MeetingSessionSummaryFromJson(
     notesError: $checkedConvert('notesError', (v) => v as String),
     documentId: $checkedConvert('documentId', (v) => (v as num?)?.toInt()),
     documentTitle: $checkedConvert('documentTitle', (v) => v as String),
+    uploaded: $checkedConvert('uploaded', (v) => v as bool),
   );
   return val;
 });
@@ -260,6 +273,7 @@ Map<String, dynamic> _$MeetingSessionSummaryToJson(
   'notesError': instance.notesError,
   'documentId': ?instance.documentId,
   'documentTitle': instance.documentTitle,
+  'uploaded': instance.uploaded,
 };
 
 const _$MeetingNotesStatusEnumMap = {

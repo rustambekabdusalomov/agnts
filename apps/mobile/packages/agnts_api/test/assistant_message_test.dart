@@ -106,9 +106,15 @@ void main() {
       // TODO
     });
 
-    // Code mode: uploads that went with the message
+    // Uploads that went with the message (ids)
     // List<int> attachments
     test('to test the property `attachments`', () async {
+      // TODO
+    });
+
+    // The uploads of attachments still there, to show
+    // List<AttachedFile> attachedFiles
+    test('to test the property `attachedFiles`', () async {
       // TODO
     });
 

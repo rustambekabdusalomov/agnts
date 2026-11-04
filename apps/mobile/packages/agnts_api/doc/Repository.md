@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **branchPrefix** | **String** |  | 
 **branchTemplate** | **String** | How agnts names branches, with placeholders {prefix} {type} {key} {number} {slug} {user}; empty uses {prefix}{key} | [optional] 
 **commitTemplate** | **String** | How agnts writes commit messages, with placeholders {number} {key} {type} {scope} {subject} {title}; empty uses KEY: Title | [optional] 
+**prTemplate** | **String** | How agnts titles pull requests, with the commit template's placeholders; empty uses the workspace's PR title (Settings, Git) | [optional] 
 **taskPrefix** | **String** |  | 
 **instructions** | **String** | Extra instructions added to every prompt | 
 **jiraProject** | **String** |  | 

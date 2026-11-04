@@ -23,7 +23,7 @@ void main() {
       // TODO
     });
 
-    // {key} and {title} are replaced
+    // Pull request title template, with the commit template's placeholders {number} {key} {type} {scope} {subject} {title}; must contain {subject} or {title}. A repository's or group's own replaces it
     // String prTitle
     test('to test the property `prTitle`', () async {
       // TODO

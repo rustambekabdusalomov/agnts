@@ -34,6 +34,8 @@ Name | Type | Description | Notes
 **fixedSha** | **String** |  | [optional] 
 **fixedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **sample** | **String** | Redacted log excerpt (single reads only) | [optional] 
+**traceId** | **String** | The trace the sample came from, when the logs carry one (single reads only) | [optional] 
+**traceUrl** | **String** | The trace in the source's tracing UI, when the source has a trace link (single reads only) | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

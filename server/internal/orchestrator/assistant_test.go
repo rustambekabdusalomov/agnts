@@ -94,7 +94,7 @@ func (a *assistantHarness) conversation(id int64) domain.AssistantConversation {
 func TestAssistantAnswersFromTheSnapshot(t *testing.T) {
 	a := newAssistantHarness(t)
 	a.answers(2, `{"answer":"**PAY-214** waits for your review.","speech":"","links":[{"kind":"ticket","key":"pay-214"},{"kind":"ci","id":0},{"kind":"repo"}]}`)
-	c, err := a.o.Ask(a.ask, 0, "  What waits on me? Look at pay-214  ", "ru")
+	c, err := a.o.Ask(a.ask, 0, "  What waits on me? Look at pay-214  ", "ru", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,13 +135,13 @@ func TestAssistantAnswersFromTheSnapshot(t *testing.T) {
 func TestAssistantFollowUpReusesTheContainerAndSeesHistory(t *testing.T) {
 	a := newAssistantHarness(t)
 	a.answers(2, `{"answer":"PAY-214 needs you.","speech":"PAY-214 needs you."}`)
-	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en")
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	a.o.WaitAnswers()
 	a.answers(4, `{"answer":"main is red since abc123.","speech":"Main is red."}`)
-	if _, err := a.o.Ask(a.ask, c.ID, "And why is CI red?", "en"); err != nil {
+	if _, err := a.o.Ask(a.ask, c.ID, "And why is CI red?", "en", nil); err != nil {
 		t.Fatal(err)
 	}
 	c = a.conversation(c.ID)
@@ -170,7 +170,7 @@ func TestAssistantFollowUpReusesTheContainerAndSeesHistory(t *testing.T) {
 func TestAssistantConversationsArePrivate(t *testing.T) {
 	a := newAssistantHarness(t)
 	a.answers(2, `{"answer":"Nothing waits on you."}`)
-	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en")
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +178,7 @@ func TestAssistantConversationsArePrivate(t *testing.T) {
 	if _, err := a.o.AssistantConversation(a.other, c.ID); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("another person read it: %v", err)
 	}
-	if _, err := a.o.Ask(a.other, c.ID, "and?", "en"); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := a.o.Ask(a.other, c.ID, "and?", "en", nil); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("another person asked in it: %v", err)
 	}
 	if list, err := a.o.AssistantConversations(a.other, ""); err != nil || len(list) != 0 {
@@ -203,19 +203,19 @@ func TestAssistantConversationsArePrivate(t *testing.T) {
 
 func TestAssistantFailures(t *testing.T) {
 	a := newAssistantHarness(t)
-	if _, err := a.o.Ask(a.ask, 0, "   ", "en"); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := a.o.Ask(a.ask, 0, "   ", "en", nil); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("empty question: %v", err)
 	}
-	if _, err := a.o.Ask(a.ask, 0, strings.Repeat("я", 1001), "en"); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := a.o.Ask(a.ask, 0, strings.Repeat("я", 1001), "en", nil); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("long question: %v", err)
 	}
-	if _, err := a.o.Ask(a.ctx, 0, "who am I?", "en"); !errors.Is(err, orchestrator.ErrInvalid) {
+	if _, err := a.o.Ask(a.ctx, 0, "who am I?", "en", nil); !errors.Is(err, orchestrator.ErrInvalid) {
 		t.Fatalf("no person: %v", err)
 	}
 
 	// No answer file: the answer fails, in words the person can read.
 	a.runner.scripts = []script{{result: ok("s")}}
-	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "xx")
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "xx", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,7 +229,7 @@ func TestAssistantFailures(t *testing.T) {
 
 	// At the plan limit no run starts.
 	a.usage.paused = true
-	if _, err := a.o.Ask(a.ask, c.ID, "and now?", "en"); err != nil {
+	if _, err := a.o.Ask(a.ask, c.ID, "and now?", "en", nil); err != nil {
 		t.Fatal(err)
 	}
 	c = a.conversation(c.ID)
@@ -246,7 +246,7 @@ func TestAssistantFailures(t *testing.T) {
 			SELECT workspace_id, id, 'user', 'q' FROM assistant_conversations WHERE id = $1`, c.ID)
 	}
 	var rl *orchestrator.RateLimitedError
-	if _, err := a.o.Ask(a.ask, c.ID, "one more", "en"); !errors.As(err, &rl) || rl.RetryAfter <= 0 {
+	if _, err := a.o.Ask(a.ask, c.ID, "one more", "en", nil); !errors.As(err, &rl) || rl.RetryAfter <= 0 {
 		t.Fatalf("31st question: %v", err)
 	}
 }
@@ -254,7 +254,7 @@ func TestAssistantFailures(t *testing.T) {
 func TestAssistantRatingsAndStats(t *testing.T) {
 	a := newAssistantHarness(t)
 	a.answers(2, `{"answer":"PAY-214 needs you."}`)
-	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en")
+	c, err := a.o.Ask(a.ask, 0, "What waits on me?", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,7 +285,7 @@ func TestAssistantReplaysSharedAnswers(t *testing.T) {
 	a := newAssistantHarness(t)
 	store := postgres.NewAssistant(a.db, mustBox(t))
 	a.answers(2, `{"answer":"PAY-214 needs you."}`)
-	if _, err := a.o.Ask(a.ask, 0, "What waits on me?", "uz"); err != nil {
+	if _, err := a.o.Ask(a.ask, 0, "What waits on me?", "uz", nil); err != nil {
 		t.Fatal(err)
 	}
 	a.o.WaitAnswers()
@@ -360,7 +360,7 @@ func TestAssistantProposesActions(t *testing.T) {
 	acts := &fakeActs{}
 	a.o.SetAssistantActions(acts)
 	a.answers(2, `{"answer":"PAY-214 passed review. Confirm to approve it.","actions":[{"tool":"approve_ticket","args":{"key":"PAY-214"}},{"tool":"bad"}]}`)
-	c, err := a.o.Ask(a.ask, 0, "Approve PAY-214", "en")
+	c, err := a.o.Ask(a.ask, 0, "Approve PAY-214", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -390,7 +390,7 @@ func TestAssistantProposesActions(t *testing.T) {
 func TestAssistantWithoutActionsSaysSo(t *testing.T) {
 	a := newAssistantHarness(t)
 	a.answers(2, `{"answer":"Confirm to approve.","actions":[{"tool":"approve_ticket","args":{"key":"PAY-214"}}]}`)
-	c, err := a.o.Ask(a.ask, 0, "Approve PAY-214", "en")
+	c, err := a.o.Ask(a.ask, 0, "Approve PAY-214", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -433,7 +433,7 @@ func TestAssistantKeepsItsTextWhenItRunsOutOfTurns(t *testing.T) {
 	// It replied with the answer, then hit the turn limit before writing the file.
 	a.runner.scripts = append(a.runner.scripts, script{result: ai.Result{SessionID: "s", Turns: 16, Subtype: "error_max_turns", IsError: true,
 		Text: "Сегодня закрыто 6 задач: 5 готовы, 1 отклонена."}})
-	c, err := a.o.Ask(a.ask, 0, "Что сделано сегодня?", "en")
+	c, err := a.o.Ask(a.ask, 0, "Что сделано сегодня?", "en", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

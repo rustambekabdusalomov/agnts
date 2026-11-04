@@ -95,7 +95,9 @@ type AssistantMessage struct {
 	TicketKey   string
 	Routed      CodeRouted
 	Attachments []int64
-	CreatedAt   time.Time
+	// AttachedFiles are the uploads of Attachments still there, to show.
+	AttachedFiles []FileRef
+	CreatedAt     time.Time
 }
 
 // AssistantProposal is a write an answer asks for: a write tool's name and

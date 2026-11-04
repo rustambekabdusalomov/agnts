@@ -48,6 +48,8 @@ class Repository {
 
      this.commitTemplate,
 
+     this.prTemplate,
+
     required  this.taskPrefix,
 
     required  this.instructions,
@@ -233,6 +235,19 @@ class Repository {
 
 
   final String? commitTemplate;
+
+
+
+      /// How agnts titles pull requests, with the commit template's placeholders; empty uses the workspace's PR title (Settings, Git)
+  @JsonKey(
+    
+    name: r'prTemplate',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? prTemplate;
 
 
 
@@ -503,6 +518,7 @@ class Repository {
       other.branchPrefix == branchPrefix &&
       other.branchTemplate == branchTemplate &&
       other.commitTemplate == commitTemplate &&
+      other.prTemplate == prTemplate &&
       other.taskPrefix == taskPrefix &&
       other.instructions == instructions &&
       other.jiraProject == jiraProject &&
@@ -538,6 +554,7 @@ class Repository {
         branchPrefix.hashCode +
         branchTemplate.hashCode +
         commitTemplate.hashCode +
+        prTemplate.hashCode +
         taskPrefix.hashCode +
         instructions.hashCode +
         jiraProject.hashCode +

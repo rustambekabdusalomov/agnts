@@ -27,6 +27,8 @@ class MeetingSettingsInput {
     required  this.keepAudio,
 
     required  this.maxParticipants,
+
+     this.draftTickets,
   });
 
   @JsonKey(
@@ -81,6 +83,19 @@ class MeetingSettingsInput {
 
 
 
+      /// Absent keeps it as it is
+  @JsonKey(
+    
+    name: r'draftTickets',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? draftTickets;
+
+
+
 
 
     @override
@@ -88,14 +103,16 @@ class MeetingSettingsInput {
       other.allowRecording == allowRecording &&
       other.retentionDays == retentionDays &&
       other.keepAudio == keepAudio &&
-      other.maxParticipants == maxParticipants;
+      other.maxParticipants == maxParticipants &&
+      other.draftTickets == draftTickets;
 
     @override
     int get hashCode =>
         allowRecording.hashCode +
         retentionDays.hashCode +
         keepAudio.hashCode +
-        maxParticipants.hashCode;
+        maxParticipants.hashCode +
+        draftTickets.hashCode;
 
   factory MeetingSettingsInput.fromJson(Map<String, dynamic> json) => _$MeetingSettingsInputFromJson(json);
 

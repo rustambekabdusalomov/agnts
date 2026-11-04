@@ -15,6 +15,8 @@ abstract class _$MeetingSettingsCWProxy {
 
   MeetingSettings maxParticipants(int maxParticipants);
 
+  MeetingSettings draftTickets(bool draftTickets);
+
   MeetingSettings available(MeetingSettingsAvailable available);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -28,6 +30,7 @@ abstract class _$MeetingSettingsCWProxy {
     int retentionDays,
     bool keepAudio,
     int maxParticipants,
+    bool draftTickets,
     MeetingSettingsAvailable available,
   });
 }
@@ -54,6 +57,10 @@ class _$MeetingSettingsCWProxyImpl implements _$MeetingSettingsCWProxy {
       this(maxParticipants: maxParticipants);
 
   @override
+  MeetingSettings draftTickets(bool draftTickets) =>
+      this(draftTickets: draftTickets);
+
+  @override
   MeetingSettings available(MeetingSettingsAvailable available) =>
       this(available: available);
 
@@ -69,6 +76,7 @@ class _$MeetingSettingsCWProxyImpl implements _$MeetingSettingsCWProxy {
     Object? retentionDays = const $CopyWithPlaceholder(),
     Object? keepAudio = const $CopyWithPlaceholder(),
     Object? maxParticipants = const $CopyWithPlaceholder(),
+    Object? draftTickets = const $CopyWithPlaceholder(),
     Object? available = const $CopyWithPlaceholder(),
   }) {
     return MeetingSettings(
@@ -88,6 +96,10 @@ class _$MeetingSettingsCWProxyImpl implements _$MeetingSettingsCWProxy {
           ? _value.maxParticipants
           // ignore: cast_nullable_to_non_nullable
           : maxParticipants as int,
+      draftTickets: draftTickets == const $CopyWithPlaceholder()
+          ? _value.draftTickets
+          // ignore: cast_nullable_to_non_nullable
+          : draftTickets as bool,
       available: available == const $CopyWithPlaceholder()
           ? _value.available
           // ignore: cast_nullable_to_non_nullable
@@ -115,6 +127,7 @@ MeetingSettings _$MeetingSettingsFromJson(Map<String, dynamic> json) =>
           'retentionDays',
           'keepAudio',
           'maxParticipants',
+          'draftTickets',
           'available',
         ],
       );
@@ -129,6 +142,7 @@ MeetingSettings _$MeetingSettingsFromJson(Map<String, dynamic> json) =>
           'maxParticipants',
           (v) => (v as num).toInt(),
         ),
+        draftTickets: $checkedConvert('draftTickets', (v) => v as bool),
         available: $checkedConvert(
           'available',
           (v) => MeetingSettingsAvailable.fromJson(v as Map<String, dynamic>),
@@ -143,5 +157,6 @@ Map<String, dynamic> _$MeetingSettingsToJson(MeetingSettings instance) =>
       'retentionDays': instance.retentionDays,
       'keepAudio': instance.keepAudio,
       'maxParticipants': instance.maxParticipants,
+      'draftTickets': instance.draftTickets,
       'available': instance.available.toJson(),
     };

@@ -29,6 +29,12 @@ void main() {
       // TODO
     });
 
+    // Every action item becomes a held draft ticket on the member who took it when the notes are written
+    // bool draftTickets
+    test('to test the property `draftTickets`', () async {
+      // TODO
+    });
+
     // MeetingSettingsAvailable available
     test('to test the property `available`', () async {
       // TODO

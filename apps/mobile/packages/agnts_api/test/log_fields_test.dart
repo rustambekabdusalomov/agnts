@@ -32,5 +32,11 @@ void main() {
       // TODO
     });
 
+    // Link to a trace in the tracing UI (Tempo, Jaeger), with {traceId} where the id goes
+    // String traceUrl
+    test('to test the property `traceUrl`', () async {
+      // TODO
+    });
+
   });
 }

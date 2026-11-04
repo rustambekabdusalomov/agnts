@@ -35,6 +35,13 @@ void main() {
       // TODO
     });
 
+    // The egress proxy's upstream (the way Muse's traffic leaves the server) and its recent checks (Admin)
+    //
+    //Future<EgressStatus> getPlatformEgress() async
+    test('test getPlatformEgress', () async {
+      // TODO
+    });
+
     // Servers, runs and the queue across every workspace (Admin)
     //
     //Future<PlatformOverview> getPlatformOverview() async

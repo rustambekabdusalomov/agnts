@@ -9,6 +9,8 @@ import { applyLive, assistantLang, fileLabel, isOpen, live, MAX_QUESTION, secs }
 import AssistantActionCard from '../components/assistant/AssistantActionCard.vue'
 import ChatBody from '../components/chat/ChatBody.vue'
 import ChatModeSwitch from '../components/codechat/ChatModeSwitch.vue'
+import ChatFiles from '../components/files/ChatFiles.vue'
+import FileAttach from '../components/files/FileAttach.vue'
 import PageHeader from '../components/PageHeader.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
@@ -56,28 +58,44 @@ watch(() => [messages.value.length, messages.value.at(-1)?.status, live.get(mess
   if (scroller.value) scroller.value.scrollTop = scroller.value.scrollHeight
 }, { flush: 'post' })
 
+// The question the server stores for files sent without words.
+const FILES_ONLY = 'See the attached files.'
+
 const text = ref('')
 const error = ref('')
 const length = computed(() => text.value.trim().length)
+// Files go with the next question; the answer reads them. Text is then
+// optional.
+const fileIds = ref<number[]>([])
+const uploading = ref(false)
+const attach = ref<InstanceType<typeof FileAttach> | null>(null)
+const dragging = ref(false)
+function dropped(e: DragEvent) {
+  dragging.value = false
+  if (e.dataTransfer?.files.length) attach.value?.add(Array.from(e.dataTransfer.files))
+}
+const canSend = computed(() => (length.value > 0 || fileIds.value.length > 0) && length.value <= MAX_QUESTION && !uploading.value && !ask.isPending.value)
+
 const ask = useMutation({
-  mutationFn: (question: string) => {
-    const body = { question, lang: assistantLang(locale.value) }
+  mutationFn: ({ question, files }: { question: string; files: number[] }) => {
+    const body = { question, lang: assistantLang(locale.value), ...(files.length ? { attachments: files } : {}) }
     return id.value
       ? unwrap(api.POST('/assistant/conversations/{conversationId}/messages', { params: { path: { conversationId: id.value } }, body }))
       : unwrap(api.POST('/assistant/conversations', { body }))
   },
   onMutate: () => (error.value = ''),
-  onSuccess: async (c, question) => {
+  onSuccess: async (c, { question, files }) => {
     if (question === text.value.trim()) text.value = ''
+    if (files.length && files.every((f) => fileIds.value.includes(f))) fileIds.value = []
     qc.setQueryData(['assistant', 'conversation', c.id], c)
     void qc.invalidateQueries({ queryKey: ['assistant', 'list'] })
     if (c.id !== id.value) await router.replace({ name: 'assistant', params: { id: c.id } })
   },
   onError: (e) => (error.value = e instanceof Error ? e.message : t('common.error')),
 })
-function send(question = text.value.trim()) {
-  if (!question || question.length > MAX_QUESTION || ask.isPending.value) return
-  ask.mutate(question)
+function send(question = text.value.trim(), files = fileIds.value) {
+  if ((!question && !files.length) || question.length > MAX_QUESTION || ask.isPending.value || uploading.value) return
+  ask.mutate({ question, files: [...files] })
 }
 function onKey(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
@@ -105,7 +123,7 @@ async function finishVoice() {
   hearing.value = true
   try {
     const question = (await transcribeQuestion(await voice.stop())).trim().slice(0, MAX_QUESTION)
-    if (question) send(question)
+    if (question) send(question, [])
   } catch (e) {
     error.value = e instanceof Error ? e.message : t('common.error')
   } finally {
@@ -117,7 +135,8 @@ async function finishVoice() {
 function questionOf(m: AssistantMessage): string | undefined {
   const i = messages.value.indexOf(m)
   const q = messages.value[i - 1]
-  return q?.role === 'user' ? q.text : undefined
+  // A question with files is not asked again: its files went with it.
+  return q?.role === 'user' && !q.attachedFiles?.length ? q.text : undefined
 }
 
 
@@ -183,7 +202,10 @@ const suggestions = computed(() => [
       <p v-else-if="conv.isPending.value" class="hint">{{ t('common.loading') }}</p>
       <p v-else-if="conv.isError.value" class="ferr">{{ t('common.error') }}</p>
       <template v-for="m in messages" v-else :key="m.id">
-        <div v-if="m.role === 'user'" class="as-q">{{ m.text }}</div>
+        <div v-if="m.role === 'user'" class="as-q">
+          <template v-if="!m.attachedFiles?.length || m.text !== FILES_ONLY">{{ m.text }}</template>
+          <ChatFiles v-if="m.attachedFiles?.length" :files="m.attachedFiles" />
+        </div>
         <div v-else class="as-a" :class="{ failed: m.status === 'failed' }">
           <template v-if="isOpen(m)">
             <div class="as-think"><span class="as-spin" />{{ t('massistant.thinking', { seconds: thinking(m) }) }}</div>
@@ -193,7 +215,7 @@ const suggestions = computed(() => [
           <template v-else-if="m.status === 'failed'">
             <b>{{ t('massistant.failed') }}</b>
             <p v-if="m.error" class="as-err">{{ m.error }}</p>
-            <button v-if="questionOf(m)" type="button" class="btn btn-s" :disabled="ask.isPending.value" @click="send(questionOf(m))">{{ t('massistant.askAgain') }}</button>
+            <button v-if="questionOf(m)" type="button" class="btn btn-s" :disabled="ask.isPending.value" @click="send(questionOf(m), [])">{{ t('massistant.askAgain') }}</button>
           </template>
           <template v-else>
             <ChatBody :body="m.text" cite assistant />
@@ -249,17 +271,31 @@ const suggestions = computed(() => [
       </template>
       <p v-if="error" class="ferr">{{ error }}</p>
     </div>
-    <form v-else class="as-compose" @submit.prevent="send()">
+    <form
+      v-else
+      class="as-compose"
+      :class="{ drag: dragging }"
+      @submit.prevent="send()"
+      @dragover.prevent="dragging = true"
+      @dragleave.self="dragging = false"
+      @drop.prevent="dropped"
+    >
+      <p v-if="dragging" class="as-drop" aria-hidden="true">{{ t('files.drop') }}</p>
+      <FileAttach ref="attach" v-model="fileIds" v-model:busy="uploading" bare />
       <textarea
         v-model="text"
         rows="2"
         :placeholder="t('massistant.placeholder')"
         :aria-label="t('massistant.placeholder')"
         @keydown="onKey"
+        @paste="attach?.pasted($event)"
       />
       <div class="as-send">
         <span class="hint">{{ length > MAX_QUESTION - 100 ? t('massistant.count', { n: length }) : t('massistant.sendHint') }}</span>
         <span class="as-btns">
+          <button type="button" class="btn as-attach" :disabled="ask.isPending.value" :title="t('files.attach')" :aria-label="t('files.attach')" @click="attach?.open()">
+            <HiIcon name="attach" />
+          </button>
           <button
             v-if="voiceOn"
             type="button"
@@ -269,7 +305,7 @@ const suggestions = computed(() => [
             :aria-label="t('massistant.voiceStart')"
             @click="startVoice"
           ><HiIcon name="mic" /></button>
-          <button type="submit" class="btn btn-p" :disabled="!length || length > MAX_QUESTION || ask.isPending.value">{{ t('massistant.send') }}</button>
+          <button type="submit" class="btn btn-p" :disabled="!canSend" :title="uploading ? t('files.wait') : undefined">{{ t('massistant.send') }}</button>
         </span>
       </div>
       <p v-if="error" class="ferr">{{ error }}</p>
@@ -310,10 +346,13 @@ const suggestions = computed(() => [
 
 .as-compose { border-top: 1px solid var(--line); padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
 .as-compose textarea { min-height: 48px; resize: none; }
+.as-compose.drag { outline: 2px dashed var(--primary); outline-offset: -4px; }
+.as-drop { margin: 0; font-size: 13px; color: var(--primary-ink); font-weight: 600; }
 .as-send { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .as-btns { display: flex; gap: 8px; }
-.as-mic { padding-inline: 10px; }
-.as-mic svg { width: 18px; height: 18px; }
+.as-mic, .as-attach { padding-inline: 10px; }
+.as-mic svg, .as-attach :deep(svg) { width: 18px; height: 18px; }
+.as-attach :deep(svg) { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .as-voice { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; min-height: 106px; }
 .as-voice .sp { flex: 1; }
 .as-voice .ferr { flex-basis: 100%; }

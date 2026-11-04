@@ -34,6 +34,16 @@ class MeetingActionItem {
 
     required  this.quote,
 
+    required  this.speaker,
+
+     this.memberId,
+
+     this.memberName,
+
+    required  this.memberByHand,
+
+    required  this.drafted,
+
      this.ticketKey,
   });
 
@@ -124,6 +134,70 @@ class MeetingActionItem {
 
 
 
+      /// Who said the line where it was taken, as the transcript names them; empty when it does not say
+  @JsonKey(
+    
+    name: r'speaker',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String speaker;
+
+
+
+      /// The member who takes it: matched from the name as said, or picked by hand; absent when nobody matched
+  @JsonKey(
+    
+    name: r'memberId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final int? memberId;
+
+
+
+  @JsonKey(
+    
+    name: r'memberName',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? memberName;
+
+
+
+      /// The member was picked by hand, not matched
+  @JsonKey(
+    
+    name: r'memberByHand',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool memberByHand;
+
+
+
+      /// Its draft ticket was made when the notes were written
+  @JsonKey(
+    
+    name: r'drafted',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool drafted;
+
+
+
       /// The ticket made from it
   @JsonKey(
     
@@ -148,6 +222,11 @@ class MeetingActionItem {
       other.due == due &&
       other.atMs == atMs &&
       other.quote == quote &&
+      other.speaker == speaker &&
+      other.memberId == memberId &&
+      other.memberName == memberName &&
+      other.memberByHand == memberByHand &&
+      other.drafted == drafted &&
       other.ticketKey == ticketKey;
 
     @override
@@ -159,6 +238,11 @@ class MeetingActionItem {
         due.hashCode +
         atMs.hashCode +
         quote.hashCode +
+        speaker.hashCode +
+        memberId.hashCode +
+        memberName.hashCode +
+        memberByHand.hashCode +
+        drafted.hashCode +
         ticketKey.hashCode;
 
   factory MeetingActionItem.fromJson(Map<String, dynamic> json) => _$MeetingActionItemFromJson(json);

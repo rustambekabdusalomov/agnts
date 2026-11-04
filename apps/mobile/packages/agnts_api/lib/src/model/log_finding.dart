@@ -75,6 +75,10 @@ class LogFinding {
      this.fixedAt,
 
      this.sample,
+
+     this.traceId,
+
+     this.traceUrl,
   });
 
   @JsonKey(
@@ -393,6 +397,32 @@ class LogFinding {
 
 
 
+      /// The trace the sample came from, when the logs carry one (single reads only)
+  @JsonKey(
+    
+    name: r'traceId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? traceId;
+
+
+
+      /// The trace in the source's tracing UI, when the source has a trace link (single reads only)
+  @JsonKey(
+    
+    name: r'traceUrl',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? traceUrl;
+
+
+
 
 
     @override
@@ -422,7 +452,9 @@ class LogFinding {
       other.ticketState == ticketState &&
       other.fixedSha == fixedSha &&
       other.fixedAt == fixedAt &&
-      other.sample == sample;
+      other.sample == sample &&
+      other.traceId == traceId &&
+      other.traceUrl == traceUrl;
 
     @override
     int get hashCode =>
@@ -451,7 +483,9 @@ class LogFinding {
         ticketState.hashCode +
         fixedSha.hashCode +
         fixedAt.hashCode +
-        sample.hashCode;
+        sample.hashCode +
+        traceId.hashCode +
+        traceUrl.hashCode;
 
   factory LogFinding.fromJson(Map<String, dynamic> json) => _$LogFindingFromJson(json);
 

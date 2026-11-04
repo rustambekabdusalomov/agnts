@@ -122,6 +122,10 @@ const (
 type AssistantFile struct {
 	Name    string `json:"name"`
 	Content string `json:"content"`
+	// Attachment is a file the person attached (its id): kept in a
+	// snapshot by id, not by its bytes, which are in Data while it runs.
+	Attachment int64  `json:"attachment,omitempty"`
+	Data       []byte `json:"-"`
 }
 
 // AssistantSnapshotter reads the workspace for a question. It makes the
@@ -193,7 +197,7 @@ func asker(ctx context.Context) (int64, int64, error) {
 // is 0) and starts answering it. It returns at once with the conversation,
 // its answer pending; the answer is stored when ready and announced with
 // an assistant_answered (or assistant_failed) event to the asker.
-func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, lang string) (domain.AssistantConversation, error) {
+func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, lang string, files []int64) (domain.AssistantConversation, error) {
 	if !o.AssistantReady() {
 		return domain.AssistantConversation{}, invalid("the assistant is not available")
 	}
@@ -202,7 +206,13 @@ func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, 
 		return domain.AssistantConversation{}, err
 	}
 	question = strings.TrimSpace(question)
+	files, err = o.checkOwnUploads(ctx, files, user)
+	if err != nil {
+		return domain.AssistantConversation{}, err
+	}
 	switch n := utf8.RuneCountInString(question); {
+	case n == 0 && len(files) > 0:
+		question = assistantFilesQuestion
 	case n == 0:
 		return domain.AssistantConversation{}, invalid("ask a question")
 	case n > domain.AssistantMaxQuestion:
@@ -231,8 +241,14 @@ func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, 
 		return c, invalid("this is a Code conversation: send it a message instead")
 	}
 	q, err := o.assistant.AddAssistantMessage(ctx, domain.AssistantMessage{ConversationID: c.ID, Role: domain.AssistantUser, Text: question,
-		Status: domain.AssistantDone, Lang: lang})
+		Status: domain.AssistantDone, Lang: lang, Attachments: files})
 	if err != nil {
+		return c, err
+	}
+	if err := o.store.LinkAssistantFiles(ctx, files, q.ID, user); err != nil {
+		if errors.Is(err, domain.ErrConflict) {
+			err = invalid("a file is not a new upload of yours: upload it again")
+		}
 		return c, err
 	}
 	a, err := o.assistant.AddAssistantMessage(ctx, domain.AssistantMessage{ConversationID: c.ID, Role: domain.AssistantReply,
@@ -496,6 +512,7 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 		return out, nil, fmt.Errorf("snapshot: %w", err)
 	}
 	files = append(files, assistantConversationFiles(q.Text, history)...)
+	files = append(files, o.assistantUploads(ctx, q)...)
 	snapshot, _ := json.Marshal(files)
 	out.Timing.SnapshotMS = time.Since(t0).Milliseconds()
 
@@ -598,6 +615,13 @@ func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang s
 	if len(files) == 0 {
 		return AssistantAnswer{}, ai.Result{}, errors.New("the snapshot is empty")
 	}
+	for i, f := range files {
+		if f.Attachment > 0 {
+			if _, data, err := o.store.AttachmentData(ctx, f.Attachment); err == nil {
+				files[i].Data = data
+			}
+		}
+	}
 	ctx = o.withPerson(ctx, user)
 	s, err := o.settings.Get(ctx)
 	if err != nil {
@@ -627,6 +651,31 @@ func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang s
 	return a, res, err
 }
 
+// assistantFilesQuestion is the question of files sent without words.
+const assistantFilesQuestion = "See the attached files."
+
+// assistantUploads are the files the person attached to question q, as
+// snapshot files named upload-<id>-<name>. Only this question's files come
+// (earlier ones are named in conversation.json): every file read is a turn.
+// One that cannot be read is left out with a warning.
+func (o *Orchestrator) assistantUploads(ctx context.Context, q domain.AssistantMessage) []AssistantFile {
+	var out []AssistantFile
+	for _, id := range q.Attachments {
+		a, data, err := o.store.AttachmentData(ctx, id)
+		if err != nil {
+			o.log.Warn("assistant: load attached file", "message", q.ID, "id", id, "err", err)
+			continue
+		}
+		out = append(out, AssistantFile{Name: AssistantUploadName(a), Attachment: a.ID, Data: data})
+	}
+	return out
+}
+
+// AssistantUploadName is the snapshot file name of an attached file.
+func AssistantUploadName(a domain.Attachment) string {
+	return fmt.Sprintf("upload-%d-%s", a.ID, strings.ReplaceAll(a.Name, " ", "_"))
+}
+
 // assistantConversationFiles are the question and the talk before it.
 func assistantConversationFiles(question string, history []domain.AssistantMessage) []AssistantFile {
 	type turn struct {
@@ -647,6 +696,13 @@ func assistantConversationFiles(question string, history []domain.AssistantMessa
 		}
 		for _, e := range m.ActionErrors {
 			text += "\n\n[action not offered: " + e + "]"
+		}
+		if len(m.AttachedFiles) > 0 {
+			names := make([]string, len(m.AttachedFiles))
+			for i, f := range m.AttachedFiles {
+				names[i] = f.Name
+			}
+			text += "\n\n[attached earlier, not in the files now: " + strings.Join(names, ", ") + "]"
 		}
 		conv = append(conv, turn{Role: string(m.Role), Text: text})
 	}
@@ -737,7 +793,14 @@ func (o *Orchestrator) runAssistant(ctx context.Context, s domain.Settings, wsID
 	dir := AssistantDir(a.ID)
 	names := make([]string, 0, len(files))
 	for _, f := range files {
-		if err := ws.WriteFile(ctx, dir+"/"+f.Name, []byte(f.Content)); err != nil {
+		data := []byte(f.Content)
+		if f.Attachment > 0 {
+			if f.Data == nil {
+				continue // gone since (a replay of an old answer)
+			}
+			data = f.Data
+		}
+		if err := ws.WriteFile(ctx, dir+"/"+f.Name, data); err != nil {
 			return ai.Result{}, fmt.Errorf("write %s: %w", f.Name, err)
 		}
 		names = append(names, f.Name)

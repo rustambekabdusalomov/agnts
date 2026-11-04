@@ -71,6 +71,10 @@ class MeetingDetail {
      this.myRsvp,
 
     required  this.canManage,
+
+    required  this.canUpload,
+
+    required  this.maxUploadMb,
   });
 
   @JsonKey(
@@ -379,6 +383,32 @@ class MeetingDetail {
 
 
 
+      /// You may upload a recording of it (uploadMeetingRecording): you host it and this server hears uploads
+  @JsonKey(
+    
+    name: r'canUpload',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool canUpload;
+
+
+
+      /// The largest recording that can be uploaded
+  @JsonKey(
+    
+    name: r'maxUploadMb',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int maxUploadMb;
+
+
+
 
 
     @override
@@ -407,7 +437,9 @@ class MeetingDetail {
       other.live == live &&
       other.invitees == invitees &&
       other.myRsvp == myRsvp &&
-      other.canManage == canManage;
+      other.canManage == canManage &&
+      other.canUpload == canUpload &&
+      other.maxUploadMb == maxUploadMb;
 
     @override
     int get hashCode =>
@@ -435,7 +467,9 @@ class MeetingDetail {
         live.hashCode +
         invitees.hashCode +
         myRsvp.hashCode +
-        canManage.hashCode;
+        canManage.hashCode +
+        canUpload.hashCode +
+        maxUploadMb.hashCode;
 
   factory MeetingDetail.fromJson(Map<String, dynamic> json) => _$MeetingDetailFromJson(json);
 
