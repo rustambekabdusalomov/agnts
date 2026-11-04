@@ -6,6 +6,7 @@ import { api, unwrap } from '../../api/client'
 import type { components } from '../../api/schema.gen'
 import CfgRow from '../form/CfgRow.vue'
 import CommandChips from '../form/CommandChips.vue'
+import InputSelect, { type SelectOption } from '../form/InputSelect.vue'
 import SwitchToggle from '../form/SwitchToggle.vue'
 
 // Performance reviews in Settings: the switch, the zone months are
@@ -33,6 +34,10 @@ const ids = useQuery({
   queryFn: () => unwrap(api.GET('/analytics/developers/identities')),
   enabled: computed(() => props.saved),
 })
+// Members by name, for both pickers; 0 is none picked yet.
+const memberOptions = computed<SelectOption<number>[]>(() =>
+  (members.data.value ?? []).map((m) => ({ value: m.userId, label: m.displayName || m.username, hint: m.displayName ? m.username : undefined })),
+)
 const nameOf = (id: number) => {
   const m = (members.data.value ?? []).find((x) => x.userId === id)
   return m ? m.displayName || m.username : `#${id}`
@@ -91,10 +96,7 @@ const backfill = useMutation({
     <p v-if="!saved" class="hint">{{ t('perf.saveFirst') }}</p>
     <template v-else>
       <div class="pr-add">
-        <select v-model.number="form.userId" class="cfg-in" :aria-label="t('perf.member')">
-          <option :value="0">{{ t('perf.member') }}</option>
-          <option v-for="m in members.data.value ?? []" :key="m.userId" :value="m.userId">{{ m.displayName || m.username }}</option>
-        </select>
+        <InputSelect v-model="form.userId" :options="memberOptions" :label="t('perf.member')" :placeholder="t('perf.member')" class="pr-sel" />
         <input v-model="form.login" class="cfg-in" :placeholder="t('perf.login')" :aria-label="t('perf.login')" maxlength="200">
         <input v-model="form.email" class="cfg-in" :placeholder="t('perf.email')" :aria-label="t('perf.email')" maxlength="320">
         <button type="button" class="btn btn-s btn-p" :disabled="map.isPending.value" @click="add">{{ t('perf.add') }}</button>
@@ -121,10 +123,15 @@ const backfill = useMutation({
       <div v-for="u in ids.data.value?.unmapped ?? []" :key="u.key" class="pr-un">
         <span class="mono">{{ u.identity }}</span>
         <span class="hint">{{ t('perf.unmappedDeliveries', { n: u.deliveries }) }}</span>
-        <select class="cfg-in" :aria-label="t('perf.mapTo')" @change="mapUnmapped(u.identity, Number(($event.target as HTMLSelectElement).value))">
-          <option value="0">{{ t('perf.mapTo') }}</option>
-          <option v-for="m in members.data.value ?? []" :key="m.userId" :value="m.userId">{{ m.displayName || m.username }}</option>
-        </select>
+        <InputSelect
+          :model-value="0"
+          :options="memberOptions"
+          :label="t('perf.mapTo')"
+          :placeholder="t('perf.mapTo')"
+          :disabled="map.isPending.value"
+          class="pr-sel"
+          @update:model-value="mapUnmapped(u.identity, $event)"
+        />
       </div>
     </template>
   </section>
@@ -160,5 +167,6 @@ const backfill = useMutation({
 .pr-add { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
 .pr-un { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 4px 0; }
 .pr-h { font-size: 14px; margin: 14px 0 6px; }
+.pr-sel { min-width: 200px; }
 .mono { font-family: var(--mono); font-size: 13px; }
 </style>
