@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
@@ -20,7 +21,7 @@ func TestSecurityStore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// One manual scan at a time per repository; verify scans always queue.
+	// One manual scan at a time per repository.
 	scan, busy, err := sec.CreateSecurityScan(ctx, domain.SecurityScan{RepoID: repo.ID, Trigger: domain.SecManual, Scope: domain.SecScope{FullHistory: true}})
 	if err != nil || busy || scan.Status != domain.ScanPending || !scan.Scope.FullHistory || scan.RepoName != "api" {
 		t.Fatalf("create: %+v %v %v", scan, busy, err)
@@ -156,8 +157,27 @@ func TestSecurityStore(t *testing.T) {
 	if x, _ := sec.SecurityScan(ctx, s4.ID); x.Status != domain.ScanPending || len(x.Scope.FindingIDs) != 2 {
 		t.Fatalf("recovered: %+v", x)
 	}
+
+	// Fixes merged close together are verified by one scan: a verify scan
+	// joins the one queued. Once that runs, the next queues on its own.
+	more := []int64{ids[1], ids[0] + 1000}
+	joined, busy, err := sec.CreateSecurityScan(ctx, domain.SecurityScan{RepoID: repo.ID, Trigger: domain.SecVerify, Scope: domain.SecScope{FindingIDs: more}})
+	want := []int64{ids[0], ids[1], ids[0] + 1000}
+	if ids[0] > ids[1] {
+		want = []int64{ids[1], ids[0], ids[0] + 1000}
+	}
+	if err != nil || !busy || joined.ID != s4.ID || !slices.Equal(joined.Scope.FindingIDs, want) {
+		t.Fatalf("joined verify scan: %+v %v %v (want %v)", joined.Scope, busy, err, want)
+	}
+	if c, ok, _ := sec.ClaimSecurityScan(ctx); !ok || c.ID != s4.ID {
+		t.Fatalf("claim the joined scan: %+v", c)
+	}
+	s5, busy, err := sec.CreateSecurityScan(ctx, domain.SecurityScan{RepoID: repo.ID, Trigger: domain.SecVerify, Scope: domain.SecScope{FindingIDs: ids[:1]}})
+	if err != nil || busy || s5.ID == s4.ID || s5.Status != domain.ScanPending || !slices.Equal(s5.Scope.FindingIDs, ids[:1]) {
+		t.Fatalf("verify scan while one runs: %+v %v %v", s5, busy, err)
+	}
 	list, _ := sec.SecurityScans(ctx, repo.ID, 10)
-	if len(list) != 4 || list[0].ID != s4.ID {
+	if len(list) != 5 || list[0].ID != s5.ID {
 		t.Fatalf("scans = %d", len(list))
 	}
 }
