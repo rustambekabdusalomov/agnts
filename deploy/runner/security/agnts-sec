@@ -200,31 +200,53 @@ update() {
 	local dir=${1:-} eco
 	[ -n "$dir" ] || die "usage: agnts-sec update DIR"
 	mkdir -p "$dir/osv/osv-scalibr" || die "cannot write $dir"
-	# A restart does not download again: once a day is enough.
+	local want=("${ECOSYSTEMS[@]}")
+	# A restart does not download again: once a day is enough, unless the
+	# last update missed some ecosystems; then only those are fetched.
 	if [ -z "${AGNTS_SEC_FORCE:-}" ] && [ -f "$dir/versions.json" ] && [ -n "$(find "$dir/versions.json" -mmin -1200 2>/dev/null)" ]; then
-		cat "$dir/versions.json"
-		return 0
+		mapfile -t want < <(jq -r '.failed[]?' "$dir/versions.json" 2>/dev/null)
+		if [ ${#want[@]} -eq 0 ]; then
+			jq -c . "$dir/versions.json"
+			return 0
+		fi
 	fi
-	local ok=0 failed=()
-	for eco in "${ECOSYSTEMS[@]}"; do
+	local failed=()
+	for eco in "${want[@]}"; do
 		local to="$dir/osv/osv-scalibr/$eco"
+		rm -rf "$to.new"
 		mkdir -p "$to.new"
-		if curl -fsSL --retry 3 --max-time 900 -o "$to.new/all.zip" \
+		# A transfer that breaks halfway is retried and resumed (-C -):
+		# npm's database is over 200 MB.
+		if curl -fsSL --retry 5 --retry-all-errors --retry-delay 5 -C - --max-time 1800 -o "$to.new/all.zip" \
 			"https://osv-vulnerabilities.storage.googleapis.com/$eco/all.zip" && unzip -tq "$to.new/all.zip" >/dev/null; then
 			rm -rf "$to.old"
 			[ -d "$to" ] && mv "$to" "$to.old"
 			mv "$to.new" "$to" && rm -rf "$to.old"
-			ok=$((ok + 1))
 		else
 			rm -rf "$to.new"
 			failed+=("$eco")
 		fi
 	done
-	printf '{"osv":"%s","ecosystems":%d,"failed":%s}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$ok" \
-		"$(printf '%s\n' "${failed[@]}" | jq -R 'select(. != "")' | jq -s .)" >"$dir/versions.json.new"
-	[ "$ok" -gt 0 ] && mv "$dir/versions.json.new" "$dir/versions.json"
-	cat "$dir/versions.json" 2>/dev/null
-	[ "$ok" -gt 0 ]
+	# ecosystems counts what is on disk (an older copy of a failed one
+	# still counts); failed is what this update could not fetch.
+	local have=0
+	for eco in "${ECOSYSTEMS[@]}"; do
+		[ -f "$dir/osv/osv-scalibr/$eco/all.zip" ] && have=$((have + 1))
+	done
+	local missing=()
+	for eco in "${ECOSYSTEMS[@]}"; do
+		[ -f "$dir/osv/osv-scalibr/$eco/all.zip" ] || missing+=("$eco")
+	done
+	printf '{"osv":"%s","ecosystems":%d,"failed":%s,"missing":%s}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$have" \
+		"$(printf '%s\n' "${failed[@]}" | jq -R 'select(. != "")' | jq -cs .)" \
+		"$(printf '%s\n' "${missing[@]}" | jq -R 'select(. != "")' | jq -cs .)" >"$dir/versions.json.new"
+	[ "$have" -gt 0 ] && mv "$dir/versions.json.new" "$dir/versions.json"
+	rm -f "$dir/versions.json.new"
+	jq -c . "$dir/versions.json" 2>/dev/null
+	# 0: everything is there; 3: some ecosystems are missing; 1: none.
+	[ "$have" -eq 0 ] && return 1
+	[ ${#failed[@]} -gt 0 ] && return 3
+	return 0
 }
 
 case ${1:-} in
