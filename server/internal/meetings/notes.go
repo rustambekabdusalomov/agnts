@@ -30,6 +30,7 @@ func (s *Service) RunNotes(ctx context.Context) {
 	if n, err := s.d.Store.RequeueNotes(ctx); err == nil && n > 0 {
 		s.d.Log.Info("requeued meeting notes a restart interrupted", "count", n)
 	}
+	s.returnHeldDrafts(ctx)
 	t := time.NewTicker(30 * time.Second)
 	defer t.Stop()
 	for {

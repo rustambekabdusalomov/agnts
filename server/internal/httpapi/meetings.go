@@ -659,8 +659,7 @@ func (s *Server) SearchMeetingTranscripts(w http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) meetingSettings(w http.ResponseWriter, r *http.Request, ms domain.MeetingSettings) {
-	out := gen.MeetingSettings{AllowRecording: ms.AllowRecording, RetentionDays: ms.RetentionDays, KeepAudio: ms.KeepAudio, MaxParticipants: ms.MaxParticipants,
-		DraftTickets: ms.DraftTickets}
+	out := gen.MeetingSettings{AllowRecording: ms.AllowRecording, RetentionDays: ms.RetentionDays, KeepAudio: ms.KeepAudio, MaxParticipants: ms.MaxParticipants}
 	if m := s.opt.Meetings; m != nil {
 		out.Available.Meetings, out.Available.Recording, out.Available.Notes = m.Ready(), m.RecordingReady(), m.NotesReady()
 		out.Available.Uploads, out.Available.MaxUploadMb = m.UploadsReady(), int(m.MaxUploadBytes()>>20)
@@ -696,12 +695,8 @@ func (s *Server) PutMeetingSettings(w http.ResponseWriter, r *http.Request) {
 		s.writeInternal(w, r, err)
 		return
 	}
-	drafts := cur.Meetings.DraftTickets
-	if req.DraftTickets != nil {
-		drafts = *req.DraftTickets
-	}
 	cur.Meetings = domain.MeetingSettings{AllowRecording: req.AllowRecording, RetentionDays: req.RetentionDays, KeepAudio: req.KeepAudio,
-		MaxParticipants: req.MaxParticipants, DraftTickets: drafts}
+		MaxParticipants: req.MaxParticipants}
 	saved, err := s.opt.Admin.Settings.Put(r.Context(), cur, origin(r))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
