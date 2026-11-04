@@ -15,11 +15,50 @@ pushed without a person's approval.
 > steering, interrupts, in-session model escalation and tool approvals.
 > Start there to see how Muse is integrated; this repository is the product
 > built on it.
+> What changed during the hackathon: [Built during the hackathon](#built-during-the-hackathon).
 
 - Live: [agnts.uz](https://agnts.uz) (website), [app.agnts.uz](https://app.agnts.uz) (admin panel)
 - Plans and design notes: [`plans/`](plans), starting with
   [Muse plan.md](plans/Muse%20plan.md) and
   [Implementation plan.md](plans/Implementation%20plan.md)
+
+## Built during the hackathon
+
+The hackathon work starts on 26 October 2026. The tag
+[`pre-hackathon`](https://github.com/rustambekabdusalomov/agnts/tree/pre-hackathon) marks the last commit before it
+(`1766a46`, 25 October), so one link shows everything that changed since:
+
+**[Compare pre-hackathon...master](https://github.com/rustambekabdusalomov/agnts/compare/pre-hackathon...master)**
+(over 200 commits; every pull request from #1 on)
+
+[agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse) was started during the hackathon (first commit on
+27 October): all of its history is hackathon work.
+
+| Feature | Built | Where |
+| --- | --- | --- |
+| Muse Code as the primary coding module | During | [agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse) (whole repo), [`server/internal/ai/providers/musecode`](server/internal/ai/providers/musecode), [`2041641`](https://github.com/rustambekabdusalomov/agnts/commit/2041641) |
+| Sign in with Meta, free credits, budget per run, live spend meter | During | [`be6ac02`](https://github.com/rustambekabdusalomov/agnts/commit/be6ac02), [`b06bd5d`](https://github.com/rustambekabdusalomov/agnts/commit/b06bd5d), [`dcd14d7`](https://github.com/rustambekabdusalomov/agnts/commit/dcd14d7), [#7](https://github.com/rustambekabdusalomov/agnts/pull/7) |
+| Code mode: tickets driven from a conversation, `@repo` mentions | During | [#1](https://github.com/rustambekabdusalomov/agnts/pull/1), [#3](https://github.com/rustambekabdusalomov/agnts/pull/3), [#4](https://github.com/rustambekabdusalomov/agnts/pull/4) |
+| Voice questions to the assistant (Muse transcribes) | During | [`63a189b`](https://github.com/rustambekabdusalomov/agnts/commit/63a189b) |
+| Meetings: LiveKit calls, Muse notes, draft tickets per member | During | [#6](https://github.com/rustambekabdusalomov/agnts/pull/6), [#42](https://github.com/rustambekabdusalomov/agnts/pull/42), [#44](https://github.com/rustambekabdusalomov/agnts/pull/44), [`server/internal/meetings`](server/internal/meetings) |
+| Saved work: a stopped run's change is picked up by the next | During | [#13](https://github.com/rustambekabdusalomov/agnts/pull/13) |
+| Coding modules per person (Muse, Claude, Codex) | During | [#17](https://github.com/rustambekabdusalomov/agnts/pull/17), [#18](https://github.com/rustambekabdusalomov/agnts/pull/18), [#20](https://github.com/rustambekabdusalomov/agnts/pull/20), [#21](https://github.com/rustambekabdusalomov/agnts/pull/21), [`server/internal/modules`](server/internal/modules) |
+| AI gateway: one service for every model call, retry on the next route | During | [#22](https://github.com/rustambekabdusalomov/agnts/pull/22), [#23](https://github.com/rustambekabdusalomov/agnts/pull/23), [`server/internal/ai`](server/internal/ai) |
+| Log watcher: log sources, OpenTelemetry, grouped findings, Fix it | During | [#24](https://github.com/rustambekabdusalomov/agnts/pull/24), [#43](https://github.com/rustambekabdusalomov/agnts/pull/43), [#58](https://github.com/rustambekabdusalomov/agnts/pull/58), [`server/internal/logwatch`](server/internal/logwatch) |
+| Team chat with `@agnts`: memory, citations, voice messages, files | During | [#33](https://github.com/rustambekabdusalomov/agnts/pull/33), [#34](https://github.com/rustambekabdusalomov/agnts/pull/34), [#40](https://github.com/rustambekabdusalomov/agnts/pull/40), [#48](https://github.com/rustambekabdusalomov/agnts/pull/48), [#50](https://github.com/rustambekabdusalomov/agnts/pull/50), [`server/internal/chat`](server/internal/chat) |
+| Security testing: scans, findings judged by Muse, Fix this, verify | During | [#47](https://github.com/rustambekabdusalomov/agnts/pull/47), [#52](https://github.com/rustambekabdusalomov/agnts/pull/52), [#53](https://github.com/rustambekabdusalomov/agnts/pull/53), [#55](https://github.com/rustambekabdusalomov/agnts/pull/55), [#56](https://github.com/rustambekabdusalomov/agnts/pull/56), [#63](https://github.com/rustambekabdusalomov/agnts/pull/63), [`server/internal/security`](server/internal/security) |
+| Performance reviews from delivered complexity | During | [#59](https://github.com/rustambekabdusalomov/agnts/pull/59), [`server/internal/perfreview`](server/internal/perfreview) |
+| Tickets from Jira and Plane, coded in isolated containers, PR after approval | Before | [`server/internal/orchestrator`](server/internal/orchestrator), [`server/internal/runner`](server/internal/runner) |
+| Code review, pull request reviews, CI watching | Before | [`server/internal/ciwatch`](server/internal/ciwatch), [`server/internal/vcs`](server/internal/vcs) |
+| UI previews with screenshots, Learn, team rules, queue order | Before | [`deploy/runner/preview`](deploy/runner/preview), [`plans/`](plans) |
+| AI Chat assistant and the MCP server | Before | [`server/internal/mcpserver`](server/internal/mcpserver) |
+| Documents and slides | Before | [`server/internal/documents`](server/internal/documents) |
+| Private networks (VPN to a workspace's servers) | Before | [`server/internal/privnet`](server/internal/privnet) |
+| Installer CLI, mobile app, website | Before | [`cli/`](cli), [`apps/mobile/`](apps/mobile), [`apps/website/`](apps/website) |
+
+"Before" features keep getting work during the hackathon. For example, the
+ticket flow moved to Muse Code, and code review gained a read-only view
+([#30](https://github.com/rustambekabdusalomov/agnts/pull/30)).
 
 ## What it does
 
