@@ -4403,6 +4403,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/repos/{id}/security/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** A repository's security settings: schedule, exclusions, lowest severity that notifies */
+        get: operations["getSecuritySettings"];
+        /** Save a repository's security settings and schedule its next scan */
+        put: operations["setSecuritySettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/security/scans/{scanId}": {
         parameters: {
             query?: never;
@@ -8251,6 +8271,7 @@ export interface components {
             chat?: components["schemas"]["Model"];
             documents?: components["schemas"]["Model"];
             teamChat?: components["schemas"]["Model"];
+            security?: components["schemas"]["Model"];
         };
         TicketRepo: {
             /** Format: int64 */
@@ -8747,6 +8768,7 @@ export interface components {
             prComments?: components["schemas"]["PRCommentSettings"];
             ci?: components["schemas"]["CISettings"];
             logWatch?: components["schemas"]["LogWatchSettings"];
+            security?: components["schemas"]["SecurityWorkspaceSettings"];
             guard?: components["schemas"]["GuardSettings"];
             /** @description What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) */
             stalls?: string;
@@ -9598,6 +9620,8 @@ export interface components {
             ci?: boolean;
             /** @description The log watcher found something, or a log source stopped */
             logs?: boolean;
+            /** @description A security scan found something new or reopened, or failed */
+            security?: boolean;
         };
         Repository: {
             /** Format: int64 */
@@ -11734,6 +11758,27 @@ export interface components {
             lastSeen: string;
             /** Format: date-time */
             lastChecked: string;
+        };
+        SecuritySettings: {
+            /**
+             * @description Scan on its own at a quiet hour (03:00 UTC)
+             * @enum {string}
+             */
+            schedule: "off" | "daily" | "weekly";
+            /** @description Path patterns no tool reports on, besides vendor, node_modules, dist, build and *.min.js */
+            exclude: string[];
+            minNotify: components["schemas"]["SecSeverity"];
+            /**
+             * Format: date-time
+             * @description When the next scheduled scan is due
+             */
+            nextAt?: string;
+        };
+        SecurityWorkspaceSettings: {
+            /** @description Check agnts's own changes for security issues while they wait for review (advice, never a gate) */
+            autoCheck: boolean;
+            /** @description Scheduled scans a day that may run the agent; later ones run the scanners only (0: no limit) */
+            dailyBudget: number;
         };
         SecurityRepoSummary: {
             /** Format: int64 */
@@ -18951,6 +18996,59 @@ export interface operations {
                         scan: components["schemas"]["SecurityScan"];
                         queued: boolean;
                     };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getSecuritySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecuritySettings"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setSecuritySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SecuritySettings"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecuritySettings"];
                 };
             };
             400: components["responses"]["BadRequest"];

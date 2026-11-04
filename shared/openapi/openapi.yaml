@@ -5464,6 +5464,41 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /repos/{id}/security/settings:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: getSecuritySettings
+      summary: "A repository's security settings: schedule, exclusions, lowest severity that notifies"
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecuritySettings' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: setSecuritySettings
+      summary: Save a repository's security settings and schedule its next scan
+      tags: [security]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SecuritySettings' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecuritySettings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /security/scans/{scanId}:
     parameters:
       - $ref: '#/components/parameters/SecurityScanID'
@@ -10214,6 +10249,7 @@ components:
         chat: { $ref: '#/components/schemas/Model' }
         documents: { $ref: '#/components/schemas/Model' }
         teamChat: { $ref: '#/components/schemas/Model' }
+        security: { $ref: '#/components/schemas/Model' }
 
     TicketRepo:
       type: object
@@ -10740,6 +10776,7 @@ components:
         prComments: { $ref: '#/components/schemas/PRCommentSettings' }
         ci: { $ref: '#/components/schemas/CISettings' }
         logWatch: { $ref: '#/components/schemas/LogWatchSettings' }
+        security: { $ref: '#/components/schemas/SecurityWorkspaceSettings' }
         guard: { $ref: '#/components/schemas/GuardSettings' }
         stalls:
           type: string
@@ -11651,6 +11688,7 @@ components:
         followUps: { type: boolean, description: Follow-up tickets were suggested }
         ci: { type: boolean, description: A watched branch went red }
         logs: { type: boolean, description: 'The log watcher found something, or a log source stopped' }
+        security: { type: boolean, description: 'A security scan found something new or reopened, or failed' }
 
     Repository:
       type: object
@@ -13844,6 +13882,24 @@ components:
         firstSeen: { type: string, format: date-time }
         lastSeen: { type: string, format: date-time }
         lastChecked: { type: string, format: date-time }
+    SecuritySettings:
+      type: object
+      required: [schedule, exclude, minNotify]
+      properties:
+        schedule: { type: string, enum: ['off', daily, weekly], description: 'Scan on its own at a quiet hour (03:00 UTC)' }
+        exclude:
+          type: array
+          maxItems: 50
+          description: 'Path patterns no tool reports on, besides vendor, node_modules, dist, build and *.min.js'
+          items: { type: string, maxLength: 200 }
+        minNotify: { $ref: '#/components/schemas/SecSeverity' }
+        nextAt: { type: string, format: date-time, description: When the next scheduled scan is due }
+    SecurityWorkspaceSettings:
+      type: object
+      required: [autoCheck, dailyBudget]
+      properties:
+        autoCheck: { type: boolean, description: "Check agnts's own changes for security issues while they wait for review (advice, never a gate)" }
+        dailyBudget: { type: integer, minimum: 0, maximum: 200, description: 'Scheduled scans a day that may run the agent; later ones run the scanners only (0: no limit)' }
     SecurityRepoSummary:
       type: object
       required: [repoId, repo, open]

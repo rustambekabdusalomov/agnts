@@ -8,6 +8,7 @@ import { ago } from '../../composables/format'
 import { livePoll } from '../../composables/useLive'
 import { useWorkspace } from '../../stores/workspace'
 import SecFindingList from '../security/SecFindingList.vue'
+import SecuritySettingsCard from './SecuritySettingsCard.vue'
 import { scanBusy, SEC_FILTERS, type SecFilter } from '../security/security'
 import { useSecurityActions } from '../security/useSecurityActions'
 
@@ -118,6 +119,8 @@ const changes = (s: SecurityScan) => {
       <template #empty>{{ list.length ? t('security.emptyActive') : t('security.emptyNoScan') }}</template>
     </SecFindingList>
   </section>
+
+  <SecuritySettingsCard :repo-id="repoId" />
 </template>
 
 <style scoped>

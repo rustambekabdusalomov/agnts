@@ -343,6 +343,83 @@ type SecScope struct {
 	FullHistory bool `json:"fullHistory,omitempty"`
 }
 
+// SecuritySettings are a repository's security testing settings.
+type SecuritySettings struct {
+	// Schedule scans the repository on its own: off (""), daily or weekly.
+	Schedule string `json:"schedule,omitempty"`
+	// Exclude are path patterns no tool reports on, besides
+	// SecDefaultExclude (vendor, node_modules, *.min.js, ...).
+	Exclude []string `json:"exclude,omitempty"`
+	// MinNotify is the lowest severity of a new or reopened finding that
+	// notifies; "" is high.
+	MinNotify SecSeverity `json:"minNotify,omitempty"`
+}
+
+// Schedules.
+const (
+	SecScheduleOff    = ""
+	SecScheduleDaily  = "daily"
+	SecScheduleWeekly = "weekly"
+)
+
+// Normalize cleans the settings and reports what is wrong with them.
+func (s *SecuritySettings) Normalize() error {
+	if s.Schedule == "off" {
+		s.Schedule = SecScheduleOff
+	}
+	if s.Schedule != SecScheduleOff && s.Schedule != SecScheduleDaily && s.Schedule != SecScheduleWeekly {
+		return fmt.Errorf("schedule must be off, daily or weekly")
+	}
+	if s.MinNotify != "" && !s.MinNotify.Valid() {
+		return fmt.Errorf("unknown severity %q", s.MinNotify)
+	}
+	var ex []string
+	for _, p := range s.Exclude {
+		p = strings.TrimSpace(p)
+		if p == "" || slices.Contains(ex, p) {
+			continue
+		}
+		if strings.HasPrefix(p, "/") || strings.Contains(p, "..") || len(p) > 200 || strings.ContainsAny(p, "\n\r\x00") {
+			return fmt.Errorf("exclusion %q must be a relative path pattern", p)
+		}
+		ex = append(ex, p)
+	}
+	if len(ex) > 50 {
+		return fmt.Errorf("at most 50 exclusions")
+	}
+	s.Exclude = ex
+	return nil
+}
+
+// NotifyAt is the lowest severity that notifies.
+func (s SecuritySettings) NotifyAt() SecSeverity {
+	if s.MinNotify.Valid() {
+		return s.MinNotify
+	}
+	return SecHigh
+}
+
+// NextScan is when a scheduled scan is next due after now: a quiet hour
+// (03:00 UTC, spread over an hour by repository so they do not all start
+// at once), the next day or a week later; nil when off.
+func (s SecuritySettings) NextScan(repoID int64, now time.Time) *time.Time {
+	days := 0
+	switch s.Schedule {
+	case SecScheduleDaily:
+		days = 1
+	case SecScheduleWeekly:
+		days = 7
+	default:
+		return nil
+	}
+	day := now.UTC().Truncate(24 * time.Hour)
+	at := day.Add(3*time.Hour + time.Duration(repoID%60)*time.Minute)
+	for !at.After(now) {
+		at = at.AddDate(0, 0, days)
+	}
+	return &at
+}
+
 // SecHistoryCommits is how many commits a later scan reads for secrets.
 const SecHistoryCommits = 200
 
@@ -739,6 +816,9 @@ type SecScanResult struct {
 	// Symbol names the function around a line (security.Symbol, reading
 	// the file); nil leaves symbols empty.
 	Symbol func(file string, line int) string
+	// MinNotify is the lowest severity of a new or reopened finding that
+	// counts in SecCounts.Notify; "" is high.
+	MinNotify SecSeverity
 }
 
 // SecurityCandidates turns what a scan saw into findings (not yet matched
@@ -882,6 +962,7 @@ func fromHit(h SecHit) SecurityFinding {
 // ran in this scan and did not see it (see closes).
 func ReconcileSecurity(existing []SecurityFinding, cands []SecurityFinding, res SecScanResult, scanID int64, now time.Time) ([]SecurityFinding, SecCounts) {
 	var counts SecCounts
+	notifyAt := SecuritySettings{MinNotify: res.MinNotify}.NotifyAt()
 	existing = slices.Clone(existing) // the caller's findings stay as they were
 	byFP := map[string]int{}
 	for i, f := range existing {
@@ -927,7 +1008,7 @@ func ReconcileSecurity(existing []SecurityFinding, cands []SecurityFinding, res 
 		case SecFixed:
 			f.Status = SecReopened
 			counts.Reopened++
-			if f.Severity.Rank() >= SecHigh.Rank() {
+			if f.Severity.Rank() >= notifyAt.Rank() {
 				counts.Notify++
 			}
 		case SecVerifying:
@@ -962,7 +1043,7 @@ func ReconcileSecurity(existing []SecurityFinding, cands []SecurityFinding, res 
 		added = append(added, c)
 		byFP[c.Fingerprint] = -1
 		counts.New++
-		if c.Severity.Rank() >= SecHigh.Rank() {
+		if c.Severity.Rank() >= notifyAt.Rank() {
 			counts.Notify++
 		}
 	}

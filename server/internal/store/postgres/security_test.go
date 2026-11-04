@@ -161,3 +161,44 @@ func TestSecurityStore(t *testing.T) {
 		t.Fatalf("scans = %d", len(list))
 	}
 }
+
+func TestSecuritySettingsStore(t *testing.T) {
+	users, _ := testDB(t)
+	ctx, _ := testWS(t, users)
+	s := NewAgent(users.db)
+	sec := NewSecurity(users.db)
+	repo, err := s.SaveRepository(ctx, domain.Repository{Name: "api", Kind: "side", Provider: "github", CloneURL: "https://github.com/a/api.git", DefaultBranch: "main"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	set := domain.SecuritySettings{Schedule: domain.SecScheduleDaily, Exclude: []string{"testdata/**"}, MinNotify: domain.SecMedium}
+	past := time.Now().Add(-time.Minute)
+	if err := sec.SetSecuritySettings(ctx, repo.ID, set, &past); err != nil {
+		t.Fatal(err)
+	}
+	// Saving the guardrails keeps the security settings.
+	if _, err := s.SetRepoHarness(ctx, repo.ID, domain.RepoHarness{GuardProfile: "strict"}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := sec.SecuritySettings(ctx, repo.ID)
+	if err != nil || got.Schedule != "daily" || len(got.Exclude) != 1 || got.MinNotify != domain.SecMedium {
+		t.Fatalf("after a guardrails save: %+v %v", got, err)
+	}
+	if r, _ := s.RepositoryByID(ctx, repo.ID); r.Harness.GuardProfile != "strict" || r.Harness.Security.Schedule != "daily" {
+		t.Fatalf("harness = %+v", r.Harness)
+	}
+	// Due once; the next time moves on, so it is not due again.
+	due, err := sec.DueSecurityScans(domain.System(ctx), time.Now())
+	if err != nil || len(due) != 1 || due[0].RepoID != repo.ID || due[0].Settings.Schedule != "daily" {
+		t.Fatalf("due: %+v %v", due, err)
+	}
+	if again, _ := sec.DueSecurityScans(domain.System(ctx), time.Now()); len(again) != 0 {
+		t.Fatalf("due twice: %+v", again)
+	}
+	if err := sec.SetSecuritySettings(ctx, 999999, set, nil); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("missing repository: %v", err)
+	}
+	if n, err := sec.AgentScansSince(ctx, time.Now().Add(-time.Hour)); err != nil || n != 0 {
+		t.Fatalf("agent scans = %d %v", n, err)
+	}
+}

@@ -223,6 +223,20 @@ type NotifySettings struct {
 	// Logs announces what the log watcher finds, and a log source that
 	// stopped.
 	Logs bool `json:"logs"`
+	// Security announces scans that found new or reopened findings at a
+	// repository's MinNotify or above, and scans that failed.
+	Security bool `json:"security"`
+}
+
+// SecurityWorkspaceSettings are the workspace's security testing choices.
+type SecurityWorkspaceSettings struct {
+	// AutoCheck runs the security check on agnts's own changes (a side
+	// stage beside review and preview; advice, never a gate).
+	AutoCheck bool `json:"autoCheck"`
+	// DailyBudget is how many scheduled scans a day may run the agent;
+	// later ones that day run the scanners only. Scans people start are
+	// not counted against it.
+	DailyBudget int `json:"dailyBudget"`
 }
 
 // Settings are the runtime settings edited on the Settings page.
@@ -282,6 +296,9 @@ type Settings struct {
 	// LogWatch: agnts reads the projects' logs and reports or fixes what
 	// it finds there.
 	LogWatch LogWatchSettings `json:"logWatch"`
+	// Security: security testing of the repositories and of agnts's
+	// own changes.
+	Security SecurityWorkspaceSettings `json:"security"`
 	// Guard: how strict agnts-guard, the hooks inside every run, is.
 	Guard GuardSettings `json:"guard"`
 	// SecondOpinion is the model ("codex:<model>", or a Claude model) that
@@ -389,6 +406,7 @@ func DefaultSettings() Settings {
 		PRComments:      DefaultPRCommentSettings(),
 		CI:              DefaultCISettings(),
 		LogWatch:        DefaultLogWatchSettings(),
+		Security:        SecurityWorkspaceSettings{AutoCheck: true, DailyBudget: 10},
 		Guard:           GuardSettings{Profile: GuardStandard, Disabled: []string{}, FactCheck: 50},
 		Stalls:          StallsLog,
 		ProveFixes:      true,
@@ -402,7 +420,7 @@ func DefaultSettings() Settings {
 
 		MaxTicketRepos: DefaultMaxTicketRepos,
 		Git:            GitSettings{CoAuthor: true, PRTitle: DefaultPRTitle},
-		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true, Logs: true},
+		Notify:         NotifySettings{Push: true, Telegram: true, NeedsYou: true, Stopped: true, Done: true, Progress: true, Lessons: true, Review: true, Preview: true, PreviewPhotos: true, FollowUps: true, CI: true, Logs: true, Security: true},
 		Meetings:       DefaultMeetingSettings(),
 	}
 }

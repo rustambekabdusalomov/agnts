@@ -87,7 +87,7 @@ const busy = computed(() => fix.isPending.value || dismiss.isPending.value || re
         <textarea v-model="note" rows="2" maxlength="1000" :placeholder="t('security.notePlaceholder')" :aria-label="t('security.note')" />
         <div class="actions" style="margin: 0">
           <button type="button" class="btn btn-p" :disabled="busy" @click="doDismiss">{{ t('security.dismiss') }}</button>
-          <button type="button" class="btn" @click="dismissing = false">{{ t('common.cancel') }}</button>
+          <button type="button" class="btn" @click="dismissing = false">{{ t('security.cancel') }}</button>
         </div>
       </div>
     </section>

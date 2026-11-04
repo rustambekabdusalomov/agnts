@@ -283,3 +283,53 @@ func TestSecurityScanAgentLimitAndFailure(t *testing.T) {
 		t.Fatalf("a failed scan changed findings: %d → %d", len(fs), len(after))
 	}
 }
+
+func TestSecurityScheduledScans(t *testing.T) {
+	h, sec, repo := newSecurityHarness(t)
+	h.runner.head = "0123456789abcdef0123456789abcdef01234567"
+	if _, err := h.o.SetSecuritySettings(h.ctx, repo, domain.SecuritySettings{Schedule: "hourly"}, domain.OriginWeb); err == nil {
+		t.Fatal("accepted an unknown schedule")
+	}
+	if _, err := h.o.SetSecuritySettings(h.ctx, repo, domain.SecuritySettings{Schedule: domain.SecScheduleDaily, Exclude: []string{"handlers/**"}}, domain.OriginWeb); err != nil {
+		t.Fatal(err)
+	}
+	// Make it due now, as the minute tick would find it.
+	past := time.Now().Add(-time.Minute)
+	if err := sec.SetSecuritySettings(h.ctx, repo, domain.SecuritySettings{Schedule: domain.SecScheduleDaily, Exclude: []string{"handlers/**"}}, &past); err != nil {
+		t.Fatal(err)
+	}
+	h.o.SecurityTick(h.ctx) // enqueue due scans
+	scans, _ := sec.SecurityScans(h.ctx, repo, 5)
+	if len(scans) != 1 || scans[0].Trigger != domain.SecSchedule || !scans[0].Scope.FullHistory {
+		t.Fatalf("scheduled scan: %+v", scans)
+	}
+	h.runner.scripts = []script{{result: ok("sec1"), files: map[string]string{orchestrator.SecurityPath: manifest(map[string]any{"summary": "ok"})}}}
+	h.step()
+	fs, _ := sec.SecurityFindings(h.ctx, domain.SecFindingFilter{RepoID: repo})
+	for _, f := range fs {
+		if strings.HasPrefix(f.Data.Location.File, "handlers/") {
+			t.Fatalf("an excluded path was reported: %+v", f)
+		}
+	}
+
+	// The same commit and databases again: nothing runs, nothing is said.
+	_ = sec.SetSecuritySettings(h.ctx, repo, domain.SecuritySettings{Schedule: domain.SecScheduleDaily}, &past)
+	h.o.SecurityTick(h.ctx)
+	prompts := len(h.runner.prompts)
+	h.step()
+	scans, _ = sec.SecurityScans(h.ctx, repo, 5)
+	if len(h.runner.prompts) != prompts || scans[0].Status != domain.ScanDone || !strings.Contains(scans[0].Summary, "Nothing changed") {
+		t.Fatalf("unchanged scheduled scan: %+v", scans[0])
+	}
+
+	// A new commit, but the daily budget is used: the scanners only.
+	h.runner.head = "1123456789abcdef0123456789abcdef01234567"
+	h.settings.s.Security.DailyBudget = 1
+	_ = sec.SetSecuritySettings(h.ctx, repo, domain.SecuritySettings{Schedule: domain.SecScheduleDaily}, &past)
+	h.o.SecurityTick(h.ctx)
+	h.step()
+	scans, _ = sec.SecurityScans(h.ctx, repo, 5)
+	if len(h.runner.prompts) != prompts || scans[0].Ran.Agent != domain.SecAgentSkipped || !strings.Contains(scans[0].Summary, "budget") {
+		t.Fatalf("over budget: %+v", scans[0])
+	}
+}

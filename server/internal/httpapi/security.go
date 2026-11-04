@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"agnts/internal/domain"
 	"agnts/internal/httpapi/gen"
@@ -18,6 +19,7 @@ type Security interface {
 	CreateSecurityTicket(ctx context.Context, in orchestrator.SecurityFixInput, origin domain.Origin) (domain.Ticket, error)
 	DismissFindings(ctx context.Context, ids []int64, reason, note string, by *int64, origin domain.Origin) ([]domain.SecurityFinding, error)
 	ReopenFinding(ctx context.Context, id int64, origin domain.Origin) (domain.SecurityFinding, error)
+	SetSecuritySettings(ctx context.Context, repoID int64, set domain.SecuritySettings, origin domain.Origin) (domain.SecuritySettings, error)
 }
 
 // SecurityReads is what the Security pages read (postgres.Security).
@@ -28,6 +30,7 @@ type SecurityReads interface {
 	SecurityFinding(ctx context.Context, id int64) (domain.SecurityFinding, error)
 	FindingsByTicket(ctx context.Context, key string) ([]domain.SecurityFinding, error)
 	SecuritySummaries(ctx context.Context) ([]postgres.SecuritySummary, error)
+	SecuritySettings(ctx context.Context, repoID int64) (domain.SecuritySettings, error)
 }
 
 var (
@@ -346,4 +349,45 @@ func (s *Server) GetTicketSecurityFindings(w http.ResponseWriter, r *http.Reques
 	}
 	fs, err := s.opt.SecurityReads.FindingsByTicket(r.Context(), key)
 	s.writeFindings(w, r, fs, err)
+}
+
+func toSecuritySettings(repoID int64, x domain.SecuritySettings) gen.SecuritySettings {
+	out := gen.SecuritySettings{Schedule: gen.SecuritySettingsSchedule(cmpOr(x.Schedule, "off")), Exclude: strSlice(x.Exclude),
+		MinNotify: gen.SecSeverity(x.NotifyAt())}
+	if next := x.NextScan(repoID, time.Now()); next != nil {
+		out.NextAt = next
+	}
+	return out
+}
+
+// GetSecuritySettings implements gen.ServerInterface.
+func (s *Server) GetSecuritySettings(w http.ResponseWriter, r *http.Request, id gen.RepoID) {
+	if !s.securityReady(w) {
+		return
+	}
+	set, err := s.opt.SecurityReads.SecuritySettings(r.Context(), id)
+	if err != nil {
+		s.writeSecurityError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toSecuritySettings(id, set))
+}
+
+// SetSecuritySettings implements gen.ServerInterface.
+func (s *Server) SetSecuritySettings(w http.ResponseWriter, r *http.Request, id gen.RepoID) {
+	if !s.securityReady(w) {
+		return
+	}
+	var req gen.SecuritySettings
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", err.Error())
+		return
+	}
+	set := domain.SecuritySettings{Schedule: string(req.Schedule), Exclude: req.Exclude, MinNotify: domain.SecSeverity(req.MinNotify)}
+	saved, err := s.opt.Security.SetSecuritySettings(r.Context(), id, set, origin(r))
+	if err != nil {
+		s.writeSecurityError(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toSecuritySettings(id, saved))
 }

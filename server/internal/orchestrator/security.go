@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"time"
@@ -67,6 +68,75 @@ type SecurityStore interface {
 	FixingTickets(ctx context.Context) ([]domain.TicketRef, error)
 	UpdateSecurityFindings(ctx context.Context, ids []int64, mut func(*domain.SecurityFinding) error,
 		ev func([]domain.SecurityFinding) *domain.Event) ([]domain.SecurityFinding, error)
+	SetSecuritySettings(ctx context.Context, repoID int64, set domain.SecuritySettings, next *time.Time) error
+	DueSecurityScans(ctx context.Context, now time.Time) ([]DueSecurityScan, error)
+	AgentScansSince(ctx context.Context, t time.Time) (int, error)
+}
+
+// DueSecurityScan is a repository whose scheduled scan is due.
+type DueSecurityScan struct {
+	RepoID      int64
+	WorkspaceID int64
+	Settings    domain.SecuritySettings
+}
+
+// errUnchanged ends a scheduled scan of a commit that was already scanned
+// with the same vulnerability databases: nothing can have changed.
+var errUnchanged = errors.New("unchanged since the last scan")
+
+// SetSecuritySettings saves a repository's security settings and
+// schedules its next scan.
+func (o *Orchestrator) SetSecuritySettings(ctx context.Context, repoID int64, set domain.SecuritySettings, origin domain.Origin) (domain.SecuritySettings, error) {
+	if err := o.securityReady(); err != nil {
+		return set, err
+	}
+	if err := set.Normalize(); err != nil {
+		return set, invalid("%s", err)
+	}
+	repo, err := o.store.RepositoryByID(ctx, repoID)
+	if err != nil {
+		return set, err
+	}
+	if err := o.security.SetSecuritySettings(ctx, repoID, set, set.NextScan(repoID, time.Now())); err != nil {
+		return set, err
+	}
+	sched := cmp.Or(set.Schedule, "off")
+	o.event(ctx, securityEvent(origin, domain.LevelInfo, fmt.Sprintf("%s: security settings changed (schedule %s, %d exclusions)", repo.Name, sched, len(set.Exclude)),
+		map[string]any{"repo": repoID, "schedule": sched}))
+	return set, nil
+}
+
+// SecurityTick is security testing's minute work: follow fix tickets and
+// queue the scheduled scans that are due.
+func (o *Orchestrator) SecurityTick(ctx context.Context) {
+	o.SyncSecurityTickets(ctx)
+	o.enqueueDueScans(ctx)
+}
+
+// enqueueDueScans queues the scheduled scans that are due.
+func (o *Orchestrator) enqueueDueScans(ctx context.Context) {
+	if o.security == nil {
+		return
+	}
+	due, err := o.security.DueSecurityScans(domain.System(ctx), time.Now())
+	if err != nil {
+		if ctx.Err() == nil {
+			o.log.Warn("read due security scans", "err", err)
+		}
+		return
+	}
+	for _, d := range due {
+		wctx := domain.WithWorkspace(ctx, d.WorkspaceID)
+		_, err := o.security.LastFullScan(wctx, d.RepoID)
+		first := errors.Is(err, domain.ErrNotFound)
+		if _, _, err := o.security.CreateSecurityScan(wctx, domain.SecurityScan{RepoID: d.RepoID, Trigger: domain.SecSchedule,
+			Scope: domain.SecScope{FullHistory: first}}); err != nil {
+			o.log.Warn("queue scheduled security scan", "repo", d.RepoID, "err", err)
+		}
+	}
+	if len(due) > 0 {
+		o.Wake()
+	}
 }
 
 func (o *Orchestrator) securityReady() error {
@@ -197,9 +267,12 @@ func (o *Orchestrator) runSecurityScan(parent context.Context, scan domain.Secur
 		return
 	}
 	var apply func([]domain.SecurityFinding) ([]domain.SecurityFinding, domain.SecCounts)
-	if err != nil {
+	switch {
+	case errors.Is(err, errUnchanged):
+		out.Status, out.Summary, err = domain.ScanDone, "Nothing changed since the last scan: the same commit and the same vulnerability databases.", nil
+	case err != nil:
 		out.Status, out.Error = domain.ScanFailed, err.Error()
-	} else {
+	default:
 		out.Status = domain.ScanDone
 		apply = func(existing []domain.SecurityFinding) ([]domain.SecurityFinding, domain.SecCounts) {
 			cands, rejected := domain.SecurityCandidates(scan.RepoID, res)
@@ -212,9 +285,11 @@ func (o *Orchestrator) runSecurityScan(parent context.Context, scan domain.Secur
 			return save, counts
 		}
 	}
-	saved, serr := o.security.FinishSecurityScan(bg, out, apply, func(x domain.SecurityScan) *domain.Event {
-		return scanEvent(x)
-	})
+	ev := func(x domain.SecurityScan) *domain.Event { return scanEvent(x) }
+	if out.Status == domain.ScanDone && apply == nil {
+		ev = nil // an unchanged scheduled scan says nothing
+	}
+	saved, serr := o.security.FinishSecurityScan(bg, out, apply, ev)
 	switch {
 	case errors.Is(serr, domain.ErrScanStale):
 		log.Info("security scan was cancelled; result dropped")
@@ -310,8 +385,16 @@ func (o *Orchestrator) securityScan(ctx context.Context, scan domain.SecuritySca
 		}
 	}
 
+	// A scheduled scan of what was already scanned changes nothing.
+	if scan.Trigger == domain.SecSchedule && scan.Commit != "" {
+		if last, err := o.security.LastFullScan(ctx, scan.RepoID); err == nil && last.Commit == scan.Commit && maps.Equal(last.DBVersions, scan.DBVersions) {
+			return scan, res, errUnchanged
+		}
+	}
+	res.MinNotify = repo.Harness.Security.MinNotify
+
 	// The static sweep, before the agent.
-	exclude := slices.Clone(domain.SecDefaultExclude)
+	exclude := slices.Concat(domain.SecDefaultExclude, repo.Harness.Security.Exclude)
 	if err := ws.WriteFile(ctx, SecExcludePath, []byte(strings.Join(exclude, "\n")+"\n")); err != nil {
 		return scan, res, fmt.Errorf("write exclusions: %w", err)
 	}
@@ -400,6 +483,14 @@ func (o *Orchestrator) securityScan(ctx context.Context, scan domain.SecuritySca
 			needAgent = true // only the agent can recheck its own findings
 		}
 		in.Known = append(in.Known, k)
+	}
+	// Scheduled scans share a daily budget of agent runs; past it they
+	// run the scanners only.
+	if needAgent && scan.Trigger == domain.SecSchedule && s.Security.DailyBudget > 0 {
+		if n, err := o.security.AgentScansSince(ctx, time.Now().UTC().Truncate(24*time.Hour)); err == nil && n >= s.Security.DailyBudget {
+			needAgent = false
+			scan.Summary = fmt.Sprintf("The daily budget of %d scheduled scans with %s is used up: only the scanners ran.", s.Security.DailyBudget, domain.AgentName(""))
+		}
 	}
 	if !needAgent {
 		ran.Agent = domain.SecAgentSkipped

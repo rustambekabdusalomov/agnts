@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -15,6 +16,7 @@ import (
 type fakeSecurity struct {
 	dismissed []int64
 	fixed     []int64
+	settings  domain.SecuritySettings
 }
 
 var secNow = time.Date(2026, 11, 4, 9, 0, 0, 0, time.UTC)
@@ -138,5 +140,36 @@ func TestSecurityAPI(t *testing.T) {
 	}
 	if rec := h.do("GET", "/api/w/acme/security/findings", "", cookie); rec.Code != http.StatusOK {
 		t.Fatalf("a viewer could not read: %d", rec.Code)
+	}
+}
+
+func (f *fakeSecurity) SetSecuritySettings(_ context.Context, _ int64, set domain.SecuritySettings, _ domain.Origin) (domain.SecuritySettings, error) {
+	if err := set.Normalize(); err != nil {
+		return set, fmt.Errorf("%w: %v", orchestrator.ErrInvalid, err)
+	}
+	f.settings = set
+	return set, nil
+}
+
+func (f *fakeSecurity) SecuritySettings(context.Context, int64) (domain.SecuritySettings, error) {
+	return f.settings, nil
+}
+
+func TestSecuritySettingsAPI(t *testing.T) {
+	h := newHarness(t, pinger{})
+	cookie := h.signIn(t)
+	rec := h.do("PUT", "/api/w/acme/repos/1/security/settings", `{"schedule":"weekly","exclude":["testdata/**"],"minNotify":"medium"}`, cookie)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"nextAt":"`) || h.security.settings.Schedule != "weekly" {
+		t.Fatalf("save: %d %s", rec.Code, rec.Body)
+	}
+	if rec := h.do("GET", "/api/w/acme/repos/1/security/settings", "", cookie); rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"minNotify":"medium"`) {
+		t.Fatalf("get: %d %s", rec.Code, rec.Body)
+	}
+	if rec := h.do("PUT", "/api/w/acme/repos/1/security/settings", `{"schedule":"daily","exclude":["../x"],"minNotify":"high"}`, cookie); rec.Code != http.StatusBadRequest {
+		t.Fatalf("bad exclusion: %d", rec.Code)
+	}
+	h.workspaces.roles[[2]int64{1, 1}] = domain.RoleUser
+	if rec := h.do("PUT", "/api/w/acme/repos/1/security/settings", `{"schedule":"off","exclude":[],"minNotify":"high"}`, cookie); rec.Code != http.StatusForbidden {
+		t.Fatalf("a member changed settings: %d", rec.Code)
 	}
 }

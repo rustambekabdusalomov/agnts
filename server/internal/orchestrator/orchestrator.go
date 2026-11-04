@@ -382,7 +382,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 		}
 		if o.security != nil && time.Since(lastSecSync) > time.Minute {
 			lastSecSync = time.Now()
-			o.SyncSecurityTickets(sys)
+			o.SecurityTick(sys)
 		}
 		if o.security != nil && o.cfg.Image != "" && time.Since(lastSecDB) > secDBEvery && secDBBusy.CompareAndSwap(false, true) {
 			lastSecDB = time.Now()

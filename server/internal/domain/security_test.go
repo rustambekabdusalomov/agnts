@@ -371,3 +371,46 @@ func TestReconcileKeepsJudgment(t *testing.T) {
 		t.Fatalf("new judgment ignored: %+v", out[0])
 	}
 }
+
+func TestSecuritySettings(t *testing.T) {
+	s := SecuritySettings{Schedule: "off", Exclude: []string{" vendor ", "vendor", ""}, MinNotify: SecMedium}
+	if err := s.Normalize(); err != nil || s.Schedule != "" || len(s.Exclude) != 1 {
+		t.Fatalf("normalize: %+v %v", s, err)
+	}
+	for _, bad := range []SecuritySettings{{Schedule: "hourly"}, {MinNotify: "urgent"}, {Exclude: []string{"../etc"}}, {Exclude: []string{"/abs"}}} {
+		if err := bad.Normalize(); err == nil {
+			t.Errorf("accepted %+v", bad)
+		}
+	}
+	if (SecuritySettings{}).NotifyAt() != SecHigh || s.NotifyAt() != SecMedium {
+		t.Fatal("NotifyAt")
+	}
+	now := time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)
+	if (SecuritySettings{}).NextScan(1, now) != nil {
+		t.Fatal("off has a next scan")
+	}
+	d := SecuritySettings{Schedule: SecScheduleDaily}.NextScan(5, now)
+	if d == nil || !d.Equal(time.Date(2026, 11, 5, 3, 5, 0, 0, time.UTC)) {
+		t.Fatalf("daily = %v", d)
+	}
+	early := time.Date(2026, 11, 4, 1, 0, 0, 0, time.UTC)
+	if d := (SecuritySettings{Schedule: SecScheduleDaily}).NextScan(5, early); !d.Equal(time.Date(2026, 11, 4, 3, 5, 0, 0, time.UTC)) {
+		t.Fatalf("daily before 3am = %v", d)
+	}
+	if w := (SecuritySettings{Schedule: SecScheduleWeekly}).NextScan(5, now); !w.Equal(time.Date(2026, 11, 11, 3, 5, 0, 0, time.UTC)) {
+		t.Fatalf("weekly = %v", w)
+	}
+}
+
+func TestReconcileMinNotify(t *testing.T) {
+	hit := sqliHit("h1", 20) // medium
+	res := SecScanResult{Hits: []SecHit{hit}, Ran: allRan()}
+	cands, _ := SecurityCandidates(1, res)
+	if _, c := ReconcileSecurity(nil, cands, res, 1, time.Now()); c.Notify != 0 {
+		t.Fatalf("medium notified at the default (high): %+v", c)
+	}
+	res.MinNotify = SecMedium
+	if _, c := ReconcileSecurity(nil, cands, res, 1, time.Now()); c.Notify != 1 {
+		t.Fatalf("medium did not notify at medium: %+v", c)
+	}
+}

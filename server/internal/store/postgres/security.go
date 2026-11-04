@@ -6,12 +6,16 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"agnts/internal/domain"
+	"agnts/internal/orchestrator"
 )
+
+var _ orchestrator.SecurityStore = (*Security)(nil)
 
 // Security stores security scans and findings.
 type Security struct{ db *pgxpool.Pool }
@@ -405,6 +409,76 @@ func (st *Security) UpdateSecurityFindings(ctx context.Context, ids []int64, mut
 		return nil
 	})
 	return out, err
+}
+
+// SetSecuritySettings saves a repository's security settings and when
+// its next scheduled scan is due (nil: none).
+func (st *Security) SetSecuritySettings(ctx context.Context, repoID int64, set domain.SecuritySettings, next *time.Time) error {
+	raw, err := json.Marshal(set)
+	if err != nil {
+		return err
+	}
+	tag, err := st.db.Exec(ctx, `UPDATE repositories SET harness = jsonb_set(harness, '{security}', $2::jsonb),
+		security_next_at = $3, updated_at = now() WHERE id = $1`, repoID, raw, next)
+	if err == nil && tag.RowsAffected() == 0 {
+		return domain.ErrNotFound
+	}
+	return err
+}
+
+// SecuritySettings returns a repository's security settings.
+func (st *Security) SecuritySettings(ctx context.Context, repoID int64) (domain.SecuritySettings, error) {
+	var raw []byte
+	var set domain.SecuritySettings
+	if err := st.db.QueryRow(ctx, `SELECT COALESCE(harness->'security', '{}'::jsonb) FROM repositories WHERE id = $1`, repoID).Scan(&raw); err != nil {
+		return set, notFound(err)
+	}
+	err := json.Unmarshal(raw, &set)
+	return set, err
+}
+
+// DueSecurityScans returns the repositories, in every workspace the
+// context sees, whose scheduled scan is due, and moves each one's next
+// time on (so a crash between the two never scans twice in a row).
+func (st *Security) DueSecurityScans(ctx context.Context, now time.Time) ([]orchestrator.DueSecurityScan, error) {
+	var out []orchestrator.DueSecurityScan
+	err := pgx.BeginFunc(ctx, st.db, func(tx pgx.Tx) error {
+		rows, err := tx.Query(ctx, `SELECT id, workspace_id, COALESCE(harness->'security', '{}'::jsonb) FROM repositories
+			WHERE security_next_at IS NOT NULL AND security_next_at <= $1 AND archived_at IS NULL
+			ORDER BY security_next_at FOR UPDATE SKIP LOCKED`, now)
+		if err != nil {
+			return err
+		}
+		for rows.Next() {
+			var d orchestrator.DueSecurityScan
+			var raw []byte
+			if err := rows.Scan(&d.RepoID, &d.WorkspaceID, &raw); err != nil {
+				rows.Close()
+				return err
+			}
+			_ = json.Unmarshal(raw, &d.Settings)
+			out = append(out, d)
+		}
+		rows.Close()
+		if err := rows.Err(); err != nil {
+			return err
+		}
+		for _, d := range out {
+			if _, err := tx.Exec(ctx, `UPDATE repositories SET security_next_at = $2 WHERE id = $1`, d.RepoID, d.Settings.NextScan(d.RepoID, now)); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return out, err
+}
+
+// AgentScansSince counts the scans that ran the agent in the workspace
+// since t (the daily budget).
+func (st *Security) AgentScansSince(ctx context.Context, t time.Time) (int, error) {
+	var n int
+	err := st.db.QueryRow(ctx, `SELECT count(*) FROM security_scans WHERE created_at >= $1 AND provider <> ''`, t).Scan(&n)
+	return n, err
 }
 
 // SecuritySummary is one repository's active findings by severity and

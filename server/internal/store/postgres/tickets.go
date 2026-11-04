@@ -520,12 +520,17 @@ func (s *Agent) FinishRun(ctx context.Context, r domain.Run) error {
 // repository, keeping agnts's scan of its agent files.
 func (s *Agent) SetRepoHarness(ctx context.Context, id int64, h domain.RepoHarness) (domain.Repository, error) {
 	h.AgentConfig = nil
+	h.Security = domain.SecuritySettings{}
 	raw, err := json.Marshal(h)
 	if err != nil {
 		return domain.Repository{}, err
 	}
+	// agnts's agent-config scan and the security settings are saved on
+	// their own: keep them.
 	return scanRepo(s.db.QueryRow(ctx, `UPDATE repositories SET
-		harness = CASE WHEN harness ? 'agentConfig' THEN $2::jsonb || jsonb_build_object('agentConfig', harness->'agentConfig') ELSE $2::jsonb END,
+		harness = $2::jsonb
+			|| CASE WHEN harness ? 'agentConfig' THEN jsonb_build_object('agentConfig', harness->'agentConfig') ELSE '{}'::jsonb END
+			|| CASE WHEN harness ? 'security' THEN jsonb_build_object('security', harness->'security') ELSE '{}'::jsonb END,
 		updated_at = now() WHERE id = $1 RETURNING `+repoCols, id, raw))
 }
 
