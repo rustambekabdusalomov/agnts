@@ -18,6 +18,9 @@
     "fromFeedback": "With requested changes",
     "dropOne": "Drop a file here, or",
     "choose": "choose a file",
-    "change": "Choose another"
+    "change": "Choose another",
+    "download": "Download {name}",
+    "drop": "Drop files to send them",
+    "chatHint": "Up to 10 files, 10 MB each"
   }
 }

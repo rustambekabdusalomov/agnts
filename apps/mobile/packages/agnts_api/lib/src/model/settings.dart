@@ -5,6 +5,7 @@
 // ignore_for_file: unused_element
 import 'package:agnts_api/src/model/log_watch_settings.dart';
 import 'package:agnts_api/src/model/notify_settings.dart';
+import 'package:agnts_api/src/model/security_workspace_settings.dart';
 import 'package:agnts_api/src/model/pr_comment_settings.dart';
 import 'package:agnts_api/src/model/ci_settings.dart';
 import 'package:agnts_api/src/model/guard_settings.dart';
@@ -76,6 +77,8 @@ class Settings {
      this.ci,
 
      this.logWatch,
+
+     this.security,
 
      this.guard,
 
@@ -417,6 +420,18 @@ class Settings {
 
   @JsonKey(
     
+    name: r'security',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final SecurityWorkspaceSettings? security;
+
+
+
+  @JsonKey(
+    
     name: r'guard',
     required: false,
     includeIfNull: false,
@@ -623,6 +638,7 @@ class Settings {
       other.prComments == prComments &&
       other.ci == ci &&
       other.logWatch == logWatch &&
+      other.security == security &&
       other.guard == guard &&
       other.stalls == stalls &&
       other.proveFixes == proveFixes &&
@@ -664,6 +680,7 @@ class Settings {
         prComments.hashCode +
         ci.hashCode +
         logWatch.hashCode +
+        security.hashCode +
         guard.hashCode +
         stalls.hashCode +
         proveFixes.hashCode +

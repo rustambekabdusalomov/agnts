@@ -8,6 +8,7 @@ import 'package:agnts_api/agnts_api.dart';
 import '../../core/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme.dart';
+import '../../widgets/attachments.dart';
 import '../../widgets/common.dart';
 import '../../widgets/ui.dart';
 import '../../core/data.dart' show canEditProvider;
@@ -32,6 +33,10 @@ class AssistantScreen extends ConsumerStatefulWidget {
 
 class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   final _text = TextEditingController();
+  // Files go with the next question, and the answer reads them; text is
+  // then optional.
+  late final _files = AttachmentsController()..addListener(_changed);
+  bool _attach = false;
   int? _id;
   bool _sending = false;
   Timer? _poll; // fetches the conversation while an answer is open
@@ -48,7 +53,12 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     _poll?.cancel();
     _tick?.cancel();
     _text.dispose();
+    _files.dispose();
     super.dispose();
+  }
+
+  void _changed() {
+    if (mounted) setState(() {});
   }
 
   /// Polls and ticks while an answer is being made, and stops after.
@@ -67,19 +77,30 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     }
   }
 
+  /// Asks the typed question with the files picked, or [question] again
+  /// (without files: those went with the first asking).
   Future<void> _send([String? question]) async {
     final l = AppLocalizations.of(context);
     final q = (question ?? _text.text).trim();
-    if (q.isEmpty || q.length > _maxQuestion || _sending) return;
+    final files = question == null ? _files.ids : const <int>[];
+    if ((q.isEmpty && files.isEmpty) || q.length > _maxQuestion || _sending || _files.uploading) return;
     setState(() => _sending = true);
     final api = ref.read(apiProvider)!.getAssistantApi();
-    final ask = AssistantAsk(question: q, lang: assistantLanguage(ref, context));
+    final ask = AssistantAsk(
+      question: q.isEmpty ? null : q,
+      lang: assistantLanguage(ref, context),
+      attachments: files.isEmpty ? null : files,
+    );
     try {
       final res = _id == null
           ? await api.startAssistantConversation(assistantAsk: ask)
           : await api.askAssistant(conversationId: _id!, assistantAsk: ask);
       final c = res.data!;
-      if (question == null) _text.clear();
+      if (question == null) {
+        _text.clear();
+        _files.clear();
+        _attach = false;
+      }
       setState(() => _id = c.id);
       ref.invalidate(assistantConversationProvider(c.id));
       ref.invalidate(assistantConversationsProvider);
@@ -126,9 +147,11 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
         itemCount: rev.length,
         itemBuilder: (context, i) {
           final m = rev[i];
-          if (m.role == AssistantMessageRoleEnum.user) return _Question(m.text);
+          if (m.role == AssistantMessageRoleEnum.user) return _Question(m);
           // The question an answer belongs to, to ask again.
-          final q = i + 1 < rev.length && rev[i + 1].role == AssistantMessageRoleEnum.user ? rev[i + 1].text : null;
+          // A question with files is not asked again: its files went with it.
+          final prev = i + 1 < rev.length && rev[i + 1].role == AssistantMessageRoleEnum.user ? rev[i + 1] : null;
+          final q = prev != null && (prev.attachedFiles ?? const []).isEmpty ? prev.text : null;
           return _Answer(m, onAskAgain: q == null ? null : () => _send(q));
         },
       );
@@ -166,7 +189,14 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
         child: Column(
           children: [
             Expanded(child: body),
-            _InputBar(controller: _text, sending: _sending, onSend: () => _send()),
+            _InputBar(
+              controller: _text,
+              files: _files,
+              attach: _attach,
+              onAttach: () => setState(() => _attach = !_attach),
+              sending: _sending,
+              onSend: () => _send(),
+            ),
           ],
         ),
       ),
@@ -221,20 +251,33 @@ class _Empty extends ConsumerWidget {
   }
 }
 
+/// The text the server stores for files sent without words.
+const _filesOnly = 'See the attached files.';
+
+/// A question: its text, and the files it brought.
 class _Question extends StatelessWidget {
-  const _Question(this.text);
-  final String text;
+  const _Question(this.m);
+  final AssistantMessage m;
 
   @override
   Widget build(BuildContext context) {
     final c = Agnts.of(context);
+    final files = [for (final f in m.attachedFiles ?? const <AttachedFile>[]) attachmentOf(f)];
+    final text = files.isNotEmpty && m.text == _filesOnly ? '' : m.text;
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.only(top: 10, left: 48),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(color: c.primarySoft, borderRadius: BorderRadius.circular(18)),
-        child: SelectableText(text, style: TextStyle(fontSize: 15, height: 1.4, color: c.primaryInk)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (text.isNotEmpty) SelectableText(text, style: TextStyle(fontSize: 15, height: 1.4, color: c.primaryInk)),
+            AttachmentList(files),
+          ],
+        ),
       ),
     );
   }
@@ -671,8 +714,18 @@ class _RateSheetState extends State<_RateSheet> {
 
 /// The question field and the send button.
 class _InputBar extends StatefulWidget {
-  const _InputBar({required this.controller, required this.sending, required this.onSend});
+  const _InputBar({
+    required this.controller,
+    required this.files,
+    required this.attach,
+    required this.onAttach,
+    required this.sending,
+    required this.onSend,
+  });
   final TextEditingController controller;
+  final AttachmentsController files;
+  final bool attach;
+  final VoidCallback onAttach;
   final bool sending;
   final VoidCallback onSend;
 
@@ -700,20 +753,33 @@ class _InputBarState extends State<_InputBar> {
     final l = AppLocalizations.of(context);
     final c = Agnts.of(context);
     final n = widget.controller.text.trim().length;
-    final can = n > 0 && n <= _maxQuestion && !widget.sending;
+    final can = (n > 0 || widget.files.ids.isNotEmpty) && n <= _maxQuestion && !widget.sending && !widget.files.uploading;
     return Container(
       decoration: BoxDecoration(
         color: c.surface,
         border: Border(top: BorderSide(color: c.line)),
       ),
-      padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+      padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          if (widget.attach)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: AttachmentPicker(controller: widget.files),
+              ),
+            ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              IconButton(
+                tooltip: l.filesTitle,
+                onPressed: widget.sending ? null : widget.onAttach,
+                icon: Icon(Icons.attach_file_rounded, color: widget.files.ids.isNotEmpty ? c.primary : c.ink3),
+              ),
               Expanded(
                 child: TextField(
                   controller: widget.controller,

@@ -9,7 +9,9 @@ part of 'chat_send_request.dart';
 abstract class _$ChatSendRequestCWProxy {
   ChatSendRequest clientMsgId(String clientMsgId);
 
-  ChatSendRequest body(String body);
+  ChatSendRequest body(String? body);
+
+  ChatSendRequest files(List<int>? files);
 
   ChatSendRequest replyTo(int? replyTo);
 
@@ -19,7 +21,12 @@ abstract class _$ChatSendRequestCWProxy {
   /// ```dart
   /// ChatSendRequest(...).copyWith(id: 12, name: "My name")
   /// ````
-  ChatSendRequest call({String clientMsgId, String body, int? replyTo});
+  ChatSendRequest call({
+    String clientMsgId,
+    String? body,
+    List<int>? files,
+    int? replyTo,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfChatSendRequest.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfChatSendRequest.copyWith.fieldName(...)`
@@ -33,7 +40,10 @@ class _$ChatSendRequestCWProxyImpl implements _$ChatSendRequestCWProxy {
       this(clientMsgId: clientMsgId);
 
   @override
-  ChatSendRequest body(String body) => this(body: body);
+  ChatSendRequest body(String? body) => this(body: body);
+
+  @override
+  ChatSendRequest files(List<int>? files) => this(files: files);
 
   @override
   ChatSendRequest replyTo(int? replyTo) => this(replyTo: replyTo);
@@ -48,6 +58,7 @@ class _$ChatSendRequestCWProxyImpl implements _$ChatSendRequestCWProxy {
   ChatSendRequest call({
     Object? clientMsgId = const $CopyWithPlaceholder(),
     Object? body = const $CopyWithPlaceholder(),
+    Object? files = const $CopyWithPlaceholder(),
     Object? replyTo = const $CopyWithPlaceholder(),
   }) {
     return ChatSendRequest(
@@ -58,7 +69,11 @@ class _$ChatSendRequestCWProxyImpl implements _$ChatSendRequestCWProxy {
       body: body == const $CopyWithPlaceholder()
           ? _value.body
           // ignore: cast_nullable_to_non_nullable
-          : body as String,
+          : body as String?,
+      files: files == const $CopyWithPlaceholder()
+          ? _value.files
+          // ignore: cast_nullable_to_non_nullable
+          : files as List<int>?,
       replyTo: replyTo == const $CopyWithPlaceholder()
           ? _value.replyTo
           // ignore: cast_nullable_to_non_nullable
@@ -79,10 +94,14 @@ extension $ChatSendRequestCopyWith on ChatSendRequest {
 
 ChatSendRequest _$ChatSendRequestFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ChatSendRequest', json, ($checkedConvert) {
-      $checkKeys(json, requiredKeys: const ['clientMsgId', 'body']);
+      $checkKeys(json, requiredKeys: const ['clientMsgId']);
       final val = ChatSendRequest(
         clientMsgId: $checkedConvert('clientMsgId', (v) => v as String),
-        body: $checkedConvert('body', (v) => v as String),
+        body: $checkedConvert('body', (v) => v as String?),
+        files: $checkedConvert(
+          'files',
+          (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+        ),
         replyTo: $checkedConvert('replyTo', (v) => (v as num?)?.toInt()),
       );
       return val;
@@ -91,6 +110,7 @@ ChatSendRequest _$ChatSendRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ChatSendRequestToJson(ChatSendRequest instance) =>
     <String, dynamic>{
       'clientMsgId': instance.clientMsgId,
-      'body': instance.body,
+      'body': ?instance.body,
+      'files': ?instance.files,
       'replyTo': ?instance.replyTo,
     };

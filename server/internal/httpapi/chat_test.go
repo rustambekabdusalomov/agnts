@@ -51,6 +51,9 @@ func (f *fakeChat) Send(_ context.Context, in domain.ChatSend) (domain.ChatMessa
 		return m, false, nil
 	}
 	m := domain.ChatMessage{ID: int64(len(f.sent) + 10), ChannelID: in.ChannelID, Body: in.Body, ClientMsgID: in.ClientMsgID, Kind: domain.ChatKindText, Refs: []domain.ChatRef{}}
+	for _, id := range in.Files {
+		m.Files = append(m.Files, domain.Attachment{ID: id, Name: "shot.png", ContentType: "image/png", Size: 4}.Ref())
+	}
 	f.sent[in.ClientMsgID] = m
 	return m, true, nil
 }
@@ -146,6 +149,27 @@ func TestChatAPI(t *testing.T) {
 	}
 	if rec := h.do("PUT", "/api/w/acme/chat/channels/1/read", `{"lastReadId":5}`, cookie); rec.Code != http.StatusNoContent {
 		t.Fatalf("viewer read: %d %s", rec.Code, rec.Body)
+	}
+	// It sends files too: uploads, sends them without words, and removes an upload.
+	var form bytes.Buffer
+	mw := multipart.NewWriter(&form)
+	fw, _ := mw.CreateFormFile("file", "shot.png")
+	_, _ = fw.Write([]byte("\x89PNG"))
+	_ = mw.Close()
+	req := httptest.NewRequest("POST", "/api/w/acme/attachments", &form)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Cookie", cookie["Cookie"])
+	up := httptest.NewRecorder()
+	h.h.ServeHTTP(up, req)
+	if up.Code != http.StatusCreated {
+		t.Fatalf("viewer upload: %d %s", up.Code, up.Body)
+	}
+	if rec := h.do("POST", "/api/w/acme/chat/channels/1/messages", `{"clientMsgId":"8d9f6a0e-4f6b-4a43-9a4b-1f0f8c6c2a12","files":[9]}`, cookie); rec.Code != http.StatusCreated ||
+		!strings.Contains(rec.Body.String(), `"files":[{"id":9,"name":"shot.png","contentType":"image/png","size":4,"image":true,"url":"/attachments/9"}]`) {
+		t.Fatalf("viewer sends files: %d %s", rec.Code, rec.Body)
+	}
+	if rec := h.do("DELETE", "/api/w/acme/attachments/9", "", cookie); rec.Code != http.StatusNoContent {
+		t.Fatalf("viewer removes an upload: %d %s", rec.Code, rec.Body)
 	}
 	for _, path := range []string{"/api/w/acme/chat/messages/7/actions", "/api/w/acme/chat/messages/7/ticket", "/api/w/acme/chat/channels"} {
 		if rec := h.do("POST", path, `{"action":"merge","name":"x"}`, cookie); rec.Code != http.StatusForbidden {

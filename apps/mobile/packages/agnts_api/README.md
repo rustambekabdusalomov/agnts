@@ -113,7 +113,7 @@ Class | Method | HTTP request | Description
 [*AssistantApi*](doc/AssistantApi.md) | [**transcribeAssistantQuestion**](doc/AssistantApi.md#transcribeassistantquestion) | **POST** /assistant/transcribe | Turn a spoken question into text
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**deleteAttachment**](doc/AttachmentsApi.md#deleteattachment) | **DELETE** /attachments/{id} | Delete an upload that nothing uses yet
 [*AttachmentsApi*](doc/AttachmentsApi.md) | [**getAttachment**](doc/AttachmentsApi.md#getattachment) | **GET** /attachments/{id} | An attached file&#39;s bytes
-[*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer or a retry note
+[*AttachmentsApi*](doc/AttachmentsApi.md) | [**uploadAttachment**](doc/AttachmentsApi.md#uploadattachment) | **POST** /attachments | Upload a file to attach to a task, an answer, a retry note or a chat message
 [*AuthApi*](doc/AuthApi.md) | [**beginLoginTotp**](doc/AuthApi.md#beginlogintotp) | **POST** /auth/login/totp | Start the two-factor setup an Admin without it does at sign-in
 [*AuthApi*](doc/AuthApi.md) | [**forgotPassword**](doc/AuthApi.md#forgotpassword) | **POST** /auth/password/forgot | Email a password reset link (always answers 204)
 [*AuthApi*](doc/AuthApi.md) | [**getMe**](doc/AuthApi.md#getme) | **GET** /auth/me | The signed-in user
@@ -375,11 +375,13 @@ Class | Method | HTTP request | Description
 [*SecurityApi*](doc/SecurityApi.md) | [**fixSecurityFindings**](doc/SecurityApi.md#fixsecurityfindings) | **POST** /security/fix | Open one ticket that fixes findings of one repository (Fix this, Fix together)
 [*SecurityApi*](doc/SecurityApi.md) | [**getSecurityFinding**](doc/SecurityApi.md#getsecurityfinding) | **GET** /security/findings/{findingId} | One finding
 [*SecurityApi*](doc/SecurityApi.md) | [**getSecurityScan**](doc/SecurityApi.md#getsecurityscan) | **GET** /security/scans/{scanId} | One scan, with what ran and the hits the agent rejected
+[*SecurityApi*](doc/SecurityApi.md) | [**getSecuritySettings**](doc/SecurityApi.md#getsecuritysettings) | **GET** /repos/{id}/security/settings | A repository&#39;s security settings: schedule, exclusions, lowest severity that notifies
 [*SecurityApi*](doc/SecurityApi.md) | [**getSecuritySummary**](doc/SecurityApi.md#getsecuritysummary) | **GET** /security/summary | Open security findings by repository and severity, with each repository&#39;s last scan
 [*SecurityApi*](doc/SecurityApi.md) | [**getTicketSecurityFindings**](doc/SecurityApi.md#getticketsecurityfindings) | **GET** /tickets/{key}/security-findings | The security findings a fix ticket works on
 [*SecurityApi*](doc/SecurityApi.md) | [**listSecurityFindings**](doc/SecurityApi.md#listsecurityfindings) | **GET** /security/findings | Security findings, worst first
 [*SecurityApi*](doc/SecurityApi.md) | [**listSecurityScans**](doc/SecurityApi.md#listsecurityscans) | **GET** /repos/{id}/security/scans | A repository&#39;s security scans, newest first
 [*SecurityApi*](doc/SecurityApi.md) | [**reopenSecurityFinding**](doc/SecurityApi.md#reopensecurityfinding) | **POST** /security/findings/{findingId}/reopen | Open a dismissed or fixed finding again
+[*SecurityApi*](doc/SecurityApi.md) | [**setSecuritySettings**](doc/SecurityApi.md#setsecuritysettings) | **PUT** /repos/{id}/security/settings | Save a repository&#39;s security settings and schedule its next scan
 [*SecurityApi*](doc/SecurityApi.md) | [**startSecurityScan**](doc/SecurityApi.md#startsecurityscan) | **POST** /repos/{id}/security/scans | Scan the repository&#39;s default branch (a scan already queued or running is returned instead)
 [*SettingsApi*](doc/SettingsApi.md) | [**getSettings**](doc/SettingsApi.md#getsettings) | **GET** /settings | 
 [*SettingsApi*](doc/SettingsApi.md) | [**listModels**](doc/SettingsApi.md#listmodels) | **GET** /models | The coding modules and models you may use
@@ -525,6 +527,7 @@ Class | Method | HTTP request | Description
  - [AssistantStatsVersionsInner](doc/AssistantStatsVersionsInner.md)
  - [AssistantTranscript](doc/AssistantTranscript.md)
  - [AttachCodeTicketRequest](doc/AttachCodeTicketRequest.md)
+ - [AttachedFile](doc/AttachedFile.md)
  - [Attachment](doc/Attachment.md)
  - [BeginLoginTotp200Response](doc/BeginLoginTotp200Response.md)
  - [BeginLoginTotpRequest](doc/BeginLoginTotpRequest.md)
@@ -884,6 +887,8 @@ Class | Method | HTTP request | Description
  - [SecurityFindingLocation](doc/SecurityFindingLocation.md)
  - [SecurityRepoSummary](doc/SecurityRepoSummary.md)
  - [SecurityScan](doc/SecurityScan.md)
+ - [SecuritySettings](doc/SecuritySettings.md)
+ - [SecurityWorkspaceSettings](doc/SecurityWorkspaceSettings.md)
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
  - [SendMeetingMessageRequest](doc/SendMeetingMessageRequest.md)
  - [SetCreditLimitRequest](doc/SetCreditLimitRequest.md)

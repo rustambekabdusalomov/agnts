@@ -190,10 +190,13 @@ func scanMessage(row pgx.Row) (domain.ChatMessage, error) {
 	return m, nil
 }
 
-// withRefs fills each message's refs (removed ones left out).
+// withRefs fills each message's refs (removed ones left out) and files.
 func withRefs(ctx context.Context, db pgx.Tx, pool *pgxpool.Pool, ms []domain.ChatMessage) error {
 	if len(ms) == 0 {
 		return nil
+	}
+	if err := withFiles(ctx, db, pool, ms); err != nil {
+		return err
 	}
 	ids := make([]int64, len(ms))
 	at := make(map[int64]int, len(ms))
@@ -227,6 +230,28 @@ func withRefs(ctx context.Context, db pgx.Tx, pool *pgxpool.Pool, ms []domain.Ch
 		ms[at[id]].Refs = append(ms[at[id]].Refs, r)
 	}
 	return rows.Err()
+}
+
+// withFiles fills each message's files.
+func withFiles(ctx context.Context, db pgx.Tx, pool *pgxpool.Pool, ms []domain.ChatMessage) error {
+	ids := make([]int64, len(ms))
+	for i, m := range ms {
+		ids[i] = m.ID
+	}
+	var files map[int64][]domain.FileRef
+	var err error
+	if db != nil {
+		files, err = fileRefs(ctx, db, "chat_message_id", ids)
+	} else {
+		files, err = fileRefs(ctx, pool, "chat_message_id", ids)
+	}
+	if err != nil {
+		return err
+	}
+	for i := range ms {
+		ms[i].Files = files[ms[i].ID]
+	}
+	return nil
 }
 
 func collectMessages(rows pgx.Rows) ([]domain.ChatMessage, error) {
@@ -341,8 +366,8 @@ const (
 	ChatJobTranscribe = "transcribe"
 )
 
-// Send stores user's message with the jobs to run on it, in one
-// transaction. A message whose client id was already stored comes back
+// Send stores user's message, with its files and the jobs to run on it,
+// in one transaction. A message whose client id was already stored comes back
 // as it is, with created false and no new jobs.
 func (s *Chat) Send(ctx context.Context, user int64, in domain.ChatSend, jobs []string) (domain.ChatMessage, bool, error) {
 	var m domain.ChatMessage
@@ -372,6 +397,9 @@ func (s *Chat) Send(ctx context.Context, user int64, in domain.ChatSend, jobs []
 			return err
 		}
 		created = true
+		if err := linkMessageFiles(ctx, tx, in.Files, "chat_message_id", id, user, domain.AttachChat); err != nil {
+			return err
+		}
 		if m, err = messageTx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -383,6 +411,23 @@ func (s *Chat) Send(ctx context.Context, user int64, in domain.ChatSend, jobs []
 		return messageEvent(ctx, tx, domain.EventChatMessage, m)
 	})
 	return m, created, err
+}
+
+// FileData returns the bytes of a file a chat message brought.
+func (s *Chat) FileData(ctx context.Context, id int64) ([]byte, error) {
+	var data []byte
+	err := s.db.QueryRow(ctx, `SELECT data FROM attachments WHERE id = $1 AND chat_message_id IS NOT NULL`, id).Scan(&data)
+	return data, notFound(err)
+}
+
+// CopyFilesToTicket copies chat message msg's files to ticket key, as
+// files of its description, so its runs get them; it returns how many.
+func (s *Chat) CopyFilesToTicket(ctx context.Context, msg int64, key string) (int64, error) {
+	tag, err := s.db.Exec(ctx, `INSERT INTO attachments (ticket_id, purpose, name, content_type, size, data, uploaded_by)
+		SELECT t.id, 'ticket', a.name, a.content_type, a.size, a.data, a.uploaded_by
+		FROM attachments a JOIN tickets t ON t.key = $2
+		WHERE a.chat_message_id = $1 ORDER BY a.id`, msg, key)
+	return tag.RowsAffected(), err
 }
 
 // Post stores agnts's message (a card or text) in a channel.

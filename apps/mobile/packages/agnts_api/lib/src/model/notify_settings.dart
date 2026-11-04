@@ -45,6 +45,8 @@ class NotifySettings {
      this.ci,
 
      this.logs,
+
+     this.security,
   });
 
   @JsonKey(
@@ -211,6 +213,19 @@ class NotifySettings {
 
 
 
+      /// A security scan found something new or reopened, or failed
+  @JsonKey(
+    
+    name: r'security',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? security;
+
+
+
 
 
     @override
@@ -227,7 +242,8 @@ class NotifySettings {
       other.previewPhotos == previewPhotos &&
       other.followUps == followUps &&
       other.ci == ci &&
-      other.logs == logs;
+      other.logs == logs &&
+      other.security == security;
 
     @override
     int get hashCode =>
@@ -243,7 +259,8 @@ class NotifySettings {
         previewPhotos.hashCode +
         followUps.hashCode +
         ci.hashCode +
-        logs.hashCode;
+        logs.hashCode +
+        security.hashCode;
 
   factory NotifySettings.fromJson(Map<String, dynamic> json) => _$NotifySettingsFromJson(json);
 

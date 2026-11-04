@@ -1315,14 +1315,16 @@ paths:
   /attachments:
     post:
       operationId: uploadAttachment
-      summary: Upload a file to attach to a task, an answer or a retry note
+      summary: Upload a file to attach to a task, an answer, a retry note or a chat message
       description: >-
         The upload stays pending until the request that uses it (createTask,
-        updateTask, answerQuestions, retryTicket, requestChanges) lists its id; pending uploads
+        updateTask, answerQuestions, retryTicket, requestChanges, sendChatMessage,
+        askAssistant, Code mode) lists its id; pending uploads
         nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP)
         are shown in place; other files download. Claude reads every attached
-        file, pictures and PDFs included.
+        file, pictures and PDFs included. Viewers may upload too, for the chats.
       tags: [attachments]
+      x-viewer: true
       requestBody:
         required: true
         content:
@@ -1358,6 +1360,7 @@ paths:
     get:
       operationId: getAttachment
       summary: An attached file's bytes
+      description: An AI chat (Ask) question's file is only its asker's; anyone else gets 404.
       tags: [attachments]
       responses:
         '200':
@@ -1370,10 +1373,13 @@ paths:
     delete:
       operationId: deleteAttachment
       summary: Delete an upload that nothing uses yet
+      description: Viewers delete only their own uploads; editors any pending one.
       tags: [attachments]
+      x-viewer: true
       responses:
         '204': { description: Deleted }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
 
@@ -7924,10 +7930,10 @@ paths:
               required: [clientMsgId, durationMs, audio, wav]
               properties:
                 clientMsgId: { type: string, format: uuid }
-                durationMs: { type: integer, format: int64, description: The recording's length, at most 2 minutes }
+                durationMs: { type: integer, format: int64, description: "The recording's length, at most 2 minutes" }
                 replyTo: { type: integer, format: int64 }
                 audio: { type: string, format: binary, description: 'The recording to keep and play (WebM, Ogg, MP4, MP3, AAC or WAV), at most 3 MB' }
-                wav: { type: string, format: binary, description: The same audio as 16-bit PCM WAV for Muse to hear, at most 4 MB }
+                wav: { type: string, format: binary, description: 'The same audio as 16-bit PCM WAV for Muse to hear, at most 4 MB' }
       responses:
         '200':
           description: Already stored (a resend)
@@ -8314,7 +8320,7 @@ components:
       required: [configured, ok, latencyMs, history, calls, failed]
       properties:
         configured: { type: boolean, description: AGNTS_EGRESS_UPSTREAM is set }
-        via: { type: string, description: The upstream proxy, without its password }
+        via: { type: string, description: 'The upstream proxy, without its password' }
         hosts:
           type: array
           items: { type: string }
@@ -8417,13 +8423,17 @@ components:
         channelId: { type: integer, format: int64 }
         replyTo: { type: integer, format: int64 }
         authorId: { type: integer, format: int64 }
-        author: { type: string, description: The person's username, or agnts }
+        author: { type: string, description: "The person's username, or agnts" }
         kind: { type: string, enum: [text, agent_card, agent_text, system] }
         body: { type: string }
         card: { $ref: '#/components/schemas/ChatCard' }
         ai: { $ref: '#/components/schemas/ChatAI' }
         ticketKey: { type: string }
         audio: { $ref: '#/components/schemas/ChatAudio' }
+        files:
+          type: array
+          description: Files that came with the message; its body may then be empty
+          items: { $ref: '#/components/schemas/AttachedFile' }
         clientMsgId: { type: string }
         refs:
           type: array
@@ -8440,10 +8450,15 @@ components:
         error: { type: string }
     ChatSendRequest:
       type: object
-      required: [clientMsgId, body]
+      required: [clientMsgId]
       properties:
         clientMsgId: { type: string, format: uuid, description: Made on the device; a resend with the same id returns the stored message }
-        body: { type: string, maxLength: 8000 }
+        body: { type: string, maxLength: 8000, description: 'May be empty when files are sent' }
+        files:
+          type: array
+          maxItems: 10
+          description: The sender's pending uploads (uploadAttachment) to send with it
+          items: { type: integer, format: int64 }
         replyTo: { type: integer, format: int64 }
     ChatActionRequest:
       type: object
@@ -9269,9 +9284,13 @@ components:
 
     AssistantAsk:
       type: object
-      required: [question]
       properties:
-        question: { type: string, minLength: 1, maxLength: 1000 }
+        question: { type: string, maxLength: 1000, description: 'May be empty when attachments are sent' }
+        attachments:
+          type: array
+          maxItems: 10
+          description: The asker's pending uploads (uploadAttachment); the answer reads them
+          items: { type: integer, format: int64 }
         lang: { $ref: '#/components/schemas/AssistantLanguage' }
 
     AssistantTranscript:
@@ -9324,8 +9343,12 @@ components:
         routed: { $ref: '#/components/schemas/CodeRouted' }
         attachments:
           type: array
-          description: 'Code mode: uploads that went with the message'
+          description: 'Uploads that went with the message (ids)'
           items: { type: integer, format: int64 }
+        attachedFiles:
+          type: array
+          description: 'The uploads of attachments still there, to show'
+          items: { $ref: '#/components/schemas/AttachedFile' }
         createdAt: { type: string, format: date-time }
 
     AssistantAction:
@@ -9790,12 +9813,24 @@ components:
         size: { type: integer, format: int64, description: Bytes }
         purpose:
           type: string
-          enum: [pending, ticket, answer, retry, feedback]
-          description: 'pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes'
+          enum: [pending, ticket, answer, retry, feedback, chat, assistant]
+          description: 'pending = uploaded, not attached yet; ticket = the task description; answer = an answer (see questionId); retry = a retry note; feedback = requested changes; chat = a team chat message; assistant = an AI chat question'
         questionId: { type: integer, format: int64 }
         image: { type: boolean, description: 'A picture clients can show in place' }
         url: { type: string, description: 'Where to load the file, relative to the API base' }
         createdAt: { type: string, format: date-time }
+
+    AttachedFile:
+      type: object
+      description: A file a chat message brought, as the message shows it
+      required: [id, name, contentType, size, image, url]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        contentType: { type: string }
+        size: { type: integer, format: int64, description: Bytes }
+        image: { type: boolean, description: 'A picture clients can show in place' }
+        url: { type: string, description: 'Where to load the file, relative to the API base' }
 
     Analysis:
       type: object

@@ -27,7 +27,7 @@ void main() {
       // TODO
     });
 
-    // The person's username
+    // The person's username, or agnts
     // String author
     test('to test the property `author`', () async {
       // TODO
@@ -60,6 +60,12 @@ void main() {
 
     // ChatAudio audio
     test('to test the property `audio`', () async {
+      // TODO
+    });
+
+    // Files that came with the message; its body may then be empty
+    // List<AttachedFile> files
+    test('to test the property `files`', () async {
       // TODO
     });
 

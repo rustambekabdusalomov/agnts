@@ -9,7 +9,7 @@ import 'package:agnts_api/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **configured** | **bool** | AGNTS_EGRESS_UPSTREAM is set | 
-**via** | **String** | The upstream proxy | [optional] 
+**via** | **String** | The upstream proxy, without its password | [optional] 
 **hosts** | **List&lt;String&gt;** |  | [optional] 
 **target** | **String** | The host each check reaches through it | [optional] 
 **ok** | **bool** |  | 

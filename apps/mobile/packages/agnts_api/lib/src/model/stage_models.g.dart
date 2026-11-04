@@ -27,6 +27,8 @@ abstract class _$StageModelsCWProxy {
 
   StageModels teamChat(String? teamChat);
 
+  StageModels security(String? security);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -44,6 +46,7 @@ abstract class _$StageModelsCWProxy {
     String? chat,
     String? documents,
     String? teamChat,
+    String? security,
   });
 }
 
@@ -84,6 +87,9 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
   StageModels teamChat(String? teamChat) => this(teamChat: teamChat);
 
   @override
+  StageModels security(String? security) => this(security: security);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `StageModels(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -101,6 +107,7 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
     Object? chat = const $CopyWithPlaceholder(),
     Object? documents = const $CopyWithPlaceholder(),
     Object? teamChat = const $CopyWithPlaceholder(),
+    Object? security = const $CopyWithPlaceholder(),
   }) {
     return StageModels(
       analyze: analyze == const $CopyWithPlaceholder()
@@ -143,6 +150,10 @@ class _$StageModelsCWProxyImpl implements _$StageModelsCWProxy {
           ? _value.teamChat
           // ignore: cast_nullable_to_non_nullable
           : teamChat as String?,
+      security: security == const $CopyWithPlaceholder()
+          ? _value.security
+          // ignore: cast_nullable_to_non_nullable
+          : security as String?,
     );
   }
 }
@@ -174,6 +185,7 @@ StageModels _$StageModelsFromJson(Map<String, dynamic> json) =>
         chat: $checkedConvert('chat', (v) => v as String?),
         documents: $checkedConvert('documents', (v) => v as String?),
         teamChat: $checkedConvert('teamChat', (v) => v as String?),
+        security: $checkedConvert('security', (v) => v as String?),
       );
       return val;
     });
@@ -190,4 +202,5 @@ Map<String, dynamic> _$StageModelsToJson(StageModels instance) =>
       'chat': ?instance.chat,
       'documents': ?instance.documents,
       'teamChat': ?instance.teamChat,
+      'security': ?instance.security,
     };

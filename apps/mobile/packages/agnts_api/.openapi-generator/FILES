@@ -59,6 +59,7 @@ doc/AssistantStatsActions.md
 doc/AssistantStatsVersionsInner.md
 doc/AssistantTranscript.md
 doc/AttachCodeTicketRequest.md
+doc/AttachedFile.md
 doc/Attachment.md
 doc/AttachmentsApi.md
 doc/AuthApi.md
@@ -441,6 +442,8 @@ doc/SecurityFinding.md
 doc/SecurityFindingLocation.md
 doc/SecurityRepoSummary.md
 doc/SecurityScan.md
+doc/SecuritySettings.md
+doc/SecurityWorkspaceSettings.md
 doc/SendFeedbackRequest.md
 doc/SendMeetingMessageRequest.md
 doc/SetCreditLimitRequest.md
@@ -635,6 +638,7 @@ lib/src/model/assistant_stats_actions.dart
 lib/src/model/assistant_stats_versions_inner.dart
 lib/src/model/assistant_transcript.dart
 lib/src/model/attach_code_ticket_request.dart
+lib/src/model/attached_file.dart
 lib/src/model/attachment.dart
 lib/src/model/begin_login_totp200_response.dart
 lib/src/model/begin_login_totp_request.dart
@@ -994,6 +998,8 @@ lib/src/model/security_finding.dart
 lib/src/model/security_finding_location.dart
 lib/src/model/security_repo_summary.dart
 lib/src/model/security_scan.dart
+lib/src/model/security_settings.dart
+lib/src/model/security_workspace_settings.dart
 lib/src/model/send_feedback_request.dart
 lib/src/model/send_meeting_message_request.dart
 lib/src/model/set_credit_limit_request.dart
@@ -1144,6 +1150,7 @@ test/assistant_stats_test.dart
 test/assistant_stats_versions_inner_test.dart
 test/assistant_transcript_test.dart
 test/attach_code_ticket_request_test.dart
+test/attached_file_test.dart
 test/attachment_test.dart
 test/attachments_api_test.dart
 test/auth_api_test.dart
@@ -1526,6 +1533,8 @@ test/security_finding_location_test.dart
 test/security_finding_test.dart
 test/security_repo_summary_test.dart
 test/security_scan_test.dart
+test/security_settings_test.dart
+test/security_workspace_settings_test.dart
 test/send_feedback_request_test.dart
 test/send_meeting_message_request_test.dart
 test/set_credit_limit_request_test.dart

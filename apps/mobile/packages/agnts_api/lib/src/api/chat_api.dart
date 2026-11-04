@@ -1009,9 +1009,9 @@ _responseData = rawData == null ? null : deserialize<ChatMessage, ChatMessage>(r
   /// Parameters:
   /// * [channelId] 
   /// * [clientMsgId] 
-  /// * [durationMs] - The recording's length
+  /// * [durationMs] - The recording's length, at most 2 minutes
   /// * [audio] - The recording to keep and play (WebM, Ogg, MP4, MP3, AAC or WAV), at most 3 MB
-  /// * [wav] - The same audio as 16-bit PCM WAV for Muse to hear
+  /// * [wav] - The same audio as 16-bit PCM WAV for Muse to hear, at most 4 MB
   /// * [replyTo] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request

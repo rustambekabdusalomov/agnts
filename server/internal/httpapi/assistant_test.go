@@ -38,7 +38,7 @@ func (f *fakeAssistant) conv() domain.AssistantConversation {
 	}}
 }
 
-func (f *fakeAssistant) Ask(ctx context.Context, id int64, q, lang string) (domain.AssistantConversation, error) {
+func (f *fakeAssistant) Ask(ctx context.Context, id int64, q, lang string, _ []int64) (domain.AssistantConversation, error) {
 	if a, ok := domain.ActorOf(ctx); ok {
 		f.user = a.UserID
 	}

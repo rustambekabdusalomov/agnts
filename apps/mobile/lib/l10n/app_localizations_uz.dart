@@ -1272,9 +1272,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get authUseGoogle => 'Bu yerda parollar faqat administratorlar uchun. Google orqali kiring.';
 
   @override
-  String get authAdminsLede => 'Administratorlar parol bilan kiradi. Qolganlar Google orqali davom etadi.';
-
-  @override
   String get authGoogleInvite => 'Taklif havolasi yaroqsiz, allaqachon ishlatilgan, muddati o\'tgan yoki boshqa Google akkaunti uchun.';
 
   @override
@@ -3884,6 +3881,26 @@ class AppLocalizationsUz extends AppLocalizations {
   String get filesFromFeedback => 'Soʻralgan oʻzgarishlarga';
 
   @override
+  String get filesDropOne => 'Faylni shu yerga tashlang yoki';
+
+  @override
+  String get filesChoose => 'faylni tanlang';
+
+  @override
+  String get filesChange => 'Boshqasini tanlash';
+
+  @override
+  String filesDownload(String name) {
+    return '$name ni yuklab olish';
+  }
+
+  @override
+  String get filesDrop => 'Fayllarni yuborish uchun qoʻyib yuboring';
+
+  @override
+  String get filesChatHint => '10 tagacha fayl, har biri 10 MB gacha';
+
+  @override
   String get followUpsTitle => 'Keyingi tiketlar';
 
   @override
@@ -4113,6 +4130,24 @@ class AppLocalizationsUz extends AppLocalizations {
   String get formNoMatch => 'Hech narsa topilmadi';
 
   @override
+  String get formPickDateTime => 'Sana va vaqtni tanlang';
+
+  @override
+  String get formPrevMonth => 'Oldingi oy';
+
+  @override
+  String get formNextMonth => 'Keyingi oy';
+
+  @override
+  String get formNow => 'Hozir';
+
+  @override
+  String get formTime => 'Vaqt';
+
+  @override
+  String get formDone => 'Tayyor';
+
+  @override
   String groupsView(String n) {
     return 'Guruhlar ($n)';
   }
@@ -4196,6 +4231,10 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get groupsCommitTemplateHelp =>
       'Bu guruh vazifalari kommit xabarlari barcha repozitoriylarda shu formatda yoziladi; har bir repozitoriyning oʻz formatini almashtiradi. Har birining oʻzinikini qoldirish uchun boʻsh qoldiring.';
+
+  @override
+  String get groupsPrTemplateHelp =>
+      'Bu guruh vazifalari pull requestlarining sarlavhasi barcha repozitoriylarda shu formatda bo\'ladi; har bir repozitoriyning oʻz formatini almashtiradi. Har birining oʻzinikini qoldirish uchun boʻsh qoldiring.';
 
   @override
   String get groupsInstructions => 'Koʻrsatmalar';
@@ -6859,11 +6898,22 @@ class AppLocalizationsUz extends AppLocalizations {
   String get logwatchFieldsHelp => 'Ulanishni tekshirish ularni to‘ldiradi; faqat noto‘g‘ri topsa o‘zgartiring.';
 
   @override
+  String get logwatchTraceUrl => 'Trace havolasi';
+
+  @override
+  String logwatchTraceUrlHelp(String traceId) {
+    return 'Ixtiyoriy. Tempo, Jaeger yoki Grafana’dagi trace havolasi, id o‘rniga \'$traceId\' yoziladi. Trace id bor loglardan topilganlar unga havola beradi.';
+  }
+
+  @override
+  String get logwatchTrace => 'Trace';
+
+  @override
   String get logwatchCa => 'Xususiy CA uchun CA sertifikati (PEM)';
 
   @override
   String get logwatchPushHelp =>
-      'Log jo‘natuvchingiz agnts ga token bilan yuboradi. Manba qo‘shilgach, agnts token va tayyor Vector hamda Fluent Bit sozlamalarini ko‘rsatadi.';
+      'Log jo‘natuvchingiz agnts ga token bilan yuboradi. Manba qo‘shilgach, agnts token va tayyor Vector, Fluent Bit, Promtail hamda OpenTelemetry sozlamalarini ko‘rsatadi.';
 
   @override
   String get logwatchEnabled => 'Bu manbani o‘qish';
@@ -7116,6 +7166,17 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get logwatchAgentHelp =>
       'Log tizimi bo‘lmagan serverda: buni servislaringiz yonida ishga tushiring. U agnts.watch=logs yorlig‘li konteynerlarni kuzatadi, yiqilishlar, OOM va sog‘liq tekshiruvi xatolarini bildiradi va o‘zi agnts ga ulanadi.';
+
+  @override
+  String get logwatchOtelTitle => 'OpenTelemetry Collector';
+
+  @override
+  String get logwatchOtelHelp =>
+      'Bu pipeline’ni Collector sozlamasiga qo‘shing. U faqat xato loglarining nusxasini yuboradi; boshqa pipeline’laringiz o‘zgarmaydi.';
+
+  @override
+  String get logwatchOtelSdk =>
+      'Collector’siz OpenTelemetry SDK bilan eksport qiladigan ilovalar barcha loglarni yuboradi; agnts keraklisini oladi:';
 
   @override
   String get logwatchKind_datadog => 'Datadog';
@@ -8181,6 +8242,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get meetingsKeepAudio => 'Muse tinglagandan keyin eslatmalar ovozini saqlash';
 
   @override
+  String get meetingsDraftTickets => 'Har bir vazifani uni olgan aʼzoga qoralama tiket qilish';
+
+  @override
   String get meetingsRetention => 'Yozuv va matnlarni saqlash muddati (kun)';
 
   @override
@@ -8227,6 +8291,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get meetingsTime => 'Vaqt';
+
+  @override
+  String get meetingsStarts => 'Boshlanishi';
 
   @override
   String get meetingsDuration => 'Davomiyligi';
@@ -8457,6 +8524,41 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get meetingsCreateTicket => 'Tiket yaratish';
+
+  @override
+  String get meetingsNobody => 'Hech kim';
+
+  @override
+  String get meetingsUnassigned => 'Biriktirilmagan';
+
+  @override
+  String meetingsSaid(String who) {
+    return 'aytilgan: $who';
+  }
+
+  @override
+  String get meetingsTakenBy => 'Kim oladi';
+
+  @override
+  String get meetingsMemberByHand => 'Qoʻlda tanlangan';
+
+  @override
+  String meetingsMemberMatched(String said) {
+    return '«$said» boʻyicha topildi';
+  }
+
+  @override
+  String meetingsMemberSet(String name) {
+    return 'Endi ${name}niki';
+  }
+
+  @override
+  String meetingsMemberSetTicket(String name, String key) {
+    return 'Endi ${name}niki, $key ham';
+  }
+
+  @override
+  String get meetingsDraftHint => 'Eslatmalar bilan yaratilgan qoralama: kimdir ishga tushirmaguncha kutadi';
 
   @override
   String meetingsTicketMade(String key) {
@@ -9006,6 +9108,123 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get meetingsUninviteBody => 'U endi taklif qilinmagan va eslatmalar olmaydi.';
+
+  @override
+  String get meetingsUploadRecording => 'Yozuvni yuklash';
+
+  @override
+  String get meetingsUploadTitle => 'Ushbu uchrashuv yozuvini yuklash';
+
+  @override
+  String meetingsUploadSub(String mb) {
+    return 'Boshqa joyda oʻtgan uchrashuvning video yoki audio fayli, $mb MB gacha. Faqat ovozi ishlatiladi: agnts audioni saqlaydi, yuborilgan faylni oʻchiradi, Muse esa aytilganlardan eslatmalar va qoralama tiketlar yozadi.';
+  }
+
+  @override
+  String get meetingsUploadFile => 'Yozuv';
+
+  @override
+  String get meetingsUploadHeld => 'Qachon oʻtgan';
+
+  @override
+  String get meetingsUploadPeople => 'Yozuvda kimlar bor (Muse vazifalarni toʻgʻri odamlarga biriktirishiga yordam beradi)';
+
+  @override
+  String get meetingsUploadNow => 'Yuklash';
+
+  @override
+  String get meetingsUploading => 'Yuklanmoqda';
+
+  @override
+  String meetingsUploadingPct(String n) {
+    return 'Yuklanmoqda… $n%';
+  }
+
+  @override
+  String get meetingsUploaded => 'Yuklandi: Muse tinglamoqda';
+
+  @override
+  String meetingsUploadTooBig(String mb) {
+    return 'Fayl $mb MB dan katta';
+  }
+
+  @override
+  String get meetingsUploadedBadge => 'Yuklangan';
+
+  @override
+  String meetingsInRecording(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Yozuvda $n kishi', zero: 'Yozuvda');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsUploadedNote =>
+      'Yuklangan yozuv: faqat ovozi tinglandi, fayl oʻchirildi. Qoʻngʻiroq boʻlmagan, shuning uchun ishtirok roʻyxati yoʻq.';
+
+  @override
+  String get meetingsTodayLive => 'Jonli';
+
+  @override
+  String meetingsTodayInCall(String n) {
+    return '$n kishi qoʻngʻiroqda';
+  }
+
+  @override
+  String meetingsTodayIn(String n) {
+    return '$n daqiqadan soʻng';
+  }
+
+  @override
+  String get meetingsTodayNow => 'hozir';
+
+  @override
+  String get meetingsTodayJoin => 'Qoʻshilish';
+
+  @override
+  String get meetingsTodayLater => 'Bugun keyinroq:';
+
+  @override
+  String meetingsTodayLiveLine(String title) {
+    return 'Jonli: $title';
+  }
+
+  @override
+  String meetingsTodayLiveAria(String title, String n) {
+    return '«$title» jonli, qoʻngʻiroqda $n kishi. Qoʻshilish';
+  }
+
+  @override
+  String meetingsTodaySoonAria(String title, String n) {
+    return '«$title» $n daqiqadan soʻng boshlanadi. Qoʻshilish';
+  }
+
+  @override
+  String meetingsTodayNowAria(String title) {
+    return '«$title» hozir boshlanmoqda. Qoʻshilish';
+  }
+
+  @override
+  String meetingsTodayLaterAria(String title, String time) {
+    return 'Bugungi navbatdagi uchrashuv: «$title», soat $time';
+  }
+
+  @override
+  String meetingsTodayMoreAria(num n) {
+    return 'Bugun yana $n ta uchrashuv';
+  }
+
+  @override
+  String get meetingsUploadDrop => 'Yozuvni shu yerga tashlang yoki';
+
+  @override
+  String meetingsUploadTypes(String mb) {
+    return 'Video yoki audio · $mb MB gacha';
+  }
+
+  @override
+  String meetingsUploadBadType(String name) {
+    return '«$name» video yoki audio fayl emas';
+  }
 
   @override
   String get mgroupsGroups => 'Guruhlar';
@@ -10079,6 +10298,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get navMeetings => 'Uchrashuvlar';
 
   @override
+  String get navChat => 'Chat';
+
+  @override
   String get navLogWatcher => 'Loglarni kuzatish';
 
   @override
@@ -10889,6 +11111,78 @@ class AppLocalizationsUz extends AppLocalizations {
   String platformModulesServerOnly(String list) {
     return 'Bu server faqat $list ni ishga tushira oladi. Ko‘proq taklif qilish uchun modul serverdagi AGNTS_PROVIDERS ga (va ishga tushirish obraziga) qo‘shilishi kerak.';
   }
+
+  @override
+  String get platformMuseRoute => 'Muse yo\'li';
+
+  @override
+  String get platformMuseRouteSub => 'Muse trafigi bu serverdan qanday chiqadi. egress uni har 30 soniyada tekshiradi.';
+
+  @override
+  String get platformMuseStateLoading => 'Tekshirilmoqda…';
+
+  @override
+  String get platformMuseStateUnknown => 'Noma\'lum';
+
+  @override
+  String get platformMuseStateDirect => 'To\'g\'ridan-to\'g\'ri';
+
+  @override
+  String get platformMuseStateWaiting => 'Birinchi tekshiruv…';
+
+  @override
+  String get platformMuseStateUp => 'Ishlayapti';
+
+  @override
+  String get platformMuseStateDown => 'Ishlamayapti';
+
+  @override
+  String get platformMuseDirect => 'Proksi o\'rnatilmagan (AGNTS_EGRESS_UPSTREAM): Muse bu serverdan to\'g\'ridan-to\'g\'ri ulanadi.';
+
+  @override
+  String get platformMuseVia => 'Orqali';
+
+  @override
+  String get platformMuseExit => 'Meta ko\'radigan manzil';
+
+  @override
+  String get platformMuseCheck => 'Oxirgi tekshiruv';
+
+  @override
+  String get platformMuseDownSince => 'Ishlamayapti';
+
+  @override
+  String platformMuseLastOk(String at) {
+    return 'oxirgi marta $at da ishlagan';
+  }
+
+  @override
+  String get platformMuseCalls => 'Muse ulanishlari';
+
+  @override
+  String platformMuseFailed(String n) {
+    return '$n tasi xato';
+  }
+
+  @override
+  String platformMuseStrip(String pct) {
+    return 'Oxirgi 30 daqiqa: tekshiruvlarning $pct% muvaffaqiyatli';
+  }
+
+  @override
+  String get platformMuseFixTunnel =>
+      'Noutbukda tunnelni qayta ishga tushiring va ochiq qoldiring (noutbuk yoqilgan va internetda bo\'lishi kerak):';
+
+  @override
+  String get platformMuseFixProxy => 'Proksi ishlayotganini va bu serverdan ochiq ekanini tekshiring.';
+
+  @override
+  String platformMuseLastCallError(String err) {
+    return 'Oxirgi xato ulanish: $err';
+  }
+
+  @override
+  String get platformMuseNavDown => 'Muse yo\'li ishlamayapti';
 
   @override
   String get previewTab => 'Oldindan koʻrish';
@@ -12368,6 +12662,13 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
+  String get reposPrTemplate => 'Pull request sarlavhasi formati';
+
+  @override
+  String get reposPrTemplateHelp =>
+      'agnts pull requestlariga sarlavhani qanday qo\'yadi, commit xabari formatidagi o\'rinbosarlar bilan. Bo\'sh qoldirilsa ish maydonining sarlavhasi (Sozlamalar → Git).';
+
+  @override
   String get reposPlaceholders => 'O\'rinbosarlar';
 
   @override
@@ -13845,6 +14146,13 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsStageDocumentsHelp => 'Hujjatlarni, shuningdek uchrashuv qaydlari va vazifalarini yozadi.';
 
   @override
+  String get settingsStageTeamChat => 'Jamoa chati';
+
+  @override
+  String get settingsStageTeamChatHelp =>
+      'Jamoa chatida @agnts savollariga javob beradi va tiket qoralamalarini tayyorlaydi. Havolalar uchun shu provayderning yengil modeli ishlatiladi.';
+
+  @override
   String get settingsMeetingAudioMuse =>
       'Uchrashuv ovozini doim Muse eshitadi — audioni eshitadigan yagona modul; qaydlarni yuqoridagi model yozadi.';
 
@@ -13928,8 +14236,8 @@ class AppLocalizationsUz extends AppLocalizations {
   String get settingsPrTitle => 'Pull request sarlavhasi';
 
   @override
-  String settingsPrTitleHelp(String key, String title) {
-    return '\'$key\' va \'$title\' tiket kaliti va sarlavhasi bilan almashtiriladi';
+  String settingsPrTitleHelp(String number, String key, String type, String scope, String subject, String title) {
+    return 'O\'rinbosarlar $number, $key, $type, $scope, $subject va $title, commit xabari formatidagidek. Repozitoriy yoki guruhning oʻz formati uni almashtiradi.';
   }
 
   @override
@@ -14934,6 +15242,355 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get tasksRepoNeeded => 'Kod va testlar uchun repozitoriy kerak: uni yoki boshqa turni tanlang.';
+
+  @override
+  String get teamchatSubtitle =>
+      'Aʼzolar va agnts bitta xonada: ish odamni talab qilganda agnts kartochka joylaydi, xabarlarni tiketlarga bogʻlaydi va @agnts savollariga javob beradi.';
+
+  @override
+  String get teamchatChannels => 'Kanallar';
+
+  @override
+  String get teamchatNewChannel => 'Yangi kanal';
+
+  @override
+  String get teamchatChannelName => 'Nomi';
+
+  @override
+  String get teamchatChannelNameHelp => 'Kichik harflar, raqamlar, - va _ (boʻshliqlar - ga aylanadi).';
+
+  @override
+  String get teamchatTopic => 'Mavzu';
+
+  @override
+  String get teamchatAgentsHere => 'agnts shu yerga yozadi';
+
+  @override
+  String get teamchatCreate => 'Yaratish';
+
+  @override
+  String teamchatStart(String channel) {
+    return '#$channel kanalining boshlanishi.';
+  }
+
+  @override
+  String teamchatEmptyTitle(String channel) {
+    return '#$channel kanaliga xush kelibsiz';
+  }
+
+  @override
+  String get teamchatEmptyText =>
+      'Birinchi xabarni yozing. Tiketlar, pull requestlar, CI va topilmalar haqida soʻrash uchun @agnts ni eslating.';
+
+  @override
+  String get teamchatToday => 'Bugun';
+
+  @override
+  String get teamchatYesterday => 'Kecha';
+
+  @override
+  String teamchatPlaceholder(String channel) {
+    return '#$channel ga xabar';
+  }
+
+  @override
+  String get teamchatSendHint => 'Enter — yuborish, Shift+Enter — yangi qator · @agnts — agnts dan soʻrash';
+
+  @override
+  String teamchatCount(String n, String max) {
+    return '$max belgidan $n';
+  }
+
+  @override
+  String get teamchatSend => 'Yuborish';
+
+  @override
+  String get teamchatReply => 'Javob berish';
+
+  @override
+  String get teamchatCancelReply => 'Javobni bekor qilish';
+
+  @override
+  String teamchatReplyingTo(String name) {
+    return '$name ga javob';
+  }
+
+  @override
+  String get teamchatReplyingToMessage => 'xabarga javob';
+
+  @override
+  String get teamchatToTicket => 'Tiketga aylantirish';
+
+  @override
+  String teamchatDrafting(String name) {
+    return '$name tiket qoralamasini tayyorlamoqda…';
+  }
+
+  @override
+  String get teamchatThinking => 'agnts oʻylamoqda…';
+
+  @override
+  String teamchatSources(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n manba', one: '$n manba');
+    return '$_temp0';
+  }
+
+  @override
+  String get teamchatSending => 'Yuborilmoqda…';
+
+  @override
+  String get teamchatWaitingNet => 'Ulanish kutilmoqda…';
+
+  @override
+  String get teamchatFailed => 'Yuborilmadi';
+
+  @override
+  String get teamchatRetry => 'Qayta urinish';
+
+  @override
+  String get teamchatDelete => 'Oʻchirish';
+
+  @override
+  String get teamchatOffline => 'Tarmoq yoʻq';
+
+  @override
+  String get teamchatReconnecting => 'Qayta ulanmoqda…';
+
+  @override
+  String teamchatWaiting(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n xabar kutmoqda', one: '$n xabar kutmoqda');
+    return '$_temp0';
+  }
+
+  @override
+  String get teamchatNotLoaded => 'Bu xabar bu yerda yuklanmagan. Eskiroq xabarlarni yuklash uchun yuqoriga aylantiring.';
+
+  @override
+  String teamchatStatsLine(num links, num answers, num drafts) {
+    String _temp0 = intl.Intl.pluralLogic(links, locale: localeName, other: '$links havola', one: '$links havola');
+    String _temp1 = intl.Intl.pluralLogic(answers, locale: localeName, other: '$answers javob', one: '$answers javob');
+    String _temp2 = intl.Intl.pluralLogic(drafts, locale: localeName, other: '$drafts qoralama', one: '$drafts qoralama');
+    return '$_temp0 · $_temp1 · $_temp2';
+  }
+
+  @override
+  String teamchatStatsMedian(String secs) {
+    return 'Bugun, mediana $secs s';
+  }
+
+  @override
+  String teamchatAiTip(String model, String cost) {
+    return 'Model: $model · narxi $cost';
+  }
+
+  @override
+  String teamchatLinkedBy(String name, String secs) {
+    return '✨ $name bogʻladi · $secs s';
+  }
+
+  @override
+  String teamchatRemoveLink(String name) {
+    return '$name bilan bogʻlanishni olib tashlash';
+  }
+
+  @override
+  String teamchatCiteMsg(String id) {
+    return 'xabar $id';
+  }
+
+  @override
+  String teamchatCiteFinding(String id) {
+    return 'topilma #$id';
+  }
+
+  @override
+  String teamchatBy(String name) {
+    return '$name';
+  }
+
+  @override
+  String get teamchatState_open => 'Ochiq';
+
+  @override
+  String get teamchatState_done => 'Bajarildi';
+
+  @override
+  String get teamchatState_failed => 'Xato';
+
+  @override
+  String get teamchatState_expired => 'Eskirgan';
+
+  @override
+  String get teamchatAct_fix => 'Tuzatish';
+
+  @override
+  String get teamchatAct_mute => 'Ovozsiz qilish';
+
+  @override
+  String get teamchatAct_approve => 'Tasdiqlash';
+
+  @override
+  String get teamchatAct_request_changes => 'Oʻzgartirish soʻrash';
+
+  @override
+  String get teamchatAct_merge => 'Birlashtirish';
+
+  @override
+  String get teamchatAct_create => 'Vazifa yaratish';
+
+  @override
+  String get teamchatAct_create_assign => 'Yaratish va agentga topshirish';
+
+  @override
+  String teamchatApproveTitle(String key) {
+    return '$key tasdiqlansinmi?';
+  }
+
+  @override
+  String teamchatMergeTitle(String number) {
+    return 'PR #$number birlashtirilsinmi?';
+  }
+
+  @override
+  String teamchatMergeText(String number, String repo) {
+    return '$repo dagi PR #$number git-xostingda birlashtiriladi.';
+  }
+
+  @override
+  String get teamchatMergeCiFail => 'CI muvaffaqiyatsiz. Baribir birlashtirilsinmi?';
+
+  @override
+  String teamchatMergeCiFailNames(String checks) {
+    return 'CI muvaffaqiyatsiz: $checks. Baribir birlashtirilsinmi?';
+  }
+
+  @override
+  String get teamchatMergeCiRun => 'CI hali ishlamoqda. Baribir birlashtirilsinmi?';
+
+  @override
+  String teamchatMergeCiRunNames(String checks) {
+    return 'CI hali ishlamoqda: $checks. Baribir birlashtirilsinmi?';
+  }
+
+  @override
+  String get teamchatMergeCiNone => 'Bu repozitoriyda CI tekshiruvlari yoʻq. Baribir birlashtirilsinmi?';
+
+  @override
+  String get teamchatCiOk => 'CI yashil';
+
+  @override
+  String get teamchatCiFail => 'CI muvaffaqiyatsiz';
+
+  @override
+  String teamchatCiFailNames(String checks) {
+    return 'CI muvaffaqiyatsiz: $checks';
+  }
+
+  @override
+  String get teamchatCiRun => 'CI ishlamoqda';
+
+  @override
+  String teamchatCiRunNames(String checks) {
+    return 'CI ishlamoqda: $checks';
+  }
+
+  @override
+  String get teamchatCiNone => 'CI yoʻq';
+
+  @override
+  String get teamchatRegression => 'Regressiya';
+
+  @override
+  String get teamchatNewFinding => 'Yangi';
+
+  @override
+  String get teamchatRepos => 'Repozitoriylar';
+
+  @override
+  String teamchatFiles(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n fayl', one: '$n fayl');
+    return '$_temp0';
+  }
+
+  @override
+  String teamchatReviewFindings(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n review izohi', one: '$n review izohi');
+    return '$_temp0';
+  }
+
+  @override
+  String teamchatMore(String n) {
+    return 'va yana $n';
+  }
+
+  @override
+  String get teamchatOpenFinding => 'Topilmani ochish';
+
+  @override
+  String get teamchatViewDiff => 'Diffni koʻrish';
+
+  @override
+  String get teamchatViewPr => 'PR ni ochish';
+
+  @override
+  String get teamchatFeedbackPlaceholder => 'Nimani oʻzgartirish kerak?';
+
+  @override
+  String get teamchatSendFeedback => 'Fikrni yuborish';
+
+  @override
+  String get teamchatDraftTitle => 'Sarlavha';
+
+  @override
+  String get teamchatDraftDescription => 'Tavsif';
+
+  @override
+  String get teamchatDraftRepo => 'Repozitoriy';
+
+  @override
+  String get teamchatDraftEdit => 'Tahrirlash';
+
+  @override
+  String get teamchatDraftDone => 'Tayyor';
+
+  @override
+  String get teamchatVoiceStart => 'Ovozli xabar yozish';
+
+  @override
+  String get teamchatVoiceRecording => 'Yozilmoqda';
+
+  @override
+  String get teamchatVoiceEncoding => 'Ovozli xabar tayyorlanmoqda…';
+
+  @override
+  String teamchatVoiceLimit(String n) {
+    return '$n daqiqagacha';
+  }
+
+  @override
+  String get teamchatVoiceSend => 'Ovozli xabarni yuborish';
+
+  @override
+  String get teamchatVoiceDenied => 'Ovozli xabar yuborish uchun bu saytga mikrofonga ruxsat bering.';
+
+  @override
+  String get teamchatVoiceNoMic => 'Mikrofonni ochib bo\'lmadi.';
+
+  @override
+  String teamchatVoiceMessage(String time) {
+    return 'Ovozli xabar, $time';
+  }
+
+  @override
+  String get teamchatVoiceListening => 'Muse tinglamoqda…';
+
+  @override
+  String get teamchatVoiceNoWords => 'Bu ovozli xabarda so\'z eshitilmadi.';
+
+  @override
+  String teamchatVoiceFailed(String error) {
+    return 'Matnga aylantirib bo\'lmadi: $error';
+  }
 
   @override
   String ticketUpdateTitle(String source) {

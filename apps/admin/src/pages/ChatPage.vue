@@ -4,9 +4,11 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, unwrap } from '../api/client'
+import type { AttachedFile } from '../api/types'
 import { AI_NAME } from '../components/chat/AiBadge.vue'
 import ChannelList from '../components/chat/ChannelList.vue'
 import ChatComposer from '../components/chat/ChatComposer.vue'
+import ChatFiles from '../components/files/ChatFiles.vue'
 import ChatMessageItem from '../components/chat/ChatMessageItem.vue'
 import { dayOf, secs, type ChatChannel, type ChatMessage } from '../components/chat/chat'
 import {
@@ -218,10 +220,10 @@ async function onVoice(clip: { recording: Blob; wav: Blob; durationMs: number })
   }
 }
 
-function onSend(body: string) {
+function onSend(body: string, files: AttachedFile[]) {
   if (!channelId.value) return
   stickNext = true
-  send(channelId.value, body, replyTo.value?.id)
+  send(channelId.value, body, replyTo.value?.id, files)
   replyTo.value = undefined
 }
 
@@ -294,7 +296,8 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
               <span v-else class="ferr">{{ t('teamchat.failed') }}<template v-if="o.error">: {{ o.error }}</template></span>
             </div>
             <p v-if="o.replyTo" class="hint tc-pq">↪ {{ byId.get(o.replyTo)?.author ?? '' }}</p>
-            <p class="tc-pb">{{ o.body }}</p>
+            <p v-if="o.body" class="tc-pb">{{ o.body }}</p>
+            <ChatFiles v-if="o.files?.length" :files="o.files" />
             <div v-if="o.status === 'failed'" class="tc-pa">
               <button type="button" class="btn btn-s" @click="retrySend(o.clientMsgId)">{{ t('teamchat.retry') }}</button>
               <button type="button" class="btn btn-s btn-d" @click="discard(o.clientMsgId)">{{ t('teamchat.delete') }}</button>

@@ -49,6 +49,7 @@ import 'package:agnts_api/src/model/assistant_stats_actions.dart';
 import 'package:agnts_api/src/model/assistant_stats_versions_inner.dart';
 import 'package:agnts_api/src/model/assistant_transcript.dart';
 import 'package:agnts_api/src/model/attach_code_ticket_request.dart';
+import 'package:agnts_api/src/model/attached_file.dart';
 import 'package:agnts_api/src/model/attachment.dart';
 import 'package:agnts_api/src/model/begin_login_totp200_response.dart';
 import 'package:agnts_api/src/model/begin_login_totp_request.dart';
@@ -387,6 +388,8 @@ import 'package:agnts_api/src/model/security_finding.dart';
 import 'package:agnts_api/src/model/security_finding_location.dart';
 import 'package:agnts_api/src/model/security_repo_summary.dart';
 import 'package:agnts_api/src/model/security_scan.dart';
+import 'package:agnts_api/src/model/security_settings.dart';
+import 'package:agnts_api/src/model/security_workspace_settings.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/send_meeting_message_request.dart';
 import 'package:agnts_api/src/model/set_credit_limit_request.dart';
@@ -601,6 +604,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AssistantTranscript.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AttachCodeTicketRequest':
           return AttachCodeTicketRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AttachedFile':
+          return AttachedFile.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Attachment':
           return Attachment.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BeginLoginTotp200Response':
@@ -1340,6 +1345,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SecurityRepoSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SecurityScan':
           return SecurityScan.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecuritySettings':
+          return SecuritySettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecurityWorkspaceSettings':
+          return SecurityWorkspaceSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendFeedbackRequest':
           return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendMeetingMessageRequest':

@@ -74,6 +74,11 @@ type Store interface {
 	// ErrConflict when one is not pending.
 	LinkAttachments(ctx context.Context, ids []int64, ticketID int64, questionID *int64, purpose domain.AttachmentPurpose) error
 	DeleteAttachments(ctx context.Context, ids []int64) error
+	// LinkAssistantFiles links user's pending uploads to their Ask
+	// question, failing with domain.ErrConflict when one is not.
+	LinkAssistantFiles(ctx context.Context, ids []int64, messageID, user int64) error
+	// AssistantFileOwner returns whose conversation an assistant message is in.
+	AssistantFileOwner(ctx context.Context, messageID int64) (int64, error)
 	PrunePendingAttachments(ctx context.Context, before time.Time) (int64, error)
 
 	SaveResult(ctx context.Context, r domain.Result) error

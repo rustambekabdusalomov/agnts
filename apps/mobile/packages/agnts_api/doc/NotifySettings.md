@@ -21,6 +21,7 @@ Name | Type | Description | Notes
 **followUps** | **bool** | Follow-up tickets were suggested | [optional] 
 **ci** | **bool** | A watched branch went red | [optional] 
 **logs** | **bool** | The log watcher found something, or a log source stopped | [optional] 
+**security** | **bool** | A security scan found something new or reopened, or failed | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

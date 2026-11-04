@@ -29,6 +29,8 @@ abstract class _$ChatMessageCWProxy {
 
   ChatMessage audio(ChatAudio? audio);
 
+  ChatMessage files(List<AttachedFile>? files);
+
   ChatMessage clientMsgId(String? clientMsgId);
 
   ChatMessage refs(List<ChatRef> refs);
@@ -53,6 +55,7 @@ abstract class _$ChatMessageCWProxy {
     ChatAI? ai,
     String? ticketKey,
     ChatAudio? audio,
+    List<AttachedFile>? files,
     String? clientMsgId,
     List<ChatRef> refs,
     DateTime createdAt,
@@ -99,6 +102,9 @@ class _$ChatMessageCWProxyImpl implements _$ChatMessageCWProxy {
   ChatMessage audio(ChatAudio? audio) => this(audio: audio);
 
   @override
+  ChatMessage files(List<AttachedFile>? files) => this(files: files);
+
+  @override
   ChatMessage clientMsgId(String? clientMsgId) =>
       this(clientMsgId: clientMsgId);
 
@@ -127,6 +133,7 @@ class _$ChatMessageCWProxyImpl implements _$ChatMessageCWProxy {
     Object? ai = const $CopyWithPlaceholder(),
     Object? ticketKey = const $CopyWithPlaceholder(),
     Object? audio = const $CopyWithPlaceholder(),
+    Object? files = const $CopyWithPlaceholder(),
     Object? clientMsgId = const $CopyWithPlaceholder(),
     Object? refs = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
@@ -176,6 +183,10 @@ class _$ChatMessageCWProxyImpl implements _$ChatMessageCWProxy {
           ? _value.audio
           // ignore: cast_nullable_to_non_nullable
           : audio as ChatAudio?,
+      files: files == const $CopyWithPlaceholder()
+          ? _value.files
+          // ignore: cast_nullable_to_non_nullable
+          : files as List<AttachedFile>?,
       clientMsgId: clientMsgId == const $CopyWithPlaceholder()
           ? _value.clientMsgId
           // ignore: cast_nullable_to_non_nullable
@@ -242,6 +253,12 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) =>
           (v) =>
               v == null ? null : ChatAudio.fromJson(v as Map<String, dynamic>),
         ),
+        files: $checkedConvert(
+          'files',
+          (v) => (v as List<dynamic>?)
+              ?.map((e) => AttachedFile.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
         clientMsgId: $checkedConvert('clientMsgId', (v) => v as String?),
         refs: $checkedConvert(
           'refs',
@@ -270,6 +287,7 @@ Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) =>
       'ai': ?instance.ai?.toJson(),
       'ticketKey': ?instance.ticketKey,
       'audio': ?instance.audio?.toJson(),
+      'files': ?instance.files?.map((e) => e.toJson()).toList(),
       'clientMsgId': ?instance.clientMsgId,
       'refs': instance.refs.map((e) => e.toJson()).toList(),
       'createdAt': instance.createdAt.toIso8601String(),

@@ -42,6 +42,13 @@ void main() {
       // TODO
     });
 
+    // A repository's security settings: schedule, exclusions, lowest severity that notifies
+    //
+    //Future<SecuritySettings> getSecuritySettings(int id) async
+    test('test getSecuritySettings', () async {
+      // TODO
+    });
+
     // Open security findings by repository and severity, with each repository's last scan
     //
     //Future<List<SecurityRepoSummary>> getSecuritySummary() async
@@ -74,6 +81,13 @@ void main() {
     //
     //Future<SecurityFinding> reopenSecurityFinding(int findingId) async
     test('test reopenSecurityFinding', () async {
+      // TODO
+    });
+
+    // Save a repository's security settings and schedule its next scan
+    //
+    //Future<SecuritySettings> setSecuritySettings(int id, SecuritySettings securitySettings) async
+    test('test setSecuritySettings', () async {
       // TODO
     });
 

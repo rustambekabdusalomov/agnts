@@ -45,6 +45,8 @@ abstract class _$AssistantMessageCWProxy {
 
   AssistantMessage attachments(List<int>? attachments);
 
+  AssistantMessage attachedFiles(List<AttachedFile>? attachedFiles);
+
   AssistantMessage createdAt(DateTime createdAt);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AssistantMessage(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -73,6 +75,7 @@ abstract class _$AssistantMessageCWProxy {
     String? ticketKey,
     CodeRouted? routed,
     List<int>? attachments,
+    List<AttachedFile>? attachedFiles,
     DateTime createdAt,
   });
 }
@@ -147,6 +150,10 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
       this(attachments: attachments);
 
   @override
+  AssistantMessage attachedFiles(List<AttachedFile>? attachedFiles) =>
+      this(attachedFiles: attachedFiles);
+
+  @override
   AssistantMessage createdAt(DateTime createdAt) => this(createdAt: createdAt);
 
   @override
@@ -176,6 +183,7 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
     Object? ticketKey = const $CopyWithPlaceholder(),
     Object? routed = const $CopyWithPlaceholder(),
     Object? attachments = const $CopyWithPlaceholder(),
+    Object? attachedFiles = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
   }) {
     return AssistantMessage(
@@ -255,6 +263,10 @@ class _$AssistantMessageCWProxyImpl implements _$AssistantMessageCWProxy {
           ? _value.attachments
           // ignore: cast_nullable_to_non_nullable
           : attachments as List<int>?,
+      attachedFiles: attachedFiles == const $CopyWithPlaceholder()
+          ? _value.attachedFiles
+          // ignore: cast_nullable_to_non_nullable
+          : attachedFiles as List<AttachedFile>?,
       createdAt: createdAt == const $CopyWithPlaceholder()
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
@@ -348,6 +360,12 @@ AssistantMessage _$AssistantMessageFromJson(
       'attachments',
       (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
     ),
+    attachedFiles: $checkedConvert(
+      'attachedFiles',
+      (v) => (v as List<dynamic>?)
+          ?.map((e) => AttachedFile.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
   );
   return val;
@@ -374,6 +392,7 @@ Map<String, dynamic> _$AssistantMessageToJson(AssistantMessage instance) =>
       'ticketKey': ?instance.ticketKey,
       'routed': ?_$CodeRoutedEnumMap[instance.routed],
       'attachments': ?instance.attachments,
+      'attachedFiles': ?instance.attachedFiles?.map((e) => e.toJson()).toList(),
       'createdAt': instance.createdAt.toIso8601String(),
     };
 

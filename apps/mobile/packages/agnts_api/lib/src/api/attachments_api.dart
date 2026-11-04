@@ -20,7 +20,7 @@ class AttachmentsApi {
   const AttachmentsApi(this._dio);
 
   /// Delete an upload that nothing uses yet
-  /// 
+  /// Viewers delete only their own uploads; editors any pending one.
   ///
   /// Parameters:
   /// * [id] 
@@ -78,7 +78,7 @@ class AttachmentsApi {
   }
 
   /// An attached file&#39;s bytes
-  /// 
+  /// An AI chat (Ask) question&#39;s file is only its asker&#39;s; anyone else gets 404.
   ///
   /// Parameters:
   /// * [id] 
@@ -161,8 +161,8 @@ _responseData = rawData == null ? null : rawData as Uint8List;
     );
   }
 
-  /// Upload a file to attach to a task, an answer or a retry note
-  /// The upload stays pending until the request that uses it (createTask, updateTask, answerQuestions, retryTicket, requestChanges) lists its id; pending uploads nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP) are shown in place; other files download. Claude reads every attached file, pictures and PDFs included.
+  /// Upload a file to attach to a task, an answer, a retry note or a chat message
+  /// The upload stays pending until the request that uses it (createTask, updateTask, answerQuestions, retryTicket, requestChanges, sendChatMessage, askAssistant, Code mode) lists its id; pending uploads nobody used are deleted after a day. Pictures (PNG, JPEG, GIF, WebP) are shown in place; other files download. Claude reads every attached file, pictures and PDFs included. Viewers may upload too, for the chats.
   ///
   /// Parameters:
   /// * [file] - At most 10 MB

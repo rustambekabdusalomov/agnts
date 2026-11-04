@@ -145,7 +145,7 @@ func TestSecurityAPI(t *testing.T) {
 
 func (f *fakeSecurity) SetSecuritySettings(_ context.Context, _ int64, set domain.SecuritySettings, _ domain.Origin) (domain.SecuritySettings, error) {
 	if err := set.Normalize(); err != nil {
-		return set, fmt.Errorf("%w: %v", orchestrator.ErrInvalid, err)
+		return set, fmt.Errorf("%w: %w", orchestrator.ErrInvalid, err)
 	}
 	f.settings = set
 	return set, nil

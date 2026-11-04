@@ -7,7 +7,7 @@ Revised Nov 4, 2026 after a review against the current code: provider-neutral (C
 
 ## Implementation status (Nov 4, 2026)
 
-**Phase 1a is built** on branch `security-scan`: runner tools and `agnts-sec`, the vulnerability-database volume and daily updater, migration `00082_security.sql`, store, scheduler class, scan job, the `security` prompt, fingerprints and closing rules, Fix this → SEC tickets with verify-on-merge, the API, and the admin Security page, finding page, repository tab and ticket card. Phases 1b, 1c and 2 are not started.
+**Phase 1a is built** on branch `security-scan`: runner tools and `agnts-sec`, the vulnerability-database volume and daily updater, migrations `00083_security.sql` and `00084_security_more.sql`, store, scheduler class, scan job, the `security` prompt, fingerprints and closing rules, Fix this → SEC tickets with verify-on-merge, the API, and the admin Security page, finding page, repository tab and ticket card. Phases 1b, 1c and 2 are not started.
 
 Where 1a differs from the text below:
 
@@ -268,7 +268,7 @@ Scanner binaries are pinned in the image. Their **data** must be fresh, and run 
 - `settings.go`: `AutoSecurity` (default true; only affects agnts changes), `ModelSecurity = "security"` next to `ModelReview` and `ModelPreview`, resolved per provider like them (Claude: Sonnet; Muse: the provider's review-tier model), `Notify.Security`, `SecurityDailyBudget` (agent-run scans per day per workspace, default 10, counting verify runs that need the agent) and `SecurityFileProof` (default false, ignored on hosted).
 - `harness.go`: `RepoHarness.Security` with the repository settings above.
 
-### Migration `server/migrations/00082_security.sql`
+### Migration `server/migrations/00083_security.sql`
 
 (The last migration today is `00081_meeting_tasks.sql`; take the next free number when the work starts.)
 

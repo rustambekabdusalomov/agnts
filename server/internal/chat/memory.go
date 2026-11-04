@@ -286,6 +286,9 @@ func (r *recall) msg(m domain.ChatMessage) {
 			body += " (" + m.Card.Result + ")"
 		}
 	}
+	if len(m.Files) > 0 {
+		body = strings.TrimSpace(body + " [files: " + fileNames(m.Files) + "]")
+	}
 	if strings.TrimSpace(body) == "" {
 		return
 	}

@@ -55,6 +55,8 @@ abstract class _$SettingsCWProxy {
 
   Settings logWatch(LogWatchSettings? logWatch);
 
+  Settings security(SecurityWorkspaceSettings? security);
+
   Settings guard(GuardSettings? guard);
 
   Settings stalls(String? stalls);
@@ -114,6 +116,7 @@ abstract class _$SettingsCWProxy {
     PRCommentSettings? prComments,
     CISettings? ci,
     LogWatchSettings? logWatch,
+    SecurityWorkspaceSettings? security,
     GuardSettings? guard,
     String? stalls,
     bool? proveFixes,
@@ -217,6 +220,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
   Settings logWatch(LogWatchSettings? logWatch) => this(logWatch: logWatch);
 
   @override
+  Settings security(SecurityWorkspaceSettings? security) =>
+      this(security: security);
+
+  @override
   Settings guard(GuardSettings? guard) => this(guard: guard);
 
   @override
@@ -294,6 +301,7 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
     Object? prComments = const $CopyWithPlaceholder(),
     Object? ci = const $CopyWithPlaceholder(),
     Object? logWatch = const $CopyWithPlaceholder(),
+    Object? security = const $CopyWithPlaceholder(),
     Object? guard = const $CopyWithPlaceholder(),
     Object? stalls = const $CopyWithPlaceholder(),
     Object? proveFixes = const $CopyWithPlaceholder(),
@@ -406,6 +414,10 @@ class _$SettingsCWProxyImpl implements _$SettingsCWProxy {
           ? _value.logWatch
           // ignore: cast_nullable_to_non_nullable
           : logWatch as LogWatchSettings?,
+      security: security == const $CopyWithPlaceholder()
+          ? _value.security
+          // ignore: cast_nullable_to_non_nullable
+          : security as SecurityWorkspaceSettings?,
       guard: guard == const $CopyWithPlaceholder()
           ? _value.guard
           // ignore: cast_nullable_to_non_nullable
@@ -552,6 +564,12 @@ Settings _$SettingsFromJson(
           ? null
           : LogWatchSettings.fromJson(v as Map<String, dynamic>),
     ),
+    security: $checkedConvert(
+      'security',
+      (v) => v == null
+          ? null
+          : SecurityWorkspaceSettings.fromJson(v as Map<String, dynamic>),
+    ),
     guard: $checkedConvert(
       'guard',
       (v) =>
@@ -610,6 +628,7 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
   'prComments': ?instance.prComments?.toJson(),
   'ci': ?instance.ci?.toJson(),
   'logWatch': ?instance.logWatch?.toJson(),
+  'security': ?instance.security?.toJson(),
   'guard': ?instance.guard?.toJson(),
   'stalls': ?instance.stalls,
   'proveFixes': ?instance.proveFixes,

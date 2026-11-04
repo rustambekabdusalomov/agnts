@@ -66,7 +66,7 @@ class EgressUpstream {
 
 
 
-      /// The upstream proxy
+      /// The upstream proxy, without its password
   @JsonKey(
     
     name: r'via',

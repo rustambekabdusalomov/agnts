@@ -98,8 +98,12 @@ func (s *Agent) FinishAssistantAction(ctx context.Context, id string, outcome do
 	return err
 }
 
-// attachAssistantActions loads the actions each of msgs proposed.
+// attachAssistantActions loads the actions each of msgs proposed, and the
+// files each brought.
 func attachAssistantActions(ctx context.Context, db *pgxpool.Pool, msgs []domain.AssistantMessage) error {
+	if err := withAssistantFiles(ctx, db, msgs); err != nil {
+		return err
+	}
 	var ids []int64
 	for _, m := range msgs {
 		if m.Role == domain.AssistantReply {
@@ -138,4 +142,37 @@ func assistantActionsOf(ctx context.Context, db *pgxpool.Pool, ids []int64) (map
 		out[a.MessageID] = append(out[a.MessageID], a)
 	}
 	return out, rows.Err()
+}
+
+// withAssistantFiles fills AttachedFiles from each message's upload ids
+// (Ask questions' files, and Code messages' until a ticket takes them);
+// a file deleted since is left out.
+func withAssistantFiles(ctx context.Context, db *pgxpool.Pool, msgs []domain.AssistantMessage) error {
+	var ids []int64
+	for _, m := range msgs {
+		ids = append(ids, m.Attachments...)
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	rows, err := db.Query(ctx, `SELECT `+attachmentCols+` FROM attachments WHERE id = ANY($1)`, ids)
+	if err != nil {
+		return err
+	}
+	as, err := collectAttachments(rows)
+	if err != nil {
+		return err
+	}
+	by := make(map[int64]domain.FileRef, len(as))
+	for _, a := range as {
+		by[a.ID] = a.Ref()
+	}
+	for i := range msgs {
+		for _, id := range msgs[i].Attachments {
+			if f, ok := by[id]; ok {
+				msgs[i].AttachedFiles = append(msgs[i].AttachedFiles, f)
+			}
+		}
+	}
+	return nil
 }

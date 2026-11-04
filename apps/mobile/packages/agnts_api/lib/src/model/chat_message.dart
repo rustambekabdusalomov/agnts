@@ -7,6 +7,7 @@ import 'package:agnts_api/src/model/chat_ref.dart';
 import 'package:agnts_api/src/model/chat_audio.dart';
 import 'package:agnts_api/src/model/chat_card.dart';
 import 'package:agnts_api/src/model/chat_ai.dart';
+import 'package:agnts_api/src/model/attached_file.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -45,6 +46,8 @@ class ChatMessage {
      this.ticketKey,
 
      this.audio,
+
+     this.files,
 
      this.clientMsgId,
 
@@ -101,7 +104,7 @@ class ChatMessage {
 
 
 
-      /// The person's username
+      /// The person's username, or agnts
   @JsonKey(
     
     name: r'author',
@@ -186,6 +189,19 @@ class ChatMessage {
 
 
 
+      /// Files that came with the message; its body may then be empty
+  @JsonKey(
+    
+    name: r'files',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<AttachedFile>? files;
+
+
+
   @JsonKey(
     
     name: r'clientMsgId',
@@ -237,6 +253,7 @@ class ChatMessage {
       other.ai == ai &&
       other.ticketKey == ticketKey &&
       other.audio == audio &&
+      other.files == files &&
       other.clientMsgId == clientMsgId &&
       other.refs == refs &&
       other.createdAt == createdAt;
@@ -254,6 +271,7 @@ class ChatMessage {
         ai.hashCode +
         ticketKey.hashCode +
         audio.hashCode +
+        files.hashCode +
         clientMsgId.hashCode +
         refs.hashCode +
         createdAt.hashCode;

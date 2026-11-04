@@ -539,9 +539,9 @@ import 'package:agnts_api/api.dart';
 final api = AgntsApi().getChatApi();
 final int channelId = 789; // int | 
 final String clientMsgId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
-final int durationMs = 789; // int | The recording's length
+final int durationMs = 789; // int | The recording's length, at most 2 minutes
 final MultipartFile audio = BINARY_DATA_HERE; // MultipartFile | The recording to keep and play (WebM, Ogg, MP4, MP3, AAC or WAV), at most 3 MB
-final MultipartFile wav = BINARY_DATA_HERE; // MultipartFile | The same audio as 16-bit PCM WAV for Muse to hear
+final MultipartFile wav = BINARY_DATA_HERE; // MultipartFile | The same audio as 16-bit PCM WAV for Muse to hear, at most 4 MB
 final int replyTo = 789; // int | 
 
 try {
@@ -558,9 +558,9 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **channelId** | **int**|  | 
  **clientMsgId** | **String**|  | 
- **durationMs** | **int**| The recording's length | 
+ **durationMs** | **int**| The recording's length, at most 2 minutes | 
  **audio** | **MultipartFile**| The recording to keep and play (WebM, Ogg, MP4, MP3, AAC or WAV), at most 3 MB | 
- **wav** | **MultipartFile**| The same audio as 16-bit PCM WAV for Muse to hear | 
+ **wav** | **MultipartFile**| The same audio as 16-bit PCM WAV for Muse to hear, at most 4 MB | 
  **replyTo** | **int**|  | [optional] 
 
 ### Return type

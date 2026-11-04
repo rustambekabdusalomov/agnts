@@ -26,7 +26,8 @@ Name | Type | Description | Notes
 **handoff** | [**CodeHandoff**](CodeHandoff.md) |  | [optional] 
 **ticketKey** | **String** | Code mode: the ticket the message went to | [optional] 
 **routed** | [**CodeRouted**](CodeRouted.md) |  | [optional] 
-**attachments** | **List&lt;int&gt;** | Code mode: uploads that went with the message | [optional] 
+**attachments** | **List&lt;int&gt;** | Uploads that went with the message (ids) | [optional] 
+**attachedFiles** | [**List&lt;AttachedFile&gt;**](AttachedFile.md) | The uploads of attachments still there, to show | [optional] 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

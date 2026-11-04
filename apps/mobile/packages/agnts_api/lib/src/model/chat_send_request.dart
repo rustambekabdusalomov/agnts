@@ -22,7 +22,9 @@ class ChatSendRequest {
 
     required  this.clientMsgId,
 
-    required  this.body,
+     this.body,
+
+     this.files,
 
      this.replyTo,
   });
@@ -40,15 +42,29 @@ class ChatSendRequest {
 
 
 
+      /// May be empty when files are sent
   @JsonKey(
     
     name: r'body',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final String body;
+  final String? body;
+
+
+
+      /// The sender's pending uploads (uploadAttachment) to send with it
+  @JsonKey(
+    
+    name: r'files',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<int>? files;
 
 
 
@@ -70,12 +86,14 @@ class ChatSendRequest {
     bool operator ==(Object other) => identical(this, other) || other is ChatSendRequest &&
       other.clientMsgId == clientMsgId &&
       other.body == body &&
+      other.files == files &&
       other.replyTo == replyTo;
 
     @override
     int get hashCode =>
         clientMsgId.hashCode +
         body.hashCode +
+        files.hashCode +
         replyTo.hashCode;
 
   factory ChatSendRequest.fromJson(Map<String, dynamic> json) => _$ChatSendRequestFromJson(json);

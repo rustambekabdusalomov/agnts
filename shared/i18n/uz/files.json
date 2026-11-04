@@ -18,6 +18,9 @@
     "fromFeedback": "Soʻralgan oʻzgarishlarga",
     "dropOne": "Faylni shu yerga tashlang yoki",
     "choose": "faylni tanlang",
-    "change": "Boshqasini tanlash"
+    "change": "Boshqasini tanlash",
+    "download": "{name} ni yuklab olish",
+    "drop": "Fayllarni yuborish uchun qoʻyib yuboring",
+    "chatHint": "10 tagacha fayl, har biri 10 MB gacha"
   }
 }

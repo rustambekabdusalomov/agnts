@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/vue-query'
 import { reactive } from 'vue'
 import { api, currentWorkspace, HttpError, sendChatVoice, unwrap } from '../../api/client'
-import type { TicketEvent } from '../../api/types'
+import type { AttachedFile, TicketEvent } from '../../api/types'
 import { livePoll, onLiveReconnect, useLive } from '../../composables/useLive'
 import { queryClient } from '../../queryClient'
 import { useSession } from '../../stores/session'
@@ -207,9 +207,9 @@ let failures = 0
 let retryTimer: ReturnType<typeof setTimeout> | undefined
 
 /** Shows the message at once and queues it to be sent. */
-export function send(channelId: number, body: string, replyTo?: number) {
+export function send(channelId: number, body: string, replyTo?: number, files?: AttachedFile[]) {
   ensureWs()
-  chat.outbox.push({ clientMsgId: newClientId(), channelId, body, replyTo, createdAt: new Date().toISOString(), status: 'pending' })
+  chat.outbox.push({ clientMsgId: newClientId(), channelId, body, replyTo, ...(files?.length ? { files } : {}), createdAt: new Date().toISOString(), status: 'pending' })
   saveOutbox()
   void flush()
 }
@@ -251,7 +251,12 @@ export async function flush() {
         const m = await unwrap(
           api.POST('/chat/channels/{channelId}/messages', {
             params: { path: { channelId: o.channelId } },
-            body: { clientMsgId: o.clientMsgId, body: o.body, ...(o.replyTo ? { replyTo: o.replyTo } : {}) },
+            body: {
+              clientMsgId: o.clientMsgId,
+              body: o.body,
+              ...(o.replyTo ? { replyTo: o.replyTo } : {}),
+              ...(o.files?.length ? { files: o.files.map((f) => f.id) } : {}),
+            },
           }),
         )
         failures = 0

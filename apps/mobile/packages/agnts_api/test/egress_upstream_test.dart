@@ -13,7 +13,7 @@ void main() {
       // TODO
     });
 
-    // The upstream proxy
+    // The upstream proxy, without its password
     // String via
     test('to test the property `via`', () async {
       // TODO

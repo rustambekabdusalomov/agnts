@@ -1272,9 +1272,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authUseGoogle => 'Passwords are for Admins only here. Continue with Google instead.';
 
   @override
-  String get authAdminsLede => 'Admins sign in with their password. Everyone else continues with Google.';
-
-  @override
   String get authGoogleInvite => 'This invite link is invalid, already used, expired, or meant for another Google account.';
 
   @override
@@ -3883,6 +3880,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filesFromFeedback => 'With requested changes';
 
   @override
+  String get filesDropOne => 'Drop a file here, or';
+
+  @override
+  String get filesChoose => 'choose a file';
+
+  @override
+  String get filesChange => 'Choose another';
+
+  @override
+  String filesDownload(String name) {
+    return 'Download $name';
+  }
+
+  @override
+  String get filesDrop => 'Drop files to send them';
+
+  @override
+  String get filesChatHint => 'Up to 10 files, 10 MB each';
+
+  @override
   String get followUpsTitle => 'Follow-up tickets';
 
   @override
@@ -4123,6 +4140,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formNoMatch => 'No matches';
 
   @override
+  String get formPickDateTime => 'Choose a date and time';
+
+  @override
+  String get formPrevMonth => 'Previous month';
+
+  @override
+  String get formNextMonth => 'Next month';
+
+  @override
+  String get formNow => 'Now';
+
+  @override
+  String get formTime => 'Time';
+
+  @override
+  String get formDone => 'Done';
+
+  @override
   String groupsView(String n) {
     return 'Groups ($n)';
   }
@@ -4205,6 +4240,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get groupsCommitTemplateHelp =>
       'Writes the commit messages of this group\'s tickets in every repository, replacing each repository\'s own format. Leave empty to keep each repository\'s own.';
+
+  @override
+  String get groupsPrTemplateHelp =>
+      'Titles the pull requests of this group\'s tickets in every repository, replacing each repository\'s own format. Leave empty to keep each repository\'s own.';
 
   @override
   String get groupsInstructions => 'Instructions';
@@ -6861,11 +6900,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logwatchFieldsHelp => 'Test connection fills these in; change them only if it guessed wrong.';
 
   @override
+  String get logwatchTraceUrl => 'Trace link';
+
+  @override
+  String logwatchTraceUrlHelp(String traceId) {
+    return 'Optional. A link to a trace in Tempo, Jaeger or Grafana, with \'$traceId\' where the id goes. Findings from logs that carry a trace id link to it.';
+  }
+
+  @override
+  String get logwatchTrace => 'Trace';
+
+  @override
   String get logwatchCa => 'CA certificate (PEM), for a private CA';
 
   @override
   String get logwatchPushHelp =>
-      'Your shipper sends to agnts with a token. agnts shows the token and ready Vector and Fluent Bit configuration once you add the source.';
+      'Your shipper sends to agnts with a token. agnts shows the token and ready Vector, Fluent Bit, Promtail and OpenTelemetry configuration once you add the source.';
 
   @override
   String get logwatchEnabled => 'Read this source';
@@ -7115,6 +7165,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get logwatchAgentHelp =>
       'On a server without a logging system: run this next to your services. It follows the containers labelled agnts.watch=logs, reports crashes, OOM kills and failed health checks, and connects out to agnts only.';
+
+  @override
+  String get logwatchOtelTitle => 'OpenTelemetry Collector';
+
+  @override
+  String get logwatchOtelHelp =>
+      'Add this pipeline to the Collector configuration. It sends a copy of error logs only; your other pipelines stay as they are.';
+
+  @override
+  String get logwatchOtelSdk => 'Apps that export with an OpenTelemetry SDK and no Collector send every log; agnts keeps what it needs:';
 
   @override
   String get logwatchKind_datadog => 'Datadog';
@@ -8179,6 +8239,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get meetingsKeepAudio => 'Keep the audio of notes after Muse has heard it';
 
   @override
+  String get meetingsDraftTickets => 'Make every action item a draft ticket of the member who took it';
+
+  @override
   String get meetingsRetention => 'Keep recordings and transcripts for (days)';
 
   @override
@@ -8225,6 +8288,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get meetingsTime => 'Time';
+
+  @override
+  String get meetingsStarts => 'Starts';
 
   @override
   String get meetingsDuration => 'Length';
@@ -8449,6 +8515,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get meetingsCreateTicket => 'Create ticket';
+
+  @override
+  String get meetingsNobody => 'Nobody';
+
+  @override
+  String get meetingsUnassigned => 'Unassigned';
+
+  @override
+  String meetingsSaid(String who) {
+    return 'said: $who';
+  }
+
+  @override
+  String get meetingsTakenBy => 'Taken by';
+
+  @override
+  String get meetingsMemberByHand => 'Picked by hand';
+
+  @override
+  String meetingsMemberMatched(String said) {
+    return 'Matched from “$said”';
+  }
+
+  @override
+  String meetingsMemberSet(String name) {
+    return 'Now $name’s';
+  }
+
+  @override
+  String meetingsMemberSetTicket(String name, String key) {
+    return 'Now $name’s, and so is $key';
+  }
+
+  @override
+  String get meetingsDraftHint => 'A draft made when the notes were written: held until someone starts it';
 
   @override
   String meetingsTicketMade(String key) {
@@ -8997,6 +9098,130 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get meetingsUninviteBody => 'They are no longer invited and get no more reminders.';
+
+  @override
+  String get meetingsUploadRecording => 'Upload recording';
+
+  @override
+  String get meetingsUploadTitle => 'Upload a recording of this meeting';
+
+  @override
+  String meetingsUploadSub(String mb) {
+    return 'A video or audio file of a meeting held elsewhere, up to $mb MB. Only its sound is used: agnts keeps the audio, deletes the file you send, and Muse writes the notes and draft tickets from what people said.';
+  }
+
+  @override
+  String get meetingsUploadFile => 'Recording';
+
+  @override
+  String get meetingsUploadHeld => 'When it was held';
+
+  @override
+  String get meetingsUploadPeople => 'Who is in it (helps Muse put tasks on the right people)';
+
+  @override
+  String get meetingsUploadNow => 'Upload';
+
+  @override
+  String get meetingsUploading => 'Uploading';
+
+  @override
+  String meetingsUploadingPct(String n) {
+    return 'Uploading… $n%';
+  }
+
+  @override
+  String get meetingsUploaded => 'Uploaded: Muse is listening to it';
+
+  @override
+  String meetingsUploadTooBig(String mb) {
+    return 'The file is bigger than $mb MB';
+  }
+
+  @override
+  String get meetingsUploadedBadge => 'Uploaded';
+
+  @override
+  String meetingsInRecording(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n people in the recording',
+      one: '$n person in the recording',
+      zero: 'In the recording',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsUploadedNote =>
+      'An uploaded recording: only its sound was heard, and the file was deleted. Nobody joined a call, so there is no attendance.';
+
+  @override
+  String get meetingsTodayLive => 'Live';
+
+  @override
+  String meetingsTodayInCall(String n) {
+    return '$n in call';
+  }
+
+  @override
+  String meetingsTodayIn(String n) {
+    return 'in $n min';
+  }
+
+  @override
+  String get meetingsTodayNow => 'now';
+
+  @override
+  String get meetingsTodayJoin => 'Join';
+
+  @override
+  String get meetingsTodayLater => 'Later today:';
+
+  @override
+  String meetingsTodayLiveLine(String title) {
+    return 'Live: $title';
+  }
+
+  @override
+  String meetingsTodayLiveAria(String title, String n) {
+    return '$title is live, $n in call. Join';
+  }
+
+  @override
+  String meetingsTodaySoonAria(String title, String n) {
+    return '$title starts in $n min. Join';
+  }
+
+  @override
+  String meetingsTodayNowAria(String title) {
+    return '$title is starting now. Join';
+  }
+
+  @override
+  String meetingsTodayLaterAria(String title, String time) {
+    return 'Next meeting today: $title at $time';
+  }
+
+  @override
+  String meetingsTodayMoreAria(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n more meetings today', one: '$n more meeting today');
+    return '$_temp0';
+  }
+
+  @override
+  String get meetingsUploadDrop => 'Drop the recording here, or';
+
+  @override
+  String meetingsUploadTypes(String mb) {
+    return 'Video or audio · up to $mb MB';
+  }
+
+  @override
+  String meetingsUploadBadType(String name) {
+    return '$name is not a video or audio file';
+  }
 
   @override
   String get mgroupsGroups => 'Groups';
@@ -10066,6 +10291,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMeetings => 'Meetings';
 
   @override
+  String get navChat => 'Chat';
+
+  @override
   String get navLogWatcher => 'Log watcher';
 
   @override
@@ -10870,6 +11098,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String platformModulesServerOnly(String list) {
     return 'This server can run only $list. Offering more needs the module in AGNTS_PROVIDERS on the server (and in the run image).';
   }
+
+  @override
+  String get platformMuseRoute => 'Muse route';
+
+  @override
+  String get platformMuseRouteSub => 'How Muse\'s traffic leaves this server. egress checks it every 30 seconds.';
+
+  @override
+  String get platformMuseStateLoading => 'Checking…';
+
+  @override
+  String get platformMuseStateUnknown => 'Unknown';
+
+  @override
+  String get platformMuseStateDirect => 'Direct';
+
+  @override
+  String get platformMuseStateWaiting => 'First check…';
+
+  @override
+  String get platformMuseStateUp => 'Working';
+
+  @override
+  String get platformMuseStateDown => 'Down';
+
+  @override
+  String get platformMuseDirect => 'No upstream proxy is set (AGNTS_EGRESS_UPSTREAM): Muse connects straight from this server.';
+
+  @override
+  String get platformMuseVia => 'Through';
+
+  @override
+  String get platformMuseExit => 'Seen by Meta as';
+
+  @override
+  String get platformMuseCheck => 'Last check';
+
+  @override
+  String get platformMuseDownSince => 'Down since';
+
+  @override
+  String platformMuseLastOk(String at) {
+    return 'last worked $at';
+  }
+
+  @override
+  String get platformMuseCalls => 'Muse connections';
+
+  @override
+  String platformMuseFailed(String n) {
+    return '$n failed';
+  }
+
+  @override
+  String platformMuseStrip(String pct) {
+    return 'Last 30 minutes: $pct% of checks worked';
+  }
+
+  @override
+  String get platformMuseFixTunnel => 'Start the tunnel again on the laptop and keep it open (the laptop must stay awake and online):';
+
+  @override
+  String get platformMuseFixProxy => 'Check that the upstream proxy is running and reachable from this server.';
+
+  @override
+  String platformMuseLastCallError(String err) {
+    return 'Last failed connection: $err';
+  }
+
+  @override
+  String get platformMuseNavDown => 'Muse\'s route is down';
 
   @override
   String get previewTab => 'Preview';
@@ -12349,6 +12648,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String reposCommitTemplateExample(String example) {
     return 'Example: $example';
   }
+
+  @override
+  String get reposPrTemplate => 'Pull request title format';
+
+  @override
+  String get reposPrTemplateHelp =>
+      'How agnts titles its pull requests, with the commit message format\'s placeholders. Leave empty for the workspace\'s title (Settings → Git).';
 
   @override
   String get reposPlaceholders => 'Placeholders';
@@ -13841,6 +14147,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsStageDocumentsHelp => 'Writes documents and the notes and action items of a meeting.';
 
   @override
+  String get settingsStageTeamChat => 'Team chat';
+
+  @override
+  String get settingsStageTeamChatHelp => 'Answers @agnts and drafts tickets in the team chat. Links use the same provider\'s light model.';
+
+  @override
   String get settingsMeetingAudioMuse =>
       'Meeting audio is always heard by Muse, the only module that hears audio; the notes are written by the model above.';
 
@@ -13923,8 +14235,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPrTitle => 'Pull request title';
 
   @override
-  String settingsPrTitleHelp(String key, String title) {
-    return '\'$key\' and \'$title\' are replaced with the ticket\'s key and title';
+  String settingsPrTitleHelp(String number, String key, String type, String scope, String subject, String title) {
+    return 'Placeholders $number, $key, $type, $scope, $subject and $title, as in the commit message format. A repository\'s or group\'s own format replaces it.';
   }
 
   @override
@@ -14927,6 +15239,354 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasksRepoNeeded => 'Code and tests need a repository: pick one, or choose another kind.';
+
+  @override
+  String get teamchatSubtitle =>
+      'Members and agnts in one room: agnts posts cards when work needs a person, links messages to tickets and answers @agnts.';
+
+  @override
+  String get teamchatChannels => 'Channels';
+
+  @override
+  String get teamchatNewChannel => 'New channel';
+
+  @override
+  String get teamchatChannelName => 'Name';
+
+  @override
+  String get teamchatChannelNameHelp => 'Lower case letters, digits, - and _ (spaces become -).';
+
+  @override
+  String get teamchatTopic => 'Topic';
+
+  @override
+  String get teamchatAgentsHere => 'agnts posts here';
+
+  @override
+  String get teamchatCreate => 'Create';
+
+  @override
+  String teamchatStart(String channel) {
+    return 'This is the start of #$channel.';
+  }
+
+  @override
+  String teamchatEmptyTitle(String channel) {
+    return 'Welcome to #$channel';
+  }
+
+  @override
+  String get teamchatEmptyText => 'Write the first message. Mention @agnts to ask about tickets, pull requests, CI and findings.';
+
+  @override
+  String get teamchatToday => 'Today';
+
+  @override
+  String get teamchatYesterday => 'Yesterday';
+
+  @override
+  String teamchatPlaceholder(String channel) {
+    return 'Message #$channel';
+  }
+
+  @override
+  String get teamchatSendHint => 'Enter to send, Shift+Enter for a new line · @agnts to ask agnts';
+
+  @override
+  String teamchatCount(String n, String max) {
+    return '$n of $max characters';
+  }
+
+  @override
+  String get teamchatSend => 'Send';
+
+  @override
+  String get teamchatReply => 'Reply';
+
+  @override
+  String get teamchatCancelReply => 'Cancel the reply';
+
+  @override
+  String teamchatReplyingTo(String name) {
+    return 'replying to $name';
+  }
+
+  @override
+  String get teamchatReplyingToMessage => 'replying to a message';
+
+  @override
+  String get teamchatToTicket => 'Turn into ticket';
+
+  @override
+  String teamchatDrafting(String name) {
+    return '$name is drafting a ticket…';
+  }
+
+  @override
+  String get teamchatThinking => 'agnts is thinking…';
+
+  @override
+  String teamchatSources(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n sources', one: '$n source');
+    return '$_temp0';
+  }
+
+  @override
+  String get teamchatSending => 'Sending…';
+
+  @override
+  String get teamchatWaitingNet => 'Waiting for the connection…';
+
+  @override
+  String get teamchatFailed => 'Not sent';
+
+  @override
+  String get teamchatRetry => 'Retry';
+
+  @override
+  String get teamchatDelete => 'Delete';
+
+  @override
+  String get teamchatOffline => 'Offline';
+
+  @override
+  String get teamchatReconnecting => 'Reconnecting…';
+
+  @override
+  String teamchatWaiting(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n messages wait', one: '$n message waits');
+    return '$_temp0';
+  }
+
+  @override
+  String get teamchatNotLoaded => 'That message is not loaded here. Scroll up to load older messages.';
+
+  @override
+  String teamchatStatsLine(num links, num answers, num drafts) {
+    String _temp0 = intl.Intl.pluralLogic(links, locale: localeName, other: '$links links', one: '$links link');
+    String _temp1 = intl.Intl.pluralLogic(answers, locale: localeName, other: '$answers answers', one: '$answers answer');
+    String _temp2 = intl.Intl.pluralLogic(drafts, locale: localeName, other: '$drafts drafts', one: '$drafts draft');
+    return '$_temp0 · $_temp1 · $_temp2';
+  }
+
+  @override
+  String teamchatStatsMedian(String secs) {
+    return 'Today, median ${secs}s';
+  }
+
+  @override
+  String teamchatAiTip(String model, String cost) {
+    return 'Model: $model · cost $cost';
+  }
+
+  @override
+  String teamchatLinkedBy(String name, String secs) {
+    return '✨ Linked by $name · ${secs}s';
+  }
+
+  @override
+  String teamchatRemoveLink(String name) {
+    return 'Remove the link to $name';
+  }
+
+  @override
+  String teamchatCiteMsg(String id) {
+    return 'message $id';
+  }
+
+  @override
+  String teamchatCiteFinding(String id) {
+    return 'finding #$id';
+  }
+
+  @override
+  String teamchatBy(String name) {
+    return 'by $name';
+  }
+
+  @override
+  String get teamchatState_open => 'Open';
+
+  @override
+  String get teamchatState_done => 'Done';
+
+  @override
+  String get teamchatState_failed => 'Failed';
+
+  @override
+  String get teamchatState_expired => 'Expired';
+
+  @override
+  String get teamchatAct_fix => 'Fix it';
+
+  @override
+  String get teamchatAct_mute => 'Mute';
+
+  @override
+  String get teamchatAct_approve => 'Approve';
+
+  @override
+  String get teamchatAct_request_changes => 'Request changes';
+
+  @override
+  String get teamchatAct_merge => 'Merge';
+
+  @override
+  String get teamchatAct_create => 'Create task';
+
+  @override
+  String get teamchatAct_create_assign => 'Create and assign to agent';
+
+  @override
+  String teamchatApproveTitle(String key) {
+    return 'Approve $key?';
+  }
+
+  @override
+  String teamchatMergeTitle(String number) {
+    return 'Merge PR #$number?';
+  }
+
+  @override
+  String teamchatMergeText(String number, String repo) {
+    return 'PR #$number in $repo will be merged on the git host.';
+  }
+
+  @override
+  String get teamchatMergeCiFail => 'CI is failing. Merge anyway?';
+
+  @override
+  String teamchatMergeCiFailNames(String checks) {
+    return 'CI is failing: $checks. Merge anyway?';
+  }
+
+  @override
+  String get teamchatMergeCiRun => 'CI is still running. Merge anyway?';
+
+  @override
+  String teamchatMergeCiRunNames(String checks) {
+    return 'CI is still running: $checks. Merge anyway?';
+  }
+
+  @override
+  String get teamchatMergeCiNone => 'This repository has no CI checks. Merge anyway?';
+
+  @override
+  String get teamchatCiOk => 'CI green';
+
+  @override
+  String get teamchatCiFail => 'CI failing';
+
+  @override
+  String teamchatCiFailNames(String checks) {
+    return 'CI failing: $checks';
+  }
+
+  @override
+  String get teamchatCiRun => 'CI running';
+
+  @override
+  String teamchatCiRunNames(String checks) {
+    return 'CI running: $checks';
+  }
+
+  @override
+  String get teamchatCiNone => 'No CI';
+
+  @override
+  String get teamchatRegression => 'Regression';
+
+  @override
+  String get teamchatNewFinding => 'New';
+
+  @override
+  String get teamchatRepos => 'Repositories';
+
+  @override
+  String teamchatFiles(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n files', one: '$n file');
+    return '$_temp0';
+  }
+
+  @override
+  String teamchatReviewFindings(num n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n review findings', one: '$n review finding');
+    return '$_temp0';
+  }
+
+  @override
+  String teamchatMore(String n) {
+    return 'and $n more';
+  }
+
+  @override
+  String get teamchatOpenFinding => 'Open finding';
+
+  @override
+  String get teamchatViewDiff => 'View diff';
+
+  @override
+  String get teamchatViewPr => 'View PR';
+
+  @override
+  String get teamchatFeedbackPlaceholder => 'What should change?';
+
+  @override
+  String get teamchatSendFeedback => 'Send feedback';
+
+  @override
+  String get teamchatDraftTitle => 'Title';
+
+  @override
+  String get teamchatDraftDescription => 'Description';
+
+  @override
+  String get teamchatDraftRepo => 'Repository';
+
+  @override
+  String get teamchatDraftEdit => 'Edit';
+
+  @override
+  String get teamchatDraftDone => 'Done editing';
+
+  @override
+  String get teamchatVoiceStart => 'Record a voice message';
+
+  @override
+  String get teamchatVoiceRecording => 'Recording';
+
+  @override
+  String get teamchatVoiceEncoding => 'Preparing the voice message…';
+
+  @override
+  String teamchatVoiceLimit(String n) {
+    return 'up to $n min';
+  }
+
+  @override
+  String get teamchatVoiceSend => 'Send voice message';
+
+  @override
+  String get teamchatVoiceDenied => 'Allow the microphone for this site to send voice messages.';
+
+  @override
+  String get teamchatVoiceNoMic => 'No microphone could be opened.';
+
+  @override
+  String teamchatVoiceMessage(String time) {
+    return 'Voice message, $time';
+  }
+
+  @override
+  String get teamchatVoiceListening => 'Muse is listening…';
+
+  @override
+  String get teamchatVoiceNoWords => 'No words were heard in this voice message.';
+
+  @override
+  String teamchatVoiceFailed(String error) {
+    return 'Could not transcribe it: $error';
+  }
 
   @override
   String ticketUpdateTitle(String source) {

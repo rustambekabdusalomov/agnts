@@ -7,7 +7,9 @@ part of 'assistant_ask.dart';
 // **************************************************************************
 
 abstract class _$AssistantAskCWProxy {
-  AssistantAsk question(String question);
+  AssistantAsk question(String? question);
+
+  AssistantAsk attachments(List<int>? attachments);
 
   AssistantAsk lang(AssistantLanguage? lang);
 
@@ -17,7 +19,11 @@ abstract class _$AssistantAskCWProxy {
   /// ```dart
   /// AssistantAsk(...).copyWith(id: 12, name: "My name")
   /// ````
-  AssistantAsk call({String question, AssistantLanguage? lang});
+  AssistantAsk call({
+    String? question,
+    List<int>? attachments,
+    AssistantLanguage? lang,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfAssistantAsk.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfAssistantAsk.copyWith.fieldName(...)`
@@ -27,7 +33,11 @@ class _$AssistantAskCWProxyImpl implements _$AssistantAskCWProxy {
   final AssistantAsk _value;
 
   @override
-  AssistantAsk question(String question) => this(question: question);
+  AssistantAsk question(String? question) => this(question: question);
+
+  @override
+  AssistantAsk attachments(List<int>? attachments) =>
+      this(attachments: attachments);
 
   @override
   AssistantAsk lang(AssistantLanguage? lang) => this(lang: lang);
@@ -41,13 +51,18 @@ class _$AssistantAskCWProxyImpl implements _$AssistantAskCWProxy {
   /// ````
   AssistantAsk call({
     Object? question = const $CopyWithPlaceholder(),
+    Object? attachments = const $CopyWithPlaceholder(),
     Object? lang = const $CopyWithPlaceholder(),
   }) {
     return AssistantAsk(
       question: question == const $CopyWithPlaceholder()
           ? _value.question
           // ignore: cast_nullable_to_non_nullable
-          : question as String,
+          : question as String?,
+      attachments: attachments == const $CopyWithPlaceholder()
+          ? _value.attachments
+          // ignore: cast_nullable_to_non_nullable
+          : attachments as List<int>?,
       lang: lang == const $CopyWithPlaceholder()
           ? _value.lang
           // ignore: cast_nullable_to_non_nullable
@@ -68,9 +83,12 @@ extension $AssistantAskCopyWith on AssistantAsk {
 
 AssistantAsk _$AssistantAskFromJson(Map<String, dynamic> json) =>
     $checkedCreate('AssistantAsk', json, ($checkedConvert) {
-      $checkKeys(json, requiredKeys: const ['question']);
       final val = AssistantAsk(
-        question: $checkedConvert('question', (v) => v as String),
+        question: $checkedConvert('question', (v) => v as String?),
+        attachments: $checkedConvert(
+          'attachments',
+          (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+        ),
         lang: $checkedConvert(
           'lang',
           (v) => $enumDecodeNullable(_$AssistantLanguageEnumMap, v),
@@ -81,7 +99,8 @@ AssistantAsk _$AssistantAskFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AssistantAskToJson(AssistantAsk instance) =>
     <String, dynamic>{
-      'question': instance.question,
+      'question': ?instance.question,
+      'attachments': ?instance.attachments,
       'lang': ?_$AssistantLanguageEnumMap[instance.lang],
     };
 
