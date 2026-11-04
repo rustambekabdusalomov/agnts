@@ -66,6 +66,7 @@ import WaitBanner from '../components/ticket/WaitBanner.vue'
 import { useSession } from '../stores/session'
 import { useWorkspace } from '../stores/workspace'
 import CopyButton from '../components/ui/CopyButton.vue'
+import GitHubAvatar from '../components/ui/GitHubAvatar.vue'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -985,8 +986,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   :title="m.role"
                   @click="toggleAssignee(m.username)"
                 >
-                  <img v-if="m.avatarUrl" class="mem-av" :src="m.avatarUrl" alt="" loading="lazy">
-                  <span v-else class="mem-av mem-av-x" aria-hidden="true">{{ m.username.slice(0, 1).toUpperCase() }}</span>
+                  <GitHubAvatar :url="m.avatarUrl" :size="26" />
                   {{ m.name || m.username }}
                 </button>
               </div>

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Repository } from '../../api/types'
+import GitHubAvatar from '../ui/GitHubAvatar.vue'
 import { useRepoMembers } from './useRepoMembers'
 
 // Who has access to the repository on GitHub or GitLab. These are the
@@ -34,8 +35,7 @@ const rows = computed(() => {
     <p v-else-if="!rows.length" class="empty">{{ q ? t('repos.noMatch') : t('repo.membersNone') }}</p>
     <ul v-else class="mem-list">
       <li v-for="m in rows" :key="m.username" class="mem">
-        <img v-if="m.avatarUrl" class="mem-av" :src="m.avatarUrl" alt="" loading="lazy">
-        <span v-else class="mem-av mem-av-x" aria-hidden="true">{{ m.username.slice(0, 1).toUpperCase() }}</span>
+        <GitHubAvatar :url="m.avatarUrl" :size="32" />
         <div class="mem-main">
           <a v-if="m.url" class="mem-name" :href="m.url" target="_blank" rel="noopener noreferrer">{{ m.name || m.username }}</a>
           <span v-else class="mem-name">{{ m.name || m.username }}</span>
