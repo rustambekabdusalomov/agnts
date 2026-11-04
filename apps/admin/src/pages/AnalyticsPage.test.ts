@@ -109,6 +109,20 @@ describe('AnalyticsPage', () => {
     expect(text).toContain('Close again with the new numbers')
     expect(text).toContain('2 delivered tickets are not scored yet')
     expect(o.w.find('.seg-b').text()).toBe('Month') // its own period picker, not the days
+    expect(o.w.find('select').exists()).toBe(false) // the month is our own select, by name
+    const months = o.w.findAll('.isel-trigger')
+    expect(months.length).toBe(1)
+    const last = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toLocaleDateString('en', { month: 'long', year: 'numeric' })
+    expect(months[0].text()).toBe(last)
+    await months[0].trigger('click')
+    const opts = o.w.findAll('[role="option"]')
+    expect(opts.length).toBe(12)
+    get.mockClear()
+    await opts[0].trigger('click')
+    await flushPromises()
+    const now = new Date()
+    const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    expect(get.mock.calls.some((c) => c[0] === '/analytics/developers' && c[1]?.params?.query?.month === thisMonth)).toBe(true)
 
     const member = await setup('/w/acme/analytics/developers', 'user')
     expect(member.w.findAll('.page-tab').map((x) => x.text())).not.toContain('Developers')

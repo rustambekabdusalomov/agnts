@@ -15,6 +15,7 @@
     "reclose": "Yangi raqamlar bilan qayta yopish",
     "closeNow": "Hozir yopish",
     "closings": "Oldingi yopilishlar",
+    "closingLatest": "Oxirgi yopilish",
     "closingN": "{n}-yopilish · {date}",
     "author": "Muallif",
     "points": "Ballar",

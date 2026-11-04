@@ -15,6 +15,7 @@
     "reclose": "Close again with the new numbers",
     "closeNow": "Close now",
     "closings": "Earlier closings",
+    "closingLatest": "Latest closing",
     "closingN": "Closing {n} · {date}",
     "author": "Author",
     "points": "Points",
