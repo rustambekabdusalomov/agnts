@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { api, unwrap } from '../api/client'
 import PageHeader from '../components/PageHeader.vue'
 import InputSelect from '../components/form/InputSelect.vue'
 import LogFindingList from '../components/logwatch/LogFindingList.vue'
 import { LOG_CATEGORIES, LOG_FILTERS, type LogCategory, type LogFilter } from '../components/logwatch/logwatch'
 import { useRepos } from '../components/repos/useRepos'
 import HiIcon from '../components/ui/HiIcon.vue'
-import { useLive } from '../composables/useLive'
+import { livePoll, useLive } from '../composables/useLive'
 
 // What agnts found in the projects' logs: errors and security mistakes,
 // grouped by fingerprint. The tab, the filter and the repository live in
@@ -32,6 +34,18 @@ const repoId = computed<number>({
   get: () => Number(route.query.repo) || 0,
   set: (id) => void router.replace({ query: { ...route.query, repo: id ? String(id) : undefined } }),
 })
+// What waits on each tab, counted as the menu counts it (reported, no
+// ticket yet): the same query, so the numbers add up to the menu's.
+const reported = useQuery({
+  queryKey: ['logwatch', 'nav'],
+  queryFn: () => unwrap(api.GET('/log-findings', { params: { query: { status: 'reported' } } })),
+  refetchInterval: () => livePoll(120_000),
+})
+const waiting = computed(() => {
+  const n: Record<LogCategory, number> = { error: 0, security: 0 }
+  for (const f of reported.data.value ?? []) if (!f.ticketKey) n[f.category]++
+  return n
+})
 const repoOptions = computed(() => [
   { value: 0, label: t('logwatch.allRepos') },
   ...(repos.data.value ?? []).map((r) => ({ value: r.id, label: r.name })),
@@ -52,6 +66,7 @@ const repoOptions = computed(() => [
       <div class="tabs" role="group" :aria-label="t('logwatch.categoryLabel')">
         <button v-for="c in LOG_CATEGORIES" :key="c" type="button" class="tab" :aria-pressed="category === c" @click="category = c">
           {{ t(`logwatch.cat_${c}`) }}
+          <span v-if="waiting[c]" class="cnt lw-cnt" :title="t('logwatch.waitingCount', { n: waiting[c] })">{{ waiting[c] }}</span>
         </button>
       </div>
       <div class="tabs" role="group" :aria-label="t('logwatch.filterLabel')">
@@ -81,6 +96,7 @@ const repoOptions = computed(() => [
 
 <style scoped>
 .lw-repo { width: 240px; margin-left: auto; }
+.lw-cnt { margin-left: 6px; min-width: 20px; height: 20px; font-size: 12px; }
 .lw-how { text-align: left; max-width: 640px; margin: 0 auto; }
 .lw-how p + p { margin-top: 6px; }
 @media (max-width: 700px) { .lw-repo { width: 100%; margin-left: 0; } }

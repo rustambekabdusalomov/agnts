@@ -6,7 +6,9 @@ import HiIcon from './HiIcon.vue'
 
 // Pages under a list: which rows are shown, the pages to jump to and how
 // many rows a page holds. page counts from 1; the parent slices the rows.
-const props = withDefaults(defineProps<{ total: number; sizes?: number[] }>(), { sizes: () => [25, 50, 100] })
+// It hides while one page holds every row, unless always: then the range
+// ("1–10 of 10") still shows, without the page buttons.
+const props = withDefaults(defineProps<{ total: number; sizes?: number[]; always?: boolean }>(), { sizes: () => [25, 50, 100], always: false })
 const page = defineModel<number>({ required: true })
 const size = defineModel<number>('size', { required: true })
 const { t } = useI18n()
@@ -28,6 +30,7 @@ const shown = computed(() => {
   }
   return out
 })
+const few = computed(() => props.total <= props.sizes[0])
 const sizeOptions = computed(() => props.sizes.map((n) => ({ value: n, label: String(n) })))
 function setSize(n: number) {
   // Keep the first row in view on its new page.
@@ -38,9 +41,9 @@ function setSize(n: number) {
 </script>
 
 <template>
-  <nav v-if="total > sizes[0]" class="pn" :aria-label="t('common.pager')">
+  <nav v-if="!few || (always && total)" class="pn" :aria-label="t('common.pager')">
     <span class="pn-range">{{ t('common.pageRange', { from, to, n: total }) }}</span>
-    <div class="pn-pages">
+    <div v-if="!few" class="pn-pages">
       <button type="button" class="btn btn-s pn-btn" :disabled="page <= 1" :aria-label="t('common.pagePrev')" @click="page = page - 1"><HiIcon name="prev" /></button>
       <template v-for="(p, i) in shown" :key="`${p}-${i}`">
         <span v-if="p === '…'" class="pn-gap" aria-hidden="true">…</span>
@@ -48,7 +51,7 @@ function setSize(n: number) {
       </template>
       <button type="button" class="btn btn-s pn-btn" :disabled="page >= pages" :aria-label="t('common.pageNext')" @click="page = page + 1"><HiIcon name="next" /></button>
     </div>
-    <div class="pn-size">
+    <div v-if="!few" class="pn-size">
       <span aria-hidden="true">{{ t('common.perPage') }}</span>
       <InputSelect :model-value="size" :options="sizeOptions" :label="t('common.perPage')" class="pn-sel" @update:model-value="setSize" />
     </div>
