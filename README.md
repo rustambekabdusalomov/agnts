@@ -502,7 +502,10 @@ copies are not automated yet.
 
 ## License
 
-agnts is released under the [MIT License](LICENSE).
-[agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse) is MIT too.
-Muse Code is Meta's, Claude Code is Anthropic's and Codex is OpenAI's; none is
-covered by this license.
+Copyright © 2026 Rustambek Abdusalomov. All rights reserved. The source is
+published so it can be read and evaluated; no license to use, copy, modify or
+distribute it is granted.
+
+[agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse), the Muse
+Code module agnts is built on, is open source under the MIT License. Muse Code
+is Meta's, Claude Code is Anthropic's and Codex is OpenAI's.
