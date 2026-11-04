@@ -1,49 +1,109 @@
 # agnts
 
-A self-hosted agent that takes Jira tickets and side-project tasks, codes them
-with Meta's Muse Code in isolated containers, and ships nothing without your
-approval. See [Implementation plan.md](plans/Implementation%20plan.md) and
-[Muse plan.md](plans/Muse%20plan.md).
+**An AI engineering teammate for your whole team, powered by Meta's Muse Code.**
+
+agnts is a self-hosted agent. It takes tickets from Jira, Plane, chats and
+meetings, and codes them with Muse Code in isolated containers. It also reads
+your logs, scans your repositories for security holes, reviews pull requests,
+writes up your meetings and answers your team's questions in chat. Nothing is
+pushed without a person's approval.
+
+> **Meta AI developer hackathon, Startup track.** agnts drives Muse Code
+> through **[agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse)**,
+> our open-source Go module (MIT) that runs Muse under a hard, live-enforced
+> budget over Muse's session protocol (MSP): per-call metering, mid-turn
+> steering, interrupts, in-session model escalation and tool approvals.
+> Start there to see how Muse is integrated; this repository is the product
+> built on it.
+
+- Live: [agnts.uz](https://agnts.uz) (website), [app.agnts.uz](https://app.agnts.uz) (admin panel)
+- Plans and design notes: [`plans/`](plans), starting with
+  [Muse plan.md](plans/Muse%20plan.md) and
+  [Implementation plan.md](plans/Implementation%20plan.md)
+
+## What it does
+
+| Area | What agnts does | Muse Code's part |
+| --- | --- | --- |
+| **Tickets** | Labelled Jira or Plane issues, or a message in Code mode, become tickets. agnts analyses the code, asks questions or codes the change, runs your build, lint and tests, and opens the PR once you approve. | Analysis, coding and fix rounds, under a live budget; a person can steer a running turn and approve risky calls ([agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse)) |
+| **Assistant** | AI Chat answers questions about the workspace. Code mode drives tickets from a conversation, with `@repo` mentions. You can also ask by voice. | Answers, code changes, `muse voice transcribe` |
+| **Meetings** | Video calls on self-hosted LiveKit, with recordings. | Transcribes the call and writes the notes. Action items become draft tickets on the member who took them. |
+| **Log watcher** | Reads Loki, Elasticsearch, OpenSearch, Graylog, Datadog, CloudWatch, Splunk or OpenTelemetry. Groups errors and security mistakes by cause and reports them or opens a fix ticket. | Fixes the cause |
+| **Security testing** | Scans repositories with opengrep, gitleaks, osv-scanner and trivy, keeps findings across scans, and re-scans to verify a fix. It also checks agnts's own changes while they wait for review. | Judges each hit, audits what scanners miss, fixes findings ("Fix this") |
+| **Team chat** | Channels where members and agnts work together. Cards have buttons that act (Fix it, Approve, Merge). Voice messages and files. "Turn into ticket". | `@agnts` answers from the workspace's memory, with checked citations, in the language you asked in |
+| **Reviews and CI** | Code review of every change, reviews of other people's PRs, CI failure triage and fixes, UI previews with screenshots. | Reviewer and fixer |
+| **Team insight** | Learn (lessons from new patterns in the code), team rules, queue order by dependencies and conflicts, performance reviews from delivered complexity. | Lessons, rule checks, complexity scores |
+
+agnts runs on Muse Code by default. Claude Code and Codex are optional
+modules (see below). The web admin panel and the Flutter mobile app are in
+English, Russian and Uzbek.
 
 ## Muse Code
 
-Muse Code is one of agnts's three coding modules, with Claude Code and Codex.
-`AGNTS_PROVIDERS` lists the ones this server can run; within it, the platform
-Admin chooses the modules the server offers and who may use which (Admin →
-Modules, and Set modules on Admin → Users). agnts drives Muse with
+Muse Code is agnts's primary coding module; Claude Code and Codex are the
+others. `AGNTS_PROVIDERS` lists the ones this server can run; within it, the
+platform Admin chooses the modules the server offers and who may use which
+(Admin → Modules, and Set modules on Admin → Users), and each person orders
+their own (Profile). Every model call goes through one AI gateway
+(`server/internal/ai`), which picks the module, account and payer and, when
+a call fails early (an account at its limit, a refused credential), runs it
+again on the next route.
+
+agnts drives Muse with
 [agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse), which speaks
-Muse's session protocol (`muse serve`) inside each run container:
+Muse's session protocol (`muse serve`) inside each run container
+(`server/internal/ai/providers/musecode`):
 
 - **Live cost.** Every model call is charged as Muse reports it and shows on the
   ticket's log; a run on credits holds money ahead of its spend and is told to
   wrap up at 80% of its budget, then stopped before the call that would pass it.
+- **A person in the loop.** People following a run send it messages mid-turn
+  (MSP `turn/steer`), and calls the rules leave to a person, such as installing
+  a dependency, wait for their Allow or Deny.
 - **Escalation without a restart.** A Spark session that keeps failing moves to
   Wonder in the same session, with its context.
 - **agnts's rules decide tool calls.** The guard vetoes `git push`, reading
   secrets, piping downloads into a shell and the like through Muse's approvals.
+- **Voice.** Spoken questions, team chat voice messages and meeting recordings
+  are transcribed with `muse voice transcribe`.
 - **Accounts.** A person or workspace connects Muse by signing in with Meta
-  (a code to confirm, like `muse login`) or with a Meta Model API key. Without
-  one, runs use agnts's key (`AGNTS_MUSE_PLATFORM_KEY`) and are paid with
-  credits: first the person's **free credits** (set by an Admin per person,
-  0 by default; Admin → Users), then the workspace's bought credits, under a
-  monthly cap for the whole server (`AGNTS_MUSE_GLOBAL_CAP_USD`).
+  (Muse Code's own `muse login`) or with a Meta Model API key. Without one,
+  runs use agnts's key (`AGNTS_MUSE_PLATFORM_KEY`) and are paid with credits:
+  first the person's **free credits** (set by an Admin per person, 0 by
+  default; Admin → Users), then the workspace's bought credits, under a
+  monthly cap for the whole server (`AGNTS_MUSE_GLOBAL_CAP_USD`) and an
+  optional monthly limit per person.
 
-agnts-muse sits beside this repository (`../agnts-muse`, see
-`server/go.mod`); the server image builds with
-`docker build --build-context agnts-muse=../agnts-muse .` (`make build` does).
+## Getting started
+
+agnts imports agnts-muse from a sibling folder (`replace` directives in
+`server/go.mod`), so clone both side by side:
+
+```sh
+git clone https://github.com/rustambekabdusalomov/agnts.git
+git clone https://github.com/rustambekabdusalomov/agnts-muse.git
+cd agnts
+```
+
+The server image builds with
+`docker build --build-context agnts-muse=../agnts-muse .` (`make image` does;
+`MUSE_DIR` overrides the path). The runner image (`deploy/runner/`) installs
+Muse Code, Claude Code and Codex for the run containers.
 
 ## Layout
 
 | Path | What |
 | --- | --- |
-| `server/` | Go server: REST API, auth, and later orchestrator, runner, MCP |
+| `server/` | Go server: REST API, auth, orchestrator, runner, AI gateway, MCP server, log watcher, security, meetings, chat |
+| `server/cmd/` | `agnts` (the server and its commands), `agnts-guard` (the tool guard inside run containers), `agnts-link` |
 | `apps/admin/` | Admin panel: Vue 3 + Vite, served by the Go binary |
 | `apps/website/` | Public website (agnts.uz): Nuxt 3, fully static build in EN/RU/UZ |
 | `apps/mobile/` | Mobile app: Flutter (iOS and Android) |
 | `shared/openapi/` | OpenAPI spec, the contract for both clients and the server |
 | `shared/i18n/` | EN/RU/UZ dictionaries (ICU MessageFormat) |
-| `deploy/` | Docker Compose stack: Caddy, agnts, PostgreSQL, nightly backups |
+| `deploy/` | Docker Compose stack: Caddy, agnts, PostgreSQL, egress proxy, LiveKit, nightly backups; the runner image; Loki and demo services for the log watcher |
 | `cli/` | Rust CLI that installs and manages agnts on a server; see [CLI plan.md](plans/CLI%20plan.md) |
+| `plans/` | Design plans for each feature, with notes on where the build differs |
 | `admin.html`, `mobile.html` | The original demos the UI is ported from |
 
 Server packages follow Clean Architecture: `domain` (types, no imports) ←
@@ -78,7 +138,7 @@ AGNTS_TEST_DATABASE_URL=postgres://hiro:hiro@localhost:5442/hiro_test?sslmode=di
 ```
 
 After editing `shared/openapi/openapi.yaml` or `shared/i18n/*.json`, run
-`make gen` and commit the generated files. CI fails if they are stale.
+`make gen` and commit the generated files.
 
 ## Log watcher
 
@@ -97,6 +157,9 @@ off until you turn them on; every fix waits for your approval.
 - **Push:** a push source's token lets Vector, Fluent Bit, Promtail or Grafana
   Alloy send to `/webhooks/logs` (Loki's push API under
   `/webhooks/logs/loki/api/v1/push`).
+- **OpenTelemetry:** Collectors and SDKs send OTLP/HTTP logs (protobuf or
+  JSON, gzip) to `/webhooks/logs/v1/logs`. A source's trace link template
+  (`{traceId}`) links each finding to its trace in Tempo, Jaeger or Grafana.
 - **No logging system:** `agnts watch` runs on the project's server and follows
   containers labelled `agnts.watch=logs` (crashes, OOM kills and failed health
   checks too) and log files, through a read-only Docker socket proxy.
@@ -139,6 +202,47 @@ the room. See [Team chat plan.md](plans/Team%20chat%20plan.md).
 The model is **Settings → Models → Team chat** (any connected module; unset,
 the assistant's). Daily caps per workspace: 500 links, 200 answers, 30 code
 answers, 100 drafts.
+
+## Meetings
+
+Video calls for a workspace's members and their guests, on a self-hosted
+**LiveKit** server; **LiveKit Egress** records them. agnts is the control
+plane: who joins, with what rights, and what happened. See
+[Meetings plan.md](plans/Meetings%20plan.md) and
+[Meeting tasks plan.md](plans/Meeting%20tasks%20plan.md).
+
+- **Calls:** reusable links (`/m/abc-defg-hij`), instant or scheduled; camera,
+  mic, screen sharing, chat, hands and reactions; host and co-host controls;
+  guests knock and are admitted. Email invitations carry an `.ics`.
+- **Notes:** Muse transcribes the recording and writes the notes as a
+  document. Each action item becomes a held draft ticket on the member who
+  took it: the spoken name is matched to a member in Latin or Cyrillic, and
+  "I'll do it" resolves to the speaker. A recording of a meeting held
+  elsewhere can be uploaded too: agnts keeps only its sound and writes the
+  same notes and drafts.
+- **Today's meeting** sits in the header: its time and title, a Join button
+  15 minutes before, and Live while it runs.
+
+## Security testing
+
+agnts scans repositories, keeps their findings across scans and fixes them
+through ordinary tickets. See [Security plan.md](plans/Security%20plan.md);
+its status section lists what is built.
+
+- **Scans:** in a run container, `agnts-sec` runs opengrep (with agnts's own
+  rules for SQL built from input in Go, Python, JavaScript, Java and PHP),
+  gitleaks (the whole git history on the first scan), osv-scanner and trivy
+  config, offline, against vulnerability databases the server keeps up to date.
+- **Judged by the agent:** Muse (or the workspace's module) judges each hit,
+  audits what tools miss (authorization, IDOR, mass assignment) and writes
+  each finding with its location, source and confidence.
+- **Fix this** opens a ticket for a finding. After the fix merges, a verify
+  scan checks it is gone; fixes merged close together share one scan.
+- **agnts's own changes** get a security check beside the code review while
+  they wait for approval. It is advice and never blocks Approve.
+- **Schedules and alerts:** scans on a schedule, notices in Telegram, and the
+  `list_security_findings` / `get_security_finding` MCP tools, so the
+  assistant can answer "what's our worst open security issue?".
 
 ## Connecting agnts to your work
 
@@ -209,8 +313,8 @@ read-only into runs; each repository keeps a package cache between runs. See
 
 Then label a Jira issue `agnts`. The flow: agnts reads the code and either asks
 questions (answer them on the ticket page) or starts coding; it runs your
-build, lint and tests inside the container and sends failures back to Claude
-up to twice; you review the diff and approve; only then does agnts push
+build, lint and tests inside the container and sends failures back to the
+coding agent up to twice; you review the diff and approve; only then does agnts push
 `agnts/<KEY>` and open the pull request.
 
 **Code review.** While a ticket waits for your review, a review run reads
@@ -219,8 +323,8 @@ report against the code) and writes findings next to it: severity,
 category, file and line, and a suggestion you can add to your feedback in
 one click. It is advice, never a gate: approving or requesting changes
 cancels a review still running, and each new revision is reviewed again.
-With the review model on Auto (Settings), Opus reviews tickets the analysis
-rated complex or large changes, and Sonnet the rest. Turn it off in
+With the review model on Auto (Settings), the strong model reviews tickets the
+analysis rated complex or large changes, and the light one the rest. Turn it off in
 Settings, or run it again from the ticket.
 
 **Pull request reviews.** agnts also reviews the pull requests other people
@@ -251,7 +355,7 @@ turns red builds into work; see [CI plan.md](plans/CI%20plan.md).
   and review again and is pushed to the same pull request after you approve.
 - *Watched branches:* turn it on per repository (Repositories → CI). The
   default branch is always watched; add globs such as `release/*`. A failed
-  run is triaged without Claude: logs are read and redacted, infra failures
+  run is triaged without a model: logs are read and redacted, infra failures
   (lost runners, rate limits, no disk) are set aside, a new failure is
   re-run once and marked flaky if it passes, and the same failure on many
   commits is one entry (a fingerprint of the failing tests or first error).
@@ -264,20 +368,20 @@ turns red builds into work; see [CI plan.md](plans/CI%20plan.md).
   merged reopens it as a regression.
 - *Other people's pull requests:* off, or one diagnosis comment per pull
   request (what failed, whether `main` fails the same way). agnts never
-  pushes to their branches. Runs from forks are never given to Claude.
+  pushes to their branches. Runs from forks are never given to the agent.
 - *Token:* GitHub needs **Actions: Read** (logs) and **Actions: Read and
   write** (re-runs); GitLab needs `api`. The CI tab shows what is missing.
 
 **Preview.** For front-end work a diff is not enough, so agnts can show the
 change running. Give a repository a preview command and port (Repositories →
 Preview): when a change touches its UI files, a preview run starts the app
-in a container, Claude opens the pages the diff affects, and the ticket's
+in a container, the agent opens the pages the diff affects, and the ticket's
 Preview tab shows screenshots at desktop and phone width with console errors
 and visual problems it noticed. Tick Compare with the default branch on a
 ticket for before/after shots. Add to feedback attaches a screenshot to
 Request changes, and the coding run gets the image. Like the code review it
 is advice, never a gate, and runs again for each revision. With Let coding
-runs look at the app on (Settings → Previews), Claude also checks the pages
+runs look at the app on (Settings → Previews), the agent also checks the pages
 it changed before it finishes. A staging API the app calls goes under
 Settings → Previews → Allowed hosts; the preview environment (KEY=value) is
 stored encrypted. Screenshots are kept on disk under the data dir and
@@ -294,7 +398,7 @@ Settings, or start one by hand from a finished ticket.
 
 **Rules.** Under Rules in the admin panel, write instructions agnts follows on
 every ticket: global ones, and ones for a single repository (which win where
-the two disagree). Saving a rule queues a short Claude review in a container
+the two disagree). Saving a rule queues a short review run in a container
 (next to the repository's code for a repository rule) that looks for vague
 wording, missing scope and conflicts with other rules, and asks questions
 when something is unclear. A rule applies only once it is clear, or once you
@@ -312,7 +416,7 @@ waits until the first is merged. Analysis never waits. Relations come from:
 - the analysis, which predicts each ticket's footprint (files, what it adds
   and needs) and compares it with the other open tickets. The same files, or
   a shared hot spot (database migrations, lockfiles, an API spec and its
-  generated code, translation files), make a conflict. Relations Claude reads
+  generated code, translation files), make a conflict. Relations the agent reads
   from the tickets apply when it is confident and are only proposed when it
   is not: accept or dismiss them on the ticket's Order tab.
 
@@ -326,7 +430,8 @@ a merge webhook, mark a pull request merged from the ticket page.
 recall, predicted vs real collisions), and `/metrics` exports the same.
 
 Secrets are stored encrypted with `AGNTS_ENC_KEY`. Run containers get the
-Claude token and a copy of the repository, never the GitHub token.
+credential of their coding module and a copy of the repository, never the
+GitHub token.
 
 ## Deploy
 
@@ -381,7 +486,7 @@ agnts-muse keeps its own CI. Tagging `v*` runs `.github/workflows/release.yml`,
 which publishes the images to `registry.agnts.uz` and the CLI to agnts.uz.
 
 Run containers sit on the internal `agnts-runs` network; the `egress`
-service is their only way out and allows the Claude API, GitHub, GitLab.com,
+service is their only way out and allows Meta's API (Muse), the Claude and OpenAI APIs, GitHub, GitLab.com,
 the toolchain downloads (nodejs.org, go.dev, static.rust-lang.org, Adoptium,
 dot.net, ...) and the package registries of the supported languages (npm,
 PyPI, crates.io, Maven Central, NuGet, RubyGems, Packagist, Hex, pub.dev, ...).
@@ -394,3 +499,10 @@ which Caddy does not expose.
 Backups land in `/opt/agnts/backups` nightly at 03:00. Copy them off the server
 with `agnts backup --pull` (or rclone, restic, or similar); scheduled off-site
 copies are not automated yet.
+
+## License
+
+agnts is released under the [MIT License](LICENSE).
+[agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse) is MIT too.
+Muse Code is Meta's, Claude Code is Anthropic's and Codex is OpenAI's; none is
+covered by this license.

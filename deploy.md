@@ -8,7 +8,7 @@ image. This repository has no CI workflow for now (Actions minutes), so run
 
 | | |
 |---|---|
-| Host | `root@45.138.158.39` (SSH key auth) |
+| Host | `$SERVER`, e.g. `export SERVER=root@your-server` (SSH key auth; the address is kept off the repository) |
 | Stack | `/opt/agnts` (Docker Compose) |
 | Website | https://agnts.uz, static files in `/opt/agnts/website` |
 | Admin panel | https://app.agnts.uz |
@@ -48,7 +48,7 @@ included, so check `git status` first.
 rsync -az --stats \
   --exclude node_modules --exclude .git --exclude dist --exclude .nuxt --exclude .output \
   --exclude '.dev-data*' --exclude apps/mobile --exclude cli/target --exclude .env.dev \
-  ./ root@45.138.158.39:/opt/agnts/src/
+  ./ $SERVER:/opt/agnts/src/
 ```
 
 The excludes matter: `.dev-data/` holds about 20k files of local test repos,
@@ -58,7 +58,7 @@ agnts-muse, the Muse engine, is a sibling module (`server/go.mod` replaces it
 with `../../agnts-muse`). Copy it beside `src/`:
 
 ```sh
-rsync -az --stats --exclude .git ../agnts-muse/ root@45.138.158.39:/opt/agnts/agnts-muse/
+rsync -az --stats --exclude .git ../agnts-muse/ $SERVER:/opt/agnts/agnts-muse/
 ```
 
 ### 2. Build the image on the server
@@ -66,7 +66,7 @@ rsync -az --stats --exclude .git ../agnts-muse/ root@45.138.158.39:/opt/agnts/ag
 Tag the running image first so you can roll back:
 
 ```sh
-ssh root@45.138.158.39 'docker tag agnts:local agnts:prev; cd /opt/agnts/src && \
+ssh $SERVER 'docker tag agnts:local agnts:prev; cd /opt/agnts/src && \
   docker build --build-context agnts-muse=/opt/agnts/agnts-muse --build-arg COMMIT=$(date +%Y%m%d%H%M) -t agnts:local . > /opt/agnts/build.log 2>&1; \
   echo exit=$?; tail -5 /opt/agnts/build.log'
 ```
@@ -76,7 +76,7 @@ This takes a few minutes. Run it in the background and do step 4 meanwhile.
 ### 3. Restart the backend
 
 ```sh
-ssh root@45.138.158.39 'cd /opt/agnts && \
+ssh $SERVER 'cd /opt/agnts && \
   docker build --build-arg AGNTS_IMAGE=agnts:local -t agnts-ovpn:latest src/deploy/ovpn > /opt/agnts/ovpn-build.log 2>&1 && \
   docker compose --profile private-network up -d agnts egress gateway && \
   docker rm -f $(docker ps -aq --filter label=agnts=ovpn) 2>/dev/null; \
@@ -101,7 +101,7 @@ cd apps/website && \
   NUXT_PUBLIC_GOOGLE_CLIENT_ID=340542876762-6bqfc0a1s9eumku5qv7b14nvpu5qdvs1.apps.googleusercontent.com \
   NUXT_PUBLIC_APP_URL=https://app.agnts.uz \
   npm run generate
-rsync -az --delete --stats .output/public/ root@45.138.158.39:/opt/agnts/website/
+rsync -az --delete --stats .output/public/ $SERVER:/opt/agnts/website/
 ```
 
 The two variables are baked into the static build. Without them the site falls back to
@@ -115,7 +115,7 @@ serves the files directly, so nothing needs restarting.
 
 ```sh
 for u in https://agnts.uz/ https://app.agnts.uz/; do curl -s -o /dev/null -w "$u %{http_code}\n" $u; done
-ssh root@45.138.158.39 'cd /opt/agnts && docker compose ps'
+ssh $SERVER 'cd /opt/agnts && docker compose ps'
 ```
 
 Both URLs should return `200`. `https://api.agnts.uz/healthz` returns `302`,
@@ -131,7 +131,7 @@ repository lockdown, the `/agnts/context` volume, `agnts-act`):
 Tag the running image first so you can roll back:
 
 ```sh
-ssh root@45.138.158.39 'docker tag agnts-runner:latest agnts-runner:prev; cd /opt/agnts/src/deploy/runner && \
+ssh $SERVER 'docker tag agnts-runner:latest agnts-runner:prev; cd /opt/agnts/src/deploy/runner && \
   docker build -t agnts-runner:latest . > /opt/agnts/runner-build.log 2>&1; \
   echo exit=$?; tail -3 /opt/agnts/runner-build.log'
 ```
@@ -151,8 +151,8 @@ New runs use the new image; runs in progress keep theirs.
 Check it, and roll back if a run misbehaves:
 
 ```sh
-ssh root@45.138.158.39 'docker run --rm agnts-runner:latest muse --version'
-ssh root@45.138.158.39 'docker tag agnts-runner:prev agnts-runner:latest'
+ssh $SERVER 'docker run --rm agnts-runner:latest muse --version'
+ssh $SERVER 'docker tag agnts-runner:prev agnts-runner:latest'
 ```
 
 Claude Code is a native binary that needs a CPU with SSE4.2/AVX. Before
@@ -182,13 +182,13 @@ Until `AGNTS_GATEWAY` is set the feature stays off and the page says so.
 4. Build the sidecar image after the main image (step 2 above):
 
    ```sh
-   ssh root@45.138.158.39 'docker build --build-arg AGNTS_IMAGE=agnts:local -t agnts-ovpn:latest /opt/agnts/src/deploy/ovpn'
+   ssh $SERVER 'docker build --build-arg AGNTS_IMAGE=agnts:local -t agnts-ovpn:latest /opt/agnts/src/deploy/ovpn'
    ```
 
 5. Start it:
 
    ```sh
-   ssh root@45.138.158.39 'cd /opt/agnts && docker compose --profile private-network up -d gateway agnts egress && docker compose restart caddy'
+   ssh $SERVER 'cd /opt/agnts && docker compose --profile private-network up -d gateway agnts egress && docker compose restart caddy'
    ```
 
 The command the page shows for agnts-link uses `registry.agnts.uz/agnts-link:latest`.
@@ -216,7 +216,7 @@ CPUs for each recording while it runs (`AGNTS_MEET_MAX_RECORDINGS`, default 2).
 1. Open the media ports (signaling goes through Caddy), in ufw or the provider's firewall:
 
    ```sh
-   ssh root@45.138.158.39 'ufw allow 7881/tcp && ufw allow 7882/udp && ufw allow 3478/udp'
+   ssh $SERVER 'ufw allow 7881/tcp && ufw allow 7882/udp && ufw allow 3478/udp'
    ```
 
 2. Add to `/opt/agnts/.env` (the URL is the domain whose Caddy block has `/rtc`):
@@ -239,7 +239,7 @@ CPUs for each recording while it runs (`AGNTS_MEET_MAX_RECORDINGS`, default 2).
 6. Deploy as usual (steps 1–3), then start it:
 
    ```sh
-   ssh root@45.138.158.39 'cd /opt/agnts && docker compose --profile meetings up -d livekit redis livekit-egress agnts && docker compose restart caddy'
+   ssh $SERVER 'cd /opt/agnts && docker compose --profile meetings up -d livekit redis livekit-egress agnts && docker compose restart caddy'
    ```
 
 Check: open `/m/<code>` from two devices on different networks (one on mobile
@@ -263,9 +263,9 @@ and nothing is published. Loki joins `agnts_default`, so agnts reaches it at
 allows.
 
 ```sh
-ssh root@45.138.158.39 'mkdir -p /opt/loki'
-scp deploy/loki/docker-compose.yml deploy/loki/loki-config.yaml deploy/loki/config.alloy root@45.138.158.39:/opt/loki/
-ssh root@45.138.158.39 'cd /opt/loki && docker compose up -d'
+ssh $SERVER 'mkdir -p /opt/loki'
+scp deploy/loki/docker-compose.yml deploy/loki/loki-config.yaml deploy/loki/config.alloy $SERVER:/opt/loki/
+ssh $SERVER 'cd /opt/loki && docker compose up -d'
 ```
 
 Alloy's first start backfills each container's history; Loki refuses lines
@@ -280,7 +280,7 @@ Since 3 November 2026 Meta returns an empty model catalog ("model catalog has no
 visible models") to Muse from this server's network (AS35682), for every login and
 key. agnts shows it as "not logged in: run /login to add an API key". It is the
 network, not the country: the same key works from a home connection in Uzbekistan,
-another server at the same provider (5.182.26.104) gets the same refusal, and the
+another server at the same provider gets the same refusal, and the
 provider confirmed nothing changed on their side. `egress` sends Muse's hosts
 (`api.meta.ai`, `auth.meta.com`) through another proxy, `AGNTS_EGRESS_UPSTREAM`,
 while everything else stays direct.
@@ -295,12 +295,12 @@ In `/opt/agnts/docker-compose.yml`, the `egress` service's environment needs
 
 ### The way it goes now: a server at DigitalOcean (since 4 November 2026)
 
-`24.199.90.170` (New York region, Ubuntu 24.04, 1 CPU / 1 GB) runs no proxy
+The upstream server (`$UPSTREAM`, New York region, Ubuntu 24.04, 1 CPU / 1 GB) runs no proxy
 software. This server keeps an SSH connection to it open, and OpenSSH's dynamic
 forward is the SOCKS5 proxy:
 
 - `/etc/systemd/system/agnts-upstream.service` runs
-  `ssh -N -i /root/.ssh/agnts_upstream -o ExitOnForwardFailure=yes -o ServerAliveInterval=15 -D 172.19.0.1:1081 tunnel@24.199.90.170`
+  `ssh -N -i /root/.ssh/agnts_upstream -o ExitOnForwardFailure=yes -o ServerAliveInterval=15 -D 172.19.0.1:1081 tunnel@$UPSTREAM`
   and restarts it within 5 seconds when it drops. `172.19.0.1` is the gateway of
   the `agnts_default` network
   (`docker network inspect agnts_default -f '{{(index .IPAM.Config 0).Gateway}}'`),
@@ -320,9 +320,9 @@ this provider's is not.
 Useful:
 
 ```sh
-ssh root@45.138.158.39 'systemctl status agnts-upstream --no-pager | head -5'
-ssh root@45.138.158.39 'curl -s --socks5-hostname 172.19.0.1:1081 https://ipinfo.io/org'   # AS14061 DigitalOcean
-ssh root@45.138.158.39 'docker run --rm --network agnts_default curlimages/curl:8.11.1 -s http://egress:3128/_agnts/upstream'
+ssh $SERVER 'systemctl status agnts-upstream --no-pager | head -5'
+ssh $SERVER 'curl -s --socks5-hostname 172.19.0.1:1081 https://ipinfo.io/org'   # AS14061 DigitalOcean
+ssh $SERVER 'docker run --rm --network agnts_default curlimages/curl:8.11.1 -s http://egress:3128/_agnts/upstream'
 ```
 
 ### Fallback: a laptop as the proxy
@@ -333,13 +333,13 @@ leaves through the laptop. sshd lets it bind to the Docker network's gateway
 Keep this running on the laptop:
 
 ```sh
-ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 172.19.0.1:1080 root@45.138.158.39
+ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 172.19.0.1:1080 $SERVER
 ```
 
 then point egress at it, and back at `:1081` when the DigitalOcean server is up again:
 
 ```sh
-ssh root@45.138.158.39 'cd /opt/agnts && sed -i "s|^AGNTS_EGRESS_UPSTREAM=.*|AGNTS_EGRESS_UPSTREAM=socks5://172.19.0.1:1080|" .env && docker compose up -d egress'
+ssh $SERVER 'cd /opt/agnts && sed -i "s|^AGNTS_EGRESS_UPSTREAM=.*|AGNTS_EGRESS_UPSTREAM=socks5://172.19.0.1:1080|" .env && docker compose up -d egress'
 ```
 
 Any other proxy works the same way (`socks5://user:pass@host:1080` or
@@ -359,7 +359,7 @@ and recreate egress to go direct again.
 ## Rollback
 
 ```sh
-ssh root@45.138.158.39 'docker tag agnts:prev agnts:local && cd /opt/agnts && docker compose --profile private-network up -d agnts egress gateway'
+ssh $SERVER 'docker tag agnts:prev agnts:local && cd /opt/agnts && docker compose --profile private-network up -d agnts egress gateway'
 ```
 
 Migrations only go forward. If a deploy applied a migration the old image
@@ -367,7 +367,7 @@ doesn't understand, restore from `/opt/agnts/backups` instead.
 
 ## Useful
 
-- Logs: `ssh root@45.138.158.39 'cd /opt/agnts && docker compose logs -f agnts'`
+- Logs: `ssh $SERVER 'cd /opt/agnts && docker compose logs -f agnts'`
 - Last build output: `/opt/agnts/build.log`
 - Changing Caddy config: edit `/opt/agnts/Caddyfile.cloud` on the server, then
   `docker compose restart caddy`.
