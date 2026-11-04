@@ -1,0 +1,124 @@
+# agnts security rules for JavaScript and TypeScript (written by agnts).
+rules:
+  - id: agnts.js.sqli.template-query
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      A SQL query is built from a template string or concatenation. Pass
+      values as parameters ($1, ?) instead.
+    metadata:
+      category: injection
+      cwe: "CWE-89"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: $DB.$M(`...${$X}...`, ...)
+          - pattern: $DB.$M("..." + $X, ...)
+          - pattern: $DB.$M($X + "...", ...)
+      - metavariable-regex:
+          metavariable: $M
+          regex: ^(query|execute|raw|\$queryRawUnsafe|\$executeRawUnsafe|exec)$
+      - metavariable-regex:
+          metavariable: $DB
+          regex: (?i).*(db|pool|client|conn|connection|knex|sequelize|prisma|pg|mysql).*
+
+  - id: agnts.js.cmdi.exec-with-input
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      A shell command is built from a variable. With user input it runs any
+      command; use execFile/spawn with an argument list.
+    metadata:
+      category: injection
+      cwe: "CWE-78"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: $CP.exec($X, ...)
+          - pattern: $CP.execSync($X, ...)
+          - pattern: exec($X, ...)
+          - pattern: execSync($X, ...)
+      - pattern-not: $CP.exec("...", ...)
+      - pattern-not: $CP.execSync("...", ...)
+      - pattern-not: exec("...", ...)
+      - pattern-not: execSync("...", ...)
+      - pattern-inside: |
+          $M = require("child_process")
+          ...
+
+  - id: agnts.js.code.eval
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      eval or new Function runs a string as code. With any user input it is
+      remote code execution; parse the data instead (JSON.parse).
+    metadata:
+      category: injection
+      cwe: "CWE-95"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: eval($X)
+          - pattern: new Function(..., $X)
+      - pattern-not: eval("...")
+      - pattern-not: new Function(..., "...")
+
+  - id: agnts.js.xss.request-into-response
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      Request input is written into an HTML response without escaping
+      (cross-site scripting). Render it through a template that escapes,
+      or send JSON.
+    metadata:
+      category: xss
+      cwe: "CWE-79"
+      owasp: "A03"
+      confidence: medium
+    mode: taint
+    pattern-sources:
+      - pattern: $REQ.query
+      - pattern: $REQ.params
+      - pattern: $REQ.body
+    pattern-sinks:
+      - pattern: $RES.send(...)
+      - pattern: $RES.write(...)
+    pattern-sanitizers:
+      - pattern: escape(...)
+      - pattern: encodeURIComponent(...)
+      - pattern: JSON.stringify(...)
+
+  - id: agnts.js.jwt.verify-without-algorithms
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      jwt.decode does not check the signature, so anyone can forge the
+      token. Use jwt.verify with the key and an algorithms list.
+    metadata:
+      category: auth
+      cwe: "CWE-347"
+      owasp: "A07"
+      confidence: medium
+    patterns:
+      - pattern: $JWT.decode(...)
+      - metavariable-regex:
+          metavariable: $JWT
+          regex: ^(jwt|jsonwebtoken)$
+
+  - id: agnts.js.crypto.weak-hash
+    languages: [javascript, typescript]
+    severity: INFO
+    message: >-
+      MD5 and SHA-1 are broken for security uses. Use SHA-256, or
+      bcrypt/argon2 for passwords.
+    metadata:
+      category: crypto
+      cwe: "CWE-328"
+      owasp: "A02"
+      confidence: low
+    pattern-either:
+      - pattern: $C.createHash("md5")
+      - pattern: $C.createHash("sha1")

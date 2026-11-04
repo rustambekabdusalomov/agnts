@@ -67,6 +67,7 @@
     "documents": "Documents",
     "meetings": "Meetings",
     "chat": "Chat",
-    "logWatcher": "Log watcher"
+    "logWatcher": "Log watcher",
+    "security": "Security"
   }
 }

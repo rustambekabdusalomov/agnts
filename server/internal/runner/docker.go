@@ -526,6 +526,16 @@ func (d *Docker) EnsureVolume(ctx context.Context, name string, labels map[strin
 	return err
 }
 
+// VolumeExists reports whether a named volume exists.
+func (d *Docker) VolumeExists(ctx context.Context, name string) (bool, error) {
+	err := d.json(ctx, http.MethodGet, "/volumes/"+url.PathEscape(name), nil, nil, nil)
+	var ae *apiError
+	if errors.As(err, &ae) && ae.Status == http.StatusNotFound {
+		return false, nil
+	}
+	return err == nil, err
+}
+
 // VolumeUsage is a volume's size as the daemon last measured it.
 type VolumeUsage struct {
 	Name     string

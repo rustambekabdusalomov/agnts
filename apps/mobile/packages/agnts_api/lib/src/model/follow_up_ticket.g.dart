@@ -181,4 +181,5 @@ const _$FollowUpTicketSource_EnumEnumMap = {
   FollowUpTicketSource_Enum.git: 'git',
   FollowUpTicketSource_Enum.ci: 'ci',
   FollowUpTicketSource_Enum.logs: 'logs',
+  FollowUpTicketSource_Enum.security: 'security',
 };

@@ -93,6 +93,7 @@
     "codeEmpty": "This branch has no files yet.",
     "codeSubmodule": "Submodule",
     "codeSymlink": "Link",
-    "codeCapped": "Only the first {n} entries of this folder are listed."
+    "codeCapped": "Only the first {n} entries of this folder are listed.",
+    "security": "Security"
   }
 }

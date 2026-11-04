@@ -588,6 +588,18 @@ const prPlaceholders = Object.fromEntries(['number', 'key', 'type', 'scope', 'su
         </CfgRow>
       </section>
 
+      <section v-else-if="section === 'security' && draft.security" id="s-security" class="card">
+        <div class="ch"><div><h2>{{ t('security.settingsTitle') }}</h2><p class="sub">{{ t('security.settingsSub') }}</p></div></div>
+        <CfgRow :label="t('security.autoCheck')" :help="t('security.autoCheckHelp')">
+          <SwitchToggle v-model="draft.security.autoCheck" :label="t('security.autoCheck')" />
+        </CfgRow>
+        <CfgRow :label="t('security.dailyBudget')" :help="t('security.dailyBudgetHelp')">
+          <NumberStepper v-model="draft.security.dailyBudget" :min="0" :max="200" :step="1" :label="t('security.dailyBudget')" :format="perDay" />
+        </CfgRow>
+        <CfgRow v-if="draft.models.security !== undefined" :label="t('security.model')" :help="t('security.modelHelp')">
+          <SegButtons v-model="draft.models.security" :options="models" :label="t('security.model')" />
+        </CfgRow>
+      </section>
       <PrivateNetworksCard v-else-if="section === 'network'" />
       <section v-else-if="section === 'notify' && draft.notify" id="s-notify" class="card">
         <div class="ch"><div><h2>{{ t('settings.notify') }}</h2><p class="sub">{{ t('settings.notifySub') }}</p></div></div>
@@ -629,6 +641,9 @@ const prPlaceholders = Object.fromEntries(['number', 'key', 'type', 'scope', 'su
         </CfgRow>
         <CfgRow v-if="draft.notify.logs !== undefined" :label="t('logwatch.notifyLabel')">
           <SwitchToggle v-model="draft.notify.logs" :label="t('logwatch.notifyLabel')" />
+        </CfgRow>
+        <CfgRow v-if="draft.notify.security !== undefined" :label="t('security.notifyLabel')" :help="t('security.notifyHelp')">
+          <SwitchToggle v-model="draft.notify.security" :label="t('security.notifyLabel')" />
         </CfgRow>
       </section>
       <McpCard v-else-if="section === 'mcp' && !catalog.claudeOff.value" />

@@ -41,6 +41,7 @@ type harness struct {
 	links      *fakeLinks
 	modules    *fakeModules
 	chat       *fakeChat
+	security   *fakeSecurity
 	// hookWS and hookID are what the test webhook last saw.
 	hookWS int64
 	hookID string
@@ -98,21 +99,24 @@ func newHarness(t *testing.T, db Pinger) *harness {
 	h.links = &fakeLinks{}
 	h.modules = newFakeModules()
 	h.chat = &fakeChat{}
+	h.security = &fakeSecurity{}
 	h.h, err = NewHandler(Options{
-		Chat:        h.chat,
-		Modules:     h.modules,
-		CommitLinks: h.links,
-		Auth:        svc,
-		Tickets:     h.tickets,
-		Assistant:   h.assistant,
-		Code:        h.codeChat,
-		Swagger:     h.swagger,
-		Suites:      h.swagger,
-		Workspaces:  h.workspaces,
-		Users:       fakeUsers{users},
-		Feedback:    &fakeFeedback{},
-		RunHistory:  h.runs,
-		SiteURL:     site,
+		Security:      h.security,
+		SecurityReads: h.security,
+		Chat:          h.chat,
+		Modules:       h.modules,
+		CommitLinks:   h.links,
+		Auth:          svc,
+		Tickets:       h.tickets,
+		Assistant:     h.assistant,
+		Code:          h.codeChat,
+		Swagger:       h.swagger,
+		Suites:        h.swagger,
+		Workspaces:    h.workspaces,
+		Users:         fakeUsers{users},
+		Feedback:      &fakeFeedback{},
+		RunHistory:    h.runs,
+		SiteURL:       site,
 		Webhooks: map[string]http.Handler{"test": http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h.hookWS, h.hookID = domain.WorkspaceOf(r.Context()), domain.HookOf(r.Context())
 			w.WriteHeader(http.StatusOK)

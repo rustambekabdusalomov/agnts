@@ -5419,6 +5419,242 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /security/summary:
+    get:
+      operationId: getSecuritySummary
+      summary: Open security findings by repository and severity, with each repository's last scan
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SecurityRepoSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /repos/{id}/security/scans:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: listSecurityScans
+      summary: A repository's security scans, newest first
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SecurityScan' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: startSecurityScan
+      summary: Scan the repository's default branch (a scan already queued or running is returned instead)
+      tags: [security]
+      responses:
+        '200':
+          description: The scan, and whether this call queued it
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [scan, queued]
+                properties:
+                  scan: { $ref: '#/components/schemas/SecurityScan' }
+                  queued: { type: boolean }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repos/{id}/security/settings:
+    parameters:
+      - $ref: '#/components/parameters/RepoID'
+    get:
+      operationId: getSecuritySettings
+      summary: "A repository's security settings: schedule, exclusions, lowest severity that notifies"
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecuritySettings' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      operationId: setSecuritySettings
+      summary: Save a repository's security settings and schedule its next scan
+      tags: [security]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SecuritySettings' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecuritySettings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /security/scans/{scanId}:
+    parameters:
+      - $ref: '#/components/parameters/SecurityScanID'
+    get:
+      operationId: getSecurityScan
+      summary: One scan, with what ran and the hits the agent rejected
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecurityScan' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: cancelSecurityScan
+      summary: Cancel a queued or running scan (a running one saves nothing)
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecurityScan' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /security/findings:
+    get:
+      operationId: listSecurityFindings
+      summary: Security findings, worst first
+      tags: [security]
+      parameters:
+        - { name: repoId, in: query, required: false, schema: { type: integer, format: int64 } }
+        - { name: status, in: query, required: false, schema: { $ref: '#/components/schemas/SecFindingStatus' } }
+        - { name: severity, in: query, required: false, schema: { $ref: '#/components/schemas/SecSeverity' } }
+        - { name: active, in: query, required: false, description: 'Only open, fixing, verifying and reopened findings', schema: { type: boolean } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SecurityFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /security/findings/{findingId}:
+    parameters:
+      - $ref: '#/components/parameters/SecurityFindingID'
+    get:
+      operationId: getSecurityFinding
+      summary: One finding
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecurityFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /security/findings/{findingId}/reopen:
+    parameters:
+      - $ref: '#/components/parameters/SecurityFindingID'
+    post:
+      operationId: reopenSecurityFinding
+      summary: Open a dismissed or fixed finding again
+      tags: [security]
+      x-role: owner
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SecurityFinding' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /security/dismiss:
+    post:
+      operationId: dismissSecurityFindings
+      summary: Dismiss findings with a reason; they stay dismissed while their fingerprint matches
+      tags: [security]
+      x-role: owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [findingIds, reason]
+              properties:
+                findingIds: { type: array, items: { type: integer, format: int64 }, minItems: 1, maxItems: 200 }
+                reason: { type: string, enum: [false_positive, accepted_risk, wont_fix] }
+                note: { type: string, maxLength: 1000 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SecurityFinding' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /security/fix:
+    post:
+      operationId: fixSecurityFindings
+      summary: Open one ticket that fixes findings of one repository (Fix this, Fix together)
+      tags: [security]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [findingIds]
+              properties:
+                findingIds: { type: array, items: { type: integer, format: int64 }, minItems: 1, maxItems: 20 }
+                hold: { type: boolean, description: Create the ticket without starting it }
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/security-findings:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    get:
+      operationId: getTicketSecurityFindings
+      summary: The security findings a fix ticket works on
+      tags: [security]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SecurityFinding' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /tickets/{key}/log-finding:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -7997,6 +8233,16 @@ components:
       in: path
       required: true
       schema: { type: integer, format: int64 }
+    SecurityScanID:
+      name: scanId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    SecurityFindingID:
+      name: findingId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
     CIFailureID:
       name: failureId
       in: path
@@ -8964,7 +9210,7 @@ components:
         title: { type: string }
         state: { $ref: '#/components/schemas/TicketState' }
         kind: { $ref: '#/components/schemas/TicketKind' }
-        source: { type: string, enum: [jira, plane, local, git, ci, logs] }
+        source: { type: string, enum: [jira, plane, local, git, ci, logs, security] }
         held: { type: boolean }
 
     FollowUps:
@@ -9388,7 +9634,7 @@ components:
       properties:
         key: { type: string }
         ticketNumber: { type: string, description: "The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key" }
-        source: { type: string, enum: [jira, plane, local, git, ci, logs] }
+        source: { type: string, enum: [jira, plane, local, git, ci, logs, security] }
         repoId: { type: integer, format: int64, description: 'The primary repository; repos lists all of them' }
         repos:
           type: array
@@ -10038,6 +10284,7 @@ components:
         chat: { $ref: '#/components/schemas/Model' }
         documents: { $ref: '#/components/schemas/Model' }
         teamChat: { $ref: '#/components/schemas/Model' }
+        security: { $ref: '#/components/schemas/Model' }
 
     TicketRepo:
       type: object
@@ -10564,6 +10811,7 @@ components:
         prComments: { $ref: '#/components/schemas/PRCommentSettings' }
         ci: { $ref: '#/components/schemas/CISettings' }
         logWatch: { $ref: '#/components/schemas/LogWatchSettings' }
+        security: { $ref: '#/components/schemas/SecurityWorkspaceSettings' }
         guard: { $ref: '#/components/schemas/GuardSettings' }
         stalls:
           type: string
@@ -11475,6 +11723,7 @@ components:
         followUps: { type: boolean, description: Follow-up tickets were suggested }
         ci: { type: boolean, description: A watched branch went red }
         logs: { type: boolean, description: 'The log watcher found something, or a log source stopped' }
+        security: { type: boolean, description: 'A security scan found something new or reopened, or failed' }
 
     Repository:
       type: object
@@ -13556,6 +13805,144 @@ components:
         guestsQuiet: { type: boolean, description: 'Guests can''t chat or share their screen' }
         recording: { type: boolean, description: 'Start or stop the video recording' }
         notes: { type: boolean, description: 'Start or stop taking notes' }
+
+    SecSeverity:
+      type: string
+      enum: [critical, high, medium, low, info]
+    SecFindingStatus:
+      type: string
+      enum: [open, fixing, verifying, fixed, dismissed, reopened]
+    SecSeverityCounts:
+      type: object
+      description: Findings by severity
+      required: [critical, high, medium, low, info]
+      properties:
+        critical: { type: integer }
+        high: { type: integer }
+        medium: { type: integer }
+        low: { type: integer }
+        info: { type: integer }
+    SecToolRun:
+      type: object
+      required: [tool, status, seconds, hits]
+      properties:
+        tool: { type: string, description: 'opengrep, gitleaks, osv or trivy' }
+        status: { type: string, enum: [ok, failed, timeout, skipped] }
+        seconds: { type: integer }
+        hits: { type: integer }
+        error: { type: string }
+    SecRejectedHit:
+      type: object
+      required: [hit, reason]
+      properties:
+        hit: { type: string }
+        tool: { type: string }
+        rule: { type: string }
+        file: { type: string }
+        line: { type: integer }
+        reason: { type: string }
+    SecurityScan:
+      type: object
+      required: [id, repoId, repo, trigger, status, commit, tools, agent, history, commits, new, seen, fixed, reopened, unchecked, rejectedCount, open, summary, error, provider, createdAt]
+      properties:
+        id: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64 }
+        repo: { type: string }
+        trigger: { type: string, enum: [manual, schedule, verify] }
+        status: { type: string, enum: [pending, running, done, failed, cancelled] }
+        commit: { type: string }
+        findingIds: { type: array, items: { type: integer, format: int64 }, description: 'A verify scan: the findings it checks' }
+        fullHistory: { type: boolean }
+        tools: { type: array, items: { $ref: '#/components/schemas/SecToolRun' }, description: What actually ran }
+        agent: { type: string, description: 'done, limit (stopped at its turn or time limit), failed, skipped, or empty when it has not run' }
+        history: { type: integer, description: Commits the secret scan read }
+        commits: { type: integer, description: Commits the checkout had }
+        dbVersions: { type: object, additionalProperties: { type: string } }
+        new: { type: integer }
+        seen: { type: integer }
+        fixed: { type: integer }
+        reopened: { type: integer }
+        unchecked: { type: integer, description: Active findings this scan could not recheck }
+        rejectedCount: { type: integer }
+        rejected: { type: array, items: { $ref: '#/components/schemas/SecRejectedHit' } }
+        open: { $ref: '#/components/schemas/SecSeverityCounts' }
+        summary: { type: string }
+        error: { type: string }
+        provider: { type: string, description: "The agent's module (claude, muse)" }
+        createdAt: { type: string, format: date-time }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+    SecurityFinding:
+      type: object
+      required: [id, repoId, repo, severity, category, source, status, title, confidence, location, rules, references, firstSeen, lastSeen, lastChecked, ticketKey, dismissReason, dismissNote]
+      properties:
+        id: { type: integer, format: int64 }
+        repoId: { type: integer, format: int64 }
+        repo: { type: string }
+        severity: { $ref: '#/components/schemas/SecSeverity' }
+        category: { type: string }
+        source: { type: string, enum: [code, config, dependency, secret, history, agent, logs] }
+        symbol: { type: string, description: The enclosing function }
+        status: { $ref: '#/components/schemas/SecFindingStatus' }
+        title: { type: string }
+        cwe: { type: string }
+        owasp: { type: string }
+        location:
+          type: object
+          properties:
+            file: { type: string }
+            line: { type: integer }
+            url: { type: string }
+        tool: { type: string }
+        rules: { type: array, items: { type: string } }
+        confidence: { type: string, enum: [confirmed, likely, possible] }
+        evidence: { type: string }
+        impact: { type: string }
+        fixExplanation: { type: string }
+        fixPatch: { type: string }
+        references: { type: array, items: { type: string } }
+        package: { type: string }
+        version: { type: string }
+        ecosystem: { type: string }
+        fixedIn: { type: string }
+        advisories: { type: array, items: { type: string } }
+        cvss: { type: string }
+        secretMask: { type: string, description: The secret's first characters; agnts never stores the value }
+        commit: { type: string }
+        note: { type: string, description: What the last recheck said }
+        ticketKey: { type: string }
+        ticketState: { $ref: '#/components/schemas/TicketState' }
+        dismissReason: { type: string }
+        dismissNote: { type: string }
+        firstSeen: { type: string, format: date-time }
+        lastSeen: { type: string, format: date-time }
+        lastChecked: { type: string, format: date-time }
+    SecuritySettings:
+      type: object
+      required: [schedule, exclude, minNotify]
+      properties:
+        schedule: { type: string, enum: ['off', daily, weekly], description: 'Scan on its own at a quiet hour (03:00 UTC)' }
+        exclude:
+          type: array
+          maxItems: 50
+          description: 'Path patterns no tool reports on, besides vendor, node_modules, dist, build and *.min.js'
+          items: { type: string, maxLength: 200 }
+        minNotify: { $ref: '#/components/schemas/SecSeverity' }
+        nextAt: { type: string, format: date-time, description: When the next scheduled scan is due }
+    SecurityWorkspaceSettings:
+      type: object
+      required: [autoCheck, dailyBudget]
+      properties:
+        autoCheck: { type: boolean, description: "Check agnts's own changes for security issues while they wait for review (advice, never a gate)" }
+        dailyBudget: { type: integer, minimum: 0, maximum: 200, description: 'Scheduled scans a day that may run the agent; later ones run the scanners only (0: no limit)' }
+    SecurityRepoSummary:
+      type: object
+      required: [repoId, repo, open]
+      properties:
+        repoId: { type: integer, format: int64 }
+        repo: { type: string }
+        open: { $ref: '#/components/schemas/SecSeverityCounts' }
+        lastScan: { $ref: '#/components/schemas/SecurityScan' }
 
   responses:
     Preparing:

@@ -13,6 +13,7 @@ import CommitsTab from '../components/repo/CommitsTab.vue'
 import GuardrailsTab from '../components/repo/GuardrailsTab.vue'
 import MembersTab from '../components/repo/MembersTab.vue'
 import PipelinesTab from '../components/repo/PipelinesTab.vue'
+import SecurityTab from '../components/repo/SecurityTab.vue'
 import PullsTab from '../components/pulls/PullsTab.vue'
 import RepoDrawer from '../components/repos/RepoDrawer.vue'
 import { useArchiveRepo, useRepos } from '../components/repos/useRepos'
@@ -29,7 +30,7 @@ const route = useRoute()
 const router = useRouter()
 const qc = useQueryClient()
 const id = computed(() => Number(route.params.id))
-const TABS = ['branches', 'code', 'commits', 'pulls', 'pipelines', 'ci', 'members', 'brief', 'guardrails'] as const
+const TABS = ['branches', 'code', 'commits', 'pulls', 'pipelines', 'ci', 'security', 'members', 'brief', 'guardrails'] as const
 type Tab = (typeof TABS)[number]
 const tab = computed<Tab>(() => (TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : 'branches'))
 const editOpen = ref(false)
@@ -147,6 +148,7 @@ function setTab(v: Tab) {
     <PullsTab v-else-if="tab === 'pulls'" :repo-id="id" />
     <PipelinesTab v-else-if="tab === 'pipelines'" :repo="repo.data.value" />
     <CiTab v-else-if="tab === 'ci'" :repo="repo.data.value" />
+    <SecurityTab v-else-if="tab === 'security'" :repo-id="id" />
     <MembersTab v-else-if="tab === 'members'" :repo="repo.data.value" />
     <GuardrailsTab v-else-if="tab === 'guardrails'" :repo="repo.data.value" />
     <BriefTab v-else :repo-id="id" />
