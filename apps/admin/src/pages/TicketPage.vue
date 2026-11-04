@@ -46,6 +46,7 @@ import TicketMeetings from '../components/meetings/TicketMeetings.vue'
 import CiCard from '../components/ticket/CiCard.vue'
 import LogFindingCard from '../components/ticket/LogFindingCard.vue'
 import SecurityFindingsCard from '../components/ticket/SecurityFindingsCard.vue'
+import SecurityCheckCard from '../components/ticket/SecurityCheckCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
 import SpendCard from '../components/ticket/SpendCard.vue'
@@ -611,7 +612,7 @@ const checksOk = computed(() => (result.value?.checks ?? []).every((c) => c.exit
 // instead of every section stacked. The first available tab opens by default.
 // The ticket's details, token spend and history come last, as tabs rather
 // than a side column, so the main panel keeps the full width.
-type Tab = 'api' | 'decide' | 'report' | 'review' | 'preview' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'documents' | 'log' | 'task' | 'spend' | 'history'
+type Tab = 'api' | 'decide' | 'report' | 'review' | 'preview' | 'security' | 'changes' | 'followUps' | 'order' | 'answers' | 'lessons' | 'documents' | 'log' | 'task' | 'spend' | 'history'
 const tabs = computed(() => {
   const k = tk.value
   if (!k) return []
@@ -625,6 +626,11 @@ const tabs = computed(() => {
   if (k.state === 'waiting_for_review' && !report.value && (k.canPreview || d.value?.preview)) {
     const pv = d.value?.preview
     out.push({ id: 'preview', label: t('preview.tab'), n: pv?.revision === k.revision ? pv.issues.length || undefined : undefined })
+  }
+  // Like the review, a check stays readable once the ticket moves on.
+  if (!report.value && ((k.state === 'waiting_for_review' && k.canCheckSecurity) || d.value?.security)) {
+    const sc = d.value?.security
+    out.push({ id: 'security', label: t('security.check.tab'), n: sc?.revision === k.revision ? sc.issues.length || undefined : undefined })
   }
   if (!report.value && result.value?.files.length) out.push({ id: 'changes', label: t('ticket.changes'), n: totals.value.n })
   if (d.value?.followUps && !pull.value) out.push({ id: 'followUps', label: t('ticket.tabFollowUps') })
@@ -1192,6 +1198,12 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
         <section v-else-if="activeTab === 'preview'" class="card tk-panel">
           <fieldset class="ro-fs" :disabled="!workspace.canEdit">
             <PreviewShots :ticket="tk" :preview="d.preview" :attached="feedbackShots" @add="addShot" />
+          </fieldset>
+        </section>
+
+        <section v-else-if="activeTab === 'security'" class="card tk-panel">
+          <fieldset class="ro-fs" :disabled="!workspace.canEdit">
+            <SecurityCheckCard :ticket="tk" :check="d.security" :feedback="feedback" @add="addFeedback" @show="showFile" />
           </fieldset>
         </section>
 

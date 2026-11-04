@@ -208,6 +208,7 @@ type securityPrompt struct {
 	HitsPath   string
 	InputPath  string
 	OutPath    string
+	ChangePath string   // the change's diff (the check of a change)
 	Tools      []string // "opengrep: ok, 2 hits"
 	History    int
 	FullScan   bool
@@ -406,38 +407,9 @@ func (o *Orchestrator) securityScan(ctx context.Context, scan domain.SecuritySca
 	if scan.Scope.FullHistory {
 		history = 0
 	}
-	sweep, err := ws.Exec(ctx, fmt.Sprintf("AGNTS_SEC_QUIET=1 agnts-sec static --history %d", history), securityStaticTimeout)
-	if err != nil {
-		return scan, res, fmt.Errorf("run the scanners: %w", err)
-	}
-	ranRaw, err := ws.ReadFile(ctx, SecOutDir+"/ran.json")
-	if err != nil {
-		return scan, res, fmt.Errorf("the scanners did not finish (exit %d): %s", sweep.ExitCode, truncate(sweep.Output, 800))
-	}
-	ran, err := parseRan(ranRaw)
+	hits, ran, err := o.secSweep(ctx, ws, fmt.Sprintf("--history %d", history), exclude)
 	if err != nil {
 		return scan, res, err
-	}
-	ran.Excluded = exclude
-	raw := security.Raw{}
-	for _, f := range security.Files {
-		if b, err := ws.ReadFile(ctx, SecOutDir+"/raw/"+f); err == nil {
-			raw[f] = b
-		}
-	}
-	// gitleaks's raw report holds the secrets themselves: nothing after
-	// this point (the agent included) needs it.
-	_, _ = ws.Exec(ctx, "rm -f "+SecOutDir+"/raw/gitleaks.json "+SecOutDir+"/raw/gitleaks-history.json", time.Minute)
-	hits, perrs := security.Hits(raw, exclude)
-	for tool, perr := range perrs {
-		t := ran.Tools[tool]
-		t.Status, t.Error = "failed", perr.Error()
-		ran.Tools[tool] = t
-	}
-	for _, h := range hits {
-		t := ran.Tools[h.Tool]
-		t.Hits++
-		ran.Tools[h.Tool] = t
 	}
 	res.Hits, res.Ran = hits, ran
 
@@ -601,6 +573,45 @@ func (o *Orchestrator) securityScan(ctx context.Context, scan domain.SecuritySca
 	}
 	res.Ran = ran
 	return scan, res, nil
+}
+
+// secSweep runs agnts-sec static with args (the exclusions are already in
+// SecExcludePath) and reads what it found. It deletes gitleaks's raw
+// report, which holds the secrets themselves, before anything else (the
+// agent included) can read it.
+func (o *Orchestrator) secSweep(ctx context.Context, ws Workspace, args string, exclude []string) ([]domain.SecHit, domain.SecRan, error) {
+	sweep, err := ws.Exec(ctx, "AGNTS_SEC_QUIET=1 agnts-sec static "+args, securityStaticTimeout)
+	if err != nil {
+		return nil, domain.SecRan{}, fmt.Errorf("run the scanners: %w", err)
+	}
+	ranRaw, err := ws.ReadFile(ctx, SecOutDir+"/ran.json")
+	if err != nil {
+		return nil, domain.SecRan{}, fmt.Errorf("the scanners did not finish (exit %d): %s", sweep.ExitCode, truncate(sweep.Output, 800))
+	}
+	ran, err := parseRan(ranRaw)
+	if err != nil {
+		return nil, ran, err
+	}
+	ran.Excluded = exclude
+	raw := security.Raw{}
+	for _, f := range security.Files {
+		if b, err := ws.ReadFile(ctx, SecOutDir+"/raw/"+f); err == nil {
+			raw[f] = b
+		}
+	}
+	_, _ = ws.Exec(ctx, "rm -f "+SecOutDir+"/raw/gitleaks.json "+SecOutDir+"/raw/gitleaks-history.json", time.Minute)
+	hits, perrs := security.Hits(raw, exclude)
+	for tool, perr := range perrs {
+		t := ran.Tools[tool]
+		t.Status, t.Error = "failed", perr.Error()
+		ran.Tools[tool] = t
+	}
+	for _, h := range hits {
+		t := ran.Tools[h.Tool]
+		t.Hits++
+		ran.Tools[h.Tool] = t
+	}
+	return hits, ran, nil
 }
 
 func parseRan(b []byte) (domain.SecRan, error) {

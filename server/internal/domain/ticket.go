@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -533,8 +534,11 @@ const (
 	EventKind           = "kind_changed"
 	EventReview         = "review_done"
 	EventPreview        = "preview_done"
-	EventFollowUps      = "follow_ups_suggested"
-	EventCIFailure      = "ci_failure"
+	// EventSecurityCheck: the security check of a ticket's change finished
+	// (data: issues, worst, revision, runId).
+	EventSecurityCheck = "security_check_done"
+	EventFollowUps     = "follow_ups_suggested"
+	EventCIFailure     = "ci_failure"
 	// EventLogFinding: the log watcher found something worth reporting
 	// (data: findingId, title, service, category, severity, notify).
 	EventLogFinding = "log_finding"
@@ -771,6 +775,35 @@ func NewTrackerUpdate(title, description string) TrackerUpdate {
 // ticket was worked from.
 func (u TrackerUpdate) Differs(t Ticket) bool {
 	return u.Title != t.Title || u.Description != t.Description
+}
+
+// DiffLine is a line a unified diff adds, with its number in the new file.
+type DiffLine struct {
+	N    int
+	Text string
+}
+
+// AddedLines returns the lines a unified diff adds.
+func AddedLines(diff string) []DiffLine {
+	var out []DiffLine
+	n := 0
+	for _, l := range strings.Split(diff, "\n") {
+		switch {
+		case strings.HasPrefix(l, "@@"):
+			if _, after, ok := strings.Cut(l, "+"); ok {
+				num, _, _ := strings.Cut(after, ",")
+				num, _, _ = strings.Cut(num, " ")
+				n, _ = strconv.Atoi(num)
+			}
+		case strings.HasPrefix(l, "+++"), strings.HasPrefix(l, "---"):
+		case strings.HasPrefix(l, "+"):
+			out = append(out, DiffLine{n, l[1:]})
+			n++
+		case strings.HasPrefix(l, " "):
+			n++
+		}
+	}
+	return out
 }
 
 // Where is the file's path from /workspace: its repository's folder, then

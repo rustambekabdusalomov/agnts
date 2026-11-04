@@ -90,6 +90,9 @@ func (o *Orchestrator) afterReview(ctx context.Context, s domain.Settings, t dom
 		if x.PreviewState == domain.PreviewPending {
 			x.PreviewState = domain.PreviewNone // it would show the old revision
 		}
+		if x.SecurityState == domain.SecCheckPending {
+			x.SecurityState = domain.SecCheckNone // the next revision gets its own
+		}
 	})
 	var te *domain.TransitionError
 	if errors.As(err, &te) {

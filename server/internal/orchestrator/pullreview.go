@@ -490,7 +490,7 @@ func (o *Orchestrator) reviewPullIn(ctx context.Context, s domain.Settings, t do
 		x.HeadSHA = sha
 		x.Feedback, x.FeedbackFiles, x.FeedbackShots = "", nil, nil
 		x.Turns += run.Turns
-		x.ReviewState, x.PreviewState = domain.ReviewNone, domain.PreviewNone
+		x.ReviewState, x.PreviewState, x.SecurityState = domain.ReviewNone, domain.PreviewNone, domain.SecCheckNone
 	})
 }
 

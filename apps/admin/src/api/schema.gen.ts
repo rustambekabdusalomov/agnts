@@ -746,6 +746,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets/{key}/security": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue a security check of the change of a ticket waiting for review, again if one already ran */
+        post: operations["checkTicketSecurity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/preview/{runId}/shots/{shotId}": {
         parameters: {
             query?: never;
@@ -7900,6 +7919,13 @@ export interface components {
             previewCompare?: boolean;
             /** @description The ticket's repository has a preview command */
             canPreview?: boolean;
+            /**
+             * @description The security check agnts runs on the change beside the human review
+             * @enum {string}
+             */
+            securityState?: "none" | "pending" | "running" | "done" | "failed";
+            /** @description A security check of the change can be run (ticket detail only) */
+            canCheckSecurity?: boolean;
             continueTo?: components["schemas"]["TicketState"];
             /** @description This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note */
             canStartOver?: boolean;
@@ -8208,6 +8234,38 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        /** @description The security check of the change at the latest result: what the scanners report on the lines it adds, judged by the agent. Advice beside the human review; it shows an older revision when revision is below the ticket's. */
+        SecurityCheck: {
+            /** Format: int64 */
+            runId: number;
+            revision: number;
+            summary: string;
+            /** @description Changed files the scanners looked at */
+            files: number;
+            tools: components["schemas"]["SecToolRun"][];
+            issues: components["schemas"]["SecCheckIssue"][];
+            rejected?: components["schemas"]["SecRejectedHit"][];
+            /**
+             * @description skipped: nothing to judge
+             * @enum {string}
+             */
+            agent: "done" | "limit" | "failed" | "skipped";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        SecCheckIssue: {
+            severity: components["schemas"]["SecSeverity"];
+            title: string;
+            file?: string;
+            line?: number;
+            cwe?: string;
+            tool?: string;
+            rule?: string;
+            advice?: string;
+            secretMask?: string;
+            /** @description The issue as a line of request-changes feedback */
+            feedback: string;
+        };
         CheckStep: {
             name: string;
             command: string;
@@ -8264,6 +8322,7 @@ export interface components {
             relations?: components["schemas"]["Relations"];
             review?: components["schemas"]["CodeReview"];
             preview?: components["schemas"]["TicketPreview"];
+            security?: components["schemas"]["SecurityCheck"];
             history?: components["schemas"]["HistoryItem"][];
             maxTurns?: number;
             effectiveModels?: components["schemas"]["StageModels"];
@@ -13097,6 +13156,23 @@ export interface operations {
                 "application/json": components["schemas"]["PreviewInput"];
             };
         };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    checkTicketSecurity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: components["responses"]["TicketOK"];
             400: components["responses"]["BadRequest"];
