@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, unwrap } from '../../api/client'
+import InputSelect, { type SelectOption } from '../form/InputSelect.vue'
 import HiIcon from '../ui/HiIcon.vue'
 import {
   SCALE, differs, download, factsOf, lastMonths, pts, sources,
@@ -51,6 +52,18 @@ const selected = computed(() => rep.value?.rows.find((r) => r.key === author.val
 const regressions = useQuery({ queryKey: ['developers', 'regressions'], queryFn: () => unwrap(api.GET('/analytics/developers/regressions')) })
 const proposed = computed(() => (regressions.data.value ?? []).filter((r) => r.status === 'proposed'))
 
+// Months by name ("October 2026"), newest first; closings by number and date.
+const monthOptions = computed<SelectOption<string>[]>(() =>
+  months.map((m) => {
+    const [y, mo] = m.split('-').map(Number)
+    const label = new Date(y, mo - 1, 1).toLocaleDateString(locale.value, { month: 'long', year: 'numeric' })
+    return { value: m, label: label.charAt(0).toLocaleUpperCase(locale.value) + label.slice(1) }
+  }),
+)
+const closingOptions = computed<SelectOption<number | undefined>[]>(() => [
+  { value: undefined, label: t('perf.closingLatest') },
+  ...(rep.value?.closings ?? []).map((c) => ({ value: c.closing, label: t('perf.closingN', { n: c.closing, date: date(c.closedAt) }) })),
+])
 const date = (iso: string) => new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' })
 const kindLabel = (r: DeveloperRow) => t(`perf.kind_${r.kind}`)
 const shown = (r: DeveloperRow): DeveloperTotals => r.totals
@@ -117,23 +130,18 @@ async function exportData(format: 'json' | 'csv') {
         <button type="button" class="seg-b" :aria-pressed="mode === 'month'" @click="mode = 'month'">{{ t('perf.month') }}</button>
         <button type="button" class="seg-b" :aria-pressed="mode === 'range'" @click="mode = 'range'">{{ t('perf.range') }}</button>
       </div>
-      <label v-if="mode === 'month'" class="dv-f">
-        <span class="sr-only">{{ t('perf.month') }}</span>
-        <select v-model="month" class="cfg-in">
-          <option v-for="m in months" :key="m" :value="m">{{ m }}</option>
-        </select>
-      </label>
+      <InputSelect v-if="mode === 'month'" v-model="month" :options="monthOptions" :label="t('perf.month')" class="dv-sel" />
       <template v-else>
         <label class="dv-f">{{ t('perf.from') }} <input v-model="from" class="cfg-in" type="date"></label>
         <label class="dv-f">{{ t('perf.to') }} <input v-model="to" class="cfg-in" type="date"></label>
       </template>
-      <label v-if="mode === 'month' && rep && rep.closings.length > 1" class="dv-f">
-        {{ t('perf.closings') }}
-        <select v-model="closing" class="cfg-in">
-          <option :value="undefined">—</option>
-          <option v-for="c in rep.closings" :key="c.closing" :value="c.closing">{{ t('perf.closingN', { n: c.closing, date: date(c.closedAt) }) }}</option>
-        </select>
-      </label>
+      <InputSelect
+        v-if="mode === 'month' && rep && rep.closings.length > 1"
+        v-model="closing"
+        :options="closingOptions"
+        :label="t('perf.closings')"
+        class="dv-sel"
+      />
     </div>
 
     <p v-if="report.isPending.value && query" class="hint">{{ t('analytics.loading') }}</p>
@@ -285,5 +293,5 @@ async function exportData(format: 'json' | 'csv') {
 .dv-edit { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
 .dv-reason { flex-basis: 100%; margin: 0; }
 .mono { font-family: var(--mono); font-size: 13px; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.dv-sel { min-width: 200px; }
 </style>
