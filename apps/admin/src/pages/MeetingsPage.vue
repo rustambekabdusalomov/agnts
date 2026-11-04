@@ -35,6 +35,20 @@ const tab = computed<Tab>({
 const view = computed(() => (tab.value === 'mine' ? 'mine' : 'upcoming'))
 const list = useMeetingList(view)
 const past = usePastSessions()
+// Opened without a tab: once the upcoming list is in, show Past instead
+// when nothing is coming up. Only on opening; a tab picked later stays.
+if (!route.query.tab) {
+  let decided = false
+  watch(
+    () => list.data.value,
+    (d) => {
+      if (!d || decided) return
+      decided = true
+      if (!d.length && !route.query.tab) tab.value = 'past'
+    },
+    { immediate: true },
+  )
+}
 const drawer = ref(route.query.new === '1')
 const code = ref('')
 const codeError = ref('')
