@@ -268,6 +268,10 @@ func NewHandler(opt Options) (http.Handler, error) {
 // else is small JSON.
 func bodyLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isMeetingUpload(r) {
+			next.ServeHTTP(w, r) // the handler limits it
+			return
+		}
 		limit := int64(maxBodyBytes)
 		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/attachments") {
 			limit = maxUploadBytes

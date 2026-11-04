@@ -678,11 +678,15 @@ func finishMeetingNotes(ctx context.Context, tx pgx.Tx, runID, docID int64, res 
 	if res.ActionItems == nil {
 		return nil
 	}
-	rows, err := tx.Query(ctx, `SELECT lower(text) FROM meeting_action_items WHERE session_id = $1 AND ticket_id IS NOT NULL`, sessionID)
+	rows, err := tx.Query(ctx, `SELECT text, who, quote, at_ms FROM meeting_action_items WHERE session_id = $1 AND ticket_id IS NOT NULL`, sessionID)
 	if err != nil {
 		return err
 	}
-	kept, err := pgx.CollectRows(rows, pgx.RowTo[string])
+	kept, err := pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.ActionItem, error) {
+		var a domain.ActionItem
+		err := r.Scan(&a.Text, &a.Who, &a.Quote, &a.AtMS)
+		return a, err
+	})
 	if err != nil {
 		return err
 	}
@@ -691,12 +695,12 @@ func finishMeetingNotes(ctx context.Context, tx pgx.Tx, runID, docID int64, res 
 	}
 	pos := len(kept)
 	for _, it := range res.ActionItems {
-		if slices.Contains(kept, strings.ToLower(it.Text)) {
+		if slices.ContainsFunc(kept, func(k domain.ActionItem) bool { return domain.SameActionItem(k, it) }) {
 			continue
 		}
-		if _, err := tx.Exec(ctx, `INSERT INTO meeting_action_items (workspace_id, session_id, position, text, who, due, at_ms, quote)
-			SELECT workspace_id, id, $2, $3, $4, $5, $6, $7 FROM meeting_sessions WHERE id = $1`,
-			sessionID, pos, it.Text, it.Who, it.Due, it.AtMS, it.Quote); err != nil {
+		if _, err := tx.Exec(ctx, `INSERT INTO meeting_action_items (workspace_id, session_id, position, text, who, due, at_ms, quote, speaker)
+			SELECT workspace_id, id, $2, $3, $4, $5, $6, $7, $8 FROM meeting_sessions WHERE id = $1`,
+			sessionID, pos, it.Text, it.Who, it.Due, it.AtMS, it.Quote, it.Speaker); err != nil {
 			return err
 		}
 		pos++

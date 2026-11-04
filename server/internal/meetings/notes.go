@@ -14,7 +14,6 @@ import (
 
 	"agnts/internal/documents"
 	"agnts/internal/domain"
-	"agnts/internal/orchestrator"
 )
 
 // WakeNotes has the notes worker look at its queue now.
@@ -70,14 +69,27 @@ func (s *Service) hear(ctx context.Context, x domain.MeetingSession) {
 		}
 		s.notesDone(ctx, x.ID)
 	}
-	if !s.NotesReady() {
+	if (x.Uploaded && !s.UploadsReady()) || (!x.Uploaded && !s.NotesReady()) {
 		fail(errors.New("notes are not available on this server"))
 		return
 	}
-	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio)
+	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio, domain.MediaUpload)
 	if err != nil {
 		fail(err)
 		return
+	}
+	for i, md := range media {
+		if md.Kind != domain.MediaUpload || md.Status != domain.MediaReady {
+			continue
+		}
+		if s.d.Sound == nil {
+			fail(errors.New("uploaded recordings are not available on this server"))
+			return
+		}
+		if media[i], err = s.takeSound(ctx, md); err != nil {
+			fail(err)
+			return
+		}
 	}
 	for _, md := range media {
 		if md.Status == domain.MediaActive && s.now().Sub(md.StartedAt) < 6*time.Hour && x.EndedAt != nil && s.now().Sub(*x.EndedAt) < audioWait {
@@ -118,6 +130,11 @@ func (s *Service) hear(ctx context.Context, x domain.MeetingSession) {
 	if err := s.d.Store.ReplaceSegments(ctx, x.ID, segs); err != nil {
 		fail(err)
 		return
+	}
+	if x.Uploaded {
+		if err := s.d.Store.SetUploadLength(ctx, x.ID, segs[len(segs)-1].EndMS); err != nil {
+			log.Warn("uploaded recording's length", "err", err)
+		}
 	}
 	if !s.settings(ctx).KeepAudio {
 		for _, md := range media {
@@ -175,6 +192,9 @@ func (s *Service) transcribe(ctx context.Context, x domain.MeetingSession, media
 			continue
 		}
 		offset := int(md.StartedAt.Sub(x.StartedAt).Milliseconds())
+		if md.Kind == domain.MediaUpload {
+			offset = 0 // the file is the whole meeting
+		}
 		var who string
 		if md.Kind == domain.MediaAudio {
 			if p, _, ok := domain.ParseMeetingIdentity(md.Identity); ok {
@@ -230,6 +250,10 @@ func (s *Service) writeNotes(ctx context.Context, m domain.Meeting, x domain.Mee
 		}
 	}
 	viewers = append(viewers, m.CohostIDs...)
+	viewers = append(viewers, x.People...) // an upload's people
+	if x.NotesBy != nil {
+		viewers = append(viewers, *x.NotesBy)
+	}
 	slices.Sort(viewers)
 	viewers = slices.Compact(viewers)
 	lang := m.Language
@@ -286,6 +310,13 @@ func (s *Service) NotesChanged(ctx context.Context, d domain.Document) {
 	if d.Run.Status != domain.DocRunDone && d.Run.Status != domain.DocRunFailed {
 		return
 	}
+	// Done or failed, the items are the ones to keep: the new notes', or
+	// the earlier ones a failed rewrite left.
+	if x, err := s.d.Store.Session(ctx, d.Source.SessionID); err == nil {
+		if m, err := s.d.Store.Meeting(ctx, x.MeetingID); err == nil {
+			s.settleActionItems(ctx, x, m)
+		}
+	}
 	s.notesDone(ctx, d.Source.SessionID)
 }
 
@@ -302,6 +333,10 @@ func (s *Service) notesDone(ctx context.Context, sessionID int64) {
 	users, _ := s.d.Store.AttendedMembers(ctx, x.ID)
 	if m.HostID != nil {
 		users = append(users, *m.HostID)
+	}
+	users = append(users, x.People...)
+	if x.NotesBy != nil {
+		users = append(users, *x.NotesBy)
 	}
 	slices.Sort(users)
 	users = slices.Compact(users)
@@ -343,6 +378,9 @@ func (s *Service) RegenerateNotes(ctx context.Context, c Caller, meetingID, sess
 	if err != nil {
 		return err
 	}
+	if err := s.dropUntouchedDrafts(ctx, x.ID); err != nil {
+		return err
+	}
 	if len(segs) > 0 {
 		if x.DocumentID != nil {
 			if err := s.d.Notes.RegenerateMeetingNotes(ctx, *x.DocumentID, x.ID, c.UserID); err == nil {
@@ -356,7 +394,7 @@ func (s *Service) RegenerateNotes(ctx context.Context, c Caller, meetingID, sess
 		}
 		return s.writeNotes(ctx, m, x, c.UserID, segs)
 	}
-	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio)
+	media, err := s.d.Store.SessionMedia(ctx, x.ID, domain.MediaAudioMixed, domain.MediaAudio, domain.MediaUpload)
 	if err != nil {
 		return err
 	}
@@ -507,8 +545,7 @@ func (s *Service) ActionItemTicket(ctx context.Context, c Caller, meetingID, ses
 	if o.Origin == "" {
 		o.Origin = domain.OriginWeb
 	}
-	t, err := s.d.Tickets.CreateTask(ctx, orchestrator.TaskInput{RepoID: o.RepoID, Kind: "auto", Title: it.Text,
-		Description: s.itemDescription(ctx, m, x, it), Priority: "medium", AfterApprove: "pr", Start: o.Start}, o.Origin)
+	t, err := s.itemTicket(ctx, m, x, it, o.Start, &c.UserID, o.Origin, o.RepoID)
 	if err != nil {
 		return t, err
 	}
@@ -529,8 +566,13 @@ func (s *Service) itemDescription(ctx context.Context, m domain.Meeting, x domai
 		loc = time.UTC
 	}
 	fmt.Fprintf(&b, "From the meeting **%s** on %s.\n\n", titleOf(m), x.StartedAt.In(loc).Format("2 January 2006"))
-	if it.Who != "" {
-		fmt.Fprintf(&b, "- Who: %s\n", it.Who)
+	switch {
+	case it.WhoName != "" && it.Who != "" && domain.FoldName(it.Who) != domain.FoldName(it.WhoName):
+		fmt.Fprintf(&b, "- Who: %s (said: %s)\n", it.WhoName, it.Who)
+	case it.WhoName != "":
+		fmt.Fprintf(&b, "- Who: %s\n", it.WhoName)
+	case it.Who != "":
+		fmt.Fprintf(&b, "- Who: %s (no member matched this name)\n", it.Who)
 	}
 	if it.Due != "" {
 		fmt.Fprintf(&b, "- When: %s\n", it.Due)

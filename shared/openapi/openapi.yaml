@@ -7014,6 +7014,45 @@ paths:
                 items: { $ref: '#/components/schemas/MeetingSessionBrief' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /meetings/{meetingId}/uploads:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+    post:
+      operationId: uploadMeetingRecording
+      summary: Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
+      description: >-
+        Hosts only. The file (video or audio: mp4, mov, m4v, webm, mkv, ogg, opus, oga, m4a, mp3, wav; at most
+        the server's limit, 2 GB by default) becomes a new ended session of the meeting with notes on. agnts takes
+        its first audio track out and deletes the file as sent before anything hears it: the picture is never
+        analysed. The session's notes then go as a call's do (queued, transcribing, writing, done).
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                startedAt: { type: string, format: date-time, description: 'When the meeting was held; absent is now. Send it before the file.' }
+                people: { type: string, description: 'Comma-separated ids of the members in the recording. Send it before the file.' }
+                file: { type: string, format: binary }
+      responses:
+        '201':
+          description: Uploaded; its notes are queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingSessionBrief' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413':
+          description: The file is over the limit
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
   /meetings/{meetingId}/sessions/{sessionId}:
     parameters:
       - $ref: '#/components/parameters/MeetingID'
@@ -7154,6 +7193,33 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
+
+  /meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/member:
+    parameters:
+      - $ref: '#/components/parameters/MeetingID'
+      - $ref: '#/components/parameters/SessionID'
+      - name: itemId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      operationId: setActionItemMember
+      summary: Pick the member who takes an action item; its ticket becomes theirs too
+      tags: [meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActionItemMemberInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingActionItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   /tickets/{key}/meetings:
     parameters:
@@ -13062,13 +13128,15 @@ components:
       allOf:
         - $ref: '#/components/schemas/Meeting'
         - type: object
-          required: [invitees, canManage]
+          required: [invitees, canManage, canUpload, maxUploadMb]
           properties:
             invitees:
               type: array
               items: { $ref: '#/components/schemas/MeetingInvitee' }
             myRsvp: { type: string, enum: [none, yes, no, maybe], description: 'Set when you are invited' }
             canManage: { type: boolean, description: 'You may change, invite, cancel' }
+            canUpload: { type: boolean, description: 'You may upload a recording of it (uploadMeetingRecording): you host it and this server hears uploads' }
+            maxUploadMb: { type: integer, description: 'The largest recording that can be uploaded' }
 
     MeetingInvitee:
       type: object
@@ -13119,7 +13187,7 @@ components:
 
     MeetingSessionBrief:
       type: object
-      required: [id, startedAt, notesStatus, notesError]
+      required: [id, startedAt, notesStatus, notesError, uploaded]
       properties:
         id: { type: integer, format: int64 }
         startedAt: { type: string, format: date-time }
@@ -13128,6 +13196,7 @@ components:
         notesStatus: { $ref: '#/components/schemas/MeetingNotesStatus' }
         notesError: { type: string }
         documentId: { type: integer, format: int64 }
+        uploaded: { type: boolean, description: 'A recording a host uploaded, not a call' }
 
     MeetingNotesStatus:
       type: string
@@ -13136,7 +13205,7 @@ components:
 
     MeetingSessionSummary:
       type: object
-      required: [id, meetingId, meetingCode, meetingTitle, startedAt, people, recordings, actionItems, notesStatus, notesError, documentTitle]
+      required: [id, meetingId, meetingCode, meetingTitle, startedAt, people, recordings, actionItems, notesStatus, notesError, documentTitle, uploaded]
       properties:
         id: { type: integer, format: int64 }
         meetingId: { type: integer, format: int64 }
@@ -13151,13 +13220,19 @@ components:
         notesError: { type: string }
         documentId: { type: integer, format: int64 }
         documentTitle: { type: string }
+        uploaded: { type: boolean, description: 'A recording a host uploaded, not a call' }
 
     MeetingSessionDetail:
       type: object
-      required: [id, meeting, startedAt, notesStatus, notesError, attendees, recordings, actionItems, messages, canManage]
+      required: [id, meeting, startedAt, notesStatus, notesError, attendees, recordings, actionItems, messages, canManage, uploaded, people]
       properties:
         id: { type: integer, format: int64 }
         meeting: { $ref: '#/components/schemas/Meeting' }
+        uploaded: { type: boolean, description: 'A recording a host uploaded, not a call: it has no attendance' }
+        people:
+          type: array
+          description: 'An uploaded recording: the members the uploader said are in it'
+          items: { type: integer, format: int64 }
         startedAt: { type: string, format: date-time }
         endedAt: { type: string, format: date-time }
         notesStatus: { $ref: '#/components/schemas/MeetingNotesStatus' }
@@ -13200,7 +13275,7 @@ components:
 
     MeetingActionItem:
       type: object
-      required: [id, position, text, who, due, quote]
+      required: [id, position, text, who, due, quote, speaker, drafted, memberByHand]
       properties:
         id: { type: integer, format: int64 }
         position: { type: integer }
@@ -13209,7 +13284,18 @@ components:
         due: { type: string, description: 'As said' }
         atMs: { type: integer, description: 'When it was said, from the start of the call' }
         quote: { type: string }
+        speaker: { type: string, description: 'Who said the line where it was taken, as the transcript names them; empty when it does not say' }
+        memberId: { type: integer, format: int64, description: 'The member who takes it: matched from the name as said, or picked by hand; absent when nobody matched' }
+        memberName: { type: string }
+        memberByHand: { type: boolean, description: 'The member was picked by hand, not matched' }
+        drafted: { type: boolean, description: 'Its draft ticket was made when the notes were written' }
         ticketKey: { type: string, description: 'The ticket made from it' }
+
+    ActionItemMemberInput:
+      type: object
+      required: [userId]
+      properties:
+        userId: { type: integer, format: int64, description: 'A member of the workspace' }
 
     ActionItemTicketInput:
       type: object
@@ -13269,20 +13355,23 @@ components:
 
     MeetingSettings:
       type: object
-      required: [allowRecording, retentionDays, keepAudio, maxParticipants, available]
+      required: [allowRecording, retentionDays, keepAudio, maxParticipants, draftTickets, available]
       properties:
         allowRecording: { type: boolean }
         retentionDays: { type: integer, description: 'Recordings, notes audio and transcripts are deleted after; 0 keeps them' }
         keepAudio: { type: boolean, description: 'Keep the audio of notes after it is heard' }
         maxParticipants: { type: integer }
+        draftTickets: { type: boolean, description: 'Every action item becomes a held draft ticket on the member who took it when the notes are written' }
         available:
           type: object
           description: What this server can do
-          required: [meetings, recording, notes]
+          required: [meetings, recording, notes, uploads, maxUploadMb]
           properties:
             meetings: { type: boolean }
             recording: { type: boolean }
             notes: { type: boolean }
+            uploads: { type: boolean, description: 'Recordings can be uploaded and heard' }
+            maxUploadMb: { type: integer, description: 'The largest recording that can be uploaded' }
 
     MeetingSettingsInput:
       type: object
@@ -13292,6 +13381,7 @@ components:
         retentionDays: { type: integer, minimum: 0, maximum: 3650 }
         keepAudio: { type: boolean }
         maxParticipants: { type: integer, minimum: 2, maximum: 100 }
+        draftTickets: { type: boolean, description: 'Absent keeps it as it is' }
 
     MeetingPrefs:
       type: object
