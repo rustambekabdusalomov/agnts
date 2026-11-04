@@ -11,12 +11,84 @@ rules:
       cwe: "CWE-89"
       owasp: "A03"
       confidence: medium
-    patterns:
-      - pattern: $S.$M($A + $B, ...)
-      - pattern-not: $S.$M("..." + "...", ...)
-      - metavariable-regex:
-          metavariable: $M
-          regex: ^(executeQuery|executeUpdate|execute|addBatch|createQuery|createNativeQuery)$
+    # JDBC, Spring's JdbcTemplate and JPA: the statement is a concatenation
+    # with something that is not a constant: in place, built in a variable
+    # first (reported where it runs, also inside try blocks), or built in a
+    # variable and handed to a helper (reported where it is built). It must
+    # start as a string and read as SQL (or JPQL), which leaves out lambdas
+    # passed to an executor.
+    pattern-either:
+      # the query in place
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern: $DB.$M(..., $Q, ...)
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(executeQuery|executeUpdate|executeLargeUpdate|execute|addBatch|prepareStatement|prepareCall|createQuery|createNativeQuery|createSQLQuery|query|queryForObject|queryForList|queryForMap|queryForRowSet|update|batchUpdate)$
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \A\s*"
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\b(select|insert|update|delete|from|where|order\s+by|group\s+by|values|create|drop|alter|limit|join|like|set\s+schema|set\s+search_path)\b
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: $A + $B
+                - pattern-not: |
+                          "..."
+          - focus-metavariable: $Q
+      # built in a variable first; reported where it runs
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern: $DB.$M(..., $V, ...)
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(executeQuery|executeUpdate|executeLargeUpdate|execute|addBatch|prepareStatement|prepareCall|createQuery|createNativeQuery|createSQLQuery|query|queryForObject|queryForList|queryForMap|queryForRowSet|update|batchUpdate)$
+          - pattern-either:
+              - pattern-inside: |
+                  $T $V = $Q;
+                  ...
+              - pattern-inside: |
+                  $V = $Q;
+                  ...
+              - pattern-inside: |
+                  $V += $Q;
+                  ...
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \A\s*"
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\b(select|insert|update|delete|from|where|order\s+by|group\s+by|values|create|drop|alter|limit|join|like|set\s+schema|set\s+search_path)\b
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: $A + $B
+                - pattern-not: |
+                          "..."
+          - focus-metavariable: $V
+      # a statement built in a variable and run elsewhere (a helper takes
+      # the query): reported where it is built
+      - patterns:
+          - pattern-either:
+              - pattern: $T $V = $Q;
+              - pattern: $V = $Q;
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\A[\s(]*[fFrRbBuU]*[`\"']?\s*(select|insert\s+into|update|delete\s+from|with)\s
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: $A + $B
+                - pattern-not: |
+                          "..."
+          - focus-metavariable: $Q
 
   - id: agnts.java.cmdi.runtime-exec
     languages: [java]

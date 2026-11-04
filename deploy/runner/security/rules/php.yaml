@@ -25,6 +25,122 @@ rules:
       - pattern: intval(...)
       - pattern: (int) $X
 
+  - id: agnts.php.sqli.concat-query
+    languages: [php]
+    severity: WARNING
+    message: >-
+      A SQL query is built by concatenation or interpolation with a
+      variable. If any part comes from a user, this is SQL injection; use
+      prepared statements with bound parameters.
+    metadata:
+      category: injection
+      cwe: "CWE-89"
+      owasp: "A03"
+      confidence: medium
+    # request-into-query follows $_GET and the like within one function;
+    # this rule covers a repository method that builds the query from its
+    # parameters (and Laravel's DB facade and *Raw methods), in place or in
+    # a variable first (then reported where it runs). The query must hold a
+    # PHP variable, so constants and literals are left alone, and read as
+    # SQL (a *Raw method takes SQL anyway).
+    pattern-either:
+      - patterns:
+          - pattern-either:
+              - pattern: mysqli_query($C, $Q, ...)
+              - patterns:
+                  - pattern-either:
+                      - pattern: $DB->$M($Q, ...)
+                      - pattern: $K::$M($Q, ...)
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(query|exec|prepare|select|statement|unprepared|raw|insert|update|delete)$
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\b(select|insert|update|delete|from|where|order\s+by|group\s+by|values|create|drop|alter|limit|join|like|set\s+schema|set\s+search_path)\b
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: $A . $B
+                    - pattern: '"...$X..."'
+                # a number cast is not injection
+                - pattern-not: '"..." . intval(...)'
+                - pattern-not: '"..." . (int) $X'
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \$[A-Za-z_]
+          - focus-metavariable: $Q
+      - patterns:
+          - pattern: $DB->$M($Q, ...)
+          - metavariable-regex:
+              metavariable: $M
+              regex: ^(whereRaw|orWhereRaw|havingRaw|orHavingRaw|orderByRaw|selectRaw|groupByRaw|fromRaw)$
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: $A . $B
+                    - pattern: '"...$X..."'
+                # a number cast is not injection
+                - pattern-not: '"..." . intval(...)'
+                - pattern-not: '"..." . (int) $X'
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \$[A-Za-z_]
+          - focus-metavariable: $Q
+      - patterns:
+          - pattern-either:
+              - pattern: mysqli_query($C, $V, ...)
+              - patterns:
+                  - pattern-either:
+                      - pattern: $DB->$M($V, ...)
+                      - pattern: $K::$M($V, ...)
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(query|exec|prepare|select|statement|unprepared|raw|insert|update|delete)$
+          - pattern-either:
+              - pattern-inside: |
+                  $V = $Q;
+                  ...
+              - pattern-inside: |
+                  $V .= $Q;
+                  ...
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\b(select|insert|update|delete|from|where|order\s+by|group\s+by|values|create|drop|alter|limit|join|like|set\s+schema|set\s+search_path)\b
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: $A . $B
+                    - pattern: '"...$X..."'
+                # a number cast is not injection
+                - pattern-not: '"..." . intval(...)'
+                - pattern-not: '"..." . (int) $X'
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \$[A-Za-z_]
+          - focus-metavariable: $V
+      # a statement built in a variable and run elsewhere (a helper takes
+      # the query): reported where it is built
+      - patterns:
+          - pattern: $V = $Q;
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\A\s*["']?\s*(select|insert\s+into|update|delete\s+from|with)\s
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: $A . $B
+                    - pattern: '"...$X..."'
+                - pattern-not: '"..." . intval(...)'
+                - pattern-not: '"..." . (int) $X'
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \$[A-Za-z_]
+          - focus-metavariable: $Q
+
   - id: agnts.php.code.eval
     languages: [php]
     severity: ERROR

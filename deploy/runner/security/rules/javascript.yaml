@@ -11,17 +11,96 @@ rules:
       cwe: "CWE-89"
       owasp: "A03"
       confidence: medium
-    patterns:
-      - pattern-either:
-          - pattern: $DB.$M(`...${$X}...`, ...)
-          - pattern: $DB.$M("..." + $X, ...)
-          - pattern: $DB.$M($X + "...", ...)
-      - metavariable-regex:
-          metavariable: $M
-          regex: ^(query|execute|raw|\$queryRawUnsafe|\$executeRawUnsafe|exec)$
-      - metavariable-regex:
-          metavariable: $DB
-          regex: (?i).*(db|pool|client|conn|connection|knex|sequelize|prisma|pg|mysql).*
+    # The query is a template or concatenation with something that is not
+    # a constant: in place, built in a variable first (reported where it
+    # runs, also inside try blocks), or a statement built in a variable
+    # and handed to a helper (reported where it is built). Constants of
+    # the same file are folded by opengrep and left alone, and so are
+    # value arguments (db.query("... ILIKE $1", [`%${q}%`])). The query
+    # must start as a string and read as SQL, which leaves out callbacks.
+    pattern-either:
+      # the query in place
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern: $DB.$M(..., $Q, ...)
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(query|execute|raw|\$queryRawUnsafe|\$executeRawUnsafe|exec|run|all|get|prepare)$
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \A\s*[`"']
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\b(select|insert|update|delete|from|where|order\s+by|group\s+by|values|create|drop|alter|limit|join|like|set\s+schema|set\s+search_path)\b
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: '`...${$X}...`'
+                    - pattern: $A + $B
+                - pattern-not: |
+                          "..."
+          - focus-metavariable: $Q
+      # built in a variable first; reported where it runs
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern: $DB.$M(..., $V, ...)
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(query|execute|raw|\$queryRawUnsafe|\$executeRawUnsafe|exec|run|all|get|prepare)$
+          - pattern-either:
+              - pattern-inside: |
+                  const $V = $Q;
+                  ...
+              - pattern-inside: |
+                  let $V = $Q;
+                  ...
+              - pattern-inside: |
+                  var $V = $Q;
+                  ...
+              - pattern-inside: |
+                  $V = $Q;
+                  ...
+              - pattern-inside: |
+                  $V += $Q;
+                  ...
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: \A\s*[`"']
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\b(select|insert|update|delete|from|where|order\s+by|group\s+by|values|create|drop|alter|limit|join|like|set\s+schema|set\s+search_path)\b
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: '`...${$X}...`'
+                    - pattern: $A + $B
+                - pattern-not: |
+                          "..."
+          - focus-metavariable: $V
+      # a statement built in a variable and run elsewhere (a helper takes
+      # the query): reported where it is built
+      - patterns:
+          - pattern-either:
+              - pattern: const $V = $Q;
+              - pattern: let $V = $Q;
+              - pattern: var $V = $Q;
+              - pattern: $V = $Q;
+          - metavariable-pattern:
+              metavariable: $Q
+              pattern-regex: (?i)\A[\s(]*[fFrRbBuU]*[`\"']?\s*(select|insert\s+into|update|delete\s+from|with)\s
+          - metavariable-pattern:
+              metavariable: $Q
+              patterns:
+                - pattern-either:
+                    - pattern: '`...${$X}...`'
+                    - pattern: $A + $B
+                - pattern-not: |
+                          "..."
+          - focus-metavariable: $Q
 
   - id: agnts.js.cmdi.exec-with-input
     languages: [javascript, typescript]
