@@ -165,6 +165,26 @@
     "exclude": "O'tkazib yuborish",
     "excludeHelp": "Har qatorda bitta yo'l shabloni (testdata/**, docs/examples). vendor, node_modules, dist, build va *.min.js doim o'tkazib yuboriladi.",
     "settingsSaved": "Xavfsizlik sozlamalari saqlandi.",
-    "ownerOnly": "Buni faqat ish maydoni egasi o'zgartira oladi."
+    "ownerOnly": "Buni faqat ish maydoni egasi o'zgartira oladi.",
+    "check": {
+      "tab": "Xavfsizlik",
+      "title": "Xavfsizlik tekshiruvi",
+      "sub": "agnts o'zgarish tegib o'tgan fayllarda xavfsizlik skanerlarini ishga tushirdi va qo'shilgan qatorlarda topilganlarini qoldirdi; har birini {agent} baholadi. Bu maslahat: tasdiqlashga to'sqinlik qilmaydi.",
+      "issues": "topildi: {n}",
+      "clean": "Hech narsa topilmadi",
+      "running": "O'zgarish tekshirilmoqda…",
+      "pending": "Navbatda: ishchi bo'shaganda tekshiruv boshlanadi.",
+      "failed": "Oxirgi tekshiruv muvaffaqiyatsiz tugadi. Sababi ishga tushirish jurnalida; uni qayta ishga tushirish mumkin.",
+      "stale": "Oxirgi tekshiruv {n}-reviziyaga tegishli, so'nggi o'zgarishlardan oldingi.",
+      "none": "Bu o'zgarish hali tekshirilmagan.",
+      "files": "tekshirilgan o'zgargan fayllar: {n}",
+      "judged": "{agent} baholadi",
+      "rejected": "{agent} rad etgan: {n}",
+      "toolsNotOk": "Hamma skanerlar tugamadi: {tools}. Ularning qismi yo'q.",
+      "noIssues": "Qo'shilgan qatorlarda xavfsizlik muammolari yo'q.",
+      "fix": "Tuzatish",
+      "run": "O'zgarishni tekshirish",
+      "runAgain": "Qayta tekshirish"
+    }
   }
 }

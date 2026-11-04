@@ -1356,3 +1356,72 @@ func SecCheckIssues(hits []SecHit, m *SecurityManifest) ([]SecCheckIssue, []SecR
 	slices.SortStableFunc(out, func(a, b SecCheckIssue) int { return cmp.Compare(b.Severity.Rank(), a.Severity.Rank()) })
 	return out, rej
 }
+
+// secAddsPackage reports whether a lockfile's added lines name a package
+// at a version. Lockfiles put them on one line (go.sum, requirements.txt)
+// or a few lines apart (package-lock.json's "node_modules/x" and its
+// "version", yarn.lock).
+func secAddsPackage(lines []DiffLine, pkg, version string) bool {
+	for _, l := range lines {
+		if !strings.Contains(l.Text, pkg) {
+			continue
+		}
+		if version == "" {
+			return true
+		}
+		for _, v := range lines {
+			if v.N >= l.N && v.N <= l.N+secPackageLines && strings.Contains(v.Text, version) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// secPackageLines is how far below its name a lockfile may give a
+// package's version.
+const secPackageLines = 6
+
+// secNearLines is how far from an added line a hit may start and still
+// count as the change's: a rule reports where a statement starts, which
+// can be a line above the part that was added.
+const secNearLines = 3
+
+// SecChangeHits keeps the hits a change brought, out of a scan of the
+// files it touched: on or near a line it added, and for a dependency, a
+// package and version the lockfile's added lines name. A hit that has no
+// line (a whole-file misconfiguration), and every hit in a file whose
+// diff agnts does not have, counts. Files are matched by their path from
+// /workspace (FileChange.Where). The hits keep their order and are
+// numbered again (h1, h2, ...).
+func SecChangeHits(hits []SecHit, files []FileChange) []SecHit {
+	added := map[string][]DiffLine{}
+	whole := map[string]bool{}
+	for _, f := range files {
+		if strings.TrimSpace(f.Diff) == "" {
+			whole[f.Where()] = true
+			continue
+		}
+		added[f.Where()] = AddedLines(f.Diff)
+	}
+	var out []SecHit
+	for _, h := range hits {
+		lines, ok := added[h.File]
+		switch {
+		case whole[h.File]:
+		case !ok:
+			continue
+		case h.Package != "":
+			if !secAddsPackage(lines, h.Package, h.Version) {
+				continue
+			}
+		case h.Line > 0:
+			if !slices.ContainsFunc(lines, func(l DiffLine) bool { return l.N >= h.Line-secNearLines && l.N <= h.Line+secNearLines }) {
+				continue
+			}
+		}
+		h.ID = "h" + strconv.Itoa(len(out)+1)
+		out = append(out, h)
+	}
+	return out
+}

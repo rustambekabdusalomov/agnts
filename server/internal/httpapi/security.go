@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"net/http"
@@ -91,8 +92,19 @@ func toSecurityScan(x domain.SecurityScan, withRejected bool) gen.SecurityScan {
 		v := x.DBVersions
 		out.DbVersions = &v
 	}
+	out.Tools = toSecToolRuns(x.Ran.Tools)
+	if withRejected {
+		rej := toSecRejected(x.Rejected)
+		out.Rejected = &rej
+	}
+	return out
+}
+
+// toSecToolRuns lists how each scanner's run ended, in a fixed order.
+func toSecToolRuns(tools map[string]domain.SecToolRun) []gen.SecToolRun {
+	out := []gen.SecToolRun{}
 	for _, tool := range domain.SecTools {
-		t, ok := x.Ran.Tools[tool]
+		t, ok := tools[tool]
 		if !ok {
 			continue
 		}
@@ -101,18 +113,39 @@ func toSecurityScan(x domain.SecurityScan, withRejected bool) gen.SecurityScan {
 			e := t.Error
 			g.Error = &e
 		}
-		out.Tools = append(out.Tools, g)
+		out = append(out, g)
 	}
-	if withRejected {
-		rej := make([]gen.SecRejectedHit, 0, len(x.Rejected))
-		for _, r := range x.Rejected {
-			h := gen.SecRejectedHit{Hit: r.Hit, Reason: r.Reason, Tool: optStr(r.Tool), Rule: optStr(r.Rule), File: optStr(r.File)}
-			if r.Line > 0 {
-				l := r.Line
-				h.Line = &l
-			}
-			rej = append(rej, h)
+	return out
+}
+
+func toSecRejected(xs []domain.SecRejected) []gen.SecRejectedHit {
+	rej := make([]gen.SecRejectedHit, 0, len(xs))
+	for _, r := range xs {
+		h := gen.SecRejectedHit{Hit: r.Hit, Reason: r.Reason, Tool: optStr(r.Tool), Rule: optStr(r.Rule), File: optStr(r.File)}
+		if r.Line > 0 {
+			l := r.Line
+			h.Line = &l
 		}
+		rej = append(rej, h)
+	}
+	return rej
+}
+
+// toSecurityCheck is a ticket's security check for the API.
+func toSecurityCheck(c domain.SecurityCheck) gen.SecurityCheck {
+	out := gen.SecurityCheck{RunId: c.RunID, Revision: c.Revision, Summary: c.Summary, Files: c.Files, Tools: toSecToolRuns(c.Tools),
+		Issues: make([]gen.SecCheckIssue, 0, len(c.Issues)), Agent: gen.SecurityCheckAgent(cmp.Or(c.Agent, domain.SecAgentSkipped)), CreatedAt: c.CreatedAt}
+	for _, i := range c.Issues {
+		g := gen.SecCheckIssue{Severity: gen.SecSeverity(i.Severity), Title: i.Title, Feedback: i.FeedbackText(), File: optStr(i.File),
+			Cwe: optStr(i.CWE), Tool: optStr(i.Tool), Rule: optStr(i.Rule), Advice: optStr(i.Advice), SecretMask: optStr(i.SecretMask)}
+		if i.Line > 0 {
+			l := i.Line
+			g.Line = &l
+		}
+		out.Issues = append(out.Issues, g)
+	}
+	if len(c.Rejected) > 0 {
+		rej := toSecRejected(c.Rejected)
 		out.Rejected = &rej
 	}
 	return out

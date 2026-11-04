@@ -165,6 +165,26 @@
     "exclude": "Leave out",
     "excludeHelp": "One path pattern per line (testdata/**, docs/examples). vendor, node_modules, dist, build and *.min.js are always left out.",
     "settingsSaved": "Security settings saved.",
-    "ownerOnly": "Only the workspace owner can change these."
+    "ownerOnly": "Only the workspace owner can change these.",
+    "check": {
+      "tab": "Security",
+      "title": "Security check",
+      "sub": "agnts ran its security scanners on the files this change touched and kept what they report on the lines it adds; {agent} judged each hit. Advice only: it never blocks Approve.",
+      "issues": "{n} found",
+      "clean": "Nothing found",
+      "running": "Checking the change…",
+      "pending": "Queued: the check starts when a worker is free.",
+      "failed": "The last check failed. The run log says why; you can run it again.",
+      "stale": "The last check is of revision {n}, before the latest changes.",
+      "none": "This change has not been checked yet.",
+      "files": "changed files scanned: {n}",
+      "judged": "judged by {agent}",
+      "rejected": "hits {agent} rejected: {n}",
+      "toolsNotOk": "Not every scanner finished: {tools}. Their part is missing.",
+      "noIssues": "No security issues in the lines this change adds.",
+      "fix": "Fix",
+      "run": "Check the change",
+      "runAgain": "Check again"
+    }
   }
 }

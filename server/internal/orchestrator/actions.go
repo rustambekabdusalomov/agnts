@@ -656,12 +656,13 @@ func cannotRewrite(t domain.Ticket, r domain.TicketRepo, what string) error {
 	return nil
 }
 
-// dropSideRuns forgets the code review and preview of a ticket leaving
-// review; it reports whether one of them may be running.
+// dropSideRuns forgets the code review, preview and security check of a
+// ticket leaving review; it reports whether one of them may be running.
 func dropSideRuns(x *domain.Ticket) bool {
 	r := dropReview(x)
 	p := dropPreview(x)
-	return r || p
+	c := dropSecurity(x)
+	return r || p || c
 }
 
 // RequestChanges sends the ticket back to coding with reviewer feedback.
@@ -1581,6 +1582,10 @@ type TicketView struct {
 	ChildKey      string          // the code task that implements this report, if any
 	Review        *domain.Review  // newest code review; stale when its revision is older
 	Preview       *domain.Preview // newest preview; stale when its revision is older
+	// SecurityCheck is the newest security check of the change; stale when
+	// its revision is older. CanCheckSecurity: one can be run.
+	SecurityCheck    *domain.SecurityCheck
+	CanCheckSecurity bool
 	// CanPreview reports whether the ticket's repository has a preview
 	// command (and the server can store screenshots).
 	CanPreview bool
@@ -1755,6 +1760,10 @@ func (o *Orchestrator) View(ctx context.Context, key string) (TicketView, error)
 	if v.Preview, err = o.latestPreview(ctx, t.ID); err != nil {
 		return v, err
 	}
+	if v.SecurityCheck, err = o.latestSecurityCheck(ctx, t.ID); err != nil {
+		return v, err
+	}
+	v.CanCheckSecurity = o.security != nil && t.RepoID != nil && !t.Kind.Report() && t.Kind != domain.KindReview
 	if o.shots != nil && t.RepoID != nil && !t.Kind.Report() {
 		for _, id := range t.RepoIDs() {
 			if repo, err := o.store.RepositoryByID(ctx, id); err == nil && repo.Preview.Enabled() {

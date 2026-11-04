@@ -222,7 +222,11 @@ func (f *fakeTickets) View(_ context.Context, key string) (orchestrator.TicketVi
 			Shots:  []domain.Shot{{ID: "home-phone-after", Name: "Home", Route: "/", Viewport: "phone", Side: "after", Width: 390, Height: 844}},
 			Issues: []domain.PreviewIssue{{Severity: "medium", Description: "button overlaps", ShotID: "home-phone-after"}}},
 		CanPreview: true,
-		Spend:      domain.TokenUsage{Input: 30, Output: 7, CacheRead: 500, CacheWrite: 60, CostUSD: 0.25},
+		SecurityCheck: &domain.SecurityCheck{RunID: 43, Summary: "one injection", Files: 2, Agent: domain.SecAgentDone,
+			Tools:  map[string]domain.SecToolRun{domain.ToolOpengrep: {Status: "ok", Hits: 1}},
+			Issues: []domain.SecCheckIssue{{Severity: domain.SecHigh, Title: "SQL injection", File: "repo.go", Line: 50, Advice: "Use $1."}}},
+		CanCheckSecurity: true,
+		Spend:            domain.TokenUsage{Input: 30, Output: 7, CacheRead: 500, CacheWrite: 60, CostUSD: 0.25},
 		Stages: []domain.StageUsage{
 			{ModelStage: domain.ModelCoding, Model: "opus", Calls: 1, Turns: 4, Usage: domain.TokenUsage{Input: 20, Output: 5, CacheRead: 500, CostUSD: 0.25}},
 			{ModelStage: domain.ModelRetry, Model: "opus", Calls: 2, Turns: 3, Partial: true, Usage: domain.TokenUsage{Input: 10, Output: 2, CacheWrite: 60}},
@@ -378,6 +382,13 @@ func (f *fakeTickets) Preview(_ context.Context, key string, compare *bool, o do
 	return t, err
 }
 
+func (f *fakeTickets) CheckSecurity(_ context.Context, key string, o domain.Origin) (domain.Ticket, error) {
+	f.lastOrigin = o
+	t, err := f.ticket(key, domain.StateWaitingForReview)
+	t.SecurityState = domain.SecCheckPending
+	return t, err
+}
+
 func (f *fakeTickets) OpenShot(_ context.Context, key string, runID int64, shotID string) (io.ReadCloser, error) {
 	if key != "PAY-1" || runID != 42 || shotID != "home-phone-after" {
 		return nil, domain.ErrNotFound
@@ -502,6 +513,11 @@ func TestTicketEndpoints(t *testing.T) {
 		{"GET", "/api/tickets/PAY-1", "", 200, `"reviewState":"none"`},
 		{"POST", "/api/tickets/PAY-1/review", "", 200, `"reviewState":"pending"`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"canPreview":true`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"securityState":"none"`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"canCheckSecurity":true`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"issues":[{"advice":"Use $1.","feedback":"Security (high): SQL injection at repo.go:50. Use $1.","file":"repo.go","line":50,"severity":"high","title":"SQL injection"}]`},
+		{"GET", "/api/tickets/PAY-1", "", 200, `"tools":[{"hits":1,"seconds":0,"status":"ok","tool":"opengrep"}]`},
+		{"POST", "/api/tickets/PAY-1/security", "", 200, `"securityState":"pending"`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"shots":[{"height":844,"id":"home-phone-after","name":"Home","route":"/","side":"after","url":"/tickets/PAY-1/preview/42/shots/home-phone-after","viewport":"phone","width":390}]`},
 		{"GET", "/api/tickets/PAY-1", "", 200, `"issues":[{"description":"button overlaps","severity":"medium","shotId":"home-phone-after"}]`},
 		{"POST", "/api/tickets/PAY-1/preview", "", 200, `"previewState":"pending"`},
