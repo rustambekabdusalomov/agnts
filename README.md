@@ -8,7 +8,7 @@ your logs, scans your repositories for security holes, reviews pull requests,
 writes up your meetings and answers your team's questions in chat. Nothing is
 pushed without a person's approval.
 
-> **Meta AI developer hackathon, Startup track.** agnts drives Muse Code
+> **Meta AI developer hackathon, Indie Developer track.** agnts drives Muse Code
 > through **[agnts-muse](https://github.com/rustambekabdusalomov/agnts-muse)**,
 > our open-source Go module (MIT) that runs Muse under a hard, live-enforced
 > budget over Muse's session protocol (MSP): per-call metering, mid-turn
