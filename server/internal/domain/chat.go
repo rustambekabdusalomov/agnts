@@ -197,6 +197,14 @@ type ChatRef struct {
 func (r ChatRef) Key() string { return r.Type + ":" + r.ID }
 
 // ChatSend is a person's new message.
+// ChatSearchHit is a message a team chat search found, with its channel's
+// name and the part of it that matched (SearchSnippet's marks).
+type ChatSearchHit struct {
+	Message ChatMessage `json:"message"`
+	Channel string      `json:"channel"`
+	Snippet string      `json:"snippet"`
+}
+
 type ChatSend struct {
 	ChannelID   int64
 	ClientMsgID string

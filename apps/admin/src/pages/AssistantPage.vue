@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, transcribeQuestion, unwrap } from '../api/client'
@@ -58,10 +58,24 @@ const thinking = (m: AssistantMessage) => Math.max(0, Math.round((now.value - ne
 // conversation or asking goes to the bottom.
 const scroller = ref<HTMLElement | null>(null)
 const bottom = useStickToBottom(scroller)
+// Opened from a search hit (?msg=): show that message, highlighted, not the bottom.
+const target = computed(() => Number(route.query.msg) || 0)
+const highlight = ref(0)
+let hlTimer: ReturnType<typeof setTimeout> | undefined
+watch([() => messages.value.length, target], async ([, want]) => {
+  if (!want || !messages.value.some((m) => m.id === want)) return
+  await nextTick()
+  document.getElementById(`as-msg-${want}`)?.scrollIntoView({ block: 'center' })
+  highlight.value = want
+  clearTimeout(hlTimer)
+  hlTimer = setTimeout(() => (highlight.value = 0), 2200)
+  void router.replace({ query: {} })
+}, { flush: 'post' })
+onBeforeUnmount(() => clearTimeout(hlTimer))
 let stickNext = true
 watch(id, () => (stickNext = true))
 watch(() => [messages.value.length, messages.value.at(-1)?.status, live.get(messages.value.at(-1)?.id ?? 0)?.text], () => {
-  bottom.follow(stickNext)
+  bottom.follow(stickNext && !target.value)
   stickNext = false
 }, { flush: 'pre' })
 
@@ -211,11 +225,11 @@ const suggestions = computed(() => [
         <p v-else-if="conv.isPending.value" class="hint">{{ t('common.loading') }}</p>
         <p v-else-if="conv.isError.value" class="ferr">{{ t('common.error') }}</p>
         <template v-for="m in messages" v-else :key="m.id">
-          <div v-if="m.role === 'user'" class="as-q">
+          <div v-if="m.role === 'user'" :id="`as-msg-${m.id}`" class="as-q" :class="{ hl: highlight === m.id }">
             <template v-if="!m.attachedFiles?.length || m.text !== FILES_ONLY">{{ m.text }}</template>
             <ChatFiles v-if="m.attachedFiles?.length" :files="m.attachedFiles" />
           </div>
-          <div v-else class="as-a" :class="{ failed: m.status === 'failed' }">
+          <div v-else :id="`as-msg-${m.id}`" class="as-a" :class="{ failed: m.status === 'failed', hl: highlight === m.id }">
             <template v-if="isOpen(m)">
               <div class="as-think"><span class="as-spin" />{{ t('massistant.thinking', { seconds: thinking(m) }) }}</div>
               <p v-if="live.get(m.id)?.file && !live.get(m.id)?.text" class="hint">{{ t('massistant.reading', { what: fileLabel(t, live.get(m.id)!.file!) }) }}</p>
@@ -334,6 +348,7 @@ const suggestions = computed(() => [
 .as-big { width: 40px; height: 40px; color: var(--primary); }
 .as-suggest { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px; }
 .as-q { align-self: flex-end; max-width: 75%; padding: 10px 14px; border-radius: 16px; background: var(--primary-soft); color: var(--primary-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.as-q.hl, .as-a.hl { outline: 2px solid var(--primary); outline-offset: 3px; transition: outline-color 0.3s; }
 .as-a { align-self: flex-start; max-width: 85%; padding: 12px 16px 8px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
 .as-a.failed b { color: var(--bad-ink); }
 .as-err { margin: 4px 0 8px; color: var(--ink-2); }

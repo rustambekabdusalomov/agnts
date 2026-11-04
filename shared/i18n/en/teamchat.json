@@ -93,6 +93,11 @@
     "voiceMessage": "Voice message, {time}",
     "voiceListening": "Muse is listening…",
     "voiceNoWords": "No words were heard in this voice message.",
-    "voiceFailed": "Could not transcribe it: {error}"
+    "voiceFailed": "Could not transcribe it: {error}",
+    "search": "Search messages",
+    "searchNone": "Nothing found for “{q}”",
+    "searchShort": "Type at least 2 letters",
+    "searchClose": "Close search",
+    "searchCount": "{n} found · newest first"
   }
 }

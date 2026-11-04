@@ -169,3 +169,37 @@ func TestAssistantKeepsTheNewestFiles(t *testing.T) {
 		t.Fatalf("files.json does not say the oldest is left out: %s", fj)
 	}
 }
+
+func TestSearchAssistant(t *testing.T) {
+	a := newAssistantHarness(t)
+	plan, err := a.o.Upload(a.ask, "Implementation plan.md", []byte("# plan"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.answers(2, `{"answer":"It covers the rollout of the gateway.","speech":"","links":[]}`)
+	c, err := a.o.Ask(a.ask, 0, "review this", "en", []int64{plan.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.conversation(c.ID)
+	// Someone else's conversation is never searched.
+	a.answers(4, `{"answer":"ok","speech":"","links":[]}`)
+	theirs, err := a.o.Ask(a.other, 0, "my rollout plan", "en", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.o.WaitAnswers()
+
+	hits, err := a.o.SearchAssistant(a.ask, "rollout")
+	if err != nil || len(hits) != 1 || hits[0].MessageID != 2 || hits[0].Role != domain.AssistantReply || hits[0].ConversationID != c.ID ||
+		!strings.Contains(hits[0].Snippet, domain.SearchMarkStart+"rollout"+domain.SearchMarkEnd) {
+		t.Fatalf("rollout: %v %+v (theirs is %d)", err, hits, theirs.ID)
+	}
+	// A file's name counts; every word must match.
+	if hits, _ := a.o.SearchAssistant(a.ask, "implementation plan"); len(hits) != 1 || hits[0].MessageID != 1 || !strings.Contains(hits[0].Snippet, "📎") {
+		t.Fatalf("by a file's name: %+v", hits)
+	}
+	if hits, _ := a.o.SearchAssistant(a.ask, "rollout nothing"); len(hits) != 0 {
+		t.Fatalf("every word: %+v", hits)
+	}
+}

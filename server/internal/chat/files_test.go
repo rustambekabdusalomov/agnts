@@ -203,3 +203,53 @@ func TestAnswerReadsEarlierFiles(t *testing.T) {
 		t.Fatalf("the reply's prompt lacks the chain's file:\n%s", p)
 	}
 }
+
+func TestSearch(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	ch := cs[0].ID
+	other, err := h.s.CreateChannel(h.ctx, "#payments", "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	csv := h.upload(t, h.ann, "invoice_march.csv", "text/csv", "a,b")
+	withFile, _, err := h.sendFiles(ch, "numbers for the board", csv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	export := h.send(t, ch, "The CSV export times out for big merchants")
+	ru := h.send(t, other.ID, "Отчёт за март готов")
+
+	ids := func(hits []domain.ChatSearchHit) []int64 {
+		var out []int64
+		for _, x := range hits {
+			out = append(out, x.Message.ID)
+		}
+		return out
+	}
+	// A word's start matches; every word must; a file's name counts.
+	hits, err := h.s.Search(h.ctx, "expo", 0)
+	if err != nil || fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{export.ID}) || !strings.Contains(hits[0].Snippet, domain.SearchMarkStart+"expo") {
+		t.Fatalf("expo: %v %+v", err, hits)
+	}
+	if hits, _ := h.s.Search(h.ctx, "csv merchants", 0); fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{export.ID}) {
+		t.Fatalf("csv merchants: %v", ids(hits))
+	}
+	hits, _ = h.s.Search(h.ctx, "march", 0)
+	if fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{withFile.ID}) || !strings.Contains(hits[0].Snippet, "📎 invoice_"+domain.SearchMarkStart+"march") || len(hits[0].Message.Files) != 1 {
+		t.Fatalf("by a file's name: %+v", hits)
+	}
+	// Any script; newest first; one channel only.
+	if hits, _ := h.s.Search(h.ctx, "март", 0); fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{ru.ID}) || hits[0].Channel != "payments" {
+		t.Fatalf("cyrillic: %+v", hits)
+	}
+	if hits, _ := h.s.Search(h.ctx, "csv", 0); fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{export.ID, withFile.ID}) {
+		t.Fatalf("newest first: %v", ids(hits))
+	}
+	if hits, _ := h.s.Search(h.ctx, "csv", other.ID); len(hits) != 0 {
+		t.Fatalf("another channel's: %v", ids(hits))
+	}
+	if _, err := h.s.Search(h.ctx, "a !", 0); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("no words: %v", err)
+	}
+}

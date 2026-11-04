@@ -93,6 +93,11 @@
     "voiceMessage": "Ovozli xabar, {time}",
     "voiceListening": "Muse tinglamoqda…",
     "voiceNoWords": "Bu ovozli xabarda so'z eshitilmadi.",
-    "voiceFailed": "Matnga aylantirib bo'lmadi: {error}"
+    "voiceFailed": "Matnga aylantirib bo'lmadi: {error}",
+    "search": "Xabarlarni qidirish",
+    "searchNone": "“{q}” boʻyicha hech narsa topilmadi",
+    "searchShort": "Kamida 2 ta harf yozing",
+    "searchClose": "Qidiruvni yopish",
+    "searchCount": "{n} ta topildi · avval yangilari"
   }
 }

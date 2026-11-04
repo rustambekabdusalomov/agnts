@@ -160,7 +160,7 @@ func linkMessageFiles(ctx context.Context, tx pgx.Tx, ids []int64, col string, m
 		return fmt.Errorf("attachments already used or gone: %w", domain.ErrConflict)
 	}
 	if col == "chat_message_id" {
-		_, err = tx.Exec(ctx, `UPDATE chat_messages SET file_names = (SELECT string_agg(replace(name, '_', ' '), ' ' ORDER BY id)
+		_, err = tx.Exec(ctx, `UPDATE chat_messages SET file_names = (SELECT string_agg(translate(name, '_.-', '   '), ' ' ORDER BY id)
 			FROM attachments WHERE chat_message_id = $1) WHERE id = $1`, msg)
 	}
 	return err

@@ -91,6 +91,10 @@
     "voiceHearing": "Muse savolingizni tinglamoqda…",
     "voiceLimit": "{n} daqiqagacha",
     "voiceDenied": "Ovoz bilan soʻrash uchun bu saytga mikrofonga ruxsat bering.",
-    "voiceNoMic": "Mikrofonni ochib boʻlmadi."
+    "voiceNoMic": "Mikrofonni ochib boʻlmadi.",
+    "search": "Suhbatlaringizdan qidirish",
+    "searchNone": "“{q}” boʻyicha hech narsa topilmadi",
+    "you": "Siz",
+    "answer": "Javob"
   }
 }

@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+
 	"agnts/internal/domain"
 )
 
@@ -150,6 +152,49 @@ func (s *Chat) SearchMessages(ctx context.Context, question string, limit int) (
 	}
 	return out, withRefs(ctx, nil, s.db, out)
 }
+
+// Search finds the messages (people's and agnts's text, file names too)
+// holding every word of words as a word's start, newest first, in channel
+// (0: every channel), with their channel's name.
+func (s *Chat) Search(ctx context.Context, words []string, channel int64, limit int) ([]domain.ChatMessage, []string, error) {
+	if len(words) == 0 {
+		return nil, nil, nil
+	}
+	terms := make([]string, len(words))
+	for i, w := range words {
+		terms[i] = w + ":*" // SearchWords keeps letters and digits only
+	}
+	rows, err := s.db.Query(ctx, `SELECT `+chatMsgCols+`, c.name FROM `+chatMsgFrom+`
+		JOIN chat_channels c ON c.id = m.channel_id, to_tsquery('simple', $1) q
+		WHERE m.search @@ q AND m.kind IN ('text', 'agent_text') AND ($2 = 0 OR m.channel_id = $2)
+		ORDER BY m.id DESC LIMIT $3`, strings.Join(terms, " & "), channel, limit)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+	var ms []domain.ChatMessage
+	var names []string
+	for rows.Next() {
+		var name string
+		m, err := scanMessage(scanWith{rows, &name})
+		if err != nil {
+			return nil, nil, err
+		}
+		ms, names = append(ms, m), append(names, name)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, nil, err
+	}
+	return ms, names, withRefs(ctx, nil, s.db, ms)
+}
+
+// scanWith scans a row's columns into scanMessage's and then extra.
+type scanWith struct {
+	row   pgx.Row
+	extra any
+}
+
+func (s scanWith) Scan(dest ...any) error { return s.row.Scan(append(dest, s.extra)...) }
 
 // searchQuery turns a question into an OR query of its words of three
 // letters or more (a question rarely repeats a message word for word).

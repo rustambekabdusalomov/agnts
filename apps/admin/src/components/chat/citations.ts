@@ -59,3 +59,42 @@ export function splitPr(id: string): { repo: string; number: number } | null {
 export function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
 }
+
+/** @agnts as the server hears it (domain.MentionsAgent): not inside a word or after another @. */
+const AGENT_MENTION = /(^|[^\w@])(@agnts)\b/gi
+
+/**
+ * Marks each @agnts in sanitised HTML with <span class="mention-agnts">, in
+ * text only: never inside code, pre or links, and never in tags or
+ * attributes (it walks the parsed text nodes).
+ */
+export function markAgentMentions(html: string): string {
+  if (!/@agnts/i.test(html)) return html
+  const box = document.createElement('template')
+  box.innerHTML = html
+  const walker = document.createTreeWalker(box.content, NodeFilter.SHOW_TEXT)
+  const texts: Text[] = []
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (!(n.parentElement?.closest('code, pre, a') ?? null)) texts.push(n as Text)
+  }
+  for (const node of texts) {
+    const text = node.data
+    AGENT_MENTION.lastIndex = 0
+    if (!AGENT_MENTION.test(text)) continue
+    AGENT_MENTION.lastIndex = 0
+    const frag = document.createDocumentFragment()
+    let at = 0
+    for (const m of text.matchAll(AGENT_MENTION)) {
+      const start = (m.index ?? 0) + m[1].length
+      frag.append(text.slice(at, start))
+      const span = document.createElement('span')
+      span.className = 'mention-agnts'
+      span.textContent = m[2]
+      frag.append(span)
+      at = start + m[2].length
+    }
+    frag.append(text.slice(at))
+    node.replaceWith(frag)
+  }
+  return box.innerHTML
+}

@@ -5485,6 +5485,31 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /assistant/search:
+    get:
+      operationId: searchAssistant
+      summary: Find messages in your own AI chat conversations (both modes), newest first
+      description: >-
+        Every word of q must be in the message's text or its files' names.
+        Only your own conversations are searched. At most 40 hits.
+      tags: [assistant]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AssistantSearchHit' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
   /assistant/conversations:
     get:
       operationId: listAssistantConversations
@@ -7849,6 +7874,35 @@ paths:
               schema: { $ref: '#/components/schemas/ChatStats' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /chat/search:
+    get:
+      operationId: searchChat
+      summary: Find team chat messages by their words or their files' names, newest first
+      description: >-
+        Every word of q must start a word of the message (its text, or a
+        file's name). People's messages and agnts's answers; cards are left
+        out. At most 40 hits.
+      tags: [chat]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 200 }
+        - name: channelId
+          in: query
+          description: Only this channel's messages
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ChatSearchHit' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
 components:
   parameters:
     ChatChannelID:
@@ -8202,6 +8256,24 @@ components:
         durationMs: { type: integer, format: int64 }
         transcript: { type: string, enum: [pending, done, none, failed], description: 'none: no words were heard' }
         error: { type: string }
+    ChatSearchHit:
+      type: object
+      required: [message, channel, snippet]
+      properties:
+        message: { $ref: '#/components/schemas/ChatMessage' }
+        channel: { type: string, description: "The channel's name" }
+        snippet: { type: string, description: 'The part that matched; matched words are between \u0002 and \u0003' }
+    AssistantSearchHit:
+      type: object
+      required: [conversationId, title, mode, messageId, role, snippet, createdAt]
+      properties:
+        conversationId: { type: integer, format: int64 }
+        title: { type: string }
+        mode: { $ref: '#/components/schemas/ChatMode' }
+        messageId: { type: integer, format: int64 }
+        role: { type: string, enum: [user, assistant] }
+        snippet: { type: string, description: 'The part that matched; matched words are between \u0002 and \u0003' }
+        createdAt: { type: string, format: date-time }
     ChatSendRequest:
       type: object
       required: [clientMsgId]

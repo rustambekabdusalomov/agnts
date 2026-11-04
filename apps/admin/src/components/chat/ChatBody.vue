@@ -5,7 +5,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 import type { ChatRef } from './chat'
-import { escapeHtml, replaceCitations, type Citation } from './citations'
+import { escapeHtml, markAgentMentions, replaceCitations, type Citation } from './citations'
 import { useChatLinks } from './useChatLinks'
 
 // Markdown, sanitised (anyone's text, or a model's). With cite, each
@@ -46,7 +46,9 @@ function chip(c: Citation): string {
 
 const html = computed(() => {
   const src = props.cite ? replaceCitations(props.body, chip) : props.body
-  return DOMPurify.sanitize(marked.parse(src, { async: false, gfm: true, breaks: !props.assistant }))
+  const clean = DOMPurify.sanitize(marked.parse(src, { async: false, gfm: true, breaks: !props.assistant }))
+  // In the team chat, @agnts stands out: it is what calls agnts.
+  return props.assistant ? clean : markAgentMentions(clean)
 })
 
 function onClick(e: MouseEvent) {
@@ -82,6 +84,7 @@ function onClick(e: MouseEvent) {
 
 <style scoped>
 .chat-md { overflow-wrap: anywhere; }
+.chat-md :deep(.mention-agnts) { color: var(--primary-ink); font-weight: 600; }
 .chat-md :deep(p) { margin: 0 0 6px; }
 .chat-md :deep(p:last-child) { margin-bottom: 0; }
 .cited :deep(.cite) { display: inline-block; padding: 0 8px; margin: 0 1px; border-radius: 999px; background: var(--primary-soft); color: var(--primary-ink); font-size: 12.5px; font-weight: 700; line-height: 1.6; text-decoration: none; vertical-align: baseline; }

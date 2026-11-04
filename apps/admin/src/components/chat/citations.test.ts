@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { citationsOf, parseCitations, replaceCitations, splitPr } from './citations'
+import { citationsOf, markAgentMentions, parseCitations, replaceCitations, splitPr } from './citations'
 
 describe('parseCitations', () => {
   it('splits text and every kind of token in order', () => {
@@ -48,5 +48,17 @@ describe('splitPr', () => {
     expect(splitPr('my-repo#14')).toEqual({ repo: 'my-repo', number: 14 })
     expect(splitPr('a#b#7')).toEqual({ repo: 'a#b', number: 7 })
     expect(splitPr('14')).toBeNull()
+  })
+})
+
+describe('markAgentMentions', () => {
+  it('colours @agnts in text only', () => {
+    const out = markAgentMentions('<p>hey @agnts, ask @Agnts! mail a@agnts.uz <code>@agnts</code> <a href="/x">@agnts</a> @agntsy</p>')
+    expect(out).toBe(
+      '<p>hey <span class="mention-agnts">@agnts</span>, ask <span class="mention-agnts">@Agnts</span>! mail a@agnts.uz <code>@agnts</code> <a href="/x">@agnts</a> @agntsy</p>',
+    )
+  })
+  it('leaves text without it alone', () => {
+    expect(markAgentMentions('<p>plain &amp; simple</p>')).toBe('<p>plain &amp; simple</p>')
   })
 })

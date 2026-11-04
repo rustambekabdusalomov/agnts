@@ -93,6 +93,11 @@
     "voiceMessage": "Голосовое сообщение, {time}",
     "voiceListening": "Muse слушает…",
     "voiceNoWords": "В этом голосовом сообщении не слышно слов.",
-    "voiceFailed": "Не удалось распознать: {error}"
+    "voiceFailed": "Не удалось распознать: {error}",
+    "search": "Поиск сообщений",
+    "searchNone": "По запросу «{q}» ничего не найдено",
+    "searchShort": "Введите хотя бы 2 буквы",
+    "searchClose": "Закрыть поиск",
+    "searchCount": "Найдено: {n} · сначала новые"
   }
 }

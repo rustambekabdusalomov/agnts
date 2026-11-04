@@ -36,6 +36,7 @@ type Store interface {
 	Messages(ctx context.Context, channel, before, after int64, limit int) ([]domain.ChatMessage, error)
 	Message(ctx context.Context, id int64) (domain.ChatMessage, error)
 	MessagesByID(ctx context.Context, ids []int64) ([]domain.ChatMessage, error)
+	Search(ctx context.Context, words []string, channel int64, limit int) ([]domain.ChatMessage, []string, error)
 	Send(ctx context.Context, user int64, in domain.ChatSend, jobs []string) (domain.ChatMessage, bool, error)
 	CopyFilesToTicket(ctx context.Context, msg int64, key string) (int64, error)
 	FileData(ctx context.Context, id int64) ([]byte, error)
@@ -285,6 +286,29 @@ func (s *Service) Send(ctx context.Context, in domain.ChatSend) (domain.ChatMess
 		s.Wake()
 	}
 	return m, created, err
+}
+
+// Search finds the messages holding every word of q (as a word's start, in
+// their text or their files' names), newest first, in channel (0: all of
+// them), each with the part that matched.
+func (s *Service) Search(ctx context.Context, q string, channel int64) ([]domain.ChatSearchHit, error) {
+	words := domain.SearchWords(q)
+	if len(words) == 0 {
+		return nil, invalid("search for a word of %d letters or more", domain.SearchMinRunes)
+	}
+	ms, names, err := s.Store.Search(ctx, words, channel, domain.SearchLimit)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.ChatSearchHit, len(ms))
+	for i, m := range ms {
+		text := m.Body
+		if len(m.Files) > 0 {
+			text = strings.TrimSpace(text + " 📎 " + fileNames(m.Files))
+		}
+		out[i] = domain.ChatSearchHit{Message: m, Channel: names[i], Snippet: domain.SearchSnippet(text, words, 160)}
+	}
+	return out, nil
 }
 
 // Message returns one message with its refs.

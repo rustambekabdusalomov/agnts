@@ -90,6 +90,7 @@ type AssistantStore interface {
 	AssistantAsked(ctx context.Context, userID int64, since time.Time) (int, time.Time, error)
 	AssistantStats(ctx context.Context, days int) (domain.AssistantStats, error)
 	AssistantRated(ctx context.Context, rating, limit int) ([]domain.AssistantRated, error)
+	SearchAssistant(ctx context.Context, userID int64, words []string, limit int) ([]domain.AssistantSearchHit, error)
 }
 
 // AssistantQuestion is what a snapshot is taken for.
@@ -268,6 +269,28 @@ func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, 
 
 // WaitAnswers waits for the answers being made (tests and shutdown).
 func (o *Orchestrator) WaitAnswers() { o.answering.Wait() }
+
+// SearchAssistant finds the asker's AI chat messages holding every word of
+// q (their text or their files' names), newest first, each with the part
+// that matched. Only the asker's own conversations are searched.
+func (o *Orchestrator) SearchAssistant(ctx context.Context, q string) ([]domain.AssistantSearchHit, error) {
+	if !o.AssistantReady() {
+		return nil, invalid("the assistant is not available")
+	}
+	_, user, err := asker(ctx)
+	if err != nil {
+		return nil, err
+	}
+	words := domain.SearchWords(q)
+	if len(words) == 0 {
+		return nil, invalid("search for a word of %d letters or more", domain.SearchMinRunes)
+	}
+	hits, err := o.assistant.SearchAssistant(ctx, user, words, domain.SearchLimit)
+	for i := range hits {
+		hits[i].Snippet = domain.SearchSnippet(hits[i].Text, words, 160)
+	}
+	return hits, err
+}
 
 // AssistantConversations lists the asker's conversations of mode ("" for
 // both), newest first.

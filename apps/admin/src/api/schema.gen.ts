@@ -4430,6 +4430,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assistant/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find messages in your own AI chat conversations (both modes), newest first
+         * @description Every word of q must be in the message's text or its files' names. Only your own conversations are searched. At most 40 hits.
+         */
+        get: operations["searchAssistant"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assistant/conversations": {
         parameters: {
             query?: never;
@@ -6239,6 +6259,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/chat/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find team chat messages by their words or their files' names, newest first
+         * @description Every word of q must start a word of the message (its text, or a file's name). People's messages and agnts's answers; cards are left out. At most 40 hits.
+         */
+        get: operations["searchChat"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6396,6 +6436,27 @@ export interface components {
              */
             transcript: "pending" | "done" | "none" | "failed";
             error?: string;
+        };
+        ChatSearchHit: {
+            message: components["schemas"]["ChatMessage"];
+            /** @description The channel's name */
+            channel: string;
+            /** @description The part that matched; matched words are between \u0002 and \u0003 */
+            snippet: string;
+        };
+        AssistantSearchHit: {
+            /** Format: int64 */
+            conversationId: number;
+            title: string;
+            mode: components["schemas"]["ChatMode"];
+            /** Format: int64 */
+            messageId: number;
+            /** @enum {string} */
+            role: "user" | "assistant";
+            /** @description The part that matched; matched words are between \u0002 and \u0003 */
+            snippet: string;
+            /** Format: date-time */
+            createdAt: string;
         };
         ChatSendRequest: {
             /**
@@ -18719,6 +18780,31 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    searchAssistant: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantSearchHit"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
     listAssistantConversations: {
         parameters: {
             query?: {
@@ -21805,6 +21891,32 @@ export interface operations {
                     "application/json": components["schemas"]["ChatStats"];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    searchChat: {
+        parameters: {
+            query: {
+                q: string;
+                /** @description Only this channel's messages */
+                channelId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatSearchHit"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
         };
     };

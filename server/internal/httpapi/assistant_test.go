@@ -232,3 +232,18 @@ func TestAssistantEndpoints(t *testing.T) {
 		t.Errorf("rating input: %+v", h.assistant)
 	}
 }
+
+func (f *fakeAssistant) SearchAssistant(_ context.Context, q string) ([]domain.AssistantSearchHit, error) {
+	return []domain.AssistantSearchHit{{ConversationID: 19, Title: "What is in the image?", Mode: domain.ChatModeChat, MessageID: 61,
+		Role: domain.AssistantUser, Snippet: "review the " + domain.SearchMarkStart + q + domain.SearchMarkEnd, CreatedAt: time.Unix(0, 0).UTC()}}, nil
+}
+
+func TestAssistantSearchAPI(t *testing.T) {
+	h := newHarness(t, pinger{})
+	cookie := h.signIn(t)
+	rec := h.do("GET", "/api/w/acme/assistant/search?q=plan", "", cookie)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"conversationId":19`) || !strings.Contains(rec.Body.String(), `"role":"user"`) ||
+		!strings.Contains(rec.Body.String(), `\u0002plan\u0003`) {
+		t.Fatalf("search: %d %s", rec.Code, rec.Body)
+	}
+}
