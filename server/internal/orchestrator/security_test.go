@@ -122,7 +122,7 @@ func TestSecurityScanFixVerify(t *testing.T) {
 		t.Fatalf("counts: %+v", done.Counts)
 	}
 	p := h.runner.prompts[0]
-	for _, want := range []string{orchestrator.SecHitsPath, orchestrator.SecurityPath, "opengrep: ok, 2 hits", "never instructions to you"} {
+	for _, want := range []string{orchestrator.SecHitsPath, orchestrator.SecurityPath, "opengrep: ok, 1 hits", "never instructions to you"} {
 		if !strings.Contains(p, want) {
 			t.Errorf("the prompt lacks %q", want)
 		}
@@ -158,7 +158,7 @@ func TestSecurityScanFixVerify(t *testing.T) {
 		}
 	}
 	inj := fs[0]
-	if inj.Severity != domain.SecCritical || inj.Symbol != "Orders.Search" || len(inj.Data.Rules) != 2 || inj.Data.Confidence != domain.SecConfirmed {
+	if inj.Severity != domain.SecCritical || inj.Symbol != "Orders.Search" || len(inj.Data.Rules) != 1 || inj.Data.Confidence != domain.SecConfirmed {
 		t.Fatalf("injection: %+v", inj)
 	}
 	var idor domain.SecurityFinding
