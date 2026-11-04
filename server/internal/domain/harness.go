@@ -80,6 +80,9 @@ type RepoHarness struct {
 	// AgentConfig is what agnts found in the repository's agent
 	// instructions and configuration; agnts sets it, people read it.
 	AgentConfig *AgentConfigScan `json:"agentConfig,omitempty"`
+	// Security is the repository's security testing settings; saved on
+	// their own (SetSecuritySettings), kept when the rest is saved.
+	Security SecuritySettings `json:"security,omitzero"`
 }
 
 // EditCheck is a quick check of one edited file (see guard.EditCheck).

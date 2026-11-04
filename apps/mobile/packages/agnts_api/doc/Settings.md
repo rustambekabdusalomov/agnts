@@ -32,6 +32,7 @@ Name | Type | Description | Notes
 **prComments** | [**PRCommentSettings**](PRCommentSettings.md) |  | [optional] 
 **ci** | [**CISettings**](CISettings.md) |  | [optional] 
 **logWatch** | [**LogWatchSettings**](LogWatchSettings.md) |  | [optional] 
+**security** | [**SecurityWorkspaceSettings**](SecurityWorkspaceSettings.md) |  | [optional] 
 **guard** | [**GuardSettings**](GuardSettings.md) |  | [optional] 
 **stalls** | **String** | What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) | [optional] 
 **proveFixes** | **bool** | Bug fixes need a test that fails before the change and passes after it; agnts checks it | [optional] 

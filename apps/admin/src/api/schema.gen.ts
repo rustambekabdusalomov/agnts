@@ -4413,6 +4413,191 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/security/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open security findings by repository and severity, with each repository's last scan */
+        get: operations["getSecuritySummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/security/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** A repository's security scans, newest first */
+        get: operations["listSecurityScans"];
+        put?: never;
+        /** Scan the repository's default branch (a scan already queued or running is returned instead) */
+        post: operations["startSecurityScan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repos/{id}/security/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        /** A repository's security settings: schedule, exclusions, lowest severity that notifies */
+        get: operations["getSecuritySettings"];
+        /** Save a repository's security settings and schedule its next scan */
+        put: operations["setSecuritySettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/scans/{scanId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scanId: components["parameters"]["SecurityScanID"];
+            };
+            cookie?: never;
+        };
+        /** One scan, with what ran and the hits the agent rejected */
+        get: operations["getSecurityScan"];
+        put?: never;
+        post?: never;
+        /** Cancel a queued or running scan (a running one saves nothing) */
+        delete: operations["cancelSecurityScan"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Security findings, worst first */
+        get: operations["listSecurityFindings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/findings/{findingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["SecurityFindingID"];
+            };
+            cookie?: never;
+        };
+        /** One finding */
+        get: operations["getSecurityFinding"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/findings/{findingId}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["SecurityFindingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open a dismissed or fixed finding again */
+        post: operations["reopenSecurityFinding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss findings with a reason; they stay dismissed while their fingerprint matches */
+        post: operations["dismissSecurityFindings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/fix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open one ticket that fixes findings of one repository (Fix this, Fix together) */
+        post: operations["fixSecurityFindings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/security-findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        /** The security findings a fix ticket works on */
+        get: operations["getTicketSecurityFindings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tickets/{key}/log-finding": {
         parameters: {
             query?: never;
@@ -7260,7 +7445,7 @@ export interface components {
             state: components["schemas"]["TicketState"];
             kind: components["schemas"]["TicketKind"];
             /** @enum {string} */
-            source: "jira" | "plane" | "local" | "git" | "ci" | "logs";
+            source: "jira" | "plane" | "local" | "git" | "ci" | "logs" | "security";
             held?: boolean;
         };
         FollowUps: {
@@ -7625,7 +7810,7 @@ export interface components {
             /** @description The team's number for the work (AMANAT-2288), used in branch and commit names; absent uses key */
             ticketNumber?: string;
             /** @enum {string} */
-            source: "jira" | "plane" | "local" | "git" | "ci" | "logs";
+            source: "jira" | "plane" | "local" | "git" | "ci" | "logs" | "security";
             /**
              * Format: int64
              * @description The primary repository; repos lists all of them
@@ -8224,6 +8409,7 @@ export interface components {
             chat?: components["schemas"]["Model"];
             documents?: components["schemas"]["Model"];
             teamChat?: components["schemas"]["Model"];
+            security?: components["schemas"]["Model"];
         };
         TicketRepo: {
             /** Format: int64 */
@@ -8720,6 +8906,7 @@ export interface components {
             prComments?: components["schemas"]["PRCommentSettings"];
             ci?: components["schemas"]["CISettings"];
             logWatch?: components["schemas"]["LogWatchSettings"];
+            security?: components["schemas"]["SecurityWorkspaceSettings"];
             guard?: components["schemas"]["GuardSettings"];
             /** @description What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) */
             stalls?: string;
@@ -9571,6 +9758,8 @@ export interface components {
             ci?: boolean;
             /** @description The log watcher found something, or a log source stopped */
             logs?: boolean;
+            /** @description A security scan found something new or reopened, or failed */
+            security?: boolean;
         };
         Repository: {
             /** Format: int64 */
@@ -11582,6 +11771,160 @@ export interface components {
             /** @description Start or stop taking notes */
             notes?: boolean;
         };
+        /** @enum {string} */
+        SecSeverity: "critical" | "high" | "medium" | "low" | "info";
+        /** @enum {string} */
+        SecFindingStatus: "open" | "fixing" | "verifying" | "fixed" | "dismissed" | "reopened";
+        /** @description Findings by severity */
+        SecSeverityCounts: {
+            critical: number;
+            high: number;
+            medium: number;
+            low: number;
+            info: number;
+        };
+        SecToolRun: {
+            /** @description opengrep, gitleaks, osv or trivy */
+            tool: string;
+            /** @enum {string} */
+            status: "ok" | "failed" | "timeout" | "skipped";
+            seconds: number;
+            hits: number;
+            error?: string;
+        };
+        SecRejectedHit: {
+            hit: string;
+            tool?: string;
+            rule?: string;
+            file?: string;
+            line?: number;
+            reason: string;
+        };
+        SecurityScan: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            repoId: number;
+            repo: string;
+            /** @enum {string} */
+            trigger: "manual" | "schedule" | "verify";
+            /** @enum {string} */
+            status: "pending" | "running" | "done" | "failed" | "cancelled";
+            commit: string;
+            /** @description A verify scan: the findings it checks */
+            findingIds?: number[];
+            fullHistory?: boolean;
+            /** @description What actually ran */
+            tools: components["schemas"]["SecToolRun"][];
+            /** @description done, limit (stopped at its turn or time limit), failed, skipped, or empty when it has not run */
+            agent: string;
+            /** @description Commits the secret scan read */
+            history: number;
+            /** @description Commits the checkout had */
+            commits: number;
+            dbVersions?: {
+                [key: string]: string;
+            };
+            new: number;
+            seen: number;
+            fixed: number;
+            reopened: number;
+            /** @description Active findings this scan could not recheck */
+            unchecked: number;
+            rejectedCount: number;
+            rejected?: components["schemas"]["SecRejectedHit"][];
+            open: components["schemas"]["SecSeverityCounts"];
+            summary: string;
+            error: string;
+            /** @description The agent's module (claude, muse) */
+            provider: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+        };
+        SecurityFinding: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            repoId: number;
+            repo: string;
+            severity: components["schemas"]["SecSeverity"];
+            category: string;
+            /** @enum {string} */
+            source: "code" | "config" | "dependency" | "secret" | "history" | "agent" | "logs";
+            /** @description The enclosing function */
+            symbol?: string;
+            status: components["schemas"]["SecFindingStatus"];
+            title: string;
+            cwe?: string;
+            owasp?: string;
+            location: {
+                file?: string;
+                line?: number;
+                url?: string;
+            };
+            tool?: string;
+            rules: string[];
+            /** @enum {string} */
+            confidence: "confirmed" | "likely" | "possible";
+            evidence?: string;
+            impact?: string;
+            fixExplanation?: string;
+            fixPatch?: string;
+            references: string[];
+            package?: string;
+            version?: string;
+            ecosystem?: string;
+            fixedIn?: string;
+            advisories?: string[];
+            cvss?: string;
+            /** @description The secret's first characters; agnts never stores the value */
+            secretMask?: string;
+            commit?: string;
+            /** @description What the last recheck said */
+            note?: string;
+            ticketKey: string;
+            ticketState?: components["schemas"]["TicketState"];
+            dismissReason: string;
+            dismissNote: string;
+            /** Format: date-time */
+            firstSeen: string;
+            /** Format: date-time */
+            lastSeen: string;
+            /** Format: date-time */
+            lastChecked: string;
+        };
+        SecuritySettings: {
+            /**
+             * @description Scan on its own at a quiet hour (03:00 UTC)
+             * @enum {string}
+             */
+            schedule: "off" | "daily" | "weekly";
+            /** @description Path patterns no tool reports on, besides vendor, node_modules, dist, build and *.min.js */
+            exclude: string[];
+            minNotify: components["schemas"]["SecSeverity"];
+            /**
+             * Format: date-time
+             * @description When the next scheduled scan is due
+             */
+            nextAt?: string;
+        };
+        SecurityWorkspaceSettings: {
+            /** @description Check agnts's own changes for security issues while they wait for review (advice, never a gate) */
+            autoCheck: boolean;
+            /** @description Scheduled scans a day that may run the agent; later ones run the scanners only (0: no limit) */
+            dailyBudget: number;
+        };
+        SecurityRepoSummary: {
+            /** Format: int64 */
+            repoId: number;
+            repo: string;
+            open: components["schemas"]["SecSeverityCounts"];
+            lastScan?: components["schemas"]["SecurityScan"];
+        };
     };
     responses: {
         /** @description The PDF is being made; ask again after Retry-After seconds */
@@ -11737,6 +12080,8 @@ export interface components {
         NetworkID: number;
         LogSourceID: number;
         LogFindingID: number;
+        SecurityScanID: number;
+        SecurityFindingID: number;
         CIFailureID: number;
         RepoID: number;
         GroupID: number;
@@ -18808,6 +19153,335 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    getSecuritySummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityRepoSummary"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listSecurityScans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityScan"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    startSecurityScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The scan, and whether this call queued it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        scan: components["schemas"]["SecurityScan"];
+                        queued: boolean;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getSecuritySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecuritySettings"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setSecuritySettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["RepoID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SecuritySettings"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecuritySettings"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getSecurityScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scanId: components["parameters"]["SecurityScanID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityScan"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    cancelSecurityScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scanId: components["parameters"]["SecurityScanID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityScan"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listSecurityFindings: {
+        parameters: {
+            query?: {
+                repoId?: number;
+                status?: components["schemas"]["SecFindingStatus"];
+                severity?: components["schemas"]["SecSeverity"];
+                /** @description Only open, fixing, verifying and reopened findings */
+                active?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityFinding"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getSecurityFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["SecurityFindingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityFinding"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    reopenSecurityFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                findingId: components["parameters"]["SecurityFindingID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityFinding"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    dismissSecurityFindings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    findingIds: number[];
+                    /** @enum {string} */
+                    reason: "false_positive" | "accepted_risk" | "wont_fix";
+                    note?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityFinding"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    fixSecurityFindings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    findingIds: number[];
+                    /** @description Create the ticket without starting it */
+                    hold?: boolean;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["TicketOK"];
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getTicketSecurityFindings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityFinding"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
     getTicketLogFinding: {

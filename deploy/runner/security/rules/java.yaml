@@ -1,0 +1,50 @@
+# agnts security rules for Java and Kotlin (written by agnts).
+rules:
+  - id: agnts.java.sqli.concat-statement
+    languages: [java]
+    severity: ERROR
+    message: >-
+      A SQL statement is built by concatenation. Use a PreparedStatement
+      with ? placeholders.
+    metadata:
+      category: injection
+      cwe: "CWE-89"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern: $S.$M($A + $B, ...)
+      - pattern-not: $S.$M("..." + "...", ...)
+      - metavariable-regex:
+          metavariable: $M
+          regex: ^(executeQuery|executeUpdate|execute|addBatch|createQuery|createNativeQuery)$
+
+  - id: agnts.java.cmdi.runtime-exec
+    languages: [java]
+    severity: ERROR
+    message: >-
+      A command is built from a variable. With user input it runs any
+      command; pass a fixed program and an argument array.
+    metadata:
+      category: injection
+      cwe: "CWE-78"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern: Runtime.getRuntime().exec($X, ...)
+      - pattern-not: Runtime.getRuntime().exec("...", ...)
+
+  - id: agnts.java.crypto.weak-hash
+    languages: [java]
+    severity: INFO
+    message: >-
+      MD5 and SHA-1 are broken for security uses. Use SHA-256, or
+      bcrypt/argon2 for passwords.
+    metadata:
+      category: crypto
+      cwe: "CWE-328"
+      owasp: "A02"
+      confidence: low
+    pattern-either:
+      - pattern: MessageDigest.getInstance("MD5")
+      - pattern: MessageDigest.getInstance("SHA-1")
+      - pattern: MessageDigest.getInstance("SHA1")

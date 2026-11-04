@@ -924,6 +924,7 @@ const _$TicketSource_EnumEnumMap = {
   TicketSource_Enum.git: 'git',
   TicketSource_Enum.ci: 'ci',
   TicketSource_Enum.logs: 'logs',
+  TicketSource_Enum.security: 'security',
 };
 
 const _$TicketStateEnumMap = {

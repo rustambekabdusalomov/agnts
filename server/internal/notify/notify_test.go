@@ -750,3 +750,68 @@ func toJSON(v any) string {
 	b, _ := json.Marshal(v)
 	return string(b)
 }
+
+type fakeSecFixer struct {
+	fixed []int64
+	found []domain.SecurityFinding
+}
+
+func (f *fakeSecFixer) NotableFindings(context.Context, int64) ([]domain.SecurityFinding, error) {
+	return f.found, nil
+}
+
+func (f *fakeSecFixer) FixFinding(_ context.Context, id int64, _ domain.Origin) (domain.Ticket, error) {
+	if id == 99 {
+		return domain.Ticket{}, domain.ErrNotFound // another workspace's finding
+	}
+	f.fixed = append(f.fixed, id)
+	return domain.Ticket{Key: "SEC-3"}, nil
+}
+
+func TestSecurityNotification(t *testing.T) {
+	n, _, _, tg := setup(t)
+	fx := &fakeSecFixer{found: []domain.SecurityFinding{
+		{ID: 7, Severity: domain.SecCritical, Status: domain.SecOpen, Data: domain.SecFindingData{Title: "SQL injection in /orders search", Evidence: "SECRET-EVIDENCE"}},
+		{ID: 8, Severity: domain.SecHigh, Status: domain.SecReopened, TicketKey: "SEC-1", Data: domain.SecFindingData{Title: "lodash 4.17.20"}},
+		{ID: 9, Severity: domain.SecHigh, Status: domain.SecOpen, Data: domain.SecFindingData{Title: "a"}},
+		{ID: 10, Severity: domain.SecHigh, Status: domain.SecOpen, Data: domain.SecFindingData{Title: "b"}},
+	}}
+	n.SetSecurityFixer(fx)
+	ev := domain.Event{WorkspaceID: 1, ID: 1, Type: domain.EventSecurity, Message: "security scan of api done: 3 new · 1 reopened; 5 open",
+		Data: map[string]any{"notify": true, "repo": float64(4), "scan": float64(12), "name": "api"}}
+	n.handle(context.Background(), ev)
+	msgs := tg.sent("sendMessage")
+	if len(msgs) != 1 {
+		t.Fatalf("messages: %v", msgs)
+	}
+	text, markup := msgs[0]["text"].(string), toJSON(msgs[0]["reply_markup"])
+	if !strings.Contains(text, "critical: SQL injection") || !strings.Contains(text, "(back again)") || !strings.Contains(text, "and 1 more") {
+		t.Fatalf("text: %q", text)
+	}
+	if strings.Contains(text, "SECRET-EVIDENCE") {
+		t.Fatal("evidence reached Telegram")
+	}
+	if !strings.Contains(markup, "sec:7") || !strings.Contains(markup, "sec:8") || strings.Contains(markup, "sec:10") {
+		t.Fatalf("buttons: %s", markup)
+	}
+	// Fix it opens a ticket; another workspace's finding is not found.
+	post(n, "sekret", callback(70, "sec:7"))
+	post(n, "sekret", callback(71, "sec:99"))
+	if len(fx.fixed) != 1 || fx.fixed[0] != 7 {
+		t.Fatalf("fixed: %v", fx.fixed)
+	}
+	all := toJSON(tg.sent("sendMessage"))
+	if !strings.Contains(all, "SEC-3 opened") || !strings.Contains(all, "Fix it: ") {
+		t.Fatalf("replies: %s", all)
+	}
+	// Nothing to say, or security notifications off: quiet.
+	before := len(tg.sent("sendMessage"))
+	ev.Data["notify"] = false
+	n.handle(context.Background(), ev)
+	ev.Data["notify"] = true
+	n.settings = fakeSettings{s: func() domain.Settings { s := domain.DefaultSettings(); s.Notify.Security = false; return s }()}
+	n.handle(context.Background(), ev)
+	if len(tg.sent("sendMessage")) != before {
+		t.Fatal("sent without notify or with security notifications off")
+	}
+}

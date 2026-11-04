@@ -39,6 +39,8 @@ class StageModels {
      this.documents,
 
      this.teamChat,
+
+     this.security,
   });
 
       /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers.
@@ -171,6 +173,19 @@ class StageModels {
 
 
 
+      /// muse:<model> for Muse Code (muse:spark, muse:wonder), a Claude model (haiku, sonnet, opus), codex:<model> for Codex CLI, or a tier (tier:light, tier:strong): the light or strong model of the module the run lands on. listModels says which this server offers.
+  @JsonKey(
+    
+    name: r'security',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? security;
+
+
+
 
 
     @override
@@ -184,7 +199,8 @@ class StageModels {
       other.preview == preview &&
       other.chat == chat &&
       other.documents == documents &&
-      other.teamChat == teamChat;
+      other.teamChat == teamChat &&
+      other.security == security;
 
     @override
     int get hashCode =>
@@ -197,7 +213,8 @@ class StageModels {
         preview.hashCode +
         chat.hashCode +
         documents.hashCode +
-        teamChat.hashCode;
+        teamChat.hashCode +
+        security.hashCode;
 
   factory StageModels.fromJson(Map<String, dynamic> json) => _$StageModelsFromJson(json);
 

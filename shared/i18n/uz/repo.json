@@ -93,6 +93,7 @@
     "codeEmpty": "Bu branchda hali fayllar yoʻq.",
     "codeSubmodule": "Submodul",
     "codeSymlink": "Havola",
-    "codeCapped": "Bu papkaning faqat dastlabki {n} ta elementi koʻrsatilgan."
+    "codeCapped": "Bu papkaning faqat dastlabki {n} ta elementi koʻrsatilgan.",
+    "security": "Xavfsizlik"
   }
 }

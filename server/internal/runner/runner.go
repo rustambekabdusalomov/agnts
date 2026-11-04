@@ -31,8 +31,10 @@ const (
 	// business context, precedents, review checklists). The root file
 	// system is read-only, so it needs a volume of its own.
 	contextDir = "/agnts/context"
-	agentUser  = "agent"
-	agentUID   = 1000 // the image's agent user, owner of files agnts writes
+	// secDBDir holds the vulnerability databases (see Config.SecDBVolume).
+	secDBDir  = "/opt/secdb"
+	agentUser = "agent"
+	agentUID  = 1000 // the image's agent user, owner of files agnts writes
 )
 
 // Config sets container limits.
@@ -46,6 +48,9 @@ type Config struct {
 	MaxMemoryMB int64
 	// ToolchainVolume is the shared volume mise installs toolchains into.
 	ToolchainVolume string
+	// SecDBVolume holds the vulnerability databases security scans read
+	// (filled once a day by agnts's updater).
+	SecDBVolume string
 	// Runtime is the OCI runtime for run containers (runsc: gVisor); ""
 	// is Docker's default.
 	Runtime string
@@ -65,7 +70,7 @@ type Config struct {
 
 // DefaultConfig returns limits for a small VPS.
 func DefaultConfig() Config {
-	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024, MaxMemoryMB: 8192, ToolchainVolume: "agnts-toolchains"}
+	return Config{Network: "agnts-runs", MemoryMB: 4096, CPUs: 2, PIDs: 1024, MaxMemoryMB: 8192, ToolchainVolume: "agnts-toolchains", SecDBVolume: "agnts-secdb"}
 }
 
 // Runner implements orchestrator.Runner with Docker.
@@ -202,6 +207,22 @@ func (r *Runner) Open(ctx context.Context, spec orchestrator.WorkspaceSpec) (orc
 	var mounts []Mount
 	if len(spec.Toolchains) > 0 {
 		mounts = append(mounts, Mount{Volume: r.cfg.ToolchainVolume, Target: toolchainDir, ReadOnly: true})
+	}
+	if spec.SecDB != "" && r.cfg.SecDBVolume != "" {
+		switch spec.SecDB {
+		case orchestrator.SecDBWrite:
+			if err := r.docker.EnsureVolume(ctx, r.cfg.SecDBVolume, map[string]string{"agnts": "secdb"}); err != nil {
+				return nil, fmt.Errorf("vulnerability database volume: %w", err)
+			}
+			mounts = append(mounts, Mount{Volume: r.cfg.SecDBVolume, Target: secDBDir})
+		default:
+			// Mounted only once the updater made it: a volume Docker made on
+			// a read-only mount would be root's, and the updater could not
+			// fill it.
+			if ok, err := r.docker.VolumeExists(ctx, r.cfg.SecDBVolume); err == nil && ok {
+				mounts = append(mounts, Mount{Volume: r.cfg.SecDBVolume, Target: secDBDir, ReadOnly: true})
+			}
+		}
 	}
 	if spec.CacheKey != "" {
 		vol := "agnts-cache-" + sanitize(spec.CacheKey)

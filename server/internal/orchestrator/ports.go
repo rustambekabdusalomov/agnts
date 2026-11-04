@@ -383,7 +383,17 @@ type WorkspaceSpec struct {
 	// alone (a Swagger test's base URL, a spec fetch's URL). The proxy
 	// still refuses internal addresses for them.
 	Grants []Grant
+	// SecDB mounts the vulnerability databases at /opt/secdb: SecDBRead
+	// for security scans (left out until the updater filled them),
+	// SecDBWrite for the updater; "" for none.
+	SecDB string
 }
+
+// SecDB mount modes.
+const (
+	SecDBRead  = "ro"
+	SecDBWrite = "rw"
+)
 
 // Grant lets one run container reach Host on Port.
 type Grant struct {

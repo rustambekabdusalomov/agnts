@@ -370,6 +370,19 @@ Class | Method | HTTP request | Description
 [*RulesApi*](doc/RulesApi.md) | [**reviewRule**](doc/RulesApi.md#reviewrule) | **POST** /rules/{id}/review | Have Claude review a rule again, keeping its answers
 [*RulesApi*](doc/RulesApi.md) | [**tryEnforce**](doc/RulesApi.md#tryenforce) | **POST** /rules/try | Check an enforcement against agnts&#39;s last changes before turning it on
 [*RulesApi*](doc/RulesApi.md) | [**updateRule**](doc/RulesApi.md#updaterule) | **PUT** /rules/{id} | Edit a rule. Changing its text or repository starts a new review; turning it on or off does not.
+[*SecurityApi*](doc/SecurityApi.md) | [**cancelSecurityScan**](doc/SecurityApi.md#cancelsecurityscan) | **DELETE** /security/scans/{scanId} | Cancel a queued or running scan (a running one saves nothing)
+[*SecurityApi*](doc/SecurityApi.md) | [**dismissSecurityFindings**](doc/SecurityApi.md#dismisssecurityfindings) | **POST** /security/dismiss | Dismiss findings with a reason; they stay dismissed while their fingerprint matches
+[*SecurityApi*](doc/SecurityApi.md) | [**fixSecurityFindings**](doc/SecurityApi.md#fixsecurityfindings) | **POST** /security/fix | Open one ticket that fixes findings of one repository (Fix this, Fix together)
+[*SecurityApi*](doc/SecurityApi.md) | [**getSecurityFinding**](doc/SecurityApi.md#getsecurityfinding) | **GET** /security/findings/{findingId} | One finding
+[*SecurityApi*](doc/SecurityApi.md) | [**getSecurityScan**](doc/SecurityApi.md#getsecurityscan) | **GET** /security/scans/{scanId} | One scan, with what ran and the hits the agent rejected
+[*SecurityApi*](doc/SecurityApi.md) | [**getSecuritySettings**](doc/SecurityApi.md#getsecuritysettings) | **GET** /repos/{id}/security/settings | A repository&#39;s security settings: schedule, exclusions, lowest severity that notifies
+[*SecurityApi*](doc/SecurityApi.md) | [**getSecuritySummary**](doc/SecurityApi.md#getsecuritysummary) | **GET** /security/summary | Open security findings by repository and severity, with each repository&#39;s last scan
+[*SecurityApi*](doc/SecurityApi.md) | [**getTicketSecurityFindings**](doc/SecurityApi.md#getticketsecurityfindings) | **GET** /tickets/{key}/security-findings | The security findings a fix ticket works on
+[*SecurityApi*](doc/SecurityApi.md) | [**listSecurityFindings**](doc/SecurityApi.md#listsecurityfindings) | **GET** /security/findings | Security findings, worst first
+[*SecurityApi*](doc/SecurityApi.md) | [**listSecurityScans**](doc/SecurityApi.md#listsecurityscans) | **GET** /repos/{id}/security/scans | A repository&#39;s security scans, newest first
+[*SecurityApi*](doc/SecurityApi.md) | [**reopenSecurityFinding**](doc/SecurityApi.md#reopensecurityfinding) | **POST** /security/findings/{findingId}/reopen | Open a dismissed or fixed finding again
+[*SecurityApi*](doc/SecurityApi.md) | [**setSecuritySettings**](doc/SecurityApi.md#setsecuritysettings) | **PUT** /repos/{id}/security/settings | Save a repository&#39;s security settings and schedule its next scan
+[*SecurityApi*](doc/SecurityApi.md) | [**startSecurityScan**](doc/SecurityApi.md#startsecurityscan) | **POST** /repos/{id}/security/scans | Scan the repository&#39;s default branch (a scan already queued or running is returned instead)
 [*SettingsApi*](doc/SettingsApi.md) | [**getSettings**](doc/SettingsApi.md#getsettings) | **GET** /settings | 
 [*SettingsApi*](doc/SettingsApi.md) | [**listModels**](doc/SettingsApi.md#listmodels) | **GET** /models | The coding modules and models you may use
 [*SettingsApi*](doc/SettingsApi.md) | [**putSettings**](doc/SettingsApi.md#putsettings) | **PUT** /settings | 
@@ -592,6 +605,7 @@ Class | Method | HTTP request | Description
  - [DeployRepoRequest](doc/DeployRepoRequest.md)
  - [DeviceRegistration](doc/DeviceRegistration.md)
  - [DisableTotpRequest](doc/DisableTotpRequest.md)
+ - [DismissSecurityFindingsRequest](doc/DismissSecurityFindingsRequest.md)
  - [Document](doc/Document.md)
  - [DocumentAccess](doc/DocumentAccess.md)
  - [DocumentAllOfDerivedFrom](doc/DocumentAllOfDerivedFrom.md)
@@ -632,6 +646,7 @@ Class | Method | HTTP request | Description
  - [Feedback](doc/Feedback.md)
  - [FileChange](doc/FileChange.md)
  - [Finding](doc/Finding.md)
+ - [FixSecurityFindingsRequest](doc/FixSecurityFindingsRequest.md)
  - [FlakyJob](doc/FlakyJob.md)
  - [FollowUpCount](doc/FollowUpCount.md)
  - [FollowUpSuggestion](doc/FollowUpSuggestion.md)
@@ -860,9 +875,20 @@ Class | Method | HTTP request | Description
  - [RunTranscript](doc/RunTranscript.md)
  - [RunTranscriptDetail](doc/RunTranscriptDetail.md)
  - [RunTranscriptEvent](doc/RunTranscriptEvent.md)
+ - [SecFindingStatus](doc/SecFindingStatus.md)
+ - [SecRejectedHit](doc/SecRejectedHit.md)
+ - [SecSeverity](doc/SecSeverity.md)
+ - [SecSeverityCounts](doc/SecSeverityCounts.md)
+ - [SecToolRun](doc/SecToolRun.md)
  - [SecondOpinion](doc/SecondOpinion.md)
  - [SecretFindings](doc/SecretFindings.md)
  - [SecretFindingsFindingsInner](doc/SecretFindingsFindingsInner.md)
+ - [SecurityFinding](doc/SecurityFinding.md)
+ - [SecurityFindingLocation](doc/SecurityFindingLocation.md)
+ - [SecurityRepoSummary](doc/SecurityRepoSummary.md)
+ - [SecurityScan](doc/SecurityScan.md)
+ - [SecuritySettings](doc/SecuritySettings.md)
+ - [SecurityWorkspaceSettings](doc/SecurityWorkspaceSettings.md)
  - [SendFeedbackRequest](doc/SendFeedbackRequest.md)
  - [SendMeetingMessageRequest](doc/SendMeetingMessageRequest.md)
  - [SetCreditLimitRequest](doc/SetCreditLimitRequest.md)
@@ -887,6 +913,7 @@ Class | Method | HTTP request | Description
  - [StageModels](doc/StageModels.md)
  - [StageSpend](doc/StageSpend.md)
  - [StalePR](doc/StalePR.md)
+ - [StartSecurityScan200Response](doc/StartSecurityScan200Response.md)
  - [StarterPack](doc/StarterPack.md)
  - [StepDuration](doc/StepDuration.md)
  - [SwaggerAuthInput](doc/SwaggerAuthInput.md)

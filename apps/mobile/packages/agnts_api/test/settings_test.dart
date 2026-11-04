@@ -140,6 +140,11 @@ void main() {
       // TODO
     });
 
+    // SecurityWorkspaceSettings security
+    test('to test the property `security`', () async {
+      // TODO
+    });
+
     // GuardSettings guard
     test('to test the property `guard`', () async {
       // TODO

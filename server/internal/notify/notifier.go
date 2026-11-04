@@ -63,7 +63,19 @@ type Notifier struct {
 	wake     chan struct{}
 	ci       CIFixer // nil: no Fix it button
 	logs     LogFixer
+	security SecurityFixer
 }
+
+// SecurityFixer lists what a security scan found and fixes a finding
+// (Telegram's Fix it button on security messages).
+type SecurityFixer interface {
+	NotableFindings(ctx context.Context, scanID int64) ([]domain.SecurityFinding, error)
+	FixFinding(ctx context.Context, id int64, origin domain.Origin) (domain.Ticket, error)
+}
+
+// SetSecurityFixer enables the findings and Fix it buttons on security
+// messages.
+func (n *Notifier) SetSecurityFixer(s SecurityFixer) { n.security = s }
 
 // LogFixer acts on a log finding (Telegram's Fix it and Mute buttons).
 type LogFixer interface {
@@ -205,6 +217,10 @@ func (n *Notifier) handle(ctx context.Context, e domain.Event) {
 	}
 	if e.Type == domain.EventLogFinding || e.Type == domain.EventLogSource || e.Type == domain.EventLogDigest {
 		n.logEvent(ctx, e)
+		return
+	}
+	if e.Type == domain.EventSecurity {
+		n.securityEvent(ctx, e)
 		return
 	}
 	to, _ := e.Data["to"].(string)
@@ -899,5 +915,60 @@ func (n *Notifier) logEvent(ctx context.Context, e domain.Event) {
 	}
 	if _, err := b.Send(ctx, cfg.ChatID, title+"\n\n"+truncate(body, 1500), buttons, false); err != nil {
 		n.log.Warn("telegram notify", "log", int64(id), "err", err)
+	}
+}
+
+// securityEvent announces a security scan that found something new or
+// reopened (at the repository's threshold) or failed: push, and Telegram
+// with up to three findings, each with a Fix it button. Titles and
+// severities only: evidence never leaves agnts in a message.
+func (n *Notifier) securityEvent(ctx context.Context, e domain.Event) {
+	if on, _ := e.Data["notify"].(bool); !on {
+		return
+	}
+	s, err := n.settings.Get(ctx)
+	if err != nil || !s.Notify.Security {
+		return
+	}
+	repoID, _ := e.Data["repo"].(float64)
+	scanID, _ := e.Data["scan"].(float64)
+	name, _ := e.Data["name"].(string)
+	title, body := "Security: "+name, e.Message
+	route := "/security"
+	if repoID > 0 {
+		route = fmt.Sprintf("/repos/%d?tab=security", int64(repoID))
+	}
+	var buttons [][]Button
+	if n.security != nil && scanID > 0 {
+		fs, err := n.security.NotableFindings(ctx, int64(scanID))
+		if err != nil {
+			n.log.Warn("security notify findings", "scan", int64(scanID), "err", err)
+		}
+		for i, f := range fs {
+			if i == 3 {
+				body += fmt.Sprintf("\n… and %d more", len(fs)-3)
+				break
+			}
+			body += fmt.Sprintf("\n• %s: %s", f.Severity, truncate(f.Data.Title, 120))
+			if f.Status == domain.SecReopened {
+				body += " (back again)"
+			}
+			if f.TicketKey == "" || f.Status == domain.SecReopened {
+				buttons = append(buttons, []Button{{Text: "Fix it: " + truncate(f.Data.Title, 40), Data: fmt.Sprintf("sec:%d", f.ID)}})
+			}
+		}
+	}
+	if s.Notify.Push && n.fcm != nil {
+		n.push(ctx, Push{Title: title, Body: truncate(body, 180), Route: route})
+	}
+	if !s.Notify.Telegram {
+		return
+	}
+	b, cfg, ok := n.bot(ctx)
+	if !ok {
+		return
+	}
+	if _, err := b.Send(ctx, cfg.ChatID, title+"\n\n"+truncate(body, 1500), buttons, false); err != nil {
+		n.log.Warn("telegram notify", "security scan", int64(scanID), "err", err)
 	}
 }

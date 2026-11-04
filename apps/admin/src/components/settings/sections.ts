@@ -10,6 +10,7 @@ export const SETTINGS_SECTIONS = [
   { key: 'preview', label: 'preview.settingsTitle', icon: 'eye' },
   { key: 'ci', label: 'ci.settingsTitle', icon: 'ci' },
   { key: 'logs', label: 'logwatch.settingsTitle', icon: 'shield' },
+  { key: 'security', label: 'security.settingsTitle', icon: 'lock' },
   { key: 'network', label: 'network.title', icon: 'network' },
   { key: 'notify', label: 'settings.notify', icon: 'bell' },
   // Claude chat's connector: only where Claude is offered.

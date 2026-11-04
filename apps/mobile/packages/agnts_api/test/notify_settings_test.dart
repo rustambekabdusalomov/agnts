@@ -80,5 +80,11 @@ void main() {
       // TODO
     });
 
+    // A security scan found something new or reopened, or failed
+    // bool security
+    test('to test the property `security`', () async {
+      // TODO
+    });
+
   });
 }

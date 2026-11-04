@@ -123,6 +123,7 @@ import 'package:agnts_api/src/model/delivery_period.dart';
 import 'package:agnts_api/src/model/deploy_repo_request.dart';
 import 'package:agnts_api/src/model/device_registration.dart';
 import 'package:agnts_api/src/model/disable_totp_request.dart';
+import 'package:agnts_api/src/model/dismiss_security_findings_request.dart';
 import 'package:agnts_api/src/model/document.dart';
 import 'package:agnts_api/src/model/document_all_of_derived_from.dart';
 import 'package:agnts_api/src/model/document_comment.dart';
@@ -161,6 +162,7 @@ import 'package:agnts_api/src/model/event_summary.dart';
 import 'package:agnts_api/src/model/feedback.dart';
 import 'package:agnts_api/src/model/file_change.dart';
 import 'package:agnts_api/src/model/finding.dart';
+import 'package:agnts_api/src/model/fix_security_findings_request.dart';
 import 'package:agnts_api/src/model/flaky_job.dart';
 import 'package:agnts_api/src/model/follow_up_count.dart';
 import 'package:agnts_api/src/model/follow_up_suggestion.dart';
@@ -376,9 +378,18 @@ import 'package:agnts_api/src/model/run_history_summary.dart';
 import 'package:agnts_api/src/model/run_transcript.dart';
 import 'package:agnts_api/src/model/run_transcript_detail.dart';
 import 'package:agnts_api/src/model/run_transcript_event.dart';
+import 'package:agnts_api/src/model/sec_rejected_hit.dart';
+import 'package:agnts_api/src/model/sec_severity_counts.dart';
+import 'package:agnts_api/src/model/sec_tool_run.dart';
 import 'package:agnts_api/src/model/second_opinion.dart';
 import 'package:agnts_api/src/model/secret_findings.dart';
 import 'package:agnts_api/src/model/secret_findings_findings_inner.dart';
+import 'package:agnts_api/src/model/security_finding.dart';
+import 'package:agnts_api/src/model/security_finding_location.dart';
+import 'package:agnts_api/src/model/security_repo_summary.dart';
+import 'package:agnts_api/src/model/security_scan.dart';
+import 'package:agnts_api/src/model/security_settings.dart';
+import 'package:agnts_api/src/model/security_workspace_settings.dart';
 import 'package:agnts_api/src/model/send_feedback_request.dart';
 import 'package:agnts_api/src/model/send_meeting_message_request.dart';
 import 'package:agnts_api/src/model/set_credit_limit_request.dart';
@@ -403,6 +414,7 @@ import 'package:agnts_api/src/model/stage.dart';
 import 'package:agnts_api/src/model/stage_models.dart';
 import 'package:agnts_api/src/model/stage_spend.dart';
 import 'package:agnts_api/src/model/stale_pr.dart';
+import 'package:agnts_api/src/model/start_security_scan200_response.dart';
 import 'package:agnts_api/src/model/starter_pack.dart';
 import 'package:agnts_api/src/model/step_duration.dart';
 import 'package:agnts_api/src/model/swagger_auth_input.dart';
@@ -752,6 +764,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DeviceRegistration.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DisableTotpRequest':
           return DisableTotpRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DismissSecurityFindingsRequest':
+          return DismissSecurityFindingsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Document':
           return Document.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DocumentAccess':
@@ -834,6 +848,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return FileChange.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Finding':
           return Finding.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FixSecurityFindingsRequest':
+          return FixSecurityFindingsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FlakyJob':
           return FlakyJob.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FollowUpCount':
@@ -1303,12 +1319,36 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RunTranscriptDetail.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RunTranscriptEvent':
           return RunTranscriptEvent.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecFindingStatus':
+          
+          
+        case 'SecRejectedHit':
+          return SecRejectedHit.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecSeverity':
+          
+          
+        case 'SecSeverityCounts':
+          return SecSeverityCounts.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecToolRun':
+          return SecToolRun.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SecondOpinion':
           return SecondOpinion.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SecretFindings':
           return SecretFindings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SecretFindingsFindingsInner':
           return SecretFindingsFindingsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecurityFinding':
+          return SecurityFinding.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecurityFindingLocation':
+          return SecurityFindingLocation.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecurityRepoSummary':
+          return SecurityRepoSummary.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecurityScan':
+          return SecurityScan.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecuritySettings':
+          return SecuritySettings.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SecurityWorkspaceSettings':
+          return SecurityWorkspaceSettings.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendFeedbackRequest':
           return SendFeedbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SendMeetingMessageRequest':
@@ -1357,6 +1397,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return StageSpend.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StalePR':
           return StalePR.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'StartSecurityScan200Response':
+          return StartSecurityScan200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StarterPack':
           return StarterPack.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'StepDuration':

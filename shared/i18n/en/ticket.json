@@ -257,6 +257,7 @@
     "museSteered": "Budget low: told to wrap up",
     "museStopped": "Stopped over budget",
     "museEscalated": "Moved to {model}",
-    "srcLogs": "Found in logs"
+    "srcLogs": "Found in logs",
+    "srcSecurity": "Security scan"
   }
 }

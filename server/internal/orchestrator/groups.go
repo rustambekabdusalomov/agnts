@@ -167,7 +167,7 @@ func (o *Orchestrator) SaveGroup(ctx context.Context, id int64, in GroupInput, o
 // checkGroupPrefix refuses a group prefix that would number tickets like a
 // repository, another group, or a tracker project.
 func (o *Orchestrator) checkGroupPrefix(ctx context.Context, g domain.RepoGroup) error {
-	if g.TaskPrefix == NoRepoTaskPrefix || g.TaskPrefix == CIPrefix {
+	if g.TaskPrefix == NoRepoTaskPrefix || g.TaskPrefix == CIPrefix || g.TaskPrefix == LogPrefix || g.TaskPrefix == domain.SecurityPrefix {
 		return invalid("%s is agnts's own prefix: pick another", g.TaskPrefix)
 	}
 	taken, err := o.store.TaskPrefixTaken(ctx, g.TaskPrefix, 0, g.ID)

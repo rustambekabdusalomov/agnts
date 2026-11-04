@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/sync/singleflight"
@@ -69,6 +70,9 @@ type Deps struct {
 	Briefs Briefs
 	// Reflections keeps feedback for reflect runs; nil disables them.
 	Reflections Reflections
+	// Security keeps security scans and findings; nil turns security
+	// testing off.
+	Security SecurityStore
 	// PullReviews keeps the reviews of pull requests waiting for you and
 	// what agnts learned from your notes; nil disables them (the git host
 	// must also implement ReviewHost, and Git PRFetcher).
@@ -144,6 +148,7 @@ type Orchestrator struct {
 	rules       Rules
 	briefs      Briefs
 	reflections Reflections
+	security    SecurityStore
 	pulls       PullReviews
 	prposts     PRPosts
 	drafts      ReviewDrafts
@@ -213,7 +218,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 	return &Orchestrator{
 		ai:  gw,
 		cfg: cfg, store: d.Store, runner: d.Runner, git: d.Git, host: d.Host, trackers: d.Trackers, homes: d.Homes, progress: d.Progress,
-		settings: personSettings{d.Settings}, stored: d.Settings, access: d.Access, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
+		settings: personSettings{d.Settings}, stored: d.Settings, access: d.Access, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, security: d.Security, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
 		swagger: d.SwaggerTests, specs: newSpecFetcher(), docs: d.Documents, docHost: d.DocumentHost,
@@ -317,6 +322,13 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			o.log.Warn("requeued interrupted surveys", "count", n)
 		}
 	}
+	if o.security != nil {
+		if n, err := o.security.RecoverSecurityScans(sys); err != nil {
+			return fmt.Errorf("recover interrupted security scans: %w", err)
+		} else if n > 0 {
+			o.log.Warn("requeued interrupted security scans", "count", n)
+		}
+	}
 	if o.docs != nil {
 		if n, err := o.docs.RecoverDocumentRuns(sys); err != nil {
 			return fmt.Errorf("recover interrupted document generations: %w", err)
@@ -349,6 +361,14 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	tick := time.NewTicker(o.cfg.PollEvery)
 	defer tick.Stop()
 	lastResume, lastPrune, lastMerges, lastPulls := time.Time{}, time.Time{}, time.Time{}, time.Time{}
+	// The vulnerability databases are first fetched a minute after start,
+	// then once a day.
+	// The vulnerability databases are first fetched a minute after start,
+	// then once a day; an update that missed some is tried again sooner.
+	var nextSecDB atomic.Int64
+	nextSecDB.Store(time.Now().Add(time.Minute).UnixNano())
+	var secDBBusy atomic.Bool
+	lastSecSync := time.Time{}
 
 	for {
 		if time.Since(lastResume) > time.Minute {
@@ -362,6 +382,22 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 		if o.cfg.MergeCheckEvery > 0 && time.Since(lastMerges) > o.cfg.MergeCheckEvery {
 			lastMerges = time.Now()
 			o.CheckMerges(sys)
+		}
+		if o.security != nil && time.Since(lastSecSync) > time.Minute {
+			lastSecSync = time.Now()
+			o.SecurityTick(sys)
+		}
+		if o.security != nil && o.cfg.Image != "" && time.Now().UnixNano() > nextSecDB.Load() && secDBBusy.CompareAndSwap(false, true) {
+			nextSecDB.Store(time.Now().Add(secDBEvery).UnixNano())
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				defer secDBBusy.Store(false)
+				if err := o.RefreshSecDB(sys); err != nil && ctx.Err() == nil {
+					o.log.Warn("refresh vulnerability databases", "err", err, "retry_in", secDBRetry.String())
+					nextSecDB.Store(time.Now().Add(secDBRetry).UnixNano())
+				}
+			}()
 		}
 		if time.Since(lastPulls) > ReviewSyncEvery {
 			lastPulls = time.Now()
@@ -471,6 +507,15 @@ func (o *Orchestrator) claim(ctx context.Context) (func(context.Context), bool, 
 		}
 		if ok {
 			return func(ctx context.Context) { o.surveyBrief(ctx, b) }, true, nil
+		}
+	}
+	if o.security != nil {
+		s, ok, err := o.security.ClaimSecurityScan(ctx)
+		if err != nil {
+			return nil, false, err
+		}
+		if ok {
+			return func(ctx context.Context) { o.runSecurityScan(ctx, s) }, true, nil
 		}
 	}
 	if o.reflections != nil {

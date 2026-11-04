@@ -1,0 +1,3 @@
+{"history":1,"commits":1,"historyLimit":200,"tools":{"gitleaks":{"status":"ok","seconds":2,"error":""},"osv":{"status":"ok","seconds":16,"error":""},"trivy":{"status":"ok","seconds":4,"error":""},"opengrep":{"status":"ok","seconds":3,"error":""}},"paths":[
+  "."
+]}

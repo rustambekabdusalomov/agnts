@@ -153,6 +153,20 @@ func (n *Notifier) handleCallback(ctx context.Context, b *Bot, cfg TelegramConfi
 		}
 		n.say(ctx, b, cfg, t.Key+" opened: agnts is on it. You review the fix before anything is pushed.")
 		return "Done"
+	case "sec": // sec:<security finding id> (Fix it)
+		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
+		id, err := strconv.ParseInt(arg, 10, 64)
+		if err != nil || n.security == nil {
+			return "Not available"
+		}
+		// The chat's workspace: a finding of another workspace is not found.
+		t, err := n.security.FixFinding(ctx, id, domain.OriginTelegram)
+		if err != nil {
+			n.say(ctx, b, cfg, "Fix it: "+friendly(err))
+			return "Not done"
+		}
+		n.say(ctx, b, cfg, t.Key+" opened: agnts is on it. You review the fix before anything is pushed.")
+		return "Done"
 	case "lgf", "lgm": // lgf:<finding id> (Fix it), lgm:<finding id> (Mute)
 		_ = b.ClearButtons(ctx, cfg.ChatID, msg.MessageID)
 		id, err := strconv.ParseInt(arg, 10, 64)

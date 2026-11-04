@@ -1,0 +1,22 @@
+[
+  {
+    "RuleID": "stripe-access-token",
+    "Description": "Found a Stripe Access Token, posing a risk to payment processing services and sensitive financial data.",
+    "StartLine": 1,
+    "EndLine": 1,
+    "StartColumn": 19,
+    "EndColumn": 58,
+    "Match": "STRIPE_SECRET_KEY=FAKE-SECRET-VALUE-0001",
+    "Secret": "FAKE-SECRET-VALUE-0001",
+    "File": "config/secrets.env",
+    "SymlinkFile": "",
+    "Commit": "aa1d1657cef66e76c7c8c9dcdfd8b3667936a43f",
+    "Entropy": 4.6841836,
+    "Author": "t",
+    "Email": "t@example.com",
+    "Date": "2026-11-04T08:18:52Z",
+    "Message": "init",
+    "Tags": [],
+    "Fingerprint": "aa1d1657cef66e76c7c8c9dcdfd8b3667936a43f:config/secrets.env:stripe-access-token:1"
+  }
+]
