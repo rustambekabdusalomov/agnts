@@ -15,9 +15,10 @@ import { useUi } from '../stores/ui'
 import { useWorkspace } from '../stores/workspace'
 
 // One call after it happened: who was there and for how long, its
-// recordings, the notes Muse wrote and their action items (each a draft
-// ticket on the member who took it, who can be changed here), what was
-// said, and the chat.
+// recordings, the notes Muse wrote and their action items, what was said,
+// and the chat. An action item stays a draft in the meeting, on the member
+// who took it (who can be changed here), until someone approves it: only
+// then is it a ticket.
 const { t, locale } = useI18n()
 const route = useRoute()
 const ui = useUi()
@@ -157,11 +158,13 @@ const repoOptions = computed(() => [
 
         <template v-if="s.actionItems.length">
           <h3>{{ t('meetings.actionItems') }}</h3>
+          <p v-if="s.actionItems.some((a) => !a.ticketKey)" class="hint ms-drafts">{{ t('meetings.draftsSub') }}</p>
           <ul class="ms-items">
             <li v-for="a in s.actionItems" :key="a.id">
               <div class="ms-item">
                 <strong>{{ a.text }}</strong>
                 <span class="hint">
+                  <span v-if="!a.ticketKey" class="badge b-warn">{{ t('meetings.draft') }}</span>
                   <span v-if="a.memberName" class="badge b-info ms-member" :title="a.memberByHand ? t('meetings.memberByHand') : t('meetings.memberMatched', { said: a.who })">{{ a.memberName }}</span>
                   <span v-else class="badge b-gray">{{ t('meetings.unassigned') }}</span>
                   <template v-if="a.who && a.who !== a.memberName"> · {{ t('meetings.said', { who: a.who }) }}</template><template v-if="a.due"> · {{ a.due }}</template>
@@ -184,7 +187,7 @@ const repoOptions = computed(() => [
                 </RouterLink>
                 <template v-else-if="workspace.canEdit">
                   <InputSelect class="ms-repo" :model-value="repoFor[a.id] ?? 0" :options="repoOptions" :label="t('meetings.repository')" @update:model-value="(v) => (repoFor[a.id] = v)" />
-                  <button type="button" class="btn btn-s btn-p" :disabled="makeTicket.isPending.value" @click="makeTicket.mutate(a)">{{ t('meetings.createTicket') }}</button>
+                  <button type="button" class="btn btn-s btn-p" :disabled="makeTicket.isPending.value" @click="makeTicket.mutate(a)">{{ t('meetings.approve') }}</button>
                 </template>
               </div>
             </li>
@@ -288,6 +291,7 @@ const repoOptions = computed(() => [
 .ms-busy { display: flex; gap: 10px; align-items: center; font-weight: 700; color: var(--ink-2); }
 .ms-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line-3); border-top-color: var(--primary); animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.ms-drafts { margin: 0 0 6px; }
 .ms-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .ms-items li { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line-2); flex-wrap: wrap; }
 .ms-items li:last-child { border-bottom: 0; }

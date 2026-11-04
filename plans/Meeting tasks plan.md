@@ -2,6 +2,8 @@
 
 Nov 4, 2026 · v1, implemented (server and admin panel)
 
+> **Changed Nov 5, 2026: drafts stay in the meeting.** Action items are no longer made into held tickets when the notes are written: they stay drafts on the session page (matched to a member as below) until someone clicks **Approve**, which makes the ticket (`ActionItemTicket`, on the item's member). The `meetings.draftTickets` setting is gone from the admin panel; the API keeps the field, always false and ignored, for older mobile builds. A notes rewrite keeps the items that are tickets and the drafts whose member was picked by hand, and replaces the other drafts. `dropUntouchedDrafts` still clears the held drafts made before this change (items marked `drafted`).
+>
 > **Status.** A and B are built and tested on the server and in the admin panel. Mobile is left for later: it keeps the one-click "Create ticket", and its ARB dictionaries were not regenerated (`make gen-dart gen-arb` brings the new fields and strings when mobile is done). Where the build differs from the text below:
 > - **A member picked by hand** is recorded (`who_set_by`); a later match never replaces it, and a rewrite keeps its draft.
 > - **Untouched drafts are dropped when the rewrite is asked for** (`RegenerateNotes`), not when it ends: their items forget they were drafted, so if the rewrite fails the old items are drafted again. A draft deleted by hand is not made again (`drafted`).

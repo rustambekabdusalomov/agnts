@@ -678,7 +678,10 @@ func finishMeetingNotes(ctx context.Context, tx pgx.Tx, runID, docID int64, res 
 	if res.ActionItems == nil {
 		return nil
 	}
-	rows, err := tx.Query(ctx, `SELECT text, who, quote, at_ms FROM meeting_action_items WHERE session_id = $1 AND ticket_id IS NOT NULL`, sessionID)
+	// Kept: the items that are tickets, and the drafts whose member a
+	// person picked. The other drafts give way to the new notes'.
+	rows, err := tx.Query(ctx, `SELECT text, who, quote, at_ms FROM meeting_action_items
+		WHERE session_id = $1 AND (ticket_id IS NOT NULL OR who_set_by IS NOT NULL)`, sessionID)
 	if err != nil {
 		return err
 	}
@@ -690,7 +693,7 @@ func finishMeetingNotes(ctx context.Context, tx pgx.Tx, runID, docID int64, res 
 	if err != nil {
 		return err
 	}
-	if _, err := tx.Exec(ctx, `DELETE FROM meeting_action_items WHERE session_id = $1 AND ticket_id IS NULL`, sessionID); err != nil {
+	if _, err := tx.Exec(ctx, `DELETE FROM meeting_action_items WHERE session_id = $1 AND ticket_id IS NULL AND who_set_by IS NULL`, sessionID); err != nil {
 		return err
 	}
 	pos := len(kept)

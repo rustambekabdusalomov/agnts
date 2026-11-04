@@ -14053,7 +14053,7 @@ components:
         retentionDays: { type: integer, description: 'Recordings, notes audio and transcripts are deleted after; 0 keeps them' }
         keepAudio: { type: boolean, description: 'Keep the audio of notes after it is heard' }
         maxParticipants: { type: integer }
-        draftTickets: { type: boolean, description: 'Every action item becomes a held draft ticket on the member who took it when the notes are written' }
+        draftTickets: { type: boolean, deprecated: true, description: 'Always false: action items stay drafts in the meeting until someone approves them. Kept for older clients' }
         available:
           type: object
           description: What this server can do
@@ -14073,7 +14073,7 @@ components:
         retentionDays: { type: integer, minimum: 0, maximum: 3650 }
         keepAudio: { type: boolean }
         maxParticipants: { type: integer, minimum: 2, maximum: 100 }
-        draftTickets: { type: boolean, description: 'Absent keeps it as it is' }
+        draftTickets: { type: boolean, deprecated: true, description: 'Ignored. Kept for older clients' }
 
     MeetingPrefs:
       type: object

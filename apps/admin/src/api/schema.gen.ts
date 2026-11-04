@@ -11819,7 +11819,10 @@ export interface components {
             /** @description Keep the audio of notes after it is heard */
             keepAudio: boolean;
             maxParticipants: number;
-            /** @description Every action item becomes a held draft ticket on the member who took it when the notes are written */
+            /**
+             * @deprecated
+             * @description Always false: action items stay drafts in the meeting until someone approves them. Kept for older clients
+             */
             draftTickets: boolean;
             /** @description What this server can do */
             available: {
@@ -11837,7 +11840,10 @@ export interface components {
             retentionDays: number;
             keepAudio: boolean;
             maxParticipants: number;
-            /** @description Absent keeps it as it is */
+            /**
+             * @deprecated
+             * @description Ignored. Kept for older clients
+             */
             draftTickets?: boolean;
         };
         MeetingPrefs: {

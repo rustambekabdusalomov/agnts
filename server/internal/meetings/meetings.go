@@ -124,6 +124,7 @@ type Store interface {
 	SetActionItemTicket(ctx context.Context, itemID, ticketID, by int64) (bool, error)
 	SetActionItemMember(ctx context.Context, itemID int64, userID *int64, by int64) error
 	SetActionItemsDrafted(ctx context.Context, ids []int64, drafted bool) error
+	DraftedSessions(ctx context.Context) ([]domain.MeetingSession, error)
 	NameCandidates(ctx context.Context, sessionID int64) ([]domain.NameCandidate, error)
 	MeetingTickets(ctx context.Context, meetingID, ticketID int64) ([]postgres.MeetingTicket, error)
 	LinkMeetingTicket(ctx context.Context, meetingID, ticketID, by int64) error
