@@ -5560,6 +5560,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/meetings/{meetingId}/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
+         * @description Hosts only. The file (video or audio: mp4, mov, m4v, webm, mkv, ogg, opus, oga, m4a, mp3, wav; at most the server's limit, 2 GB by default) becomes a new ended session of the meeting with notes on. agnts takes its first audio track out and deletes the file as sent before anything hears it: the picture is never analysed. The session's notes then go as a call's do (queued, transcribing, writing, done).
+         */
+        post: operations["uploadMeetingRecording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/meetings/{meetingId}/sessions/{sessionId}": {
         parameters: {
             query?: never;
@@ -5680,6 +5702,27 @@ export interface paths {
         put?: never;
         /** Make a ticket of an action item, with the words of the meeting that show it */
         post: operations["createActionItemTicket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/member": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Pick the member who takes an action item; its ticket becomes theirs too */
+        put: operations["setActionItemMember"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10985,6 +11028,10 @@ export interface components {
             myRsvp?: "none" | "yes" | "no" | "maybe";
             /** @description You may change, invite, cancel */
             canManage: boolean;
+            /** @description You may upload a recording of it (uploadMeetingRecording): you host it and this server hears uploads */
+            canUpload: boolean;
+            /** @description The largest recording that can be uploaded */
+            maxUploadMb: number;
         };
         MeetingInvitee: {
             /** Format: int64 */
@@ -11044,6 +11091,8 @@ export interface components {
             notesError: string;
             /** Format: int64 */
             documentId?: number;
+            /** @description A recording a host uploaded, not a call */
+            uploaded: boolean;
         };
         /**
          * @description none; recording (notes are on); queued, transcribing (Muse hears the audio), writing (Muse writes the notes); done; failed
@@ -11069,11 +11118,17 @@ export interface components {
             /** Format: int64 */
             documentId?: number;
             documentTitle: string;
+            /** @description A recording a host uploaded, not a call */
+            uploaded: boolean;
         };
         MeetingSessionDetail: {
             /** Format: int64 */
             id: number;
             meeting: components["schemas"]["Meeting"];
+            /** @description A recording a host uploaded, not a call: it has no attendance */
+            uploaded: boolean;
+            /** @description An uploaded recording: the members the uploader said are in it */
+            people: number[];
             /** Format: date-time */
             startedAt: string;
             /** Format: date-time */
@@ -11132,8 +11187,27 @@ export interface components {
             /** @description When it was said, from the start of the call */
             atMs?: number;
             quote: string;
+            /** @description Who said the line where it was taken, as the transcript names them; empty when it does not say */
+            speaker: string;
+            /**
+             * Format: int64
+             * @description The member who takes it: matched from the name as said, or picked by hand; absent when nobody matched
+             */
+            memberId?: number;
+            memberName?: string;
+            /** @description The member was picked by hand, not matched */
+            memberByHand: boolean;
+            /** @description Its draft ticket was made when the notes were written */
+            drafted: boolean;
             /** @description The ticket made from it */
             ticketKey?: string;
+        };
+        ActionItemMemberInput: {
+            /**
+             * Format: int64
+             * @description A member of the workspace
+             */
+            userId: number;
         };
         ActionItemTicketInput: {
             /**
@@ -11198,11 +11272,17 @@ export interface components {
             /** @description Keep the audio of notes after it is heard */
             keepAudio: boolean;
             maxParticipants: number;
+            /** @description Every action item becomes a held draft ticket on the member who took it when the notes are written */
+            draftTickets: boolean;
             /** @description What this server can do */
             available: {
                 meetings: boolean;
                 recording: boolean;
                 notes: boolean;
+                /** @description Recordings can be uploaded and heard */
+                uploads: boolean;
+                /** @description The largest recording that can be uploaded */
+                maxUploadMb: number;
             };
         };
         MeetingSettingsInput: {
@@ -11210,6 +11290,8 @@ export interface components {
             retentionDays: number;
             keepAudio: boolean;
             maxParticipants: number;
+            /** @description Absent keeps it as it is */
+            draftTickets?: boolean;
         };
         MeetingPrefs: {
             /**
@@ -20566,6 +20648,55 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    uploadMeetingRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: date-time
+                     * @description When the meeting was held; absent is now. Send it before the file.
+                     */
+                    startedAt?: string;
+                    /** @description Comma-separated ids of the members in the recording. Send it before the file. */
+                    people?: string;
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Uploaded; its notes are queued */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingSessionBrief"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description The file is over the limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            501: components["responses"]["NotImplemented"];
+        };
+    };
     getMeetingSession: {
         parameters: {
             query?: never;
@@ -20757,6 +20888,37 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    setActionItemMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                meetingId: components["parameters"]["MeetingID"];
+                sessionId: components["parameters"]["SessionID"];
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionItemMemberInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeetingActionItem"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     listTicketMeetings: {

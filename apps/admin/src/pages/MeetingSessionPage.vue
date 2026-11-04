@@ -15,8 +15,9 @@ import { useUi } from '../stores/ui'
 import { useWorkspace } from '../stores/workspace'
 
 // One call after it happened: who was there and for how long, its
-// recordings, the notes Muse wrote and their action items (each can
-// become a ticket), what was said, and the chat.
+// recordings, the notes Muse wrote and their action items (each a draft
+// ticket on the member who took it, who can be changed here), what was
+// said, and the chat.
 const { t, locale } = useI18n()
 const route = useRoute()
 const ui = useUi()
@@ -41,6 +42,16 @@ const chat = useQuery({
 })
 const repos = useQuery({ queryKey: ['repos'], queryFn: () => unwrap(api.GET('/repos')) })
 const repoFor = ref<Record<number, number>>({})
+const members = useQuery({ queryKey: ['members'], queryFn: () => unwrap(api.GET('/workspace/members')), enabled: computed(() => workspace.canEdit || !!s.value?.uploaded) })
+// An uploaded recording's people: the members the uploader said are in it.
+const people = computed(() => {
+  const byId = new Map((members.data.value ?? []).map((m) => [m.userId, m.displayName || m.username]))
+  return (s.value?.people ?? []).map((u) => byId.get(u) ?? `#${u}`)
+})
+const memberOptions = computed(() => [
+  { value: 0, label: t('meetings.nobody') },
+  ...(members.data.value ?? []).map((m) => ({ value: m.userId, label: m.displayName || m.username })),
+])
 
 const segments = computed(() => {
   const q = filter.value.trim().toLowerCase()
@@ -83,6 +94,20 @@ const makeTicket = useMutation({
   },
   onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
 })
+const setMember = useMutation({
+  mutationFn: ({ a, userId }: { a: MeetingActionItem; userId: number }) =>
+    unwrap(
+      api.PUT('/meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/member', {
+        params: { path: { meetingId: id.value, sessionId: sid.value, itemId: a.id } },
+        body: { userId },
+      }),
+    ),
+  onSuccess: (a) => {
+    refresh()
+    ui.notify(a.ticketKey ? t('meetings.memberSetTicket', { name: a.memberName ?? '', key: a.ticketKey }) : t('meetings.memberSet', { name: a.memberName ?? '' }))
+  },
+  onError: (e) => ui.notify(e instanceof HttpError ? e.message : t('common.error')),
+})
 async function deleteRecording(mid: number) {
   if (!(await askConfirm({ title: t('meetings.deleteRecordingTitle'), message: t('meetings.deleteRecordingBody'), confirmLabel: t('meetings.delete'), danger: true }))) return
   try {
@@ -107,6 +132,7 @@ const repoOptions = computed(() => [
       <template #below>
         <p class="sub" style="margin: 4px 0 0">
           {{ new Date(s.startedAt).toLocaleString(locale, { dateStyle: 'full', timeStyle: 'short' }) }}<template v-if="duration"> · {{ duration }}</template>
+          <template v-if="s.uploaded"> · <span class="badge b-gray">{{ t('meetings.uploadedBadge') }}</span></template>
           · <RouterLink class="ms-back" :to="{ name: 'meeting', params: { id: s.meeting.id } }">{{ t('meetings.theMeeting') }}</RouterLink>
         </p>
       </template>
@@ -136,13 +162,26 @@ const repoOptions = computed(() => [
               <div class="ms-item">
                 <strong>{{ a.text }}</strong>
                 <span class="hint">
-                  <template v-if="a.who">{{ a.who }}</template><template v-if="a.due"> · {{ a.due }}</template>
+                  <span v-if="a.memberName" class="badge b-info ms-member" :title="a.memberByHand ? t('meetings.memberByHand') : t('meetings.memberMatched', { said: a.who })">{{ a.memberName }}</span>
+                  <span v-else class="badge b-gray">{{ t('meetings.unassigned') }}</span>
+                  <template v-if="a.who && a.who !== a.memberName"> · {{ t('meetings.said', { who: a.who }) }}</template><template v-if="a.due"> · {{ a.due }}</template>
                   <button v-if="a.atMs != null" type="button" class="ms-at" @click="seek(a.atMs)">{{ offset(a.atMs) }}</button>
                 </span>
                 <q v-if="a.quote" class="ms-quote">{{ a.quote }}</q>
               </div>
               <div class="ms-item-acts">
-                <RouterLink v-if="a.ticketKey" :to="{ name: 'ticket', params: { key: a.ticketKey } }" class="badge b-ok">{{ a.ticketKey }}</RouterLink>
+                <InputSelect
+                  v-if="workspace.canEdit"
+                  class="ms-repo"
+                  :model-value="a.memberId ?? 0"
+                  :options="memberOptions"
+                  :label="t('meetings.takenBy')"
+                  :disabled="setMember.isPending.value"
+                  @update:model-value="(v) => v && v !== a.memberId && setMember.mutate({ a, userId: v })"
+                />
+                <RouterLink v-if="a.ticketKey" :to="{ name: 'ticket', params: { key: a.ticketKey } }" class="badge b-ok" :title="a.drafted ? t('meetings.draftHint') : ''">
+                  {{ a.ticketKey }}
+                </RouterLink>
                 <template v-else-if="workspace.canEdit">
                   <InputSelect class="ms-repo" :model-value="repoFor[a.id] ?? 0" :options="repoOptions" :label="t('meetings.repository')" @update:model-value="(v) => (repoFor[a.id] = v)" />
                   <button type="button" class="btn btn-s btn-p" :disabled="makeTicket.isPending.value" @click="makeTicket.mutate(a)">{{ t('meetings.createTicket') }}</button>
@@ -170,7 +209,13 @@ const repoOptions = computed(() => [
         </div>
       </section>
 
-      <section class="card ms-att-card">
+      <section v-if="s.uploaded" class="card">
+        <h2><HiIcon name="people" /> {{ t('meetings.inRecording', { n: s.people.length }) }}</h2>
+        <p class="hint">{{ t('meetings.uploadedNote') }}</p>
+        <p v-if="people.length">{{ people.join(', ') }}</p>
+      </section>
+
+      <section v-else class="card ms-att-card">
         <h2 class="ms-att-h"><HiIcon name="people" /> {{ t('meetings.attendance', { n: s.attendees.length }) }}</h2>
         <table class="ms-att">
           <thead>
@@ -250,6 +295,7 @@ const repoOptions = computed(() => [
 .ms-quote { font-size: 13.5px; color: var(--ink-2); font-style: italic; }
 .ms-item-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .ms-repo { width: 200px; }
+.ms-member { margin-right: 2px; }
 .ms-repo :deep(.isel-trigger) { min-height: 34px; font-size: 13.5px; }
 .ms-back { color: var(--primary-ink); font-weight: 700; }
 .ms-back:hover { text-decoration: underline; }

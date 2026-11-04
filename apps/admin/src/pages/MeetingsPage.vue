@@ -87,7 +87,7 @@ watch(
 )
 const saveSettings = useMutation({
   mutationFn: (s: MeetingSettings) =>
-    unwrap(api.PUT('/meetings/settings', { body: { allowRecording: s.allowRecording, retentionDays: s.retentionDays, keepAudio: s.keepAudio, maxParticipants: s.maxParticipants } })),
+    unwrap(api.PUT('/meetings/settings', { body: { allowRecording: s.allowRecording, retentionDays: s.retentionDays, keepAudio: s.keepAudio, maxParticipants: s.maxParticipants, draftTickets: s.draftTickets } })),
   onSuccess: () => {
     void settings.refetch()
     ui.notify(t('meetings.settingsSaved'))
@@ -230,6 +230,7 @@ const statusLabel = (s: string) => t(`meetings.notes_${s}`)
       <p class="sub">{{ t('meetings.settingsSub') }}</p>
       <CheckBox v-model="form.allowRecording" :disabled="!form.available.recording">{{ t('meetings.allowRecording') }}</CheckBox>
       <CheckBox v-model="form.keepAudio">{{ t('meetings.keepAudio') }}</CheckBox>
+      <CheckBox v-model="form.draftTickets">{{ t('meetings.draftTickets') }}</CheckBox>
       <div class="mt-nums">
         <label class="field">
           <span class="flbl">{{ t('meetings.retention') }}</span>

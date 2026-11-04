@@ -313,6 +313,10 @@ type MeetingSession struct {
 	NotesError  string
 	NotesBy     *int64
 	DocumentID  *int64
+	// Uploaded: a recording a host uploaded, not a call. People are the
+	// members the uploader said are in it.
+	Uploaded bool
+	People   []int64
 	// Read with the session.
 	Recording bool // a video recording is running
 }
@@ -687,6 +691,10 @@ const (
 	MediaRecording  MediaKind = "recording"   // the call as video (MP4)
 	MediaAudioMixed MediaKind = "audio-mixed" // everyone's audio in one file, for notes
 	MediaAudio      MediaKind = "audio"       // one microphone, for notes per speaker
+	// MediaUpload is a recording a host uploaded: until its sound is
+	// taken out (see meetings.Service.Upload) the file as sent, then an
+	// Ogg of its sound only.
+	MediaUpload MediaKind = "upload"
 )
 
 // MediaStatus is where a meeting file is.
@@ -745,8 +753,19 @@ type ActionItem struct {
 	Due       string // as said
 	AtMS      *int   // when it was said, from the session's start
 	Quote     string
+	// Speaker is who said the line where it was taken, as the transcript
+	// names them; empty when the transcript does not say who spoke.
+	Speaker string
+	// WhoUserID is the member who takes it: matched from Who (or Speaker),
+	// or picked by hand (WhoSetBy). nil when nobody matched.
+	WhoUserID *int64
+	WhoSetBy  *int64
+	// Drafted: its draft ticket was made. A person deleting that ticket
+	// does not bring another.
+	Drafted   bool
 	TicketID  *int64
 	TicketKey string // read with the item
+	WhoName   string // read with the item: WhoUserID's name
 }
 
 // Limits of action items, as the notes generation writes them.
@@ -769,6 +788,7 @@ func CleanActionItems(in []ActionItem) ([]ActionItem, error) {
 			continue
 		}
 		it.Who = truncateRunes(strings.TrimSpace(it.Who), 100)
+		it.Speaker = truncateRunes(strings.TrimSpace(it.Speaker), 100)
 		it.Due = truncateRunes(strings.TrimSpace(it.Due), 100)
 		it.Quote = truncateRunes(strings.TrimSpace(it.Quote), ActionItemMaxQuote)
 		if it.AtMS != nil && *it.AtMS < 0 {
@@ -778,6 +798,22 @@ func CleanActionItems(in []ActionItem) ([]ActionItem, error) {
 		out = append(out, it)
 	}
 	return out, nil
+}
+
+// SameActionItem reports whether a new action item is one kept from an
+// earlier writing of the notes (it has a ticket someone works on): the
+// same text, the same quote, or said within 30 seconds by the same person.
+func SameActionItem(kept, it ActionItem) bool {
+	switch {
+	case strings.EqualFold(kept.Text, it.Text):
+		return true
+	case kept.Quote != "" && strings.EqualFold(kept.Quote, it.Quote):
+		return true
+	case kept.AtMS != nil && it.AtMS != nil && FoldName(kept.Who) == FoldName(it.Who):
+		d := *kept.AtMS - *it.AtMS
+		return d >= -30_000 && d <= 30_000
+	}
+	return false
 }
 
 // FormatOffset shows a time from the session's start as m:ss or h:mm:ss.
@@ -798,6 +834,9 @@ type MeetingNotesInput struct {
 	Messages  []MeetingMessage
 	// Speakers says whether segments name who spoke (per-speaker audio).
 	Speakers bool
+	// People are the members an uploaded recording's uploader said are in
+	// it (an upload has no attendance).
+	People []string
 }
 
 // Invitee is someone invited to a meeting: a member or an email address.

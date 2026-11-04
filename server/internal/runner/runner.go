@@ -456,32 +456,10 @@ func (w *workspace) ReadFile(ctx context.Context, path string) ([]byte, error) {
 // of the writable roots are created (the archive carries them), so agnts
 // can write /agnts/context/review/go.md into a fresh run.
 func (w *workspace) WriteFile(ctx context.Context, p string, data []byte) error {
-	p = path.Clean(p)
-	root := path.Dir(p)
-	for _, r := range []string{workDir, homeDir, outDir, contextDir} {
-		if strings.HasPrefix(p, r+"/") {
-			root = r
-			break
-		}
-	}
-	rel := strings.TrimPrefix(p, root+"/")
 	var buf bytes.Buffer
-	tw := tar.NewWriter(&buf)
-	dir := ""
-	for _, part := range strings.Split(path.Dir(rel), "/") {
-		if part == "." || part == "" {
-			continue
-		}
-		dir = path.Join(dir, part)
-		if err := tw.WriteHeader(&tar.Header{Name: dir + "/", Mode: 0o755, Typeflag: tar.TypeDir,
-			Uid: agentUID, Gid: agentUID, Uname: agentUser, Gname: agentUser, ModTime: time.Now()}); err != nil {
-			return err
-		}
-	}
-	if err := tw.WriteHeader(&tar.Header{
-		Name: rel, Mode: 0o644, Size: int64(len(data)), Typeflag: tar.TypeReg,
-		Uid: agentUID, Gid: agentUID, Uname: agentUser, Gname: agentUser, ModTime: time.Now(),
-	}); err != nil {
+	root, rel := tarPlace(p)
+	tw, err := fileTar(&buf, rel, int64(len(data)))
+	if err != nil {
 		return err
 	}
 	if _, err := tw.Write(data); err != nil {
@@ -491,6 +469,62 @@ func (w *workspace) WriteFile(ctx context.Context, p string, data []byte) error 
 		return err
 	}
 	return w.docker.PutArchive(ctx, w.id, root, &buf)
+}
+
+// WriteFileFrom implements ai.StreamWriter: a file of size bytes read
+// from r, streamed into the container without being held in memory.
+func (w *workspace) WriteFileFrom(ctx context.Context, p string, r io.Reader, size int64) error {
+	root, rel := tarPlace(p)
+	pr, pw := io.Pipe()
+	go func() {
+		tw, err := fileTar(pw, rel, size)
+		if err == nil {
+			_, err = io.CopyN(tw, r, size)
+		}
+		if err == nil {
+			err = tw.Close()
+		}
+		_ = pw.CloseWithError(err)
+	}()
+	err := w.docker.PutArchive(ctx, w.id, root, pr)
+	_ = pr.CloseWithError(err) // stops the copy when Docker gave up
+	return err
+}
+
+// tarPlace splits a path in the container into the folder a tar of it is
+// unpacked at and the path in the tar.
+func tarPlace(p string) (root, rel string) {
+	p = path.Clean(p)
+	root = path.Dir(p)
+	for _, r := range []string{workDir, homeDir, outDir, contextDir} {
+		if strings.HasPrefix(p, r+"/") {
+			root = r
+			break
+		}
+	}
+	return root, strings.TrimPrefix(p, root+"/")
+}
+
+// fileTar starts a tar on out of the file rel of size bytes and the
+// folders above it, and returns the writer to write the file's bytes with.
+func fileTar(out io.Writer, rel string, size int64) (*tar.Writer, error) {
+	tw := tar.NewWriter(out)
+	dir := ""
+	for _, part := range strings.Split(path.Dir(rel), "/") {
+		if part == "." || part == "" {
+			continue
+		}
+		dir = path.Join(dir, part)
+		if err := tw.WriteHeader(&tar.Header{Name: dir + "/", Mode: 0o755, Typeflag: tar.TypeDir,
+			Uid: agentUID, Gid: agentUID, Uname: agentUser, Gname: agentUser, ModTime: time.Now()}); err != nil {
+			return nil, err
+		}
+	}
+	err := tw.WriteHeader(&tar.Header{
+		Name: rel, Mode: 0o644, Size: size, Typeflag: tar.TypeReg,
+		Uid: agentUID, Gid: agentUID, Uname: agentUser, Gname: agentUser, ModTime: time.Now(),
+	})
+	return tw, err
 }
 
 // ExportRepo streams a tar of the files git would see in /workspace (or

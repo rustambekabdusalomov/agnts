@@ -116,7 +116,8 @@ const meetingVisibleTo = `($2 OR m.access = 'workspace' OR m.host_id = $1
 	OR EXISTS (SELECT 1 FROM meeting_cohosts c WHERE c.meeting_id = m.id AND c.user_id = $1)
 	OR EXISTS (SELECT 1 FROM meeting_invitees i WHERE i.meeting_id = m.id AND i.user_id = $1)
 	OR EXISTS (SELECT 1 FROM meeting_participants p JOIN meeting_sessions ps ON ps.id = p.session_id
-	           WHERE ps.meeting_id = m.id AND p.user_id = $1))`
+	           WHERE ps.meeting_id = m.id AND p.user_id = $1)
+	OR EXISTS (SELECT 1 FROM meeting_sessions us WHERE us.meeting_id = m.id AND $1 = ANY(us.people)))`
 
 // ListMeetings returns the meetings a person sees in a view.
 func (s *Meetings) ListMeetings(ctx context.Context, f MeetingFilter) ([]domain.Meeting, error) {
@@ -409,14 +410,14 @@ func (s *Meetings) SetMeetingReminderMin(ctx context.Context, userID int64, n in
 // --- Sessions ---
 
 const sessionCols = `s.id, s.workspace_id, s.meeting_id, s.room, s.started_at, s.connected_at, s.ended_at, s.guests_quiet, s.notes_on, s.notes_status,
-	s.notes_error, s.notes_by, s.document_id,
+	s.notes_error, s.notes_by, s.document_id, s.uploaded, s.people,
 	EXISTS (SELECT 1 FROM meeting_media r WHERE r.session_id = s.id AND r.kind = 'recording' AND r.status = 'active')`
 
 func scanSession(row pgx.Row) (domain.MeetingSession, error) {
 	var x domain.MeetingSession
 	var st string
 	err := row.Scan(&x.ID, &x.WorkspaceID, &x.MeetingID, &x.Room, &x.StartedAt, &x.ConnectedAt, &x.EndedAt, &x.GuestsQuiet, &x.NotesOn, &st,
-		&x.NotesError, &x.NotesBy, &x.DocumentID, &x.Recording)
+		&x.NotesError, &x.NotesBy, &x.DocumentID, &x.Uploaded, &x.People, &x.Recording)
 	x.NotesStatus = domain.NotesStatus(st)
 	return x, notFound(err)
 }
@@ -633,7 +634,7 @@ func (s *Meetings) PastSessions(ctx context.Context, userID int64, owner bool, b
 		var st, kind string
 		v := &x.Session
 		if err := rows.Scan(&v.ID, &v.WorkspaceID, &v.MeetingID, &v.Room, &v.StartedAt, &v.ConnectedAt, &v.EndedAt, &v.GuestsQuiet, &v.NotesOn, &st,
-			&v.NotesError, &v.NotesBy, &v.DocumentID, &v.Recording,
+			&v.NotesError, &v.NotesBy, &v.DocumentID, &v.Uploaded, &v.People, &v.Recording,
 			&x.Meeting.ID, &x.Meeting.Code, &x.Meeting.Title, &kind, &x.People, &x.Recordings, &x.ActionItems, &x.DocumentName); err != nil {
 			return nil, err
 		}
@@ -1016,11 +1017,13 @@ func (s *Meetings) AttendedMembers(ctx context.Context, sessionID int64) ([]int6
 }
 
 // Attended reports whether a member was in any session of a meeting, or
-// in one session when sessionID is set.
+// in one session when sessionID is set (or in its uploaded recording).
 func (s *Meetings) Attended(ctx context.Context, meetingID, sessionID, userID int64) (bool, error) {
 	var ok bool
 	err := s.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM meeting_participants p JOIN meeting_sessions ss ON ss.id = p.session_id
-		WHERE ss.meeting_id = $1 AND ($2 = 0 OR ss.id = $2) AND p.user_id = $3)`, meetingID, sessionID, userID).Scan(&ok)
+		WHERE ss.meeting_id = $1 AND ($2 = 0 OR ss.id = $2) AND p.user_id = $3)
+		OR EXISTS (SELECT 1 FROM meeting_sessions ss WHERE ss.meeting_id = $1 AND ($2 = 0 OR ss.id = $2) AND $3 = ANY(ss.people))`,
+		meetingID, sessionID, userID).Scan(&ok)
 	return ok, err
 }
 
@@ -1141,6 +1144,53 @@ func (s *Meetings) FinishMedia(ctx context.Context, egressID string, st domain.M
 // SetMediaStatus changes a file's status (deleted, expired).
 func (s *Meetings) SetMediaStatus(ctx context.Context, id int64, st domain.MediaStatus) error {
 	return s.exec1(ctx, `UPDATE meeting_media SET status = $2 WHERE id = $1`, id, string(st))
+}
+
+// SetMediaFile records that a file was replaced by another (an upload by
+// its sound) of bytes bytes.
+func (s *Meetings) SetMediaFile(ctx context.Context, id int64, file string, bytes int64) error {
+	return s.exec1(ctx, `UPDATE meeting_media SET file = $2, bytes = $3 WHERE id = $1`, id, file, bytes)
+}
+
+// NewUpload is a recording a host uploaded, as its session is made.
+type NewUpload struct {
+	MeetingID int64
+	StartedAt time.Time // when the meeting was held
+	By        int64
+	People    []int64 // members in it
+	EgressID  string  // the media's unique id ("upload-…")
+	File      string
+	Bytes     int64
+}
+
+// CreateUploadSession makes the ended session of an uploaded recording
+// and its file, with notes on and not yet queued (QueueNotes).
+func (s *Meetings) CreateUploadSession(ctx context.Context, u NewUpload) (domain.MeetingSession, error) {
+	var id int64
+	if u.People == nil {
+		u.People = []int64{} // the column is NOT NULL
+	}
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		if err := tx.QueryRow(ctx, `INSERT INTO meeting_sessions (workspace_id, meeting_id, started_at, connected_at, ended_at, notes_on, notes_by, uploaded, people)
+			SELECT workspace_id, id, $2, $2, $2, true, $3, true, $4 FROM meetings WHERE id = $1 RETURNING id`,
+			u.MeetingID, u.StartedAt, u.By, u.People).Scan(&id); err != nil {
+			return notFound(err)
+		}
+		_, err := tx.Exec(ctx, `INSERT INTO meeting_media (workspace_id, session_id, kind, egress_id, file, bytes, started_at, ended_at, status, started_by)
+			SELECT workspace_id, id, 'upload', $2, $3, $4, now(), now(), 'ready', $5 FROM meeting_sessions WHERE id = $1`,
+			id, u.EgressID, u.File, u.Bytes, u.By)
+		return err
+	})
+	if err != nil {
+		return domain.MeetingSession{}, err
+	}
+	return s.Session(ctx, id)
+}
+
+// SetUploadLength sets an uploaded session's end from how long its sound
+// runs, once it is heard.
+func (s *Meetings) SetUploadLength(ctx context.Context, id int64, ms int) error {
+	return s.exec1(ctx, `UPDATE meeting_sessions SET ended_at = started_at + make_interval(secs => $2::float8 / 1000) WHERE id = $1 AND uploaded`, id, ms)
 }
 
 // ActiveRecordings counts the video recordings running in the scope's
@@ -1279,27 +1329,79 @@ func (s *Meetings) SearchTranscripts(ctx context.Context, userID int64, owner bo
 	})
 }
 
+const actionItemCols = `a.id, a.session_id, a.position, a.text, a.who, a.due, a.at_ms, a.quote, a.speaker, a.who_user_id, a.who_set_by, a.drafted,
+	a.ticket_id, COALESCE(t.key, ''), COALESCE(NULLIF(u.display_name, ''), u.username, '')`
+
+const actionItemFrom = `meeting_action_items a LEFT JOIN tickets t ON t.id = a.ticket_id LEFT JOIN users u ON u.id = a.who_user_id`
+
+func scanActionItem(r pgx.Row) (domain.ActionItem, error) {
+	var a domain.ActionItem
+	err := r.Scan(&a.ID, &a.SessionID, &a.Position, &a.Text, &a.Who, &a.Due, &a.AtMS, &a.Quote, &a.Speaker, &a.WhoUserID, &a.WhoSetBy, &a.Drafted,
+		&a.TicketID, &a.TicketKey, &a.WhoName)
+	return a, err
+}
+
 // ActionItems returns a session's action items in order, with their tickets.
 func (s *Meetings) ActionItems(ctx context.Context, sessionID int64) ([]domain.ActionItem, error) {
-	rows, err := s.db.Query(ctx, `SELECT a.id, a.session_id, a.position, a.text, a.who, a.due, a.at_ms, a.quote, a.ticket_id, COALESCE(t.key, '')
-		FROM meeting_action_items a LEFT JOIN tickets t ON t.id = a.ticket_id WHERE a.session_id = $1 ORDER BY a.position, a.id`, sessionID)
+	rows, err := s.db.Query(ctx, `SELECT `+actionItemCols+` FROM `+actionItemFrom+` WHERE a.session_id = $1 ORDER BY a.position, a.id`, sessionID)
 	if err != nil {
 		return nil, err
 	}
-	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.ActionItem, error) {
-		var a domain.ActionItem
-		err := r.Scan(&a.ID, &a.SessionID, &a.Position, &a.Text, &a.Who, &a.Due, &a.AtMS, &a.Quote, &a.TicketID, &a.TicketKey)
-		return a, err
-	})
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.ActionItem, error) { return scanActionItem(r) })
 }
 
 // ActionItem returns one action item.
 func (s *Meetings) ActionItem(ctx context.Context, id int64) (domain.ActionItem, error) {
-	var a domain.ActionItem
-	err := s.db.QueryRow(ctx, `SELECT a.id, a.session_id, a.position, a.text, a.who, a.due, a.at_ms, a.quote, a.ticket_id, COALESCE(t.key, '')
-		FROM meeting_action_items a LEFT JOIN tickets t ON t.id = a.ticket_id WHERE a.id = $1`, id).
-		Scan(&a.ID, &a.SessionID, &a.Position, &a.Text, &a.Who, &a.Due, &a.AtMS, &a.Quote, &a.TicketID, &a.TicketKey)
+	a, err := scanActionItem(s.db.QueryRow(ctx, `SELECT `+actionItemCols+` FROM `+actionItemFrom+` WHERE a.id = $1`, id))
 	return a, notFound(err)
+}
+
+// SetActionItemMember records the member who takes an action item: by is
+// who picked them by hand, 0 when agnts matched the name. A matched member
+// never replaces one picked by hand.
+func (s *Meetings) SetActionItemMember(ctx context.Context, itemID int64, userID *int64, by int64) error {
+	if by == 0 {
+		_, err := s.db.Exec(ctx, `UPDATE meeting_action_items SET who_user_id = $2 WHERE id = $1 AND who_set_by IS NULL`, itemID, userID)
+		return err
+	}
+	return s.exec1(ctx, `UPDATE meeting_action_items SET who_user_id = $2, who_set_by = $3 WHERE id = $1`, itemID, userID, by)
+}
+
+// SetActionItemsDrafted marks action items as having (true) or not
+// having had (false) their draft ticket made.
+func (s *Meetings) SetActionItemsDrafted(ctx context.Context, ids []int64, drafted bool) error {
+	_, err := s.db.Exec(ctx, `UPDATE meeting_action_items SET drafted = $2 WHERE id = ANY($1)`, ids, drafted)
+	return err
+}
+
+// NameCandidates returns the members an action item of a session may
+// name, with the names they go by; Near ones were in the call, are
+// invited, host it, or are in the uploaded recording.
+func (s *Meetings) NameCandidates(ctx context.Context, sessionID int64) ([]domain.NameCandidate, error) {
+	rows, err := s.db.Query(ctx, `SELECT u.id, u.display_name, u.username, COALESCE(split_part(u.email, '@', 1), ''),
+			COALESCE((SELECT array_agg(DISTINCT p.name) FROM meeting_participants p WHERE p.session_id = ss.id AND p.user_id = u.id), '{}'),
+			EXISTS (SELECT 1 FROM meeting_participants p WHERE p.session_id = ss.id AND p.user_id = u.id)
+			OR EXISTS (SELECT 1 FROM meeting_invitees i WHERE i.meeting_id = ss.meeting_id AND i.user_id = u.id)
+			OR EXISTS (SELECT 1 FROM meeting_cohosts c WHERE c.meeting_id = ss.meeting_id AND c.user_id = u.id)
+			OR m.host_id = u.id OR u.id = ANY(ss.people)
+		FROM meeting_sessions ss JOIN meetings m ON m.id = ss.meeting_id
+		JOIN memberships ms ON ms.workspace_id = ss.workspace_id JOIN users u ON u.id = ms.user_id
+		WHERE ss.id = $1 ORDER BY u.id`, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.NameCandidate, error) {
+		var c domain.NameCandidate
+		var display, username, mailName string
+		var joined []string
+		err := r.Scan(&c.UserID, &display, &username, &mailName, &joined, &c.Near)
+		for _, n := range append([]string{display, username, mailName}, joined...) {
+			if n != "" {
+				c.Names = append(c.Names, n)
+			}
+		}
+		return c, err
+	})
 }
 
 // SetActionItemTicket records the ticket made from an action item, and
@@ -1395,6 +1497,15 @@ func (s *Meetings) NotesInput(ctx context.Context, sessionID int64) (domain.Meet
 		if g.Identity != "" {
 			in.Speakers = true
 			break
+		}
+	}
+	if len(x.People) > 0 {
+		rows, err := s.db.Query(ctx, `SELECT COALESCE(NULLIF(display_name, ''), username) FROM users WHERE id = ANY($1) ORDER BY 1`, x.People)
+		if err != nil {
+			return in, err
+		}
+		if in.People, err = pgx.CollectRows(rows, pgx.RowTo[string]); err != nil {
+			return in, err
 		}
 	}
 	return in, nil

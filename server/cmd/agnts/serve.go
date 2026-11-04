@@ -1424,21 +1424,25 @@ func (m museAPI) LoginStatus(id string, ws, user int64) (musecredits.Login, bool
 func newMeetings(cfg config.Config, a *agent, docSvc *documents.Service, broker *httpapi.Broker, mailer mail.Sender, log *slog.Logger) *meetings.Service {
 	keys := livekit.Keys{Key: cfg.LiveKitKey, Secret: cfg.LiveKitSecret}
 	mcfg := meetings.Config{LiveKitURL: cfg.LiveKitURL, Keys: keys, PublicURL: cfg.PublicURL.String(), MediaDir: cfg.MeetingsDir,
-		EgressDir: cfg.MeetingsEgressDir, Egress: cfg.LiveKitEgress, MaxRecordings: cfg.MeetMaxRecordings, NotesAudio: cfg.MeetNotesAudio}
+		EgressDir: cfg.MeetingsEgressDir, Egress: cfg.LiveKitEgress, MaxRecordings: cfg.MeetMaxRecordings, NotesAudio: cfg.MeetNotesAudio,
+		MaxUploadBytes: int64(cfg.MeetMaxUploadMB) << 20}
 	deps := meetings.Deps{Store: a.meetStore, Workspaces: a.workspaces, Users: a.users, Settings: a.settings, Stream: broker,
 		Pusher: a.notifier, Mailer: mailer, Notes: docSvc, Tickets: meetingTickets{a.orch, a.store}, Log: log}
 	if cfg.LiveKitURL != "" {
 		deps.LiveKit = livekit.NewClient(cfg.LiveKitInternalURL, keys)
 		if cfg.AgentEnabled {
 			deps.Hearer = a.orch
-		}
-		if cfg.LiveKitEgress {
-			if err := meetingsDir(cfg.MeetingsDir); err != nil {
-				log.Warn("recordings and notes are off: the meetings directory is not usable", "dir", cfg.MeetingsDir, "err", err)
-				mcfg.Egress = false
+			if a.runner != nil {
+				// Uploaded recordings: ffmpeg in a box of the run image takes the sound out.
+				deps.Sound = meetings.BoxSound{Boxes: a.runner, Image: cfg.RunnerImage}
 			}
 		}
-		log.Info("meetings on", "livekit", cfg.LiveKitURL, "recording", mcfg.Egress, "notes", mcfg.Egress && deps.Hearer != nil, "notes_audio", cfg.MeetNotesAudio)
+		if err := meetingsDir(cfg.MeetingsDir); err != nil {
+			log.Warn("recordings, notes and uploads are off: the meetings directory is not usable", "dir", cfg.MeetingsDir, "err", err)
+			mcfg.Egress, mcfg.MediaDir, deps.Sound = false, "", nil
+		}
+		log.Info("meetings on", "livekit", cfg.LiveKitURL, "recording", mcfg.Egress, "notes", mcfg.Egress && deps.Hearer != nil,
+			"uploads", deps.Sound != nil, "notes_audio", cfg.MeetNotesAudio)
 	} else {
 		log.Info("meetings off: set AGNTS_LIVEKIT_URL, AGNTS_LIVEKIT_API_KEY and AGNTS_LIVEKIT_API_SECRET to enable video calls")
 	}
@@ -1483,6 +1487,14 @@ func (t meetingTickets) CreateTask(ctx context.Context, in orchestrator.TaskInpu
 
 func (t meetingTickets) TicketByKey(ctx context.Context, key string) (domain.Ticket, error) {
 	return t.store.TicketByKey(ctx, key)
+}
+
+func (t meetingTickets) SetMember(ctx context.Context, key string, userID int64, name string, origin domain.Origin) (domain.Ticket, error) {
+	return t.orch.SetMember(ctx, key, userID, name, origin)
+}
+
+func (t meetingTickets) DeleteTask(ctx context.Context, key string, origin domain.Origin) error {
+	return t.orch.DeleteTask(ctx, key, origin)
 }
 
 // logTriager is the orchestrator's model triage of log findings, as the

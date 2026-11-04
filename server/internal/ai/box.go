@@ -45,6 +45,12 @@ type Box interface {
 	OOM(ctx context.Context, code int) error
 }
 
+// StreamWriter is a Box that can take a file from a stream: one too big
+// to hold in memory (an uploaded recording).
+type StreamWriter interface {
+	WriteFileFrom(ctx context.Context, path string, r io.Reader, size int64) error
+}
+
 // Process is a command started with Box.Attach.
 type Process interface {
 	io.ReadWriteCloser // Close ends its stdin

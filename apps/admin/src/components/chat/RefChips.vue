@@ -62,6 +62,8 @@ async function remove(r: ChatRef) {
 .refs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .ref { position: relative; display: inline-flex; align-items: center; border-radius: 999px; background: var(--gray-soft); color: var(--gray-ink); font-size: 12.5px; font-weight: 700; }
 .ref.ticket, .ref.pr { font-family: var(--mono); }
+/* A ref a card brought has the class card (its source): not the page's .card box. */
+.ref.card { padding: 4px; }
 .ref.model { background: var(--primary-soft); color: var(--primary-ink); animation: ref-in 0.9s ease-out both; }
 .ref.busy { opacity: 0.5; }
 .ref-a { display: inline-flex; gap: 3px; padding: 2px 10px; color: inherit; text-decoration: none; }

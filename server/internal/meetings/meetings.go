@@ -107,6 +107,9 @@ type Store interface {
 	SessionMedia(ctx context.Context, sessionID int64, kinds ...domain.MediaKind) ([]domain.MeetingMedia, error)
 	FinishMedia(ctx context.Context, egressID string, st domain.MediaStatus, bytes int64, endedAt time.Time, msg string) (domain.MeetingMedia, error)
 	SetMediaStatus(ctx context.Context, id int64, st domain.MediaStatus) error
+	SetMediaFile(ctx context.Context, id int64, file string, bytes int64) error
+	CreateUploadSession(ctx context.Context, u postgres.NewUpload) (domain.MeetingSession, error)
+	SetUploadLength(ctx context.Context, id int64, ms int) error
 	ActiveRecordings(ctx context.Context) (int, error)
 	MediaBytes(ctx context.Context) (int64, error)
 	StaleActiveMedia(ctx context.Context, before time.Time) ([]domain.MeetingMedia, error)
@@ -119,6 +122,9 @@ type Store interface {
 	ActionItems(ctx context.Context, sessionID int64) ([]domain.ActionItem, error)
 	ActionItem(ctx context.Context, id int64) (domain.ActionItem, error)
 	SetActionItemTicket(ctx context.Context, itemID, ticketID, by int64) (bool, error)
+	SetActionItemMember(ctx context.Context, itemID int64, userID *int64, by int64) error
+	SetActionItemsDrafted(ctx context.Context, ids []int64, drafted bool) error
+	NameCandidates(ctx context.Context, sessionID int64) ([]domain.NameCandidate, error)
 	MeetingTickets(ctx context.Context, meetingID, ticketID int64) ([]postgres.MeetingTicket, error)
 	LinkMeetingTicket(ctx context.Context, meetingID, ticketID, by int64) error
 	UnlinkMeetingTicket(ctx context.Context, meetingID, ticketID int64) error
@@ -196,6 +202,8 @@ type Hearer interface {
 type Tickets interface {
 	CreateTask(ctx context.Context, in orchestrator.TaskInput, origin domain.Origin) (domain.Ticket, error)
 	TicketByKey(ctx context.Context, key string) (domain.Ticket, error)
+	SetMember(ctx context.Context, key string, userID int64, name string, origin domain.Origin) (domain.Ticket, error)
+	DeleteTask(ctx context.Context, key string, origin domain.Origin) error
 }
 
 // Config is how the service reaches LiveKit and where files go.
@@ -217,6 +225,8 @@ type Config struct {
 	NotesAudio string
 	// MaxAudioBytes caps the audio one session's notes may hear.
 	MaxAudioBytes int64
+	// MaxUploadBytes caps an uploaded recording (default 2 GB).
+	MaxUploadBytes int64
 }
 
 // NotesPerSpeaker is the NotesAudio setting that records each microphone.
@@ -232,9 +242,10 @@ type Deps struct {
 	Stream     Stream // nil: nobody hears live events
 	Pusher     Pusher // nil: no pushes
 	Mailer     mail.Sender
-	Notes      Notes   // nil: no notes
-	Hearer     Hearer  // nil: no notes
-	Tickets    Tickets // nil: action items can't become tickets
+	Notes      Notes      // nil: no notes
+	Hearer     Hearer     // nil: no notes
+	Tickets    Tickets    // nil: action items can't become tickets
+	Sound      SoundTaker // nil: recordings can't be uploaded
 	Log        *slog.Logger
 }
 
@@ -256,6 +267,9 @@ func New(cfg Config, d Deps) *Service {
 	}
 	if cfg.MaxAudioBytes <= 0 {
 		cfg.MaxAudioBytes = 512 << 20
+	}
+	if cfg.MaxUploadBytes <= 0 {
+		cfg.MaxUploadBytes = 2 << 30
 	}
 	if cfg.EgressDir == "" {
 		cfg.EgressDir = cfg.MediaDir

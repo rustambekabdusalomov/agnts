@@ -187,3 +187,43 @@ func TestWriteFileCreatesDirs(t *testing.T) {
 		}
 	}
 }
+
+// TestWriteFileFromStreams streams a file bigger than a pipe's buffer
+// into a container (an uploaded recording) and reads it back.
+func TestWriteFileFromStreams(t *testing.T) {
+	if os.Getenv("AGNTS_TEST_DOCKER") != "1" {
+		t.Skip("AGNTS_TEST_DOCKER=1 not set")
+	}
+	sock := os.Getenv("AGNTS_DOCKER_SOCKET")
+	if sock == "" {
+		sock = "/var/run/docker.sock"
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	d := NewDocker(sock)
+	id, err := d.Create(ctx, ContainerConfig{
+		Name: "agnts-test-stream-" + time.Now().Format("150405.000000"), Image: "alpine:3.20", WorkingDir: "/workspace",
+		Cmd: []string{"sleep", "120"}, Labels: map[string]string{"agnts.test": "1"}, MemoryMB: 128, CPUs: 0.5, PIDs: 64,
+		Volumes: []string{homeDir},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = d.Remove(context.Background(), id) }()
+	if err := d.Start(ctx, id); err != nil {
+		t.Fatal(err)
+	}
+	ws := &workspace{docker: d, id: id}
+	body := bytes.Repeat([]byte("0123456789abcdef"), 1<<16) // 1 MiB
+	if err := ws.WriteFileFrom(ctx, homeDir+"/voice/upload.mp4", bytes.NewReader(body), int64(len(body))); err != nil {
+		t.Fatal(err)
+	}
+	got, err := ws.ReadFile(ctx, homeDir+"/voice/upload.mp4")
+	if err != nil || !bytes.Equal(got, body) {
+		t.Fatalf("read back %d bytes, %v", len(got), err)
+	}
+	// A reader shorter than it says fails instead of writing half a file.
+	if err := ws.WriteFileFrom(ctx, homeDir+"/voice/short.mp4", bytes.NewReader(body[:10]), 100); err == nil {
+		t.Error("a short stream was written")
+	}
+}
