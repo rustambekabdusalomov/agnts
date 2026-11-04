@@ -45,6 +45,7 @@ type Store interface {
 	Ledger(ctx context.Context, ws int64, limit int) ([]postgres.LedgerEntry, error)
 	RunCostUSD(ctx context.Context, runID int64) (float64, error)
 	DocumentRunCostUSD(ctx context.Context, runID int64) (float64, error)
+	ScoreRunCostUSD(ctx context.Context, runID int64) (float64, error)
 	CreatePayment(ctx context.Context, p postgres.Payment) (postgres.Payment, error)
 	PaymentByID(ctx context.Context, id int64) (postgres.Payment, error)
 	PaymentByTxn(ctx context.Context, provider, txn string) (postgres.Payment, error)
@@ -338,6 +339,34 @@ func (s *Service) SettleDocument(ctx context.Context, ws, runID int64) error {
 	}
 	_, err = s.store.Add(ctx, postgres.LedgerEntry{WorkspaceID: ws, Amount: -credits, Reason: postgres.CreditDocument, DocumentRunID: &runID,
 		Note: fmt.Sprintf("$%.2f of API cost (document)", usd)})
+	if errors.Is(err, postgres.ErrAlreadyCharged) {
+		return nil
+	}
+	if err == nil {
+		s.changed(ws)
+	}
+	return err
+}
+
+// Afford returns the credits usd of API cost takes and the workspace's
+// balance, for a cost estimate.
+func (s *Service) Afford(ctx context.Context, ws int64, usd float64) (need, balance int64, err error) {
+	balance, err = s.store.Balance(ctx, ws)
+	return creditsOf(usd), balance, err
+}
+
+// SettleScore charges a finished performance review score's cost, once.
+func (s *Service) SettleScore(ctx context.Context, ws, runID int64, key string) error {
+	usd, err := s.store.ScoreRunCostUSD(ctx, runID)
+	if err != nil {
+		return err
+	}
+	credits := creditsOf(usd)
+	if credits <= 0 {
+		return nil
+	}
+	_, err = s.store.Add(ctx, postgres.LedgerEntry{WorkspaceID: ws, Amount: -credits, Reason: postgres.CreditScore, ScoreRunID: &runID, TicketKey: key,
+		Note: fmt.Sprintf("$%.2f of API cost (score)", usd)})
 	if errors.Is(err, postgres.ErrAlreadyCharged) {
 		return nil
 	}

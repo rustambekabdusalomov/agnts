@@ -35,10 +35,13 @@ const (
 	// ClassDocument is a document generation: someone waits for it, so
 	// it ranks right after the ticket's own stages.
 	ClassDocument QueueClass = "document"
+	// ClassScore scores a delivered ticket for performance reviews:
+	// nobody waits on it, it takes only spare room.
+	ClassScore QueueClass = "score"
 )
 
 func (c QueueClass) rank() int {
-	return map[QueueClass]int{ClassRule: 0, ClassMain: 1, ClassDocument: 2, ClassBrief: 3, ClassReview: 4, ClassPreview: 5, ClassSecurity: 6, ClassSecurityScan: 7, ClassLearn: 8, ClassReflect: 9}[c]
+	return map[QueueClass]int{ClassRule: 0, ClassMain: 1, ClassDocument: 2, ClassBrief: 3, ClassReview: 4, ClassPreview: 5, ClassSecurity: 6, ClassSecurityScan: 7, ClassLearn: 8, ClassReflect: 9, ClassScore: 10}[c]
 }
 
 // QueueItem is a ticket waiting for a run.
@@ -288,6 +291,13 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 		}
 	}
 
+	var scoreWS []int64
+	if sr := o.scoreRuns(); sr != nil && o.scoreHost != nil {
+		if scoreWS, err = sr.PendingScoreWorkspaces(sys); err != nil && ctx.Err() == nil {
+			o.log.Warn("read pending scores", "err", err)
+		}
+	}
+
 	queues := map[int64]*wsQueue{}
 	get := func(id int64) *wsQueue {
 		if q, ok := queues[id]; ok {
@@ -336,6 +346,12 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 	for _, id := range secWS {
 		if q := get(id); q != nil {
 			q.items = append(q.items, QueueItem{WorkspaceID: id, Class: ClassSecurityScan})
+		}
+	}
+	for _, id := range scoreWS {
+		if q := get(id); q != nil {
+			// No person: the workspace's own connection or its credits.
+			q.items = append(q.items, QueueItem{WorkspaceID: id, Class: ClassScore})
 		}
 	}
 	for _, it := range items {
@@ -408,7 +424,7 @@ func (o *Orchestrator) tick(ctx context.Context, start func(job scheduled)) {
 				var release func()
 				if o.capacity != nil {
 					mem = o.capacity.RunMemory(it.MemoryMB)
-					if (it.Class == ClassLearn || it.Class == ClassReflect || it.Class == ClassSecurityScan) && !o.capacity.Spare(mem) {
+					if (it.Class == ClassLearn || it.Class == ClassReflect || it.Class == ClassSecurityScan || it.Class == ClassScore) && !o.capacity.Spare(mem) {
 						continue // learn, reflect and security scans only take spare room
 					}
 					rel, fits, why := o.capacity.Reserve(mem)
@@ -562,6 +578,8 @@ func purposeOf(it QueueItem) ai.Purpose {
 		return domain.PurposeReflect
 	case ClassSecurityScan:
 		return domain.PurposeSecurity
+	case ClassScore:
+		return domain.PurposeScore
 	}
 	return ai.Purpose(it.Class)
 }
@@ -589,6 +607,8 @@ type scheduled struct {
 	hasAcct bool
 	// docRunID is the document generation it runs, 0 for anything else.
 	docRunID int64
+	// scoreRunID is the score it runs, 0 for anything else.
+	scoreRunID int64
 }
 
 // claimItem claims the run an item waits for.
@@ -623,6 +643,16 @@ func (o *Orchestrator) claimItem(ctx context.Context, it QueueItem) (scheduled, 
 			return scheduled{}, false
 		}
 		return scheduled{ws: it.WorkspaceID, stage: "document", docRunID: r.ID, work: func(ctx context.Context) { o.writeDocument(ctx, r) }}, true
+	}
+	if it.Class == ClassScore {
+		r, ok, err := o.scoreRuns().ClaimScoreRun(wctx)
+		if err != nil {
+			o.log.Error("claim score", "workspace", it.WorkspaceID, "err", err)
+		}
+		if !ok {
+			return scheduled{}, false
+		}
+		return scheduled{ws: it.WorkspaceID, key: r.TicketKey, stage: "score", scoreRunID: r.ID, work: func(ctx context.Context) { o.scoreDelivery(ctx, r) }}, true
 	}
 	if it.Class == ClassSecurityScan {
 		s, ok, err := o.security.ClaimSecurityScan(wctx)
@@ -714,7 +744,21 @@ func (o *Orchestrator) runScheduled(ctx context.Context, j scheduled) {
 			o.log.Warn("record document run account", "document_run", j.docRunID, "err", err)
 		}
 	}
+	if j.hasAcct && j.scoreRunID > 0 {
+		var conn *int64
+		if acct.ConnectionID > 0 {
+			conn = &acct.ConnectionID
+		}
+		if err := o.scoreRuns().SetScoreRunAccount(wctx, j.scoreRunID, conn, onCredits); err != nil {
+			o.log.Warn("record score run account", "score_run", j.scoreRunID, "err", err)
+		}
+	}
 	j.work(wctx)
+	if sc, ok := o.credits.(ScoreCredits); ok && j.hasAcct && onCredits && j.scoreRunID > 0 {
+		if err := sc.SettleScore(context.WithoutCancel(wctx), j.ws, j.scoreRunID, j.key); err != nil {
+			o.log.Error("charge score to credits", "score_run", j.scoreRunID, "err", err)
+		}
+	}
 	if j.hasAcct && onCredits && o.credits != nil && j.runID > 0 {
 		if err := o.credits.Settle(context.WithoutCancel(wctx), j.ws, j.runID, j.key); err != nil {
 			o.log.Error("charge run to credits", "run_id", j.runID, "err", err)

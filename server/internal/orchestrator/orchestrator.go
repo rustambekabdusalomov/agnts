@@ -123,6 +123,9 @@ type Deps struct {
 	// DocumentHost reads commits and pull requests for documents; nil
 	// leaves those sources out.
 	DocumentHost DocumentHost
+	// ScoreHost reads the diffs performance review scores are made of;
+	// nil: nothing is scored.
+	ScoreHost ScoreHost
 }
 
 // Orchestrator runs tickets through their stages.
@@ -167,10 +170,11 @@ type Orchestrator struct {
 	credits    Credits
 	sched      *schedState
 
-	docs     DocumentRuns
-	docHost  DocumentHost
-	docWatch DocumentWatcher
-	meetings MeetingNotesSource // nil: no meeting notes
+	docs      DocumentRuns
+	docHost   DocumentHost
+	scoreHost ScoreHost
+	docWatch  DocumentWatcher
+	meetings  MeetingNotesSource // nil: no meeting notes
 
 	swagger SwaggerTests
 	suites  SwaggerSuites
@@ -221,7 +225,7 @@ func New(cfg Config, d Deps, log *slog.Logger) *Orchestrator {
 		settings: personSettings{d.Settings}, stored: d.Settings, access: d.Access, usage: d.Usage, lessons: d.Lessons, rules: d.Rules, briefs: d.Briefs, reflections: d.Reflections, security: d.Security, pulls: d.PullReviews, prposts: d.PRPosts, drafts: d.ReviewDrafts, trans: d.Translations,
 		shots: d.Shots, envs: d.PreviewEnvs, builds: d.BuildEnvs, log: log,
 		queue: q, workspaces: d.Workspaces, accounts: d.Accounts, capacity: d.Capacity, credits: d.Credits, sched: newSchedState(),
-		swagger: d.SwaggerTests, specs: newSpecFetcher(), docs: d.Documents, docHost: d.DocumentHost,
+		swagger: d.SwaggerTests, specs: newSpecFetcher(), docs: d.Documents, docHost: d.DocumentHost, scoreHost: d.ScoreHost,
 		wake:    make(chan struct{}, 1),
 		cancels: map[string]context.CancelFunc{},
 	}
@@ -236,6 +240,12 @@ func spendTo(store Store, docs DocumentRuns) ai.Spend {
 				return nil
 			}
 			return docs.RecordDocumentCall(ctx, c.DocumentRunID, c)
+		}
+		if c.ScoreRunID > 0 {
+			if sc, ok := store.(ScoreRuns); ok {
+				return sc.RecordScoreCall(ctx, c.ScoreRunID, c)
+			}
+			return nil
 		}
 		if store == nil {
 			return nil
@@ -343,6 +353,13 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			o.log.Warn("requeued interrupted reflect runs", "count", n)
 		}
 	}
+	if sr := o.scoreRuns(); sr != nil {
+		if n, err := sr.RecoverScoreRuns(sys); err != nil {
+			return fmt.Errorf("recover interrupted scores: %w", err)
+		} else if n > 0 {
+			o.log.Warn("requeued interrupted scores", "count", n)
+		}
+	}
 	if o.recorder != nil {
 		if n, err := o.recorder.RecoverTranscripts(sys); err != nil {
 			o.log.Error("close interrupted transcripts", "err", err) // run history must not stop the worker
@@ -360,7 +377,7 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	defer wg.Wait()
 	tick := time.NewTicker(o.cfg.PollEvery)
 	defer tick.Stop()
-	lastResume, lastPrune, lastMerges, lastPulls := time.Time{}, time.Time{}, time.Time{}, time.Time{}
+	lastResume, lastPrune, lastMerges, lastPulls, lastPerf := time.Time{}, time.Time{}, time.Time{}, time.Time{}, time.Time{}
 	// The vulnerability databases are first fetched a minute after start,
 	// then once a day.
 	// The vulnerability databases are first fetched a minute after start,
@@ -398,6 +415,10 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 					nextSecDB.Store(time.Now().Add(secDBRetry).UnixNano())
 				}
 			}()
+		}
+		if o.scoreHost != nil && time.Since(lastPerf) > time.Minute {
+			lastPerf = time.Now()
+			o.PerfTick(sys)
 		}
 		if time.Since(lastPulls) > ReviewSyncEvery {
 			lastPulls = time.Now()
@@ -516,6 +537,15 @@ func (o *Orchestrator) claim(ctx context.Context) (func(context.Context), bool, 
 		}
 		if ok {
 			return func(ctx context.Context) { o.runSecurityScan(ctx, s) }, true, nil
+		}
+	}
+	if sr := o.scoreRuns(); sr != nil && o.scoreHost != nil {
+		r, ok, err := sr.ClaimScoreRun(ctx)
+		if err != nil {
+			return nil, false, err
+		}
+		if ok {
+			return func(ctx context.Context) { o.scoreDelivery(ctx, r) }, true, nil
 		}
 	}
 	if o.reflections != nil {

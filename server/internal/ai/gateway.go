@@ -70,6 +70,7 @@ type Call struct {
 	// is recorded; neither: it is not.
 	RunID         int64
 	DocumentRunID int64
+	ScoreRunID    int64
 	ModelStage    string
 	// Record keeps the call's transcript; nil: none.
 	Record Recording
@@ -348,7 +349,7 @@ func (g *Gateway) credential(ctx context.Context, acct Account) (Credential, err
 // they were spent all the same. A call that never reached the model (no
 // turns, no tokens) is not recorded.
 func (g *Gateway) spend(ctx context.Context, c Call, acct Account, res Result) {
-	if g.d.Spend == nil || (c.RunID == 0 && c.DocumentRunID == 0) || (res.Usage.IsZero() && res.Turns == 0) {
+	if g.d.Spend == nil || (c.RunID == 0 && c.DocumentRunID == 0 && c.ScoreRunID == 0) || (res.Usage.IsZero() && res.Turns == 0) {
 		return
 	}
 	model := c.Req.Model
@@ -356,13 +357,13 @@ func (g *Gateway) spend(ctx context.Context, c Call, acct Account, res Result) {
 		model = res.Model
 	}
 	call := domain.ClaudeCall{
-		RunID: c.RunID, DocumentRunID: c.DocumentRunID, ModelStage: c.ModelStage, Model: model, Usage: res.Usage,
+		RunID: c.RunID, DocumentRunID: c.DocumentRunID, ScoreRunID: c.ScoreRunID, ModelStage: c.ModelStage, Model: model, Usage: res.Usage,
 		Turns: res.Turns, Duration: res.Duration, Partial: res.Partial, TranscriptID: res.TranscriptID, Provider: acct.Provider,
 		ConnectionID: acct.ConnectionID, OnCredits: acct.Credits,
 	}
 	// The call may have been stopped; the spend is recorded regardless.
 	if err := g.d.Spend(context.WithoutCancel(ctx), call); err != nil {
-		g.d.Log.Error("record spend", "run_id", c.RunID, "document_run_id", c.DocumentRunID, "err", err)
+		g.d.Log.Error("record spend", "run_id", c.RunID, "document_run_id", c.DocumentRunID, "score_run_id", c.ScoreRunID, "err", err)
 	}
 }
 
