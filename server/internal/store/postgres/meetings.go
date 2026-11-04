@@ -1378,8 +1378,6 @@ func (s *Meetings) SetActionItemMember(ctx context.Context, itemID int64, userID
 	return s.exec1(ctx, `UPDATE meeting_action_items SET who_user_id = $2, who_set_by = $3 WHERE id = $1`, itemID, userID, by)
 }
 
-// SetActionItemsDrafted marks action items as having (true) or not
-// having had (false) their draft ticket made.
 // DraftedSessions returns, across workspaces, the sessions with action
 // items whose ticket was made as a draft when the notes were written
 // (before drafts stayed in the meeting). ctx must be system work.
@@ -1396,6 +1394,8 @@ func (s *Meetings) DraftedSessions(ctx context.Context) ([]domain.MeetingSession
 	})
 }
 
+// SetActionItemsDrafted marks action items as having (true) or not
+// having had (false) their draft ticket made.
 func (s *Meetings) SetActionItemsDrafted(ctx context.Context, ids []int64, drafted bool) error {
 	_, err := s.db.Exec(ctx, `UPDATE meeting_action_items SET drafted = $2 WHERE id = ANY($1)`, ids, drafted)
 	return err
