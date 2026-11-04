@@ -25,7 +25,7 @@ type Auth = 'none' | 'basic' | 'bearer' | 'apikey' | 'aws'
 const blank = () => ({
   name: '', kind: 'loki' as LogKind, environment: 'production' as LogSourceInput['environment'], address: '',
   authKind: 'none' as Auth, user: '', password: '', token: '', tenant: '', changeAuth: true,
-  selector: '', index: '', caPem: '', pollSeconds: 15, enabled: true,
+  selector: '', index: '', caPem: '', pollSeconds: 15, enabled: true, traceUrl: '',
   fields: { message: '', timestamp: '', level: '', service: '', revision: '' },
 })
 const form = reactive(blank())
@@ -42,7 +42,7 @@ watch(open, (v) => {
   Object.assign(form, {
     name: c.name, kind: c.kind, environment: c.environment, address: c.address, authKind: c.authKind as Auth,
     user: c.authUser ?? '', tenant: c.authTenant ?? '', changeAuth: !c.hasAuth, selector: c.scope.selector ?? '',
-    index: c.scope.index ?? '', caPem: c.caPem, pollSeconds: c.pollSeconds, enabled: c.enabled,
+    index: c.scope.index ?? '', caPem: c.caPem, pollSeconds: c.pollSeconds, enabled: c.enabled, traceUrl: c.fields.traceUrl ?? '',
     fields: { message: c.fields.message ?? '', timestamp: c.fields.timestamp ?? '', level: c.fields.level ?? '', service: c.fields.service ?? '', revision: c.fields.revision ?? '' },
   })
 })
@@ -57,7 +57,7 @@ const pulls = computed(() => form.kind !== 'push')
 const empty = (s: string) => s.trim() || undefined
 
 function input(): LogSourceInput {
-  const fields = Object.fromEntries(Object.entries(form.fields).map(([k, v]) => [k, empty(v)]))
+  const fields = { ...Object.fromEntries(Object.entries(form.fields).map(([k, v]) => [k, empty(v)])), traceUrl: empty(form.traceUrl) }
   const body: LogSourceInput = {
     name: form.name.trim(), kind: form.kind, environment: form.environment, enabled: form.enabled, pollSeconds: form.pollSeconds,
     address: pulls.value ? form.address.trim() : undefined, caPem: empty(form.caPem),
@@ -166,18 +166,26 @@ const save = useMutation({
         </div>
         <details class="field">
           <summary class="flbl">{{ t('logwatch.advanced') }}</summary>
-          <div class="ls-fields">
-            <input
-              v-for="k in (['service', 'level', 'message', 'timestamp', 'revision'] as const)" :key="k" v-model="form.fields[k]" type="text" maxlength="120"
-              :placeholder="t(`logwatch.field_${k}`)" :aria-label="t(`logwatch.field_${k}`)" style="font-family: var(--mono)"
-            >
+          <!-- <details> can't lay its children out as flex items, so they get a wrapper. -->
+          <div class="ls-adv">
+            <div class="ls-fields">
+              <input
+                v-for="k in (['service', 'level', 'message', 'timestamp', 'revision'] as const)" :key="k" v-model="form.fields[k]" type="text" maxlength="120"
+                :placeholder="t(`logwatch.field_${k}`)" :aria-label="t(`logwatch.field_${k}`)" style="font-family: var(--mono)"
+              >
+            </div>
+            <span class="fhelp">{{ t('logwatch.fieldsHelp') }}</span>
+            <label for="ls-ca" class="flbl ls-sub">{{ t('logwatch.ca') }}</label>
+            <textarea id="ls-ca" v-model="form.caPem" maxlength="20000" placeholder="-----BEGIN CERTIFICATE-----" style="font-family: var(--mono); font-size: 12px; min-height: 80px" />
           </div>
-          <span class="fhelp">{{ t('logwatch.fieldsHelp') }}</span>
-          <label for="ls-ca" class="flbl" style="margin-top: 8px">{{ t('logwatch.ca') }}</label>
-          <textarea id="ls-ca" v-model="form.caPem" maxlength="20000" placeholder="-----BEGIN CERTIFICATE-----" style="font-family: var(--mono); font-size: 12px; min-height: 80px" />
         </details>
       </template>
       <div v-else class="help"><HiIcon name="info" /><p>{{ t('logwatch.pushHelp') }}</p></div>
+      <div class="field">
+        <label for="ls-trace">{{ t('logwatch.traceUrl') }}</label>
+        <input id="ls-trace" v-model="form.traceUrl" type="text" maxlength="1000" placeholder="https://tempo.example.com/trace/{traceId}" style="font-family: var(--mono)">
+        <span class="fhelp">{{ t('logwatch.traceUrlHelp') }}</span>
+      </div>
       <div class="field">
         <SwitchToggle v-model="form.enabled" :label="t('logwatch.enabled')" />
       </div>
@@ -200,7 +208,10 @@ const save = useMutation({
 </template>
 
 <style scoped>
-.ls-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+.ls-adv { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.ls-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ls-sub { font-weight: 700; color: var(--ink); margin-top: 8px; }
+.field > .step { align-self: flex-start; }
 .ls-sample { margin: 6px 0 0; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; word-break: break-word; max-height: 120px; overflow: auto; }
 details.field summary { cursor: pointer; }
 </style>

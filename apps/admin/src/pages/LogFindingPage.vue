@@ -116,6 +116,13 @@ const occurrences = computed(() => [...(f.value?.occurrences ?? [])].sort((a, b)
             <dt>{{ t('logwatch.detector') }}</dt><dd class="mono">{{ f.detector }}</dd>
             <template v-if="f.route"><dt>{{ t('logwatch.route') }}</dt><dd class="mono">{{ f.route }}</dd></template>
             <template v-if="f.revision"><dt>{{ t('logwatch.revision') }}</dt><dd class="mono">{{ f.revision.slice(0, 10) }}</dd></template>
+            <template v-if="f.traceId">
+              <dt>{{ t('logwatch.trace') }}</dt>
+              <dd class="mono">
+                <a v-if="f.traceUrl" :href="f.traceUrl" :title="f.traceId" target="_blank" rel="noopener noreferrer">{{ f.traceId.slice(0, 16) }}</a>
+                <span v-else :title="f.traceId">{{ f.traceId.slice(0, 16) }}</span>
+              </dd>
+            </template>
             <template v-if="f.fixedSha"><dt>{{ t('logwatch.fixedSha') }}</dt><dd class="mono">{{ f.fixedSha.slice(0, 10) }}</dd></template>
             <template v-if="f.ticketKey">
               <dt>{{ t('logwatch.ticket') }}</dt>

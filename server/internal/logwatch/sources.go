@@ -257,6 +257,7 @@ var ErrUnknownToken = errors.New("unknown push token")
 const (
 	PushPlain = ""     // NDJSON, a JSON array or text lines
 	PushLoki  = "loki" // Loki's push API (Promtail, Grafana Alloy)
+	PushOTLP  = "otlp" // OTLP/HTTP logs (OpenTelemetry Collector, SDKs)
 )
 
 // Push takes a batch a log shipper sent with a token.
@@ -274,15 +275,23 @@ func (s *Service) Push(ctx context.Context, token string, body io.Reader, conten
 	ctx = domain.WithWorkspace(ctx, src.WorkspaceID)
 	now := s.now()
 	var entries []domain.LogEntry
-	if format == PushLoki {
+	rejected := 0
+	switch format {
+	case PushLoki:
 		entries, err = logsource.ParseLokiPush(body, contentType, contentEncoding, src.Name)
-	} else {
+	case PushOTLP:
+		entries, rejected, err = logsource.ParseOTLPLogs(body, contentType, contentEncoding, src.Name, now)
+	default:
 		entries, err = logsource.ParsePush(body, contentType, contentEncoding, src.Name, now)
+	}
+	if errors.Is(err, logsource.ErrPushTooLarge) {
+		return IngestResult{}, err
 	}
 	if err != nil {
 		return IngestResult{}, invalid("%v", err)
 	}
 	res, err := s.Ingest(ctx, src, entries)
+	res.Rejected = rejected
 	if err != nil {
 		return res, err
 	}

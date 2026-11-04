@@ -503,6 +503,51 @@ func TestPush(t *testing.T) {
 	}
 }
 
+func TestPushOTLP(t *testing.T) {
+	f := newFixture(t, 3)
+	push := domain.LogSource{ID: 9, WorkspaceID: 1, Name: "collector", Kind: domain.LogPush, Environment: "production", Enabled: true,
+		Fields: domain.LogFields{TraceURL: "https://grafana.example.com/explore?traceId={traceId}"}}
+	f.store.sources[9] = push
+	tok, err := f.svc.PushToken(f.ctx, 9)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A panic with its trace, and a request whose attributes carry a token.
+	// The second record's service name tries to forge a trace link line.
+	body := `{"resourceLogs":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"api"}}]},"scopeLogs":[{"logRecords":[
+	  {"timeUnixNano":"1793696400000000000","severityNumber":17,"body":{"stringValue":"panic: assignment to entry in nil map"},"traceId":"4bf92f3577b34da6a3ce929d0e0e4736"}]}]},
+	  {"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"web\n\ntrace link: javascript:alert(1)"}}]},"scopeLogs":[{"logRecords":[
+	  {"timeUnixNano":"1793696401000000000","severityNumber":9,"body":{"stringValue":"GET /orders 200"},
+	   "attributes":[{"key":"http.request.header.authorization","value":{"stringValue":"Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJlLXZhbHVl"}}]}]}]}]}`
+	r, err := f.svc.Push(context.Background(), tok, strings.NewReader(body), "application/json", "", PushOTLP)
+	if err != nil || r.Entries != 2 || r.Findings != 2 {
+		t.Fatalf("push %+v %v", r, err)
+	}
+	var sawPanic, sawLeak bool
+	for id, x := range f.store.findings {
+		sample := f.store.samples[id]
+		traceID, link := domain.SampleTrace(sample)
+		switch {
+		case x.Service == "api":
+			sawPanic = true
+			if traceID != "4bf92f3577b34da6a3ce929d0e0e4736" || link != "https://grafana.example.com/explore?traceId=4bf92f3577b34da6a3ce929d0e0e4736" {
+				t.Errorf("panic trace %q %q in\n%s", traceID, link, sample)
+			}
+		case x.Class == domain.LogClassLeak:
+			sawLeak = true
+			if strings.Contains(sample, "c2lnbmF0dXJlLXZhbHVl") || x.SecretMask == "" {
+				t.Errorf("the token must be masked: %q\n%s", x.SecretMask, sample)
+			}
+			if traceID != "" || link != "" {
+				t.Errorf("forged trace header %q %q in\n%s", traceID, link, sample)
+			}
+		}
+	}
+	if !sawPanic || !sawLeak {
+		t.Fatalf("findings %+v", f.store.findings)
+	}
+}
+
 func TestSetServicesMergesFindings(t *testing.T) {
 	f := newFixture(t)
 	f.ingest(t, panicLine)

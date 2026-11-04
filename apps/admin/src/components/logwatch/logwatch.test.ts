@@ -24,5 +24,8 @@ describe('pushSnippets', () => {
     expect(s.fluentbit).toContain('Port         443')
     expect(s.fluentbit).toContain('Header       Authorization Bearer agl_x')
     expect(s.promtail).toContain('url: https://agnts.example.com/webhooks/logs/loki/api/v1/push')
+    expect(s.otel).toContain('logs_endpoint: https://agnts.example.com/webhooks/logs/v1/logs')
+    expect(s.otel).toContain('Authorization: "Bearer agl_x"')
+    expect(s.otelSdk).toContain('OTEL_EXPORTER_OTLP_LOGS_HEADERS=Authorization=Bearer%20agl_x')
   })
 })

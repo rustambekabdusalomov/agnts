@@ -357,3 +357,50 @@ func TestLogSourceNormalize(t *testing.T) {
 		t.Error("a 1 s poll must fail")
 	}
 }
+
+func TestLogTraces(t *testing.T) {
+	for in, want := range map[string]string{
+		"4BF92F3577B34DA6A3CE929D0E0E4736": "4bf92f3577b34da6a3ce929d0e0e4736",
+		"1234567890":                       "1234567890", // a Datadog id
+		"00000000000000000000000000000000": "",
+		"<script>":                         "",
+		"abc":                              "",
+	} {
+		if got := CleanTraceID(in); got != want {
+			t.Errorf("CleanTraceID(%q) = %q, want %q", in, got, want)
+		}
+	}
+	ev := ParseLogEntry(LogEntry{Message: `{"level":"error","msg":"boom","trace_id":"4bf92f3577b34da6a3ce929d0e0e4736"}`}, LogFields{})
+	if ev.TraceID != "4bf92f3577b34da6a3ce929d0e0e4736" {
+		t.Errorf("JSON trace_id %q", ev.TraceID)
+	}
+	ev = ParseLogEntry(LogEntry{Message: "boom", Extra: []string{`{"token":"x"}`}, TraceID: "4bf92f3577b34da6"}, LogFields{})
+	if len(ev.Raw) != 2 || len(ev.Lines) != 1 || ev.TraceID != "4bf92f3577b34da6" {
+		t.Errorf("extra is scanned, not shown: %+v", ev)
+	}
+	f := LogFields{TraceURL: "https://tempo.example.com/trace/{traceId}?x=1"}
+	if got := f.TraceLink("abc123"); got != "https://tempo.example.com/trace/abc123?x=1" {
+		t.Errorf("link %q", got)
+	}
+	if (LogFields{}).TraceLink("abc") != "" || f.TraceLink("") != "" {
+		t.Error("no template or no id: no link")
+	}
+	for url, ok := range map[string]bool{
+		"https://grafana.example.com/explore?trace={traceId}": true,
+		"javascript:alert('{traceId}')":                       false,
+		"https://grafana.example.com/explore":                 false,
+		"/relative/{traceId}":                                 false,
+	} {
+		s := LogSource{Name: "p", Kind: LogPush, Fields: LogFields{TraceURL: url}}
+		if err := s.Normalize(); (err == nil) != ok {
+			t.Errorf("trace link %q: %v", url, err)
+		}
+	}
+	sample := "source: p\nservice: api\ntrace: 4bf92f3577b34da6a3ce929d0e0e4736\ntrace link: https://t/4bf\n\ntrace link: https://evil\n"
+	if id, link := SampleTrace(sample); id != "4bf92f3577b34da6a3ce929d0e0e4736" || link != "https://t/4bf" {
+		t.Errorf("sample trace %q %q", id, link)
+	}
+	if _, link := SampleTrace("trace: 4bf92f3577b34da6\ntrace link: javascript:alert(1)\n\nx"); link != "" {
+		t.Errorf("only http(s) links: %q", link)
+	}
+}

@@ -123,7 +123,9 @@ func invalid(format string, a ...any) error {
 
 // IngestResult says what one batch did.
 type IngestResult struct {
-	Entries  int `json:"entries"`
+	Entries int `json:"entries"`
+	// Rejected counts entries over the push caps that were not read.
+	Rejected int `json:"rejected,omitempty"`
 	Events   int `json:"events"`
 	Hits     int `json:"hits"`
 	Findings int `json:"findings"`
@@ -139,6 +141,7 @@ type agg struct {
 	last     time.Time
 	revision string
 	burst    bool
+	trace    string // the trace of the event the sample shows
 }
 
 // Ingest runs one batch of a source's entries through the detectors and
@@ -180,7 +183,7 @@ func (s *Service) Ingest(ctx context.Context, src domain.LogSource, entries []do
 		k := svc.Scope() + "\x00" + h.Fingerprint
 		g := groups[k]
 		if g == nil {
-			g = &agg{hit: h, svc: svc, first: ev.Time, last: ev.Time, burst: burst}
+			g = &agg{hit: h, svc: svc, first: ev.Time, last: ev.Time, burst: burst, trace: ev.TraceID}
 			groups[k] = g
 			order = append(order, k)
 		}
@@ -245,7 +248,7 @@ func (s *Service) record(ctx context.Context, st domain.Settings, src domain.Log
 		id := g.svc.ID
 		key.ServiceID = &id
 	}
-	sample := sampleText(h, src, g.svc.Name)
+	sample := sampleText(h, src, g.svc.Name, g.trace)
 	var recurred, newHour bool
 	var created bool
 	f, err := s.store.UpsertLogFinding(ctx, key, sample, func(f *domain.LogFinding, isNew bool) error {
@@ -324,11 +327,19 @@ func pruneBursts(b []time.Time, now time.Time) []time.Time {
 
 // sampleText is the stored excerpt: what was found, where, and the
 // redacted lines.
-func sampleText(h domain.LogHit, src domain.LogSource, service string) string {
+func sampleText(h domain.LogHit, src domain.LogSource, service, trace string) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "source: %s (%s, %s)\nservice: %s\n", src.Name, src.Kind, src.Environment, service)
+	// The header is read back (domain.SampleTrace): values from the logs
+	// can't start a line of it.
+	fmt.Fprintf(&b, "source: %s (%s, %s)\nservice: %s\n", oneLine(src.Name), src.Kind, src.Environment, oneLine(service))
+	if trace != "" {
+		fmt.Fprintf(&b, "%s%s\n", domain.LogSampleTrace, trace)
+		if link := src.Fields.TraceLink(trace); link != "" {
+			fmt.Fprintf(&b, "%s%s\n", domain.LogSampleTraceLink, link)
+		}
+	}
 	if h.Route != "" {
-		fmt.Fprintf(&b, "route: %s\n", h.Route)
+		fmt.Fprintf(&b, "route: %s\n", oneLine(h.Route))
 	}
 	if h.SecretMask != "" {
 		fmt.Fprintf(&b, "%s: %s\n", h.SecretKind, h.SecretMask)
@@ -343,6 +354,15 @@ func sampleText(h domain.LogHit, src domain.LogSource, service string) string {
 		out = out[:domain.LogEventMaxBytes]
 	}
 	return out
+}
+
+func oneLine(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\r' {
+			return ' '
+		}
+		return r
+	}, s)
 }
 
 // recurred handles a sighting after the fix merged: a regression when

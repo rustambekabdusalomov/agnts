@@ -91,6 +91,11 @@ const watched = (s: LogSource) => s.services.filter((v) => v.enabled).length
     <pre class="lw-snip">{{ snippets.fluentbit }}</pre>
     <h3 class="lw-h3">Promtail / Grafana Alloy</h3>
     <pre class="lw-snip">{{ snippets.promtail }}</pre>
+    <h3 class="lw-h3">{{ t('logwatch.otelTitle') }}</h3>
+    <p class="hint" style="margin: 0 0 6px">{{ t('logwatch.otelHelp') }}</p>
+    <pre class="lw-snip">{{ snippets.otel }}</pre>
+    <p class="hint" style="margin: 0 0 6px">{{ t('logwatch.otelSdk') }}</p>
+    <pre class="lw-snip">{{ snippets.otelSdk }}</pre>
     <h3 class="lw-h3">{{ t('logwatch.agentTitle') }}</h3>
     <p class="hint" style="margin: 0 0 6px">{{ t('logwatch.agentHelp') }}</p>
     <pre class="lw-snip">{{ snippets.watch }}</pre>
