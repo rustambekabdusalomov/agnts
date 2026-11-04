@@ -1536,6 +1536,9 @@ func (o *Orchestrator) commitRepos(ctx context.Context, s domain.Settings, ws Wo
 			}
 			return nil, nil, nil, fmt.Errorf("commit: %w", err)
 		}
+		if sha != "" {
+			o.recordAgentCommits(ctx, r.ID, t.ID, sha)
+		}
 		if len(dropped) > 0 {
 			o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventError, Level: domain.LevelWarn,
 				Message: r.Label(multi) + "left out symlinks that point outside the repository (ignore them in .gitignore): " + strings.Join(dropped, ", ")})

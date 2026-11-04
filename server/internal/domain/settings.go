@@ -301,6 +301,9 @@ type Settings struct {
 	Security SecurityWorkspaceSettings `json:"security"`
 	// Guard: how strict agnts-guard, the hooks inside every run, is.
 	Guard GuardSettings `json:"guard"`
+	// PerfReview: scoring delivered tickets for the owner's performance
+	// reviews.
+	PerfReview PerfReviewSettings `json:"perfReview"`
 	// SecondOpinion is the model ("codex:<model>", or a Claude model) that
 	// critiques the chosen approach of complex tickets; "" turns it off.
 	SecondOpinion string `json:"secondOpinion"`

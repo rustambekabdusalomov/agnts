@@ -11,6 +11,16 @@ import (
 const (
 	MatchBranch  = "branch"  // the branch the commit was pushed to
 	MatchMessage = "message" // the commit message
+	// MatchPullRequest: the pull request the commit reached the default
+	// branch through has the number in its branch or title (a squash or
+	// rebase commit that does not carry it).
+	MatchPullRequest = "pull_request"
+)
+
+// Merge kinds of a commit on a default branch.
+const (
+	MergeKindMerge  = "merge"  // two or more parents
+	MergeKindSquash = "squash" // a squashed pull request
 )
 
 // PushedCommit is a commit on the git host, as a push or a history read
@@ -20,8 +30,12 @@ type PushedCommit struct {
 	Message     string
 	Author      string
 	AuthorLogin string // the host account, when known
-	Date        time.Time
+	AuthorEmail string
+	Date        time.Time // authored
 	URL         string
+	// Parents are the parent shas, when the host gave them (push
+	// payloads do not).
+	Parents []string
 }
 
 // Push is a push to a repository's branch, as a webhook reports it.
@@ -60,9 +74,91 @@ type CommitLink struct {
 	AuthorLogin string
 	URL         string
 	CommittedAt time.Time
-	MatchedOn   []string // MatchBranch, MatchMessage
+	MatchedOn   []string // MatchBranch, MatchMessage, MatchPullRequest
 	Token       string   // what matched, lower case (amanat-2288)
 	CreatedAt   time.Time
+
+	AuthorEmail string
+	Parents     []string
+	// OnDefaultAt is when the commit was first seen on the repository's
+	// default branch; nil while it is only on another branch.
+	OnDefaultAt *time.Time
+	MergeKind   string // "", MergeKindMerge or MergeKindSquash
+	PRNumber    *int   // the pull request it reached the default branch through
+	Reverts     string // the sha it reverts, if any
+}
+
+// MergedPull is a merged pull request a default-branch commit came
+// through, as the git host reports it.
+type MergedPull struct {
+	Number     int
+	Title      string
+	HeadBranch string
+	BaseBranch string
+	MergedAt   *time.Time
+	// MergeSHA is the commit the merge made on the base branch: the merge
+	// commit, the squash commit, or the last rebased commit.
+	MergeSHA string
+	// Squash is true when the host says it was squashed (GitLab); GitHub
+	// does not say, so SquashKnown is false there.
+	Squash      bool
+	SquashKnown bool
+}
+
+// CommitPull is what a lookup found about a default-branch commit: the
+// merged pull request it came through (Number 0: none) and whether it is
+// that pull request's squash.
+type CommitPull struct {
+	Number     int
+	Title      string
+	HeadBranch string
+	Squash     bool
+}
+
+// DefaultCommit is what is known of a commit seen on a default branch.
+type DefaultCommit struct {
+	SHA         string
+	At          time.Time // when it was seen there
+	MergeKind   string
+	PRNumber    *int
+	Reverts     string
+	AuthorEmail string
+	Parents     []string
+}
+
+// revertsRe finds the sha git writes into a revert's message.
+var revertsRe = regexp.MustCompile(`(?i)This reverts commit ([0-9a-f]{7,40})`)
+
+// RevertedSHA returns the sha a commit message says it reverts, lower
+// case, or "".
+func RevertedSHA(message string) string {
+	m := revertsRe.FindStringSubmatch(message)
+	if m == nil {
+		return ""
+	}
+	return strings.ToLower(m[1])
+}
+
+// IsSquashOf reports whether commit (on the default branch, one parent)
+// is the squash of pr, whose own commits are prCommits. GitLab says so;
+// on GitHub the squash is the pull request's merge commit, is not one of
+// its commits, and has a subject none of them has (GitHub adds " (#n)").
+// A rebased commit keeps its subject, so a rebase merge is not a squash.
+func IsSquashOf(commit PushedCommit, pr MergedPull, prCommits []PushedCommit) bool {
+	sha := strings.ToLower(commit.SHA)
+	if pr.SquashKnown {
+		return pr.Squash && strings.EqualFold(pr.MergeSHA, sha)
+	}
+	if !strings.EqualFold(pr.MergeSHA, sha) || len(commit.Parents) > 1 {
+		return false
+	}
+	subject := Subject(commit.Message)
+	for _, c := range prCommits {
+		if strings.EqualFold(c.SHA, sha) || Subject(c.Message) == subject {
+			return false
+		}
+	}
+	return true
 }
 
 // LinkedTicket is a ticket a commit is linked to, for the commit views.

@@ -22,6 +22,12 @@ type Ingester interface {
 	Ingest(ctx context.Context, in orchestrator.Incoming, origin domain.Origin) (bool, error)
 }
 
+// Resolver hears how a known ticket's work item ended (the
+// orchestrator). An Ingester may implement it.
+type Resolver interface {
+	TrackerResolved(ctx context.Context, source domain.TicketSource, key string, r domain.TrackerResolution) error
+}
+
 // Deduper remembers webhook delivery ids.
 type Deduper interface {
 	SeenDelivery(ctx context.Context, provider, id string) (bool, error)
@@ -134,6 +140,12 @@ func WebhookHandler(cfg ConfigSource, c *Client, ing Ingester, dedup Deduper, lo
 			}
 			w.WriteHeader(http.StatusNoContent)
 			return
+		}
+		if rv, ok := ing.(Resolver); ok && it.state.Group != "" {
+			res := domain.TrackerResolution{Closed: it.closed(), Resolution: it.state.Group}
+			if err := rv.TrackerResolved(ctx, domain.SourcePlane, it.key, res); err != nil {
+				log.Warn("plane webhook: record the resolution", "work_item", it.key, "err", err)
+			}
 		}
 		if !it.forAgnts(conf.Label) || it.closed() {
 			w.WriteHeader(http.StatusNoContent) // not for agnts (or the label was removed)

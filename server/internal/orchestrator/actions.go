@@ -575,7 +575,7 @@ func (o *Orchestrator) EditCommitMessage(ctx context.Context, key string, repoID
 	if repo.ArchivedAt != nil {
 		return cur, invalid("the repository %s is archived", repo.Name)
 	}
-	head, err := cr.RewordCommits(ctx, repo, row.Branch, map[string]string{sha: message})
+	head, err := o.rewordAgentCommits(ctx, cr, repo, row.Branch, cur.ID, map[string]string{sha: message})
 	switch {
 	case errors.Is(err, domain.ErrNotFound):
 		return cur, invalid("%s is not one of the commits on %s that agnts can still change", shortSHA(sha), row.Branch)

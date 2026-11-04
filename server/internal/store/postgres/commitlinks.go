@@ -42,14 +42,21 @@ func (s *Agent) UpsertCommitLinks(ctx context.Context, links []domain.CommitLink
 	}
 	b := &pgx.Batch{}
 	for _, l := range links {
+		parents := l.Parents
+		if parents == nil {
+			parents = []string{}
+		}
 		b.Queue(`INSERT INTO ticket_commits
-			(ticket_id, repo_id, sha, branch, subject, author, author_login, url, committed_at, matched_on, token)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+			(ticket_id, repo_id, sha, branch, subject, author, author_login, url, committed_at, matched_on, token,
+			 author_email, parents, on_default_at, merge_kind, pr_number, reverts)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 			ON CONFLICT (ticket_id, repo_id, sha) DO UPDATE SET
 				matched_on = ARRAY(SELECT DISTINCT m FROM unnest(ticket_commits.matched_on || EXCLUDED.matched_on) m ORDER BY m),
-				branch = CASE WHEN ticket_commits.branch = '' THEN EXCLUDED.branch ELSE ticket_commits.branch END
+				branch = CASE WHEN ticket_commits.branch = '' THEN EXCLUDED.branch ELSE ticket_commits.branch END,
+				`+factsUpsert+`
 			RETURNING (xmax = 0)`,
-			l.TicketID, l.RepoID, l.SHA, l.Branch, l.Subject, l.Author, l.AuthorLogin, l.URL, l.CommittedAt, l.MatchedOn, l.Token)
+			l.TicketID, l.RepoID, l.SHA, l.Branch, l.Subject, l.Author, l.AuthorLogin, l.URL, l.CommittedAt, l.MatchedOn, l.Token,
+			l.AuthorEmail, parents, l.OnDefaultAt, l.MergeKind, l.PRNumber, l.Reverts)
 	}
 	br := s.db.SendBatch(ctx, b)
 	for _, l := range links {
@@ -65,13 +72,22 @@ func (s *Agent) UpsertCommitLinks(ctx context.Context, links []domain.CommitLink
 	return added, br.Close()
 }
 
+// factsUpsert keeps what a link knew and adds what the new one knows: a
+// commit is on the default branch from when it was first seen there.
+const factsUpsert = `author_email = CASE WHEN EXCLUDED.author_email <> '' THEN EXCLUDED.author_email ELSE ticket_commits.author_email END,
+				parents = CASE WHEN cardinality(EXCLUDED.parents) > 0 THEN EXCLUDED.parents ELSE ticket_commits.parents END,
+				on_default_at = LEAST(ticket_commits.on_default_at, EXCLUDED.on_default_at),
+				merge_kind = CASE WHEN EXCLUDED.merge_kind <> '' THEN EXCLUDED.merge_kind ELSE ticket_commits.merge_kind END,
+				pr_number = coalesce(EXCLUDED.pr_number, ticket_commits.pr_number),
+				reverts = CASE WHEN EXCLUDED.reverts <> '' THEN EXCLUDED.reverts ELSE ticket_commits.reverts END`
+
 const commitLinkCols = `c.ticket_id, t.key, c.repo_id, r.name, c.sha, c.branch, c.subject, c.author, c.author_login, c.url,
-	c.committed_at, c.matched_on, c.token, c.created_at`
+	c.committed_at, c.matched_on, c.token, c.created_at, c.author_email, c.parents, c.on_default_at, c.merge_kind, c.pr_number, c.reverts`
 
 func scanCommitLink(row pgx.Row) (domain.CommitLink, error) {
 	var l domain.CommitLink
 	err := row.Scan(&l.TicketID, &l.TicketKey, &l.RepoID, &l.RepoName, &l.SHA, &l.Branch, &l.Subject, &l.Author, &l.AuthorLogin,
-		&l.URL, &l.CommittedAt, &l.MatchedOn, &l.Token, &l.CreatedAt)
+		&l.URL, &l.CommittedAt, &l.MatchedOn, &l.Token, &l.CreatedAt, &l.AuthorEmail, &l.Parents, &l.OnDefaultAt, &l.MergeKind, &l.PRNumber, &l.Reverts)
 	return l, err
 }
 
