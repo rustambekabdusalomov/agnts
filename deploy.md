@@ -278,50 +278,83 @@ This server has it set up (2 November 2026).
 
 Since 3 November 2026 Meta returns an empty model catalog ("model catalog has no
 visible models") to Muse from this server's network (AS35682), for every login and
-key; the same key works from elsewhere. agnts shows it as "not logged in: run /login to
-add an API key". `egress` can send Muse's hosts (`api.meta.ai`, `auth.meta.com`)
-through another proxy, `AGNTS_EGRESS_UPSTREAM`, while everything else stays direct.
+key. agnts shows it as "not logged in: run /login to add an API key". It is the
+network, not the country: the same key works from a home connection in Uzbekistan,
+another server at the same provider (5.182.26.104) gets the same refusal, and the
+provider confirmed nothing changed on their side. `egress` sends Muse's hosts
+(`api.meta.ai`, `auth.meta.com`) through another proxy, `AGNTS_EGRESS_UPSTREAM`,
+while everything else stays direct.
 
-1. In `/opt/agnts/docker-compose.yml`, the `egress` service's environment needs
-   (see `deploy/docker-compose.yml`):
+In `/opt/agnts/docker-compose.yml`, the `egress` service's environment needs
+(see `deploy/docker-compose.yml`):
 
-   ```yaml
-         AGNTS_EGRESS_UPSTREAM: ${AGNTS_EGRESS_UPSTREAM:-}
-         AGNTS_EGRESS_UPSTREAM_HOSTS: ${AGNTS_EGRESS_UPSTREAM_HOSTS:-}
-   ```
+```yaml
+      AGNTS_EGRESS_UPSTREAM: ${AGNTS_EGRESS_UPSTREAM:-}
+      AGNTS_EGRESS_UPSTREAM_HOSTS: ${AGNTS_EGRESS_UPSTREAM_HOSTS:-}
+```
 
-2. Set the proxy in `/opt/agnts/.env` (back it up first) and recreate egress:
+### The way it goes now: a server at DigitalOcean (since 4 November 2026)
 
-   ```sh
-   AGNTS_EGRESS_UPSTREAM=socks5://user:pass@proxy-host:1080   # or http://user:pass@host:3128
-   ssh root@45.138.158.39 'cd /opt/agnts && docker compose up -d egress'
-   ```
+`24.199.90.170` (New York region, Ubuntu 24.04, 1 CPU / 1 GB) runs no proxy
+software. This server keeps an SSH connection to it open, and OpenSSH's dynamic
+forward is the SOCKS5 proxy:
 
-   Test a proxy before using it: `muse exec --api-key-stdin "Reply OK"` from that
-   machine must answer, not "no visible models". Another server at the same provider
-   (5.182.26.104) gets the same refusal.
+- `/etc/systemd/system/agnts-upstream.service` runs
+  `ssh -N -i /root/.ssh/agnts_upstream -o ExitOnForwardFailure=yes -o ServerAliveInterval=15 -D 172.19.0.1:1081 tunnel@24.199.90.170`
+  and restarts it within 5 seconds when it drops. `172.19.0.1` is the gateway of
+  the `agnts_default` network
+  (`docker network inspect agnts_default -f '{{(index .IPAM.Config 0).Gateway}}'`),
+  so containers reach it and the internet doesn't.
+- `/opt/agnts/.env` has `AGNTS_EGRESS_UPSTREAM=socks5://172.19.0.1:1081`.
+- On the DigitalOcean server, the user `tunnel` has no shell, and its one key
+  may only open `api.meta.ai:443`, `auth.meta.com:443` and `ipinfo.io:443` (for
+  checks) (`restrict,port-forwarding,permitopen=...` in its `authorized_keys`).
+  ufw allows SSH only, passwords are off (root logs in by key), and
+  unattended-upgrades is on.
 
-**A laptop as the proxy (demos).** OpenSSH's remote dynamic forward makes a SOCKS5
-proxy on the server whose traffic leaves through the laptop. sshd must let it bind
-to the Docker network's gateway (once: `/etc/ssh/sshd_config.d/agnts-tunnel.conf`
-with `GatewayPorts clientspecified`, then `systemctl reload ssh`). Find the gateway
-with `docker network inspect agnts_default -f '{{(index .IPAM.Config 0).Gateway}}'`
-(172.19.0.1 here), set `AGNTS_EGRESS_UPSTREAM=socks5://172.19.0.1:1080`, and keep this
-running on the laptop:
+Before moving to another server, test that Meta answers there: install Muse
+(as `deploy/runner/Dockerfile` does) and run `muse exec --api-key-stdin "Reply OK"`.
+It must answer, not "no visible models". DigitalOcean's network is accepted;
+this provider's is not.
+
+Useful:
+
+```sh
+ssh root@45.138.158.39 'systemctl status agnts-upstream --no-pager | head -5'
+ssh root@45.138.158.39 'curl -s --socks5-hostname 172.19.0.1:1081 https://ipinfo.io/org'   # AS14061 DigitalOcean
+ssh root@45.138.158.39 'docker run --rm --network agnts_default curlimages/curl:8.11.1 -s http://egress:3128/_agnts/upstream'
+```
+
+### Fallback: a laptop as the proxy
+
+OpenSSH's remote dynamic forward makes a SOCKS5 proxy on this server whose traffic
+leaves through the laptop. sshd lets it bind to the Docker network's gateway
+(`/etc/ssh/sshd_config.d/agnts-tunnel.conf` has `GatewayPorts clientspecified`).
+Keep this running on the laptop:
 
 ```sh
 ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 172.19.0.1:1080 root@45.138.158.39
 ```
 
-**Seeing it, and alerts.** Admin → Dashboard has a *Muse route* card (egress checks the way every
-30 seconds; the Dashboard menu item is marked while it is down). When it fails two checks in a
-row (or egress is silent for 3 minutes), agnts sends an alert to the Telegram chat of the workspace
-in `AGNTS_ALERT_WORKSPACE` (here `1`), and emails the Admins when mail is set up; another when it
-works again.
+then point egress at it, and back at `:1081` when the DigitalOcean server is up again:
 
-The port is reachable only from the host and its containers. While the tunnel is
-down, Muse calls fail as before; set `AGNTS_EGRESS_UPSTREAM=` and recreate egress
-to go direct again.
+```sh
+ssh root@45.138.158.39 'cd /opt/agnts && sed -i "s|^AGNTS_EGRESS_UPSTREAM=.*|AGNTS_EGRESS_UPSTREAM=socks5://172.19.0.1:1080|" .env && docker compose up -d egress'
+```
+
+Any other proxy works the same way (`socks5://user:pass@host:1080` or
+`http://user:pass@host:3128`). Test it with `muse exec` first.
+
+### Seeing it, and alerts
+
+Admin → Dashboard has a *Muse route* card: egress checks the way every 30
+seconds, and the Dashboard menu item is marked while it is down. When it fails
+two checks in a row (or egress is silent for 3 minutes), agnts sends an alert to
+the Telegram chat of the workspace in `AGNTS_ALERT_WORKSPACE` (here `1`), and
+emails the Admins when mail is set up. It sends another when the route works again.
+
+While the route is down, Muse calls fail as before. Set `AGNTS_EGRESS_UPSTREAM=`
+and recreate egress to go direct again.
 
 ## Rollback
 
