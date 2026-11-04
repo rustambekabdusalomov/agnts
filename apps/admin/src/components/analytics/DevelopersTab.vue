@@ -85,7 +85,8 @@ const decide = useMutation({
 
 // The owner's override of one delivery's score.
 const editing = ref<string | null>(null)
-const form = reactive<{ points: number | null; reason: string }>({ points: null, reason: '' })
+const form = reactive<{ points: number; reason: string }>({ points: 0, reason: '' })
+const pointOptions: SelectOption<number>[] = SCALE.map((p) => ({ value: p, label: String(p) }))
 const editKey = (x: DeveloperTicket) => `${x.key}#${x.delivery}`
 function edit(x: DeveloperTicket) {
   editing.value = editKey(x)
@@ -238,9 +239,9 @@ async function exportData(format: 'json' | 'csv') {
           <template v-if="x.revertedShare > 0 || x.regressions > 0"> · {{ t('perf.penalty', { revert: Math.round(x.revertedShare * 100), regressions: x.regressions }) }}</template>
         </p>
         <div v-if="editing === editKey(x)" class="dv-edit">
-          <label class="dv-f">{{ t('perf.overridePoints') }}
-            <select v-model="form.points" class="cfg-in"><option v-for="p in SCALE" :key="p" :value="p">{{ p }}</option></select>
-          </label>
+          <span class="dv-f">{{ t('perf.overridePoints') }}
+            <InputSelect v-model="form.points" :options="pointOptions" :label="t('perf.overridePoints')" class="dv-points" />
+          </span>
           <label class="dv-f dv-grow">{{ t('perf.overrideReason') }} <input v-model="form.reason" class="cfg-in" maxlength="1000"></label>
           <button type="button" class="btn btn-s btn-p" :disabled="override.isPending.value" @click="saveOverride(x)">{{ t('perf.overrideSave') }}</button>
           <button v-if="x.overridePoints != null" type="button" class="btn btn-s" :disabled="override.isPending.value" @click="override.mutate({ t: x, clear: true })">{{ t('perf.overrideClear') }}</button>
@@ -294,4 +295,5 @@ async function exportData(format: 'json' | 'csv') {
 .dv-reason { flex-basis: 100%; margin: 0; }
 .mono { font-family: var(--mono); font-size: 13px; }
 .dv-sel { min-width: 200px; }
+.dv-points { width: 90px; }
 </style>
