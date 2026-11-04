@@ -155,3 +155,51 @@ func TestTicketFromAMessageGetsItsFiles(t *testing.T) {
 // timeFar is a moment after every upload of the test: the prune then
 // takes every pending one.
 func timeFar() time.Time { return time.Now().Add(time.Hour) }
+
+func TestAnswerReadsEarlierFiles(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	ch := cs[0].ID
+	other, err := h.s.CreateChannel(h.ctx, "#elsewhere", "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan := h.upload(t, h.ann, "Implementation plan.md", "text/markdown", "# auth-gateway: rate limits missing")
+	posted, _, err := h.sendFiles(ch, "here is the plan", plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	away := h.upload(t, h.ann, "secret.txt", "text/plain", "another channel's file")
+	if _, _, err := h.sendFiles(other.ID, "not here", away); err != nil {
+		t.Fatal(err)
+	}
+	h.runJobs(t)
+
+	// A follow-up that is not a reply still reads the plan sent before it.
+	h.brain.replies["answer"] = fmt.Sprintf(`{"answer_md": "It lacks rate limits [msg:%d].", "citations": [], "insufficient": false, "needs_code": null}`, posted.ID)
+	h.send(t, ch, "@agnts what improvements does that plan need?")
+	h.runJobs(t)
+	p := h.brain.prompts["answer"]
+	if !strings.Contains(p, "rate limits missing") || strings.Contains(p, "another channel's file") {
+		t.Fatalf("the follow-up's prompt:\n%s", p)
+	}
+
+	// A reply deep in a chain reads the files at its top.
+	parent := posted
+	for i := range 4 {
+		m, _, err := h.s.Send(h.ctx, domain.ChatSend{ChannelID: ch, ClientMsgID: newUUID(), Body: fmt.Sprintf("reply %d", i), ReplyTo: &parent.ID})
+		if err != nil {
+			t.Fatal(err)
+		}
+		parent = m
+	}
+	pgtest.Exec(t, h.pool, `UPDATE chat_messages SET created_at = now() - interval '1 day' WHERE id = $1`, posted.ID) // out of the recent window
+	h.brain.prompts = nil
+	if _, _, err := h.s.Send(h.ctx, domain.ChatSend{ChannelID: ch, ClientMsgID: newUUID(), Body: "@agnts and the tests?", ReplyTo: &parent.ID}); err != nil {
+		t.Fatal(err)
+	}
+	h.runJobs(t)
+	if p := h.brain.prompts["answer"]; !strings.Contains(p, "rate limits missing") {
+		t.Fatalf("the reply's prompt lacks the chain's file:\n%s", p)
+	}
+}

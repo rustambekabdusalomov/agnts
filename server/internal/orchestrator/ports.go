@@ -77,6 +77,9 @@ type Store interface {
 	// LinkAssistantFiles links user's pending uploads to their Ask
 	// question, failing with domain.ErrConflict when one is not.
 	LinkAssistantFiles(ctx context.Context, ids []int64, messageID, user int64) error
+	// ConversationFiles returns an Ask conversation's files up to message
+	// upTo, newest question first.
+	ConversationFiles(ctx context.Context, conversationID, upTo int64) ([]domain.ConversationFile, error)
 	// AssistantFileOwner returns whose conversation an assistant message is in.
 	AssistantFileOwner(ctx context.Context, messageID int64) (int64, error)
 	PrunePendingAttachments(ctx context.Context, before time.Time) (int64, error)

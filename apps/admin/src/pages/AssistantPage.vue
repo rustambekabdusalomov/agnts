@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, transcribeQuestion, unwrap } from '../api/client'
@@ -8,6 +8,7 @@ import type { AssistantConversation, AssistantLink, AssistantMessage } from '../
 import { applyLive, assistantLang, fileLabel, isOpen, live, MAX_QUESTION, secs } from '../components/assistant/assistant'
 import AssistantActionCard from '../components/assistant/AssistantActionCard.vue'
 import ChatBody from '../components/chat/ChatBody.vue'
+import ScrollToBottom from '../components/chat/ScrollToBottom.vue'
 import ChatModeSwitch from '../components/codechat/ChatModeSwitch.vue'
 import ChatFiles from '../components/files/ChatFiles.vue'
 import FileAttach from '../components/files/FileAttach.vue'
@@ -15,6 +16,7 @@ import PageHeader from '../components/PageHeader.vue'
 import ReportView from '../components/ticket/ReportView.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { livePoll, useLive } from '../composables/useLive'
+import { useStickToBottom } from '../composables/useStickToBottom'
 import { canRecord, MAX_VOICE_SECONDS, useVoiceRecorder } from '../composables/useVoiceRecorder'
 import { useWorkspace } from '../stores/workspace'
 
@@ -51,12 +53,17 @@ watch(open, (o) => {
 onBeforeUnmount(() => clearInterval(tick))
 const thinking = (m: AssistantMessage) => Math.max(0, Math.round((now.value - new Date(m.createdAt).getTime()) / 1000))
 
-// Newest at the bottom, kept in view as answers arrive.
+// Newest at the bottom, kept in view as answers arrive, unless the person
+// scrolled up to read (then a button brings them back). Opening a
+// conversation or asking goes to the bottom.
 const scroller = ref<HTMLElement | null>(null)
-watch(() => [messages.value.length, messages.value.at(-1)?.status, live.get(messages.value.at(-1)?.id ?? 0)?.text], async () => {
-  await nextTick()
-  if (scroller.value) scroller.value.scrollTop = scroller.value.scrollHeight
-}, { flush: 'post' })
+const bottom = useStickToBottom(scroller)
+let stickNext = true
+watch(id, () => (stickNext = true))
+watch(() => [messages.value.length, messages.value.at(-1)?.status, live.get(messages.value.at(-1)?.id ?? 0)?.text], () => {
+  bottom.follow(stickNext)
+  stickNext = false
+}, { flush: 'pre' })
 
 // The question the server stores for files sent without words.
 const FILES_ONLY = 'See the attached files.'
@@ -95,6 +102,7 @@ const ask = useMutation({
 })
 function send(question = text.value.trim(), files = fileIds.value) {
   if ((!question && !files.length) || question.length > MAX_QUESTION || ask.isPending.value || uploading.value) return
+  stickNext = true // the question and its answer are what to watch
   ask.mutate({ question, files: [...files] })
 }
 function onKey(e: KeyboardEvent) {
@@ -190,70 +198,73 @@ const suggestions = computed(() => [
   </PageHeader>
 
   <section class="card as-chat">
-    <div ref="scroller" class="as-msgs" aria-live="polite">
-      <div v-if="!id" class="as-empty">
-        <HiIcon name="assistant" class="as-big" />
-        <h2>{{ t('massistant.emptyTitle') }}</h2>
-        <p class="hint">{{ t('massistant.emptyText') }}</p>
-        <div class="as-suggest">
-          <button v-for="s in suggestions" :key="s" type="button" class="btn btn-s" :disabled="ask.isPending.value" @click="send(s)">{{ s }}</button>
+    <div class="as-scroll">
+      <div ref="scroller" class="as-msgs" aria-live="polite">
+        <div v-if="!id" class="as-empty">
+          <HiIcon name="assistant" class="as-big" />
+          <h2>{{ t('massistant.emptyTitle') }}</h2>
+          <p class="hint">{{ t('massistant.emptyText') }}</p>
+          <div class="as-suggest">
+            <button v-for="s in suggestions" :key="s" type="button" class="btn btn-s" :disabled="ask.isPending.value" @click="send(s)">{{ s }}</button>
+          </div>
         </div>
-      </div>
-      <p v-else-if="conv.isPending.value" class="hint">{{ t('common.loading') }}</p>
-      <p v-else-if="conv.isError.value" class="ferr">{{ t('common.error') }}</p>
-      <template v-for="m in messages" v-else :key="m.id">
-        <div v-if="m.role === 'user'" class="as-q">
-          <template v-if="!m.attachedFiles?.length || m.text !== FILES_ONLY">{{ m.text }}</template>
-          <ChatFiles v-if="m.attachedFiles?.length" :files="m.attachedFiles" />
-        </div>
-        <div v-else class="as-a" :class="{ failed: m.status === 'failed' }">
-          <template v-if="isOpen(m)">
-            <div class="as-think"><span class="as-spin" />{{ t('massistant.thinking', { seconds: thinking(m) }) }}</div>
-            <p v-if="live.get(m.id)?.file && !live.get(m.id)?.text" class="hint">{{ t('massistant.reading', { what: fileLabel(t, live.get(m.id)!.file!) }) }}</p>
-            <ReportView v-if="live.get(m.id)?.text" class="as-partial" :markdown="live.get(m.id)!.text!" />
-          </template>
-          <template v-else-if="m.status === 'failed'">
-            <b>{{ t('massistant.failed') }}</b>
-            <p v-if="m.error" class="as-err">{{ m.error }}</p>
-            <button v-if="questionOf(m)" type="button" class="btn btn-s" :disabled="ask.isPending.value" @click="send(questionOf(m), [])">{{ t('massistant.askAgain') }}</button>
-          </template>
-          <template v-else>
-            <ChatBody :body="m.text" cite assistant />
-            <AssistantActionCard v-for="a in m.actions ?? []" :key="a.id" :action="a" />
-            <div v-if="m.handoff" class="as-handoff">
-              <b>{{ t('codechat.handoffTitle') }}</b>
-              <p>{{ m.handoff.request }}</p>
-              <p v-if="m.handoff.repos.length" class="hint">{{ t('codechat.repos') }}: {{ m.handoff.repos.join(', ') }}</p>
-              <RouterLink
-                class="btn btn-p btn-s"
-                :to="{ name: 'assistantCode', query: { text: m.handoff.request, repos: m.handoff.repoIds.join(',') || undefined } }"
-              >
-                <HiIcon name="code" />{{ t('codechat.handoffOpen') }}
-              </RouterLink>
-            </div>
-            <p v-for="(e, i) in m.actionErrors ?? []" :key="i" class="hint as-noact">{{ t('massistant.actionNotOffered', { reason: e }) }}</p>
-            <div v-if="m.links.length" class="as-links">
-              <RouterLink v-for="(l, i) in m.links" :key="i" class="as-link" :class="{ mono: l.kind === 'ticket' }" :to="linkTo(l)">{{ linkLabel(l) }}</RouterLink>
-            </div>
-            <div class="as-foot">
-              <span v-if="m.durationMs" class="hint">{{ secs(m.durationMs) }}</span>
-              <span class="sp" />
-              <button type="button" class="as-thumb" :aria-pressed="m.rating === 1" :title="t('massistant.helpful')" :aria-label="t('massistant.helpful')" @click="thumb(m, 1)">👍</button>
-              <button type="button" class="as-thumb" :aria-pressed="m.rating === -1" :title="t('massistant.notHelpful')" :aria-label="t('massistant.notHelpful')" @click="thumb(m, -1)">👎</button>
-            </div>
-            <form v-if="rating.id === m.id" class="as-rate" @submit.prevent="rate(m.id, rating.value, rating.comment, rating.share)">
-              <b>{{ t('massistant.rateTitle') }} {{ rating.value === 1 ? '👍' : '👎' }}</b>
-              <textarea v-model="rating.comment" :maxlength="MAX_QUESTION" rows="2" :placeholder="t('massistant.rateComment')" />
-              <label class="as-check"><input v-model="rating.share" type="checkbox"> {{ t('massistant.rateShare') }}</label>
-              <p class="hint">{{ t('massistant.rateNote') }}</p>
-              <div class="as-rate-b">
-                <button type="button" class="btn btn-s" @click="rating.id = 0">{{ t('form.cancel') }}</button>
-                <button type="submit" class="btn btn-s btn-p" :disabled="rating.busy">{{ t('massistant.rateSend') }}</button>
+        <p v-else-if="conv.isPending.value" class="hint">{{ t('common.loading') }}</p>
+        <p v-else-if="conv.isError.value" class="ferr">{{ t('common.error') }}</p>
+        <template v-for="m in messages" v-else :key="m.id">
+          <div v-if="m.role === 'user'" class="as-q">
+            <template v-if="!m.attachedFiles?.length || m.text !== FILES_ONLY">{{ m.text }}</template>
+            <ChatFiles v-if="m.attachedFiles?.length" :files="m.attachedFiles" />
+          </div>
+          <div v-else class="as-a" :class="{ failed: m.status === 'failed' }">
+            <template v-if="isOpen(m)">
+              <div class="as-think"><span class="as-spin" />{{ t('massistant.thinking', { seconds: thinking(m) }) }}</div>
+              <p v-if="live.get(m.id)?.file && !live.get(m.id)?.text" class="hint">{{ t('massistant.reading', { what: fileLabel(t, live.get(m.id)!.file!) }) }}</p>
+              <ReportView v-if="live.get(m.id)?.text" class="as-partial" :markdown="live.get(m.id)!.text!" />
+            </template>
+            <template v-else-if="m.status === 'failed'">
+              <b>{{ t('massistant.failed') }}</b>
+              <p v-if="m.error" class="as-err">{{ m.error }}</p>
+              <button v-if="questionOf(m)" type="button" class="btn btn-s" :disabled="ask.isPending.value" @click="send(questionOf(m), [])">{{ t('massistant.askAgain') }}</button>
+            </template>
+            <template v-else>
+              <ChatBody :body="m.text" cite assistant />
+              <AssistantActionCard v-for="a in m.actions ?? []" :key="a.id" :action="a" />
+              <div v-if="m.handoff" class="as-handoff">
+                <b>{{ t('codechat.handoffTitle') }}</b>
+                <p>{{ m.handoff.request }}</p>
+                <p v-if="m.handoff.repos.length" class="hint">{{ t('codechat.repos') }}: {{ m.handoff.repos.join(', ') }}</p>
+                <RouterLink
+                  class="btn btn-p btn-s"
+                  :to="{ name: 'assistantCode', query: { text: m.handoff.request, repos: m.handoff.repoIds.join(',') || undefined } }"
+                >
+                  <HiIcon name="code" />{{ t('codechat.handoffOpen') }}
+                </RouterLink>
               </div>
-            </form>
-          </template>
-        </div>
-      </template>
+              <p v-for="(e, i) in m.actionErrors ?? []" :key="i" class="hint as-noact">{{ t('massistant.actionNotOffered', { reason: e }) }}</p>
+              <div v-if="m.links.length" class="as-links">
+                <RouterLink v-for="(l, i) in m.links" :key="i" class="as-link" :class="{ mono: l.kind === 'ticket' }" :to="linkTo(l)">{{ linkLabel(l) }}</RouterLink>
+              </div>
+              <div class="as-foot">
+                <span v-if="m.durationMs" class="hint">{{ secs(m.durationMs) }}</span>
+                <span class="sp" />
+                <button type="button" class="as-thumb" :aria-pressed="m.rating === 1" :title="t('massistant.helpful')" :aria-label="t('massistant.helpful')" @click="thumb(m, 1)">👍</button>
+                <button type="button" class="as-thumb" :aria-pressed="m.rating === -1" :title="t('massistant.notHelpful')" :aria-label="t('massistant.notHelpful')" @click="thumb(m, -1)">👎</button>
+              </div>
+              <form v-if="rating.id === m.id" class="as-rate" @submit.prevent="rate(m.id, rating.value, rating.comment, rating.share)">
+                <b>{{ t('massistant.rateTitle') }} {{ rating.value === 1 ? '👍' : '👎' }}</b>
+                <textarea v-model="rating.comment" :maxlength="MAX_QUESTION" rows="2" :placeholder="t('massistant.rateComment')" />
+                <label class="as-check"><input v-model="rating.share" type="checkbox"> {{ t('massistant.rateShare') }}</label>
+                <p class="hint">{{ t('massistant.rateNote') }}</p>
+                <div class="as-rate-b">
+                  <button type="button" class="btn btn-s" @click="rating.id = 0">{{ t('form.cancel') }}</button>
+                  <button type="submit" class="btn btn-s btn-p" :disabled="rating.busy">{{ t('massistant.rateSend') }}</button>
+                </div>
+              </form>
+            </template>
+          </div>
+        </template>
+      </div>
+      <ScrollToBottom :show="bottom.far.value" @go="bottom.toBottom(true)" />
     </div>
 
     <div v-if="voice.state.value === 'recording' || hearing" class="as-compose as-voice" role="status">
@@ -316,6 +327,7 @@ const suggestions = computed(() => [
 <style scoped>
 
 .as-chat { display: flex; flex-direction: column; padding: 0; }
+.as-scroll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .as-msgs { flex: 1; min-height: 0; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .as-empty { margin: auto; max-width: 520px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .as-empty h2 { margin: 0; font-size: 18px; }

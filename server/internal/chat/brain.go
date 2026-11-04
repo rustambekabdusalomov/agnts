@@ -211,7 +211,7 @@ func (s *Service) answer(ctx context.Context, j postgres.ChatJob) error {
 	if err != nil {
 		return err
 	}
-	items = withFiles(withThread(items, thread), s.fileItems(ctx, append(slices.Clone(thread), q)))
+	items = withFiles(withThread(items, thread), s.fileItems(ctx, s.fileSources(ctx, q, items)))
 	s.thinking(ctx, q, "answer")
 	res, err := s.Brain.ChatModel(ctx, orchestrator.ChatModelCall{Kind: "answer", User: j.UserID, Prompt: answerPrompt(q, items, thread)})
 	if err != nil {
@@ -276,6 +276,66 @@ const (
 	fileTextEach  = 8 << 10
 	fileTextTotal = 24 << 10
 )
+
+// Where an answer looks for files besides the question's own.
+const (
+	fileReplyDepth  = 5             // messages up the reply chain
+	fileRecalled    = 8             // messages memory recalled
+	fileRecent      = 20            // the channel's latest messages before the question…
+	fileRecentSince = 2 * time.Hour // …from this long before it
+)
+
+// fileSources are the messages whose files an answer to q reads, most
+// relevant first, so the text budget goes to them: q itself, the messages
+// up its reply chain (a reply to a message with files is about them), the
+// messages memory recalled for it, then the channel's recent ones (a
+// follow-up like "@agnts what does that plan need?" without a reply).
+// Only messages with files are kept, each once.
+func (s *Service) fileSources(ctx context.Context, q domain.ChatMessage, items []Item) []domain.ChatMessage {
+	var out []domain.ChatMessage
+	seen := map[int64]bool{}
+	add := func(m domain.ChatMessage) {
+		if len(m.Files) > 0 && !seen[m.ID] && m.ChannelID == q.ChannelID {
+			seen[m.ID] = true
+			out = append(out, m)
+		}
+	}
+	add(q)
+	id := q.ReplyTo
+	for i := 0; i < fileReplyDepth && id != nil; i++ {
+		p, err := s.Store.Message(ctx, *id)
+		if err != nil {
+			break
+		}
+		add(p)
+		id = p.ReplyTo
+	}
+	var recalled []int64
+	for _, it := range items {
+		if n, ok := strings.CutPrefix(it.ID, "msg:"); ok && len(recalled) < fileRecalled {
+			if v, err := strconv.ParseInt(n, 10, 64); err == nil {
+				recalled = append(recalled, v)
+			}
+		}
+	}
+	if len(recalled) > 0 {
+		if ms, err := s.Store.MessagesByID(ctx, recalled); err == nil {
+			for _, rid := range recalled { // in memory's order, not by id
+				if i := slices.IndexFunc(ms, func(m domain.ChatMessage) bool { return m.ID == rid }); i >= 0 {
+					add(ms[i])
+				}
+			}
+		}
+	}
+	if recent, err := s.Store.Messages(ctx, q.ChannelID, q.ID, 0, fileRecent); err == nil {
+		for i := len(recent) - 1; i >= 0; i-- { // newest first
+			if q.CreatedAt.Sub(recent[i].CreatedAt) <= fileRecentSince {
+				add(recent[i])
+			}
+		}
+	}
+	return out
+}
 
 // fileItems are the files msgs brought, one context item per message
 // ("msg:<id>", so an answer cites the message): each file's name, and the

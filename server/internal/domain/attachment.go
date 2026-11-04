@@ -59,6 +59,13 @@ var inlineTypes = map[string]bool{
 // Image reports whether the attachment is a picture clients can show.
 func (a Attachment) Image() bool { return inlineTypes[a.ContentType] }
 
+// ConversationFile is a file of an AI chat (Ask) conversation, with the
+// question it came with.
+type ConversationFile struct {
+	Attachment
+	Question string
+}
+
 // FileRef is an attachment as a message shows it: enough to draw a
 // thumbnail or a download row. It is stored in events as JSON, so it
 // carries its own field names (the API's AttachedFile).

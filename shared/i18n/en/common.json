@@ -8,6 +8,8 @@
     "loading": "Loading…",
     "error": "Something went wrong. Try again.",
     "signedInAs": "Signed in as {username}",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "toNewest": "Scroll to the newest",
+    "newBelow": "{n} new"
   }
 }

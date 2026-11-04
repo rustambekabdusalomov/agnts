@@ -10,11 +10,13 @@ import ChannelList from '../components/chat/ChannelList.vue'
 import ChatComposer from '../components/chat/ChatComposer.vue'
 import ChatFiles from '../components/files/ChatFiles.vue'
 import ChatMessageItem from '../components/chat/ChatMessageItem.vue'
+import ScrollToBottom from '../components/chat/ScrollToBottom.vue'
 import { dayOf, secs, type ChatChannel, type ChatMessage } from '../components/chat/chat'
 import {
   chat, channelState, discard, flush, loadChannel, loadOlder, markRead, retrySend, send, sendVoice, STATS_KEY, toTicket, useChatChannels,
 } from '../components/chat/useChat'
 import { livePoll, useLive } from '../composables/useLive'
+import { useStickToBottom } from '../composables/useStickToBottom'
 import { useSession } from '../stores/session'
 import { useUi } from '../stores/ui'
 import { useWorkspace } from '../stores/workspace'
@@ -120,9 +122,20 @@ function toBottom() {
   const el = scroller.value
   if (el) el.scrollTop = el.scrollHeight
 }
+// "Scroll to the newest": shown while scrolled up, with how many messages
+// came from others since the newest was last on screen.
+const bottom = useStickToBottom(scroller)
+const seenUpTo = ref(0)
+const unseen = computed(() => messages.value.filter((m) => m.id > seenUpTo.value && m.author !== me.value).length)
+function toNewest() {
+  stickNext = false
+  bottom.toBottom(true)
+}
+
 /** Marks the channel read when its newest message is on screen. */
 function seen() {
   chat.atBottom = nearBottom()
+  if (chat.atBottom) seenUpTo.value = messages.value.at(-1)?.id ?? 0
   if (chat.atBottom && channelId.value && document.visibilityState === 'visible') void markRead(channelId.value)
 }
 
@@ -135,6 +148,7 @@ watch(
   async (id) => {
     chat.openChannel = id
     replyTo.value = undefined
+    seenUpTo.value = Number.MAX_SAFE_INTEGER // until it is shown at its bottom
     if (!id) return
     channelState(id)
     await loadChannel(id)
@@ -261,49 +275,52 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
         <p v-if="channel?.topic" class="hint tc-topic">{{ channel.topic }}</p>
       </header>
 
-      <div ref="scroller" class="tc-msgs" aria-live="polite" @scroll.passive="onScroll">
-        <p v-if="channels.isError.value" class="ferr">{{ t('common.error') }}</p>
-        <p v-if="state?.loadingOlder" class="hint tc-c">{{ t('common.loading') }}</p>
-        <p v-else-if="state?.loaded && !state.hasOlder && messages.length" class="hint tc-c">{{ t('teamchat.start', { channel: channel?.name ?? '' }) }}</p>
-        <p v-if="state?.loading && !messages.length" class="hint tc-c">{{ t('common.loading') }}</p>
-        <p v-else-if="state?.error && !messages.length" class="ferr tc-c">{{ state.error }}</p>
-        <div v-else-if="state?.loaded && !messages.length && !pending.length" class="tc-empty">
-          <h3>{{ t('teamchat.emptyTitle', { channel: channel?.name ?? '' }) }}</h3>
-          <p class="hint">{{ t('teamchat.emptyText') }}</p>
-        </div>
+      <div class="tc-scroll">
+        <div ref="scroller" class="tc-msgs" aria-live="polite" @scroll.passive="onScroll">
+          <p v-if="channels.isError.value" class="ferr">{{ t('common.error') }}</p>
+          <p v-if="state?.loadingOlder" class="hint tc-c">{{ t('common.loading') }}</p>
+          <p v-else-if="state?.loaded && !state.hasOlder && messages.length" class="hint tc-c">{{ t('teamchat.start', { channel: channel?.name ?? '' }) }}</p>
+          <p v-if="state?.loading && !messages.length" class="hint tc-c">{{ t('common.loading') }}</p>
+          <p v-else-if="state?.error && !messages.length" class="ferr tc-c">{{ state.error }}</p>
+          <div v-else-if="state?.loaded && !messages.length && !pending.length" class="tc-empty">
+            <h3>{{ t('teamchat.emptyTitle', { channel: channel?.name ?? '' }) }}</h3>
+            <p class="hint">{{ t('teamchat.emptyText') }}</p>
+          </div>
 
-        <template v-for="r in rows" :key="r.key">
-          <div v-if="r.kind === 'day'" class="tc-day"><span>{{ r.label }}</span></div>
-          <ChatMessageItem
-            v-else
-            :message="r.m"
-            :parent="r.m.replyTo ? byId.get(r.m.replyTo) : undefined"
-            :thinking="!!chat.thinking[r.m.id]"
-            :highlight="highlight === r.m.id"
-            :can-ticket="workspace.canEdit"
-            @reply="replyTo = $event"
-            @jump="jump"
-            @ticket="ticket"
-          />
-        </template>
+          <template v-for="r in rows" :key="r.key">
+            <div v-if="r.kind === 'day'" class="tc-day"><span>{{ r.label }}</span></div>
+            <ChatMessageItem
+              v-else
+              :message="r.m"
+              :parent="r.m.replyTo ? byId.get(r.m.replyTo) : undefined"
+              :thinking="!!chat.thinking[r.m.id]"
+              :highlight="highlight === r.m.id"
+              :can-ticket="workspace.canEdit"
+              @reply="replyTo = $event"
+              @jump="jump"
+              @ticket="ticket"
+            />
+          </template>
 
-        <div v-for="o in pending" :key="o.clientMsgId" class="tc-pend" :class="o.status">
-          <span class="tc-av" aria-hidden="true">{{ me.slice(0, 2).toUpperCase() }}</span>
-          <div class="tc-pm">
-            <div class="tc-ph">
-              <b>{{ me }}</b>
-              <span v-if="o.status === 'pending'" class="hint">{{ conn ? t('teamchat.waitingNet') : t('teamchat.sending') }}</span>
-              <span v-else class="ferr">{{ t('teamchat.failed') }}<template v-if="o.error">: {{ o.error }}</template></span>
-            </div>
-            <p v-if="o.replyTo" class="hint tc-pq">↪ {{ byId.get(o.replyTo)?.author ?? '' }}</p>
-            <p v-if="o.body" class="tc-pb">{{ o.body }}</p>
-            <ChatFiles v-if="o.files?.length" :files="o.files" />
-            <div v-if="o.status === 'failed'" class="tc-pa">
-              <button type="button" class="btn btn-s" @click="retrySend(o.clientMsgId)">{{ t('teamchat.retry') }}</button>
-              <button type="button" class="btn btn-s btn-d" @click="discard(o.clientMsgId)">{{ t('teamchat.delete') }}</button>
+          <div v-for="o in pending" :key="o.clientMsgId" class="tc-pend" :class="o.status">
+            <span class="tc-av" aria-hidden="true">{{ me.slice(0, 2).toUpperCase() }}</span>
+            <div class="tc-pm">
+              <div class="tc-ph">
+                <b>{{ me }}</b>
+                <span v-if="o.status === 'pending'" class="hint">{{ conn ? t('teamchat.waitingNet') : t('teamchat.sending') }}</span>
+                <span v-else class="ferr">{{ t('teamchat.failed') }}<template v-if="o.error">: {{ o.error }}</template></span>
+              </div>
+              <p v-if="o.replyTo" class="hint tc-pq">↪ {{ byId.get(o.replyTo)?.author ?? '' }}</p>
+              <p v-if="o.body" class="tc-pb">{{ o.body }}</p>
+              <ChatFiles v-if="o.files?.length" :files="o.files" />
+              <div v-if="o.status === 'failed'" class="tc-pa">
+                <button type="button" class="btn btn-s" @click="retrySend(o.clientMsgId)">{{ t('teamchat.retry') }}</button>
+                <button type="button" class="btn btn-s btn-d" @click="discard(o.clientMsgId)">{{ t('teamchat.delete') }}</button>
+              </div>
             </div>
           </div>
         </div>
+        <ScrollToBottom :show="bottom.far.value" :count="unseen" @go="toNewest" />
       </div>
 
       <ChatComposer :channel-name="channel?.name ?? ''" :reply-to="replyTo" @send="onSend" @voice="onVoice" @cancel-reply="replyTo = undefined" />
@@ -320,6 +337,7 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
 .tc-ht .sp { flex: 1; }
 .tc-stats { font-size: 13px; font-weight: 700; color: var(--primary-ink); }
 .tc-topic { margin: 2px 0 0; }
+.tc-scroll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .tc-msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 10px; display: flex; flex-direction: column; gap: 4px; }
 .tc-c { text-align: center; margin: 4px 0; }
 .tc-empty { margin: auto; text-align: center; max-width: 440px; }

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -107,6 +108,39 @@ func (s *Agent) AssistantFileOwner(ctx context.Context, messageID int64) (int64,
 	err := s.db.QueryRow(ctx, `SELECT c.user_id FROM assistant_messages m
 		JOIN assistant_conversations c ON c.id = m.conversation_id WHERE m.id = $1`, messageID).Scan(&user)
 	return user, notFound(err)
+}
+
+// ConversationFiles returns the files of Ask conversation conversationID's
+// questions up to message upTo, newest question first (a question's own
+// files in the order sent), with the question each came with.
+func (s *Agent) ConversationFiles(ctx context.Context, conversationID, upTo int64) ([]domain.ConversationFile, error) {
+	rows, err := s.db.Query(ctx, `SELECT `+prefixed("a", attachmentCols)+`, m.text FROM attachments a
+		JOIN assistant_messages m ON m.id = a.assistant_message_id
+		WHERE m.conversation_id = $1 AND m.id <= $2 ORDER BY m.id DESC, a.id`, conversationID, upTo)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []domain.ConversationFile
+	for rows.Next() {
+		var f domain.ConversationFile
+		var purpose string
+		if err := rows.Scan(append(attachmentDest(&f.Attachment, &purpose), &f.Question)...); err != nil {
+			return nil, err
+		}
+		f.Purpose = domain.AttachmentPurpose(purpose)
+		out = append(out, f)
+	}
+	return out, rows.Err()
+}
+
+// prefixed qualifies each column of cols with table alias t.
+func prefixed(t, cols string) string {
+	parts := strings.Split(cols, ",")
+	for i, c := range parts {
+		parts[i] = t + "." + strings.TrimSpace(c)
+	}
+	return strings.Join(parts, ", ")
 }
 
 // linkMessageFiles links user's pending uploads ids to a chat message

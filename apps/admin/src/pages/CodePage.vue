@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap } from '../api/client'
@@ -11,6 +11,7 @@ import CodeQuestions from '../components/codechat/CodeQuestions.vue'
 import CodeResult from '../components/codechat/CodeResult.vue'
 import CodeTimelineView from '../components/codechat/CodeTimelineView.vue'
 import { blocks, currentTicket, liveItems, MAX_CODE_MESSAGE, mentionedRepos, placeholder, queued, running, TIMELINE_TYPES } from '../components/codechat/codechat'
+import ScrollToBottom from '../components/chat/ScrollToBottom.vue'
 import MentionInput from '../components/codechat/MentionInput.vue'
 import FileAttach from '../components/files/FileAttach.vue'
 import CheckBox from '../components/form/CheckBox.vue'
@@ -24,6 +25,7 @@ import MuseMeter from '../components/ticket/MuseMeter.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
 import { askConfirm } from '../composables/useConfirm'
 import { livePoll, useLive } from '../composables/useLive'
+import { useStickToBottom } from '../composables/useStickToBottom'
 import { useUi } from '../stores/ui'
 import { useWorkspace } from '../stores/workspace'
 
@@ -86,11 +88,16 @@ const state = computed(() => tk.value?.state ?? cur.value?.state)
 const waiting = computed(() => queued(conv.value))
 const approvals = computed(() => (timeline.data.value?.approvals ?? []).filter((a) => a.status === 'pending'))
 
+// Kept at the bottom as the work goes on, unless the person scrolled up
+// (then a button brings them back); opening or sending goes to the bottom.
 const scroller = ref<HTMLElement | null>(null)
-watch(() => [shown.value.length, state.value], async () => {
-  await nextTick()
-  if (scroller.value) scroller.value.scrollTop = scroller.value.scrollHeight
-}, { flush: 'post' })
+const bottom = useStickToBottom(scroller)
+let stickNext = true
+watch(id, () => (stickNext = true))
+watch(() => [shown.value.length, state.value], () => {
+  bottom.follow(stickNext)
+  stickNext = false
+}, { flush: 'pre' })
 
 // A new conversation: where it works, or the ticket it picks up.
 const repos = useQuery({ queryKey: ['repos'], queryFn: () => unwrap(api.GET('/repos')) })
@@ -154,6 +161,7 @@ function submit() {
   if (send.isPending.value || uploading.value || length.value > MAX_CODE_MESSAGE) return
   if (!length.value && !files.value.length) return
   if (!id.value && !canStart.value) return void (error.value = t('codechat.reposNone'))
+  stickNext = true
   send.mutate(undefined)
 }
 
@@ -247,69 +255,72 @@ async function stopAndSend() {
       </div>
     </div>
 
-    <div ref="scroller" class="cc-msgs" aria-live="polite">
-      <div v-if="!id" class="cc-setup">
-        <HiIcon name="code" class="cc-big" />
-        <h2>{{ t('codechat.emptyTitle') }}</h2>
-        <p class="hint">{{ t('codechat.emptyText') }}</p>
-        <div class="cc-field">
-          <b>{{ t('codechat.repos') }}</b>
-          <p v-if="repos.isPending.value" class="hint">{{ t('common.loading') }}</p>
-          <RepoSetPicker v-else v-model="sel" :repos="repos.data.value ?? []" :groups="groups.data.value ?? []" :label="t('codechat.repos')" :disabled="!!ticketKey.trim()" />
-        </div>
-        <div class="cc-row">
-          <label class="cc-field">
-            <b>{{ t('codechat.kind') }}</b>
-            <InputSelect v-model="kind" :options="kinds" :label="t('codechat.kind')" :disabled="!!ticketKey.trim()" />
-          </label>
+    <div class="cc-scroll">
+      <div ref="scroller" class="cc-msgs" aria-live="polite">
+        <div v-if="!id" class="cc-setup">
+          <HiIcon name="code" class="cc-big" />
+          <h2>{{ t('codechat.emptyTitle') }}</h2>
+          <p class="hint">{{ t('codechat.emptyText') }}</p>
           <div class="cc-field">
-            <CheckBox v-model="quick">{{ t('codechat.quick') }}</CheckBox>
-            <span class="hint">{{ t('codechat.quickHint') }}</span>
+            <b>{{ t('codechat.repos') }}</b>
+            <p v-if="repos.isPending.value" class="hint">{{ t('common.loading') }}</p>
+            <RepoSetPicker v-else v-model="sel" :repos="repos.data.value ?? []" :groups="groups.data.value ?? []" :label="t('codechat.repos')" :disabled="!!ticketKey.trim()" />
           </div>
+          <div class="cc-row">
+            <label class="cc-field">
+              <b>{{ t('codechat.kind') }}</b>
+              <InputSelect v-model="kind" :options="kinds" :label="t('codechat.kind')" :disabled="!!ticketKey.trim()" />
+            </label>
+            <div class="cc-field">
+              <CheckBox v-model="quick">{{ t('codechat.quick') }}</CheckBox>
+              <span class="hint">{{ t('codechat.quickHint') }}</span>
+            </div>
+          </div>
+          <label class="cc-field">
+            <b>{{ t('codechat.ticketPick') }}</b>
+            <input v-model="ticketKey" class="cfg-in" :placeholder="t('codechat.ticketPlaceholder')" maxlength="64">
+          </label>
         </div>
-        <label class="cc-field">
-          <b>{{ t('codechat.ticketPick') }}</b>
-          <input v-model="ticketKey" class="cfg-in" :placeholder="t('codechat.ticketPlaceholder')" maxlength="64">
-        </label>
-      </div>
-      <p v-else-if="timeline.isPending.value" class="hint">{{ t('common.loading') }}</p>
-      <p v-else-if="timeline.isError.value" class="ferr">{{ t('common.error') }}</p>
-      <CodeTimelineView v-else :blocks="shown" />
+        <p v-else-if="timeline.isPending.value" class="hint">{{ t('common.loading') }}</p>
+        <p v-else-if="timeline.isError.value" class="ferr">{{ t('common.error') }}</p>
+        <CodeTimelineView v-else :blocks="shown" />
 
-      <template v-if="cur && tk">
-        <CodeApprovalCard v-for="a in approvals" :key="a.id" :approval="a" />
-        <div v-if="running(state)" class="cc-working">
-          <span class="cc-spin" /><b>{{ t('codechat.working') }}</b>
-          <MuseMeter :events="budgetEvents" />
-        </div>
-        <div v-if="waiting.length && running(state)" class="cc-queued">
-          <span>{{ t('codechat.queuedTitle', { n: waiting.length }) }}</span>
-          <button v-if="state !== 'pushing'" type="button" class="btn btn-s" :disabled="sendNow.isPending.value" @click="stopAndSend">{{ t('codechat.sendNow') }}</button>
-        </div>
-        <CodeResult v-if="state === 'waiting_for_review' && detail.data.value" :detail="detail.data.value" />
-        <CodeQuestions
-          v-else-if="state === 'waiting_for_answers' && detail.data.value"
-          :ticket-key="cur.key"
-          :questions="detail.data.value.questions"
-          :busy="send.isPending.value"
-          @send="(a) => send.mutate(a)"
-        />
-        <div v-else-if="state === 'failed' || state === 'rate_limited'" class="cc-note bad">
-          <b>{{ t('codechat.stoppedTitle', { key: cur.key }) }}</b>
-          <p v-if="tk.stopReason" class="hint">{{ tk.stopReason }}</p>
-          <p class="hint">{{ t('codechat.stoppedHint') }}</p>
-        </div>
-        <div v-else-if="state === 'done'" class="cc-note">
-          <b>{{ t('codechat.doneTitle', { key: cur.key }) }}</b>
-          <a v-if="tk.prUrl" :href="tk.prUrl" target="_blank" rel="noopener">{{ t('codechat.prOpened') }} ↗</a>
-          <p class="hint">{{ t('codechat.doneHint') }}</p>
-        </div>
-        <div v-else-if="state === 'rejected'" class="cc-note">
-          <b>{{ t('codechat.rejectedTitle', { key: cur.key }) }}</b>
-          <p class="hint">{{ t('codechat.rejectedHint') }}</p>
-        </div>
-      </template>
-      <p v-else-if="conv && !cur && conv.tickets?.length" class="hint cc-center">{{ t('codechat.movedHint', { key: conv.tickets.at(-1)!.key }) }}</p>
+        <template v-if="cur && tk">
+          <CodeApprovalCard v-for="a in approvals" :key="a.id" :approval="a" />
+          <div v-if="running(state)" class="cc-working">
+            <span class="cc-spin" /><b>{{ t('codechat.working') }}</b>
+            <MuseMeter :events="budgetEvents" />
+          </div>
+          <div v-if="waiting.length && running(state)" class="cc-queued">
+            <span>{{ t('codechat.queuedTitle', { n: waiting.length }) }}</span>
+            <button v-if="state !== 'pushing'" type="button" class="btn btn-s" :disabled="sendNow.isPending.value" @click="stopAndSend">{{ t('codechat.sendNow') }}</button>
+          </div>
+          <CodeResult v-if="state === 'waiting_for_review' && detail.data.value" :detail="detail.data.value" />
+          <CodeQuestions
+            v-else-if="state === 'waiting_for_answers' && detail.data.value"
+            :ticket-key="cur.key"
+            :questions="detail.data.value.questions"
+            :busy="send.isPending.value"
+            @send="(a) => send.mutate(a)"
+          />
+          <div v-else-if="state === 'failed' || state === 'rate_limited'" class="cc-note bad">
+            <b>{{ t('codechat.stoppedTitle', { key: cur.key }) }}</b>
+            <p v-if="tk.stopReason" class="hint">{{ tk.stopReason }}</p>
+            <p class="hint">{{ t('codechat.stoppedHint') }}</p>
+          </div>
+          <div v-else-if="state === 'done'" class="cc-note">
+            <b>{{ t('codechat.doneTitle', { key: cur.key }) }}</b>
+            <a v-if="tk.prUrl" :href="tk.prUrl" target="_blank" rel="noopener">{{ t('codechat.prOpened') }} ↗</a>
+            <p class="hint">{{ t('codechat.doneHint') }}</p>
+          </div>
+          <div v-else-if="state === 'rejected'" class="cc-note">
+            <b>{{ t('codechat.rejectedTitle', { key: cur.key }) }}</b>
+            <p class="hint">{{ t('codechat.rejectedHint') }}</p>
+          </div>
+        </template>
+        <p v-else-if="conv && !cur && conv.tickets?.length" class="hint cc-center">{{ t('codechat.movedHint', { key: conv.tickets.at(-1)!.key }) }}</p>
+      </div>
+      <ScrollToBottom :show="bottom.far.value" @go="bottom.toBottom(true)" />
     </div>
 
     <form class="cc-compose" @submit.prevent="submit">
@@ -346,6 +357,7 @@ async function stopAndSend() {
 .cc-attach { display: flex; gap: 6px; }
 .cc-attach input { width: 200px; }
 .cc-repos { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.cc-scroll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .cc-msgs { flex: 1; min-height: 0; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .cc-setup { margin: 0 auto; width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 12px; }
 .cc-setup h2 { margin: 0; font-size: 18px; }

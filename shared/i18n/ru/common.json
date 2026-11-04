@@ -8,6 +8,8 @@
     "loading": "Загрузка…",
     "error": "Что-то пошло не так. Попробуйте ещё раз.",
     "signedInAs": "Вы вошли как {username}",
-    "version": "Версия {version}"
+    "version": "Версия {version}",
+    "toNewest": "К последним сообщениям",
+    "newBelow": "Новых: {n}"
   }
 }

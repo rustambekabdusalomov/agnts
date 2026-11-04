@@ -17,7 +17,7 @@ import (
 // Analytics page can compare the quality of the work before and after a
 // change: bump it whenever a change to the prompts or to the context runs
 // get could change what Claude does.
-const PromptVersion = "2026-11-04.1"
+const PromptVersion = "2026-11-04.2"
 
 // Files Claude Code writes for agnts to read back. stream-json output has no
 // structured result, so the contract is a file outside the repository.
@@ -902,7 +902,7 @@ Write {{.TranslationPath}} with exactly this shape, one item for every id in the
 {{range .AssistantFiles}}- {{$.AssistantDir}}/{{.}}
 {{end}}
 memory.json, when there, is what agnts's memory recalled for the question: items with an id ("msg:812" a team chat message, "ticket:PAY-214", "pr:api#14", "repo:api" with its brief, "finding:12" a log finding) and their text. When the answer uses an item, cite its id in square brackets right after the claim, exactly as written: [msg:812]. Cite only ids that are in memory.json.
-question.txt is the question; conversation.json is the talk so far (the question may refer to it; "[action ...]" lines say what became of actions you proposed). me.json says the person's role. Files named upload-<id>-<name> are files the person attached to this question ("See the attached files." means they sent files without words): read them, they are what the question is about. When you cannot read one (a picture or a PDF your tools do not open), say so and do not guess what is in it. Read only the files the question needs. Each file holds what agnts showed at {{.AsOf}}.
+question.txt is the question; conversation.json is the talk so far (the question may refer to it; "[action ...]" lines say what became of actions you proposed). me.json says the person's role. Files named upload-<id>-<name> are files the person attached in this conversation; files.json lists them, newest first, with the question each came with ("this_question": true for the ones sent with this question; "See the attached files." means files sent without words). Read the ones the question is about: its own files, or the earlier file it refers to ("the plan", "that screenshot"). A file in files.json with "left_out" is not here: say so if the question needs it. When you cannot read one (a picture or a PDF your tools do not open), say so and do not guess what is in it. Read only the files the question needs. Each file holds what agnts showed at {{.AsOf}}.
 
 ## Rules
 

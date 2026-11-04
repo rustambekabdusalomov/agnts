@@ -83,7 +83,7 @@ func (c AssistantCase) Snapshot() []byte {
 		}
 		files = append(files, AssistantFile{Name: n, Content: content})
 	}
-	files = append(files, assistantConversationFiles(c.Question, nil)...)
+	files = append(files, assistantConversationFiles(c.Question, nil, nil)...)
 	b, _ := json.Marshal(files)
 	return b
 }

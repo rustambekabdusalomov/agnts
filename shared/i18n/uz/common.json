@@ -8,6 +8,8 @@
     "loading": "Yuklanmoqda…",
     "error": "Nimadir xato ketdi. Qayta urining.",
     "signedInAs": "{username} sifatida kirdingiz",
-    "version": "Versiya {version}"
+    "version": "Versiya {version}",
+    "toNewest": "Eng yangilariga oʻtish",
+    "newBelow": "{n} ta yangi"
   }
 }
