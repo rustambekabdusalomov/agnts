@@ -196,7 +196,10 @@ async function signOut() {
   <PageHeader :title="t('account.profileTitle')" />
   <div class="stack pf-stack">
     <section class="card">
-      <div class="ch"><div><h2>{{ t('account.profile') }}</h2><p class="sub">{{ t('account.profileSub') }}</p></div></div>
+      <div class="ch">
+        <div><h2>{{ t('account.profile') }}</h2><p class="sub">{{ t('account.profileSub') }}</p></div>
+        <button type="button" class="btn btn-s btn-d" @click="confirmOut = true">{{ t('auth.signOut') }}</button>
+      </div>
       <CfgRow :label="t('account.avatar')" :help="t('account.avatarHelp')">
         <span class="row-actions pf-avatar">
           <UserAvatar :name="user?.username ?? ''" :url="user?.avatarUrl" :size="56" />
@@ -309,13 +312,6 @@ async function signOut() {
       <div class="ch">
         <div><h2>{{ t('feedback.title') }}</h2><p class="sub">{{ t('feedback.lede') }}</p></div>
         <button type="button" class="btn btn-s" @click="feedbackOpen = true">{{ t('feedback.title') }}</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="ch">
-        <div><h2>{{ t('auth.signOut') }}</h2><p class="sub">{{ t('common.signedInAs', { username: user?.username }) }}</p></div>
-        <button type="button" class="btn btn-s btn-d" @click="confirmOut = true">{{ t('auth.signOut') }}</button>
       </div>
     </section>
   </div>

@@ -7,6 +7,7 @@ import { askConfirm } from '../../composables/useConfirm'
 import CommentBody from './CommentBody.vue'
 import CommentComposer from './CommentComposer.vue'
 import type { usePullWrites } from './usePull'
+import GitHubAvatar from '../ui/GitHubAvatar.vue'
 
 // One thread of a pull request: its comments, with edit and delete on
 // your own, a reply box and resolve. `where` shows the file and line
@@ -51,10 +52,7 @@ function sendReply(body: string) {
     <pre v-if="where && th.kind === 'inline' && hunk" class="th-hunk mono">{{ hunk }}</pre>
     <div v-for="c in th.comments" :key="c.id" :class="{ sys: c.system }">
       <div class="cm-h">
-        <span class="cm-av" aria-hidden="true">
-          <img v-if="c.avatarUrl" :src="c.avatarUrl" alt="" referrerpolicy="no-referrer">
-          <template v-else>{{ c.author.slice(0, 1).toUpperCase() }}</template>
-        </span>
+        <GitHubAvatar :url="c.avatarUrl" :size="22" />
         <b>{{ c.author }}</b>
         <span v-if="verdict && c === th.comments[0]" class="badge" :class="VERDICT_TONE[verdict] ?? 'b-gray'">{{ t(`pulls.verdict_${verdict}`) }}</span>
         <span v-if="c.agnts" class="badge b-info">agnts</span>
@@ -114,8 +112,6 @@ function sendReply(body: string) {
 .cm + .cm { border-top: 1px solid var(--line-2); padding-top: 10px; }
 .cm.sys { color: var(--ink-3); font-size: 13px; }
 .cm-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; }
-.cm-av { width: 22px; height: 22px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--hover); font-size: 11px; font-weight: 700; flex: none; }
-.cm-av img { width: 100%; height: 100%; object-fit: cover; }
 .cm-sp { flex: 1; }
 .lnk { background: none; border: 0; padding: 2px 4px; font: inherit; font-size: 13px; color: var(--ink-2); cursor: pointer; }
 .lnk:hover { color: var(--ink); text-decoration: underline; }
