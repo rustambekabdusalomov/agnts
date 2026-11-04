@@ -105,7 +105,7 @@
     "kind_elasticsearch": "Elasticsearch",
     "kind_opensearch": "OpenSearch",
     "kind_graylog": "Graylog",
-    "kind_push": "Push (Vector, Fluent Bit…)",
+    "kind_push": "Push (OpenTelemetry, Vector, Fluent Bit…)",
     "name": "Nomi",
     "namePh": "prod-loki",
     "environment": "Muhit",

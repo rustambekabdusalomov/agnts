@@ -12072,7 +12072,7 @@ abstract class AppLocalizations {
   /// No description provided for @logwatchKind_push.
   ///
   /// In en, this message translates to:
-  /// **'Push (Vector, Fluent Bit…)'**
+  /// **'Push (OpenTelemetry, Vector, Fluent Bit…)'**
   String get logwatchKind_push;
 
   /// No description provided for @logwatchName.

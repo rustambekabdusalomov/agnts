@@ -4009,7 +4009,7 @@
   "logwatchKind_elasticsearch": "Elasticsearch",
   "logwatchKind_opensearch": "OpenSearch",
   "logwatchKind_graylog": "Graylog",
-  "logwatchKind_push": "Push (Vector, Fluent Bit…)",
+  "logwatchKind_push": "Push (OpenTelemetry, Vector, Fluent Bit…)",
   "logwatchName": "Name",
   "logwatchNamePh": "prod-loki",
   "logwatchEnvironment": "Environment",
