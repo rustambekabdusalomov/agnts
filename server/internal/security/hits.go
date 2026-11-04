@@ -92,7 +92,8 @@ func opengrep(b []byte) ([]domain.SecHit, error) {
 			CheckID string `json:"check_id"`
 			Path    string `json:"path"`
 			Start   struct {
-				Line int `json:"line"`
+				Line   int `json:"line"`
+				Offset int `json:"offset"`
 			} `json:"start"`
 			Extra struct {
 				Message  string `json:"message"`
@@ -111,6 +112,14 @@ func opengrep(b []byte) ([]domain.SecHit, error) {
 		return nil, fmt.Errorf("opengrep output: %w", err)
 	}
 	var hs []domain.SecHit
+	// A rule can match one place several times, once for each way its
+	// metavariables bind (a query built from two parameters); that is one
+	// hit to triage, not several.
+	type at struct {
+		rule, file string
+		offset     int
+	}
+	seen := map[at]bool{}
 	for _, r := range out.Results {
 		file := repoPath(r.Path)
 		if file == "" {
@@ -120,6 +129,11 @@ func opengrep(b []byte) ([]domain.SecHit, error) {
 		if i := strings.Index(rule, "agnts."); i >= 0 {
 			rule = rule[i:] // opengrep prefixes the rules folder
 		}
+		k := at{rule, file, r.Start.Offset}
+		if seen[k] {
+			continue
+		}
+		seen[k] = true
 		sev := domain.SecMedium
 		switch strings.ToUpper(r.Extra.Severity) {
 		case "ERROR":
