@@ -119,9 +119,9 @@ func ruleHits(files []domain.FileChange, rules []domain.Rule) []RuleHit {
 				out = append(out, RuleHit{RuleID: r.ID, Title: r.Title, Path: f.Path, Text: fmt.Sprintf("changed (+%d −%d)", f.Add, f.Del), Action: e.Action})
 				continue
 			}
-			for _, l := range addedLines(f.Diff) {
-				if re.MatchString(l.text) {
-					out = append(out, RuleHit{RuleID: r.ID, Title: r.Title, Path: f.Path, Line: l.n, Text: truncate(strings.TrimSpace(l.text), 200), Action: e.Action})
+			for _, l := range domain.AddedLines(f.Diff) {
+				if re.MatchString(l.Text) {
+					out = append(out, RuleHit{RuleID: r.ID, Title: r.Title, Path: f.Path, Line: l.N, Text: truncate(strings.TrimSpace(l.Text), 200), Action: e.Action})
 					break // one hit per file is enough to show it
 				}
 			}
@@ -137,35 +137,6 @@ func matchesAny(globs []string, p string) bool {
 		}
 	}
 	return false
-}
-
-type numberedLine struct {
-	n    int
-	text string
-}
-
-// addedLines returns the lines a unified diff adds, with their numbers in
-// the new file.
-func addedLines(diff string) []numberedLine {
-	var out []numberedLine
-	n := 0
-	for _, l := range strings.Split(diff, "\n") {
-		switch {
-		case strings.HasPrefix(l, "@@"):
-			if _, after, ok := strings.Cut(l, "+"); ok {
-				num, _, _ := strings.Cut(after, ",")
-				num, _, _ = strings.Cut(num, " ")
-				n, _ = strconv.Atoi(num)
-			}
-		case strings.HasPrefix(l, "+++"), strings.HasPrefix(l, "---"):
-		case strings.HasPrefix(l, "+"):
-			out = append(out, numberedLine{n, l[1:]})
-			n++
-		case strings.HasPrefix(l, " "):
-			n++
-		}
-	}
-	return out
 }
 
 // ruleFlags turns rule hits into red flags for the reviewer.

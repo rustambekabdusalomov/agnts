@@ -1,6 +1,7 @@
 package security
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,7 +37,7 @@ func TestHitsFromVulnapp(t *testing.T) {
 		}
 		by[h.Tool] = append(by[h.Tool], h)
 	}
-	if g := by[domain.ToolOpengrep]; len(g) != 2 || g[0].File != "handlers/orders.go" || g[0].CWE != "CWE-89" || !strings.HasPrefix(g[0].Rule, "agnts.go.sqli.") {
+	if g := by[domain.ToolOpengrep]; len(g) != 1 || g[0].File != "handlers/orders.go" || g[0].CWE != "CWE-89" || !strings.HasPrefix(g[0].Rule, "agnts.go.sqli.") {
 		t.Fatalf("opengrep = %+v", g)
 	}
 	sec := by[domain.ToolGitleaks]
@@ -69,6 +70,26 @@ func TestHitsExcludeAndBadOutput(t *testing.T) {
 	_, errs := Hits(raw, nil)
 	if errs[domain.ToolOSV] == nil || len(errs) != 1 {
 		t.Fatalf("errs = %v", errs)
+	}
+}
+
+func TestOpengrepOneHitPerPlace(t *testing.T) {
+	// formatted-query matches a query built from two parameters once per
+	// parameter; another rule on the same place is a hit of its own.
+	res := func(rule string, line, offset int) string {
+		return fmt.Sprintf(`{"check_id":"opt.agnts-sec.rules.%s","path":"/workspace/repo.go","start":{"line":%d,"offset":%d},`+
+			`"extra":{"message":"m","severity":"WARNING","lines":"q := x","metadata":{"cwe":["CWE-89"]}}}`, rule, line, offset)
+	}
+	b := `{"results":[` + strings.Join([]string{
+		res("agnts.go.sqli.formatted-query", 50, 900), res("agnts.go.sqli.formatted-query", 50, 900),
+		res("agnts.go.sqli.request-into-query", 50, 900), res("agnts.go.sqli.formatted-query", 70, 1400),
+	}, ",") + `]}`
+	hits, errs := Hits(Raw{"opengrep.json": []byte(b)}, nil)
+	if len(errs) > 0 || len(hits) != 3 {
+		t.Fatalf("hits = %+v, errs = %v", hits, errs)
+	}
+	if hits[0].Line != 50 || hits[1].Rule != "agnts.go.sqli.request-into-query" || hits[2].Line != 70 {
+		t.Fatalf("hits = %+v", hits)
 	}
 }
 

@@ -54,6 +54,7 @@ type Tickets interface {
 	RestartWithUpdate(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	KeepCurrentVersion(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	Preview(ctx context.Context, key string, compare *bool, origin domain.Origin) (domain.Ticket, error)
+	CheckSecurity(ctx context.Context, key string, origin domain.Origin) (domain.Ticket, error)
 	OpenShot(ctx context.Context, key string, runID int64, shotID string) (io.ReadCloser, error)
 	Translate(ctx context.Context, key, lang string) ([]orchestrator.TranslatedText, error)
 	SetMember(ctx context.Context, key string, userID int64, name string, origin domain.Origin) (domain.Ticket, error)
@@ -156,6 +157,8 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	em.Preview = &pm
 	canPreview := v.CanPreview
 	d.Ticket.CanPreview = &canPreview
+	canCheck := v.CanCheckSecurity
+	d.Ticket.CanCheckSecurity = &canCheck
 	if v.ContinueTo != "" {
 		to, startOver := gen.TicketState(v.ContinueTo), v.CanStartOver
 		d.Ticket.ContinueTo, d.Ticket.CanStartOver = &to, &startOver
@@ -232,6 +235,10 @@ func (s *Server) GetTicket(w http.ResponseWriter, r *http.Request, key gen.Ticke
 	}
 	if v.Preview != nil {
 		d.Preview = toPreview(v.Ticket.Key, *v.Preview)
+	}
+	if v.SecurityCheck != nil {
+		c := toSecurityCheck(*v.SecurityCheck)
+		d.Security = &c
 	}
 	fu := toFollowUps(v.FollowUps, v.FollowUpsOn, v.Ticket.State)
 	d.FollowUps = &fu
@@ -693,6 +700,11 @@ func toTicket(t domain.Ticket) gen.Ticket {
 	}
 	compare := t.PreviewCompare
 	out.PreviewState, out.PreviewCompare = &ps, &compare
+	ss := gen.TicketSecurityState(t.SecurityState)
+	if ss == "" {
+		ss = gen.TicketSecurityStateNone
+	}
+	out.SecurityState = &ss
 	if len(t.Assignees) > 0 {
 		as := t.Assignees
 		out.Assignees = &as
@@ -785,6 +797,13 @@ func (s *Server) PreviewTicket(w http.ResponseWriter, r *http.Request, key gen.T
 	}
 	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
 		return s.opt.Tickets.Preview(ctx, key, req.Compare, origin(r))
+	})
+}
+
+// CheckTicketSecurity implements gen.ServerInterface.
+func (s *Server) CheckTicketSecurity(w http.ResponseWriter, r *http.Request, key gen.TicketKey) {
+	s.ticketAction(w, r, func(ctx context.Context) (domain.Ticket, error) {
+		return s.opt.Tickets.CheckSecurity(ctx, key, origin(r))
 	})
 }
 

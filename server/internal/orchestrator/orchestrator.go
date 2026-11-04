@@ -603,6 +603,8 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 			err = o.review(ctx, s, t, &run)
 		case domain.StagePreview:
 			err = o.preview(ctx, s, t, &run)
+		case domain.StageSecurity:
+			err = o.securityCheck(ctx, s, t, &run)
 		default:
 			err = fmt.Errorf("unknown stage %q", run.Stage)
 		}
@@ -655,6 +657,9 @@ func (o *Orchestrator) work(parent context.Context, t domain.Ticket, run domain.
 	case run.Stage == domain.StagePreview:
 		log.Warn("preview run failed", "err", err)
 		o.previewFailed(bg, t, run, err)
+	case run.Stage == domain.StageSecurity:
+		log.Warn("security check failed", "err", err)
+		o.securityCheckFailed(bg, t, run, err)
 	default:
 		log.Error("stage failed", "err", err)
 		o.fail(bg, t.Key, run, err)
@@ -888,7 +893,7 @@ func (o *Orchestrator) claudeTurns(ctx context.Context, s domain.Settings, ws Wo
 		}
 		effort = s.Effort.For(modelStage, complex)
 	}
-	readOnly := t.Kind.Report() || run.Stage == domain.StageReview || run.Stage == domain.StagePreview
+	readOnly := t.Kind.Report() || run.Stage == domain.StageReview || run.Stage == domain.StagePreview || run.Stage == domain.StageSecurity
 	if domain.IsMuse(model) && run.Harness.Tool == "" {
 		run.Harness.Tool = "muse"
 		o.event(ctx, domain.Event{TicketKey: t.Key, RunID: &run.ID, Step: string(run.Stage), Type: domain.EventGuard,
@@ -1050,6 +1055,9 @@ func (o *Orchestrator) openWorkspace(ctx context.Context, t domain.Ticket, rs []
 		return nil, fmt.Errorf("load claude home: %w", err)
 	}
 	spec := WorkspaceSpec{TicketKey: t.Key, Image: o.cfg.Image, Repo: tree, ClaudeHome: home, Grants: o.swaggerGrants(ctx, t)}
+	if run.Stage == domain.StageSecurity {
+		spec.SecDB = SecDBRead // osv-scanner's offline databases
+	}
 	if len(rs) > 0 {
 		if err := o.mergeSpec(ctx, &spec, rs, t.Key, run); err != nil {
 			return nil, err
@@ -1530,6 +1538,7 @@ func (o *Orchestrator) code(ctx context.Context, s domain.Settings, t domain.Tic
 		x.Turns += run.Turns
 		x.ReviewState = reviewState(s)
 		x.PreviewState = o.previewState(s, rs, x.RepoID, files)
+		x.SecurityState = o.securityState(s, rs, x.RepoID, files)
 		x.QuietReview = quiet
 	})
 	if err == nil {

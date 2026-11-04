@@ -20,6 +20,15 @@ rules:
       - pattern: $R.PostFormValue(...)
       - pattern: $R.PathValue(...)
       - pattern: $R.Header.Get(...)
+      # Gin and Echo handlers, by the context's type so that db.Query(...)
+      # is not taken for a request read
+      - patterns:
+          - pattern-either:
+              - pattern: '($C : *gin.Context).$READ(...)'
+              - pattern: '($C : echo.Context).$READ(...)'
+          - metavariable-regex:
+              metavariable: $READ
+              regex: ^(Query|DefaultQuery|Param|PostForm|DefaultPostForm|GetHeader|QueryParam|FormValue)$
     pattern-sinks:
       - patterns:
           - pattern-either:
@@ -30,35 +39,82 @@ rules:
               - pattern: $DB.QueryRowContext($CTX, $Q, ...)
               - pattern: $DB.ExecContext($CTX, $Q, ...)
               - pattern: $DB.Raw($Q, ...)
+          - pattern-not: '($C : *gin.Context).$M(...)'
+          - pattern-not: '($C : echo.Context).$M(...)'
+          - focus-metavariable: $Q
+      # pgx takes the context first: db.Query(ctx, query, args...)
+      - patterns:
+          - pattern-either:
+              - pattern: $DB.Query($CTX, $Q, ...)
+              - pattern: $DB.QueryRow($CTX, $Q, ...)
+              - pattern: $DB.Exec($CTX, $Q, ...)
+          - pattern-not: '($C : *gin.Context).$M(...)'
+          - pattern-not: '($C : echo.Context).$M(...)'
+          - metavariable-regex:
+              metavariable: $CTX
+              regex: (?i)(ctx|context)
           - focus-metavariable: $Q
 
   - id: agnts.go.sqli.formatted-query
     languages: [go]
     severity: WARNING
     message: >-
-      A SQL query is built with fmt.Sprintf or string concatenation. If any
-      part comes from a user, this is SQL injection; use placeholders.
+      A SQL query is built from a string parameter with concatenation or
+      fmt.Sprintf. If a caller passes user input (a handler usually does),
+      this is SQL injection; use placeholders ($1, ?) and pass the value
+      as an argument.
     metadata:
       category: injection
       cwe: "CWE-89"
       owasp: "A03"
       confidence: medium
+    # request-into-query follows request input within one function; this
+    # rule covers the usual layering, where a handler passes the value to
+    # a repository method that builds the query. It reports a query that
+    # takes a string parameter of its function into SQL text, in place or
+    # through a variable, unless the parameter is quoted as an identifier.
+    # Column lists and other constants are not parameters, so they don't
+    # count, even when they're defined in another file. The query must
+    # read as SQL, which leaves out command runners that have an Exec too.
     patterns:
       - pattern-either:
-          - pattern: $DB.$METHOD(fmt.Sprintf($FMT, ...), ...)
-          - pattern: $DB.$METHOD($CTX, fmt.Sprintf($FMT, ...), ...)
+          - pattern-inside: |
+              func $F(..., $P string, ...) { ... }
+          - pattern-inside: |
+              func ($RECV $T) $F(..., $P string, ...) { ... }
+      - pattern-either:
+          - pattern: $DB.$METHOD(..., $Q, ...)
           - pattern: |
-              $Q := fmt.Sprintf($FMT, ...)
+              $V := $Q
               ...
-              $DB.$METHOD($Q, ...)
+              $DB.$METHOD(..., $V, ...)
           - pattern: |
-              $Q := fmt.Sprintf($FMT, ...)
+              $V = $Q
               ...
-              $DB.$METHOD($CTX, $Q, ...)
-          - pattern: $DB.$METHOD("..." + $X, ...)
+              $DB.$METHOD(..., $V, ...)
+          - pattern: |
+              $V += $Q
+              ...
+              $DB.$METHOD(..., $V, ...)
       - metavariable-regex:
           metavariable: $METHOD
-          regex: ^(Query|QueryRow|Exec|QueryContext|QueryRowContext|ExecContext|Raw)$
+          regex: ^(Query|QueryRow|Exec|QueryContext|QueryRowContext|ExecContext|Raw|Queryx|QueryRowx|MustExec|Where)$
+      - metavariable-pattern:
+          metavariable: $Q
+          pattern-regex: (?i)\b(select|insert|update|delete|from|where|order\s+by|group\s+by|values|create|drop|alter|limit|join|ilike|like)\b
+      - metavariable-pattern:
+          metavariable: $Q
+          patterns:
+            - pattern-either:
+                - pattern: fmt.Sprintf(..., $P, ...)
+                - pattern: $P + $B
+                - pattern: $A + $P
+            - pattern-not-inside: $X.Sanitize()
+            - pattern-not-inside: pq.QuoteIdentifier(...)
+            - pattern-not-inside: pq.QuoteLiteral(...)
+      # one finding per query, on the query (a call can match with each
+      # of its arguments taken for the query)
+      - focus-metavariable: $Q
 
   - id: agnts.go.cmdi.shell-with-input
     languages: [go]

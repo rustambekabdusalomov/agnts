@@ -463,6 +463,7 @@ type agent struct {
 func (a *agent) mcpDeps() mcpserver.Deps {
 	return mcpserver.Deps{
 		Orch: a.orch, Store: a.store, Usage: a.usage, Viewer: a.viewerAccount, Settings: a.settings, Dashboard: a.dashboard, Repos: a.repos, Lessons: a.lessons, CI: a.ci, Logs: a.logs,
+		Security:  a.security,
 		Analytics: func(ctx context.Context, days int) (any, error) { return a.dashboard.Analytics(ctx, days) },
 		Role:      a.workspaces.Role,
 		Meetings:  func() *meetings.Service { return a.meet },

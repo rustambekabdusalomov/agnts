@@ -2,6 +2,7 @@ package domain
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -412,5 +413,38 @@ func TestReconcileMinNotify(t *testing.T) {
 	res.MinNotify = SecMedium
 	if _, c := ReconcileSecurity(nil, cands, res, 1, time.Now()); c.Notify != 1 {
 		t.Fatalf("medium did not notify at medium: %+v", c)
+	}
+}
+
+func TestSecChangeHits(t *testing.T) {
+	code := "@@ -10,3 +10,5 @@ func search(q string) {\n \tdb := open()\n+\tquery := \"SELECT * FROM t WHERE a = '\" + q + \"'\"\n+\trows, _ := db.Query(query)\n \treturn rows\n }\n"
+	lock := "@@ -40,6 +40,10 @@\n     },\n+    \"node_modules/lodash\": {\n+      \"version\": \"4.17.20\",\n+      \"resolved\": \"https://registry.npmjs.org/lodash/-/lodash-4.17.20.tgz\"\n+    },\n     \"node_modules/minimist\": {\n       \"version\": \"1.2.0\",\n"
+	files := []FileChange{
+		{Path: "repo.go", Diff: code},
+		{Path: "package-lock.json", Diff: lock},
+		{Path: "Dockerfile", Diff: "@@ -1 +1,2 @@\n FROM node:20\n+RUN npm ci\n"},
+		{Repo: "web", Path: "big.min.json"}, // no diff kept
+	}
+	hits := []SecHit{
+		{ID: "h1", File: "repo.go", Line: 11, Rule: "formatted-query"},               // the added query
+		{ID: "h2", File: "repo.go", Line: 40, Rule: "weak-hash"},                     // in the file, not in the change
+		{ID: "h3", File: "other.go", Line: 11, Rule: "formatted-query"},              // a file the change did not touch
+		{ID: "h4", File: "package-lock.json", Package: "lodash", Version: "4.17.20"}, // added
+		{ID: "h5", File: "package-lock.json", Package: "minimist", Version: "1.2.0"}, // there before
+		{ID: "h6", File: "Dockerfile", Rule: "DS-0002"},                              // no line: the whole file
+		{ID: "h7", File: "web/big.min.json", Line: 900, Rule: "secret"},              // no diff: kept
+		{ID: "h8", File: "repo.go", Line: 8, Rule: "near"},                           // starts just above the added lines
+	}
+	got := SecChangeHits(hits, files)
+	var rules []string
+	for i, h := range got {
+		if h.ID != "h"+strconv.Itoa(i+1) {
+			t.Errorf("hit %d is %s", i, h.ID)
+		}
+		rules = append(rules, h.Rule+h.Package)
+	}
+	want := []string{"formatted-query", "lodash", "DS-0002", "secret", "near"}
+	if !slices.Equal(rules, want) {
+		t.Fatalf("kept %v, want %v", rules, want)
 	}
 }

@@ -96,8 +96,8 @@ func layerFlags(files []domain.FileChange, arch *domain.Architecture, goModule s
 		if from == nil || from.MayImport == nil || f.Diff == "" {
 			continue
 		}
-		for _, l := range addedLines(f.Diff) {
-			for _, target := range importTargets(f.Path, l.text, goModule) {
+		for _, l := range domain.AddedLines(f.Diff) {
+			for _, target := range importTargets(f.Path, l.Text, goModule) {
 				to := arch.LayerOfDir(target)
 				if to == nil || from.Allows(to.Name) {
 					continue
@@ -106,7 +106,7 @@ func layerFlags(files []domain.FileChange, arch *domain.Architecture, goModule s
 				if len(from.MayImport) > 0 {
 					allowed = strings.Join(from.MayImport, ", ")
 				}
-				out = append(out, domain.RedFlag{Kind: domain.FlagRuleViolation, Path: f.Path, Line: l.n,
+				out = append(out, domain.RedFlag{Kind: domain.FlagRuleViolation, Path: f.Path, Line: l.N,
 					Text: truncate(fmt.Sprintf("layer: %s (%s) imports %s (%s); %s may import %s", f.Path, from.Name, target, to.Name, from.Name, allowed), 300)})
 			}
 		}
@@ -154,8 +154,8 @@ func newNames(files []domain.FileChange, max int) []string {
 		default:
 			continue
 		}
-		for _, l := range addedLines(f.Diff) {
-			m := re.FindStringSubmatch(l.text)
+		for _, l := range domain.AddedLines(f.Diff) {
+			m := re.FindStringSubmatch(l.Text)
 			if m == nil {
 				continue
 			}

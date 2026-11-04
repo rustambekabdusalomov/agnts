@@ -917,6 +917,19 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /tickets/{key}/security:
+    parameters:
+      - $ref: '#/components/parameters/TicketKey'
+    post:
+      operationId: checkTicketSecurity
+      summary: Queue a security check of the change of a ticket waiting for review, again if one already ran
+      tags: [tickets]
+      responses:
+        '200': { $ref: '#/components/responses/TicketOK' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /tickets/{key}/preview/{runId}/shots/{shotId}:
     parameters:
       - $ref: '#/components/parameters/TicketKey'
@@ -10047,6 +10060,11 @@ components:
           description: The screenshots agnts takes beside the human review
         previewCompare: { type: boolean, description: Previews of this ticket also capture the default branch (before shots) }
         canPreview: { type: boolean, description: The ticket's repository has a preview command }
+        securityState:
+          type: string
+          enum: [none, pending, running, done, failed]
+          description: The security check agnts runs on the change beside the human review
+        canCheckSecurity: { type: boolean, description: "A security check of the change can be run (ticket detail only)" }
         continueTo: { $ref: '#/components/schemas/TicketState' }
         canStartOver: { type: boolean, description: "This rejected ticket can start over from scratch (nothing of it was pushed); continueTo, when set, is where Continue sends it without a note" }
         savedWork:
@@ -10386,6 +10404,45 @@ components:
         acceptance: { $ref: '#/components/schemas/Acceptance' }
         createdAt: { type: string, format: date-time }
 
+    SecurityCheck:
+      type: object
+      required: [runId, revision, summary, files, tools, issues, agent, createdAt]
+      description: >-
+        The security check of the change at the latest result: what the
+        scanners report on the lines it adds, judged by the agent. Advice
+        beside the human review; it shows an older revision when revision is
+        below the ticket's.
+      properties:
+        runId: { type: integer, format: int64 }
+        revision: { type: integer }
+        summary: { type: string }
+        files: { type: integer, description: Changed files the scanners looked at }
+        tools:
+          type: array
+          items: { $ref: '#/components/schemas/SecToolRun' }
+        issues:
+          type: array
+          items: { $ref: '#/components/schemas/SecCheckIssue' }
+        rejected:
+          type: array
+          items: { $ref: '#/components/schemas/SecRejectedHit' }
+        agent: { type: string, enum: [done, limit, failed, skipped], description: 'skipped: nothing to judge' }
+        createdAt: { type: string, format: date-time }
+    SecCheckIssue:
+      type: object
+      required: [severity, title, feedback]
+      properties:
+        severity: { $ref: '#/components/schemas/SecSeverity' }
+        title: { type: string }
+        file: { type: string }
+        line: { type: integer }
+        cwe: { type: string }
+        tool: { type: string }
+        rule: { type: string }
+        advice: { type: string }
+        secretMask: { type: string }
+        feedback: { type: string, description: The issue as a line of request-changes feedback }
+
     CheckStep:
       type: object
       required: [name, command, exitCode, durationMs]
@@ -10463,6 +10520,7 @@ components:
         relations: { $ref: '#/components/schemas/Relations' }
         review: { $ref: '#/components/schemas/CodeReview' }
         preview: { $ref: '#/components/schemas/TicketPreview' }
+        security: { $ref: '#/components/schemas/SecurityCheck' }
         history:
           type: array
           items: { $ref: '#/components/schemas/HistoryItem' }
