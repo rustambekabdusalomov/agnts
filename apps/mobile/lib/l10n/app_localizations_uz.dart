@@ -6722,7 +6722,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get logwatchKind_graylog => 'Graylog';
 
   @override
-  String get logwatchKind_push => 'Push (Vector, Fluent Bit…)';
+  String get logwatchKind_push => 'Push (OpenTelemetry, Vector, Fluent Bit…)';
 
   @override
   String get logwatchName => 'Nomi';
