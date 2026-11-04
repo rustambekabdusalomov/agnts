@@ -2988,6 +2988,212 @@ paths:
               schema: { $ref: '#/components/schemas/AnalyticsLearning' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /analytics/developers:
+    get:
+      operationId: getDevelopers
+      x-role: owner
+      summary: Delivered complexity per developer for a month or a range (performance reviews; input to the owner's review, not a verdict)
+      tags: [analytics]
+      parameters:
+        - { name: month, in: query, schema: { type: string, pattern: '^\d{4}-\d{2}$' }, description: 'A calendar month, 2026-10, in the workspace''s time zone' }
+        - { name: closing, in: query, schema: { type: integer, minimum: 1 }, description: 'An earlier closing of the month (default: the latest)' }
+        - { name: from, in: query, schema: { type: string, format: date-time }, description: 'Start of a custom range (always live)' }
+        - { name: to, in: query, schema: { type: string, format: date-time }, description: 'End of a custom range, exclusive' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DevelopersReport' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/developers/tickets:
+    get:
+      operationId: getDeveloperTickets
+      x-role: owner
+      summary: The deliveries of one author (user:<id>, agent, unmapped:<identity>), or of everyone, with their scores and shares
+      tags: [analytics]
+      parameters:
+        - { name: author, in: query, schema: { type: string }, description: 'An author key; empty lists every delivery' }
+        - { name: month, in: query, schema: { type: string, pattern: '^\d{4}-\d{2}$' } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DeveloperTicket' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/developers/export:
+    get:
+      operationId: exportDeveloper
+      x-role: owner
+      summary: Everything held about one author, for a right of access request (GDPR Article 15)
+      tags: [analytics]
+      parameters:
+        - { name: author, in: query, required: true, schema: { type: string } }
+        - { name: format, in: query, schema: { type: string, enum: [json, csv], default: json } }
+      responses:
+        '200':
+          description: The data, as a download
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DeveloperExport' }
+            text/csv:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/developers/months/{month}/close:
+    post:
+      operationId: closeDevelopersMonth
+      x-role: owner
+      summary: Close an ended month now, or close it again to take the numbers that changed since (earlier closings are kept)
+      tags: [analytics]
+      parameters:
+        - { name: month, in: path, required: true, schema: { type: string, pattern: '^\d{4}-\d{2}$' } }
+      responses:
+        '200':
+          description: The month as closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DevelopersReport' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/developers/backfill:
+    post:
+      operationId: backfillScores
+      x-role: owner
+      summary: Estimate, and when confirmed queue, the scores of deliveries from before the workspace started scoring
+      tags: [analytics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScoreBackfillRequest' }
+      responses:
+        '200':
+          description: The estimate, and what was queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ScoreBackfill' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/developers/identities:
+    get:
+      operationId: getGitIdentities
+      x-role: owner
+      summary: Which git logins and emails are whose, and the identities that earned points but are no member's
+      tags: [analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GitIdentities' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      operationId: mapGitIdentity
+      x-role: owner
+      summary: Give a git login or email to a member (or take it away); shares are worked out again
+      tags: [analytics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GitIdentityInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GitIdentities' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /analytics/developers/regressions:
+    get:
+      operationId: getRegressions
+      x-role: owner
+      summary: Regressions analysis proposed and the owner confirmed or dismissed
+      tags: [analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Regression' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /tickets/{key}/score:
+    put:
+      operationId: overrideScore
+      x-role: owner
+      summary: Override a delivery's score (logged with who and why), or clear the override
+      tags: [analytics]
+      parameters:
+        - $ref: '#/components/parameters/TicketKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScoreOverride' }
+      responses:
+        '200':
+          description: The delivery as scored now
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DeveloperTicket' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /tickets/{key}/regression-of:
+    put:
+      operationId: setRegressionOf
+      x-role: owner
+      summary: Confirm, dismiss or set the ticket a bug ticket is a regression of
+      tags: [analytics]
+      parameters:
+        - $ref: '#/components/parameters/TicketKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegressionInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Regression' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /eval/replays:
     get:
       operationId: getReplayReport
@@ -11013,6 +11219,7 @@ components:
         ci: { $ref: '#/components/schemas/CISettings' }
         logWatch: { $ref: '#/components/schemas/LogWatchSettings' }
         security: { $ref: '#/components/schemas/SecurityWorkspaceSettings' }
+        perfReview: { $ref: '#/components/schemas/PerfReviewSettings' }
         guard: { $ref: '#/components/schemas/GuardSettings' }
         stalls:
           type: string
@@ -14144,6 +14351,203 @@ components:
         repo: { type: string }
         open: { $ref: '#/components/schemas/SecSeverityCounts' }
         lastScan: { $ref: '#/components/schemas/SecurityScan' }
+
+    PerfReviewSettings:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean, description: 'Score delivered tickets and show the Developers tab. Off by default: automated scoring of people falls under GDPR Article 22 and may need a works council''s agreement' }
+        notDone:
+          type: array
+          maxItems: 30
+          items: { type: string, maxLength: 80 }
+          description: "Jira resolutions that close an issue without the work being done (default: Won't Do, Won't Fix, Duplicate, Cannot Reproduce, Declined, Incomplete)"
+        timeZone: { type: string, maxLength: 64, description: 'IANA time zone months and commit days are counted in (default UTC)' }
+    DevelopersClosing:
+      type: object
+      required: [closing, promptVersion, unscored, closedAt]
+      properties:
+        closing: { type: integer }
+        promptVersion: { type: string }
+        unscored: { type: integer }
+        closedAt: { type: string, format: date-time }
+        closedBy: { type: integer, format: int64, nullable: true, description: 'Null when it closed on its own' }
+    DeveloperTotals:
+      type: object
+      required: [points, tickets, avgPoints, reverts, regressions]
+      properties:
+        points: { type: number, description: 'Delivered points after reverts and regressions' }
+        tickets: { type: integer }
+        avgPoints: { type: number, description: 'Points per ticket: many small against few hard' }
+        reverts: { type: integer }
+        regressions: { type: integer }
+    DeveloperRow:
+      type: object
+      required: [key, kind, name, totals]
+      properties:
+        key: { type: string, description: 'user:<id>, agent or unmapped:<login or email>' }
+        kind: { type: string, enum: [user, agent, unmapped] }
+        userId: { type: integer, format: int64 }
+        name: { type: string }
+        totals: { $ref: '#/components/schemas/DeveloperTotals' }
+        live: { $ref: '#/components/schemas/DeveloperTotals' }
+    DevelopersReport:
+      type: object
+      required: [from, to, live, promptVersion, closings, changed, rows, unscored]
+      properties:
+        from: { type: string, format: date-time }
+        to: { type: string, format: date-time }
+        month: { type: string }
+        live: { type: boolean, description: 'A custom range, or a month not closed yet' }
+        promptVersion: { type: string }
+        closing: { $ref: '#/components/schemas/DevelopersClosing' }
+        closings:
+          type: array
+          items: { $ref: '#/components/schemas/DevelopersClosing' }
+        changed: { type: boolean, description: 'The closed month changed since this closing (rows carry live)' }
+        closesOn: { type: string, format: date-time, description: 'An ended month in its grace period closes then (or by the 10th while scores are pending)' }
+        rows:
+          type: array
+          items: { $ref: '#/components/schemas/DeveloperRow' }
+        unscored: { type: integer }
+    DeveloperShare:
+      type: object
+      required: [key, name, share, days]
+      properties:
+        key: { type: string }
+        name: { type: string }
+        share: { type: number }
+        days: { type: integer }
+    DeveloperTicket:
+      type: object
+      required: [key, title, delivery, deliveredAt, status, points, effective, rationale, diffSource, clamped, fromFactsOnly, revertedShare, regressions, share, earned, authors, factors, promptVersion]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        delivery: { type: integer }
+        deliveredAt: { type: string, format: date-time }
+        promptVersion: { type: string }
+        status: { type: string, enum: [scored, unscored] }
+        error: { type: string }
+        points: { type: integer, description: 'The score' }
+        effective: { type: integer, description: 'The override, else the score' }
+        overridePoints: { type: integer, nullable: true }
+        overrideReason: { type: string }
+        overriddenBy: { type: integer, format: int64, nullable: true }
+        overriddenAt: { type: string, format: date-time, nullable: true }
+        rationale: { type: string }
+        diffSource: { type: string, description: 'repository:pull_request|squash|commits, comma separated' }
+        clamped: { type: boolean }
+        fromFactsOnly: { type: boolean }
+        model: { type: string }
+        revertedShare: { type: number }
+        regressions: { type: integer }
+        share: { type: number, description: "The author's share (0 when listing everyone)" }
+        earned: { type: number, description: 'What the share earned after penalties' }
+        authors:
+          type: array
+          items: { $ref: '#/components/schemas/DeveloperShare' }
+        factors: { type: object, additionalProperties: true }
+    DeveloperExport:
+      type: object
+      required: [author, name, tickets, snapshots, exportedAt]
+      properties:
+        author: { type: string }
+        name: { type: string }
+        exportedAt: { type: string, format: date-time }
+        tickets:
+          type: array
+          items: { $ref: '#/components/schemas/DeveloperTicket' }
+        snapshots:
+          type: array
+          items:
+            type: object
+            required: [month, closing, closedAt, totals]
+            properties:
+              month: { type: string }
+              closing: { type: integer }
+              closedAt: { type: string, format: date-time }
+              totals: { $ref: '#/components/schemas/DeveloperTotals' }
+    ScoreBackfillRequest:
+      type: object
+      required: [confirm]
+      properties:
+        since: { type: string, format: date-time, description: 'Deliveries from then on (default: all that have none)' }
+        confirm: { type: boolean, description: 'false: only estimate' }
+    ScoreBackfill:
+      type: object
+      required: [deliveries, costUsd, credits, balance, onCredits, queued, reachDays]
+      properties:
+        deliveries: { type: integer }
+        costUsd: { type: number }
+        credits: { type: integer, format: int64 }
+        balance: { type: integer, format: int64 }
+        onCredits: { type: boolean }
+        refused: { type: string }
+        queued: { type: integer }
+        reachDays: { type: integer, description: 'Commits older than this are not linked, so older tickets show as not delivered' }
+    GitIdentity:
+      type: object
+      required: [userId, login, email]
+      properties:
+        userId: { type: integer, format: int64 }
+        name: { type: string }
+        login: { type: string }
+        email: { type: string }
+    GitIdentityInput:
+      type: object
+      required: [userId]
+      properties:
+        userId: { type: integer, format: int64 }
+        login: { type: string, maxLength: 200 }
+        email: { type: string, maxLength: 320 }
+        remove: { type: boolean }
+    GitIdentities:
+      type: object
+      required: [identities, unmapped]
+      properties:
+        identities:
+          type: array
+          items: { $ref: '#/components/schemas/GitIdentity' }
+        unmapped:
+          type: array
+          items:
+            type: object
+            required: [key, identity, deliveries]
+            properties:
+              key: { type: string }
+              identity: { type: string }
+              deliveries: { type: integer }
+    ScoreOverride:
+      type: object
+      required: [delivery]
+      properties:
+        delivery: { type: integer, minimum: 1 }
+        points: { type: integer, nullable: true, enum: [0, 1, 2, 3, 5, 8, 13], description: 'Null clears the override' }
+        reason: { type: string, maxLength: 1000 }
+    Regression:
+      type: object
+      required: [id, bug, bugTitle, origin, originTitle, status, source, reason]
+      properties:
+        id: { type: integer, format: int64 }
+        bug: { type: string, description: 'The bug ticket' }
+        bugTitle: { type: string }
+        origin: { type: string, description: 'The ticket whose work it is a regression of' }
+        originTitle: { type: string }
+        status: { type: string, enum: [proposed, active, dismissed] }
+        source: { type: string }
+        reason: { type: string }
+        counts: { type: boolean, description: 'Confirmed and filed within 90 days of the origin''s delivery' }
+        decidedBy: { type: integer, format: int64, nullable: true }
+        decidedAt: { type: string, format: date-time, nullable: true }
+    RegressionInput:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [confirm, dismiss, set] }
+        id: { type: integer, format: int64, description: 'The proposed regression (confirm, dismiss)' }
+        origin: { type: string, description: 'The origin ticket (set)' }
+        reason: { type: string, maxLength: 1000 }
 
   responses:
     Preparing:

@@ -58,6 +58,8 @@ type transcriptMeta struct {
 	ModelStage  string
 	// DocumentRunID is the document generation a call is charged to.
 	DocumentRunID int64
+	// ScoreRunID is the performance review score a call is charged to.
+	ScoreRunID int64
 	// Person is whose modules and account a call outside a scheduled run
 	// uses; 0: the person acting in ctx.
 	Person int64
@@ -122,7 +124,7 @@ func (o *Orchestrator) hold(ctx context.Context, m transcriptMeta, model string)
 func (o *Orchestrator) callClaude(ctx context.Context, ws Workspace, m transcriptMeta, req ai.Request, onEvent func(ai.Event)) (ai.Result, error) {
 	// Where it runs: the run's route for its model's module, else routed
 	// now for its person.
-	call := ai.Call{Who: o.whoFor(ctx, m), Purpose: m.Purpose, Box: ws, Req: req, ModelStage: m.ModelStage, DocumentRunID: m.DocumentRunID}
+	call := ai.Call{Who: o.whoFor(ctx, m), Purpose: m.Purpose, Box: ws, Req: req, ModelStage: m.ModelStage, DocumentRunID: m.DocumentRunID, ScoreRunID: m.ScoreRunID}
 	var route ai.Route
 	if m.Route != nil {
 		route = *m.Route // the caller routed it to build the request

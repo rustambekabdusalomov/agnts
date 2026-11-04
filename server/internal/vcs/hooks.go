@@ -137,6 +137,7 @@ func githubPush(body []byte) (domain.Push, bool) {
 			Distinct  bool      `json:"distinct"`
 			Author    struct {
 				Name     string `json:"name"`
+				Email    string `json:"email"`
 				Username string `json:"username"`
 			} `json:"author"`
 		} `json:"commits"`
@@ -163,7 +164,7 @@ func githubPush(body []byte) (domain.Push, bool) {
 			continue
 		}
 		out.Commits = append(out.Commits, domain.PushedCommit{SHA: c.ID, Message: c.Message, Author: c.Author.Name,
-			AuthorLogin: c.Author.Username, Date: c.Timestamp, URL: c.URL})
+			AuthorLogin: c.Author.Username, AuthorEmail: c.Author.Email, Date: c.Timestamp, URL: c.URL})
 	}
 	out.Total = len(out.Commits)
 	return out, out.Branch != ""
@@ -184,7 +185,8 @@ func gitlabPush(body []byte) (domain.Push, bool) {
 			Timestamp time.Time `json:"timestamp"`
 			URL       string    `json:"url"`
 			Author    struct {
-				Name string `json:"name"`
+				Name  string `json:"name"`
+				Email string `json:"email"`
 			} `json:"author"`
 		} `json:"commits"`
 		Project struct {
@@ -197,7 +199,7 @@ func gitlabPush(body []byte) (domain.Push, bool) {
 	out := domain.Push{Provider: "gitlab", Repo: p.Project.Path, Branch: branchOf(p.Ref), Before: p.Before, After: p.After,
 		Pusher: p.Username, Total: max(p.Total, len(p.Commits))}
 	for _, c := range p.Commits {
-		out.Commits = append(out.Commits, domain.PushedCommit{SHA: c.ID, Message: c.Message, Author: c.Author.Name, Date: c.Timestamp, URL: c.URL})
+		out.Commits = append(out.Commits, domain.PushedCommit{SHA: c.ID, Message: c.Message, Author: c.Author.Name, AuthorEmail: c.Author.Email, Date: c.Timestamp, URL: c.URL})
 	}
 	return out, out.Branch != ""
 }

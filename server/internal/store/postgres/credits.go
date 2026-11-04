@@ -21,11 +21,13 @@ type LedgerEntry struct {
 	RunID       *int64
 	// DocumentRunID is the document generation charged (reason document).
 	DocumentRunID *int64
-	TicketKey     string
-	PaymentID     *int64
-	Note          string
-	CreatedBy     *int64
-	CreatedAt     time.Time
+	// ScoreRunID is the performance review score charged (reason score).
+	ScoreRunID *int64
+	TicketKey  string
+	PaymentID  *int64
+	Note       string
+	CreatedBy  *int64
+	CreatedAt  time.Time
 }
 
 // Ledger reasons.
@@ -33,6 +35,7 @@ const (
 	CreditPurchase = "purchase"
 	CreditRun      = "run"
 	CreditDocument = "document"
+	CreditScore    = "score"
 	CreditRefund   = "refund"
 	CreditGrant    = "grant"
 )
@@ -55,8 +58,9 @@ func (s *Credits) Add(ctx context.Context, e LedgerEntry) (int64, error) {
 }
 
 func addCredits(ctx context.Context, tx pgx.Tx, e LedgerEntry, bal *int64) error {
-	_, err := tx.Exec(ctx, `INSERT INTO credit_ledger (workspace_id, amount, reason, run_id, ticket_key, payment_id, note, created_by, document_run_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, e.WorkspaceID, e.Amount, e.Reason, e.RunID, e.TicketKey, e.PaymentID, e.Note, e.CreatedBy, e.DocumentRunID)
+	_, err := tx.Exec(ctx, `INSERT INTO credit_ledger (workspace_id, amount, reason, run_id, ticket_key, payment_id, note, created_by, document_run_id, score_run_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, e.WorkspaceID, e.Amount, e.Reason, e.RunID, e.TicketKey, e.PaymentID, e.Note, e.CreatedBy,
+		e.DocumentRunID, e.ScoreRunID)
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return ErrAlreadyCharged
@@ -99,6 +103,13 @@ func (s *Credits) Ledger(ctx context.Context, ws int64, limit int) ([]LedgerEntr
 func (s *Credits) DocumentRunCostUSD(ctx context.Context, runID int64) (float64, error) {
 	var usd float64
 	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE document_run_id = $1 AND on_credits`, runID).Scan(&usd)
+	return usd, err
+}
+
+// ScoreRunCostUSD is the API cost of a score run's calls on credits.
+func (s *Credits) ScoreRunCostUSD(ctx context.Context, runID int64) (float64, error) {
+	var usd float64
+	err := s.db.QueryRow(ctx, `SELECT COALESCE(sum(cost_usd), 0)::float8 FROM claude_calls WHERE score_run_id = $1 AND on_credits`, runID).Scan(&usd)
 	return usd, err
 }
 

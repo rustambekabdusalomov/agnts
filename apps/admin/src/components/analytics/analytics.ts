@@ -8,7 +8,7 @@ export type AnalyticsLearning = components['schemas']['AnalyticsLearning']
 export type Spread = components['schemas']['Spread']
 export type Days = 7 | 30 | 90
 
-export const TABS = ['overview', 'delivery', 'quality', 'learning', 'cost', 'repos', 'assistant'] as const
+export const TABS = ['overview', 'delivery', 'quality', 'learning', 'cost', 'repos', 'assistant', 'developers'] as const
 export type Tab = (typeof TABS)[number]
 
 export const pctOf = (n: number, d: number) => (d ? Math.round((n / d) * 100) : 0)

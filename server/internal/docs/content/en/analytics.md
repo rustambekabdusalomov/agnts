@@ -29,3 +29,11 @@ Tokens Claude used in the period, input and output per day, with cache traffic l
 ## Repositories
 
 How each repository performs: tickets, success rate, merge rate, turns, agnts's time, questions per ticket, CI failures and whether it has a CLAUDE.md.
+
+## Developers
+
+Only the workspace's owner sees this tab, and only when **Settings → Performance reviews** is on. It is off by default: automated scoring of employees falls under GDPR Article 22 and, in some countries, needs a works council's agreement. The numbers are input to your review, not a verdict.
+
+Every delivered ticket gets a complexity score of 1, 2, 3, 5, 8 or 13. A ticket is delivered when it is done in agnts, or its Jira or Plane issue is resolved as done, and one of its commits is on a default branch. The score comes from the diff: the model reads it, and facts the code computes (changed lines, risky areas such as concurrency, auth, money and data migrations) cap how high it may go. Each author's share follows the distinct days they committed, with at least 20% each when two to four people share a ticket. agnts's own commits count for its own row, never for the person who reviewed them.
+
+A month closes on the 3rd of the next month, or later while scores are still coming in (up to the 10th). A closed month keeps its numbers; later changes (an override, a mapped git identity, a confirmed regression) show in brackets until you close it again. Reverts take away the reverted share of a ticket's lines, and each confirmed regression 30% of its points. Open an author for their deliveries, to override a score, or to export everything held about them for a request to see their data.

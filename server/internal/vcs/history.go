@@ -56,3 +56,42 @@ func (m *Multi) Ahead(ctx context.Context, repo domain.Repository, base, head st
 	}
 	return h.Ahead(ctx, repo, base, head)
 }
+
+// MergeReader reads how commits reached a default branch, for
+// performance reviews.
+type MergeReader interface {
+	// CommitMerges returns the merged pull requests a commit is in.
+	CommitMerges(ctx context.Context, repo domain.Repository, sha string) ([]domain.MergedPull, error)
+	// PullCommits returns a pull request's own commits, oldest first.
+	PullCommits(ctx context.Context, repo domain.Repository, number int) ([]domain.PushedCommit, error)
+}
+
+func (m *Multi) merges(repo domain.Repository) (MergeReader, error) {
+	p, err := m.pick(repo)
+	if err != nil {
+		return nil, err
+	}
+	h, ok := p.(MergeReader)
+	if !ok {
+		return nil, ErrUnsupported
+	}
+	return h, nil
+}
+
+// CommitMerges implements MergeReader.
+func (m *Multi) CommitMerges(ctx context.Context, repo domain.Repository, sha string) ([]domain.MergedPull, error) {
+	h, err := m.merges(repo)
+	if err != nil {
+		return nil, err
+	}
+	return h.CommitMerges(ctx, repo, sha)
+}
+
+// PullCommits implements MergeReader.
+func (m *Multi) PullCommits(ctx context.Context, repo domain.Repository, number int) ([]domain.PushedCommit, error) {
+	h, err := m.merges(repo)
+	if err != nil {
+		return nil, err
+	}
+	return h.PullCommits(ctx, repo, number)
+}

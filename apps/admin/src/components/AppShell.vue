@@ -200,7 +200,7 @@ const shown = (key: string) => prefs.thin || narrow.value || openMenu.value === 
 // each settings section, named as the sidebar names them.
 const searchPages = computed<SearchPage[]>(() => [
   ...menus.value.flatMap((m) => m.items.filter((x) => x.to).map((x) => ({ key: x.key, label: t(x.label), icon: x.icon, to: x.to! }))),
-  ...visibleSections(catalog.claudeOff.value).map((s) => ({
+  ...visibleSections(catalog.claudeOff.value, workspace.isOwner).map((s) => ({
     key: `settings-${s.key}`,
     label: `${t('nav.settings')} · ${t(sectionLabel(s))}`,
     icon: sectionIcon(s, catalog.claudeOff.value),
@@ -269,7 +269,7 @@ function openMenuFly(m: NavMenu, el: HTMLElement) {
 function openSettingsFly(el: HTMLElement) {
   holdFly()
   fly2From = el
-  fly2.value = place(el, visibleSections(catalog.claudeOff.value).length)
+  fly2.value = place(el, visibleSections(catalog.claudeOff.value, workspace.isOwner).length)
 }
 function clickMenu(m: NavMenu, e: MouseEvent) {
   if (!thinFly.value) return toggleMenu(m.key)
@@ -415,7 +415,7 @@ onBeforeUnmount(() => {
                   <div class="nav-sub" :class="{ open: settingsOpen }" role="group" :aria-label="t(x.label)" :inert="!settingsOpen">
                     <div class="nav-sub-in">
                       <RouterLink
-                        v-for="s in visibleSections(catalog.claudeOff.value)"
+                        v-for="s in visibleSections(catalog.claudeOff.value, workspace.isOwner)"
                         :key="s.key"
                         class="nav-a nav-sub-a"
                         :class="{ on: settingsAt === s.key }"
@@ -536,7 +536,7 @@ onBeforeUnmount(() => {
     >
       <div class="side-fly-h">{{ t('nav.settings') }}</div>
       <RouterLink
-        v-for="x in visibleSections(catalog.claudeOff.value)"
+        v-for="x in visibleSections(catalog.claudeOff.value, workspace.isOwner)"
         :key="x.key"
         class="side-fly-a"
         :class="{ on: settingsAt === x.key }"

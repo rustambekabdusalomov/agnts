@@ -58,6 +58,9 @@ type Analysis struct {
 	// Relations say how this ticket depends on or collides with the other
 	// open tickets the prompt listed.
 	Relations []RelationClaim `json:"relations,omitempty"`
+	// RegressionOf names the delivered ticket whose work a bug comes
+	// from, when the prompt listed recent deliveries (performance reviews).
+	RegressionOf *RegressionClaim `json:"regressionOf,omitempty"`
 	// Approaches are the ways the work could be done, weighed against the
 	// code base; one is chosen (code and test kinds).
 	Approaches []Approach `json:"approaches,omitempty"`
@@ -1321,6 +1324,17 @@ Add a "relations" list to the JSON, one item per ticket that matters, and an emp
 - conflicts: neither needs the other, but both change the same code (the same functions, lines, schema or generated files), so working on them side by side ends in a merge conflict.
 - Leave out tickets that only work in the same area. Check the code and the plans; do not judge from titles alone.
 - confidence: 0.9 when the tickets or the code say so plainly, 0.6 when it is likely, lower when it is a guess. agnts follows confident relations at once and asks a person about the others. Write the reason in the ticket's language.
+{{end}}
+
+{{define "regressions"}}## Recently delivered work in this repository
+
+This ticket is a bug. If the code shows it was introduced by one of these tickets' delivered changes, name that ticket. The owner checks every such claim before it counts against anyone, so name one only when the code (the lines that cause the bug, and who last changed them) points to it; leave the field out when it does not.
+{{range .Related}}
+- {{.Key}} ({{.State}}): {{.Title}}{{end}}
+
+Add to the JSON, only when it applies:
+
+    "regressionOf": {"key": "the delivered ticket's key", "reason": "one sentence a reviewer can check: the change and the lines", "confidence": 0.7}
 {{end}}
 
 {{define "checklists"}}{{with .Checklists}}

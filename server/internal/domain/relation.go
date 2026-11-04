@@ -19,6 +19,10 @@ const (
 	// RelConflicts: both change the same code. Either may go first, but not
 	// both at once: the second waits until the first is merged.
 	RelConflicts RelationType = "conflicts"
+	// RelRegressionOf: the ticket is a bug the other ticket's delivered
+	// work caused. It never holds the queue; performance reviews count it
+	// once the owner confirms it.
+	RelRegressionOf RelationType = "regression_of"
 )
 
 // Valid reports whether t is a known relation type.

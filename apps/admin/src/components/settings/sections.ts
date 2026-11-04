@@ -11,6 +11,8 @@ export const SETTINGS_SECTIONS = [
   { key: 'ci', label: 'ci.settingsTitle', icon: 'ci' },
   { key: 'logs', label: 'logwatch.settingsTitle', icon: 'shield' },
   { key: 'security', label: 'security.settingsTitle', icon: 'lock' },
+  // Performance reviews are the owner's alone.
+  { key: 'performance', label: 'perf.settingsTitle', icon: 'people', ownerOnly: true },
   { key: 'network', label: 'network.title', icon: 'network' },
   { key: 'notify', label: 'settings.notify', icon: 'bell' },
   // Claude chat's connector: only where Claude is offered.
@@ -19,9 +21,10 @@ export const SETTINGS_SECTIONS = [
 
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number]['key']
 
-/** The sections to list: without Claude-only ones where Claude is not offered. */
-export function visibleSections(claudeOff: boolean) {
-  return SETTINGS_SECTIONS.filter((s) => !(claudeOff && 'claudeOnly' in s && s.claudeOnly))
+/** The sections to list: without Claude-only ones where Claude is not
+ * offered, and without the owner's own ones for everyone else. */
+export function visibleSections(claudeOff: boolean, owner = true) {
+  return SETTINGS_SECTIONS.filter((s) => !(claudeOff && 'claudeOnly' in s && s.claudeOnly) && !(!owner && 'ownerOnly' in s && s.ownerOnly))
 }
 
 /** A section's label key. */

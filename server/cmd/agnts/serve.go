@@ -226,6 +226,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Lessons:       a.lessons,
 		Rules:         a.orch,
 		Briefs:        a.orch,
+		PerfReview:    a.orch,
 		Reviews:       a.orch,
 		Pulls:         a.orch,
 		Drafts:        a.orch,
@@ -647,7 +648,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 		BuildEnvs: previewEnvs, Workspaces: a.workspaces,
 		Accounts: a.claude, Capacity: a.budget, Credits: a.billing, AI: a.ai,
 		SwaggerTests: postgres.NewSwaggerTests(pool, box),
-		Documents:    a.docStore, DocumentHost: a.vcs,
+		Documents:    a.docStore, DocumentHost: a.vcs, ScoreHost: scoreHost{a.vcs},
 	}, log.With("component", "orchestrator"))
 	a.orch.SetSwaggerSuites(postgres.NewSwaggerSuites(pool, box))
 	a.transcripts = postgres.NewTranscripts(pool)

@@ -11,6 +11,7 @@ import OverviewTab from '../components/analytics/OverviewTab.vue'
 import QualityTab from '../components/analytics/QualityTab.vue'
 import ReposTab from '../components/analytics/ReposTab.vue'
 import AssistantTab from '../components/analytics/AssistantTab.vue'
+import DevelopersTab from '../components/analytics/DevelopersTab.vue'
 import { dayLabels, downloadCsv, TABS, type Days, type Tab } from '../components/analytics/analytics'
 import PageHeader from '../components/PageHeader.vue'
 import HiIcon from '../components/ui/HiIcon.vue'
@@ -26,7 +27,12 @@ const PERIODS: Days[] = [7, 30, 90]
 
 const workspace = useWorkspace()
 // The Assistant tab is the workspace owner's: it shows people's rated questions.
-const tabs = computed(() => TABS.filter((x) => x !== 'assistant' || workspace.isOwner))
+// Developers is the owner's too, and only when performance reviews are on.
+const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')), enabled: computed(() => workspace.isOwner) })
+const perfOn = computed(() => workspace.isOwner && !!settings.data.value?.perfReview?.enabled)
+const tabs = computed(() => TABS.filter((x) => (x !== 'assistant' || workspace.isOwner) && (x !== 'developers' || perfOn.value)))
+// Tabs that load their own data, not the period's statistics.
+const own = computed(() => tab.value === 'assistant' || tab.value === 'developers')
 const tab = computed<Tab>(() => {
   const s = String(route.params.tab ?? '')
   return (tabs.value as readonly string[]).includes(s) ? (s as Tab) : 'overview'
@@ -39,12 +45,13 @@ const TAB_LABEL: Record<Tab, string> = {
   cost: 'analytics.tabCost',
   repos: 'analytics.tabRepos',
   assistant: 'analytics.tabAssistant',
+  developers: 'perf.tab',
 }
 
 const main = useQuery({
   queryKey: computed(() => ['analytics', days.value]),
   queryFn: () => unwrap(api.GET('/analytics', { params: { query: { days: days.value } } })),
-  enabled: computed(() => tab.value !== 'learning' && tab.value !== 'assistant'),
+  enabled: computed(() => tab.value !== 'learning' && !own.value),
 })
 const delivery = useQuery({
   queryKey: computed(() => ['analytics', 'delivery', days.value]),
@@ -65,13 +72,13 @@ const learning = useQuery({
 const a = computed(() => main.data.value)
 // The tab's own data: still loading, failed, or there.
 const pending = computed(() => {
-  if (tab.value === 'assistant') return false // the tab loads its own
+  if (own.value) return false // the tab loads its own
   if (tab.value === 'learning') return learning.isPending.value
   if (tab.value === 'delivery') return main.isPending.value || delivery.isPending.value
   return main.isPending.value
 })
 const failed = computed(() => {
-  if (tab.value === 'assistant') return false
+  if (own.value) return false
   if (tab.value === 'learning') return learning.isError.value
   if (tab.value === 'delivery') return main.isError.value || delivery.isError.value
   return main.isError.value
@@ -79,7 +86,7 @@ const failed = computed(() => {
 
 const isEmpty = computed(() => {
   const x = a.value
-  if (!x || tab.value === 'learning' || tab.value === 'assistant') return false
+  if (!x || tab.value === 'learning' || own.value) return false
   const c = x.current
   return (
     c.picked + c.pushed + c.rejected + c.stopped + c.merged + c.closed === 0 &&
@@ -94,7 +101,7 @@ const maxLabels = computed(() => (days.value > 30 ? 9 : 10))
 
 // CSV: the open tab's main table, one row per day or per item.
 const canExport = computed(() => {
-  if (tab.value === 'assistant') return false
+  if (own.value) return false
   if (tab.value === 'learning') return !!learning.data.value
   if (tab.value === 'delivery') return !!delivery.data.value
   return !!a.value
@@ -156,12 +163,12 @@ function exportCsv() {
 <template>
   <PageHeader :title="t('analytics.title')" doc="analytics">
     <div class="actions" style="margin: 0">
-      <div class="seg" role="group" :aria-label="t('analytics.period')">
+      <div v-if="tab !== 'developers'" class="seg" role="group" :aria-label="t('analytics.period')">
         <button v-for="p in PERIODS" :key="p" type="button" class="seg-b" :aria-pressed="days === p" @click="days = p">
           {{ t('analytics.days', { n: p }) }}
         </button>
       </div>
-      <button type="button" class="btn" :disabled="!canExport" @click="exportCsv">{{ t('analytics.exportCsv') }}</button>
+      <button v-if="tab !== 'developers'" type="button" class="btn" :disabled="!canExport" @click="exportCsv">{{ t('analytics.exportCsv') }}</button>
     </div>
   </PageHeader>
 
@@ -201,6 +208,7 @@ function exportCsv() {
     <CostTab v-else-if="tab === 'cost' && a" :a="a" :days="days" :labels="labels" :max-labels="maxLabels" />
     <ReposTab v-else-if="tab === 'repos' && a" :a="a" />
     <AssistantTab v-else-if="tab === 'assistant'" :days="days" />
+    <DevelopersTab v-else-if="tab === 'developers'" />
   </div>
 </template>
 

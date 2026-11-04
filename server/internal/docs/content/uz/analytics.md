@@ -29,3 +29,11 @@ Davrda Claude ishlatgan tokenlar, kunlik kirish va chiqish, kesh alohida; bosqic
 ## Repozitoriylar
 
 Har bir repozitoriy qanday ishlaydi: tiketlar, muvaffaqiyat ulushi, birlashtirish ulushi, qadamlar, agnts vaqti, tiketga savollar, CI xatolari va CLAUDE.md bormi.
+
+## Dasturchilar
+
+Bu bo'limni faqat ish maydoni egasi ko'radi va faqat **Sozlamalar → Ishni baholash** yoqilganda. Odatda u o'chiq: xodimlarni avtomatik baholash GDPR ning 22-moddasiga tushadi, ba'zi mamlakatlarda xodimlar kengashi roziligi kerak. Raqamlar sizning baholashingiz uchun ma'lumot, hukm emas.
+
+Har bir topshirilgan vazifa 1, 2, 3, 5, 8 yoki 13 murakkablik bahosini oladi. Vazifa agnts da bajarilganda yoki uning Jira yoki Plane vazifasi bajarildi deb yopilganda va commitlaridan biri asosiy branchda bo'lganda topshirilgan hisoblanadi. Baho o'zgarishlardan olinadi: ularni model o'qiydi, kod hisoblagan faktlar (o'zgargan qatorlar, xavfli joylar — parallellik, avtorizatsiya, pul, ma'lumot migratsiyalari) esa u qanchalik yuqori bo'lishi mumkinligini cheklaydi. Har bir muallifning ulushi u commit qilgan turli kunlar soniga bog'liq, vazifani ikki-to'rt kishi bo'lishganda har biriga kamida 20%. agnts ning o'z commitlari uning o'z qatoriga yoziladi, ularni tekshirgan kishiga emas.
+
+Oy keyingi oyning 3-sanasida yoki baholar kelayotgan bo'lsa keyinroq (10-sanagacha) yopiladi. Yopilgan oy o'z raqamlarini saqlaydi; keyingi o'zgarishlar (qo'lda o'zgartirilgan baho, bog'langan git hisobi, tasdiqlangan regressiya) siz oyni qayta yopguningizcha qavs ichida ko'rsatiladi. Qaytarish vazifa qatorlarining qaytarilgan ulushini, har bir tasdiqlangan regressiya esa ballarining 30% ini oladi. Muallifni oching: uning topshirishlarini ko'rish, bahoni o'zgartirish yoki ma'lumotlarini ko'rish so'rovi uchun u haqda saqlangan hamma narsani yuklab olish mumkin.

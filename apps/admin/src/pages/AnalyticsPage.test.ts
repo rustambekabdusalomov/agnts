@@ -81,6 +81,39 @@ const asked = () => get.mock.calls.map((c) => c[0]).sort()
 beforeEach(() => get.mockReset())
 
 describe('AnalyticsPage', () => {
+  it('shows the Developers tab to the owner only, when performance reviews are on', async () => {
+    BODY['/settings'] = { perfReview: { enabled: false } }
+    let o = await setup('/w/acme/analytics/developers', 'owner')
+    expect(o.w.findAll('.page-tab').map((x) => x.text())).not.toContain('Developers')
+    expect(o.w.find('.page-tab[aria-current="page"]').text()).toBe('Overview')
+
+    BODY['/settings'] = { perfReview: { enabled: true } }
+    BODY['/analytics/developers'] = {
+      from: '2026-10-01T00:00:00Z', to: '2026-11-01T00:00:00Z', month: '2026-10', live: false, promptVersion: 'score-1.f1', changed: true,
+      closing: { closing: 1, promptVersion: 'score-1.f1', unscored: 0, closedAt: '2026-11-03T00:00:00Z', closedBy: null },
+      closings: [{ closing: 1, promptVersion: 'score-1.f1', unscored: 0, closedAt: '2026-11-03T00:00:00Z', closedBy: null }],
+      rows: [
+        { key: 'user:1', kind: 'user', userId: 1, name: 'Alice', totals: { points: 24, tickets: 3, avgPoints: 8, reverts: 0, regressions: 0 },
+          live: { points: 21.6, tickets: 3, avgPoints: 7.2, reverts: 0, regressions: 1 } },
+        { key: 'unmapped:bob-gh', kind: 'unmapped', name: 'bob-gh', totals: { points: 10, tickets: 10, avgPoints: 1, reverts: 1, regressions: 0 } },
+      ],
+      unscored: 2,
+    }
+    BODY['/analytics/developers/regressions'] = []
+    o = await setup('/w/acme/analytics/developers', 'owner')
+    expect(o.w.find('.page-tab[aria-current="page"]').text()).toBe('Developers')
+    const text = o.w.text()
+    expect(text).toContain('not a verdict')
+    expect(text).toContain('Alice')
+    expect(text).toContain('(21.6)') // changed since the month closed
+    expect(text).toContain('Close again with the new numbers')
+    expect(text).toContain('2 delivered tickets are not scored yet')
+    expect(o.w.find('.seg-b').text()).toBe('Month') // its own period picker, not the days
+
+    const member = await setup('/w/acme/analytics/developers', 'user')
+    expect(member.w.findAll('.page-tab').map((x) => x.text())).not.toContain('Developers')
+  })
+
   it('shows the Assistant tab to the owner only, with its stats and rated answers', async () => {
     BODY['/assistant/stats'] = { days: 30, questions: 4, answered: 3, failed: 1, people: 2, medianMs: 12000, p90Ms: 24000,
       medianStartMs: 900, medianSnapshotMs: 300, medianClaudeMs: 10500, warm: 2, up: 3, down: 1, tokens: 5400, costUsd: 0.12,
@@ -95,7 +128,7 @@ describe('AnalyticsPage', () => {
     get.mockClear()
     const { w } = await setup('/w/acme/analytics/assistant', 'owner')
     expect(w.find('.page-tab[aria-current="page"]').text()).toBe('Assistant')
-    expect(asked()).toEqual(['/assistant/rated', '/assistant/stats']) // not the main analytics
+    expect(asked()).toEqual(['/assistant/rated', '/assistant/stats', '/settings']) // settings: whether Developers shows // not the main analytics
     const text = w.text()
     expect(text).toContain('75%') // 3 of 4 answered, and 3 of 4 helpful
     expect(text).toContain('12s')

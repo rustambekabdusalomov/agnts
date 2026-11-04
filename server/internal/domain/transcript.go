@@ -30,7 +30,7 @@ const (
 // stages, which never had a claude_calls row.
 func (p TranscriptPurpose) Background() bool {
 	switch p {
-	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeDocument, PurposeReflect, PurposeRules, PurposeTranslate, PurposeLogTriage, PurposeTeamChat, PurposeSecurity:
+	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeDocument, PurposeReflect, PurposeRules, PurposeTranslate, PurposeLogTriage, PurposeTeamChat, PurposeSecurity, PurposeScore:
 		return true
 	}
 	return false

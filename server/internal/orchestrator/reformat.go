@@ -123,7 +123,7 @@ func (o *Orchestrator) ReapplyCommitFormat(ctx context.Context, key string, numb
 		if len(msgs) == 0 {
 			continue
 		}
-		head, err := cr.RewordCommits(ctx, r.Repository, r.Branch, msgs)
+		head, err := o.rewordAgentCommits(ctx, cr, r.Repository, r.Branch, cur.ID, msgs)
 		if errors.Is(err, domain.ErrNotFound) {
 			return nil, cur, invalid("the commits on %s changed since the preview: look again and retry", r.Branch)
 		}

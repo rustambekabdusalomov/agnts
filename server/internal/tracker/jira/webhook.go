@@ -22,6 +22,13 @@ type Ingester interface {
 	Ingest(ctx context.Context, in orchestrator.Incoming, origin domain.Origin) (bool, error)
 }
 
+// Resolver hears how a known ticket's issue was resolved, whether or not
+// it still carries agnts's label (the orchestrator). An Ingester may
+// implement it.
+type Resolver interface {
+	TrackerResolved(ctx context.Context, source domain.TicketSource, key string, r domain.TrackerResolution) error
+}
+
 // Deduper remembers webhook delivery ids.
 type Deduper interface {
 	SeenDelivery(ctx context.Context, provider, id string) (bool, error)
@@ -88,6 +95,13 @@ func WebhookHandler(cfg ConfigSource, me func(context.Context) (string, error), 
 		if p.Issue == nil || !strings.HasPrefix(p.WebhookEvent, "jira:issue_") || p.WebhookEvent == "jira:issue_deleted" {
 			w.WriteHeader(http.StatusNoContent)
 			return
+		}
+		if res, ok := p.Issue.resolution(); ok {
+			if rv, ok := ing.(Resolver); ok {
+				if err := rv.TrackerResolved(ctx, domain.SourceJira, p.Issue.Key, res); err != nil {
+					log.Warn("jira webhook: record the resolution", "issue", p.Issue.Key, "err", err)
+				}
+			}
 		}
 		if !p.Issue.forAgnts(c.Label) {
 			w.WriteHeader(http.StatusNoContent) // not for agnts (or the label was removed)

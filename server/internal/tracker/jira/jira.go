@@ -376,7 +376,42 @@ type issue struct {
 		} `json:"assignee"`
 		// IssueLinks is nil when the payload left the field out.
 		IssueLinks *[]issueLink `json:"issuelinks"`
+		Status     *struct {
+			StatusCategory struct {
+				Key string `json:"key"` // new, indeterminate, done
+			} `json:"statusCategory"`
+		} `json:"status"`
+		Resolution *struct {
+			Name string `json:"name"`
+		} `json:"resolution"`
+		ResolutionDate string `json:"resolutiondate"`
 	} `json:"fields"`
+}
+
+// resolution is how the issue ended, as far as the payload says; ok is
+// false when it has no status (a payload that left it out).
+func (is issue) resolution() (domain.TrackerResolution, bool) {
+	if is.Fields.Status == nil {
+		return domain.TrackerResolution{}, false
+	}
+	r := domain.TrackerResolution{Closed: is.Fields.Status.StatusCategory.Key == "done"}
+	if is.Fields.Resolution != nil {
+		r.Resolution = is.Fields.Resolution.Name
+	}
+	if at, ok := jiraTime(is.Fields.ResolutionDate); ok && r.Closed {
+		r.At = &at
+	}
+	return r, true
+}
+
+// jiraTime reads Jira's timestamps (2026-11-04T10:00:00.000+0000).
+func jiraTime(s string) (time.Time, bool) {
+	for _, layout := range []string{"2006-01-02T15:04:05.000-0700", time.RFC3339Nano, time.RFC3339} {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
 }
 
 // issueLink is one link on an issue. Jira fills inwardIssue or

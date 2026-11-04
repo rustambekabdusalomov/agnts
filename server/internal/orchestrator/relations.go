@@ -18,6 +18,14 @@ const (
 	relationMaxFiles      = 25
 )
 
+// RegressionClaim is an analysis's claim that a bug comes from a
+// delivered ticket's work.
+type RegressionClaim struct {
+	Key        string  `json:"key"`
+	Reason     string  `json:"reason"`
+	Confidence float64 `json:"confidence"`
+}
+
 // RelationClaim is how the analysis reads this ticket's relation to one of
 // the other open tickets it was shown.
 type RelationClaim struct {
