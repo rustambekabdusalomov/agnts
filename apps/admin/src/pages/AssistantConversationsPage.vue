@@ -61,14 +61,11 @@ async function remove(c: AssistantConversation) {
   </PageHeader>
 
   <section class="card">
-    <input
-      v-model="q"
-      type="search"
-      class="cv-search"
-      :placeholder="t('massistant.search')"
-      :aria-label="t('massistant.search')"
-      @keydown.esc="q = ''"
-    >
+    <label class="search cv-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+      <input v-model="q" type="search" :placeholder="t('massistant.search')" :aria-label="t('massistant.search')" @keydown.esc="q = ''">
+      <button v-if="q" type="button" class="cv-search-x" :aria-label="t('teamchat.searchClose')" @click="q = ''"><HiIcon name="close" /></button>
+    </label>
     <template v-if="searching">
       <p v-if="q.trim().length < 2" class="hint">{{ t('teamchat.searchShort') }}</p>
       <p v-else-if="found.isFetching.value && !found.data.value" class="hint">{{ t('common.loading') }}</p>
@@ -118,7 +115,10 @@ async function remove(c: AssistantConversation) {
 </template>
 
 <style scoped>
-.cv-search { width: 100%; max-width: 420px; height: 36px; padding: 0 12px; margin-bottom: 10px; }
+.cv-search { margin-bottom: 12px; }
+.cv-search-x { flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 12px; background: none; color: var(--ink-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.cv-search-x:hover { background: var(--hover); color: var(--ink); }
+.cv-search-x :deep(svg) { width: 11px; height: 11px; stroke: currentColor; stroke-width: 2.4; }
 .cv-hit { white-space: normal; }
 .cv-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
 .cv-empty p { margin: 0; }

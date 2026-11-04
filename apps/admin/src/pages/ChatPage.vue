@@ -11,6 +11,7 @@ import ChatComposer from '../components/chat/ChatComposer.vue'
 import ChatFiles from '../components/files/ChatFiles.vue'
 import ChatMessageItem from '../components/chat/ChatMessageItem.vue'
 import ScrollToBottom from '../components/chat/ScrollToBottom.vue'
+import HiIcon from '../components/ui/HiIcon.vue'
 import UserAvatar from '../components/ui/UserAvatar.vue'
 import SearchSnippet from '../components/chat/SearchSnippet.vue'
 import { dayOf, secs, type ChatChannel, type ChatMessage } from '../components/chat/chat'
@@ -308,14 +309,11 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
           </span>
           <span class="sp" />
           <span v-if="statsLine && !searching" class="tc-stats" :title="statsTip">{{ statsLine }}</span>
-          <input
-            v-model="q"
-            type="search"
-            class="tc-search"
-            :placeholder="t('teamchat.search')"
-            :aria-label="t('teamchat.search')"
-            @keydown.esc="closeSearch"
-          >
+          <label class="search tc-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+            <input v-model="q" type="search" :placeholder="t('teamchat.search')" :aria-label="t('teamchat.search')" @keydown.esc="closeSearch">
+            <button v-if="q" type="button" class="tc-search-x" :aria-label="t('teamchat.searchClose')" @click="closeSearch"><HiIcon name="close" /></button>
+          </label>
         </div>
         <p v-if="channel?.topic" class="hint tc-topic">{{ channel.topic }}</p>
       </header>
@@ -401,7 +399,11 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
 .tc-ht .sp { flex: 1; }
 .tc-stats { font-size: 13px; font-weight: 700; color: var(--primary-ink); }
 .tc-topic { margin: 2px 0 0; }
-.tc-search { width: min(260px, 40vw); height: 32px; padding: 0 10px; font-size: 13.5px; }
+.tc-search { flex: 0 1 280px; min-height: 34px; }
+.tc-search input { font-size: 13.5px; }
+.tc-search-x { flex: none; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 11px; background: none; color: var(--ink-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.tc-search-x:hover { background: var(--hover); color: var(--ink); }
+.tc-search-x :deep(svg) { width: 11px; height: 11px; stroke: currentColor; stroke-width: 2.4; }
 .tc-results { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
 .tc-rh { display: flex; align-items: center; gap: 8px; }
 .tc-hits { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
