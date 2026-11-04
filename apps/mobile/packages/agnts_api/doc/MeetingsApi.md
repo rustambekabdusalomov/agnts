@@ -1152,7 +1152,7 @@ Name | Type | Description  | Notes
 
 The meetings you see
 
-upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host.
+upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host; agenda: your own (you host, co-host, or are invited and have not declined) that are live or start within 36 hours and have not ended.
 
 ### Example
 ```dart

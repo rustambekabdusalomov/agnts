@@ -6,6 +6,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, HttpError, unwrap, uploadMeetingRecording } from '../api/client'
 import PageHeader from '../components/PageHeader.vue'
 import CheckBox from '../components/form/CheckBox.vue'
+import DateTimeInput from '../components/form/DateTimeInput.vue'
+import FileDrop from '../components/files/FileDrop.vue'
 import MeetingDrawer from '../components/meetings/MeetingDrawer.vue'
 import { callPath, minutes, notesBusy, useMeeting, useMeetingSessions, useMeetingsRefresh, when } from '../components/meetings/useMeetings'
 import HiIcon from '../components/ui/HiIcon.vue'
@@ -41,32 +43,22 @@ function toggleRing(id: number, on: boolean) {
 const uploadOpen = ref(false)
 const upFile = ref<File | null>(null)
 const upHeld = ref('')
+const upHeldMax = ref('')
 const upPeople = ref<number[]>([])
 const upProgress = ref<number | null>(null)
 function openUpload() {
   uploadOpen.value = !uploadOpen.value
   ringOpen.value = false
-  const d = new Date()
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
-  upHeld.value = d.toISOString().slice(0, 16) // now, in local time for datetime-local
+  upHeld.value = upHeldMax.value = new Date().toISOString() // a recording can't be from the future
 }
 function toggleUpPerson(id: number, on: boolean) {
   upPeople.value = on ? [...upPeople.value, id] : upPeople.value.filter((x) => x !== id)
-}
-function pickFile(e: Event) {
-  const f = (e.target as HTMLInputElement).files?.[0] ?? null
-  if (f && m.value && f.size > m.value.maxUploadMb * 1048576) {
-    ui.notify(t('meetings.uploadTooBig', { mb: m.value.maxUploadMb }))
-    upFile.value = null
-    return
-  }
-  upFile.value = f
 }
 async function upload() {
   if (!upFile.value || upProgress.value !== null) return
   upProgress.value = 0
   try {
-    const x = await uploadMeetingRecording(id.value, upFile.value, { startedAt: upHeld.value ? new Date(upHeld.value).toISOString() : undefined, people: upPeople.value }, (f) => (upProgress.value = f))
+    const x = await uploadMeetingRecording(id.value, upFile.value, { startedAt: upHeld.value || undefined, people: upPeople.value }, (f) => (upProgress.value = f))
     uploadOpen.value = false
     upFile.value = null
     upPeople.value = []
@@ -214,11 +206,21 @@ const ringable = computed(() => (members.data.value ?? []).filter((x) => x.userI
         <div class="mp-up">
           <div class="field">
             <label for="mp-up-file">{{ t('meetings.uploadFile') }}</label>
-            <input id="mp-up-file" type="file" accept="video/*,audio/*,.mkv,.opus" :disabled="upProgress !== null" @change="pickFile">
+            <FileDrop
+              id="mp-up-file"
+              v-model="upFile"
+              accept="video/*,audio/*,.mkv,.opus"
+              :max-bytes="m.maxUploadMb * 1048576"
+              :progress="upProgress"
+              :prompt="t('meetings.uploadDrop')"
+              :hint="t('meetings.uploadTypes', { mb: m.maxUploadMb })"
+              :too-big="t('meetings.uploadTooBig', { mb: m.maxUploadMb })"
+              :bad-type="(name: string) => t('meetings.uploadBadType', { name })"
+            />
           </div>
           <div class="field">
             <label for="mp-up-held">{{ t('meetings.uploadHeld') }}</label>
-            <input id="mp-up-held" v-model="upHeld" type="datetime-local" :disabled="upProgress !== null">
+            <DateTimeInput id="mp-up-held" v-model="upHeld" :label="t('meetings.uploadHeld')" :max="upHeldMax" :disabled="upProgress !== null" />
           </div>
         </div>
         <h3 class="mp-up-h">{{ t('meetings.uploadPeople') }}</h3>
@@ -227,7 +229,6 @@ const ringable = computed(() => (members.data.value ?? []).filter((x) => x.userI
             {{ x.displayName || x.username }}
           </CheckBox>
         </div>
-        <progress v-if="upProgress !== null" class="mp-progress" :value="upProgress" max="1" :aria-label="t('meetings.uploading')" />
         <div class="actions">
           <button type="button" class="btn btn-p" :disabled="!upFile || upProgress !== null" @click="upload">
             <HiIcon name="upload" />{{ upProgress !== null ? t('meetings.uploadingPct', { n: Math.round(upProgress * 100) }) : t('meetings.uploadNow') }}
@@ -282,7 +283,7 @@ const ringable = computed(() => (members.data.value ?? []).filter((x) => x.userI
 .mp-call:hover { text-decoration: underline; }
 .mp-ring { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin: 12px 0 0; }
 .mp-rsvp { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-.mp-up { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 12px 0 0; }
+.mp-up { display: grid; grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr); align-items: start; gap: 12px 16px; margin: 12px 0 0; }
+@media (max-width: 700px) { .mp-up { grid-template-columns: minmax(0, 1fr); } }
 .mp-up-h { margin: 16px 0 0; font-size: 13.5px; font-weight: 700; color: var(--ink-3); }
-.mp-progress { width: 100%; margin: 14px 0 0; accent-color: var(--primary); }
 </style>

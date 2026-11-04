@@ -15,6 +15,12 @@
     "copied": "Nusxalandi",
     "saved": "Saqlandi",
     "search": "Qidirish",
-    "noMatch": "Hech narsa topilmadi"
+    "noMatch": "Hech narsa topilmadi",
+    "pickDateTime": "Sana va vaqtni tanlang",
+    "prevMonth": "Oldingi oy",
+    "nextMonth": "Keyingi oy",
+    "now": "Hozir",
+    "time": "Vaqt",
+    "done": "Tayyor"
   }
 }

@@ -176,6 +176,73 @@ func TestMeetingsVisibility(t *testing.T) {
 	}
 }
 
+func TestMeetingsAgenda(t *testing.T) {
+	f := newMeetFixture(t)
+	schedule := func(m domain.Meeting, in time.Duration, access domain.MeetingAccess) {
+		t.Helper()
+		start := time.Now().Add(in)
+		if _, err := f.s.UpdateMeeting(f.ctx, m.ID, domain.MeetingInput{Title: m.Title, Kind: domain.MeetingScheduled, StartsAt: &start,
+			DurationMin: 30, TimeZone: "UTC", Access: access, Guests: domain.GuestsKnock, Language: "auto"}, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	invited := f.create(t, f.ctx, &f.alice, domain.AccessInvited)
+	schedule(invited, time.Hour, domain.AccessInvited)
+	declined := f.create(t, f.ctx, &f.alice, domain.AccessInvited)
+	schedule(declined, 2*time.Hour, domain.AccessInvited)
+	open := f.create(t, f.ctx, &f.alice, domain.AccessWorkspace) // bob may join, but isn't invited
+	schedule(open, time.Hour, domain.AccessWorkspace)
+	cancelled := f.create(t, f.ctx, &f.alice, domain.AccessInvited)
+	schedule(cancelled, time.Hour, domain.AccessInvited)
+	later := f.create(t, f.ctx, &f.alice, domain.AccessInvited)
+	schedule(later, 3*24*time.Hour, domain.AccessInvited)
+	over := f.create(t, f.ctx, &f.alice, domain.AccessInvited)
+	schedule(over, -2*time.Hour, domain.AccessInvited)
+	cohosted := f.create(t, f.ctx, &f.alice, domain.AccessWorkspace) // instant: on the agenda only while live
+	for _, m := range []domain.Meeting{invited, declined, cancelled, later, over} {
+		if _, err := f.s.AddInvitees(f.ctx, m.ID, []NewInvitee{{UserID: &f.bob}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := f.s.SetRSVP(f.ctx, declined.ID, f.bob, domain.RSVPNo); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.s.CancelMeeting(f.ctx, cancelled.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.s.SetCohost(f.ctx, cohosted.ID, f.bob, true); err != nil {
+		t.Fatal(err)
+	}
+	agenda := func(user int64, owner bool) []int64 {
+		t.Helper()
+		ms, err := f.s.ListMeetings(f.ctx, MeetingFilter{View: ViewAgenda, UserID: user, Owner: owner})
+		if err != nil {
+			t.Fatal(err)
+		}
+		out := []int64{}
+		for _, m := range ms {
+			out = append(out, m.ID)
+		}
+		return out
+	}
+	if got := agenda(f.bob, false); fmt.Sprint(got) != fmt.Sprint([]int64{invited.ID}) {
+		t.Errorf("bob's agenda %v, want only %d", got, invited.ID)
+	}
+	if _, _, err := f.s.OpenSession(f.ctx, cohosted.ID); err != nil {
+		t.Fatal(err)
+	}
+	if got := agenda(f.bob, false); fmt.Sprint(got) != fmt.Sprint([]int64{cohosted.ID, invited.ID}) {
+		t.Errorf("bob's agenda with a live meeting %v, want it first", got)
+	}
+	// The owner sees every meeting, but their agenda has only their own.
+	if got := agenda(f.owner, true); len(got) != 0 {
+		t.Errorf("the owner's agenda %v", got)
+	}
+	if got := agenda(f.alice, false); len(got) != 4 {
+		t.Errorf("the host's agenda %v, want invited, declined, open and the live one", got)
+	}
+}
+
 func TestMeetingSessions(t *testing.T) {
 	f := newMeetFixture(t)
 	m := f.create(t, f.ctx, &f.alice, domain.AccessWorkspace)

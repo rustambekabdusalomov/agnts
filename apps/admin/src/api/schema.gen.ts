@@ -5322,7 +5322,7 @@ export interface paths {
         };
         /**
          * The meetings you see
-         * @description upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host.
+         * @description upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host; agenda: your own (you host, co-host, or are invited and have not declined) that are live or start within 36 hours and have not ended.
          */
         get: operations["listMeetings"];
         put?: never;
@@ -20229,7 +20229,7 @@ export interface operations {
     listMeetings: {
         parameters: {
             query?: {
-                view?: "upcoming" | "live" | "mine";
+                view?: "upcoming" | "live" | "mine" | "agenda";
             };
             header?: never;
             path?: never;

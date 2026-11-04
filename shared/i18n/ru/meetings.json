@@ -68,6 +68,7 @@
     "titlePlaceholder": "Планирование спринта",
     "date": "Дата",
     "time": "Время",
+    "starts": "Начало",
     "duration": "Длительность",
     "minutes": "{n} мин",
     "timeZoneIs": "Время указано в {zone}.",
@@ -328,6 +329,21 @@
     "uploadTooBig": "Файл больше {mb} МБ",
     "uploadedBadge": "Загружено",
     "inRecording": "{n, plural, =0 {На записи} one {# человек на записи} few {# человека на записи} many {# человек на записи} other {# человека на записи}}",
-    "uploadedNote": "Загруженная запись: прослушан только звук, файл удалён. Звонка не было, поэтому нет посещаемости."
+    "uploadedNote": "Загруженная запись: прослушан только звук, файл удалён. Звонка не было, поэтому нет посещаемости.",
+    "todayLive": "В эфире",
+    "todayInCall": "{n} в звонке",
+    "todayIn": "через {n} мин",
+    "todayNow": "сейчас",
+    "todayJoin": "Войти",
+    "todayLater": "Позже сегодня:",
+    "todayLiveLine": "В эфире: {title}",
+    "todayLiveAria": "«{title}» идёт, в звонке {n}. Войти",
+    "todaySoonAria": "«{title}» начнётся через {n} мин. Войти",
+    "todayNowAria": "«{title}» начинается сейчас. Войти",
+    "todayLaterAria": "Следующая встреча сегодня: «{title}» в {time}",
+    "todayMoreAria": "{n, plural, one {Ещё # встреча сегодня} few {Ещё # встречи сегодня} other {Ещё # встреч сегодня}}",
+    "uploadDrop": "Перетащите запись сюда или",
+    "uploadTypes": "Видео или аудио · до {mb} МБ",
+    "uploadBadType": "«{name}» — не видео и не аудио"
   }
 }

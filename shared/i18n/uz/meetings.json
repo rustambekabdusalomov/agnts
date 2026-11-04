@@ -68,6 +68,7 @@
     "titlePlaceholder": "Sprintni rejalashtirish",
     "date": "Sana",
     "time": "Vaqt",
+    "starts": "Boshlanishi",
     "duration": "Davomiyligi",
     "minutes": "{n} daqiqa",
     "timeZoneIs": "Vaqt {zone} boʻyicha.",
@@ -328,6 +329,21 @@
     "uploadTooBig": "Fayl {mb} MB dan katta",
     "uploadedBadge": "Yuklangan",
     "inRecording": "{n, plural, =0 {Yozuvda} other {Yozuvda # kishi}}",
-    "uploadedNote": "Yuklangan yozuv: faqat ovozi tinglandi, fayl oʻchirildi. Qoʻngʻiroq boʻlmagan, shuning uchun ishtirok roʻyxati yoʻq."
+    "uploadedNote": "Yuklangan yozuv: faqat ovozi tinglandi, fayl oʻchirildi. Qoʻngʻiroq boʻlmagan, shuning uchun ishtirok roʻyxati yoʻq.",
+    "todayLive": "Jonli",
+    "todayInCall": "{n} kishi qoʻngʻiroqda",
+    "todayIn": "{n} daqiqadan soʻng",
+    "todayNow": "hozir",
+    "todayJoin": "Qoʻshilish",
+    "todayLater": "Bugun keyinroq:",
+    "todayLiveLine": "Jonli: {title}",
+    "todayLiveAria": "«{title}» jonli, qoʻngʻiroqda {n} kishi. Qoʻshilish",
+    "todaySoonAria": "«{title}» {n} daqiqadan soʻng boshlanadi. Qoʻshilish",
+    "todayNowAria": "«{title}» hozir boshlanmoqda. Qoʻshilish",
+    "todayLaterAria": "Bugungi navbatdagi uchrashuv: «{title}», soat {time}",
+    "todayMoreAria": "Bugun yana {n} ta uchrashuv",
+    "uploadDrop": "Yozuvni shu yerga tashlang yoki",
+    "uploadTypes": "Video yoki audio · {mb} MB gacha",
+    "uploadBadType": "«{name}» video yoki audio fayl emas"
   }
 }

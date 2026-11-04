@@ -6693,12 +6693,12 @@ paths:
       operationId: listMeetings
       x-viewer: true
       summary: The meetings you see
-      description: 'upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host.'
+      description: 'upcoming: live ones first, then scheduled ones that have not ended; live: the live ones; mine: the ones you host; agenda: your own (you host, co-host, or are invited and have not declined) that are live or start within 36 hours and have not ended.'
       tags: [meetings]
       parameters:
         - name: view
           in: query
-          schema: { type: string, enum: [upcoming, live, mine], default: upcoming }
+          schema: { type: string, enum: [upcoming, live, mine, agenda], default: upcoming }
       responses:
         '200':
           description: OK

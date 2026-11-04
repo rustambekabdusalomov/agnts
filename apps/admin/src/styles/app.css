@@ -295,6 +295,26 @@ a.mem-name:hover { color: var(--primary-ink); }
 .ws-sep { height: 1px; margin: 6px 4px; background: var(--line-2); }
 .queue-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--hover); color: var(--ink-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
 .queue-pill.warn { background: var(--warn-soft); color: var(--warn-ink); }
+/* Today's next meeting, in the header: plain later on, highlighted in the early-join window, pulsing while live. */
+.today-pill { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 340px; padding: 5px 6px 5px 10px; border-radius: 999px; background: var(--hover); color: var(--ink-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; text-decoration: none; }
+.today-pill:hover { color: var(--ink); }
+.today-pill svg { flex: none; width: 15px; height: 15px; }
+.today-pill.later { padding-right: 10px; }
+.today-pill.soon { background: var(--primary-soft); color: var(--primary-ink); }
+.today-pill.live { background: var(--bad-soft); color: var(--bad-ink); }
+.today-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--bad); animation: pulse 1.6s ease-in-out infinite; }
+.today-tag { text-transform: uppercase; letter-spacing: .04em; font-size: 11px; font-weight: 800; }
+.today-time { font-variant-numeric: tabular-nums; }
+.today-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+.today-sub { flex: none; font-weight: 500; opacity: .85; }
+.today-join { flex: none; padding: 2px 9px; border-radius: 999px; background: currentColor; }
+.today-pill.soon .today-join, .today-pill.live .today-join { color: var(--on-primary); }
+.today-pill.soon .today-join { background: var(--primary); }
+.today-pill.live .today-join { background: var(--bad); }
+.today-more { flex: none; padding: 1px 6px; border-radius: 999px; background: var(--surface); color: var(--ink-3); font-size: 11.5px; }
+.today-pill.later .today-more { margin-right: -4px; }
+@media (prefers-reduced-motion: reduce) { .today-dot { animation: none; } }
+@media (max-width: 760px) { .today-pill .today-title, .today-pill .today-sub { display: none; } }
 
 /* Why a ticket waits, on its page. */
 .wait-banner { display: flex; gap: 12px; align-items: flex-start; margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; background: var(--warn-soft); color: var(--warn-ink); }

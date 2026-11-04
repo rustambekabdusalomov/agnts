@@ -101,6 +101,10 @@ const (
 	ViewUpcoming MeetingView = "upcoming" // live ones, then scheduled ones that have not ended
 	ViewLive     MeetingView = "live"
 	ViewMine     MeetingView = "mine" // meetings the person hosts, newest first
+	// ViewAgenda: the person's own meetings (host, co-host, or invited and
+	// not declined) that are live or start within the next 36 hours and
+	// have not ended. The client cuts it to its own today.
+	ViewAgenda MeetingView = "agenda"
 )
 
 // MeetingFilter picks meetings for one person.
@@ -130,6 +134,13 @@ func (s *Meetings) ListMeetings(ctx context.Context, f MeetingFilter) ([]domain.
 		where, order = `s.id IS NOT NULL`, `s.started_at DESC`
 	case ViewMine:
 		where, order = `m.host_id = $1 AND m.cancelled_at IS NULL`, `m.created_at DESC`
+	case ViewAgenda:
+		where = `m.cancelled_at IS NULL AND (m.host_id = $1
+			OR EXISTS (SELECT 1 FROM meeting_cohosts c WHERE c.meeting_id = m.id AND c.user_id = $1)
+			OR EXISTS (SELECT 1 FROM meeting_invitees i WHERE i.meeting_id = m.id AND i.user_id = $1 AND i.rsvp <> 'no'))
+			AND (s.id IS NOT NULL OR (m.kind = 'scheduled' AND m.starts_at < now() + interval '36 hours'
+				AND m.starts_at + make_interval(mins => m.duration_min) > now()))`
+		order = `(s.id IS NULL), COALESCE(m.starts_at, s.started_at)`
 	default:
 		where = `m.cancelled_at IS NULL AND (s.id IS NOT NULL OR (m.kind = 'scheduled'
 			AND m.starts_at + make_interval(mins => m.duration_min) > now()))`
