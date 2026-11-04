@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -56,7 +57,10 @@ func secJSON(v any) []byte {
 
 // CreateSecurityScan queues a scan. A repository with a manual or
 // scheduled scan already queued or running gets that one back (busy
-// true); verify scans always queue.
+// true). A verify scan joins one still queued for the repository: its
+// findings are added to that scan's (busy true), so fixes merged close
+// together are checked by one scan. One already running has read its
+// findings, so a verify scan queues after it.
 func (st *Security) CreateSecurityScan(ctx context.Context, s domain.SecurityScan) (out domain.SecurityScan, busy bool, err error) {
 	err = pgx.BeginFunc(ctx, st.db, func(tx pgx.Tx) error {
 		// One queue per repository: lock it while checking.
@@ -64,7 +68,26 @@ func (st *Security) CreateSecurityScan(ctx context.Context, s domain.SecuritySca
 		if err := tx.QueryRow(ctx, `SELECT workspace_id FROM repositories WHERE id = $1 FOR UPDATE`, s.RepoID).Scan(&ws); err != nil {
 			return notFound(err)
 		}
-		if s.Trigger != domain.SecVerify {
+		if s.Trigger == domain.SecVerify {
+			// FOR UPDATE waits for a claim of the scan in progress; the
+			// row is then running and no longer matches.
+			var id int64
+			var scope domain.SecScope
+			err := tx.QueryRow(ctx, `SELECT id, scope FROM security_scans WHERE repo_id = $1 AND status = 'pending'
+				AND trigger = 'verify' ORDER BY id LIMIT 1 FOR UPDATE`, s.RepoID).Scan(&id, &scope)
+			if err == nil {
+				scope.FindingIDs = slices.Compact(slices.Sorted(slices.Values(append(scope.FindingIDs, s.Scope.FindingIDs...))))
+				if _, err := tx.Exec(ctx, `UPDATE security_scans SET scope = $2 WHERE id = $1`, id, secJSON(scope)); err != nil {
+					return err
+				}
+				out, err = scanScan(tx.QueryRow(ctx, `SELECT `+secScanCols+secScanFrom+` WHERE s.id = $1`, id))
+				busy = true
+				return err
+			}
+			if !errors.Is(err, pgx.ErrNoRows) {
+				return err
+			}
+		} else {
 			cur, err := scanScan(tx.QueryRow(ctx, `SELECT `+secScanCols+secScanFrom+` WHERE s.repo_id = $1 AND s.status IN ('pending', 'running')
 				AND s.trigger <> 'verify' ORDER BY s.id LIMIT 1`, s.RepoID))
 			if err == nil {
