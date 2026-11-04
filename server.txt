@@ -1,6 +1,0 @@
-ip: 45.138.158.39
-user: root
-
-proxy server
-ip: 5.182.26.104
-user: root
