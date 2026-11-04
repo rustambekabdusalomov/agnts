@@ -5,17 +5,38 @@ Revised Nov 4, 2026 after a review against the current code: provider-neutral (C
 
 "Claude" below means the agent of the run's provider: Claude Code or Muse Code, whichever the workspace's modules make the default (`domain.ToolName`). Nothing in the plan depends on which one it is.
 
-## Implementation status (Nov 4, 2026)
+## Implementation status (Nov 4, 2026, evening)
 
-**Phase 1a is built** on branch `security-scan`: runner tools and `agnts-sec`, the vulnerability-database volume and daily updater, migrations `00083_security.sql` and `00084_security_more.sql`, store, scheduler class, scan job, the `security` prompt, fingerprints and closing rules, Fix this → SEC tickets with verify-on-merge, the API, and the admin Security page, finding page, repository tab and ticket card. Phases 1b, 1c and 2 are not started.
+All of it is on master and on prod. In PR order:
 
-Where 1a differs from the text below:
+| PR | What |
+| --- | --- |
+| #47 | Phase 1a: runner tools and `agnts-sec`, the vulnerability-database volume and daily updater, migrations `00083_security.sql` and `00084_security_more.sql`, store, scan job, the `security` prompt, fingerprints and closing rules, Fix this → SEC tickets with verify-on-merge, the API and the admin Security page, finding page, repository tab and ticket card. From 1c: repository settings (exclusions, schedule, `MinNotify`), scheduled scans with a daily agent budget, the security model and notification toggle in Settings, notifications with Telegram's **Fix it** (`sec:<id>`). The side stage's groundwork (`security_state`, `StageSecurity`, its queue class). |
+| #49 | The updater retries and resumes downloads: all 10 osv ecosystems load (npm's 220 MB database had been cut off). |
+| #52 | Go SQL rules that find a query built from a function's string parameter (the repository-layer case that scans of the demo repositories missed), Gin and Echo request sources, pgx's context-first calls; one hit per rule and place. |
+| #53 | Fixes merged close together are verified by one scan: a verify scan joins one still queued for its repository. |
+| #54 | The orchestrator's scan test follows #52's rules. |
+| #55 | Phase 1b's side stage: the security check of agnts's changes (see below). |
+| #56 | MCP tools `list_security_findings` and `get_security_finding`. |
 
-- **agnts's own opengrep rules** (`deploy/runner/security/rules`, 25 annotated tests) instead of a community set: `opengrep-rules` carries a Commons Clause that forbids selling a service built on it.
+**Tried on prod.** Scans of the Meta workspace's four demo repositories with Muse, and of three repositories of workspace 1 with Claude, found the planted bugs (the agent found what the scanners missed); fix tickets merged, and the rescans closed what they fixed.
+
+Where the build differs from the text below:
+
+- **agnts's own opengrep rules** (`deploy/runner/security/rules`, annotated tests next to each rule file) instead of a community set: `opengrep-rules` carries a Commons Clause that forbids selling a service built on it. opengrep follows input within one function only, so the Go rules also report a function's string parameter concatenated into SQL text (#52). Rules for the other languages still have that gap.
 - **Paths:** inputs are in `/agnts/context` (`hits.json`, `security.json`, `sec-exclude.txt`), not `/agnts/in`; raw tool output stays in the container and is not stored under `DataDir` (gitleaks's raw report is deleted before the agent runs).
 - **Code findings are fingerprinted by CWE + file + function**, not by rule, so two rules on one query, and the agent's report of it, are one finding. Dependencies are one finding per package and lockfile.
-- **Merges are followed by polling** the fix ticket's `MergedAt` once a minute (as the log watcher does), not by a merge hook.
-- **Not in 1a:** repository settings (exclusions, schedule, `MinNotify`), the security model in the Settings page (it follows the preview model), the log watcher link, Telegram, mobile screens, MCP tools, analytics. The test repository lives at `server/internal/security/testdata/vulnapp`; its fake secret is generated at test time, never committed.
+- **Merges are followed by polling** the fix ticket's `MergedAt` once a minute (as the log watcher does), not by a merge hook. A verify scan joins one already queued for the repository (#53).
+- **The side stage is static.** It runs the scanners on the files the change touched and keeps only what the change adds: a hit on or near an added line, a package and version the lockfile adds (`domain.SecChangeHits`). The agent judges those hits with the `security-side` prompt (20 turns) only when there are any; there is no audit beyond them, so a new handler without an authorization check is found only if a rule reports it. The running app is not probed (no `agnts-sec dynamic`, no `agnts-probe`, no route globs). Results are kept as the run's result and shown in the ticket's **Security** tab with Add to feedback; Settings' "Check agnts's changes" (`Security.AutoCheck`) is the `AutoSecurity` of the text below.
+- **The test repository** lives at `server/internal/security/testdata/vulnapp`; its fake secret is generated at test time, never committed.
+
+**Still open:**
+
+- 1a's last check: three rescans of an unchanged repository, at least one with Claude and one with Muse, reporting 0 new and 0 fixed; and a verify scan that runs the agent (in the prod runs the manual rescans closed the findings first).
+- 1b: probing the running app (dynamic sweep, `agnts-probe`, route globs), and the change check on a real ticket on prod.
+- 1c: the `security` ticket kind, the log watcher link, Analytics, mobile screens (left out for now).
+- 2: live targets, not started; write a design doc first, since it is the only part that sends traffic outside the sandbox.
+- A finding stays `fixing` when its fix ticket fails; Fix this works again, but the status reads wrong.
 
 ## Overview
 
