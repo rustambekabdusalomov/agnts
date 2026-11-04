@@ -117,7 +117,7 @@ const open = (f: LogFinding) => router.push({ name: 'logFinding', params: { id: 
         </tr>
       </tbody>
     </table>
-    <PageNav v-model="page" v-model:size="pageSize" :total="rows.length" />
+    <PageNav v-model="page" v-model:size="pageSize" :total="rows.length" always />
   </div>
   <div v-else-if="all.length" class="empty">{{ t('logwatch.noMatch') }}</div>
   <div v-else class="empty"><slot name="empty">{{ t('logwatch.emptyFilter') }}</slot></div>
