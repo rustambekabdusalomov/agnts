@@ -2,6 +2,7 @@ package orchestrator_test
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"os"
@@ -341,5 +342,29 @@ func TestSecurityScheduledScans(t *testing.T) {
 	scans, _ = sec.SecurityScans(h.ctx, repo, 5)
 	if len(h.runner.prompts) != prompts || scans[0].Ran.Agent != domain.SecAgentSkipped || !strings.Contains(scans[0].Summary, "budget") {
 		t.Fatalf("over budget: %+v", scans[0])
+	}
+}
+
+func TestRefreshSecDB(t *testing.T) {
+	h, _, _ := newSecurityHarness(t)
+	partial := "curl: (56) unexpected eof\n" + `{"osv":"2026-11-04T10:44:49Z","ecosystems":9,"failed":["npm"],"missing":["npm"]}`
+	h.runner.execs["agnts-sec update /opt/secdb"] = []orchestrator.ExecResult{
+		{ExitCode: 3, Output: partial},
+		{ExitCode: 0, Output: `{"osv":"2026-11-04T11:44:49Z","ecosystems":10,"failed":[],"missing":[]}`},
+		{ExitCode: 1, Output: "curl: (6) could not resolve host"},
+	}
+	err := h.o.RefreshSecDB(h.ctx)
+	if !errors.Is(err, orchestrator.ErrSecDBPartial) || !strings.Contains(err.Error(), "npm are missing (9 of 10") {
+		t.Fatalf("partial: %v", err)
+	}
+	if err := h.o.RefreshSecDB(h.ctx); err != nil {
+		t.Fatalf("complete: %v", err)
+	}
+	if err := h.o.RefreshSecDB(h.ctx); err == nil || errors.Is(err, orchestrator.ErrSecDBPartial) {
+		t.Fatalf("nothing fetched: %v", err)
+	}
+	spec := h.runner.specs[len(h.runner.specs)-1]
+	if spec.SecDB != orchestrator.SecDBWrite || len(spec.Grants) != 1 || spec.Grants[0].Host != orchestrator.SecDBHost {
+		t.Fatalf("updater container: %+v", spec)
 	}
 }

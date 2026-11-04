@@ -41,8 +41,11 @@ const (
 	securityVerifyMaxTurns = 10
 	// securityStaticTimeout covers the four scanners (each has its own cap).
 	securityStaticTimeout = 25 * time.Minute
-	// secDBEvery is how often the vulnerability databases are refreshed.
+	// secDBEvery is how often the vulnerability databases are refreshed,
+	// and secDBRetry how soon an update that failed or missed some
+	// ecosystems is tried again.
 	secDBEvery = 24 * time.Hour
+	secDBRetry = time.Hour
 	// SecDBHost serves the osv databases; only the updater's container may
 	// reach it.
 	SecDBHost = "osv-vulnerabilities.storage.googleapis.com"
@@ -858,15 +861,51 @@ func (o *Orchestrator) RefreshSecDB(ctx context.Context) error {
 		return fmt.Errorf("start the updater: %w", err)
 	}
 	defer func() { _ = ws.Close(context.WithoutCancel(ctx)) }()
-	r, err := ws.Exec(ctx, "agnts-sec update /opt/secdb", time.Hour)
+	r, err := ws.Exec(ctx, "agnts-sec update /opt/secdb", 2*time.Hour)
 	if err != nil {
 		return err
 	}
-	if r.ExitCode != 0 {
+	v := secDBVersions(r.Output)
+	switch {
+	case r.ExitCode == 3 && v != nil:
+		// Partial: scans use what is there; the rest is tried again soon.
+		return fmt.Errorf("%w: %s are missing (%d of %d ecosystems are in)", ErrSecDBPartial,
+			strings.Join(v.Missing, ", "), v.Ecosystems, v.Ecosystems+len(v.Missing))
+	case r.ExitCode != 0:
 		return fmt.Errorf("agnts-sec update: exit %d: %s", r.ExitCode, truncate(r.Output, 500))
 	}
-	o.log.Info("vulnerability databases refreshed", "versions", truncate(strings.TrimSpace(r.Output), 300))
+	o.log.Info("vulnerability databases refreshed", "versions", truncate(strings.TrimSpace(lastLine(r.Output)), 300))
 	return nil
+}
+
+// ErrSecDBPartial is an update that fetched some vulnerability databases
+// but not all of them.
+var ErrSecDBPartial = errors.New("vulnerability databases partly updated")
+
+// secDBInfo is the line agnts-sec update ends with (versions.json).
+type secDBInfo struct {
+	OSV        string   `json:"osv"`
+	Ecosystems int      `json:"ecosystems"`
+	Failed     []string `json:"failed"`
+	Missing    []string `json:"missing"`
+}
+
+// secDBVersions reads agnts-sec update's last line; nil when it is not
+// the versions JSON (curl's errors come before it).
+func secDBVersions(out string) *secDBInfo {
+	var v secDBInfo
+	if json.Unmarshal([]byte(lastLine(out)), &v) != nil || v.OSV == "" {
+		return nil
+	}
+	return &v
+}
+
+func lastLine(s string) string {
+	s = strings.TrimSpace(s)
+	if i := strings.LastIndexByte(s, '\n'); i >= 0 {
+		return s[i+1:]
+	}
+	return s
 }
 
 func emptyTar() []byte {

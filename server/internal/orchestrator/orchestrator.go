@@ -363,7 +363,10 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 	lastResume, lastPrune, lastMerges, lastPulls := time.Time{}, time.Time{}, time.Time{}, time.Time{}
 	// The vulnerability databases are first fetched a minute after start,
 	// then once a day.
-	lastSecDB := time.Now().Add(-secDBEvery + time.Minute)
+	// The vulnerability databases are first fetched a minute after start,
+	// then once a day; an update that missed some is tried again sooner.
+	var nextSecDB atomic.Int64
+	nextSecDB.Store(time.Now().Add(time.Minute).UnixNano())
 	var secDBBusy atomic.Bool
 	lastSecSync := time.Time{}
 
@@ -384,14 +387,15 @@ func (o *Orchestrator) Run(ctx context.Context) error {
 			lastSecSync = time.Now()
 			o.SecurityTick(sys)
 		}
-		if o.security != nil && o.cfg.Image != "" && time.Since(lastSecDB) > secDBEvery && secDBBusy.CompareAndSwap(false, true) {
-			lastSecDB = time.Now()
+		if o.security != nil && o.cfg.Image != "" && time.Now().UnixNano() > nextSecDB.Load() && secDBBusy.CompareAndSwap(false, true) {
+			nextSecDB.Store(time.Now().Add(secDBEvery).UnixNano())
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 				defer secDBBusy.Store(false)
 				if err := o.RefreshSecDB(sys); err != nil && ctx.Err() == nil {
-					o.log.Warn("refresh vulnerability databases", "err", err)
+					o.log.Warn("refresh vulnerability databases", "err", err, "retry_in", secDBRetry.String())
+					nextSecDB.Store(time.Now().Add(secDBRetry).UnixNano())
 				}
 			}()
 		}
