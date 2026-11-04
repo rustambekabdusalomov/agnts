@@ -99,6 +99,13 @@
     "backToDashboard": "Back to the {name} dashboard",
     "myClaudeMuse": "Your Muse account",
     "claudeSavedMuse": "Muse account connected",
-    "claudeRemovedMuse": "Muse account disconnected"
+    "claudeRemovedMuse": "Muse account disconnected",
+    "avatar": "Profile picture",
+    "avatarHelp": "Shown beside your name in the chats. It is cut to a square.",
+    "avatarUpload": "Upload a picture",
+    "avatarChange": "Change",
+    "avatarRemove": "Remove",
+    "avatarSaved": "Profile picture saved",
+    "avatarNotImage": "Pick a PNG, JPEG, WebP or GIF picture"
   }
 }

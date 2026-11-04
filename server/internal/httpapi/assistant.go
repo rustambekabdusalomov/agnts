@@ -20,6 +20,7 @@ type Assistant interface {
 	AssistantReady() bool
 	Ask(ctx context.Context, conversationID int64, question, lang string, files []int64) (domain.AssistantConversation, error)
 	AssistantConversations(ctx context.Context, mode domain.ChatMode) ([]domain.AssistantConversation, error)
+	SearchAssistant(ctx context.Context, q string) ([]domain.AssistantSearchHit, error)
 	AssistantConversation(ctx context.Context, id int64) (domain.AssistantConversation, error)
 	DeleteAssistantConversation(ctx context.Context, id int64) error
 	RateAnswer(ctx context.Context, messageID int64, rating int, comment string, share bool) (domain.AssistantMessage, error)
@@ -81,6 +82,24 @@ func (s *Server) ListAssistantConversations(w http.ResponseWriter, r *http.Reque
 	out := make([]gen.AssistantConversation, len(cs))
 	for i, c := range cs {
 		out[i] = toConversation(c)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// SearchAssistant implements gen.ServerInterface.
+func (s *Server) SearchAssistant(w http.ResponseWriter, r *http.Request, p gen.SearchAssistantParams) {
+	if !s.assistantReady(w) {
+		return
+	}
+	hits, err := s.opt.Assistant.SearchAssistant(r.Context(), p.Q)
+	if err != nil {
+		s.writeAssistantError(w, r, err)
+		return
+	}
+	out := make([]gen.AssistantSearchHit, len(hits))
+	for i, h := range hits {
+		out[i] = gen.AssistantSearchHit{ConversationId: h.ConversationID, Title: h.Title, Mode: gen.ChatMode(h.Mode), MessageId: h.MessageID,
+			Role: gen.AssistantSearchHitRole(h.Role), Snippet: h.Snippet, CreatedAt: h.CreatedAt}
 	}
 	writeJSON(w, http.StatusOK, out)
 }

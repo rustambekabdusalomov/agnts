@@ -99,6 +99,13 @@
     "backToDashboard": "{name} ish maydoni bosh sahifasiga qaytish",
     "myClaudeMuse": "Sizning Muse hisobingiz",
     "claudeSavedMuse": "Muse hisobi ulandi",
-    "claudeRemovedMuse": "Muse hisobi uzildi"
+    "claudeRemovedMuse": "Muse hisobi uzildi",
+    "avatar": "Profil rasmi",
+    "avatarHelp": "Chatlarda ismingiz yonida koʻrinadi. Kvadrat shaklida kesiladi.",
+    "avatarUpload": "Rasm yuklash",
+    "avatarChange": "Oʻzgartirish",
+    "avatarRemove": "Olib tashlash",
+    "avatarSaved": "Profil rasmi saqlandi",
+    "avatarNotImage": "PNG, JPEG, WebP yoki GIF rasm tanlang"
   }
 }

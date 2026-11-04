@@ -3783,6 +3783,75 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /account/avatar:
+    put:
+      operationId: uploadAvatar
+      summary: Set your profile picture
+      description: >-
+        PNG, JPEG, WebP or GIF, at most 512 KB (the admin panel makes it a
+        256 px square first). Others see it beside your name.
+      tags: [account]
+      x-scope: user
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        '200':
+          description: The user with the new picture
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '413':
+          description: The picture is larger than 512 KB
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      operationId: deleteAvatar
+      summary: Remove your profile picture (your initials show again)
+      tags: [account]
+      x-scope: user
+      responses:
+        '200':
+          description: The user without a picture
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /users/{userId}/avatar:
+    get:
+      operationId: getUserAvatar
+      summary: A person's profile picture
+      description: Its URL (avatarUrl) carries the picture's version, so the response may be cached for good.
+      tags: [account]
+      x-scope: user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: v
+          in: query
+          description: The picture's version (from avatarUrl)
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: The picture
+          content:
+            image/*:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /account/password:
     put:
       operationId: changePassword
@@ -5720,6 +5789,31 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+
+  /assistant/search:
+    get:
+      operationId: searchAssistant
+      summary: Find messages in your own AI chat conversations (both modes), newest first
+      description: >-
+        Every word of q must be in the message's text or its files' names.
+        Only your own conversations are searched. At most 40 hits.
+      tags: [assistant]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AssistantSearchHit' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '501': { $ref: '#/components/responses/NotImplemented' }
 
   /assistant/conversations:
     get:
@@ -8085,6 +8179,35 @@ paths:
               schema: { $ref: '#/components/schemas/ChatStats' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /chat/search:
+    get:
+      operationId: searchChat
+      summary: Find team chat messages by their words or their files' names, newest first
+      description: >-
+        Every word of q must start a word of the message (its text, or a
+        file's name). People's messages and agnts's answers; cards are left
+        out. At most 40 hits.
+      tags: [chat]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 200 }
+        - name: channelId
+          in: query
+          description: Only this channel's messages
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ChatSearchHit' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
 components:
   parameters:
     ChatChannelID:
@@ -8424,6 +8547,7 @@ components:
         replyTo: { type: integer, format: int64 }
         authorId: { type: integer, format: int64 }
         author: { type: string, description: "The person's username, or agnts" }
+        authorAvatar: { type: string, description: "The person's profile picture URL, relative to the API base" }
         kind: { type: string, enum: [text, agent_card, agent_text, system] }
         body: { type: string }
         card: { $ref: '#/components/schemas/ChatCard' }
@@ -8448,6 +8572,24 @@ components:
         durationMs: { type: integer, format: int64 }
         transcript: { type: string, enum: [pending, done, none, failed], description: 'none: no words were heard' }
         error: { type: string }
+    ChatSearchHit:
+      type: object
+      required: [message, channel, snippet]
+      properties:
+        message: { $ref: '#/components/schemas/ChatMessage' }
+        channel: { type: string, description: "The channel's name" }
+        snippet: { type: string, description: 'The part that matched; matched words are between \u0002 and \u0003' }
+    AssistantSearchHit:
+      type: object
+      required: [conversationId, title, mode, messageId, role, snippet, createdAt]
+      properties:
+        conversationId: { type: integer, format: int64 }
+        title: { type: string }
+        mode: { $ref: '#/components/schemas/ChatMode' }
+        messageId: { type: integer, format: int64 }
+        role: { type: string, enum: [user, assistant] }
+        snippet: { type: string, description: 'The part that matched; matched words are between \u0002 and \u0003' }
+        createdAt: { type: string, format: date-time }
     ChatSendRequest:
       type: object
       required: [clientMsgId]
@@ -9004,6 +9146,7 @@ components:
         id: { type: integer, format: int64 }
         username: { type: string }
         displayName: { type: string }
+        avatarUrl: { type: string, description: "The profile picture's URL, relative to the API base; absent without one" }
         email: { type: string }
         emailVerified: { type: boolean }
         isAdmin: { type: boolean, description: The platform operator (system role Admin) }

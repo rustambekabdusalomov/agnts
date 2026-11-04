@@ -26,6 +26,7 @@ type Chat interface {
 	UpdateChannel(ctx context.Context, id int64, topic *string, agents *bool, archive bool) (domain.ChatChannel, error)
 	Messages(ctx context.Context, channel, before, after int64, limit int) ([]domain.ChatMessage, error)
 	Message(ctx context.Context, id int64) (domain.ChatMessage, error)
+	Search(ctx context.Context, q string, channel int64) ([]domain.ChatSearchHit, error)
 	Send(ctx context.Context, in domain.ChatSend) (domain.ChatMessage, bool, error)
 	SendVoice(ctx context.Context, channel int64, in chat.VoiceInput) (domain.ChatMessage, bool, error)
 	Voice(ctx context.Context, msg int64) (string, []byte, error)
@@ -249,6 +250,22 @@ func (s *Server) GetChatStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, gen.ChatStats{Links: st.Links, Answers: st.Answers, Drafts: st.Drafts, MedianMs: st.MedianMS})
+}
+
+// SearchChat implements gen.ServerInterface.
+func (s *Server) SearchChat(w http.ResponseWriter, r *http.Request, p gen.SearchChatParams) {
+	if !s.chatReady(w) {
+		return
+	}
+	hits, err := s.opt.Chat.Search(r.Context(), p.Q, orZero(p.ChannelId))
+	if err != nil {
+		s.writeChatError(w, r, err)
+		return
+	}
+	if hits == nil {
+		hits = []domain.ChatSearchHit{}
+	}
+	writeJSON(w, http.StatusOK, hits)
 }
 
 // GetChatMessage implements gen.ServerInterface.

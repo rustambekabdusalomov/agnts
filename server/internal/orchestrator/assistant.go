@@ -90,6 +90,7 @@ type AssistantStore interface {
 	AssistantAsked(ctx context.Context, userID int64, since time.Time) (int, time.Time, error)
 	AssistantStats(ctx context.Context, days int) (domain.AssistantStats, error)
 	AssistantRated(ctx context.Context, rating, limit int) ([]domain.AssistantRated, error)
+	SearchAssistant(ctx context.Context, userID int64, words []string, limit int) ([]domain.AssistantSearchHit, error)
 }
 
 // AssistantQuestion is what a snapshot is taken for.
@@ -268,6 +269,28 @@ func (o *Orchestrator) Ask(ctx context.Context, conversationID int64, question, 
 
 // WaitAnswers waits for the answers being made (tests and shutdown).
 func (o *Orchestrator) WaitAnswers() { o.answering.Wait() }
+
+// SearchAssistant finds the asker's AI chat messages holding every word of
+// q (their text or their files' names), newest first, each with the part
+// that matched. Only the asker's own conversations are searched.
+func (o *Orchestrator) SearchAssistant(ctx context.Context, q string) ([]domain.AssistantSearchHit, error) {
+	if !o.AssistantReady() {
+		return nil, invalid("the assistant is not available")
+	}
+	_, user, err := asker(ctx)
+	if err != nil {
+		return nil, err
+	}
+	words := domain.SearchWords(q)
+	if len(words) == 0 {
+		return nil, invalid("search for a word of %d letters or more", domain.SearchMinRunes)
+	}
+	hits, err := o.assistant.SearchAssistant(ctx, user, words, domain.SearchLimit)
+	for i := range hits {
+		hits[i].Snippet = domain.SearchSnippet(hits[i].Text, words, 160)
+	}
+	return hits, err
+}
 
 // AssistantConversations lists the asker's conversations of mode ("" for
 // both), newest first.
@@ -511,8 +534,9 @@ func (o *Orchestrator) makeAnswer(ctx context.Context, ws, user int64, q, a doma
 	if err != nil {
 		return out, nil, fmt.Errorf("snapshot: %w", err)
 	}
-	files = append(files, assistantConversationFiles(q.Text, history)...)
-	files = append(files, o.assistantUploads(ctx, q)...)
+	uploads, in := o.assistantUploads(ctx, q)
+	files = append(files, assistantConversationFiles(q.Text, history, in)...)
+	files = append(files, uploads...)
 	snapshot, _ := json.Marshal(files)
 	out.Timing.SnapshotMS = time.Since(t0).Milliseconds()
 
@@ -654,21 +678,64 @@ func (o *Orchestrator) ReplayAnswer(ctx context.Context, snapshot []byte, lang s
 // assistantFilesQuestion is the question of files sent without words.
 const assistantFilesQuestion = "See the attached files."
 
-// assistantUploads are the files the person attached to question q, as
-// snapshot files named upload-<id>-<name>. Only this question's files come
-// (earlier ones are named in conversation.json): every file read is a turn.
-// One that cannot be read is left out with a warning.
-func (o *Orchestrator) assistantUploads(ctx context.Context, q domain.AssistantMessage) []AssistantFile {
-	var out []AssistantFile
-	for _, id := range q.Attachments {
-		a, data, err := o.store.AttachmentData(ctx, id)
-		if err != nil {
-			o.log.Warn("assistant: load attached file", "message", q.ID, "id", id, "err", err)
-			continue
-		}
-		out = append(out, AssistantFile{Name: AssistantUploadName(a), Attachment: a.ID, Data: data})
+// Files of a conversation an answer gets: the newest first, up to these.
+const (
+	assistantMaxFiles     = 10
+	assistantMaxFileBytes = 20 << 20
+)
+
+// assistantUploads are the files the person attached in q's conversation,
+// up to q: the newest question's first, at most assistantMaxFiles and
+// assistantMaxFileBytes in all, as snapshot files named upload-<id>-<name>,
+// with files.json saying which question each came with (and which were left
+// out). Copying a file costs no turn: the answer reads the ones the
+// question needs. in names the files copied, by attachment id.
+func (o *Orchestrator) assistantUploads(ctx context.Context, q domain.AssistantMessage) ([]AssistantFile, map[int64]string) {
+	fs, err := o.store.ConversationFiles(ctx, q.ConversationID, q.ID)
+	if err != nil {
+		o.log.Warn("assistant: list attached files", "message", q.ID, "err", err)
+		return nil, nil
 	}
-	return out
+	if len(fs) == 0 {
+		return nil, nil
+	}
+	type entry struct {
+		File     string `json:"file,omitempty"`
+		Name     string `json:"name"`
+		Type     string `json:"type"`
+		Size     int64  `json:"size"`
+		Question string `json:"question"`
+		This     bool   `json:"this_question"`
+		Left     string `json:"left_out,omitempty"`
+	}
+	var out []AssistantFile
+	var list []entry
+	in := map[int64]string{}
+	total := int64(0)
+	for _, f := range fs {
+		e := entry{Name: f.Name, Type: f.ContentType, Size: f.Size, Question: truncate(f.Question, 200),
+			This: f.AssistantMessageID != nil && *f.AssistantMessageID == q.ID}
+		switch {
+		case len(out) >= assistantMaxFiles:
+			e.Left = fmt.Sprintf("only the newest %d files are here", assistantMaxFiles)
+		case total+f.Size > assistantMaxFileBytes:
+			e.Left = fmt.Sprintf("the files here are at most %d MB in all", assistantMaxFileBytes>>20)
+		default:
+			_, data, err := o.store.AttachmentData(ctx, f.ID)
+			if err != nil {
+				o.log.Warn("assistant: load attached file", "message", q.ID, "id", f.ID, "err", err)
+				e.Left = "it could not be read"
+				break
+			}
+			e.File = AssistantUploadName(f.Attachment)
+			out = append(out, AssistantFile{Name: e.File, Attachment: f.ID, Data: data})
+			in[f.ID] = e.File
+			total += f.Size
+		}
+		list = append(list, e)
+	}
+	b, _ := json.MarshalIndent(list, "", " ")
+	return append([]AssistantFile{{Name: "files.json", Content: string(b)}}, out...), in
 }
 
 // AssistantUploadName is the snapshot file name of an attached file.
@@ -676,8 +743,10 @@ func AssistantUploadName(a domain.Attachment) string {
 	return fmt.Sprintf("upload-%d-%s", a.ID, strings.ReplaceAll(a.Name, " ", "_"))
 }
 
-// assistantConversationFiles are the question and the talk before it.
-func assistantConversationFiles(question string, history []domain.AssistantMessage) []AssistantFile {
+// assistantConversationFiles are the question and the talk before it;
+// in names the attached files that are in the snapshot (by id), so each
+// turn says where its files are.
+func assistantConversationFiles(question string, history []domain.AssistantMessage, in map[int64]string) []AssistantFile {
 	type turn struct {
 		Role string `json:"role"`
 		Text string `json:"text"`
@@ -701,8 +770,13 @@ func assistantConversationFiles(question string, history []domain.AssistantMessa
 			names := make([]string, len(m.AttachedFiles))
 			for i, f := range m.AttachedFiles {
 				names[i] = f.Name
+				if file, ok := in[f.ID]; ok {
+					names[i] += " (" + file + ")"
+				} else {
+					names[i] += " (not in the files, see files.json)"
+				}
 			}
-			text += "\n\n[attached earlier, not in the files now: " + strings.Join(names, ", ") + "]"
+			text += "\n\n[attached: " + strings.Join(names, ", ") + "]"
 		}
 		conv = append(conv, turn{Role: string(m.Role), Text: text})
 	}

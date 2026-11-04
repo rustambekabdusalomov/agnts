@@ -82,3 +82,124 @@ func TestAssistantSnapshotKeepsFilesByID(t *testing.T) {
 		t.Fatalf("snapshot entry = %s", b)
 	}
 }
+
+func TestAssistantFollowUpSeesEarlierFiles(t *testing.T) {
+	a := newAssistantHarness(t)
+	plan, err := a.o.Upload(a.ask, "Implementation plan.md", []byte("# auth-gateway plan"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.answers(2, `{"answer":"It is the auth-gateway plan.","speech":"","links":[]}`)
+	c, err := a.o.Ask(a.ask, 0, "review the implementation plan", "en", []int64{plan.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.conversation(c.ID)
+
+	// Another conversation's file never comes along.
+	other, err := a.o.Upload(a.ask, "other.txt", []byte("elsewhere"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.answers(4, `{"answer":"ok","speech":"","links":[]}`)
+	c2, err := a.o.Ask(a.ask, 0, "what is this?", "en", []int64{other.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.conversation(c2.ID)
+
+	// The follow-up brings no files of its own, and still has the plan.
+	a.answers(6, `{"answer":"It needs a rollout section.","speech":"","links":[]}`)
+	if _, err := a.o.Ask(a.ask, c.ID, "What improvements does it need?", "en", nil); err != nil {
+		t.Fatal(err)
+	}
+	a.conversation(c.ID)
+	dir := orchestrator.AssistantDir(6)
+	if got := a.runner.written[dir+"/"+orchestrator.AssistantUploadName(plan)]; got != "# auth-gateway plan" {
+		t.Fatalf("the earlier plan in the box = %q", got)
+	}
+	if _, ok := a.runner.written[dir+"/"+orchestrator.AssistantUploadName(other)]; ok {
+		t.Fatal("another conversation's file is in the box")
+	}
+	var list []struct {
+		File, Name, Question string
+		This                 bool `json:"this_question"`
+	}
+	if err := json.Unmarshal([]byte(a.runner.written[dir+"/files.json"]), &list); err != nil || len(list) != 1 ||
+		list[0].Name != "Implementation plan.md" || list[0].This || list[0].Question != "review the implementation plan" {
+		t.Fatalf("files.json = %v %+v", err, list)
+	}
+	if conv := a.runner.written[dir+"/conversation.json"]; !strings.Contains(conv, "Implementation plan.md ("+orchestrator.AssistantUploadName(plan)+")") {
+		t.Fatalf("conversation.json does not say where the plan is: %s", conv)
+	}
+}
+
+func TestAssistantKeepsTheNewestFiles(t *testing.T) {
+	a := newAssistantHarness(t)
+	var ids []int64
+	for i := range 11 {
+		f, err := a.o.Upload(a.ask, "f"+itoa(int64(i))+".txt", []byte("x"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		ids = append(ids, f.ID)
+	}
+	a.answers(2, `{"answer":"ok","speech":"","links":[]}`)
+	c, err := a.o.Ask(a.ask, 0, "first", "en", ids[:1])
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.conversation(c.ID)
+	a.answers(4, `{"answer":"ok","speech":"","links":[]}`)
+	if _, err := a.o.Ask(a.ask, c.ID, "these", "en", ids[1:]); err != nil {
+		t.Fatal(err)
+	}
+	a.conversation(c.ID)
+	dir := orchestrator.AssistantDir(4)
+	n := 0
+	for p := range a.runner.written {
+		if strings.HasPrefix(p, dir+"/upload-") {
+			n++
+		}
+	}
+	if n != 10 {
+		t.Fatalf("%d files in the box, want the newest 10", n)
+	}
+	if fj := a.runner.written[dir+"/files.json"]; !strings.Contains(fj, `"name": "f0.txt"`) || !strings.Contains(fj, "only the newest 10 files are here") {
+		t.Fatalf("files.json does not say the oldest is left out: %s", fj)
+	}
+}
+
+func TestSearchAssistant(t *testing.T) {
+	a := newAssistantHarness(t)
+	plan, err := a.o.Upload(a.ask, "Implementation plan.md", []byte("# plan"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.answers(2, `{"answer":"It covers the rollout of the gateway.","speech":"","links":[]}`)
+	c, err := a.o.Ask(a.ask, 0, "review this", "en", []int64{plan.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.conversation(c.ID)
+	// Someone else's conversation is never searched.
+	a.answers(4, `{"answer":"ok","speech":"","links":[]}`)
+	theirs, err := a.o.Ask(a.other, 0, "my rollout plan", "en", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.o.WaitAnswers()
+
+	hits, err := a.o.SearchAssistant(a.ask, "rollout")
+	if err != nil || len(hits) != 1 || hits[0].MessageID != 2 || hits[0].Role != domain.AssistantReply || hits[0].ConversationID != c.ID ||
+		!strings.Contains(hits[0].Snippet, domain.SearchMarkStart+"rollout"+domain.SearchMarkEnd) {
+		t.Fatalf("rollout: %v %+v (theirs is %d)", err, hits, theirs.ID)
+	}
+	// A file's name counts; every word must match.
+	if hits, _ := a.o.SearchAssistant(a.ask, "implementation plan"); len(hits) != 1 || hits[0].MessageID != 1 || !strings.Contains(hits[0].Snippet, "📎") {
+		t.Fatalf("by a file's name: %+v", hits)
+	}
+	if hits, _ := a.o.SearchAssistant(a.ask, "rollout nothing"); len(hits) != 0 {
+		t.Fatalf("every word: %+v", hits)
+	}
+}

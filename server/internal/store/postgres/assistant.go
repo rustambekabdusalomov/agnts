@@ -508,3 +508,32 @@ func nonNilLinks(l []domain.AssistantLink) []domain.AssistantLink {
 	}
 	return l
 }
+
+// SearchAssistant finds userID's AI chat messages (both modes, questions and
+// answers, and their files' names) holding every one of words, newest first.
+func (s *Assistant) SearchAssistant(ctx context.Context, userID int64, words []string, limit int) ([]domain.AssistantSearchHit, error) {
+	if len(words) == 0 {
+		return nil, nil
+	}
+	rows, err := s.db.Query(ctx, `SELECT m.id, m.conversation_id, c.title, c.mode, m.role, m.text || COALESCE(' 📎 ' || f.names, ''), m.created_at
+		FROM assistant_messages m JOIN assistant_conversations c ON c.id = m.conversation_id
+		LEFT JOIN LATERAL (SELECT string_agg(a.name, ', ' ORDER BY a.id) AS names FROM attachments a WHERE a.id = ANY(m.attachments)) f ON true
+		WHERE c.user_id = $1 AND m.status = 'done'
+		  AND (SELECT bool_and(strpos(lower(m.text || ' ' || COALESCE(f.names, '')), w) > 0) FROM unnest($2::text[]) w)
+		ORDER BY m.id DESC LIMIT $3`, userID, words, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []domain.AssistantSearchHit
+	for rows.Next() {
+		var h domain.AssistantSearchHit
+		var mode, role string
+		if err := rows.Scan(&h.MessageID, &h.ConversationID, &h.Title, &mode, &role, &h.Text, &h.CreatedAt); err != nil {
+			return nil, err
+		}
+		h.Mode, h.Role = domain.ChatMode(mode), domain.AssistantRole(role)
+		out = append(out, h)
+	}
+	return out, rows.Err()
+}

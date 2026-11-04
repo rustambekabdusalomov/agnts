@@ -13,10 +13,11 @@ import (
 
 // Users is an in-memory auth.Users.
 type Users struct {
-	mu     sync.Mutex
-	users  []domain.User
-	steps  map[int64]int64
-	tokens map[string]token
+	mu      sync.Mutex
+	avatars map[int64][2]string // content type, bytes
+	users   []domain.User
+	steps   map[int64]int64
+	tokens  map[string]token
 }
 
 type token struct {
@@ -100,6 +101,46 @@ func (m *Users) SetProfile(_ context.Context, id int64, name, email string) (dom
 	}
 	u.DisplayName, u.Email = name, email
 	return *u, nil
+}
+
+// SetAvatar implements the store interface.
+func (m *Users) SetAvatar(_ context.Context, id int64, contentType string, data []byte) (domain.User, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	u := m.find(id)
+	if u == nil {
+		return domain.User{}, domain.ErrNotFound
+	}
+	if m.avatars == nil {
+		m.avatars = map[int64][2]string{}
+	}
+	m.avatars[id] = [2]string{contentType, string(data)}
+	u.AvatarVersion++
+	return *u, nil
+}
+
+// DeleteAvatar implements the store interface.
+func (m *Users) DeleteAvatar(_ context.Context, id int64) (domain.User, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	u := m.find(id)
+	if u == nil {
+		return domain.User{}, domain.ErrNotFound
+	}
+	delete(m.avatars, id)
+	u.AvatarVersion = 0
+	return *u, nil
+}
+
+// Avatar implements the store interface.
+func (m *Users) Avatar(_ context.Context, id int64) (string, []byte, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	a, ok := m.avatars[id]
+	if !ok {
+		return "", nil, domain.ErrNotFound
+	}
+	return a[0], []byte(a[1]), nil
 }
 
 // MarkEmailVerified implements the store interface.

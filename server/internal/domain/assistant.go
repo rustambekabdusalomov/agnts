@@ -189,6 +189,19 @@ const (
 // AssistantLanguages are the languages the assistant answers in: the app's.
 var AssistantLanguages = map[string]string{"en": "English", "ru": "Russian", "uz": "Uzbek"}
 
+// AssistantSearchHit is a message of the person's AI chat a search found:
+// its conversation, and the part that matched (SearchSnippet's marks).
+type AssistantSearchHit struct {
+	ConversationID int64
+	Title          string
+	Mode           ChatMode
+	MessageID      int64
+	Role           AssistantRole
+	Text           string // the message's text and its files' names, for the snippet
+	Snippet        string
+	CreatedAt      time.Time
+}
+
 // AssistantTitle is a conversation's title made from its first question.
 func AssistantTitle(question string) string {
 	t := strings.Join(strings.Fields(question), " ")

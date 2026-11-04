@@ -219,3 +219,24 @@ func TestChatVoiceAPI(t *testing.T) {
 		t.Fatalf("audio: %d %q %v", rec.Code, rec.Body, rec.Header())
 	}
 }
+
+func (f *fakeChat) Search(_ context.Context, q string, channel int64) ([]domain.ChatSearchHit, error) {
+	if strings.TrimSpace(q) == "x" {
+		return nil, fmt.Errorf("%w: search for a word of 2 letters or more", chat.ErrInvalid)
+	}
+	m := domain.ChatMessage{ID: 5, ChannelID: max(channel, 1), Author: "bo", Kind: domain.ChatKindText, Body: "the invoice CSV", Refs: []domain.ChatRef{}}
+	return []domain.ChatSearchHit{{Message: m, Channel: "general", Snippet: "the " + domain.SearchMarkStart + "invoice" + domain.SearchMarkEnd + " CSV"}}, nil
+}
+
+func TestChatSearchAPI(t *testing.T) {
+	h := newHarness(t, pinger{})
+	cookie := h.signIn(t)
+	rec := h.do("GET", "/api/w/acme/chat/search?q=invoice&channelId=3", "", cookie)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"channel":"general"`) || !strings.Contains(rec.Body.String(), `"channelId":3`) ||
+		!strings.Contains(rec.Body.String(), `\u0002invoice\u0003`) {
+		t.Fatalf("search: %d %s", rec.Code, rec.Body)
+	}
+	if rec := h.do("GET", "/api/w/acme/chat/search?q=x", "", cookie); rec.Code != http.StatusBadRequest {
+		t.Fatalf("short search: %d %s", rec.Code, rec.Body)
+	}
+}

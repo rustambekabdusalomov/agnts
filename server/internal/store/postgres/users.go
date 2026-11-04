@@ -19,12 +19,12 @@ type Users struct{ db *pgxpool.Pool }
 func NewUsers(db *pgxpool.Pool) *Users { return &Users{db: db} }
 
 const userCols = `id, username, password_hash, totp_secret_enc, created_at, COALESCE(email, ''), display_name, email_verified_at,
-	is_admin, last_workspace_id`
+	is_admin, last_workspace_id, avatar_version`
 
 func scanUser(row interface{ Scan(...any) error }) (domain.User, error) {
 	var u domain.User
 	err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.TOTPSecretEnc, &u.CreatedAt, &u.Email, &u.DisplayName, &u.EmailVerifiedAt,
-		&u.IsAdmin, &u.LastWorkspaceID)
+		&u.IsAdmin, &u.LastWorkspaceID, &u.AvatarVersion)
 	return u, notFound(err)
 }
 
@@ -231,4 +231,43 @@ func (s *Agent) Usernames(ctx context.Context, ids []int64) (map[int64]string, e
 		out[id] = name
 	}
 	return out, rows.Err()
+}
+
+// SetAvatar stores id's profile picture and returns the user, whose
+// avatar version has moved on.
+func (s *Users) SetAvatar(ctx context.Context, id int64, contentType string, data []byte) (domain.User, error) {
+	var u domain.User
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx, `INSERT INTO user_avatars (user_id, content_type, data) VALUES ($1, $2, $3)
+			ON CONFLICT (user_id) DO UPDATE SET content_type = EXCLUDED.content_type, data = EXCLUDED.data, updated_at = now()`,
+			id, contentType, data); err != nil {
+			return err
+		}
+		var err error
+		u, err = scanUser(tx.QueryRow(ctx, `UPDATE users SET avatar_version = avatar_version + 1 WHERE id = $1 RETURNING `+userCols, id))
+		return err
+	})
+	return u, err
+}
+
+// DeleteAvatar removes id's profile picture.
+func (s *Users) DeleteAvatar(ctx context.Context, id int64) (domain.User, error) {
+	var u domain.User
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx, `DELETE FROM user_avatars WHERE user_id = $1`, id); err != nil {
+			return err
+		}
+		var err error
+		u, err = scanUser(tx.QueryRow(ctx, `UPDATE users SET avatar_version = 0 WHERE id = $1 RETURNING `+userCols, id))
+		return err
+	})
+	return u, err
+}
+
+// Avatar returns id's profile picture, or domain.ErrNotFound.
+func (s *Users) Avatar(ctx context.Context, id int64) (string, []byte, error) {
+	var ct string
+	var data []byte
+	err := s.db.QueryRow(ctx, `SELECT content_type, data FROM user_avatars WHERE user_id = $1`, id).Scan(&ct, &data)
+	return ct, data, notFound(err)
 }

@@ -3053,6 +3053,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/account/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set your profile picture
+         * @description PNG, JPEG, WebP or GIF, at most 512 KB (the admin panel makes it a 256 px square first). Others see it beside your name.
+         */
+        put: operations["uploadAvatar"];
+        post?: never;
+        /** Remove your profile picture (your initials show again) */
+        delete: operations["deleteAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A person's profile picture
+         * @description Its URL (avatarUrl) carries the picture's version, so the response may be cached for good.
+         */
+        get: operations["getUserAvatar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/password": {
         parameters: {
             query?: never;
@@ -4608,6 +4649,26 @@ export interface paths {
         get: operations["getRepoCIWatch"];
         /** Change how agnts watches this repository's CI */
         put: operations["putRepoCIWatch"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find messages in your own AI chat conversations (both modes), newest first
+         * @description Every word of q must be in the message's text or its files' names. Only your own conversations are searched. At most 40 hits.
+         */
+        get: operations["searchAssistant"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -6424,6 +6485,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/chat/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find team chat messages by their words or their files' names, newest first
+         * @description Every word of q must start a word of the message (its text, or a file's name). People's messages and agnts's answers; cards are left out. At most 40 hits.
+         */
+        get: operations["searchChat"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6556,6 +6637,8 @@ export interface components {
             authorId?: number;
             /** @description The person's username, or agnts */
             author: string;
+            /** @description The person's profile picture URL, relative to the API base */
+            authorAvatar?: string;
             /** @enum {string} */
             kind: "text" | "agent_card" | "agent_text" | "system";
             body: string;
@@ -6581,6 +6664,27 @@ export interface components {
              */
             transcript: "pending" | "done" | "none" | "failed";
             error?: string;
+        };
+        ChatSearchHit: {
+            message: components["schemas"]["ChatMessage"];
+            /** @description The channel's name */
+            channel: string;
+            /** @description The part that matched; matched words are between \u0002 and \u0003 */
+            snippet: string;
+        };
+        AssistantSearchHit: {
+            /** Format: int64 */
+            conversationId: number;
+            title: string;
+            mode: components["schemas"]["ChatMode"];
+            /** Format: int64 */
+            messageId: number;
+            /** @enum {string} */
+            role: "user" | "assistant";
+            /** @description The part that matched; matched words are between \u0002 and \u0003 */
+            snippet: string;
+            /** Format: date-time */
+            createdAt: string;
         };
         ChatSendRequest: {
             /**
@@ -7167,6 +7271,8 @@ export interface components {
             id: number;
             username: string;
             displayName?: string;
+            /** @description The profile picture's URL, relative to the API base; absent without one */
+            avatarUrl?: string;
             email?: string;
             emailVerified?: boolean;
             /** @description The platform operator (system role Admin) */
@@ -16773,6 +16879,92 @@ export interface operations {
             409: components["responses"]["Conflict"];
         };
     };
+    uploadAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The user with the new picture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The picture is larger than 512 KB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The user without a picture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getUserAvatar: {
+        parameters: {
+            query?: {
+                /** @description The picture's version (from avatarUrl) */
+                v?: number;
+            };
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The picture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/*": string;
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     changePassword: {
         parameters: {
             query?: never;
@@ -19391,6 +19583,31 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    searchAssistant: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantSearchHit"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            501: components["responses"]["NotImplemented"];
         };
     };
     listAssistantConversations: {
@@ -22479,6 +22696,32 @@ export interface operations {
                     "application/json": components["schemas"]["ChatStats"];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    searchChat: {
+        parameters: {
+            query: {
+                q: string;
+                /** @description Only this channel's messages */
+                channelId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatSearchHit"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
         };
     };

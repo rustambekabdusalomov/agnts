@@ -138,6 +138,7 @@ func TestTicketFromAMessageGetsItsFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	var ticket int64
+	pgtest.Exec(t, h.pool, `DELETE FROM tickets WHERE workspace_id = $1 AND key = 'CHF-1'`, h.ws) // a rerun's
 	err = h.pool.QueryRow(domain.System(context.Background()), `INSERT INTO tickets (workspace_id, key, source, title, state)
 		VALUES ($1, 'CHF-1', 'local', 'Fix the refund button', 'new') RETURNING id`, h.ws).Scan(&ticket)
 	if err != nil {
@@ -155,3 +156,125 @@ func TestTicketFromAMessageGetsItsFiles(t *testing.T) {
 // timeFar is a moment after every upload of the test: the prune then
 // takes every pending one.
 func timeFar() time.Time { return time.Now().Add(time.Hour) }
+
+func TestAnswerReadsEarlierFiles(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	ch := cs[0].ID
+	other, err := h.s.CreateChannel(h.ctx, "#elsewhere", "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan := h.upload(t, h.ann, "Implementation plan.md", "text/markdown", "# auth-gateway: rate limits missing")
+	posted, _, err := h.sendFiles(ch, "here is the plan", plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	away := h.upload(t, h.ann, "secret.txt", "text/plain", "another channel's file")
+	if _, _, err := h.sendFiles(other.ID, "not here", away); err != nil {
+		t.Fatal(err)
+	}
+	h.runJobs(t)
+
+	// A follow-up that is not a reply still reads the plan sent before it.
+	h.brain.replies["answer"] = fmt.Sprintf(`{"answer_md": "It lacks rate limits [msg:%d].", "citations": [], "insufficient": false, "needs_code": null}`, posted.ID)
+	h.send(t, ch, "@agnts what improvements does that plan need?")
+	h.runJobs(t)
+	p := h.brain.prompts["answer"]
+	if !strings.Contains(p, "rate limits missing") || strings.Contains(p, "another channel's file") {
+		t.Fatalf("the follow-up's prompt:\n%s", p)
+	}
+
+	// A reply deep in a chain reads the files at its top.
+	parent := posted
+	for i := range 4 {
+		m, _, err := h.s.Send(h.ctx, domain.ChatSend{ChannelID: ch, ClientMsgID: newUUID(), Body: fmt.Sprintf("reply %d", i), ReplyTo: &parent.ID})
+		if err != nil {
+			t.Fatal(err)
+		}
+		parent = m
+	}
+	pgtest.Exec(t, h.pool, `UPDATE chat_messages SET created_at = now() - interval '1 day' WHERE id = $1`, posted.ID) // out of the recent window
+	h.brain.prompts = nil
+	if _, _, err := h.s.Send(h.ctx, domain.ChatSend{ChannelID: ch, ClientMsgID: newUUID(), Body: "@agnts and the tests?", ReplyTo: &parent.ID}); err != nil {
+		t.Fatal(err)
+	}
+	h.runJobs(t)
+	if p := h.brain.prompts["answer"]; !strings.Contains(p, "rate limits missing") {
+		t.Fatalf("the reply's prompt lacks the chain's file:\n%s", p)
+	}
+}
+
+func TestSearch(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	ch := cs[0].ID
+	other, err := h.s.CreateChannel(h.ctx, "#payments", "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	csv := h.upload(t, h.ann, "invoice_march.csv", "text/csv", "a,b")
+	withFile, _, err := h.sendFiles(ch, "numbers for the board", csv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	export := h.send(t, ch, "The CSV export times out for big merchants")
+	ru := h.send(t, other.ID, "Отчёт за март готов")
+
+	ids := func(hits []domain.ChatSearchHit) []int64 {
+		var out []int64
+		for _, x := range hits {
+			out = append(out, x.Message.ID)
+		}
+		return out
+	}
+	// A word's start matches; every word must; a file's name counts.
+	hits, err := h.s.Search(h.ctx, "expo", 0)
+	if err != nil || fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{export.ID}) || !strings.Contains(hits[0].Snippet, domain.SearchMarkStart+"expo") {
+		t.Fatalf("expo: %v %+v", err, hits)
+	}
+	if hits, _ := h.s.Search(h.ctx, "csv merchants", 0); fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{export.ID}) {
+		t.Fatalf("csv merchants: %v", ids(hits))
+	}
+	hits, _ = h.s.Search(h.ctx, "march", 0)
+	if fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{withFile.ID}) || !strings.Contains(hits[0].Snippet, "📎 invoice_"+domain.SearchMarkStart+"march") || len(hits[0].Message.Files) != 1 {
+		t.Fatalf("by a file's name: %+v", hits)
+	}
+	// Any script; newest first; one channel only.
+	if hits, _ := h.s.Search(h.ctx, "март", 0); fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{ru.ID}) || hits[0].Channel != "payments" {
+		t.Fatalf("cyrillic: %+v", hits)
+	}
+	if hits, _ := h.s.Search(h.ctx, "csv", 0); fmt.Sprint(ids(hits)) != fmt.Sprint([]int64{export.ID, withFile.ID}) {
+		t.Fatalf("newest first: %v", ids(hits))
+	}
+	if hits, _ := h.s.Search(h.ctx, "csv", other.ID); len(hits) != 0 {
+		t.Fatalf("another channel's: %v", ids(hits))
+	}
+	if _, err := h.s.Search(h.ctx, "a !", 0); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("no words: %v", err)
+	}
+}
+
+func TestMessagesCarryTheAuthorsPicture(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	before := h.send(t, cs[0].ID, "no picture yet")
+	if before.AuthorAvatar != "" {
+		t.Fatalf("avatar before = %q", before.AuthorAvatar)
+	}
+	u, err := postgres.NewUsers(h.pool).SetAvatar(context.Background(), h.ann, "image/png", []byte("\x89PNG"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ms, _ := h.s.Messages(h.ctx, cs[0].ID, 0, 0, 10)
+	want := fmt.Sprintf("/users/%d/avatar?v=%d", h.ann, u.AvatarVersion)
+	if len(ms) != 1 || ms[0].AuthorAvatar != want {
+		t.Fatalf("avatar = %+v, want %s", ms, want)
+	}
+	if _, err := postgres.NewUsers(h.pool).DeleteAvatar(context.Background(), h.ann); err != nil {
+		t.Fatal(err)
+	}
+	if m, _ := h.s.Message(h.ctx, before.ID); m.AuthorAvatar != "" {
+		t.Fatalf("avatar after removing = %q", m.AuthorAvatar)
+	}
+}

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { api, HttpError, unwrap } from '../../api/client'
+import { api, HttpError, squareAvatar, unwrap, uploadAvatar } from '../../api/client'
 import PageHeader from '../../components/PageHeader.vue'
 import ClaudeConnect from '../../components/account/ClaudeConnect.vue'
 import FeedbackDialog from '../../components/account/FeedbackDialog.vue'
@@ -17,6 +17,7 @@ import CfgRow from '../../components/form/CfgRow.vue'
 import MyModulesCard from '../../components/modules/MyModulesCard.vue'
 import TotpQr from '../../components/account/TotpQr.vue'
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
+import UserAvatar from '../../components/ui/UserAvatar.vue'
 import { useSession } from '../../stores/session'
 import { useUi } from '../../stores/ui'
 import { useWorkspace } from '../../stores/workspace'
@@ -49,6 +50,36 @@ const profile = useMutation({
   },
   onError: (e) => ui.notify(errText(e)),
 })
+// Profile picture: picked, made a 256 px square here, then uploaded.
+const picker = ref<HTMLInputElement | null>(null)
+const avatarBusy = ref(false)
+async function pickAvatar(e: Event) {
+  const el = e.target as HTMLInputElement
+  const file = el.files?.[0]
+  el.value = ''
+  if (!file) return
+  if (!file.type.startsWith('image/')) return void ui.notify(t('account.avatarNotImage'))
+  avatarBusy.value = true
+  try {
+    session.user = await uploadAvatar(await squareAvatar(file))
+    ui.notify(t('account.avatarSaved'))
+  } catch (err) {
+    ui.notify(err instanceof HttpError ? err.message : t('account.avatarNotImage'))
+  } finally {
+    avatarBusy.value = false
+  }
+}
+async function removeAvatar() {
+  avatarBusy.value = true
+  try {
+    session.user = await unwrap(api.DELETE('/account/avatar'))
+  } catch (err) {
+    ui.notify(errText(err))
+  } finally {
+    avatarBusy.value = false
+  }
+}
+
 const resend = useMutation({
   mutationFn: () => unwrap(api.POST('/account/verify')),
   onSuccess: () => ui.notify(t('account.resent')),
@@ -166,6 +197,14 @@ async function signOut() {
   <div class="stack pf-stack">
     <section class="card">
       <div class="ch"><div><h2>{{ t('account.profile') }}</h2><p class="sub">{{ t('account.profileSub') }}</p></div></div>
+      <CfgRow :label="t('account.avatar')" :help="t('account.avatarHelp')">
+        <span class="row-actions pf-avatar">
+          <UserAvatar :name="user?.username ?? ''" :url="user?.avatarUrl" :size="56" />
+          <button type="button" class="btn btn-s" :disabled="avatarBusy" @click="picker?.click()">{{ user?.avatarUrl ? t('account.avatarChange') : t('account.avatarUpload') }}</button>
+          <button v-if="user?.avatarUrl" type="button" class="btn btn-s btn-d" :disabled="avatarBusy" @click="removeAvatar">{{ t('account.avatarRemove') }}</button>
+          <input ref="picker" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden @change="pickAvatar">
+        </span>
+      </CfgRow>
       <CfgRow :label="t('account.username')"><span class="mono">{{ user?.username }}</span></CfgRow>
       <CfgRow :label="t('account.displayName')">
         <input v-model="name" class="cfg-in" maxlength="100" :aria-label="t('account.displayName')">
@@ -287,6 +326,7 @@ async function signOut() {
 </template>
 
 <style scoped>
+.pf-avatar { align-items: center; gap: 10px; }
 .pf-prefs { justify-content: flex-start; }
 /* The whole width of the page, not the 860px of other stacks. */
 .pf-stack { max-width: none; }

@@ -91,6 +91,10 @@
     "voiceHearing": "Muse is listening to your question…",
     "voiceLimit": "up to {n} min",
     "voiceDenied": "Allow the microphone for this site to ask by voice.",
-    "voiceNoMic": "No microphone could be opened."
+    "voiceNoMic": "No microphone could be opened.",
+    "search": "Search your conversations",
+    "searchNone": "Nothing found for “{q}”",
+    "you": "You",
+    "answer": "Answer"
   }
 }
