@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import McpCard from '../components/settings/McpCard.vue'
 import PrivateNetworksCard from '../components/settings/PrivateNetworksCard.vue'
+import PerfReviewCard from '../components/settings/PerfReviewCard.vue'
+import { useWorkspace } from '../stores/workspace'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -35,6 +37,7 @@ const prefs = usePrefs()
 const integrations = useIntegrations()
 const route = useRoute()
 const catalog = useModels()
+const workspace = useWorkspace()
 
 const settings = useQuery({ queryKey: ['settings'], queryFn: () => unwrap(api.GET('/settings')) })
 // Query data is a reactive Proxy, which structuredClone rejects; settings are plain JSON.
@@ -600,6 +603,11 @@ const prPlaceholders = Object.fromEntries(['number', 'key', 'type', 'scope', 'su
           <SegButtons v-model="draft.models.security" :options="models" :label="t('security.model')" />
         </CfgRow>
       </section>
+      <PerfReviewCard
+        v-else-if="section === 'performance' && workspace.isOwner && draft.perfReview"
+        v-model="draft.perfReview"
+        :saved="!!settings.data.value?.perfReview?.enabled"
+      />
       <PrivateNetworksCard v-else-if="section === 'network'" />
       <section v-else-if="section === 'notify' && draft.notify" id="s-notify" class="card">
         <div class="ch"><div><h2>{{ t('settings.notify') }}</h2><p class="sub">{{ t('settings.notifySub') }}</p></div></div>

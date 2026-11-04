@@ -1128,6 +1128,10 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	if prompt, err = withRelations(d, candidates, prompt); err != nil {
 		return err
 	}
+	regressionCands := o.regressionCandidates(ctx, s, t)
+	if prompt, err = withRegressions(d, regressionCands, prompt); err != nil {
+		return err
+	}
 	if _, err := o.claude(ctx, s, ws, &t, run, domain.ModelAnalyze, prompt, ""); err != nil {
 		return err
 	}
@@ -1160,6 +1164,7 @@ func (o *Orchestrator) analyze(ctx context.Context, s domain.Settings, t domain.
 	o.saveFollowUps(ctx, s, t, run, domain.SuggestFromAnalyze, a.FollowUps)
 	// Before the ticket can be claimed for coding, so the queue sees them.
 	o.applyRelations(ctx, t, run, a, candidates)
+	o.proposeRegression(ctx, t, a, regressionCands)
 	if t.Kind.Spec().NeedsRepo && len(rs) == 0 {
 		return fmt.Errorf("agnts read this ticket as %s work, which needs a repository: link one and retry, or change the kind", t.Kind)
 	}

@@ -12,24 +12,15 @@ import (
 	"agnts/internal/perfreview"
 )
 
-// GitIdentity maps a git login or email to a workspace member.
-type GitIdentity struct {
-	UserID      int64  `json:"userId"`
-	Provider    string `json:"provider"`
-	Login       string `json:"login"`
-	Email       string `json:"email"`
-	AutoMatched bool   `json:"autoMatched"`
-}
-
 // GitIdentities lists the workspace's explicit git identities.
-func (s *Agent) GitIdentities(ctx context.Context) ([]GitIdentity, error) {
+func (s *Agent) GitIdentities(ctx context.Context) ([]domain.GitIdentity, error) {
 	rows, err := s.db.Query(ctx, `SELECT user_id, provider, login, email, auto_matched FROM member_git_identities ORDER BY user_id, login, email`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (GitIdentity, error) {
-		var g GitIdentity
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.GitIdentity, error) {
+		var g domain.GitIdentity
 		err := r.Scan(&g.UserID, &g.Provider, &g.Login, &g.Email, &g.AutoMatched)
 		return g, err
 	})
@@ -131,4 +122,56 @@ func (s *Agent) IdentityResolver(ctx context.Context) (perfreview.Resolve, error
 		}
 		return 0
 	}, nil
+}
+
+// ScoredEarners returns, per scored delivery, the earners its latest
+// score recorded, for working its shares out again.
+func (s *Agent) ScoredEarners(ctx context.Context) ([]domain.DeliveryEarners, error) {
+	rows, err := s.db.Query(ctx, `SELECT DISTINCT ON (ticket_id, delivery) ticket_id, delivery, coalesce(factors->'earners', '[]')
+		FROM ticket_scores WHERE status = 'scored' ORDER BY ticket_id, delivery, scored_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.DeliveryEarners, error) {
+		var d domain.DeliveryEarners
+		err := r.Scan(&d.TicketID, &d.Delivery, &d.Earners)
+		return d, err
+	})
+}
+
+// ReplaceScoreAuthors sets a delivery's shares.
+func (s *Agent) ReplaceScoreAuthors(ctx context.Context, ticketID int64, delivery int, authors []domain.ScoreAuthor) error {
+	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx, `DELETE FROM ticket_score_authors WHERE ticket_id = $1 AND delivery = $2`, ticketID, delivery); err != nil {
+			return err
+		}
+		for _, a := range authors {
+			if a.Share <= 0 {
+				continue
+			}
+			if _, err := tx.Exec(ctx, `INSERT INTO ticket_score_authors (ticket_id, delivery, author_key, share, days) VALUES ($1, $2, $3, $4, $5)`,
+				ticketID, delivery, a.Key, a.Share, a.Days); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+// UnmappedAuthors lists the git identities that earned shares but map to
+// no member, with how many deliveries each has.
+func (s *Agent) UnmappedAuthors(ctx context.Context) ([]domain.UnmappedAuthor, error) {
+	rows, err := s.db.Query(ctx, `SELECT author_key, count(*) FROM ticket_score_authors WHERE author_key LIKE 'unmapped:%'
+		GROUP BY author_key ORDER BY count(*) DESC, author_key`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return pgx.CollectRows(rows, func(r pgx.CollectableRow) (domain.UnmappedAuthor, error) {
+		var u domain.UnmappedAuthor
+		err := r.Scan(&u.Key, &u.Deliveries)
+		u.Identity = strings.TrimPrefix(u.Key, "unmapped:")
+		return u, err
+	})
 }

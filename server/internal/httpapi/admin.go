@@ -479,6 +479,11 @@ func toSettings(v domain.Settings) gen.Settings {
 	ciNote, logsNote, secNote := v.Notify.CI, v.Notify.Logs, v.Notify.Security
 	secModel := v.Models.For(domain.ModelSecurity)
 	security := gen.SecurityWorkspaceSettings{AutoCheck: v.Security.AutoCheck, DailyBudget: v.Security.DailyBudget}
+	notDone, tz := append([]string{}, v.PerfReview.NotDoneResolutions()...), v.PerfReview.TimeZone
+	if tz == "" {
+		tz = "UTC"
+	}
+	perfReview := gen.PerfReviewSettings{Enabled: v.PerfReview.Enabled, NotDone: &notDone, TimeZone: &tz}
 	logWatch := toLogWatch(v.LogWatch)
 	ci := gen.CISettings{AutoFix: v.CI.AutoFix, MaxAutoPerDay: v.CI.MaxAutoPerDay, RetryFlaky: v.CI.RetryFlaky,
 		FeedbackRounds: v.CI.FeedbackRounds, InfraPatterns: append([]string{}, v.CI.InfraPatterns...)}
@@ -506,7 +511,7 @@ func toSettings(v domain.Settings) gen.Settings {
 		PullReviews: &pulls,
 		PrComments: &gen.PRCommentSettings{Attribution: v.PRComments.Attribution, LearnFromComments: v.PRComments.LearnFromComments,
 			ResolveFixed: v.PRComments.ResolveFixed, AutoAddress: v.PRComments.AutoAddress},
-		Ci: &ci, LogWatch: &logWatch, Security: &security,
+		Ci: &ci, LogWatch: &logWatch, Security: &security, PerfReview: &perfReview,
 		Models: gen.StageModels{Analyze: v.Models.Analyze, Coding: v.Models.Coding,
 			Retry: v.Models.Retry, Helper: v.Models.Helper, Learn: &learn, Review: &review, Preview: &preview, Chat: &chat, Documents: &docModel, TeamChat: &teamChat, Security: &secModel},
 		AutoPreview: &autoPreview, VisualCheck: &visualCheck, EgressAllow: &egress, AutoBrief: &autoBrief, SelfReview: &selfReview, Reflect: &reflect, PublicDocuments: &publicDocs,
@@ -647,6 +652,30 @@ func (s *Server) PutSettings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		v.Security = domain.SecurityWorkspaceSettings{AutoCheck: sec.AutoCheck, DailyBudget: sec.DailyBudget}
+	}
+	v.PerfReview = cur.PerfReview
+	if pr := req.PerfReview; pr != nil {
+		v.PerfReview.Enabled = pr.Enabled
+		if pr.NotDone != nil {
+			var nd []string
+			for _, x := range *pr.NotDone {
+				if x = strings.TrimSpace(x); x != "" {
+					nd = append(nd, x)
+				}
+			}
+			v.PerfReview.NotDone = append([]string{}, nd...)
+		}
+		if pr.TimeZone != nil {
+			tz := strings.TrimSpace(*pr.TimeZone)
+			if tz == "UTC" {
+				tz = ""
+			}
+			if _, err := time.LoadLocation(tz); err != nil {
+				writeError(w, http.StatusBadRequest, "bad_request", "unknown time zone "+strconv.Quote(tz))
+				return
+			}
+			v.PerfReview.TimeZone = tz
+		}
 	}
 	if req.Models.Documents != nil {
 		v.Models.Documents = *req.Models.Documents

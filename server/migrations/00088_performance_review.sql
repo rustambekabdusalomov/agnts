@@ -128,6 +128,7 @@ CREATE TABLE period_closings (
   month          date        NOT NULL,
   closing        int         NOT NULL,
   prompt_version text        NOT NULL,
+  unscored       int         NOT NULL DEFAULT 0,  -- the month's deliveries left out, not scored
   closed_at      timestamptz NOT NULL DEFAULT now(),
   closed_by      bigint      REFERENCES users (id) ON DELETE SET NULL,
   PRIMARY KEY (workspace_id, month, closing)

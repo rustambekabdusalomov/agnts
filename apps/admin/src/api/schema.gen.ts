@@ -2443,6 +2443,160 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/developers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Delivered complexity per developer for a month or a range (performance reviews; input to the owner's review, not a verdict) */
+        get: operations["getDevelopers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/developers/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The deliveries of one author (user:<id>, agent, unmapped:<identity>), or of everyone, with their scores and shares */
+        get: operations["getDeveloperTickets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/developers/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Everything held about one author, for a right of access request (GDPR Article 15) */
+        get: operations["exportDeveloper"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/developers/months/{month}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close an ended month now, or close it again to take the numbers that changed since (earlier closings are kept) */
+        post: operations["closeDevelopersMonth"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/developers/backfill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Estimate, and when confirmed queue, the scores of deliveries from before the workspace started scoring */
+        post: operations["backfillScores"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/developers/identities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Which git logins and emails are whose, and the identities that earned points but are no member's */
+        get: operations["getGitIdentities"];
+        /** Give a git login or email to a member (or take it away); shares are worked out again */
+        put: operations["mapGitIdentity"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/developers/regressions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Regressions analysis proposed and the owner confirmed or dismissed */
+        get: operations["getRegressions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Override a delivery's score (logged with who and why), or clear the override */
+        put: operations["overrideScore"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tickets/{key}/regression-of": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Confirm, dismiss or set the ticket a bug ticket is a regression of */
+        put: operations["setRegressionOf"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/eval/replays": {
         parameters: {
             query?: never;
@@ -8907,6 +9061,7 @@ export interface components {
             ci?: components["schemas"]["CISettings"];
             logWatch?: components["schemas"]["LogWatchSettings"];
             security?: components["schemas"]["SecurityWorkspaceSettings"];
+            perfReview?: components["schemas"]["PerfReviewSettings"];
             guard?: components["schemas"]["GuardSettings"];
             /** @description What agnts does when a run looks stuck: nothing, note it on the ticket, or also tell Claude to step back (once per run) */
             stalls?: string;
@@ -11924,6 +12079,209 @@ export interface components {
             repo: string;
             open: components["schemas"]["SecSeverityCounts"];
             lastScan?: components["schemas"]["SecurityScan"];
+        };
+        PerfReviewSettings: {
+            /** @description Score delivered tickets and show the Developers tab. Off by default: automated scoring of people falls under GDPR Article 22 and may need a works council's agreement */
+            enabled: boolean;
+            /** @description Jira resolutions that close an issue without the work being done (default: Won't Do, Won't Fix, Duplicate, Cannot Reproduce, Declined, Incomplete) */
+            notDone?: string[];
+            /** @description IANA time zone months and commit days are counted in (default UTC) */
+            timeZone?: string;
+        };
+        DevelopersClosing: {
+            closing: number;
+            promptVersion: string;
+            unscored: number;
+            /** Format: date-time */
+            closedAt: string;
+            /**
+             * Format: int64
+             * @description Null when it closed on its own
+             */
+            closedBy?: number | null;
+        };
+        DeveloperTotals: {
+            /** @description Delivered points after reverts and regressions */
+            points: number;
+            tickets: number;
+            /** @description Points per ticket: many small against few hard */
+            avgPoints: number;
+            reverts: number;
+            regressions: number;
+        };
+        DeveloperRow: {
+            /** @description user:<id>, agent or unmapped:<login or email> */
+            key: string;
+            /** @enum {string} */
+            kind: "user" | "agent" | "unmapped";
+            /** Format: int64 */
+            userId?: number;
+            name: string;
+            totals: components["schemas"]["DeveloperTotals"];
+            live?: components["schemas"]["DeveloperTotals"];
+        };
+        DevelopersReport: {
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            month?: string;
+            /** @description A custom range, or a month not closed yet */
+            live: boolean;
+            promptVersion: string;
+            closing?: components["schemas"]["DevelopersClosing"];
+            closings: components["schemas"]["DevelopersClosing"][];
+            /** @description The closed month changed since this closing (rows carry live) */
+            changed: boolean;
+            /**
+             * Format: date-time
+             * @description An ended month in its grace period closes then (or by the 10th while scores are pending)
+             */
+            closesOn?: string;
+            rows: components["schemas"]["DeveloperRow"][];
+            unscored: number;
+        };
+        DeveloperShare: {
+            key: string;
+            name: string;
+            share: number;
+            days: number;
+        };
+        DeveloperTicket: {
+            key: string;
+            title: string;
+            delivery: number;
+            /** Format: date-time */
+            deliveredAt: string;
+            promptVersion: string;
+            /** @enum {string} */
+            status: "scored" | "unscored";
+            error?: string;
+            /** @description The score */
+            points: number;
+            /** @description The override, else the score */
+            effective: number;
+            overridePoints?: number | null;
+            overrideReason?: string;
+            /** Format: int64 */
+            overriddenBy?: number | null;
+            /** Format: date-time */
+            overriddenAt?: string | null;
+            rationale: string;
+            /** @description repository:pull_request|squash|commits, comma separated */
+            diffSource: string;
+            clamped: boolean;
+            fromFactsOnly: boolean;
+            model?: string;
+            revertedShare: number;
+            regressions: number;
+            /** @description The author's share (0 when listing everyone) */
+            share: number;
+            /** @description What the share earned after penalties */
+            earned: number;
+            authors: components["schemas"]["DeveloperShare"][];
+            factors: {
+                [key: string]: unknown;
+            };
+        };
+        DeveloperExport: {
+            author: string;
+            name: string;
+            /** Format: date-time */
+            exportedAt: string;
+            tickets: components["schemas"]["DeveloperTicket"][];
+            snapshots: {
+                month: string;
+                closing: number;
+                /** Format: date-time */
+                closedAt: string;
+                totals: components["schemas"]["DeveloperTotals"];
+            }[];
+        };
+        ScoreBackfillRequest: {
+            /**
+             * Format: date-time
+             * @description Deliveries from then on (default: all that have none)
+             */
+            since?: string;
+            /** @description false: only estimate */
+            confirm: boolean;
+        };
+        ScoreBackfill: {
+            deliveries: number;
+            costUsd: number;
+            /** Format: int64 */
+            credits: number;
+            /** Format: int64 */
+            balance: number;
+            onCredits: boolean;
+            refused?: string;
+            queued: number;
+            /** @description Commits older than this are not linked, so older tickets show as not delivered */
+            reachDays: number;
+        };
+        GitIdentity: {
+            /** Format: int64 */
+            userId: number;
+            name?: string;
+            login: string;
+            email: string;
+        };
+        GitIdentityInput: {
+            /** Format: int64 */
+            userId: number;
+            login?: string;
+            email?: string;
+            remove?: boolean;
+        };
+        GitIdentities: {
+            identities: components["schemas"]["GitIdentity"][];
+            unmapped: {
+                key: string;
+                identity: string;
+                deliveries: number;
+            }[];
+        };
+        ScoreOverride: {
+            delivery: number;
+            /**
+             * @description Null clears the override
+             * @enum {integer|null}
+             */
+            points?: 0 | 1 | 2 | 3 | 5 | 8 | 13 | null;
+            reason?: string;
+        };
+        Regression: {
+            /** Format: int64 */
+            id: number;
+            /** @description The bug ticket */
+            bug: string;
+            bugTitle: string;
+            /** @description The ticket whose work it is a regression of */
+            origin: string;
+            originTitle: string;
+            /** @enum {string} */
+            status: "proposed" | "active" | "dismissed";
+            source: string;
+            reason: string;
+            /** @description Confirmed and filed within 90 days of the origin's delivery */
+            counts?: boolean;
+            /** Format: int64 */
+            decidedBy?: number | null;
+            /** Format: date-time */
+            decidedAt?: string | null;
+        };
+        RegressionInput: {
+            /** @enum {string} */
+            decision: "confirm" | "dismiss" | "set";
+            /**
+             * Format: int64
+             * @description The proposed regression (confirm, dismiss)
+             */
+            id?: number;
+            /** @description The origin ticket (set) */
+            origin?: string;
+            reason?: string;
         };
     };
     responses: {
@@ -15830,6 +16188,280 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    getDevelopers: {
+        parameters: {
+            query?: {
+                /** @description A calendar month, 2026-10, in the workspace's time zone */
+                month?: string;
+                /** @description An earlier closing of the month (default: the latest) */
+                closing?: number;
+                /** @description Start of a custom range (always live) */
+                from?: string;
+                /** @description End of a custom range, exclusive */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DevelopersReport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getDeveloperTickets: {
+        parameters: {
+            query?: {
+                /** @description An author key; empty lists every delivery */
+                author?: string;
+                month?: string;
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeveloperTicket"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    exportDeveloper: {
+        parameters: {
+            query: {
+                author: string;
+                format?: "json" | "csv";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The data, as a download */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeveloperExport"];
+                    "text/csv": string;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    closeDevelopersMonth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The month as closed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DevelopersReport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    backfillScores: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScoreBackfillRequest"];
+            };
+        };
+        responses: {
+            /** @description The estimate, and what was queued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreBackfill"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getGitIdentities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GitIdentities"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    mapGitIdentity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GitIdentityInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GitIdentities"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getRegressions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Regression"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    overrideScore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScoreOverride"];
+            };
+        };
+        responses: {
+            /** @description The delivery as scored now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeveloperTicket"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    setRegressionOf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: components["parameters"]["TicketKey"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegressionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Regression"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     getReplayReport: {

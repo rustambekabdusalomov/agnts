@@ -1,6 +1,6 @@
 # agnts Performance Review — Plan
 
-Nov 4, 2026 · draft v5 (after fourth review), decisions settled, not started
+Nov 4, 2026 · draft v5 (after fourth review), decisions settled, implemented on branch `perf-review` (see Implementation notes)
 
 ## Overview
 
@@ -474,3 +474,22 @@ Settled in the fourth review (draft v5, Nov 4, 2026):
 - Credit to people for directing the agent, such as assigning, answering its questions or reviewing its pull requests.
 - Scoring tickets older than commitlink's 90-day reach, through a deeper one-off history scan.
 - Tuning the facts-only formula and the clamp's step counts against owner overrides, once there are enough.
+
+## Implementation notes
+
+Implemented on the `perf-review` branch, Nov 4, 2026. Where it departs from the text above:
+
+- **Squash detection.** The rule "more than one commit, or its one commit's sha differs" would call every commit of a rebase merge a squash. GitLab says so itself (`squash`, `squash_commit_sha`). On GitHub a commit is a squash when it is the pull request's `merge_commit_sha`, is not one of its commits, and has a subject none of them has (GitHub adds ` (#n)`; a rebase keeps the subject). `domain.IsSquashOf`.
+- **Lookups are cached in `commit_pulls`**, one row per default-branch commit, so each costs one request ever; a push or scan asks at most 100 new ones.
+- **Pushes to the default branch read the whole range** through `Ahead(before, after)`: GitHub leaves out commits already on the host (a merged pull request's branch commits), and no payload gives parents.
+- **Branch commits get `on_default_at` by sha** (`MarkOnDefault`), whichever ticket they are linked to and however: a merge does not repeat their numbers.
+- **Deliveries are recorded by database triggers** (`agnts_check_delivery`) on `tickets` and `ticket_commits`, so no code path can miss one. `tickets.done_at` follows the state; existing done tickets take `updated_at`.
+- **Tracker closes** come from the Jira and Plane webhooks for tickets agnts already has, labelled or not. Jira's reconcile reads open issues only, so a close whose webhook was lost is not caught, and tickets closed before this shipped have no `tracker_done_at`.
+- **Score runs go through the scheduler** as their own class, in spare room only, on the workspace's account (no person). Scores are queued on their own only for deliveries since the workspace's first scoring version; earlier ones wait for the backfill.
+- **Diffs** come from the existing `PullFiles` and `CommitDetail` (which also reads CI runs and pull requests: two more requests per commit).
+- **Earners are kept in `factors`**, so mapping a git identity works shares out again without the git host.
+- **A regression is suggested** only for `bug` tickets, from the repository's deliveries of the last 90 days listed in the analysis prompt. Regression relations are left out of the ticket's relation list and the queue.
+- **The time zone** is a setting of its own (`perfReview.timeZone`, default UTC): workspaces had none.
+- **Visibility**: the API is `x-role: owner`; the platform admin has no view of it yet.
+- **Not done**: the mobile app; a "commitlink gap" warning (commitlink reports no gaps).
+

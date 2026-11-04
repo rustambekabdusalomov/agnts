@@ -118,6 +118,9 @@ func (o *Orchestrator) PerfTick(sys context.Context) {
 			o.log.Info("scores queued", "workspace", id, "count", n)
 			o.Wake()
 		}
+		if pc, ok := o.store.(PeriodCloser); ok {
+			o.closeMonths(wctx, pc)
+		}
 	}
 }
 
@@ -214,6 +217,11 @@ func (o *Orchestrator) score(ctx context.Context, sr ScoreRuns, run domain.Score
 		sc.Points, sc.Clamped = perfreview.Clamp(ans.Points, facts)
 		sc.Rationale, sc.Model = ans.Rationale, model
 		sc.Factors["model"] = map[string]any{"points": ans.Points, "factors": ans.Factors}
+	}
+	if q, err := o.quality(); err == nil {
+		if sc.RevertedShare, err = o.revertedShare(ctx, q, cleaned); err != nil {
+			return nil, err
+		}
 	}
 	resolve, err := sr.IdentityResolver(ctx)
 	if err != nil {

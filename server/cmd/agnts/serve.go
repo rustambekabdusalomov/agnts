@@ -226,6 +226,7 @@ func serve(ctx context.Context, cfg config.Config, log *slog.Logger, pool postgr
 		Lessons:       a.lessons,
 		Rules:         a.orch,
 		Briefs:        a.orch,
+		PerfReview:    a.orch,
 		Reviews:       a.orch,
 		Pulls:         a.orch,
 		Drafts:        a.orch,

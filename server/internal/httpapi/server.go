@@ -52,8 +52,10 @@ type Options struct {
 	Lessons   Lessons // Learn pages; nil answers 501
 	Rules     Rules   // Rules page; nil answers 501
 	Briefs    Briefs  // repository briefs; nil answers 501
-	Reviews   Reviews // pull request reviews; nil answers 501
-	Pulls     Pulls   // pull request conversations; nil answers 501
+	// PerfReview is the owner's performance reviews; nil answers 501.
+	PerfReview PerfReview
+	Reviews    Reviews // pull request reviews; nil answers 501
+	Pulls      Pulls   // pull request conversations; nil answers 501
 	// Drafts asks for reviews from pull request pages and keeps their
 	// draft comments; nil answers 501.
 	Drafts ReviewDrafts

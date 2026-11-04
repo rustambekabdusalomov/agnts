@@ -142,6 +142,9 @@ func (o *Orchestrator) queueLesson(ctx context.Context, t domain.Ticket, source,
 // work (commitlink.Service.OnRevert). For merged work agnts made, it logs
 // the revert once and has a reflect run look for the lesson.
 func (o *Orchestrator) Reverted(ctx context.Context, l domain.CommitLink) {
+	// Performance reviews: the delivery's reverted share changes, for
+	// people's work as well as agnts's.
+	o.updateReverts(ctx, l.TicketKey)
 	t, err := o.store.TicketByKey(ctx, l.TicketKey)
 	if err != nil || t.MergedAt == nil || t.HeadSHA == "" || t.ReplayOf != "" || t.Kind.Report() || t.Kind == domain.KindReview {
 		return

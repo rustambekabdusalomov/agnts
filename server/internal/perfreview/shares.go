@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Author keys of a delivery's shares.
+// AgentKey is the author key of agnts's own commits.
 const AgentKey = "agent"
 
 // UserKey is a member's author key.
@@ -164,4 +164,50 @@ func AfterPenalties(points int, revertedShare float64, regressions int) float64 
 
 func round2(x float64) float64 {
 	return float64(int64(x*100+0.5)) / 100
+}
+
+// Undone says which of shas stay reverted: reverts maps each revert
+// commit to the sha it reverts (a prefix may be given). A revert of a
+// revert (a re-land) cancels it, and so on down the chain.
+func Undone(shas []string, reverts map[string]string) map[string]bool {
+	target := func(prefix string) string {
+		for _, s := range shas {
+			if strings.HasPrefix(s, prefix) {
+				return s
+			}
+		}
+		for r := range reverts {
+			if strings.HasPrefix(r, prefix) {
+				return r
+			}
+		}
+		return ""
+	}
+	// active reports whether a revert commit is in force: not itself
+	// reverted by one in force.
+	var active func(r string, depth int) bool
+	active = func(r string, depth int) bool {
+		if depth > 20 {
+			return true
+		}
+		for other, of := range reverts {
+			if target(of) == r && active(other, depth+1) {
+				return false
+			}
+		}
+		return true
+	}
+	out := map[string]bool{}
+	for r, of := range reverts {
+		t := target(of)
+		if t == "" || !active(r, 0) {
+			continue
+		}
+		for _, s := range shas {
+			if s == t {
+				out[s] = true
+			}
+		}
+	}
+	return out
 }

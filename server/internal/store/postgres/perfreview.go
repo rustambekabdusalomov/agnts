@@ -13,7 +13,11 @@ import (
 	"agnts/internal/orchestrator"
 )
 
-var _ orchestrator.ScoreRuns = (*Agent)(nil)
+var (
+	_ orchestrator.ScoreRuns     = (*Agent)(nil)
+	_ orchestrator.GitIdentities = (*Agent)(nil)
+	_ orchestrator.ScoreQuality  = (*Agent)(nil)
+)
 
 // EnsurePromptVersion makes version the workspace's current scoring
 // version, creating it with anchors when it is new; an existing version
@@ -214,14 +218,14 @@ func upsertScore(ctx context.Context, tx pgx.Tx, run domain.ScoreRun, sc domain.
 		points = &sc.Points
 	}
 	if _, err := tx.Exec(ctx, `INSERT INTO ticket_scores (workspace_id, ticket_id, delivery, prompt_version, status, points, from_facts_only, clamped,
-			diff_source, rationale, factors, error, model, score_run_id, scored_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, now())
+			diff_source, rationale, factors, error, model, score_run_id, reverted_share, scored_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now())
 		ON CONFLICT (ticket_id, delivery, prompt_version) DO UPDATE SET status = EXCLUDED.status, points = EXCLUDED.points,
 			from_facts_only = EXCLUDED.from_facts_only, clamped = EXCLUDED.clamped, diff_source = EXCLUDED.diff_source,
 			rationale = EXCLUDED.rationale, factors = EXCLUDED.factors, error = EXCLUDED.error, model = EXCLUDED.model,
-			score_run_id = EXCLUDED.score_run_id, scored_at = now()`,
+			score_run_id = EXCLUDED.score_run_id, reverted_share = EXCLUDED.reverted_share, scored_at = now()`,
 		run.WorkspaceID, run.TicketID, run.Delivery, run.PromptVersion, sc.Status, points, sc.FromFactsOnly, sc.Clamped,
-		sc.DiffSource, sc.Rationale, factors, sc.Error, sc.Model, run.ID); err != nil {
+		sc.DiffSource, sc.Rationale, factors, sc.Error, sc.Model, run.ID, min(max(sc.RevertedShare, 0), 1)); err != nil {
 		return err
 	}
 	if sc.Status != domain.ScoreScored {

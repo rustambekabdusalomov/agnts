@@ -69,7 +69,7 @@ func scanRelation(row pgx.Row) (domain.Relation, error) {
 // RelationsOf returns every relation involving key.
 func (s *Agent) RelationsOf(ctx context.Context, key string) ([]orchestrator.RelationRow, error) {
 	rows, err := s.db.Query(ctx, `SELECT x.*, b.title, b.state, `+releasesSQL+`
-		FROM (SELECT `+relationCols+` FROM ticket_relations WHERE ticket_key = $1 OR other_key = $1) x
+		FROM (SELECT `+relationCols+` FROM ticket_relations WHERE (ticket_key = $1 OR other_key = $1) AND type <> 'regression_of') x
 		JOIN tickets b ON b.key = CASE WHEN x.ticket_key = $1 THEN x.other_key ELSE x.ticket_key END
 		ORDER BY x.id`, key)
 	if err != nil {
@@ -119,7 +119,10 @@ func (s *Agent) DependencyGraph(ctx context.Context) (map[string][]string, error
 func (s *Agent) ReplaceFound(ctx context.Context, foundBy string, rs []domain.Relation, ev *domain.Event) ([]domain.Relation, error) {
 	var out []domain.Relation
 	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
-		if _, err := tx.Exec(ctx, `DELETE FROM ticket_relations WHERE found_by = $1 AND source IN ('agnts', 'rule') AND status <> 'dismissed'`,
+		// A regression the owner confirmed or dismissed is theirs: analysing
+		// the bug again neither deletes it nor brings it back.
+		if _, err := tx.Exec(ctx, `DELETE FROM ticket_relations WHERE found_by = $1 AND source IN ('agnts', 'rule') AND status <> 'dismissed'
+			AND NOT (type = 'regression_of' AND status = 'active')`,
 			foundBy); err != nil {
 			return err
 		}

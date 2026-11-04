@@ -179,3 +179,55 @@ type ScoreResult struct {
 	Error  string
 	Score  *TicketScore // the score to store, when done or finally failed
 }
+
+// PeriodClosing is one closing of a month: its totals were written then.
+type PeriodClosing struct {
+	Month         time.Time
+	Closing       int
+	PromptVersion string
+	Unscored      int
+	ClosedAt      time.Time
+	ClosedBy      *int64 // nil: closed on its own
+}
+
+// DeliveryEarners are the earners a delivery's score recorded (JSON of
+// perfreview.Earner).
+type DeliveryEarners struct {
+	TicketID int64
+	Delivery int
+	Earners  []byte
+}
+
+// UnmappedAuthor is a git identity that earned shares but is no member's.
+type UnmappedAuthor struct {
+	Key        string
+	Identity   string // the login or email
+	Deliveries int
+}
+
+// GitIdentity gives a git login or email to a workspace member.
+type GitIdentity struct {
+	UserID      int64
+	Provider    string
+	Login       string
+	Email       string
+	AutoMatched bool
+}
+
+// Regression is a regression_of relation: the bug ticket and the ticket
+// whose delivered work it is a regression of.
+type Regression struct {
+	ID          int64
+	Bug         string
+	BugTitle    string
+	Origin      string
+	OriginTitle string
+	Status      string // proposed, active, dismissed
+	Source      string
+	Reason      string
+	DecidedBy   *int64
+	DecidedAt   *time.Time
+	// Counts: confirmed, and the bug was filed within 90 days of the
+	// origin's delivery.
+	Counts bool
+}
