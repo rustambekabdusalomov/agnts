@@ -108,6 +108,9 @@ type Store interface {
 	// NextTaskNumber reserves a task number in repoID, or among tasks
 	// without a repository when it is nil.
 	NextTaskNumber(ctx context.Context, repoID *int64) (int, error)
+	// NextPrefixNumber is the number after the highest key with prefix in
+	// the workspace (SEC-12 → 13), for prefixes every repository shares.
+	NextPrefixNumber(ctx context.Context, prefix string) (int, error)
 	DeleteTicket(ctx context.Context, key string, ev domain.Event) error
 	// StateSince returns when each ticket entered its current state and,
 	// for failed or paused ones, the reason.
