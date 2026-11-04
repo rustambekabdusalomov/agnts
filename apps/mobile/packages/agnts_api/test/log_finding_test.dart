@@ -141,5 +141,17 @@ void main() {
       // TODO
     });
 
+    // The trace the sample came from, when the logs carry one (single reads only)
+    // String traceId
+    test('to test the property `traceId`', () async {
+      // TODO
+    });
+
+    // The trace in the source's tracing UI, when the source has a trace link (single reads only)
+    // String traceUrl
+    test('to test the property `traceUrl`', () async {
+      // TODO
+    });
+
   });
 }

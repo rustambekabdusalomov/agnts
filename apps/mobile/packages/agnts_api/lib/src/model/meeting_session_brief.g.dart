@@ -21,6 +21,8 @@ abstract class _$MeetingSessionBriefCWProxy {
 
   MeetingSessionBrief documentId(int? documentId);
 
+  MeetingSessionBrief uploaded(bool uploaded);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSessionBrief(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -35,6 +37,7 @@ abstract class _$MeetingSessionBriefCWProxy {
     MeetingNotesStatus notesStatus,
     String notesError,
     int? documentId,
+    bool uploaded,
   });
 }
 
@@ -71,6 +74,9 @@ class _$MeetingSessionBriefCWProxyImpl implements _$MeetingSessionBriefCWProxy {
       this(documentId: documentId);
 
   @override
+  MeetingSessionBrief uploaded(bool uploaded) => this(uploaded: uploaded);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSessionBrief(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -85,6 +91,7 @@ class _$MeetingSessionBriefCWProxyImpl implements _$MeetingSessionBriefCWProxy {
     Object? notesStatus = const $CopyWithPlaceholder(),
     Object? notesError = const $CopyWithPlaceholder(),
     Object? documentId = const $CopyWithPlaceholder(),
+    Object? uploaded = const $CopyWithPlaceholder(),
   }) {
     return MeetingSessionBrief(
       id: id == const $CopyWithPlaceholder()
@@ -115,6 +122,10 @@ class _$MeetingSessionBriefCWProxyImpl implements _$MeetingSessionBriefCWProxy {
           ? _value.documentId
           // ignore: cast_nullable_to_non_nullable
           : documentId as int?,
+      uploaded: uploaded == const $CopyWithPlaceholder()
+          ? _value.uploaded
+          // ignore: cast_nullable_to_non_nullable
+          : uploaded as bool,
     );
   }
 }
@@ -134,7 +145,13 @@ MeetingSessionBrief _$MeetingSessionBriefFromJson(Map<String, dynamic> json) =>
     $checkedCreate('MeetingSessionBrief', json, ($checkedConvert) {
       $checkKeys(
         json,
-        requiredKeys: const ['id', 'startedAt', 'notesStatus', 'notesError'],
+        requiredKeys: const [
+          'id',
+          'startedAt',
+          'notesStatus',
+          'notesError',
+          'uploaded',
+        ],
       );
       final val = MeetingSessionBrief(
         id: $checkedConvert('id', (v) => (v as num).toInt()),
@@ -156,6 +173,7 @@ MeetingSessionBrief _$MeetingSessionBriefFromJson(Map<String, dynamic> json) =>
         ),
         notesError: $checkedConvert('notesError', (v) => v as String),
         documentId: $checkedConvert('documentId', (v) => (v as num?)?.toInt()),
+        uploaded: $checkedConvert('uploaded', (v) => v as bool),
       );
       return val;
     });
@@ -170,6 +188,7 @@ Map<String, dynamic> _$MeetingSessionBriefToJson(
   'notesStatus': _$MeetingNotesStatusEnumMap[instance.notesStatus]!,
   'notesError': instance.notesError,
   'documentId': ?instance.documentId,
+  'uploaded': instance.uploaded,
 };
 
 const _$MeetingNotesStatusEnumMap = {

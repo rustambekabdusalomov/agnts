@@ -42,5 +42,11 @@ void main() {
       // TODO
     });
 
+    // A recording a host uploaded, not a call
+    // bool uploaded
+    test('to test the property `uploaded`', () async {
+      // TODO
+    });
+
   });
 }

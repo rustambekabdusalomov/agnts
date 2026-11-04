@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+# agnts-sec runs agnts's pinned security scanners with fixed flags.
+#
+#   agnts-sec static [--only TOOL]... [--path PATH]... [--history N]
+#       Scans /workspace with opengrep (agnts's rules), gitleaks (the
+#       working tree and the last N commits; 0 means the whole history),
+#       osv-scanner (lockfiles, against the offline databases in
+#       /opt/secdb) and trivy config (Dockerfile, Kubernetes, Terraform,
+#       Compose). Raw output goes to /agnts/out/sec/raw/, and what ran to
+#       /agnts/out/sec/ran.json. agnts reads both; a summary is printed.
+#   agnts-sec update DIR
+#       Downloads the osv offline databases into DIR (agnts's updater runs
+#       this in a container of its own, never in a scan).
+#
+# Every tool runs offline: no update checks, no telemetry, no network.
+set -uo pipefail
+
+RULES=/opt/agnts-sec/rules
+SECDB=${AGNTS_SECDB:-/opt/secdb}
+OUT=${AGNTS_SEC_OUT:-/agnts/out/sec}
+SRC=${AGNTS_SEC_SRC:-/workspace}
+EXCLUDE_FILE=${AGNTS_SEC_EXCLUDE:-/agnts/context/sec-exclude.txt}
+TOOL_TIMEOUT=${AGNTS_SEC_TIMEOUT:-600}
+ECOSYSTEMS=(npm PyPI Go Maven crates.io RubyGems Packagist NuGet Pub Hex)
+# opengrep unpacks its engine into the cache and runs it from there: use
+# /tmp, which run containers mount with exec, not $HOME, which may not be.
+export XDG_CACHE_HOME=${XDG_CACHE_HOME:-/tmp/agnts-sec-cache}
+
+die() { echo "agnts-sec: $*" >&2; exit 2; }
+
+# Paths no tool reports on: agnts's defaults plus the repository's own.
+excludes() {
+	printf '%s\n' node_modules vendor .git dist build target .venv venv __pycache__ '*.min.js'
+	[ -f "$EXCLUDE_FILE" ] && grep -v -E '^\s*(#|$)' "$EXCLUDE_FILE"
+}
+
+# OK_CODE is the highest exit code that still means the tool finished
+# (osv-scanner exits 1 when it found vulnerabilities).
+declare -A STATUS SECONDS_OF ERRORS
+declare -A OK_CODE=([opengrep]=1 [gitleaks]=0 [osv]=1 [trivy]=0)
+
+# run TOOL CMD... runs one tool and records its status (ok, failed,
+# timeout), its seconds and, when it failed, the end of its log.
+run() {
+	local tool=$1
+	shift
+	local start=$SECONDS log="$OUT/raw/$tool.log"
+	timeout --kill-after=10 "$TOOL_TIMEOUT" "$@" >>"$log" 2>&1
+	local code=$?
+	SECONDS_OF[$tool]=$((${SECONDS_OF[$tool]:-0} + SECONDS - start))
+	if [ "$code" = 124 ] || [ "$code" = 137 ]; then
+		STATUS[$tool]=timeout
+	elif [ "$code" -le "${OK_CODE[$tool]:-0}" ]; then
+		STATUS[$tool]=ok
+	else
+		STATUS[$tool]=failed
+	fi
+	[ "${STATUS[$tool]}" = ok ] || ERRORS[$tool]=$(tail -c 600 "$log" | tr '\n' ' ')
+}
+
+static() {
+	local only=() paths=() history=200
+	while [ $# -gt 0 ]; do
+		case $1 in
+		--only) only+=("$2"); shift 2 ;;
+		--path) paths+=("$2"); shift 2 ;;
+		--history) history=$2; shift 2 ;;
+		*) die "unknown option $1" ;;
+		esac
+	done
+	want() { [ ${#only[@]} -eq 0 ] && return 0; local t; for t in "${only[@]}"; do [ "$t" = "$1" ] && return 0; done; return 1; }
+	[ ${#paths[@]} -eq 0 ] && paths=(.)
+	cd "$SRC" || die "no $SRC"
+	mkdir -p "$OUT/raw" || die "cannot write $OUT"
+
+	local ex=() gex=() oex=() tex=()
+	while IFS= read -r p; do
+		[ -n "$p" ] || continue
+		ex+=("$p")
+		oex+=(--exclude "$p")
+		tex+=(--skip-dirs "**/$p" --skip-files "**/$p")
+		gex+=("$p")
+	done < <(excludes)
+
+	if want opengrep; then
+		run opengrep opengrep scan --config "$RULES" --json --output "$OUT/raw/opengrep.json" \
+			--disable-version-check --quiet --timeout 30 --max-target-bytes 1000000 --jobs 2 "${oex[@]}" "${paths[@]}"
+	fi
+	if want gitleaks; then
+		# A config that extends the defaults with the exclusions.
+		local cfg=/tmp/agnts-gitleaks.toml
+		{
+			printf '[extend]\nuseDefault = true\n\n[allowlist]\npaths = [\n'
+			for p in "${gex[@]}"; do
+				p=${p//./\\.}
+				p=${p//\*/.*}
+				printf "  '''(^|/)%s(/|$)''',\n" "$p"
+			done
+			printf ']\n'
+		} >"$cfg"
+		run gitleaks gitleaks dir "${paths[@]}" --config "$cfg" --no-banner --log-level error \
+			--report-format json --report-path "$OUT/raw/gitleaks.json" --exit-code 0 --max-target-megabytes 5
+		if git rev-parse --git-dir >/dev/null 2>&1; then
+			local opts="-n $history"
+			[ "$history" = 0 ] && opts=""
+			# The history counts as part of gitleaks: one status for both.
+			local tree=${STATUS[gitleaks]}
+			run gitleaks gitleaks git . --config "$cfg" --no-banner --log-level error --log-opts="$opts" \
+				--report-format json --report-path "$OUT/raw/gitleaks-history.json" --exit-code 0
+			[ "$tree" = ok ] || STATUS[gitleaks]=$tree
+		fi
+	fi
+	if want osv; then
+		if [ -d "$SECDB/osv/osv-scalibr" ]; then
+			OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY="$SECDB/osv" run osv osv-scanner scan source --offline --offline-vulnerabilities \
+				--allow-no-lockfiles -r --format json --output-file "$OUT/raw/osv.json" "${paths[@]}"
+		else
+			STATUS[osv]=skipped
+			ERRORS[osv]="no vulnerability database yet (agnts downloads it daily)"
+			SECONDS_OF[osv]=0
+		fi
+	fi
+	if want trivy; then
+		run trivy trivy config --skip-check-update --disable-telemetry --skip-version-check --quiet \
+			--cache-dir /tmp/trivy --format json --output "$OUT/raw/trivy.json" "${tex[@]}" "${paths[@]}"
+	fi
+
+	local commits=0
+	git rev-parse --git-dir >/dev/null 2>&1 && commits=$(git rev-list --count HEAD 2>/dev/null || echo 0)
+	{
+		printf '{"history":%s,"commits":%s,"historyLimit":%s,"tools":{' "$([ "$history" = 0 ] && echo "$commits" || echo $((history < commits ? history : commits)))" "$commits" "$history"
+		local first=1 t
+		for t in "${!STATUS[@]}"; do
+			[ $first = 1 ] || printf ','
+			first=0
+			printf '"%s":{"status":"%s","seconds":%s,"error":%s}' "$t" "${STATUS[$t]}" "${SECONDS_OF[$t]:-0}" \
+				"$(printf '%s' "${ERRORS[$t]:-}" | jq -Rs .)"
+		done
+		printf '},"paths":%s}\n' "$(printf '%s\n' "${paths[@]}" | jq -R . | jq -s .)"
+	} >"$OUT/ran.json"
+
+	summary
+}
+
+# summary prints what each tool found, without secret values.
+summary() {
+	local t
+	for t in opengrep gitleaks osv trivy; do
+		[ -n "${STATUS[$t]:-}" ] || continue
+		local n=0
+		case $t in
+		opengrep) n=$(jq '.results | length' "$OUT/raw/opengrep.json" 2>/dev/null || echo 0) ;;
+		gitleaks) n=$(jq -s 'map(length) | add' "$OUT/raw/gitleaks.json" "$OUT/raw/gitleaks-history.json" 2>/dev/null || echo 0) ;;
+		osv) n=$(jq '[.results[]?.packages[]?] | length' "$OUT/raw/osv.json" 2>/dev/null || echo 0) ;;
+		trivy) n=$(jq '[.Results[]?.Misconfigurations[]?] | length' "$OUT/raw/trivy.json" 2>/dev/null || echo 0) ;;
+		esac
+		printf '%-9s %-8s %4s hits  %ss\n' "$t" "${STATUS[$t]}" "$n" "${SECONDS_OF[$t]:-0}"
+	done
+	if [ -f "$OUT/raw/opengrep.json" ] && [ -z "${AGNTS_SEC_QUIET:-}" ]; then
+		jq -r '.results[]? | "  \(.check_id | sub("^.*?agnts\\."; "agnts.")) \(.path):\(.start.line)"' "$OUT/raw/opengrep.json" | head -50
+	fi
+}
+
+update() {
+	local dir=${1:-} eco
+	[ -n "$dir" ] || die "usage: agnts-sec update DIR"
+	mkdir -p "$dir/osv/osv-scalibr" || die "cannot write $dir"
+	# A restart does not download again: once a day is enough.
+	if [ -z "${AGNTS_SEC_FORCE:-}" ] && [ -f "$dir/versions.json" ] && [ -n "$(find "$dir/versions.json" -mmin -1200 2>/dev/null)" ]; then
+		cat "$dir/versions.json"
+		return 0
+	fi
+	local ok=0 failed=()
+	for eco in "${ECOSYSTEMS[@]}"; do
+		local to="$dir/osv/osv-scalibr/$eco"
+		mkdir -p "$to.new"
+		if curl -fsSL --retry 3 --max-time 900 -o "$to.new/all.zip" \
+			"https://osv-vulnerabilities.storage.googleapis.com/$eco/all.zip" && unzip -tq "$to.new/all.zip" >/dev/null; then
+			rm -rf "$to.old"
+			[ -d "$to" ] && mv "$to" "$to.old"
+			mv "$to.new" "$to" && rm -rf "$to.old"
+			ok=$((ok + 1))
+		else
+			rm -rf "$to.new"
+			failed+=("$eco")
+		fi
+	done
+	printf '{"osv":"%s","ecosystems":%d,"failed":%s}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$ok" \
+		"$(printf '%s\n' "${failed[@]}" | jq -R 'select(. != "")' | jq -s .)" >"$dir/versions.json.new"
+	[ "$ok" -gt 0 ] && mv "$dir/versions.json.new" "$dir/versions.json"
+	cat "$dir/versions.json" 2>/dev/null
+	[ "$ok" -gt 0 ]
+}
+
+case ${1:-} in
+static) shift; static "$@" ;;
+update) shift; update "$@" ;;
+*) die "usage: agnts-sec static [--only TOOL] [--path PATH] [--history N] | agnts-sec update DIR" ;;
+esac

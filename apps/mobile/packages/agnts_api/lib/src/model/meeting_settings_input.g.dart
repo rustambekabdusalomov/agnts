@@ -15,6 +15,8 @@ abstract class _$MeetingSettingsInputCWProxy {
 
   MeetingSettingsInput maxParticipants(int maxParticipants);
 
+  MeetingSettingsInput draftTickets(bool? draftTickets);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSettingsInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -26,6 +28,7 @@ abstract class _$MeetingSettingsInputCWProxy {
     int retentionDays,
     bool keepAudio,
     int maxParticipants,
+    bool? draftTickets,
   });
 }
 
@@ -52,6 +55,10 @@ class _$MeetingSettingsInputCWProxyImpl
       this(maxParticipants: maxParticipants);
 
   @override
+  MeetingSettingsInput draftTickets(bool? draftTickets) =>
+      this(draftTickets: draftTickets);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MeetingSettingsInput(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -63,6 +70,7 @@ class _$MeetingSettingsInputCWProxyImpl
     Object? retentionDays = const $CopyWithPlaceholder(),
     Object? keepAudio = const $CopyWithPlaceholder(),
     Object? maxParticipants = const $CopyWithPlaceholder(),
+    Object? draftTickets = const $CopyWithPlaceholder(),
   }) {
     return MeetingSettingsInput(
       allowRecording: allowRecording == const $CopyWithPlaceholder()
@@ -81,6 +89,10 @@ class _$MeetingSettingsInputCWProxyImpl
           ? _value.maxParticipants
           // ignore: cast_nullable_to_non_nullable
           : maxParticipants as int,
+      draftTickets: draftTickets == const $CopyWithPlaceholder()
+          ? _value.draftTickets
+          // ignore: cast_nullable_to_non_nullable
+          : draftTickets as bool?,
     );
   }
 }
@@ -116,6 +128,7 @@ MeetingSettingsInput _$MeetingSettingsInputFromJson(
       'maxParticipants',
       (v) => (v as num).toInt(),
     ),
+    draftTickets: $checkedConvert('draftTickets', (v) => v as bool?),
   );
   return val;
 });
@@ -127,4 +140,5 @@ Map<String, dynamic> _$MeetingSettingsInputToJson(
   'retentionDays': instance.retentionDays,
   'keepAudio': instance.keepAudio,
   'maxParticipants': instance.maxParticipants,
+  'draftTickets': ?instance.draftTickets,
 };

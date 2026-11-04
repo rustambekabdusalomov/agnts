@@ -17,6 +17,8 @@ abstract class _$LogFieldsCWProxy {
 
   LogFields revision(String? revision);
 
+  LogFields traceUrl(String? traceUrl);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LogFields(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -29,6 +31,7 @@ abstract class _$LogFieldsCWProxy {
     String? level,
     String? service,
     String? revision,
+    String? traceUrl,
   });
 }
 
@@ -54,6 +57,9 @@ class _$LogFieldsCWProxyImpl implements _$LogFieldsCWProxy {
   LogFields revision(String? revision) => this(revision: revision);
 
   @override
+  LogFields traceUrl(String? traceUrl) => this(traceUrl: traceUrl);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LogFields(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -66,6 +72,7 @@ class _$LogFieldsCWProxyImpl implements _$LogFieldsCWProxy {
     Object? level = const $CopyWithPlaceholder(),
     Object? service = const $CopyWithPlaceholder(),
     Object? revision = const $CopyWithPlaceholder(),
+    Object? traceUrl = const $CopyWithPlaceholder(),
   }) {
     return LogFields(
       message: message == const $CopyWithPlaceholder()
@@ -88,6 +95,10 @@ class _$LogFieldsCWProxyImpl implements _$LogFieldsCWProxy {
           ? _value.revision
           // ignore: cast_nullable_to_non_nullable
           : revision as String?,
+      traceUrl: traceUrl == const $CopyWithPlaceholder()
+          ? _value.traceUrl
+          // ignore: cast_nullable_to_non_nullable
+          : traceUrl as String?,
     );
   }
 }
@@ -110,6 +121,7 @@ LogFields _$LogFieldsFromJson(Map<String, dynamic> json) =>
         level: $checkedConvert('level', (v) => v as String?),
         service: $checkedConvert('service', (v) => v as String?),
         revision: $checkedConvert('revision', (v) => v as String?),
+        traceUrl: $checkedConvert('traceUrl', (v) => v as String?),
       );
       return val;
     });
@@ -120,4 +132,5 @@ Map<String, dynamic> _$LogFieldsToJson(LogFields instance) => <String, dynamic>{
   'level': ?instance.level,
   'service': ?instance.service,
   'revision': ?instance.revision,
+  'traceUrl': ?instance.traceUrl,
 };

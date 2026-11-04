@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | 
 **meeting** | [**Meeting**](Meeting.md) |  | 
+**uploaded** | **bool** | A recording a host uploaded, not a call: it has no attendance | 
+**people** | **List&lt;int&gt;** | An uploaded recording: the members the uploader said are in it | 
 **startedAt** | [**DateTime**](DateTime.md) |  | 
 **endedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **notesStatus** | [**MeetingNotesStatus**](MeetingNotesStatus.md) |  | 

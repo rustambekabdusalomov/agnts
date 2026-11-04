@@ -25,6 +25,10 @@ class MeetingSettingsAvailable {
     required  this.recording,
 
     required  this.notes,
+
+    required  this.uploads,
+
+    required  this.maxUploadMb,
   });
 
   @JsonKey(
@@ -63,19 +67,49 @@ class MeetingSettingsAvailable {
 
 
 
+      /// Recordings can be uploaded and heard
+  @JsonKey(
+    
+    name: r'uploads',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool uploads;
+
+
+
+      /// The largest recording that can be uploaded
+  @JsonKey(
+    
+    name: r'maxUploadMb',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int maxUploadMb;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is MeetingSettingsAvailable &&
       other.meetings == meetings &&
       other.recording == recording &&
-      other.notes == notes;
+      other.notes == notes &&
+      other.uploads == uploads &&
+      other.maxUploadMb == maxUploadMb;
 
     @override
     int get hashCode =>
         meetings.hashCode +
         recording.hashCode +
-        notes.hashCode;
+        notes.hashCode +
+        uploads.hashCode +
+        maxUploadMb.hashCode;
 
   factory MeetingSettingsAvailable.fromJson(Map<String, dynamic> json) => _$MeetingSettingsAvailableFromJson(json);
 

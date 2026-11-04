@@ -138,5 +138,17 @@ void main() {
       // TODO
     });
 
+    // You may upload a recording of it (uploadMeetingRecording): you host it and this server hears uploads
+    // bool canUpload
+    test('to test the property `canUpload`', () async {
+      // TODO
+    });
+
+    // The largest recording that can be uploaded
+    // int maxUploadMb
+    test('to test the property `maxUploadMb`', () async {
+      // TODO
+    });
+
   });
 }

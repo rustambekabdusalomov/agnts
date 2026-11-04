@@ -1,0 +1,113 @@
+# agnts security rules for Python (written by agnts).
+rules:
+  - id: agnts.py.sqli.formatted-execute
+    languages: [python]
+    severity: ERROR
+    message: >-
+      A SQL query is built with an f-string, % or +. Pass values as
+      parameters: cursor.execute("... WHERE id = %s", (id,)).
+    metadata:
+      category: injection
+      cwe: "CWE-89"
+      owasp: "A03"
+      confidence: medium
+    pattern-either:
+      - pattern: $C.execute(f"...", ...)
+      - pattern: $C.execute("..." % $X, ...)
+      - pattern: $C.execute("..." + $X, ...)
+      - pattern: $C.execute("...".format(...), ...)
+      - pattern: |
+          $Q = f"..."
+          ...
+          $C.execute($Q, ...)
+      - pattern: |
+          $Q = "..." % $X
+          ...
+          $C.execute($Q, ...)
+
+  - id: agnts.py.cmdi.shell-true
+    languages: [python]
+    severity: ERROR
+    message: >-
+      A shell command is built from a variable. With user input it runs any
+      command; pass an argument list without shell=True.
+    metadata:
+      category: injection
+      cwe: "CWE-78"
+      owasp: "A03"
+      confidence: medium
+    pattern-either:
+      - patterns:
+          - pattern: subprocess.$F($X, ..., shell=True, ...)
+          - pattern-not: subprocess.$F("...", ..., shell=True, ...)
+      - patterns:
+          - pattern: os.system($X)
+          - pattern-not: os.system("...")
+      - patterns:
+          - pattern: os.popen($X, ...)
+          - pattern-not: os.popen("...", ...)
+
+  - id: agnts.py.deser.unsafe-load
+    languages: [python]
+    severity: ERROR
+    message: >-
+      This loads data that can run code (pickle, yaml.load without
+      SafeLoader). Never load untrusted data this way; use json or
+      yaml.safe_load.
+    metadata:
+      category: deserialization
+      cwe: "CWE-502"
+      owasp: "A08"
+      confidence: medium
+    pattern-either:
+      - pattern: pickle.loads(...)
+      - pattern: pickle.load(...)
+      - patterns:
+          - pattern: yaml.load(...)
+          - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+          - pattern-not: yaml.load(..., Loader=SafeLoader, ...)
+          - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader, ...)
+
+  - id: agnts.py.code.eval
+    languages: [python]
+    severity: ERROR
+    message: >-
+      eval/exec run a string as code. With any user input this is remote
+      code execution; use ast.literal_eval or json.
+    metadata:
+      category: injection
+      cwe: "CWE-95"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: eval($X)
+          - pattern: exec($X)
+      - pattern-not: eval("...")
+      - pattern-not: exec("...")
+
+  - id: agnts.py.tls.verify-false
+    languages: [python]
+    severity: WARNING
+    message: >-
+      Certificate checks are turned off (verify=False), so anyone on the
+      network can read and change this traffic.
+    metadata:
+      category: crypto
+      cwe: "CWE-295"
+      owasp: "A02"
+      confidence: high
+    pattern: requests.$M(..., verify=False, ...)
+
+  - id: agnts.py.config.flask-debug
+    languages: [python]
+    severity: WARNING
+    message: >-
+      Flask's debug mode serves an interactive console that runs code. Never
+      enable it outside a developer's machine.
+    metadata:
+      category: misconfig
+      cwe: "CWE-489"
+      owasp: "A05"
+      confidence: medium
+    pattern: $APP.run(..., debug=True, ...)

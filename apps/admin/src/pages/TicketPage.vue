@@ -45,6 +45,7 @@ import TicketDocuments from '../components/documents/TicketDocuments.vue'
 import TicketMeetings from '../components/meetings/TicketMeetings.vue'
 import CiCard from '../components/ticket/CiCard.vue'
 import LogFindingCard from '../components/ticket/LogFindingCard.vue'
+import SecurityFindingsCard from '../components/ticket/SecurityFindingsCard.vue'
 import { useRepoMembers } from '../components/repo/useRepoMembers'
 import RunLog from '../components/ticket/RunLog.vue'
 import SpendCard from '../components/ticket/SpendCard.vue'
@@ -759,6 +760,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
     <div class="col">
       <CiCard v-if="tk.source === 'ci'" :ticket-key="tk.key" />
       <LogFindingCard v-if="tk.source === 'logs'" :ticket-key="tk.key" />
+      <SecurityFindingsCard v-if="tk.source === 'security'" :ticket-key="tk.key" />
       <section class="card"><ProgressTrack :ticket="tk" :spend="d.spendByStage" /></section>
 
       <section v-if="!reviewingReport" class="card tk-stage">
@@ -1259,7 +1261,7 @@ const backTo = computed(() => (isTask.value ? '/tasks' : { name: 'tickets', quer
                   <dt>{{ t('ticket.kvKey') }}</dt><dd class="mono">{{ tk.key }}</dd>
                   <template v-if="!pull"><dt>{{ t('tasks.ticketNumber') }}</dt><dd><TicketNumber :ticket="tk" /></dd></template>
                   <dt>{{ t('kind.title') }}</dt><dd><KindBadge :ticket="tk" /></dd>
-                  <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : tk.source === 'ci' ? t('ticket.srcCi') : tk.source === 'logs' ? t('ticket.srcLogs') : t('ticket.srcJira') }}</dd>
+                  <dt>{{ t('ticket.kvSource') }}</dt><dd>{{ isTask ? t('ticket.srcTask') : isPlane ? t('ticket.srcPlane') : pull ? t('ticket.srcGit') : tk.source === 'ci' ? t('ticket.srcCi') : tk.source === 'logs' ? t('ticket.srcLogs') : tk.source === 'security' ? t('ticket.srcSecurity') : t('ticket.srcJira') }}</dd>
                   <dt>{{ t('ticket.kvPriority') }}</dt><dd>{{ tk.priority }}</dd>
                 </dl>
               </section>

@@ -166,5 +166,5 @@ func EffectiveModel(a Access, m string) string {
 func (m StageModels) EffectiveModels(a Access) StageModels {
 	return StageModels{Analyze: EffectiveModel(a, m.Analyze), Coding: EffectiveModel(a, m.Coding), Retry: EffectiveModel(a, m.Retry),
 		Helper: EffectiveModel(a, m.Helper), Learn: EffectiveModel(a, m.Learn), Review: EffectiveModel(a, m.Review), Preview: EffectiveModel(a, m.Preview),
-		Chat: EffectiveModel(a, m.Chat), Documents: EffectiveModel(a, m.Documents), TeamChat: EffectiveModel(a, m.TeamChat)}
+		Chat: EffectiveModel(a, m.Chat), Documents: EffectiveModel(a, m.Documents), TeamChat: EffectiveModel(a, m.TeamChat), Security: EffectiveModel(a, m.Security)}
 }

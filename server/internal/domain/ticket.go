@@ -40,6 +40,8 @@ func (s TicketSource) Name() string {
 		return "CI"
 	case SourceLogs:
 		return "Logs"
+	case SourceSecurity:
+		return "Security"
 	}
 	return string(s)
 }

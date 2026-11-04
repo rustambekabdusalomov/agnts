@@ -22,13 +22,15 @@ const (
 	// ticket drafts and code questions (the transcript's subject says
 	// which).
 	PurposeTeamChat TranscriptPurpose = "team_chat"
+	// PurposeSecurity triages and audits a repository's security scan.
+	PurposeSecurity TranscriptPurpose = "security"
 )
 
 // Background reports whether the purpose is a call outside a ticket's
 // stages, which never had a claude_calls row.
 func (p TranscriptPurpose) Background() bool {
 	switch p {
-	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeDocument, PurposeReflect, PurposeRules, PurposeTranslate, PurposeLogTriage, PurposeTeamChat:
+	case PurposeAssistant, PurposeBrief, PurposeDetect, PurposeDocument, PurposeReflect, PurposeRules, PurposeTranslate, PurposeLogTriage, PurposeTeamChat, PurposeSecurity:
 		return true
 	}
 	return false

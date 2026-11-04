@@ -61,6 +61,9 @@ const (
 	// ModelTeamChat answers @agnts and drafts tickets in the team chat;
 	// unset, the assistant's chat model.
 	ModelTeamChat = "team_chat"
+	// ModelSecurity triages and audits a security scan; unset, the
+	// preview model (a mid-sized model of the run's module).
+	ModelSecurity = "security"
 	// ModelRecheck re-checks a complex ticket's analysis; it is the
 	// coding model, so nobody picks it on its own.
 	ModelRecheck = "recheck"
@@ -138,6 +141,8 @@ type StageModels struct {
 	Documents string `json:"documents,omitempty"`
 	// TeamChat is "" until set: it follows Chat.
 	TeamChat string `json:"teamChat,omitempty"`
+	// Security is "" until set: it follows Preview.
+	Security string `json:"security,omitempty"`
 }
 
 // For returns the model for a stage name.
@@ -170,6 +175,11 @@ func (m StageModels) For(stage string) string {
 			return m.TeamChat
 		}
 		return m.For(ModelChat)
+	case ModelSecurity:
+		if m.Security != "" {
+			return m.Security
+		}
+		return m.Preview
 	default:
 		return m.Coding
 	}
@@ -570,7 +580,7 @@ func (s Settings) Modules(models map[string]string) []string {
 	if p := s.Access.Primary(); p != "" {
 		out = append(out, p)
 	}
-	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview, ModelChat, ModelDocuments, ModelTeamChat} {
+	for _, stage := range []string{ModelAnalyze, ModelCoding, ModelRetry, ModelHelper, ModelLearn, ModelReview, ModelPreview, ModelChat, ModelDocuments, ModelTeamChat, ModelSecurity} {
 		add(s.ModelFor(Ticket{Models: models}, stage))
 	}
 	add(s.SecondOpinion)

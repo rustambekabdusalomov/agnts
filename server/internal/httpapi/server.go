@@ -60,6 +60,10 @@ type Options struct {
 	CI     CI // CI watching; nil answers 501
 	// Logs is the log watcher; nil answers 501.
 	Logs Logs
+	// Security runs and changes security scans and findings, and
+	// SecurityReads reads them; nil answers 501.
+	Security      Security
+	SecurityReads SecurityReads
 	// Chat is the team chat; nil answers 501.
 	Chat Chat
 	// EgressURL is the egress proxy (AGNTS_RUN_PROXY), whose status page

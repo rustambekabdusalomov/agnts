@@ -56,6 +56,9 @@ type fakeRunner struct {
 	trees    [][]string
 	specs    []orchestrator.WorkspaceSpec
 	ran      []string // every command run in a workspace, in order
+	// seed are files every new workspace starts with (what a tool in the
+	// container would have written).
+	seed map[string]string
 }
 
 func (f *fakeRunner) Open(_ context.Context, spec orchestrator.WorkspaceSpec) (orchestrator.Workspace, error) {
@@ -75,7 +78,11 @@ func (f *fakeRunner) Open(_ context.Context, spec orchestrator.WorkspaceSpec) (o
 	_, _ = io.Copy(io.Discard, spec.Repo)
 	f.trees = append(f.trees, names)
 	f.specs = append(f.specs, spec)
-	return &fakeWS{r: f, files: map[string]string{}}, nil
+	files := map[string]string{}
+	for k, v := range f.seed {
+		files[k] = v
+	}
+	return &fakeWS{r: f, files: files}, nil
 }
 
 type fakeWS struct {

@@ -60,6 +60,12 @@ void main() {
       // TODO
     });
 
+    // Pull request title template, with the commit template's placeholders; must contain {subject} or {title}. Empty uses the workspace's PR title
+    // String prTemplate
+    test('to test the property `prTemplate`', () async {
+      // TODO
+    });
+
     // String taskPrefix
     test('to test the property `taskPrefix`', () async {
       // TODO

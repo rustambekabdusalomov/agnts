@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **notesStatus** | [**MeetingNotesStatus**](MeetingNotesStatus.md) |  | 
 **notesError** | **String** |  | 
 **documentId** | **int** |  | [optional] 
+**uploaded** | **bool** | A recording a host uploaded, not a call | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

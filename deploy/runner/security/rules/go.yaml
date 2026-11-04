@@ -1,0 +1,159 @@
+# agnts security rules for Go. Written by agnts (not copied from any rule
+# registry), so they can ship in a hosted service. Each rule names its CWE
+# and OWASP category; agnts-sec runs them with opengrep.
+rules:
+  - id: agnts.go.sqli.request-into-query
+    languages: [go]
+    severity: ERROR
+    message: >-
+      Request input reaches a SQL query string. Build the query with
+      placeholders ($1, ?) and pass the value as an argument.
+    metadata:
+      category: injection
+      cwe: "CWE-89"
+      owasp: "A03"
+      confidence: high
+    mode: taint
+    pattern-sources:
+      - pattern: $R.URL.Query().Get(...)
+      - pattern: $R.FormValue(...)
+      - pattern: $R.PostFormValue(...)
+      - pattern: $R.PathValue(...)
+      - pattern: $R.Header.Get(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $DB.Query($Q, ...)
+              - pattern: $DB.QueryRow($Q, ...)
+              - pattern: $DB.Exec($Q, ...)
+              - pattern: $DB.QueryContext($CTX, $Q, ...)
+              - pattern: $DB.QueryRowContext($CTX, $Q, ...)
+              - pattern: $DB.ExecContext($CTX, $Q, ...)
+              - pattern: $DB.Raw($Q, ...)
+          - focus-metavariable: $Q
+
+  - id: agnts.go.sqli.formatted-query
+    languages: [go]
+    severity: WARNING
+    message: >-
+      A SQL query is built with fmt.Sprintf or string concatenation. If any
+      part comes from a user, this is SQL injection; use placeholders.
+    metadata:
+      category: injection
+      cwe: "CWE-89"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: $DB.$METHOD(fmt.Sprintf($FMT, ...), ...)
+          - pattern: $DB.$METHOD($CTX, fmt.Sprintf($FMT, ...), ...)
+          - pattern: |
+              $Q := fmt.Sprintf($FMT, ...)
+              ...
+              $DB.$METHOD($Q, ...)
+          - pattern: |
+              $Q := fmt.Sprintf($FMT, ...)
+              ...
+              $DB.$METHOD($CTX, $Q, ...)
+          - pattern: $DB.$METHOD("..." + $X, ...)
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: ^(Query|QueryRow|Exec|QueryContext|QueryRowContext|ExecContext|Raw)$
+
+  - id: agnts.go.cmdi.shell-with-input
+    languages: [go]
+    severity: ERROR
+    message: >-
+      A shell command is built from a variable. If it contains user input,
+      it can run any command; call the program directly with arguments.
+    metadata:
+      category: injection
+      cwe: "CWE-78"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: exec.Command("sh", "-c", $X, ...)
+          - pattern: exec.Command("bash", "-c", $X, ...)
+          - pattern: exec.CommandContext($CTX, "sh", "-c", $X, ...)
+          - pattern: exec.CommandContext($CTX, "bash", "-c", $X, ...)
+      - pattern-not: exec.Command("sh", "-c", "...", ...)
+      - pattern-not: exec.Command("bash", "-c", "...", ...)
+      - pattern-not: exec.CommandContext($CTX, "sh", "-c", "...", ...)
+      - pattern-not: exec.CommandContext($CTX, "bash", "-c", "...", ...)
+
+  - id: agnts.go.path.request-into-file
+    languages: [go]
+    severity: ERROR
+    message: >-
+      Request input names a file that is opened or served. A value like
+      ../../etc/passwd escapes the folder; clean it and check it stays inside.
+    metadata:
+      category: path-traversal
+      cwe: "CWE-22"
+      owasp: "A01"
+      confidence: medium
+    mode: taint
+    pattern-sources:
+      - pattern: $R.URL.Query().Get(...)
+      - pattern: $R.FormValue(...)
+      - pattern: $R.PathValue(...)
+    pattern-sanitizers:
+      - pattern: filepath.Base(...)
+    pattern-sinks:
+      - pattern: os.Open(...)
+      - pattern: os.OpenFile(...)
+      - pattern: os.ReadFile(...)
+      - pattern: ioutil.ReadFile(...)
+      - pattern: http.ServeFile($W, $R, ...)
+
+  - id: agnts.go.ssrf.request-into-url
+    languages: [go]
+    severity: WARNING
+    message: >-
+      Request input becomes the URL of an outbound request. An attacker can
+      make the server call internal addresses; allow only known hosts.
+    metadata:
+      category: ssrf
+      cwe: "CWE-918"
+      owasp: "A10"
+      confidence: medium
+    mode: taint
+    pattern-sources:
+      - pattern: $R.URL.Query().Get(...)
+      - pattern: $R.FormValue(...)
+    pattern-sinks:
+      - pattern: http.Get(...)
+      - pattern: http.Post(...)
+      - pattern: http.NewRequest($M, $URL, ...)
+      - pattern: http.NewRequestWithContext($CTX, $M, $URL, ...)
+
+  - id: agnts.go.tls.insecure-skip-verify
+    languages: [go]
+    severity: WARNING
+    message: >-
+      TLS certificate checks are turned off, so anyone on the network can
+      read and change this traffic. Remove InsecureSkipVerify.
+    metadata:
+      category: crypto
+      cwe: "CWE-295"
+      owasp: "A02"
+      confidence: high
+    pattern: "tls.Config{..., InsecureSkipVerify: true, ...}"
+
+  - id: agnts.go.crypto.weak-hash
+    languages: [go]
+    severity: INFO
+    message: >-
+      MD5 and SHA-1 are broken for security uses (passwords, signatures,
+      tokens). Use SHA-256, or bcrypt/argon2 for passwords.
+    metadata:
+      category: crypto
+      cwe: "CWE-328"
+      owasp: "A02"
+      confidence: low
+    pattern-either:
+      - pattern: md5.New()
+      - pattern: md5.Sum(...)
+      - pattern: sha1.New()
+      - pattern: sha1.Sum(...)

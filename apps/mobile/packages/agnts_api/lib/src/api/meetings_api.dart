@@ -11,10 +11,12 @@ import 'package:dio/dio.dart';
 
 import 'dart:typed_data';
 import 'package:agnts_api/src/model/act_on_meeting_person_request.dart';
+import 'package:agnts_api/src/model/action_item_member_input.dart';
 import 'package:agnts_api/src/model/action_item_ticket_input.dart';
 import 'package:agnts_api/src/model/answer_meeting_request.dart';
 import 'package:agnts_api/src/model/error.dart';
 import 'package:agnts_api/src/model/meeting.dart';
+import 'package:agnts_api/src/model/meeting_action_item.dart';
 import 'package:agnts_api/src/model/meeting_call.dart';
 import 'package:agnts_api/src/model/meeting_call_settings.dart';
 import 'package:agnts_api/src/model/meeting_detail.dart';
@@ -2859,6 +2861,114 @@ _responseData = rawData == null ? null : deserialize<MeetingMessage, MeetingMess
     );
   }
 
+  /// Pick the member who takes an action item; its ticket becomes theirs too
+  /// 
+  ///
+  /// Parameters:
+  /// * [meetingId] 
+  /// * [sessionId] 
+  /// * [itemId] 
+  /// * [actionItemMemberInput] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [MeetingActionItem] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<MeetingActionItem>> setActionItemMember({ 
+    required int meetingId,
+    required int sessionId,
+    required int itemId,
+    required ActionItemMemberInput actionItemMemberInput,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/meetings/{meetingId}/sessions/{sessionId}/action-items/{itemId}/member'.replaceAll('{' r'meetingId' '}', meetingId.toString()).replaceAll('{' r'sessionId' '}', sessionId.toString()).replaceAll('{' r'itemId' '}', itemId.toString());
+    final _options = Options(
+      method: r'PUT',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(actionItemMemberInput);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    MeetingActionItem? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<MeetingActionItem, MeetingActionItem>(rawData, 'MeetingActionItem', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<MeetingActionItem>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Hosts: lock the meeting, change who may come in, quiet guests, record, take notes
   /// 
   ///
@@ -3231,6 +3341,118 @@ _responseData = rawData == null ? null : deserialize<MeetingDetail, MeetingDetai
     }
 
     return Response<MeetingDetail>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
+  /// Hosts only. The file (video or audio: mp4, mov, m4v, webm, mkv, ogg, opus, oga, m4a, mp3, wav; at most the server&#39;s limit, 2 GB by default) becomes a new ended session of the meeting with notes on. agnts takes its first audio track out and deletes the file as sent before anything hears it: the picture is never analysed. The session&#39;s notes then go as a call&#39;s do (queued, transcribing, writing, done).
+  ///
+  /// Parameters:
+  /// * [meetingId] 
+  /// * [file] 
+  /// * [startedAt] - When the meeting was held; absent is now. Send it before the file.
+  /// * [people] - Comma-separated ids of the members in the recording. Send it before the file.
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [MeetingSessionBrief] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<MeetingSessionBrief>> uploadMeetingRecording({ 
+    required int meetingId,
+    required MultipartFile file,
+    DateTime? startedAt,
+    String? people,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/meetings/{meetingId}/uploads'.replaceAll('{' r'meetingId' '}', meetingId.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'cookieAuth',
+            'keyName': 'hiro_session',
+            'where': '',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'multipart/form-data',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = FormData.fromMap(<String, dynamic>{
+        if (startedAt != null) r'startedAt': startedAt,
+        if (people != null) r'people': people,
+        r'file': file,
+      });
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    MeetingSessionBrief? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<MeetingSessionBrief, MeetingSessionBrief>(rawData, 'MeetingSessionBrief', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<MeetingSessionBrief>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

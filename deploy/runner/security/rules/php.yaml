@@ -1,0 +1,65 @@
+# agnts security rules for PHP (written by agnts).
+rules:
+  - id: agnts.php.sqli.request-into-query
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Request input goes into a SQL query. Use prepared statements with
+      bound parameters (PDO::prepare, mysqli_prepare).
+    metadata:
+      category: injection
+      cwe: "CWE-89"
+      owasp: "A03"
+      confidence: high
+    mode: taint
+    pattern-sources:
+      - pattern: $_GET
+      - pattern: $_POST
+      - pattern: $_REQUEST
+      - pattern: $_COOKIE
+    pattern-sinks:
+      - pattern: mysqli_query($C, $Q)
+      - pattern: $DB->query($Q, ...)
+      - pattern: $DB->exec($Q)
+    pattern-sanitizers:
+      - pattern: intval(...)
+      - pattern: (int) $X
+
+  - id: agnts.php.code.eval
+    languages: [php]
+    severity: ERROR
+    message: >-
+      eval runs a string as PHP code; with user input it is remote code
+      execution.
+    metadata:
+      category: injection
+      cwe: "CWE-95"
+      owasp: "A03"
+      confidence: medium
+    patterns:
+      - pattern: eval($X);
+      - pattern-not: eval("...");
+
+  - id: agnts.php.cmdi.shell-with-input
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Request input reaches a shell command. Use escapeshellarg on each
+      argument, or avoid the shell.
+    metadata:
+      category: injection
+      cwe: "CWE-78"
+      owasp: "A03"
+      confidence: high
+    mode: taint
+    pattern-sources:
+      - pattern: $_GET
+      - pattern: $_POST
+      - pattern: $_REQUEST
+    pattern-sinks:
+      - pattern: system(...)
+      - pattern: exec(...)
+      - pattern: shell_exec(...)
+      - pattern: passthru(...)
+    pattern-sanitizers:
+      - pattern: escapeshellarg(...)

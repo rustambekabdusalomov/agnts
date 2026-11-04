@@ -262,6 +262,13 @@ void main() {
       // TODO
     });
 
+    // Pick the member who takes an action item; its ticket becomes theirs too
+    //
+    //Future<MeetingActionItem> setActionItemMember(int meetingId, int sessionId, int itemId, ActionItemMemberInput actionItemMemberInput) async
+    test('test setActionItemMember', () async {
+      // TODO
+    });
+
     // Hosts: lock the meeting, change who may come in, quiet guests, record, take notes
     //
     //Future setMeetingCallSettings(String code, MeetingCallSettings meetingCallSettings, { String xMeetingSeat }) async
@@ -287,6 +294,15 @@ void main() {
     //
     //Future<MeetingDetail> updateMeeting(int meetingId, MeetingInput meetingInput) async
     test('test updateMeeting', () async {
+      // TODO
+    });
+
+    // Upload a recording of a meeting held elsewhere; only its sound is heard, for notes and draft tickets
+    //
+    // Hosts only. The file (video or audio: mp4, mov, m4v, webm, mkv, ogg, opus, oga, m4a, mp3, wav; at most the server's limit, 2 GB by default) becomes a new ended session of the meeting with notes on. agnts takes its first audio track out and deletes the file as sent before anything hears it: the picture is never analysed. The session's notes then go as a call's do (queued, transcribing, writing, done).
+    //
+    //Future<MeetingSessionBrief> uploadMeetingRecording(int meetingId, MultipartFile file, { DateTime startedAt, String people }) async
+    test('test uploadMeetingRecording', () async {
       // TODO
     });
 

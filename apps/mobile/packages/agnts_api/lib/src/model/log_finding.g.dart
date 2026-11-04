@@ -59,6 +59,10 @@ abstract class _$LogFindingCWProxy {
 
   LogFinding sample(String? sample);
 
+  LogFinding traceId(String? traceId);
+
+  LogFinding traceUrl(String? traceUrl);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LogFinding(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -92,6 +96,8 @@ abstract class _$LogFindingCWProxy {
     String? fixedSha,
     DateTime? fixedAt,
     String? sample,
+    String? traceId,
+    String? traceUrl,
   });
 }
 
@@ -184,6 +190,12 @@ class _$LogFindingCWProxyImpl implements _$LogFindingCWProxy {
   LogFinding sample(String? sample) => this(sample: sample);
 
   @override
+  LogFinding traceId(String? traceId) => this(traceId: traceId);
+
+  @override
+  LogFinding traceUrl(String? traceUrl) => this(traceUrl: traceUrl);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `LogFinding(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -217,6 +229,8 @@ class _$LogFindingCWProxyImpl implements _$LogFindingCWProxy {
     Object? fixedSha = const $CopyWithPlaceholder(),
     Object? fixedAt = const $CopyWithPlaceholder(),
     Object? sample = const $CopyWithPlaceholder(),
+    Object? traceId = const $CopyWithPlaceholder(),
+    Object? traceUrl = const $CopyWithPlaceholder(),
   }) {
     return LogFinding(
       id: id == const $CopyWithPlaceholder()
@@ -323,6 +337,14 @@ class _$LogFindingCWProxyImpl implements _$LogFindingCWProxy {
           ? _value.sample
           // ignore: cast_nullable_to_non_nullable
           : sample as String?,
+      traceId: traceId == const $CopyWithPlaceholder()
+          ? _value.traceId
+          // ignore: cast_nullable_to_non_nullable
+          : traceId as String?,
+      traceUrl: traceUrl == const $CopyWithPlaceholder()
+          ? _value.traceUrl
+          // ignore: cast_nullable_to_non_nullable
+          : traceUrl as String?,
     );
   }
 }
@@ -427,6 +449,8 @@ LogFinding _$LogFindingFromJson(Map<String, dynamic> json) =>
           (v) => v == null ? null : DateTime.parse(v as String),
         ),
         sample: $checkedConvert('sample', (v) => v as String?),
+        traceId: $checkedConvert('traceId', (v) => v as String?),
+        traceUrl: $checkedConvert('traceUrl', (v) => v as String?),
       );
       return val;
     }, fieldKeyMap: const {'class_': 'class'});
@@ -459,6 +483,8 @@ Map<String, dynamic> _$LogFindingToJson(LogFinding instance) =>
       'fixedSha': ?instance.fixedSha,
       'fixedAt': ?instance.fixedAt?.toIso8601String(),
       'sample': ?instance.sample,
+      'traceId': ?instance.traceId,
+      'traceUrl': ?instance.traceUrl,
     };
 
 const _$LogFindingCategoryEnumEnumMap = {

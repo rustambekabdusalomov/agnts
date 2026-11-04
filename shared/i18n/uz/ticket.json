@@ -257,6 +257,7 @@
     "museSteered": "Byudjet kam: yakunlash buyurildi",
     "museStopped": "Byudjet tugagani uchun to‘xtatildi",
     "museEscalated": "{model} ga o‘tkazildi",
-    "srcLogs": "Loglarda topilgan"
+    "srcLogs": "Loglarda topilgan",
+    "srcSecurity": "Xavfsizlik tekshiruvi"
   }
 }

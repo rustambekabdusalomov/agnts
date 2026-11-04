@@ -83,6 +83,15 @@ const logFindings = useQuery({
   refetchInterval: () => livePoll(120_000),
 })
 const reportedLogs = computed(() => (logFindings.data.value ?? []).filter((f) => !f.ticketKey).length)
+// Critical and high security findings no ticket works on yet.
+const secFindings = useQuery({
+  queryKey: ['security', 'nav'],
+  queryFn: () => unwrap(api.GET('/security/findings', { params: { query: { active: true } } })),
+  refetchInterval: () => livePoll(120_000),
+})
+const openCritical = computed(
+  () => (secFindings.data.value ?? []).filter((f) => (f.severity === 'critical' || f.severity === 'high') && (f.status === 'open' || f.status === 'reopened') && !f.ticketKey).length,
+)
 // Lessons not marked learned yet (one row is enough: the list carries the counts).
 const lessons = useQuery({
   queryKey: ['lessons', 'counts'],
@@ -156,6 +165,7 @@ const menus = computed<NavMenu[]>(() => [
     key: 'monitor',
     icon: 'usage',
     items: [
+      page('security', 'lock', { cnt: openCritical.value, on: ['security', 'securityFinding'].includes(String(route.name)) }),
       page('logWatcher', 'shield', { cnt: reportedLogs.value, on: ['logWatcher', 'logFinding', 'logSources'].includes(String(route.name)) }),
       page('logs', 'logs'),
       page('usage', 'usage'),

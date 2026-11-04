@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **branchPrefix** | **String** |  | [optional] 
 **branchTemplate** | **String** | Branch name template; must contain {key} or {number}. Empty uses {prefix}{key} | [optional] 
 **commitTemplate** | **String** | Commit message template; must contain {subject} or {title}. Empty uses KEY: Title | [optional] 
+**prTemplate** | **String** | Pull request title template, with the commit template's placeholders; must contain {subject} or {title}. Empty uses the workspace's PR title | [optional] 
 **taskPrefix** | **String** |  | [optional] 
 **instructions** | **String** |  | [optional] 
 **jiraProject** | **String** |  | [optional] 

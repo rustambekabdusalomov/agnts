@@ -106,12 +106,53 @@ RUN printf '#!/bin/sh\nexec /opt/claude/node/bin/node /opt/agnts-shot/agnts-shot
  && printf '#!/bin/sh\nexec /opt/claude/node/bin/node /opt/agnts-shot/agnts-act.mjs "$@"\n' > /usr/local/bin/agnts-act \
  && chmod 0755 /usr/local/bin/agnts-shot /usr/local/bin/agnts-act /usr/local/bin/agnts-preview /usr/local/bin/claude /opt/agnts-shot/agnts-shot.mjs /opt/agnts-shot/agnts-act.mjs
 
-# agnts's archives expect the "agent" user at uid 1000. /opt/toolchains and
-# /home/agent/.cache are owned by it so the volumes mounted there start out
-# writable for it.
+# Security testing: pinned scanners, each checked against its sha256 (from
+# the release's checksum file, or computed when the release has none:
+# opengrep). agnts-sec runs them with fixed flags, offline: their update
+# checks and telemetry are off, and the vulnerability databases come from
+# the read-only volume at /opt/secdb, filled by agnts's daily updater.
+# agnts ships its own opengrep rules (security/rules): the community rule
+# sets carry licenses that forbid a hosted service. See plans/Security plan.md.
+ARG OPENGREP_VERSION=1.33.1
+ARG GITLEAKS_VERSION=8.30.1
+ARG OSV_SCANNER_VERSION=2.7.0
+ARG TRIVY_VERSION=0.76.1
+RUN set -eu; \
+    case "$(uname -m)" in \
+      x86_64) og=x86; og_sum=46e8133cc490f9f50518061590ce2f6be5a08afaeda034471c0ceda4b3899808; \
+              gl=x64; gl_sum=551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb; \
+              osv=amd64; osv_sum=160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b; \
+              tv=64bit; tv_sum=c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0 ;; \
+      aarch64|arm64) og=aarch64; og_sum=d1433f63a90b8bc0b6ad4b498a13b372b856ce9a754a43484ba4920fe2d76dcf; \
+              gl=arm64; gl_sum=e4a487ee7ccd7d3a7f7ec08657610aa3606637dab924210b3aee62570fb4b080; \
+              osv=arm64; osv_sum=4061ef4c021ed3c47f203b818f337e351336cc5cd67c0274fc36bd1dfc728dd7; \
+              tv=ARM64; tv_sum=e174dff2a6dba5e3ae41f8d0537a6324405bd08132497340304c6b20e0f16a1f ;; \
+      *) echo "no security scanners for $(uname -m)"; exit 1 ;; \
+    esac; \
+    gh=https://github.com; \
+    curl -fsSL --retry 5 -o /usr/local/bin/opengrep "$gh/opengrep/opengrep/releases/download/v${OPENGREP_VERSION}/opengrep_manylinux_${og}"; \
+    echo "$og_sum  /usr/local/bin/opengrep" | sha256sum -c -; \
+    curl -fsSL --retry 5 -o /tmp/gl.tgz "$gh/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_${gl}.tar.gz"; \
+    echo "$gl_sum  /tmp/gl.tgz" | sha256sum -c -; \
+    tar -xzf /tmp/gl.tgz -C /usr/local/bin gitleaks; \
+    curl -fsSL --retry 5 -o /usr/local/bin/osv-scanner "$gh/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}/osv-scanner_linux_${osv}"; \
+    echo "$osv_sum  /usr/local/bin/osv-scanner" | sha256sum -c -; \
+    curl -fsSL --retry 5 -o /tmp/trivy.tgz "$gh/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-${tv}.tar.gz"; \
+    echo "$tv_sum  /tmp/trivy.tgz" | sha256sum -c -; \
+    tar -xzf /tmp/trivy.tgz -C /usr/local/bin trivy; \
+    rm -f /tmp/gl.tgz /tmp/trivy.tgz; \
+    chmod 0755 /usr/local/bin/opengrep /usr/local/bin/gitleaks /usr/local/bin/osv-scanner /usr/local/bin/trivy; \
+    opengrep --version && gitleaks version && osv-scanner --version && trivy --version
+COPY security/rules/*.yaml /opt/agnts-sec/rules/
+COPY security/agnts-sec /usr/local/bin/agnts-sec
+RUN chmod 0755 /usr/local/bin/agnts-sec && chmod -R a+rX /opt/agnts-sec
+
+# agnts's archives expect the "agent" user at uid 1000. /opt/toolchains,
+# /opt/secdb and /home/agent/.cache are owned by it so the volumes mounted
+# there start out writable for it.
 RUN useradd --uid 1000 --create-home --home-dir /home/agent --shell /bin/bash agent \
- && mkdir -p /workspace /agnts/out /agnts/context /home/agent/.claude /home/agent/.cache /home/agent/.local/bin /opt/toolchains \
- && chown -R agent:agent /workspace /agnts /home/agent /opt/toolchains
+ && mkdir -p /workspace /agnts/out /agnts/context /home/agent/.claude /home/agent/.cache /home/agent/.local/bin /opt/toolchains /opt/secdb \
+ && chown -R agent:agent /workspace /agnts /home/agent /opt/toolchains /opt/secdb
 
 # Managed settings outrank anything in the repository's .claude/ folder, so
 # a ticket's repo cannot loosen the deny list.

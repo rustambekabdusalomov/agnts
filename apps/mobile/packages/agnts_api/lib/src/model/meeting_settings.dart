@@ -29,6 +29,8 @@ class MeetingSettings {
 
     required  this.maxParticipants,
 
+    required  this.draftTickets,
+
     required  this.available,
   });
 
@@ -82,6 +84,19 @@ class MeetingSettings {
 
 
 
+      /// Every action item becomes a held draft ticket on the member who took it when the notes are written
+  @JsonKey(
+    
+    name: r'draftTickets',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool draftTickets;
+
+
+
   @JsonKey(
     
     name: r'available',
@@ -102,6 +117,7 @@ class MeetingSettings {
       other.retentionDays == retentionDays &&
       other.keepAudio == keepAudio &&
       other.maxParticipants == maxParticipants &&
+      other.draftTickets == draftTickets &&
       other.available == available;
 
     @override
@@ -110,6 +126,7 @@ class MeetingSettings {
         retentionDays.hashCode +
         keepAudio.hashCode +
         maxParticipants.hashCode +
+        draftTickets.hashCode +
         available.hashCode;
 
   factory MeetingSettings.fromJson(Map<String, dynamic> json) => _$MeetingSettingsFromJson(json);

@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**deletePlatformAdmin**](PlatformApi.md#deleteplatformadmin) | **DELETE** /platform/admins/{id} | Delete an Admin account; not your own (Admin)
 [**downloadPlatformRun**](PlatformApi.md#downloadplatformrun) | **GET** /platform/runs/{id}/download | The transcript as JSON lines, the stored normalised events, not Claude Code&#39;s raw output (Admin). Audited.
 [**getModulesSettings**](PlatformApi.md#getmodulessettings) | **GET** /platform/settings/modules | Which coding modules the server offers, and the default for new users (Admin)
+[**getPlatformEgress**](PlatformApi.md#getplatformegress) | **GET** /platform/egress | The egress proxy&#39;s upstream (the way Muse&#39;s traffic leaves the server) and its recent checks (Admin)
 [**getPlatformOverview**](PlatformApi.md#getplatformoverview) | **GET** /platform/overview | Servers, runs and the queue across every workspace (Admin)
 [**getPlatformRun**](PlatformApi.md#getplatformrun) | **GET** /platform/runs/{id} | One transcript with its whole timeline (Admin). Customer content; the read is written to the audit log first.
 [**getPlatformRunPrompt**](PlatformApi.md#getplatformrunprompt) | **GET** /platform/runs/{id}/prompt | The prompt agnts sent (Admin). Audited.
@@ -197,6 +198,47 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**ModulesSettings**](ModulesSettings.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getPlatformEgress**
+> EgressStatus getPlatformEgress()
+
+The egress proxy's upstream (the way Muse's traffic leaves the server) and its recent checks (Admin)
+
+### Example
+```dart
+import 'package:agnts_api/api.dart';
+// TODO Configure API key authorization: cookieAuth
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKey = 'YOUR_API_KEY';
+// uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+//defaultApiClient.getAuthentication<ApiKeyAuth>('cookieAuth').apiKeyPrefix = 'Bearer';
+
+final api = AgntsApi().getPlatformApi();
+
+try {
+    final response = api.getPlatformEgress();
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->getPlatformEgress: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**EgressStatus**](EgressStatus.md)
 
 ### Authorization
 

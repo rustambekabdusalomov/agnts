@@ -33,6 +33,8 @@ Name | Type | Description | Notes
 **invitees** | [**List&lt;MeetingInvitee&gt;**](MeetingInvitee.md) |  | 
 **myRsvp** | **String** | Set when you are invited | [optional] 
 **canManage** | **bool** | You may change, invite, cancel | 
+**canUpload** | **bool** | You may upload a recording of it (uploadMeetingRecording): you host it and this server hears uploads | 
+**maxUploadMb** | **int** | The largest recording that can be uploaded | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

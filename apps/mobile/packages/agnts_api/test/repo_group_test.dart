@@ -46,6 +46,12 @@ void main() {
       // TODO
     });
 
+    // Titles the pull requests of the group's tickets in every member, replacing each repository's own; empty keeps theirs
+    // String prTemplate
+    test('to test the property `prTemplate`', () async {
+      // TODO
+    });
+
     // List<RepoGroupMember> members
     test('to test the property `members`', () async {
       // TODO
