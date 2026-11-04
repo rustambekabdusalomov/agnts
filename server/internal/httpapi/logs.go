@@ -364,7 +364,9 @@ func (s *Server) ListLogFindings(w http.ResponseWriter, r *http.Request, p gen.L
 	if !s.logsReady(w) {
 		return
 	}
-	var q domain.LogFindingFilter
+	// The admin panel pages and searches the list itself: give it as many
+	// as the store allows rather than its default of 200.
+	q := domain.LogFindingFilter{Limit: 500}
 	if p.Category != nil {
 		q.Category = domain.LogCategory(*p.Category)
 	}
