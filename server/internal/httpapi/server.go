@@ -200,6 +200,8 @@ func NewHandler(opt Options) (http.Handler, error) {
 		push.Post("/webhooks/logs/loki/api/v1/push", s.logsPush)
 		push.Post("/webhooks/logs/{token}", s.logsPush)
 		push.Post("/webhooks/logs/{token}/loki/api/v1/push", s.logsPush)
+		push.Post("/webhooks/logs/v1/logs", s.logsPush)
+		push.Post("/webhooks/logs/{token}/v1/logs", s.logsPush)
 	}
 	for name, h := range opt.Payments {
 		r.With(middleware.RequestSize(maxBodyBytes)).Handle("/webhooks/"+name, h)

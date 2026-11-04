@@ -78,7 +78,7 @@ export const ADDRESS_PH: Record<LogKind, string> = {
   push: '',
 }
 
-/** Shipper snippets for a push source: Vector and Fluent Bit. */
+/** Shipper snippets for a push source: Vector, Fluent Bit, Promtail, OpenTelemetry and agnts-watch. */
 export function pushSnippets(url: string, token: string) {
   const u = new URL(url, location.origin)
   const vector = `[transforms.agnts_filter]
@@ -108,6 +108,29 @@ compression = "gzip"`
   const promtail = `clients:
   - url: ${u.href}/loki/api/v1/push
     bearer_token: ${token}`
+  // A pipeline of its own, so the Collector's other pipelines are untouched;
+  // the filter drops records below ERROR that don't look like an error or a leak.
+  const otel = `exporters:
+  otlphttp/agnts:
+    logs_endpoint: ${u.href}/v1/logs
+    headers:
+      Authorization: "Bearer ${token}"
+processors:
+  filter/agnts:
+    error_mode: ignore
+    logs:
+      log_record:
+        - severity_number < SEVERITY_NUMBER_ERROR and not IsMatch(body, "(?i)panic|exception|traceback|bearer|password|secret")
+service:
+  pipelines:
+    logs/agnts:
+      receivers: [otlp]
+      processors: [filter/agnts, batch]
+      exporters: [otlphttp/agnts]`
+  const otelSdk = `OTEL_LOGS_EXPORTER=otlp
+OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=http/protobuf
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=${u.href}/v1/logs
+OTEL_EXPORTER_OTLP_LOGS_HEADERS=Authorization=Bearer%20${token}`
   // agnts-watch: for a server with no logging system. It follows the
   // containers labelled agnts.watch=logs through a read-only socket proxy.
   const watch = `services:
@@ -129,5 +152,5 @@ compression = "gzip"`
 
 # and on each service to watch:
 #   labels: { agnts.watch: "logs" }`
-  return { vector, fluentbit, promtail, watch }
+  return { vector, fluentbit, promtail, otel, otelSdk, watch }
 }

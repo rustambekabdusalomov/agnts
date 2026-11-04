@@ -8851,6 +8851,8 @@ export interface components {
             level?: string;
             service?: string;
             revision?: string;
+            /** @description Link to a trace in the tracing UI (Tempo, Jaeger), with {traceId} where the id goes */
+            traceUrl?: string;
         };
         /** @description What a source reads: a Loki base selector, an Elasticsearch index pattern, Graylog streams */
         LogScope: {
@@ -9011,6 +9013,10 @@ export interface components {
             fixedAt?: string;
             /** @description Redacted log excerpt (single reads only) */
             sample?: string;
+            /** @description The trace the sample came from, when the logs carry one (single reads only) */
+            traceId?: string;
+            /** @description The trace in the source's tracing UI, when the source has a trace link (single reads only) */
+            traceUrl?: string;
         };
         LogPattern: {
             name: string;

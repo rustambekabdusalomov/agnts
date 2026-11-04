@@ -3,6 +3,7 @@ package domain
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"slices"
 	"strings"
 	"time"
@@ -86,6 +87,41 @@ type LogFields struct {
 	Level     string `json:"level,omitempty"`
 	Service   string `json:"service,omitempty"`
 	Revision  string `json:"revision,omitempty"`
+	// TraceURL links a trace id to the user's tracing UI (Tempo, Jaeger):
+	// a URL with {traceId} where the id goes. Optional.
+	TraceURL string `json:"traceUrl,omitempty"`
+}
+
+// TraceLink is the link to a trace, or "" without a template or an id.
+func (f LogFields) TraceLink(traceID string) string {
+	if f.TraceURL == "" || traceID == "" {
+		return ""
+	}
+	return strings.ReplaceAll(f.TraceURL, "{traceId}", url.QueryEscape(traceID))
+}
+
+// A finding's sample names the trace its lines came from in header
+// lines starting with these.
+const (
+	LogSampleTrace     = "trace: "
+	LogSampleTraceLink = "trace link: "
+)
+
+// SampleTrace reads the trace id and link from a sample's header.
+func SampleTrace(sample string) (id, link string) {
+	head, _, _ := strings.Cut(sample, "\n\n")
+	for _, l := range strings.Split(head, "\n") {
+		if v, ok := strings.CutPrefix(l, LogSampleTrace); ok {
+			id = CleanTraceID(v)
+		} else if v, ok := strings.CutPrefix(l, LogSampleTraceLink); ok {
+			link = v
+		}
+	}
+	// The link is shown as a link: only an http(s) one, and only with an id.
+	if id == "" || (!strings.HasPrefix(link, "https://") && !strings.HasPrefix(link, "http://")) {
+		link = ""
+	}
+	return id, link
 }
 
 // LogScope narrows what a source reads: a Loki base selector, an
@@ -182,6 +218,17 @@ func (s *LogSource) Normalize() error {
 	if s.CAPEM = strings.TrimSpace(s.CAPEM); s.CAPEM != "" && !strings.Contains(s.CAPEM, "BEGIN CERTIFICATE") {
 		errs = append(errs, errors.New("CA certificate must be PEM"))
 	}
+	if s.Fields.TraceURL = strings.TrimSpace(s.Fields.TraceURL); s.Fields.TraceURL != "" {
+		u, err := url.Parse(strings.ReplaceAll(s.Fields.TraceURL, "{traceId}", "x"))
+		switch {
+		case err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "":
+			errs = append(errs, errors.New("trace link must be an https:// or http:// URL"))
+		case !strings.Contains(s.Fields.TraceURL, "{traceId}"):
+			errs = append(errs, errors.New("trace link must contain {traceId}"))
+		case len(s.Fields.TraceURL) > 1000:
+			errs = append(errs, errors.New("trace link must be at most 1000 characters"))
+		}
+	}
 	return errors.Join(errs...)
 }
 
@@ -237,6 +284,13 @@ type LogEntry struct {
 	Level    string // from the backend's field, when it has one
 	Revision string
 	Message  string
+	// TraceID and SpanID (hex) tie the entry to a trace, when the
+	// producer sent them (OTLP, or a JSON log's trace_id).
+	TraceID string
+	SpanID  string
+	// Extra is more text the detectors scan but the sample never shows
+	// (an OTLP record's attributes, as JSON).
+	Extra []string
 	// Key identifies the entry for the cursor's de-duplication.
 	Key string
 }

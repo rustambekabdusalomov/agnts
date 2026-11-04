@@ -10867,6 +10867,7 @@ components:
         level: { type: string, maxLength: 120 }
         service: { type: string, maxLength: 120 }
         revision: { type: string, maxLength: 120 }
+        traceUrl: { type: string, maxLength: 1000, description: 'Link to a trace in the tracing UI (Tempo, Jaeger), with {traceId} where the id goes' }
 
     LogScope:
       type: object
@@ -11020,6 +11021,8 @@ components:
         fixedSha: { type: string }
         fixedAt: { type: string, format: date-time }
         sample: { type: string, description: 'Redacted log excerpt (single reads only)' }
+        traceId: { type: string, description: 'The trace the sample came from, when the logs carry one (single reads only)' }
+        traceUrl: { type: string, description: "The trace in the source's tracing UI, when the source has a trace link (single reads only)" }
 
     LogPattern:
       type: object

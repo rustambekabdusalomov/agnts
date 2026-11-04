@@ -197,7 +197,7 @@ var errProto = errors.New("malformed protobuf")
 
 // pbFields walks one protobuf message's fields: fn gets the field
 // number, the wire type, the bytes of a length-delimited field and the
-// value of a varint one.
+// value of a varint or fixed (64- or 32-bit, little-endian) one.
 func pbFields(b []byte, fn func(num, wire int, v []byte, n uint64) error) error {
 	for len(b) > 0 {
 		tag, k := binary.Uvarint(b)
@@ -220,7 +220,11 @@ func pbFields(b []byte, fn func(num, wire int, v []byte, n uint64) error) error 
 			if len(b) < 8 {
 				return errProto
 			}
+			n := binary.LittleEndian.Uint64(b)
 			b = b[8:]
+			if err := fn(num, wire, nil, n); err != nil {
+				return err
+			}
 		case 2:
 			n, k := binary.Uvarint(b)
 			if k <= 0 || n > uint64(len(b)-k) { //nolint:gosec // G115: len(b)-k >= 0 here
@@ -236,7 +240,11 @@ func pbFields(b []byte, fn func(num, wire int, v []byte, n uint64) error) error 
 			if len(b) < 4 {
 				return errProto
 			}
+			n := uint64(binary.LittleEndian.Uint32(b))
 			b = b[4:]
+			if err := fn(num, wire, nil, n); err != nil {
+				return err
+			}
 		default:
 			return errProto
 		}

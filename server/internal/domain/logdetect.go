@@ -45,6 +45,8 @@ type LogEvent struct {
 	Access *LogAccess
 	// Body is a logged response body, when the entry has one.
 	Body string
+	// TraceID is the trace the entry belongs to, when known.
+	TraceID string
 }
 
 // LogAccess is what an access log entry says about one request.
@@ -71,6 +73,7 @@ var (
 	jsonIPKeys       = []string{"ip", "remote_addr", "remote_ip", "client_ip", "client.ip", "source.ip", "req.remoteAddress", "x_forwarded_for"}
 	jsonBodyKeys     = []string{"response.body", "resp_body", "response_body", "http.response.body.content", "res.body"}
 	jsonRevisionKeys = []string{"revision", "version", "service.version", "commit", "git_sha", "build"}
+	jsonTraceKeys    = []string{"trace_id", "traceId", "traceID", "trace.id", "otelTraceID", "dd.trace_id"}
 )
 
 // lookup reads a dotted key from a decoded JSON object, either nested
@@ -191,7 +194,7 @@ func textLevel(line string) string {
 // into message, error, stack and fields; plain text keeps its lines. f
 // names the source's own fields.
 func ParseLogEntry(e LogEntry, f LogFields) LogEvent {
-	ev := LogEvent{Time: e.Time, Service: e.Service, Stream: e.Stream, Revision: e.Revision, Raw: []string{e.Message}}
+	ev := LogEvent{Time: e.Time, Service: e.Service, Stream: e.Stream, Revision: e.Revision, Raw: append([]string{e.Message}, e.Extra...), TraceID: CleanTraceID(e.TraceID)}
 	if ev.Stream == "" {
 		ev.Stream = e.Service
 	}
@@ -232,6 +235,9 @@ func ParseLogEntry(e LogEntry, f LogFields) LogEvent {
 			}
 		}
 		ev.Body = lookupString(m, jsonBodyKeys, "")
+		if ev.TraceID == "" {
+			ev.TraceID = CleanTraceID(lookupString(m, jsonTraceKeys, ""))
+		}
 	} else {
 		ev.Lines = splitLines(msg)
 		if len(ev.Lines) > 0 {
@@ -251,6 +257,19 @@ func ParseLogEntry(e LogEntry, f LogFields) LogEvent {
 		}
 	}
 	return ev
+}
+
+// traceIDRe is what a trace id looks like: W3C/OTel hex, or a decimal
+// Datadog id. Anything else in a log's trace field is not trusted.
+var traceIDRe = regexp.MustCompile(`^(?:[0-9a-fA-F]{16,32}|[0-9]{1,20})$`)
+
+// CleanTraceID returns id lowercased when it looks like a trace id, or "".
+func CleanTraceID(id string) string {
+	id = strings.TrimSpace(id)
+	if !traceIDRe.MatchString(id) || strings.Trim(id, "0") == "" {
+		return ""
+	}
+	return strings.ToLower(id)
 }
 
 func splitLines(s string) []string {
@@ -326,6 +345,9 @@ func FrameLogs(entries []LogEntry, f LogFields) []LogEvent {
 					cur.Raw = append(cur.Raw, ev.Raw...)
 					if cur.Level == "" && ev.Level != "" {
 						cur.Level = ev.Level
+					}
+					if cur.TraceID == "" {
+						cur.TraceID = ev.TraceID
 					}
 					continue
 				}

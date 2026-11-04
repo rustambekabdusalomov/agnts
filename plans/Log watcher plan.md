@@ -19,8 +19,12 @@
 >   (search export). Loki's push API (Promtail, Alloy) is at `/webhooks/logs/loki/api/v1/push`.
 > - **Not built:** deep links back to Grafana, Kibana or Graylog; the Rust CLI's `agnts watch install --host` (the admin
 >   shows a compose snippet instead). A source shows that it went through a private network, not which one.
-> - **Planned, not built (added 2026-11-03):** the OTLP logs receiver for OpenTelemetry Collectors and SDKs, phase 4,
->   see "OpenTelemetry (OTLP) push" below.
+> - **OpenTelemetry (phase 4) built 2026-11-04** (branch `log-otlp`), see "OpenTelemetry (OTLP) push" below. Differences:
+>   the trace id and link are lines of the finding's sample header (sealed and replaced with it, so they always match
+>   the lines shown), not columns; the trace link template is `fields.traceUrl` on the source, so no migration; record
+>   attributes reach the detectors through `LogEntry.Extra`; JSON logs' `trace_id` (and `traceId`, `trace.id`,
+>   `dd.trace_id`) is read too, so pulled Loki/ES logs get trace links. Not done: the Dart client was not regenerated
+>   (the spec has unrelated YAML errors the generator refuses), and the mobile app shows no trace.
 
 Nov 2, 2026 · draft, revised: v1 connects to the user's logging systems · supersedes `Incidents plan.md` (never
 implemented; its on-host Docker watcher becomes phase 3) · copies the shape of `ciwatch` · reaches private loggers
@@ -250,7 +254,7 @@ push API (`/loki/api/v1/push`, protobuf + snappy, for Promtail and Grafana Alloy
 
 ### OpenTelemetry (OTLP) push
 
-*Planned (phase 4), not built.*
+*Phase 4, built.*
 
 OpenTelemetry is a pipe, not a store: there is no address to read logs from, and a Collector can't be queried. Where
 OTel logs already land in Loki (Loki 3 ingests OTLP natively, resource attributes become labels such as
@@ -672,7 +676,7 @@ The gateway records the spend and the transcript, so `logwatch` writes neither.
 unhealthy, container logs, files, journald) for servers with no logging system; Datadog, CloudWatch and Splunk
 connectors; the best-effort injection detector.
 
-**4 — OpenTelemetry (planned, not built).** The OTLP/HTTP logs receiver (`/webhooks/logs/v1/logs`, protobuf and JSON,
+**4 — OpenTelemetry (built).** The OTLP/HTTP logs receiver (`/webhooks/logs/v1/logs`, protobuf and JSON,
 `PushOTLP`), `TraceID`/`SpanID` on entries and samples, the optional trace URL template, and the Collector and SDK
 snippets on the Push source. Done when a Collector with the snippet above, fed a Go service that panics and logs a
 bearer token through the OTel log bridge, gives the same two findings as the Loki smoke test, with the trace id on the

@@ -85,14 +85,14 @@ func strOr(p *string) string {
 }
 
 func toLogFields(f domain.LogFields) gen.LogFields {
-	return gen.LogFields{Message: optStr(f.Message), Timestamp: optStr(f.Timestamp), Level: optStr(f.Level), Service: optStr(f.Service), Revision: optStr(f.Revision)}
+	return gen.LogFields{Message: optStr(f.Message), Timestamp: optStr(f.Timestamp), Level: optStr(f.Level), Service: optStr(f.Service), Revision: optStr(f.Revision), TraceUrl: optStr(f.TraceURL)}
 }
 
 func fromLogFields(f *gen.LogFields) domain.LogFields {
 	if f == nil {
 		return domain.LogFields{}
 	}
-	return domain.LogFields{Message: strOr(f.Message), Timestamp: strOr(f.Timestamp), Level: strOr(f.Level), Service: strOr(f.Service), Revision: strOr(f.Revision)}
+	return domain.LogFields{Message: strOr(f.Message), Timestamp: strOr(f.Timestamp), Level: strOr(f.Level), Service: strOr(f.Service), Revision: strOr(f.Revision), TraceURL: strOr(f.TraceUrl)}
 }
 
 func toLogService(v domain.LogService) gen.LogService {
@@ -162,6 +162,12 @@ func (s *Server) toLogFinding(ctx context.Context, f domain.LogFinding) gen.LogF
 		LastSeenAt: f.LastSeenAt, Revision: f.Revision, Route: f.Route, SecretMask: f.SecretMask,
 		Occurrences: make([]gen.LogOccurrence, len(f.Occurrences)), ReportedAt: f.ReportedAt, TicketKey: f.TicketKey,
 		FixedSha: optStr(f.FixedSHA), FixedAt: f.FixedAt, Sample: optStr(f.Sample)}
+	if id, link := domain.SampleTrace(f.Sample); id != "" {
+		out.TraceId = &id
+		if link != "" {
+			out.TraceUrl = &link
+		}
+	}
 	if out.RepoIds == nil {
 		out.RepoIds = []int64{}
 	}
@@ -458,8 +464,10 @@ func (s *Server) NotifyLogFinding(w http.ResponseWriter, r *http.Request, id gen
 // logsPush takes what a log shipper sends: POST /webhooks/logs with
 // "Authorization: Bearer <token>", or /webhooks/logs/{token} for shippers
 // that can't set headers; under .../loki/api/v1/push it speaks Loki's
-// push API, so Promtail and Grafana Alloy can send to agnts. 202 on accept, 429 with Retry-After when over
-// the rate, so shippers buffer and retry.
+// push API, so Promtail and Grafana Alloy can send to agnts, and under
+// .../v1/logs OTLP/HTTP, for OpenTelemetry Collectors and SDKs. 202 on
+// accept (200 with an ExportLogsServiceResponse for OTLP), 429 with
+// Retry-After when over the rate, so shippers buffer and retry.
 func (s *Server) logsPush(w http.ResponseWriter, r *http.Request) {
 	if s.opt.Logs == nil {
 		writeError(w, http.StatusNotImplemented, "not_implemented", "the log watcher is not available")
@@ -473,8 +481,11 @@ func (s *Server) logsPush(w http.ResponseWriter, r *http.Request) {
 		token = pass // Promtail's basic_auth: any user, the token as the password
 	}
 	format := logwatch.PushPlain
-	if strings.HasSuffix(r.URL.Path, "/loki/api/v1/push") {
+	switch {
+	case strings.HasSuffix(r.URL.Path, "/loki/api/v1/push"):
 		format = logwatch.PushLoki
+	case strings.HasSuffix(r.URL.Path, "/v1/logs"):
+		format = logwatch.PushOTLP
 	}
 	if token == "" {
 		writeError(w, http.StatusUnauthorized, "unauthorized", "send the push token as Authorization: Bearer <token>")
@@ -501,9 +512,27 @@ func (s *Server) logsPush(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", strings.TrimPrefix(err.Error(), "invalid: "))
 	case err != nil:
 		s.writeInternal(w, r, err)
+	case format == logwatch.PushOTLP:
+		writeOTLP(w, r.Header.Get("Content-Type"), res.Rejected)
 	default:
 		writeJSON(w, http.StatusAccepted, res)
 	}
+}
+
+// writeOTLP answers an OTLP/HTTP export in the encoding it came in.
+func writeOTLP(w http.ResponseWriter, contentType string, rejected int) {
+	asJSON := logsource.OTLPIsJSON(contentType)
+	msg := ""
+	if rejected > 0 {
+		msg = "agnts reads at most " + strconv.Itoa(logsource.MaxPushEntries) + " records per request"
+	}
+	if asJSON {
+		w.Header().Set("Content-Type", "application/json")
+	} else {
+		w.Header().Set("Content-Type", "application/x-protobuf")
+	}
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(logsource.OTLPResponse(asJSON, rejected, msg)) //nolint:gosec // G705: protobuf or JSON agnts builds from a count and a constant, sent with its content type
 }
 
 func toLogWatch(l domain.LogWatchSettings) gen.LogWatchSettings {
