@@ -146,6 +146,16 @@ func TestSecurityScanFixVerify(t *testing.T) {
 	if strings.Contains(string(b), "FAKE-SECRET-VALUE") {
 		t.Fatal("a stored finding holds the secret")
 	}
+	// The notification lists what is new at high or above (the default).
+	notable, err := h.o.NotableFindings(h.ctx, scan.ID)
+	if err != nil || len(notable) == 0 || notable[0].Severity != domain.SecCritical {
+		t.Fatalf("notable: %+v %v", notable, err)
+	}
+	for _, f := range notable {
+		if f.Severity.Rank() < domain.SecHigh.Rank() {
+			t.Fatalf("a %s finding is notable", f.Severity)
+		}
+	}
 	inj := fs[0]
 	if inj.Severity != domain.SecCritical || inj.Symbol != "Orders.Search" || len(inj.Data.Rules) != 2 || inj.Data.Confidence != domain.SecConfirmed {
 		t.Fatalf("injection: %+v", inj)

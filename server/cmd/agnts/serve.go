@@ -714,6 +714,7 @@ func newAgent(cfg config.Config, pool postgresPool, log *slog.Logger) (*agent, e
 	a.notifier = notify.New(a.store, a.orch, a.settings, fcm, a.telegramConfig, cfg.TelegramAPI, log.With("component", "notify"))
 	a.notifier.SetCIFixer(a.ci)
 	a.notifier.SetLogFixer(a.logs)
+	a.notifier.SetSecurityFixer(a.orch)
 	a.assistant = postgres.NewAssistant(pool, box)
 	a.orch.SetAssistant(a.assistant, mcpserver.NewSnapshotter(a.mcpDeps()))
 	a.orch.SetAssistantActions(&actions.Assistant{Deps: actions.Deps{Orch: a.orch, Store: a.store, Repos: a.repos}, Role: a.workspaces.Role})

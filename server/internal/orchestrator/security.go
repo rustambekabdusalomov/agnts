@@ -308,6 +308,7 @@ func scanEvent(s domain.SecurityScan) *domain.Event {
 	data := map[string]any{"repo": s.RepoID, "name": s.RepoName, "scan": s.ID, "status": string(s.Status), "trigger": string(s.Trigger),
 		"new": s.Counts.New, "fixed": s.Counts.Fixed, "reopened": s.Counts.Reopened}
 	if s.Status == domain.ScanFailed {
+		data["notify"] = true
 		return &domain.Event{Type: domain.EventSecurity, Step: "security", Origin: domain.OriginSystem, Level: domain.LevelWarn,
 			Message: fmt.Sprintf("security scan of %s failed: %s", s.RepoName, truncate(s.Error, 300)), Data: data}
 	}
@@ -683,6 +684,44 @@ func (o *Orchestrator) CreateSecurityTicket(ctx context.Context, in SecurityFixI
 		return &e
 	})
 	return t, err
+}
+
+// FixFinding opens a fix ticket for one finding (Telegram's Fix it).
+func (o *Orchestrator) FixFinding(ctx context.Context, id int64, origin domain.Origin) (domain.Ticket, error) {
+	return o.CreateSecurityTicket(ctx, SecurityFixInput{FindingIDs: []int64{id}}, origin)
+}
+
+// NotableFindings are what a scan's notification lists: findings it
+// found new at the repository's threshold or above, and any it found
+// again after they were fixed, worst first.
+func (o *Orchestrator) NotableFindings(ctx context.Context, scanID int64) ([]domain.SecurityFinding, error) {
+	if err := o.securityReady(); err != nil {
+		return nil, err
+	}
+	scan, err := o.security.SecurityScan(ctx, scanID)
+	if err != nil {
+		return nil, err
+	}
+	repo, err := o.store.RepositoryByID(ctx, scan.RepoID)
+	if err != nil {
+		return nil, err
+	}
+	at := repo.Harness.Security.NotifyAt()
+	fs, err := o.security.SecurityFindings(ctx, domain.SecFindingFilter{RepoID: scan.RepoID, Active: true})
+	if err != nil {
+		return nil, err
+	}
+	var out []domain.SecurityFinding
+	for _, f := range fs {
+		if f.LastScanID == nil || *f.LastScanID != scanID {
+			continue
+		}
+		isNew := scan.StartedAt != nil && !f.FirstSeen.Before(*scan.StartedAt)
+		if f.Status == domain.SecReopened || isNew && f.Severity.Rank() >= at.Rank() {
+			out = append(out, f)
+		}
+	}
+	return out, nil // SecurityFindings sorts worst first
 }
 
 // DismissFindings dismisses findings with a reason (false_positive,
