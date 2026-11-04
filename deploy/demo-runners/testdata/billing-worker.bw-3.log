@@ -1,0 +1,2 @@
+2026-11-04T13:42:00.371Z INFO billing.main: connecting to postgres://billing:Sup3rS3cret-2026@postgres:5432/shop
+2026-11-04T13:42:00.372Z INFO billing.main: started 2 workers

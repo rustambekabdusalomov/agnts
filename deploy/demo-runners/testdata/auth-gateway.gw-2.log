@@ -1,0 +1,5 @@
+{"time":"2026-11-04T13:42:00.39666Z","level":"WARN","msg":"login failed for shopper-31@shop.test: wrong password","user_id":"9a50bc79-8e99-40ef-8abb-9d5e7be72239","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+[GIN] 2026/11/04 - 13:42:00 | 401 |       34.64ms |   203.0.113.194 | POST    "/auth/login"
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 200 543 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+[GIN] 2026/11/04 - 13:42:00 | 200 |      39.706ms |   203.0.113.194 | POST    "/auth/login"

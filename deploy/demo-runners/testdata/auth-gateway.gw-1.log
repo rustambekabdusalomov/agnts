@@ -1,0 +1,78 @@
+{"time":"2026-11-04T13:42:00.390097Z","level":"WARN","msg":"login failed for shopper-31@shop.test: wrong password","user_id":"889a50bc-798e-49b0-af4a-bb9d5e7be722","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      39.048ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390207Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      39.333ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390221Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      34.958ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390233Z","level":"WARN","msg":"login failed for shopper-30@shop.test: wrong password","user_id":"0ef6a1ce-38af-4db8-9421-94e074bf6c8d","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      33.823ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390245Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      34.294ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390255Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      38.833ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390267Z","level":"WARN","msg":"login failed for shopper-24@shop.test: wrong password","user_id":"ded208af-ca1e-4c4f-937e-679fcf95fca4","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      37.293ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390278Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      38.631ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390288Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      37.287ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390299Z","level":"WARN","msg":"login failed for shopper-14@shop.test: wrong password","user_id":"570efe8f-7d58-4b1d-8d26-2cc74f2a6858","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      35.498ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.39031Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      40.482ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.39032Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      35.546ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390331Z","level":"WARN","msg":"login failed for shopper-02@shop.test: wrong password","user_id":"ff6180c2-238f-451d-8105-96e016474ac4","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      36.539ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390345Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      37.121ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390353Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      37.435ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390361Z","level":"WARN","msg":"login failed for shopper-48@shop.test: wrong password","user_id":"a7e4fa7f-9d6b-47a7-9f54-9efd179b2f7b","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      39.945ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390369Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      34.885ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390377Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      33.355ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390385Z","level":"WARN","msg":"login failed for shopper-38@shop.test: wrong password","user_id":"de455373-073b-4d21-abfe-9c0f34521f76","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      38.259ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390393Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |       37.14ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390401Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      40.101ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390409Z","level":"WARN","msg":"login failed for shopper-27@shop.test: wrong password","user_id":"a73c6362-6bb6-4e24-b3a4-f9da7a82b316","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      40.313ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390417Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      37.049ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390425Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      38.264ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390433Z","level":"WARN","msg":"login failed for shopper-05@shop.test: wrong password","user_id":"23dfe155-2329-40c8-816f-d31e5b1b8368","failed_logins":1}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      35.799ms |   203.0.113.194 | POST    "/auth/login"
+{"time":"2026-11-04T13:42:00.390447Z","level":"WARN","msg":"login failed","reason":"unknown email"}
+203.0.113.194 - - [04/Nov/2026:13:42:00 +0000] "POST /auth/login HTTP/1.1" 401 37 "-" "python-requests/2.32.3"
+[GIN] 2026/11/04 - 13:42:00 | 401 |      40.416ms |   203.0.113.194 | POST    "/auth/login"

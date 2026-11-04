@@ -1,0 +1,2 @@
+{"time":"2026-11-04T13:42:00.346002Z","level":"INFO","msg":"request","method":"POST","path":"/api/cart/items","route":"POST /api/cart/items","status":201,"duration_ms":13,"ip":"203.0.113.184","user_id":"106c889a-50bc-498e-99b0-ef4abb9d5e7b"}
+{"time":"2026-11-04T13:42:00.346077Z","level":"INFO","msg":"request","method":"POST","path":"/api/checkout","route":"POST /api/checkout","status":201,"duration_ms":9,"ip":"203.0.113.184","user_id":"106c889a-50bc-498e-99b0-ef4abb9d5e7b"}

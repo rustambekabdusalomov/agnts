@@ -1,0 +1,114 @@
+panic: runtime error: integer divide by zero
+
+goroutine 315 [running]:
+github.com/shop/billing-worker/internal/jobs.checkTotals({0x67, 0x2c, {0xc0003807c0, 0x3}, {0xc0003828a0, 0x1, 0x1}, 0x0, 0x0, 0x0, ...})
+	/src/internal/jobs/charge.go:105 +0x474
+github.com/shop/billing-worker/internal/jobs.(*Handlers).ChargeOrder(0xc000020280, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, {0xc0003b25a0, 0x118, 0x118})
+	/src/internal/jobs/charge.go:27 +0x134
+github.com/shop/billing-worker/internal/queue.(*Worker).run(0x9d22158?, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, 0xc0003850c0)
+	/src/internal/queue/worker.go:113 +0x6c
+github.com/shop/billing-worker/internal/queue.(*Worker).runOne(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:88 +0x150
+github.com/shop/billing-worker/internal/queue.(*Worker).loop(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:57 +0x54
+github.com/shop/billing-worker/internal/queue.(*Worker).Run.func1()
+	/src/internal/queue/worker.go:49 +0x4c
+created by github.com/shop/billing-worker/internal/queue.(*Worker).Run in goroutine 1
+	/src/internal/queue/worker.go:47 +0x50
+2026-11-04T13:42:00.359Z INFO billing.main: connecting to postgres://billing:Sup3rS3cret-2026@postgres:5432/shop
+2026-11-04T13:42:00.359Z INFO billing.main: started 2 workers
+panic: runtime error: integer divide by zero
+
+goroutine 326 [running]:
+github.com/shop/billing-worker/internal/jobs.checkTotals({0x67, 0x2c, {0xc0003807c0, 0x3}, {0xc0003828a0, 0x1, 0x1}, 0x0, 0x0, 0x0, ...})
+	/src/internal/jobs/charge.go:105 +0x474
+github.com/shop/billing-worker/internal/jobs.(*Handlers).ChargeOrder(0xc000020280, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, {0xc0003b25a0, 0x118, 0x118})
+	/src/internal/jobs/charge.go:27 +0x134
+github.com/shop/billing-worker/internal/queue.(*Worker).run(0x9d22158?, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, 0xc0003850c0)
+	/src/internal/queue/worker.go:113 +0x6c
+github.com/shop/billing-worker/internal/queue.(*Worker).runOne(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:88 +0x150
+github.com/shop/billing-worker/internal/queue.(*Worker).loop(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:57 +0x54
+github.com/shop/billing-worker/internal/queue.(*Worker).Run.func1()
+	/src/internal/queue/worker.go:49 +0x4c
+created by github.com/shop/billing-worker/internal/queue.(*Worker).Run in goroutine 1
+	/src/internal/queue/worker.go:47 +0x50
+2026-11-04T13:42:00.359Z INFO billing.main: connecting to postgres://billing:Sup3rS3cret-2026@postgres:5432/shop
+2026-11-04T13:42:00.359Z INFO billing.main: started 2 workers
+panic: runtime error: integer divide by zero
+
+goroutine 207 [running]:
+github.com/shop/billing-worker/internal/jobs.checkTotals({0x67, 0x2c, {0xc0003807c0, 0x3}, {0xc0003828a0, 0x1, 0x1}, 0x0, 0x0, 0x0, ...})
+	/src/internal/jobs/charge.go:105 +0x474
+github.com/shop/billing-worker/internal/jobs.(*Handlers).ChargeOrder(0xc000020280, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, {0xc0003b25a0, 0x118, 0x118})
+	/src/internal/jobs/charge.go:27 +0x134
+github.com/shop/billing-worker/internal/queue.(*Worker).run(0x9d22158?, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, 0xc0003850c0)
+	/src/internal/queue/worker.go:113 +0x6c
+github.com/shop/billing-worker/internal/queue.(*Worker).runOne(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:88 +0x150
+github.com/shop/billing-worker/internal/queue.(*Worker).loop(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:57 +0x54
+github.com/shop/billing-worker/internal/queue.(*Worker).Run.func1()
+	/src/internal/queue/worker.go:49 +0x4c
+created by github.com/shop/billing-worker/internal/queue.(*Worker).Run in goroutine 1
+	/src/internal/queue/worker.go:47 +0x50
+2026-11-04T13:42:00.359Z INFO billing.main: connecting to postgres://billing:Sup3rS3cret-2026@postgres:5432/shop
+2026-11-04T13:42:00.359Z INFO billing.main: started 2 workers
+panic: runtime error: integer divide by zero
+
+goroutine 81 [running]:
+github.com/shop/billing-worker/internal/jobs.checkTotals({0x67, 0x2c, {0xc0003807c0, 0x3}, {0xc0003828a0, 0x1, 0x1}, 0x0, 0x0, 0x0, ...})
+	/src/internal/jobs/charge.go:105 +0x474
+github.com/shop/billing-worker/internal/jobs.(*Handlers).ChargeOrder(0xc000020280, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, {0xc0003b25a0, 0x118, 0x118})
+	/src/internal/jobs/charge.go:27 +0x134
+github.com/shop/billing-worker/internal/queue.(*Worker).run(0x9d22158?, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, 0xc0003850c0)
+	/src/internal/queue/worker.go:113 +0x6c
+github.com/shop/billing-worker/internal/queue.(*Worker).runOne(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:88 +0x150
+github.com/shop/billing-worker/internal/queue.(*Worker).loop(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:57 +0x54
+github.com/shop/billing-worker/internal/queue.(*Worker).Run.func1()
+	/src/internal/queue/worker.go:49 +0x4c
+created by github.com/shop/billing-worker/internal/queue.(*Worker).Run in goroutine 1
+	/src/internal/queue/worker.go:47 +0x50
+2026-11-04T13:42:00.359Z INFO billing.main: connecting to postgres://billing:Sup3rS3cret-2026@postgres:5432/shop
+2026-11-04T13:42:00.359Z INFO billing.main: started 2 workers
+panic: runtime error: integer divide by zero
+
+goroutine 384 [running]:
+github.com/shop/billing-worker/internal/jobs.checkTotals({0x67, 0x2c, {0xc0003807c0, 0x3}, {0xc0003828a0, 0x1, 0x1}, 0x0, 0x0, 0x0, ...})
+	/src/internal/jobs/charge.go:105 +0x474
+github.com/shop/billing-worker/internal/jobs.(*Handlers).ChargeOrder(0xc000020280, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, {0xc0003b25a0, 0x118, 0x118})
+	/src/internal/jobs/charge.go:27 +0x134
+github.com/shop/billing-worker/internal/queue.(*Worker).run(0x9d22158?, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, 0xc0003850c0)
+	/src/internal/queue/worker.go:113 +0x6c
+github.com/shop/billing-worker/internal/queue.(*Worker).runOne(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:88 +0x150
+github.com/shop/billing-worker/internal/queue.(*Worker).loop(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:57 +0x54
+github.com/shop/billing-worker/internal/queue.(*Worker).Run.func1()
+	/src/internal/queue/worker.go:49 +0x4c
+created by github.com/shop/billing-worker/internal/queue.(*Worker).Run in goroutine 1
+	/src/internal/queue/worker.go:47 +0x50
+2026-11-04T13:42:00.359Z INFO billing.main: connecting to postgres://billing:Sup3rS3cret-2026@postgres:5432/shop
+2026-11-04T13:42:00.359Z INFO billing.main: started 2 workers
+panic: runtime error: integer divide by zero
+
+goroutine 321 [running]:
+github.com/shop/billing-worker/internal/jobs.checkTotals({0x67, 0x2c, {0xc0003807c0, 0x3}, {0xc0003828a0, 0x1, 0x1}, 0x0, 0x0, 0x0, ...})
+	/src/internal/jobs/charge.go:105 +0x474
+github.com/shop/billing-worker/internal/jobs.(*Handlers).ChargeOrder(0xc000020280, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, {0xc0003b25a0, 0x118, 0x118})
+	/src/internal/jobs/charge.go:27 +0x134
+github.com/shop/billing-worker/internal/queue.(*Worker).run(0x9d22158?, {0x9d22190, 0xc0003cc540}, {0x9d26128, 0xc000382840}, 0xc0003850c0)
+	/src/internal/queue/worker.go:113 +0x6c
+github.com/shop/billing-worker/internal/queue.(*Worker).runOne(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:88 +0x150
+github.com/shop/billing-worker/internal/queue.(*Worker).loop(0xc0001101c0, {0x9d222a8, 0xc00009e400})
+	/src/internal/queue/worker.go:57 +0x54
+github.com/shop/billing-worker/internal/queue.(*Worker).Run.func1()
+	/src/internal/queue/worker.go:49 +0x4c
+created by github.com/shop/billing-worker/internal/queue.(*Worker).Run in goroutine 1
+	/src/internal/queue/worker.go:47 +0x50
+2026-11-04T13:42:00.359Z INFO billing.main: connecting to postgres://billing:Sup3rS3cret-2026@postgres:5432/shop
+2026-11-04T13:42:00.359Z INFO billing.main: started 2 workers
