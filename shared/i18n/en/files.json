@@ -15,6 +15,9 @@
     "wait": "Wait for the uploads to finish",
     "fromTask": "With the task",
     "fromRetry": "With a retry",
-    "fromFeedback": "With requested changes"
+    "fromFeedback": "With requested changes",
+    "dropOne": "Drop a file here, or",
+    "choose": "choose a file",
+    "change": "Choose another"
   }
 }

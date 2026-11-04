@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, ref, type Ref } from 'vue'
+import { computed, onBeforeUnmount, ref, type Ref } from 'vue'
 import { api, unwrap } from '../../api/client'
-import type { MeetingNotesStatus, MeetingTranscript } from '../../api/types'
+import type { Meeting, MeetingNotesStatus, MeetingTranscript } from '../../api/types'
 
 // Meetings as the panel lists and shows them. The call itself (the lobby,
 // LiveKit) is useCall; this is the workspace's side: meetings, past calls,
 // their transcripts, recordings and action items.
 
-export type MeetingView = 'upcoming' | 'live' | 'mine'
+export type MeetingView = 'upcoming' | 'live' | 'mine' | 'agenda'
 
 /** The meetings the person sees in a view; polls while one is live. */
 export function useMeetingList(view: Ref<MeetingView>) {
@@ -16,6 +16,37 @@ export function useMeetingList(view: Ref<MeetingView>) {
     queryFn: () => unwrap(api.GET('/meetings', { params: { query: { view: view.value } } })),
     refetchInterval: (q) => (q.state.data?.some((m) => m.live) ? 15_000 : 60_000),
   })
+}
+
+/** What is left of a person's day: the meeting to show first and the others. */
+export interface TodayMeetings {
+  /** A live meeting, else the next one today; null when the day is clear. */
+  first: Meeting | null
+  /** The rest of today's meetings, in order. */
+  rest: Meeting[]
+}
+
+/**
+ * Cuts an agenda (live meetings first, then by start) to the person's own
+ * today: live ones, and scheduled ones that start before midnight and have
+ * not ended by now.
+ */
+export function todayMeetings(agenda: Meeting[], now: Date): TodayMeetings {
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime()
+  const left = agenda.filter(
+    (m) => m.live || (m.startsAt && m.endsAt && new Date(m.startsAt).getTime() < midnight && new Date(m.endsAt).getTime() > now.getTime()),
+  )
+  return { first: left[0] ?? null, rest: left.slice(1) }
+}
+
+/** The person's meetings left today; follows the clock so they drop out as they end. */
+export function useTodayMeetings() {
+  const list = useMeetingList(ref<MeetingView>('agenda'))
+  const now = ref(new Date())
+  const timer = setInterval(() => (now.value = new Date()), 30_000)
+  onBeforeUnmount(() => clearInterval(timer))
+  const today = computed(() => todayMeetings(list.data.value ?? [], now.value))
+  return { today, now }
 }
 
 /** Calls that happened, newest first; polls while notes are being written. */

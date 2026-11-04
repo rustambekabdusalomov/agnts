@@ -15,6 +15,12 @@
     "copied": "Copied",
     "saved": "Saved",
     "search": "Search",
-    "noMatch": "No matches"
+    "noMatch": "No matches",
+    "pickDateTime": "Choose a date and time",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "now": "Now",
+    "time": "Time",
+    "done": "Done"
   }
 }

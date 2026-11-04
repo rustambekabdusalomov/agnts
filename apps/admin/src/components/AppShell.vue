@@ -21,6 +21,7 @@ import { useRules } from './rules/useRules'
 import GlobalSearch, { type SearchPage } from './GlobalSearch.vue'
 import HiIcon from './ui/HiIcon.vue'
 import IncomingCall from './meetings/IncomingCall.vue'
+import TodayMeetingPill from './meetings/TodayMeetingPill.vue'
 import { useChatChannels, useChatLive } from './chat/useChat'
 import { sectionIcon, sectionLabel, settingsSection, visibleSections } from './settings/sections'
 
@@ -463,6 +464,7 @@ onBeforeUnmount(() => {
         <RouterLink v-if="queue.data.value" class="queue-pill" :class="{ warn: serverWaiting > 0 }" :to="{ name: 'tickets', query: { f: 'queue' } }">
           {{ t('queue.header', { running: queue.data.value.running, slots: queue.data.value.slots }) }}<template v-if="queued"> · {{ t('queue.queued', { n: queued }) }}</template><template v-if="serverWaiting"> ({{ t('queue.waitingServer', { n: serverWaiting }) }})</template>
         </RouterLink>
+        <TodayMeetingPill v-if="workspace.detail" />
         <GlobalSearch :pages="searchPages" />
         <div class="top-right">
           <span v-if="!connected" class="hint">{{ t('nav.offline') }}</span>

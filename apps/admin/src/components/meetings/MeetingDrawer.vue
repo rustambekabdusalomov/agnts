@@ -7,6 +7,7 @@ import { api, HttpError, unwrap } from '../../api/client'
 import type { MeetingDetail, MeetingInput } from '../../api/types'
 import { useSession } from '../../stores/session'
 import CheckBox from '../form/CheckBox.vue'
+import DateTimeInput from '../form/DateTimeInput.vue'
 import FormDrawer from '../form/FormDrawer.vue'
 import InputSelect from '../form/InputSelect.vue'
 import SegButtons from '../form/SegButtons.vue'
@@ -28,8 +29,7 @@ const form = reactive({
   title: '',
   description: '',
   kind: 'scheduled' as 'instant' | 'scheduled',
-  date: '',
-  time: '',
+  start: '', // an ISO instant
   durationMin: 30,
   timeZone: zone,
   access: 'invited' as 'workspace' | 'invited',
@@ -44,19 +44,14 @@ const error = ref('')
 const busy = ref(false)
 const editing = computed(() => !!props.meeting)
 
-function pad(n: number) {
-  return String(n).padStart(2, '0')
-}
 function reset() {
   error.value = ''
   const m = props.meeting
   if (m) {
-    const s = m.startsAt ? new Date(m.startsAt) : null
     Object.assign(form, {
       title: m.title, description: m.description, kind: m.kind, durationMin: m.durationMin, timeZone: m.timeZone, access: m.access,
       guests: m.guests, autoNotes: m.autoNotes, autoRecord: m.autoRecord, language: m.language, members: [], emails: '',
-      date: s ? `${s.getFullYear()}-${pad(s.getMonth() + 1)}-${pad(s.getDate())}` : '',
-      time: s ? `${pad(s.getHours())}:${pad(s.getMinutes())}` : '',
+      start: m.startsAt ?? '',
     })
     return
   }
@@ -66,7 +61,7 @@ function reset() {
     title: '', description: '', kind: props.schedule === false ? 'instant' : 'scheduled', durationMin: 30, timeZone: zone,
     access: props.schedule === false ? 'workspace' : 'invited', guests: 'knock', autoNotes: false, autoRecord: false, language: 'auto',
     members: [], emails: '',
-    date: `${soon.getFullYear()}-${pad(soon.getMonth() + 1)}-${pad(soon.getDate())}`, time: `${pad(soon.getHours())}:${pad(soon.getMinutes())}`,
+    start: soon.toISOString(),
   })
 }
 watch(open, (v) => v && reset(), { immediate: true })
@@ -92,8 +87,7 @@ const durations = computed(() =>
 )
 
 function startsAt(): string | undefined {
-  if (form.kind !== 'scheduled' || !form.date || !form.time) return undefined
-  return new Date(`${form.date}T${form.time}:00`).toISOString()
+  return form.kind === 'scheduled' && form.start ? form.start : undefined
 }
 
 async function save() {
@@ -143,12 +137,8 @@ async function save() {
     <template v-if="form.kind === 'scheduled'">
       <div class="md-row">
         <div class="field">
-          <label for="md-date">{{ t('meetings.date') }}</label>
-          <input id="md-date" v-model="form.date" type="date" class="md-in">
-        </div>
-        <div class="field">
-          <label for="md-time">{{ t('meetings.time') }}</label>
-          <input id="md-time" v-model="form.time" type="time" step="300" class="md-in">
+          <label for="md-start">{{ t('meetings.starts') }}</label>
+          <DateTimeInput id="md-start" v-model="form.start" :label="t('meetings.starts')" />
         </div>
         <div class="field">
           <span class="flbl">{{ t('meetings.duration') }}</span>
@@ -202,7 +192,7 @@ async function save() {
     <p v-if="error" class="ferr" role="alert">{{ error }}</p>
     <template #footer>
       <button type="button" class="btn" @click="open = false">{{ t('meetings.cancel') }}</button>
-      <button type="button" class="btn btn-p" :disabled="busy || (form.kind === 'scheduled' && (!form.title.trim() || !form.date || !form.time))" @click="save">
+      <button type="button" class="btn btn-p" :disabled="busy || (form.kind === 'scheduled' && (!form.title.trim() || !form.start))" @click="save">
         {{ editing ? t('meetings.save') : form.kind === 'instant' ? t('meetings.startNow') : t('meetings.schedule') }}
       </button>
     </template>
@@ -210,9 +200,8 @@ async function save() {
 </template>
 
 <style scoped>
-.md-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; }
+.md-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; }
 .md-sel { width: 100%; }
-.md-in { min-height: 42px; border: 1px solid var(--line-3); border-radius: 9px; padding: 0 10px; background: var(--surface); font: inherit; width: 100%; }
 .md-members { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; max-height: 180px; overflow-y: auto; padding: 4px 0; }
 .field textarea { border: 1px solid var(--line-3); border-radius: 9px; padding: 8px 12px; font: inherit; background: var(--surface); }
 @media (max-width: 600px) { .md-row { grid-template-columns: 1fr; } }

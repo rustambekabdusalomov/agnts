@@ -68,6 +68,7 @@
     "titlePlaceholder": "Sprint planning",
     "date": "Date",
     "time": "Time",
+    "starts": "Starts",
     "duration": "Length",
     "minutes": "{n} min",
     "timeZoneIs": "Times are in {zone}.",
@@ -328,6 +329,21 @@
     "uploadTooBig": "The file is bigger than {mb} MB",
     "uploadedBadge": "Uploaded",
     "inRecording": "{n, plural, =0 {In the recording} one {# person in the recording} other {# people in the recording}}",
-    "uploadedNote": "An uploaded recording: only its sound was heard, and the file was deleted. Nobody joined a call, so there is no attendance."
+    "uploadedNote": "An uploaded recording: only its sound was heard, and the file was deleted. Nobody joined a call, so there is no attendance.",
+    "todayLive": "Live",
+    "todayInCall": "{n} in call",
+    "todayIn": "in {n} min",
+    "todayNow": "now",
+    "todayJoin": "Join",
+    "todayLater": "Later today:",
+    "todayLiveLine": "Live: {title}",
+    "todayLiveAria": "{title} is live, {n} in call. Join",
+    "todaySoonAria": "{title} starts in {n} min. Join",
+    "todayNowAria": "{title} is starting now. Join",
+    "todayLaterAria": "Next meeting today: {title} at {time}",
+    "todayMoreAria": "{n, plural, one {# more meeting today} other {# more meetings today}}",
+    "uploadDrop": "Drop the recording here, or",
+    "uploadTypes": "Video or audio · up to {mb} MB",
+    "uploadBadType": "{name} is not a video or audio file"
   }
 }
