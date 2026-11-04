@@ -1281,6 +1281,14 @@ func (o *Orchestrator) nextTaskNumber(ctx context.Context, t domain.Ticket, pref
 			return o.store.NextGroupTaskNumber(ctx, g.ID)
 		}
 	}
+	// A prefix that is not the repository's own (SEC, LOG, CI) is shared by
+	// every repository of the workspace: the repository's counter would
+	// run into keys the others took.
+	if t.RepoID != nil {
+		if r, err := o.store.RepositoryByID(ctx, *t.RepoID); err == nil && TaskPrefix(r) != prefix {
+			return o.store.NextPrefixNumber(ctx, prefix)
+		}
+	}
 	return o.store.NextTaskNumber(ctx, t.RepoID)
 }
 

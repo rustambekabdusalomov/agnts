@@ -397,6 +397,9 @@ var logLiterals = []string{
 	"xox", "sk_live_", "rk_live_", "aiza", "sk-", ":aa",
 	"debug", "development server", "debugger",
 	"/.env", "/.git", "/wp-", "phpmyadmin", "xmlrpc", "/.aws", "/actuator", "/server-status",
+	// the rest of probePath, so the backends fetch every probe a scan counts
+	"/.ssh/", "/.ds_store", "/pma/", "admin.php", "/config.json", "/config.php", "/config.yml",
+	"/.htaccess", "/.svn/", "/backup.sql", "/backup.zip", "/backup.tar", "/db.sql", "/cgi-bin/",
 	"login", "signin", "sign_in", "authentication", "credentials",
 }
 

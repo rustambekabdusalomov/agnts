@@ -404,3 +404,21 @@ func TestLogTraces(t *testing.T) {
 		t.Errorf("only http(s) links: %q", link)
 	}
 }
+
+// The backends' filter must fetch every probe a scan counts, or a scan of
+// less common paths never reaches the burst limit.
+func TestLogFilterFetchesEveryProbe(t *testing.T) {
+	filter := regexp.MustCompile(LogFilterRegex(nil))
+	for _, p := range []string{"/.env", "/.git/config", "/.aws/credentials", "/.ssh/id_rsa", "/.DS_Store", "/wp-admin/",
+		"/wp-login.php", "/xmlrpc.php", "/phpmyadmin/", "/pma/", "/admin.php", "/config.json", "/config.php", "/config.yml",
+		"/server-status", "/actuator/env", "/.htaccess", "/.svn/entries", "/backup.sql", "/backup.zip", "/backup.tar.gz",
+		"/db.sql", "/cgi-bin/test.cgi"} {
+		if !probePath.MatchString(p) {
+			t.Errorf("%s is not a probe path", p)
+		}
+		line := `203.0.113.9 - - [04/Nov/2026:12:00:00 +0000] "GET ` + p + ` HTTP/1.1" 404 21 "-" "curl/8.5.0"`
+		if !filter.MatchString(line) {
+			t.Errorf("the backends' filter drops a probe of %s", p)
+		}
+	}
+}

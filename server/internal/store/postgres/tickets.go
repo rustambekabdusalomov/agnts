@@ -1070,6 +1070,22 @@ func (s *Agent) NextTaskNumber(ctx context.Context, repoID *int64) (int, error) 
 	return n, notFound(err)
 }
 
+// NextPrefixNumber is the number after the highest key with prefix in the
+// workspace. It reserves nothing: a key taken in the meantime makes
+// CreateTicket conflict, and the caller asks again.
+func (s *Agent) NextPrefixNumber(ctx context.Context, prefix string) (int, error) {
+	ws, err := domain.MustWorkspace(ctx)
+	if err != nil {
+		return 0, err
+	}
+	var n int
+	err = s.db.QueryRow(ctx, `
+		SELECT COALESCE(MAX(substring(key FROM length($2) + 2)::int), 0) + 1
+		  FROM tickets
+		 WHERE workspace_id = $1 AND key ~ ('^' || $2 || '-[0-9]+$')`, ws, prefix).Scan(&n)
+	return n, err
+}
+
 // DeleteTicket removes a ticket and its runs; its events stay in the log.
 func (s *Agent) DeleteTicket(ctx context.Context, key string, ev domain.Event) error {
 	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {

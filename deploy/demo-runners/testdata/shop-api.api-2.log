@@ -1,0 +1,4 @@
+{"time":"2026-11-04T13:42:00.327932Z","level":"ERROR","msg":"search failed","err":"search products: ERROR: each UNION query must have the same number of columns (SQLSTATE 42601)","caller":"catalog/handler.go:65","search":"' UNION SELECT email FROM auth.users --"}
+{"time":"2026-11-04T13:42:00.328026Z","level":"INFO","msg":"request","method":"GET","path":"/api/products","route":"GET /api/products","status":500,"duration_ms":16,"ip":"203.0.113.194","user_id":""}
+{"time":"2026-11-04T13:42:00.328038Z","level":"ERROR","msg":"search failed","err":"search products: ERROR: function sleep(integer) does not exist (SQLSTATE 42883)","caller":"catalog/handler.go:65","search":"' OR sleep(5) --"}
+{"time":"2026-11-04T13:42:00.328044Z","level":"INFO","msg":"request","method":"GET","path":"/api/products","route":"GET /api/products","status":500,"duration_ms":20,"ip":"203.0.113.194","user_id":""}

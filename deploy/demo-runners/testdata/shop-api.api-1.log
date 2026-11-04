@@ -1,0 +1,47 @@
+{"time":"2026-11-04T13:42:00.321204Z","level":"INFO","msg":"request","method":"POST","path":"/api/cart/items","route":"POST /api/cart/items","status":201,"duration_ms":13,"ip":"203.0.113.184","user_id":"106c889a-50bc-498e-99b0-ef4abb9d5e7b"}
+panic: assignment to entry in nil map
+
+goroutine 140 [running]:
+runtime/debug.Stack()
+	runtime/debug/stack.go:26 +0x64
+github.com/rustambekabdusalomov/shop-api/internal/server.New.Recover.func2.1.1()
+	github.com/rustambekabdusalomov/shop-api/internal/httpx/middleware.go:123 +0xcc
+panic({0x9ba8db20?, 0x9bbefc10?})
+	runtime/panic.go:860 +0x12c
+github.com/rustambekabdusalomov/shop-api/internal/coupon.(*skuSet).add(...)
+	github.com/rustambekabdusalomov/shop-api/internal/coupon/coupon.go:107
+github.com/rustambekabdusalomov/shop-api/internal/coupon.applyCoupon({{0xc000430678, 0x5}, {0xc000430680, 0x7}, 0x19, 0x0, 0x0, {0xc00050a380, 0x32, 0x32}}, ...)
+	github.com/rustambekabdusalomov/shop-api/internal/coupon/coupon.go:77 +0x41c
+github.com/rustambekabdusalomov/shop-api/internal/coupon.Discount({{0xc000430678, 0x5}, {0xc000430680, 0x7}, 0x19, 0x0, 0x0, {0xc00050a380, 0x32, 0x32}}, ...)
+	github.com/rustambekabdusalomov/shop-api/internal/coupon/coupon.go:57 +0x8c
+github.com/rustambekabdusalomov/shop-api/internal/order.(*Repo).discount(0xc0005a4228, {0x9bb61d38, 0xc00052c750}, {0x9bb666e0, 0xc0005a40a8}, {0xc000430623?, 0x5}, 0x0?, {0xc000387478, 0x1, ...})
+	github.com/rustambekabdusalomov/shop-api/internal/order/repo.go:204 +0x1c0
+github.com/rustambekabdusalomov/shop-api/internal/order.(*Repo).Checkout(0xc0005a4228, {0x9bb61d38, 0xc00052c750}, {{0xc000376480, 0x24}, {0xc000430620, 0x3}, {{0xc000430640, 0x10}, {0xc000430628, ...}, ...}, ...})
+	github.com/rustambekabdusalomov/shop-api/internal/order/repo.go:130 +0x870
+github.com/rustambekabdusalomov/shop-api/internal/order.(*Handler).Checkout(0xc00058e230, {0x9bb60908, 0xc00041c2e8}, 0xc0005032c0)
+	github.com/rustambekabdusalomov/shop-api/internal/order/handler.go:52 +0x174
+net/http.HandlerFunc.ServeHTTP(0xc000503040?, {0x9bb60908?, 0xc00041c2e8?}, 0xc000440347?)
+	net/http/server.go:2286 +0x38
+github.com/rustambekabdusalomov/shop-api/internal/auth.(*Verifier).Require-fm.(*Verifier).Require.func1({0x9bb60908, 0xc00041c2e8}, 0xc000503040)
+	github.com/rustambekabdusalomov/shop-api/internal/auth/auth.go:36 +0xbc
+net/http.HandlerFunc.ServeHTTP(0xc000480000?, {0x9bb60908?, 0xc00041c2e8?}, 0x7?)
+	net/http/server.go:2286 +0x38
+net/http.(*ServeMux).ServeHTTP(0x0?, {0x9bb60908, 0xc00041c2e8}, 0xc000503040)
+	net/http/server.go:2828 +0x190
+github.com/rustambekabdusalomov/shop-api/internal/httpx.(*Router).ServeHTTP(0x0?, {0x9bb60908?, 0xc00041c2e8?}, 0x0?)
+	github.com/rustambekabdusalomov/shop-api/internal/httpx/router.go:64 +0x28
+github.com/rustambekabdusalomov/shop-api/internal/server.New.Recover.func2.1({0x9bb60908?, 0xc00041c2e8?}, 0x6?)
+	github.com/rustambekabdusalomov/shop-api/internal/httpx/middleware.go:126 +0x6c
+net/http.HandlerFunc.ServeHTTP(0xc000434165?, {0x9bb60908?, 0xc00041c2e8?}, 0xc000387aa8?)
+	net/http/server.go:2286 +0x38
+github.com/rustambekabdusalomov/shop-api/internal/server.New.Logger.func1.1({0x9bb60848, 0xc0005a00f0}, 0xc000502f00)
+	github.com/rustambekabdusalomov/shop-api/internal/httpx/middleware.go:78 +0x1c8
+net/http.HandlerFunc.ServeHTTP(0x10?, {0x9bb60848?, 0xc0005a00f0?}, 0xc0005a00f0?)
+	net/http/server.go:2286 +0x38
+net/http.serverHandler.ServeHTTP({0x9bb5db00?}, {0x9bb60848?, 0xc0005a00f0?}, 0x6?)
+	net/http/server.go:3311 +0xb0
+net/http.(*conn).serve(0xc0004a8360, {0x9bb61d38, 0xc000422240})
+	net/http/server.go:2073 +0x51c
+created by net/http.(*Server).Serve in goroutine 1
+	net/http/server.go:3464 +0x37c
+{"time":"2026-11-04T13:42:00.321562Z","level":"INFO","msg":"request","method":"POST","path":"/api/checkout","route":"POST /api/checkout","status":500,"duration_ms":2,"ip":"203.0.113.184","user_id":"106c889a-50bc-498e-99b0-ef4abb9d5e7b"}

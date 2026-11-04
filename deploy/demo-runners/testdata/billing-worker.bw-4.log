@@ -1,0 +1,2 @@
+2026-11-04T13:42:00.377Z INFO billing.jobs: invoice INV-2026-000411 written order_id=1201 total="0.00 UZS"
+2026-11-04T13:42:00.377Z ERROR billing.jobs: invoice INV-2026-000411 total is 0 order_id=1201 currency=UZS

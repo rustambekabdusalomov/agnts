@@ -1,0 +1,2 @@
+{"time":"2026-11-04T13:42:00.334037Z","level":"ERROR","msg":"get product failed","err":"failed to load product: no rows in result set","caller":"catalog/handler.go:94","product_id":999999}
+{"time":"2026-11-04T13:42:00.334155Z","level":"INFO","msg":"request","method":"GET","path":"/api/products/999999","route":"GET /api/products/{id}","status":500,"duration_ms":16,"ip":"203.0.113.194","user_id":""}

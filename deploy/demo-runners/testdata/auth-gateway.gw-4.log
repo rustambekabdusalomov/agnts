@@ -1,0 +1,23 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/register            --> github.com/abdusalomovrustambek/auth-gateway/internal/account.(*Handler).Register-fm (9 handlers)
+[GIN-debug] POST   /auth/login               --> github.com/abdusalomovrustambek/auth-gateway/internal/account.(*Handler).Login-fm (9 handlers)
+[GIN-debug] POST   /auth/refresh             --> github.com/abdusalomovrustambek/auth-gateway/internal/account.(*Handler).Refresh-fm (9 handlers)
+[GIN-debug] POST   /auth/logout              --> github.com/abdusalomovrustambek/auth-gateway/internal/account.(*Handler).Logout-fm (9 handlers)
+[GIN-debug] GET    /auth/me                  --> github.com/abdusalomovrustambek/auth-gateway/internal/account.(*Handler).Me-fm (10 handlers)
+[GIN-debug] GET    /.well-known/jwks.json    --> github.com/abdusalomovrustambek/auth-gateway/internal/token.JWKS.func1 (9 handlers)
+[GIN-debug] GET    /healthz                  --> main.newRouter.healthz.func10 (9 handlers)
+[GIN-debug] GET    /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] POST   /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] PUT    /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] PATCH  /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] HEAD   /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] OPTIONS /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] DELETE /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] CONNECT /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+[GIN-debug] TRACE  /api/*path                --> github.com/abdusalomovrustambek/auth-gateway/internal/edge.Proxy.func3 (9 handlers)
+{"time":"2026-11-04T13:42:00.408236Z","level":"INFO","msg":"listening","addr":":8080"}

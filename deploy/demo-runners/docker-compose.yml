@@ -1,6 +1,11 @@
-# Three pretend services for demonstrating agnts's log watcher. Alloy (in
-# /opt/loki) ships their output to Loki like every container's; the log
-# source server-loki lists them as services.
+# Three pretend services for demonstrating agnts's log watcher: the Meta
+# workspace's shop-api, billing-worker and auth-gateway, with their planted
+# bugs (see main.go). Alloy (in /opt/loki) ships their output to Loki like
+# every container's, labelled project="demo"; the Meta workspace's log source
+# reads {project="demo"}.
+#
+#   docker exec demo-shop-api-1 /demo-runners list
+#   docker exec demo-shop-api-1 /demo-runners trigger api-1
 name: demo
 
 x-runner: &runner
@@ -14,10 +19,10 @@ x-runner: &runner
 services:
   shop-api:
     <<: *runner
-    environment: { DEMO_SERVICE: shop-api, DEMO_EVERY: 45s }
+    environment: { DEMO_SERVICE: shop-api, DEMO_EVERY_MIN: 5m, DEMO_EVERY_MAX: 10m }
   billing-worker:
     <<: *runner
-    environment: { DEMO_SERVICE: billing-worker, DEMO_EVERY: 50s }
+    environment: { DEMO_SERVICE: billing-worker, DEMO_EVERY_MIN: 5m, DEMO_EVERY_MAX: 10m }
   auth-gateway:
     <<: *runner
-    environment: { DEMO_SERVICE: auth-gateway, DEMO_EVERY: 60s }
+    environment: { DEMO_SERVICE: auth-gateway, DEMO_EVERY_MIN: 5m, DEMO_EVERY_MAX: 10m }
