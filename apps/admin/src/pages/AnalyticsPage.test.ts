@@ -48,7 +48,8 @@ const learning = {
 const ci = { days: 30, watching: false, current: {}, previous: {}, byClass: {}, perDay: [], flakiest: [], open: 0 }
 
 const get = vi.hoisted(() => vi.fn())
-vi.mock('../api/client', () => ({ api: { GET: get }, unwrap: async (p: Promise<unknown>) => p }))
+const put = vi.hoisted(() => vi.fn())
+vi.mock('../api/client', () => ({ api: { GET: get, PUT: put, POST: vi.fn() }, unwrap: async (p: Promise<unknown>) => p }))
 
 const BODY: Record<string, unknown> = { '/analytics': main, '/analytics/delivery': delivery, '/analytics/learning': learning, '/analytics/ci': ci,
   '/eval/replays': { versions: [], replays: [] }, '/eval/benchmark': [],
@@ -123,6 +124,30 @@ describe('AnalyticsPage', () => {
     const now = new Date()
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     expect(get.mock.calls.some((c) => c[0] === '/analytics/developers' && c[1]?.params?.query?.month === thisMonth)).toBe(true)
+
+
+    // The owner overrides a delivery's score: the points are our own select too.
+    BODY['/analytics/developers/tickets'] = [{ key: 'PAY-7', title: 'Refunds', delivery: 1, deliveredAt: '2026-10-10T00:00:00Z', promptVersion: 'score-1.f1',
+      status: 'scored', points: 5, effective: 5, rationale: 'Money path.', diffSource: 'api:pull_request', clamped: false, fromFactsOnly: false,
+      revertedShare: 0, regressions: 0, share: 1, earned: 5, authors: [{ key: 'user:1', name: 'Alice', share: 1, days: 2 }], factors: {} }]
+    put.mockResolvedValue({})
+    await o.w.find('.dv-link').trigger('click')
+    await flushPromises()
+    const overrideBtn = o.w.findAll('button').find((b) => b.text() === 'Override')!
+    await overrideBtn.trigger('click')
+    expect(o.w.find('.dv-edit select').exists()).toBe(false)
+    const points = o.w.find('.dv-edit .isel-trigger')
+    expect(points.text()).toBe('5')
+    await points.trigger('click')
+    const pointOpts = o.w.findAll('.dv-edit [role="option"]')
+    expect(pointOpts.map((x) => x.text())).toEqual(['0', '1', '2', '3', '5', '8', '13'])
+    await pointOpts[5].trigger('click')
+    await o.w.find('.dv-edit input').setValue('The rollback was the hard part')
+    await o.w.findAll('.dv-edit button').find((b) => b.text() === 'Save the override')!.trigger('click')
+    await flushPromises()
+    expect(put).toHaveBeenCalledWith('/tickets/{key}/score', {
+      params: { path: { key: 'PAY-7' } }, body: { delivery: 1, points: 8, reason: 'The rollback was the hard part' },
+    })
 
     const member = await setup('/w/acme/analytics/developers', 'user')
     expect(member.w.findAll('.page-tab').map((x) => x.text())).not.toContain('Developers')
