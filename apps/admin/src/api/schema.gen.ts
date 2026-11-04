@@ -3053,6 +3053,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/account/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set your profile picture
+         * @description PNG, JPEG, WebP or GIF, at most 512 KB (the admin panel makes it a 256 px square first). Others see it beside your name.
+         */
+        put: operations["uploadAvatar"];
+        post?: never;
+        /** Remove your profile picture (your initials show again) */
+        delete: operations["deleteAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A person's profile picture
+         * @description Its URL (avatarUrl) carries the picture's version, so the response may be cached for good.
+         */
+        get: operations["getUserAvatar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/password": {
         parameters: {
             query?: never;
@@ -6411,6 +6452,8 @@ export interface components {
             authorId?: number;
             /** @description The person's username, or agnts */
             author: string;
+            /** @description The person's profile picture URL, relative to the API base */
+            authorAvatar?: string;
             /** @enum {string} */
             kind: "text" | "agent_card" | "agent_text" | "system";
             body: string;
@@ -7043,6 +7086,8 @@ export interface components {
             id: number;
             username: string;
             displayName?: string;
+            /** @description The profile picture's URL, relative to the API base; absent without one */
+            avatarUrl?: string;
             email?: string;
             emailVerified?: boolean;
             /** @description The platform operator (system role Admin) */
@@ -16487,6 +16532,92 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    uploadAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The user with the new picture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The picture is larger than 512 KB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The user without a picture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getUserAvatar: {
+        parameters: {
+            query?: {
+                /** @description The picture's version (from avatarUrl) */
+                v?: number;
+            };
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The picture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/*": string;
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
         };
     };
     changePassword: {

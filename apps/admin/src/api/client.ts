@@ -51,7 +51,7 @@ export function currentWorkspace(): string {
 }
 
 /** Operations that are the person's, not a workspace's (see x-scope in the spec). */
-const USER_PATHS = ['/auth/', '/meta', '/models', '/account/', '/workspaces', '/invites/', '/platform/', '/devices', '/docs/', '/oauth/', '/public/']
+const USER_PATHS = ['/auth/', '/meta', '/models', '/account/', '/workspaces', '/invites/', '/platform/', '/devices', '/docs/', '/oauth/', '/public/', '/users/']
 
 export function isUserPath(path: string): boolean {
   return USER_PATHS.some((p) => path === p.replace(/\/$/, '') || path.startsWith(p))
@@ -128,6 +128,41 @@ export async function uploadAttachment(file: File): Promise<Attachment> {
     throw new HttpError(response.status, data as Partial<ApiError> | undefined)
   }
   return data as Attachment
+}
+
+/** The side of the square a profile picture is made into before upload. */
+export const AVATAR_SIDE = 256
+
+/**
+ * Makes a picture a centred AVATAR_SIDE px square (WebP, or PNG where the
+ * browser cannot write WebP), so uploads stay small whatever was picked.
+ */
+export async function squareAvatar(file: File): Promise<Blob> {
+  const bitmap = await createImageBitmap(file)
+  const side = Math.min(bitmap.width, bitmap.height)
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = AVATAR_SIDE
+  const g = canvas.getContext('2d')
+  if (!g) throw new Error('canvas')
+  g.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, AVATAR_SIDE, AVATAR_SIDE)
+  bitmap.close()
+  const blob = (type: string) => new Promise<Blob | null>((res) => canvas.toBlob(res, type, 0.9))
+  const out = (await blob('image/webp')) ?? (await blob('image/png'))
+  if (!out) throw new Error('canvas')
+  return out
+}
+
+/** Sets the signed-in person's profile picture; returns them with it. */
+export async function uploadAvatar(picture: Blob): Promise<components['schemas']['User']> {
+  const body = new FormData()
+  body.append('file', picture, picture.type === 'image/webp' ? 'avatar.webp' : 'avatar.png')
+  const response = await fetch(apiPath('/account/avatar'), { method: 'PUT', body, credentials: 'same-origin' })
+  const data = await response.json().catch(() => undefined)
+  if (!response.ok) {
+    if (response.status === 401) onUnauthorized()
+    throw new HttpError(response.status, data as Partial<ApiError> | undefined)
+  }
+  return data as components['schemas']['User']
 }
 
 /**

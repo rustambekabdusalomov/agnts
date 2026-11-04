@@ -11,6 +11,7 @@ import ChatComposer from '../components/chat/ChatComposer.vue'
 import ChatFiles from '../components/files/ChatFiles.vue'
 import ChatMessageItem from '../components/chat/ChatMessageItem.vue'
 import ScrollToBottom from '../components/chat/ScrollToBottom.vue'
+import UserAvatar from '../components/ui/UserAvatar.vue'
 import SearchSnippet from '../components/chat/SearchSnippet.vue'
 import { dayOf, secs, type ChatChannel, type ChatMessage } from '../components/chat/chat'
 import {
@@ -366,7 +367,7 @@ const waiting = computed(() => chat.outbox.filter((o) => o.status === 'pending')
           </template>
 
           <div v-for="o in pending" :key="o.clientMsgId" class="tc-pend" :class="o.status">
-            <span class="tc-av" aria-hidden="true">{{ me.slice(0, 2).toUpperCase() }}</span>
+            <UserAvatar :name="me" :url="session.user?.avatarUrl" :size="32" />
             <div class="tc-pm">
               <div class="tc-ph">
                 <b>{{ me }}</b>

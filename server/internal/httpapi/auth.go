@@ -29,6 +29,9 @@ type UserStore interface {
 	SetProfile(ctx context.Context, id int64, displayName, email string) (domain.User, error)
 	Count(ctx context.Context) (int, error)
 	LastSignIns(ctx context.Context) (map[int64]time.Time, error)
+	SetAvatar(ctx context.Context, id int64, contentType string, data []byte) (domain.User, error)
+	DeleteAvatar(ctx context.Context, id int64) (domain.User, error)
+	Avatar(ctx context.Context, id int64) (string, []byte, error)
 }
 
 // Login implements gen.ServerInterface.
@@ -177,6 +180,9 @@ func toUser(u domain.User) gen.User {
 	if u.DisplayName != "" {
 		n := u.DisplayName
 		out.DisplayName = &n
+	}
+	if a := domain.AvatarURL(u.ID, u.AvatarVersion); a != "" {
+		out.AvatarUrl = &a
 	}
 	if !u.CreatedAt.IsZero() {
 		t := u.CreatedAt

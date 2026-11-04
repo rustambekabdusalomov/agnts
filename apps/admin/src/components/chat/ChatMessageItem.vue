@@ -5,6 +5,8 @@ import AiBadge, { AI_NAME } from './AiBadge.vue'
 import ChatBody from './ChatBody.vue'
 import ChatCardView from './ChatCardView.vue'
 import RefChips from './RefChips.vue'
+import BrandLogo from '../BrandLogo.vue'
+import UserAvatar from '../ui/UserAvatar.vue'
 import ChatFiles from '../files/ChatFiles.vue'
 import type { ChatMessage } from './chat'
 import { citationsOf } from './citations'
@@ -27,7 +29,6 @@ const time = computed(() => new Date(props.message.createdAt).toLocaleTimeString
 const sources = computed(() => (props.message.kind === 'agent_text' ? citationsOf(props.message.body).length : 0))
 const fileList = (m: ChatMessage) => (m.files ?? []).map((f) => `📎 ${f.name}`).join(', ')
 const snippet = (s: string) => (s.length > 120 ? `${s.slice(0, 120)}…` : s)
-const initials = computed(() => (props.message.author || '?').slice(0, 2).toUpperCase())
 const audio = computed(() => props.message.audio)
 const voiceLen = computed(() => {
   const s = Math.round((audio.value?.durationMs ?? 0) / 1000)
@@ -38,7 +39,8 @@ const voiceLen = computed(() => {
 <template>
   <div v-if="message.kind === 'system'" :id="`chat-msg-${message.id}`" class="cm-sys" :class="{ hl: highlight }">{{ message.body }} · {{ time }}</div>
   <div v-else :id="`chat-msg-${message.id}`" class="cm" :class="{ agent, hl: highlight }">
-    <span class="cm-av" :class="{ agent }" aria-hidden="true">{{ agent ? '✨' : initials }}</span>
+    <BrandLogo v-if="agent" class="cm-av cm-logo" mark :size="32" aria-hidden="true" />
+    <UserAvatar v-else class="cm-av" :name="message.author" :url="message.authorAvatar" :size="32" />
     <div class="cm-main">
       <button v-if="message.replyTo" type="button" class="cm-quote" @click="emit('jump', message.replyTo)">
         ↪ <template v-if="parent">{{ t('teamchat.replyingTo', { name: parent.author }) }}: <span>{{ snippet(parent.body || parent.card?.title || fileList(parent)) }}</span></template>
@@ -81,7 +83,7 @@ const voiceLen = computed(() => {
 .cm:hover { background: var(--row-hover); }
 .cm.hl, .cm-sys.hl { background: var(--primary-soft); }
 .cm-av { flex: none; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12.5px; color: #fff; background: var(--primary); }
-.cm-av.agent { background: var(--mark); color: var(--mark-ink); }
+.cm-logo { border-radius: 8px; }
 .cm-main { min-width: 0; flex: 1; }
 .cm-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .cm-who { font-size: 14.5px; }

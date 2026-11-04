@@ -99,6 +99,13 @@
     "backToDashboard": "Назад к обзору пространства {name}",
     "myClaudeMuse": "Ваш аккаунт Muse",
     "claudeSavedMuse": "Аккаунт Muse подключён",
-    "claudeRemovedMuse": "Аккаунт Muse отключён"
+    "claudeRemovedMuse": "Аккаунт Muse отключён",
+    "avatar": "Фото профиля",
+    "avatarHelp": "Показывается рядом с вашим именем в чатах. Обрезается до квадрата.",
+    "avatarUpload": "Загрузить фото",
+    "avatarChange": "Изменить",
+    "avatarRemove": "Удалить",
+    "avatarSaved": "Фото профиля сохранено",
+    "avatarNotImage": "Выберите картинку PNG, JPEG, WebP или GIF"
   }
 }

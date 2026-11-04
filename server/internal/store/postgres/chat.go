@@ -160,7 +160,8 @@ func (s *Chat) MarkRead(ctx context.Context, user, channel, last int64) error {
 // Messages
 
 const chatMsgCols = `m.id, m.workspace_id, m.channel_id, m.reply_to, m.author_user_id, COALESCE(u.username, m.author_agent, ''),
-	m.kind, m.body, m.card, m.ai, COALESCE(m.ticket_key, ''), COALESCE(m.client_msg_id::text, ''), m.created_at, m.audio`
+	m.kind, m.body, m.card, m.ai, COALESCE(m.ticket_key, ''), COALESCE(m.client_msg_id::text, ''), m.created_at, m.audio,
+	COALESCE(u.avatar_version, 0)`
 
 const chatMsgFrom = `chat_messages m LEFT JOIN users u ON u.id = m.author_user_id`
 
@@ -168,8 +169,9 @@ func scanMessage(row pgx.Row) (domain.ChatMessage, error) {
 	var m domain.ChatMessage
 	var kind string
 	var card, ai, audio []byte
+	var avatar int64
 	err := row.Scan(&m.ID, &m.WorkspaceID, &m.ChannelID, &m.ReplyTo, &m.AuthorID, &m.Author, &kind, &m.Body, &card, &ai,
-		&m.TicketKey, &m.ClientMsgID, &m.CreatedAt, &audio)
+		&m.TicketKey, &m.ClientMsgID, &m.CreatedAt, &audio, &avatar)
 	if err != nil {
 		return m, notFound(err)
 	}
@@ -185,6 +187,9 @@ func scanMessage(row pgx.Row) (domain.ChatMessage, error) {
 	if len(audio) > 0 {
 		m.Audio = &domain.ChatAudio{}
 		_ = json.Unmarshal(audio, m.Audio)
+	}
+	if m.AuthorID != nil {
+		m.AuthorAvatar = domain.AvatarURL(*m.AuthorID, avatar)
 	}
 	m.Refs = []domain.ChatRef{}
 	return m, nil

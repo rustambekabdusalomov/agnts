@@ -48,22 +48,24 @@ const (
 
 // ChatMessage is one message of a channel.
 type ChatMessage struct {
-	ID          int64           `json:"id"`
-	ChannelID   int64           `json:"channelId"`
-	ReplyTo     *int64          `json:"replyTo,omitempty"`
-	AuthorID    *int64          `json:"authorId,omitempty"`
-	Author      string          `json:"author"` // the person's username, or "agnts"
-	Kind        ChatMessageKind `json:"kind"`
-	Body        string          `json:"body"`
-	Card        *ChatCard       `json:"card,omitempty"`
-	AI          *ChatAI         `json:"ai,omitempty"`
-	TicketKey   string          `json:"ticketKey,omitempty"`
-	Audio       *ChatAudio      `json:"audio,omitempty"` // a voice message; Body is its transcript
-	Files       []FileRef       `json:"files,omitempty"` // uploads that came with it
-	ClientMsgID string          `json:"clientMsgId,omitempty"`
-	Refs        []ChatRef       `json:"refs"`
-	CreatedAt   time.Time       `json:"createdAt"`
-	WorkspaceID int64           `json:"-"`
+	ID        int64  `json:"id"`
+	ChannelID int64  `json:"channelId"`
+	ReplyTo   *int64 `json:"replyTo,omitempty"`
+	AuthorID  *int64 `json:"authorId,omitempty"`
+	Author    string `json:"author"` // the person's username, or "agnts"
+	// AuthorAvatar is the person's profile picture URL ("" without one).
+	AuthorAvatar string          `json:"authorAvatar,omitempty"`
+	Kind         ChatMessageKind `json:"kind"`
+	Body         string          `json:"body"`
+	Card         *ChatCard       `json:"card,omitempty"`
+	AI           *ChatAI         `json:"ai,omitempty"`
+	TicketKey    string          `json:"ticketKey,omitempty"`
+	Audio        *ChatAudio      `json:"audio,omitempty"` // a voice message; Body is its transcript
+	Files        []FileRef       `json:"files,omitempty"` // uploads that came with it
+	ClientMsgID  string          `json:"clientMsgId,omitempty"`
+	Refs         []ChatRef       `json:"refs"`
+	CreatedAt    time.Time       `json:"createdAt"`
+	WorkspaceID  int64           `json:"-"`
 }
 
 // ChatAudio is a voice message's recording, kept to play back, and where
@@ -196,7 +198,6 @@ type ChatRef struct {
 // Key is "type:id", the ref's id in citations.
 func (r ChatRef) Key() string { return r.Type + ":" + r.ID }
 
-// ChatSend is a person's new message.
 // ChatSearchHit is a message a team chat search found, with its channel's
 // name and the part of it that matched (SearchSnippet's marks).
 type ChatSearchHit struct {
@@ -205,6 +206,7 @@ type ChatSearchHit struct {
 	Snippet string      `json:"snippet"`
 }
 
+// ChatSend is a person's new message.
 type ChatSend struct {
 	ChannelID   int64
 	ClientMsgID string

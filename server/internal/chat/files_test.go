@@ -138,6 +138,7 @@ func TestTicketFromAMessageGetsItsFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	var ticket int64
+	pgtest.Exec(t, h.pool, `DELETE FROM tickets WHERE workspace_id = $1 AND key = 'CHF-1'`, h.ws) // a rerun's
 	err = h.pool.QueryRow(domain.System(context.Background()), `INSERT INTO tickets (workspace_id, key, source, title, state)
 		VALUES ($1, 'CHF-1', 'local', 'Fix the refund button', 'new') RETURNING id`, h.ws).Scan(&ticket)
 	if err != nil {
@@ -251,5 +252,29 @@ func TestSearch(t *testing.T) {
 	}
 	if _, err := h.s.Search(h.ctx, "a !", 0); !errors.Is(err, ErrInvalid) {
 		t.Fatalf("no words: %v", err)
+	}
+}
+
+func TestMessagesCarryTheAuthorsPicture(t *testing.T) {
+	h := newHarness(t)
+	cs, _ := h.s.Channels(h.ctx)
+	before := h.send(t, cs[0].ID, "no picture yet")
+	if before.AuthorAvatar != "" {
+		t.Fatalf("avatar before = %q", before.AuthorAvatar)
+	}
+	u, err := postgres.NewUsers(h.pool).SetAvatar(context.Background(), h.ann, "image/png", []byte("\x89PNG"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ms, _ := h.s.Messages(h.ctx, cs[0].ID, 0, 0, 10)
+	want := fmt.Sprintf("/users/%d/avatar?v=%d", h.ann, u.AvatarVersion)
+	if len(ms) != 1 || ms[0].AuthorAvatar != want {
+		t.Fatalf("avatar = %+v, want %s", ms, want)
+	}
+	if _, err := postgres.NewUsers(h.pool).DeleteAvatar(context.Background(), h.ann); err != nil {
+		t.Fatal(err)
+	}
+	if m, _ := h.s.Message(h.ctx, before.ID); m.AuthorAvatar != "" {
+		t.Fatalf("avatar after removing = %q", m.AuthorAvatar)
 	}
 }

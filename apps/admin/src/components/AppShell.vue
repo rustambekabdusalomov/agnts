@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
-import { api, unwrap } from '../api/client'
+import { api, apiPath, unwrap } from '../api/client'
 import { NEEDS, RUNNING } from '../api/types'
 import { fmtUsd } from '../composables/format'
 import { livePoll, useLive } from '../composables/useLive'
@@ -434,7 +434,7 @@ onBeforeUnmount(() => {
           :to="{ name: 'profile' }"
           v-bind="tip([t('common.signedInAs', { username: session.user?.username }), creditsLeft, t('nav.profile')].filter(Boolean).join(' · '))"
         >
-          <span class="av"><span class="av-ini">{{ initials }}</span></span>
+          <span class="av"><img v-if="session.user?.avatarUrl" :src="apiPath(session.user.avatarUrl)" alt=""><span v-else class="av-ini">{{ initials }}</span></span>
           <span class="lbl me-txt">
             <span class="me-name">{{ session.user?.username }}</span>
             <span v-if="creditsLeft" class="me-credits">{{ creditsLeft }}</span>

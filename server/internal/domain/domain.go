@@ -3,6 +3,7 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -28,7 +29,18 @@ type User struct {
 	// else is a User.
 	IsAdmin         bool
 	LastWorkspaceID *int64
-	CreatedAt       time.Time
+	// AvatarVersion counts profile picture changes; 0: no picture.
+	AvatarVersion int64
+	CreatedAt     time.Time
+}
+
+// AvatarURL is where the user's profile picture loads (relative to the
+// API base), or "" without one. The version makes each picture's URL new.
+func AvatarURL(userID, version int64) string {
+	if version <= 0 {
+		return ""
+	}
+	return fmt.Sprintf("/users/%d/avatar?v=%d", userID, version)
 }
 
 // HasTOTP reports whether the user signs in with a second factor.
