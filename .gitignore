@@ -1,5 +1,6 @@
 # Build output
 /bin/
+/server/agnts
 **/dist/
 **/node_modules/
 apps/website/.nuxt/
